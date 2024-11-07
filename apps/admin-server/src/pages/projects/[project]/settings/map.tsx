@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,6 +36,8 @@ const formSchema = z.object({
   maxZoom: z.string().optional(),
   minZoom: z.string().optional(),
   areaId: z.string().optional(),
+  tilesVariant: z.string().optional(),
+  customUrl: z.string().optional(),
 });
 
 export default function ProjectSettingsMap() {
@@ -51,6 +53,8 @@ export default function ProjectSettingsMap() {
         minZoom: data?.config?.map?.minZoom || '7',
         maxZoom: data?.config?.map?.maxZoom || '20',
         areaId: data?.config?.map?.areaId || '',
+        tilesVariant: data?.config?.map?.tilesVariant || 'nlmaps',
+        customUrl: data?.config?.map?.customUrl || '',
       }
     },
     [data, areas]
@@ -72,6 +76,8 @@ export default function ProjectSettingsMap() {
           areaId: values.areaId,
           minZoom: values.minZoom,
           maxZoom: values.maxZoom,
+          tilesVariant: values.tilesVariant,
+          customUrl: values.customUrl,
         },
       });
       if (project) {
@@ -98,6 +104,14 @@ export default function ProjectSettingsMap() {
     }
   }, [ form.watch('minZoom'), form.watch('maxZoom') ] );
 
+  const tileLayerOptions = [
+    { value: 'nlmaps', label: 'Nederlandse Kaart' },
+    { value: 'amaps', label: 'Amsterdam Kaart' },
+    { value: 'openstreetmaps', label: 'OpenStreetMap' },
+    { value: 'n3s', label: 'CartoDB Light' },
+    { value: 'custom', label: 'Aangepaste Kaart' },
+  ];
+
   return (
     <div>
       <PageLayout
@@ -122,7 +136,7 @@ export default function ProjectSettingsMap() {
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
+              className="lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
 
               <FormField
                 control={form.control}
@@ -168,6 +182,55 @@ export default function ProjectSettingsMap() {
                 label={(area: any) => `${area.name}`}
                 noSelection="&nbsp;"
               />
+
+              <FormField
+                control={form.control}
+                name="tilesVariant"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke weergave van de kaart wil je gebruiken?
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || 'nlmaps'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecteer een kaartweergave" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {tileLayerOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {form.watch('tilesVariant') === 'custom' && (
+                <FormField
+                  control={form.control}
+                  name="customUrl"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>
+                        Aangepaste URL
+                      </FormLabel>
+                      <FormDescription>{`Voer de URL in voor de aangepaste kaartweergave. Bijvoorbeeld: https://example.com/tiles/{z}/{x}/{y}.png`}</FormDescription>
+                      <FormControl>
+                        <Input placeholder="https://example.com/tiles/{z}/{x}/{y}.png" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <Button
                 type="submit"

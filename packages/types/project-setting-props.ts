@@ -71,5 +71,7 @@ export type ProjectSettingProps = {
     minZoom: string;
     maxZoom: string;
     areaId: string;
+    tilesVariant?: string;
+    customUrl?: string;
   };
 };

@@ -6,6 +6,7 @@ export default function TileLayer({
   tiles = null,
   minZoom = 0,
   maxZoom = 25,
+	customUrl = '',
   ...props
 }: MapTilesProps) {
 
@@ -52,7 +53,7 @@ export default function TileLayer({
 	      maxZoom={ typeof maxZoom != 'undefined' ? maxZoom : 19 }
 	      minZoom={ typeof minZoom != 'undefined' ? minZoom : 0 }
         subdomains={tiles && tiles.subdomains || ''}
-        url={tiles && tiles.url || 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'}
+        url={customUrl || 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'}
           />)
 
 		default:
