@@ -132,6 +132,9 @@ const BaseMap = ({
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
       : { lat: 52.37104644463586, lng: 4.900402911007405 };
+
+  tilesVariant = props?.map?.tilesVariant || tilesVariant ||'nlmaps';
+  const customUrlSetting = tilesVariant === 'custom' ? props?.map?.customUrl : undefined;
       
 
   // clustering geeft errors; ik begrijp niet waarom: het gebeurd alleen in de gebuilde widgets, niet in de dev componenten
@@ -375,6 +378,7 @@ const BaseMap = ({
   // ToDo: waarom kan ik die niet gewoon als props meesturen
   const tileLayerProps = {
     tilesVariant,
+    customUrlSetting,
     tiles,
     minZoom,
     maxZoom,
