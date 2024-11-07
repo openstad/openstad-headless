@@ -243,14 +243,16 @@ function ResourceDetail({
     try {
       if (typeof resource.delete === 'function') {
         await resource.delete(resource.id);
-        window.history.back();
+        setTimeout(() => {
+          window.history.back();
+        }, 1000);
       } else {
         console.error('Delete method not found on resource');
       }
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
   return (
     <section>
