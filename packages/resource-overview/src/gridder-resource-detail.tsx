@@ -37,6 +37,8 @@ export type GridderResourceDetailProps =
   clickableImage?: boolean;
   documentsTitle?: string;
   documentsDesc?: string;
+  displayTags?: boolean;
+  displayBudget?: boolean;
   likeWidget?: Omit<
     LikeWidgetProps,
     keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -51,6 +53,8 @@ export const GridderResourceDetail = ({
   documentsTitle = '',
   documentsDesc = '',
   clickableImage = false,
+  displayTags = true,
+  displayBudget = true,
   currentUser,
   ...props
 }: GridderResourceDetailProps) => {
@@ -107,16 +111,27 @@ export const GridderResourceDetail = ({
           {renderImage(resource.images?.at(0)?.url || defaultImage, clickableImage)}
 
           <div className="osc-gridder-resource-detail-budget-theme-bar">
-            <Heading4>Budget</Heading4>
-            <Paragraph>&euro; {resource.budget > 0 ? resource.budget.toLocaleString('nl-NL') : 0}</Paragraph>
-            <Spacer size={1} />
-            <Heading4>Tags</Heading4>
-            <Spacer size={.5} />
-            <div className="pill-grid">
-                  {(resource.tags as Array<{ type: string; name: string }>)
-                    ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => <Pill text={t.name} />)}
+
+            {displayBudget && (
+              <>
+                <Heading4>Budget</Heading4>
+                <Paragraph>&euro; {resource.budget > 0 ? resource.budget.toLocaleString('nl-NL') : 0}</Paragraph>
+                <Spacer size={1} />
+              </>
+            )}
+
+            {displayTags && (
+              <>
+                <Heading4>Tags</Heading4>
+                <Spacer size={.5} />
+                <div className="pill-grid">
+                      {(resource.tags as Array<{ type: string; name: string }>)
+                        ?.filter((t) => t.type !== 'status')
+                        ?.map((t) => <Pill text={t.name} />)}
                 </div>
+              </>
+            )}
+
           </div>
         </section>
 

@@ -46,6 +46,8 @@ const formSchema = z.object({
   resetText: z.string().optional(),
   displayLikeButton: z.boolean(),
   clickableImage: z.boolean(),
+  displayBudget: z.boolean(),
+  displayTags: z.boolean(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -87,6 +89,8 @@ export default function WidgetResourceOverviewDisplay(
       resetText: props?.resetText || 'Reset',
       displayLikeButton: props?.displayLikeButton || false,
       clickableImage: props?.clickableImage || false,
+      displayBudget: props?.displayBudget !== false,
+      displayTags: props?.displayTags !== false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -332,6 +336,34 @@ export default function WidgetResourceOverviewDisplay(
               <FormItem>
                 <FormLabel>
                   Status label weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayBudget"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Budget in dialog weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayTags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tags in dialog weergeven
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
