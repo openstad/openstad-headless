@@ -407,7 +407,7 @@ const BaseMap = ({
           <TileLayer {...tileLayerProps} />
 
           {area && area.length ? (
-            <Area area={area} areas={customPolygon} areaPolygonStyle={areaPolygonStyle} />
+            <Area area={area} areas={customPolygon} areaPolygonStyle={areaPolygonStyle} {...props} />
           ) : null}
 
           {!!currentMarkers && currentMarkers.length > 0 && currentMarkers.map((data) => {
