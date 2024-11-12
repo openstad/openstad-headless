@@ -6,6 +6,7 @@ import { Polygon, Popup } from 'react-leaflet';
 import type { AreaProps } from './types/area-props';
 
 import { difference, polygon as tPolygon } from 'turf';
+import { BaseProps } from '@openstad-headless/types/base-props';
 
 function createCutoutPolygonMulti(areas: any) {
   const outerBoxCoordinates = [
@@ -75,9 +76,11 @@ export function Area({
     fillOpacity: 0.15,
   },
   ...props
-}: AreaProps) {
+}: BaseProps & AreaProps) {
   const datastore = new DataStore({});
-  const { data: allAreas } = datastore.useAreas();
+  const { data: allAreas } = datastore.useArea({
+    projectId: props.projectId
+  });
 
   interface Area {
     id: number;
