@@ -45,7 +45,7 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 			auth:  {
         viewableBy: ['moderator', 'owner'],
-				                /**
+                                /**
                                  * In case of setting the role
                                  * Admin are allowed to set all roles, but moderators only are allowed
                                  * to set members.
