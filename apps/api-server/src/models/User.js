@@ -623,21 +623,23 @@ module.exports = function (db, sequelize, DataTypes) {
 
     },
 
-    canUpdate: function(user, self) {
-
-      // copy the base functionality
+    canUpdate: function(self, user) {
       self = self || this;
 
-      if (!user) user = self.auth && self.auth.user;
+      // The user can either be the one being updated or the one making the update. The user possessing the auth key is the one making the update.
+      if (user?.auth) {
+        self = user;
+        user = self;
+      }
+
       if (!user || !user.role) user = { role: 'all' };
 
-      let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
+      let valid = userHasRole(self, self.auth && self.auth.updateableBy, self.id);
 
       // extra: isOwner through user on different project
       valid = valid || ( self.idpUser && user.idpUser && self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
 
-      // extra: geen acties op users met meer rechten dan je zelf hebt
-      valid = valid && userHasRole(user, self.role);
+      valid = valid && userHasRole(self, user.role);
 
       return valid;
 
@@ -674,12 +676,10 @@ module.exports = function (db, sequelize, DataTypes) {
       if (instance.projectId && !instance.config) {
         db.Project.findByPk(instance.projectId)
           .then(project => {
-            if (project && project.config) {
-              instance.config = merge.recursive(true, config, project.config);
-              return project;
-            } else {
-              instance.config = merge.recursive(true, config);
-            }
+            instance.config = merge.recursive(true, config, project.config);
+            return project;
+          })
+          .then(project => {
             return resolve();
           }).catch(err => {
             throw err;
