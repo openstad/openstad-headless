@@ -13,7 +13,7 @@ require('./config/debug');
 const Server     = require('./src/Server');
 const Cron       = require('./src/cron-calendar');
 
-Cron.start();
+// Cron.start();
 
 Server.init();
 Server.start(config.get('express.port'));
