@@ -30,10 +30,10 @@ function ShareLinks({ title }: Item) {
           external
           href={'https://twitter.com/intent/tweet?text=' + encodeURIComponent(location.href)}
           target="_blank"
-          title={'Twitter'}
+          title={'X'}
         >
           <i className='icon --twitter'></i>
-          <span className='sr-only'>Twitter</span>
+          <span className='sr-only'>X</span>
         </LinkSocial>
 
         <LinkSocial
