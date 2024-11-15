@@ -13,7 +13,7 @@ const projectsWithIssues = require('../services/projects-with-issues');
 module.exports = {
   // cronTime: '*/10 * * * * *',
   // runOnInit: true,
-  cronTime: '0 15 4 * * *',
+  // cronTime: '0 15 4 * * *',
   runOnInit: false,
   onTick: UseLock.createLockedExecutable({
     name: 'send-project-issues-notifications',
@@ -47,16 +47,16 @@ module.exports = {
 
         // send notifications
         let projectIds = Object.keys(notificationsToBeSent);
-        for (let projectId of projectIds) {
-          let target = notificationsToBeSent[projectId];
-          await db.Notification.create({
-            type: "project issues warning",
-			      projectId,
-            data: {
-              messages: target.messages.map( message => ({ content: message }) ),
-            }
-          })
-        }
+        // for (let projectId of projectIds) {
+        //   let target = notificationsToBeSent[projectId];
+        //   await db.Notification.create({
+        //     type: "project issues warning",
+		// 	      projectId,
+        //     data: {
+        //       messages: target.messages.map( message => ({ content: message }) ),
+        //     }
+        //   })
+        // }
         
         return next();
 

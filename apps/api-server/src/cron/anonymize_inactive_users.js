@@ -11,7 +11,7 @@ const UseLock = require('../lib/use-lock');
 // Runs every day
 module.exports = {
   // cronTime: '*/10 * * * * *',
-  cronTime: '0 20 4 * * *',
+  // cronTime: '0 20 4 * * *',
   runOnInit: false,
   onTick: UseLock.createLockedExecutable({
     name: 'anonymize-inactive-users',
@@ -44,27 +44,27 @@ module.exports = {
             for (let i = 0; i < users.length; i++) {
               let user = users[i];
 
-              if (user.isNotifiedAboutAnonymization) {
-                let daysSinceNotification = parseInt( (Date.now() - new Date(user.isNotifiedAboutAnonymization).getTime()) / ( 24 * 60 * 60 * 1000 ) );
-                if (daysSinceNotification > anonymizeUsersXDaysAfterNotification) {
-                  console.log('CRON anonymize-inactive-users: anonymize user', user.email, user.lastLogin);
-                  // anonymize user
-                  user.doAnonymize();
-                }
-              } else {
-                // send notification
-                if (user.email) {
-                  console.log('CRON anonymize-inactive-users: send warning email to user', user.email, user.lastLogin);
-                  db.Notification.create({
-                    type: "user account about to expire",
-			              projectId: project.id,
-                    data: {
-                      userId: user.id,
-                    }
-			            })
-                  user.update({ isNotifiedAboutAnonymization: new Date() });
-                }
-              }
+              // if (user.isNotifiedAboutAnonymization) {
+              //   let daysSinceNotification = parseInt( (Date.now() - new Date(user.isNotifiedAboutAnonymization).getTime()) / ( 24 * 60 * 60 * 1000 ) );
+              //   if (daysSinceNotification > anonymizeUsersXDaysAfterNotification) {
+              //     console.log('CRON anonymize-inactive-users: anonymize user', user.email, user.lastLogin);
+              //     // anonymize user
+              //     user.doAnonymize();
+              //   }
+              // } else {
+              //   // send notification
+              //   if (user.email) {
+              //     console.log('CRON anonymize-inactive-users: send warning email to user', user.email, user.lastLogin);
+              //     db.Notification.create({
+              //       type: "user account about to expire",
+			  //             projectId: project.id,
+              //       data: {
+              //         userId: user.id,
+              //       }
+			  //           })
+              //     user.update({ isNotifiedAboutAnonymization: new Date() });
+              //   }
+              // }
 
             }
           }

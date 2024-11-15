@@ -11,7 +11,7 @@ const UseLock = require('../lib/use-lock');
 // Runs every day
 module.exports = {
   // cronTime: '*/10 * * * * *',
-  cronTime: '0 30 4 * * *',
+  // cronTime: '0 30 4 * * *',
   runOnInit: false,
   onTick: UseLock.createLockedExecutable({
     name: 'send-enddate-notifications',
@@ -74,15 +74,15 @@ module.exports = {
 
             // send notification
             console.log('CRON send-enddate-notifications: send email to projectmanager');
-            await db.Notification.create({
-              type: "project issues warning",
-			        projectId: project.id,
-              data: {
-                messages: [{content: 'de einddatum van je project nadert'}]
-              }
-			      })
-
-            project.update({ config: { project: { endDateNotificationSent: true } } });
+            // await db.Notification.create({
+            //   type: "project issues warning",
+			//         projectId: project.id,
+            //   data: {
+            //     messages: [{content: 'de einddatum van je project nadert'}]
+            //   }
+			//       })
+            //
+            // project.update({ config: { project: { endDateNotificationSent: true } } });
 
           }
         }
