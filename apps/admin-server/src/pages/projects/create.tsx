@@ -60,7 +60,9 @@ export default function CreateProject() {
     const project = await createProject(values.projectName);
     if (project) {
       toast.success('Project aangemaakt!');
-      router.push(`/projects/${project.id}/settings`);
+      const projectId = project?.id || project;
+
+      router.push(`/projects/${projectId}/settings`);
     } else {
       toast.error('Er is helaas iets mis gegaan.')
     }
