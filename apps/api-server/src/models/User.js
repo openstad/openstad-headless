@@ -45,51 +45,46 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 			auth:  {
         viewableBy: ['moderator', 'owner'],
-				/**
-				 * In case of setting the role
-				 * Admin are allowed to set all roles, but moderators only are allowed
-				 * to set members.
-				 *
-				 * @param actionUserRole
-				 * @param action (c)
-				 * @param user ()
-				 * @param self (user model)
-				 * @param project (project on which model is queried)
-				 */
-				authorizeData: function(actionUserRole, action, user, self, project) {
-					if (!self) return;
-
-					const updateAllRoles = ['admin'];
-					const updateMemberRoles = ['moderator'];
-					const fallBackRole = 'anonymous';
-					const memberRole = 'member';
-
-					// this is the role for User on which action is performed, not of the user doing the update
-          actionUserRole = actionUserRole || self.role;
-
-					// by default return anonymous role if none of the conditions are met
-					let roleToReturn;
-
-					// only for create and update check if allowed, the other option, view and list
-					// for now its ok if a the public sees the role
-					// for fields no DELETE action exists
-					if (action === 'create' || action === 'update') {
-						// if user is allowed to update all status
-						if (userHasRole(user, updateAllRoles)) {
-							roleToReturn = actionUserRole;
-						  // check if active user is allowed to set user's role to member
-						} else if (userHasRole(user, updateMemberRoles) && actionUserRole === memberRole) {
-							roleToReturn = actionUserRole;
-						} else {
-							roleToReturn = fallBackRole;
-						}
-
-					} else {
-						roleToReturn = actionUserRole;
-					}
-
-					return roleToReturn;
-				},
+                                /**
+                                 * In case of setting the role
+                                 * Admin are allowed to set all roles, but moderators only are allowed
+                                 * to set members.
+                                 *
+                                 * @param actionUserRole
+                                 * @param action (c)
+                                 * @param user ()
+                                 * @param self (user model)
+                                 * @param project (project on which model is queried)
+                                 */
+                                authorizeData: function(actionUserRole, action, user, self, project) {
+                                        if (!self) return;
+                                        const updateAllRoles = ['admin'];
+                                        const updateMemberRoles = ['moderator'];
+                                        const fallBackRole = 'anonymous';
+                                        const memberRole = 'member';
+                                        // this is the role for User on which action is performed, not of the user doing the update
+                                        actionUserRole = actionUserRole || self.role;
+                                        // by default return anonymous role if none of the conditions are met
+                                        let roleToReturn;
+                                        // only for create and update check if allowed, the other option, view and list
+                                        // for now its ok if a the public sees the role
+                                        // for fields no DELETE action exists
+                                        if (action === 'create' || action === 'update') {
+                                                // if user is allowed to update all status
+                                                if (userHasRole(user, updateAllRoles)) {
+                                                  roleToReturn = actionUserRole;
+                                                  // check if active user is allowed to set user's role to member
+                                                } else if (userHasRole(user, updateMemberRoles) && actionUserRole === memberRole) {
+                                                  roleToReturn = actionUserRole;
+                                                } else {
+                                                  roleToReturn = fallBackRole;
+                                                }
+                                        } else {
+                                                roleToReturn = actionUserRole;
+                                        }
+                                        return roleToReturn;
+                                },
+        updateableBy: ['admin']
 			},
     },
 
@@ -284,9 +279,10 @@ module.exports = function (db, sequelize, DataTypes) {
       allowNull: true,
       defaultValue: null,
       validate: {
-        is: {
-          args: [/^\d{4} ?[a-zA-Z]{2}$/],
-          msg: 'Ongeldige postcode'
+        isValidPostcode(value) {
+          if (value && !/^\d{4} ?[a-zA-Z]{2}$/.test(value)) {
+            throw new Error('Ongeldige postcode');
+          }
         }
       },
       set: function (postcode) {
@@ -627,21 +623,23 @@ module.exports = function (db, sequelize, DataTypes) {
 
     },
 
-    canUpdate: function(user, self) {
-
-      // copy the base functionality
+    canUpdate: function(self, user) {
       self = self || this;
 
-      if (!user) user = self.auth && self.auth.user;
+      // The user can either be the one being updated or the one making the update. The user possessing the auth key is the one making the update.
+      if (user?.auth) {
+        self = user;
+        user = self;
+      }
+
       if (!user || !user.role) user = { role: 'all' };
 
-      let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
+      let valid = userHasRole(self, self.auth && self.auth.updateableBy, self.id);
 
       // extra: isOwner through user on different project
       valid = valid || ( self.idpUser && user.idpUser && self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
 
-      // extra: geen acties op users met meer rechten dan je zelf hebt
-      valid = valid && userHasRole(user, self.role);
+      valid = valid && userHasRole(self, user.role);
 
       return valid;
 
