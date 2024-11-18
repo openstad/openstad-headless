@@ -585,13 +585,15 @@ router.route('/:projectId') //(\\d+)
     if (!hasRole( req.user, 'admin')) return next();
     try {
       let providers = await authSettings.providers({ project });
+      const configData = req.body.config?.auth?.provider?.openstad?.config || {};
+
       for (let provider of providers) {
-        let authData = req.body.config?.auth?.provider?.[provider];
-        if (!authData) continue;
+        if ( Object.keys(configData).length === 0 ) continue;
+
         let authConfig = await authSettings.config({ project, useAuth: provider });
         let adapter = await authSettings.adapter({ authConfig });
         if (adapter.service.updateClient) {
-          let merged = merge.recursive({}, authConfig, req.body.config?.auth?.provider?.[authConfig.provider])
+          let merged = merge.recursive({}, authConfig, {config: configData});
           await adapter.service.updateClient({ authConfig: merged, project });
           delete req.body.config?.auth?.provider?.[authConfig.provider]?.authTypes;
           delete req.body.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
