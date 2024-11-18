@@ -16,7 +16,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
@@ -27,7 +27,7 @@ import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { Button } from '@utrecht/component-library-react';
-import {hasRole} from '../../lib';
+import { hasRole } from '../../lib';
 
 type booleanProps = {
   [K in
@@ -59,6 +59,7 @@ export type ResourceDetailWidgetProps = {
     resourceId?: string;
     resourceIdRelativePath?: string;
     backUrlIdRelativePath?: string;
+    pageTitle?: boolean;
     backUrlText?: string;
   } & booleanProps & {
     likeWidget?: Omit<
@@ -70,9 +71,9 @@ export type ResourceDetailWidgetProps = {
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     commentsWidget_multiple?: Omit<
-    CommentsWidgetProps,
-    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
-  >;
+      CommentsWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
     resourceDetailMap?: Omit<
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -186,7 +187,7 @@ function ResourceDetail({
     if (window.location.hash.includes('#doc')) {
       let url = '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : '');
 
-      if ( backUrlIdRelativePath ) {
+      if (backUrlIdRelativePath) {
         const backUrlId = getIdFromHash();
 
         if (backUrlId) {
@@ -254,6 +255,14 @@ function ResourceDetail({
     }
   };
 
+
+  useEffect(() => {
+    if (props.pageTitle === true && resource.title !== undefined) {
+      const current = document.title.includes(' - ') && document.title.split(' - ')[0].length ? ' - '+ document.title.split(' - ')[0] : '';
+      document.title = resource.title + current;
+    }
+  }, [resource]);
+
   return (
     <section>
       <div
@@ -276,7 +285,7 @@ function ResourceDetail({
               )}
 
               {displayTitle && resource.title && (
-                <Heading level={1} appearance="utrecht-heading-2" dangerouslySetInnerHTML={{__html: resource.title}}></Heading>
+                <Heading level={1} appearance="utrecht-heading-2" dangerouslySetInnerHTML={{ __html: resource.title }}></Heading>
               )}
 
               {displayModBreak && resource.modBreak && (
@@ -294,7 +303,7 @@ function ResourceDetail({
                 {displayUser && resource?.user?.displayName && (
                   <div>
                     <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
-                    Ingediend door
+                      Ingediend door
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
                       {resource.user.displayName}
@@ -323,9 +332,9 @@ function ResourceDetail({
                 )}
               </div>
               <div className="resource-detail-content">
-                {displaySummary && <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{__html: resource.summary}}></Heading>}
+                {displaySummary && <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading>}
                 {displayDescription && (
-                  <Paragraph dangerouslySetInnerHTML={{__html: resource.description}}></Paragraph>
+                  <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
                 )}
               </div>
               {displayLocation && resource.location && (

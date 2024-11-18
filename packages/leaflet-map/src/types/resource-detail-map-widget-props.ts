@@ -11,4 +11,5 @@ export type ResourceDetailMapWidgetProps = BaseProps &
     marker?: MarkerProps;
     markerIcon?: MarkerIconType;
     resourceIdRelativePath?: string;
+    pageTitle?: boolean;
   };

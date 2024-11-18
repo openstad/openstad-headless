@@ -20,8 +20,11 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useCallback, useEffect, useState } from 'react';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
+
 
 const formSchema = z.object({
+  pageTitle: z.boolean().optional(),
   resourceId: z.string().optional(),
   resourceIdRelativePath: z
     .string()
@@ -53,9 +56,11 @@ export default function WidgetResourceDetailGeneral(
   const defaults = useCallback(
     () => ({
       resourceId: props?.resourceId || undefined,
-      resourceIdRelativePath: props?.resourceIdRelativePath || undefined
+      resourceIdRelativePath: props?.resourceIdRelativePath || undefined,
+      pageTitle: undefinedToTrueOrProp(props?.pageTitle),
+
     }),
-    [props?.resourceId, props?.resourceIdRelativePath]
+    [props?.resourceId, props?.resourceIdRelativePath, props?.pageTitle]
   );
 
   const form = useForm<FormData>({
@@ -109,6 +114,18 @@ export default function WidgetResourceDetailGeneral(
               )}
             />
           ) : null}
+
+          <FormField
+            control={form.control}
+            name="pageTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Inzending titel gebruiken als pagina titel</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

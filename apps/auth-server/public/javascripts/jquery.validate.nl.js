@@ -2,7 +2,7 @@
 jQuery.extend(jQuery.validator.messages, {
   required: "Dit is een verplicht veld.",
   remote: "Controleer dit veld.",
-  email: "Er is een ongeldig e-mailadres ingevuld.",
+  email: "Controleer of het e-mailadres het volgende formaat heeft: naam@domein.nl.",
   url: "Er is een ongeldige url ingevuld.",
   date: "Er is een ongeldige datum ingevuld.",
   dateISO: "Vul hier een geldige datum in (ISO-formaat).",
