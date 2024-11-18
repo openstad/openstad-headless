@@ -492,6 +492,20 @@ router.route('/')
       res.status(500).json({ errors });
     }
   })
+    .post(async function (req, res, next) {
+      // Add current user as admin to the newly made project
+      const project = await db.Project.findOne({ where: { id: req.results.id } });
+      if (!project) return next(new Error('Project not found'));
+      const user = await db.User.findOne({ where: { id: req.user.id }, raw: true });
+
+      if (user && req.user) {
+        delete user.id;
+        user.projectId = project.id;
+        await db.User.create(user);
+      }
+
+      return next()
+    })
 	.post(async function (req, res, next) {
     let publisher = await messageStreaming.getPublisher();
     if (publisher) {
