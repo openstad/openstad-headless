@@ -30,6 +30,7 @@ const formSchema = z.object({
   displayTags: z.boolean(),
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
+  displayStatusBar: z.boolean(),
   displayLikes: z.boolean(),
   displayDocuments: z.boolean(),
   documentsTitle: z.string().optional(),
@@ -65,6 +66,7 @@ export default function WidgetResourceDetailDisplay(
       displayTags: undefinedToTrueOrProp(props?.displayTags),
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
+      displayStatusBar: undefinedToTrueOrProp(props?.displayStatusBar),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
       displayDocuments: undefinedToTrueOrProp(props?.displayDocuments),
       clickableImage: props?.clickableImage || false,
@@ -208,6 +210,18 @@ export default function WidgetResourceDetailDisplay(
 
           <FormField
             control={form.control}
+            name="displayStatusBar"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>De balk met statussen weergeven bij de afbeelding?</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="displaySocials"
             render={({ field }) => (
               <FormItem>
@@ -232,6 +246,20 @@ export default function WidgetResourceDetailDisplay(
 
           <FormField
             control={form.control}
+            name="displayDocuments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Geüploade documenten weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="clickableImage"
             render={({ field }) => (
               <FormItem>
@@ -241,20 +269,6 @@ export default function WidgetResourceDetailDisplay(
                 <FormDescription>
                   Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar en wordt de afbeelding geopend in een nieuw tabblad.
                 </FormDescription>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displayDocuments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Geüploade documenten weergeven
-                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
