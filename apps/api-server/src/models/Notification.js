@@ -83,6 +83,10 @@ module.exports = ( db, sequelize, DataTypes ) => {
 
           if (managerTypes.find(type => type == instance.type)) {
             let defaultRecipient = project.emailConfig?.notifications?.projectmanagerAddress;
+            
+            if (defaultRecipient === 'info@openstad.org') {
+              defaultRecipient = '';
+            }
 
             let overwriteEmail =  (
               instance.data.hasOwnProperty('emailReceivers')
