@@ -216,13 +216,15 @@ function ResourceDetail({
       <Image
         src={src}
         imageFooter={
-          <div>
-            <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
-              {resource.statuses
-                ?.map((s: { name: string }) => s.name)
-                ?.join(', ')}
-            </Paragraph>
-          </div>
+          (displayStatus && resource.statuses && resource.statuses.length > 0) && (
+            <div>
+              <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
+                {resource.statuses
+                  ?.map((s: { name: string }) => s.name)
+                  ?.join(', ')}
+              </Paragraph>
+            </div>
+          )
         }
       />
     );
