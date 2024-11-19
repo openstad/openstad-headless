@@ -118,6 +118,7 @@ function CommentsInner({
 
   const [canComment, setCanComment] = useState(args.canComment)
   const [disableSubmit, setDisableSubmit] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
     if (!resource) return;
@@ -172,11 +173,25 @@ function CommentsInner({
     }
   }
 
+  useEffect(() => {
+    if (comments) {
+      let count = comments.length || 0;
+
+      for (let comment of comments) {
+        if (!comment?.replies) continue;
+
+        count += comment.replies.length;
+      }
+
+      setCommentCount(count);
+    }
+  }, [comments]);
+
     return (
     <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: refreshComments || defaultSetRefreshComments }}>
       <section className="osc">
         <Heading3 className="comments-title">
-          {comments && title?.replace(/\[\[nr\]\]/, comments.length)}
+          {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString()) }
           {!comments && title}
         </Heading3>
 
