@@ -46,6 +46,7 @@ type booleanProps = {
   | 'displayStatus'
   | 'displayDocuments'
   | 'clickableImage'
+  | 'displayStatusBar'
   | 'displaySocials']: boolean | undefined;
 };
 
@@ -99,6 +100,7 @@ function ResourceDetail({
   displayLikes = true,
   displayTags = true,
   displayStatus = true,
+  displayStatusBar = true,
   displaySocials = true,
   displayDocuments = true,
   clickableImage = false,
@@ -216,13 +218,15 @@ function ResourceDetail({
       <Image
         src={src}
         imageFooter={
-          <div>
-            <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
-              {resource.statuses
-                ?.map((s: { name: string }) => s.name)
-                ?.join(', ')}
-            </Paragraph>
-          </div>
+          (displayStatusBar && resource.statuses && resource.statuses.length > 0) && (
+            <div>
+              <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
+                {resource.statuses
+                  ?.map((s: { name: string }) => s.name)
+                  ?.join(', ')}
+              </Paragraph>
+            </div>
+          )
         }
       />
     );
