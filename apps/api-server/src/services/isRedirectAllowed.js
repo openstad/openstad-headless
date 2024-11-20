@@ -36,8 +36,14 @@ const isRedirectAllowed = async (projectId, redirectUri) => {
             return false;
         }
     });
+    
+    let redirectHost = new URL(redirectUri).host;
+    
+    if (redirectHost.startsWith('www.')) {
+        redirectHost = redirectHost.slice(4);
+    }
 
-    if(allowedDomains.includes(new URL(redirectUri).host)){
+    if(allowedDomains.includes(redirectHost)){
         return true;
     }
     return false;
