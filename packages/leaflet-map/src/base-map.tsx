@@ -370,7 +370,19 @@ const BaseMap = ({
       result[i] = markerData;
     });
 
-    setCurrentMarkers(result);
+    if (result.length !== currentMarkers.length) {
+      setCurrentMarkers(result);
+    } else {
+      const isDifferent = result.some(
+        (marker, index) =>
+          marker.lat !== currentMarkers[index]?.lat ||
+          marker.lng !== currentMarkers[index]?.lng
+      );
+
+      if (isDifferent) {
+        setCurrentMarkers(result);
+      }
+    }
   }, [markers, mapDataLayers]);
 
   let clusterMarkers: MarkerProps[] = [];
