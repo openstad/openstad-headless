@@ -20,7 +20,9 @@ export function Image({
         <div className="osc-image-header">{imageHeader}</div>
       ) : null}
       <img role="presentation" {...props} alt={props.alt ? props.alt : ''} />
-      <figcaption className="osc-image-footer">{imageFooter}</figcaption>
+      {imageFooter && (
+        <figcaption className="osc-image-footer">{imageFooter}</figcaption>
+      )}
     </figure>
   );
 }
