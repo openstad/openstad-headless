@@ -280,6 +280,10 @@ app.use(function (err, req, res, next) {
   }));
 })
 
+app.get('/health', (req, res) => {
+  res.send('OK');
+});
+
 app.listen(argv.port, function () {
   console.log('Application listen on port %d...', argv.port);
 });

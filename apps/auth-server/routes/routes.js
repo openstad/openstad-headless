@@ -155,6 +155,10 @@ module.exports = function (app) {
 
     app.get('/', authLocal.index);
 
+    app.get('/health', (req, res) => {
+      res.send('OK');
+    });
+
     /**
      * Login routes for clients,
      * checks if one or more options of authentications is available
