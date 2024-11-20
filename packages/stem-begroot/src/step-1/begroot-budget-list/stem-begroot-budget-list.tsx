@@ -4,7 +4,7 @@ import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading5, Paragraph, Strong, Button } from "@utrecht/component-library-react";
+import { Heading3, Paragraph, Strong, Button } from "@utrecht/component-library-react";
 
 export const StemBegrootBudgetList = ({
   introText = '',
@@ -67,12 +67,14 @@ export const StemBegrootBudgetList = ({
         </section>
       )}
       <section className="budget-list-container">
-        <Heading5>{step1Title}</Heading5>
+        <Heading3>{step1Title}</Heading3>
         {!canAddMore && allResourceInList.length > 0 ? (
           <Paragraph className="budget-list-status-text helptext error">
+            <Strong>
             {typeIsBudgeting
               ? 'Onvoldoende budget'
               : 'Maximaal aantal plannen bereikt'}
+              </Strong>
           </Paragraph>
         ) : null}
 
@@ -103,7 +105,7 @@ export const StemBegrootBudgetList = ({
                         onClick={() => {
                           onSelectedResourceRemove(resource);
                         }}
-                        className="subtle-button"
+                        className="primary-button"
                         icon="ri-close-line"
                         iconOnly={true}
                         text='Item verwijderen'

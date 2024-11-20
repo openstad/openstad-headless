@@ -1,7 +1,7 @@
 .stem-begroot-budget-list {
   display: grid;
   grid-template-columns: var(--nlds--budget-budget-columns, 1fr auto);
-  gap: var(--nlds--budget-budget-gap, 1rem);
+  gap: var(--nlds--budget-budget-gap, 3rem);
   margin: var(--nlds--budget-budget-margin, 0 0 2rem 0);
   min-height: 3rem;
 }

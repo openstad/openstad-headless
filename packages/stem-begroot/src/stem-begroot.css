@@ -111,8 +111,9 @@
   align-items: center;
 }
 .budget-overview-row .budget-overview-image{
-  width: 4rem;
-  height: 4rem;
+  width: 4rem !important;
+  height: 4rem !important;
+  background-size: 30% !important;
 }
 
 .budget-unused-panel-step-2 {
@@ -264,4 +265,10 @@ section.osc-begrootmodule-resource-detail-photo
 .budget-overview-panel .budget-two-text-row-spaced .budget-overview-row.resource-has-no-images .image-container img,
 .osc-begrootmodule-resource-detail .osc-begrootmodule-resource-detail-photo.resource-has-no-images .image-container img {
   display: none;
+}
+
+@media only screen and (max-width: 1000px){
+  .osc-begrootmodule-resource-detail{
+      flex-direction: column;
+  }
 }

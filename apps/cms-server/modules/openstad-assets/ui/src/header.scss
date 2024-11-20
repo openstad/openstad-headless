@@ -414,6 +414,7 @@ header:has(.header_navbar-container.--show)~#navbar {
         top: 0;
         box-shadow: none;
         background: #eee;
+        z-index: 1;
       }
     }
   }
