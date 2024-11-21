@@ -222,16 +222,22 @@ router.route('/:commentId(\\d+)')
   // delete comment
   // --------------
   .delete(auth.useReqUser)
-  .delete(function(req, res, next) {
+  .delete(async function(req, res, next) {
     const comment = req.results;
     if (!( comment && comment.can && comment.can('delete') )) return next( new Error('You cannot delete this comment') );
 
-    comment
-      .destroy()
-      .then(() => {
-        res.json({ 'comment': 'deleted' });
-      })
-      .catch(next);
+    try {
+      await comment.destroy();
+
+      const childComments = await db.Comment.findAll({where: {parentId: comment.id}});
+      for (const childComment of childComments) {
+        await childComment.destroy();
+      }
+
+      res.json({'comment': 'deleted', 'replies': 'deleted'});
+    } catch (err) {
+      next(err);
+    }
   });
 
 router.route('/:commentId(\\d+)/vote')
