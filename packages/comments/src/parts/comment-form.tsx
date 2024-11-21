@@ -64,6 +64,19 @@ function CommentForm({
 
   if (
     typeof args.comment !== 'undefined' &&
+    typeof args.comment.parentId !== 'undefined' &&
+    !!args.comment.parentId &&
+    activeMode === 'edit'
+  ) {
+    formFields.push({
+      type: 'hidden',
+      fieldKey: 'parentId',
+      defaultValue: args.comment.parentId.toString(),
+    });
+  }
+
+  if (
+    typeof args.comment !== 'undefined' &&
     typeof args.comment.id !== 'undefined' &&
     activeMode === 'edit'
   ) {
