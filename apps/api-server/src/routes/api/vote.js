@@ -357,10 +357,10 @@ router.route('/*')
 		}
   })
 
-  // validaties voor voteType=count-per-theme
+  // validaties voor voteType=countPerTheme
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.project.config.votes.voteType != 'count-per-theme') return next();
+		if (req.project.config.votes.voteType != 'countPerTheme') return next();
     let themes = req.project.config.votes.themes || [];
     let totalNoOfVotes = 0;
     req.votes.forEach((vote) => {
@@ -400,10 +400,10 @@ router.route('/*')
 		}
 	})
 
-  // validaties voor voteType=budgeting-per-theme
+  // validaties voor voteType=budgetingPerTheme
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.project.config.votes.voteType != 'budgeting-per-theme') return next();
+		if (req.project.config.votes.voteType != 'budgetingPerTheme') return next();
     let themes = req.project.config.votes.themes || [];
 		req.votes.forEach((vote) => {
 			let resource = req.resources.find(resource => resource.id == vote.resourceId);
@@ -458,9 +458,9 @@ router.route('/*')
 				break;
 
 			case 'count':
-			case 'count-per-theme':
+			case 'countPerTheme':
 			case 'budgeting':
-			case 'budgeting-per-theme':
+			case 'budgetingPerTheme':
 				req.votes.map( vote => actions.push({ action: 'create', vote: vote}) );
 				req.existingVotes.map( vote => actions.push({ action: 'delete', vote: vote}) );
 				break;

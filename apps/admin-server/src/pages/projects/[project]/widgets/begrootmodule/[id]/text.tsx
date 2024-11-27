@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,15 +19,15 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  step1Title: z.string(),
-  resourceCardTitle: z.string(),
-  step2Title: z.string(),
-  stemCodeTitle: z.string(),
-  stemCodeTitleSuccess: z.string(),
-  newsLetterTitle: z.string(),
-  panelTitle: z.string(),
-  budgetChosenTitle: z.string(),
-  budgetRemainingTitle: z.string(),
+  step1Title: z.string().optional(),
+  resourceCardTitle: z.string().optional(),
+  step2Title: z.string().optional(),
+  stemCodeTitle: z.string().optional(),
+  stemCodeTitleSuccess: z.string().optional(),
+  newsLetterTitle: z.string().optional(),
+  panelTitle: z.string().optional(),
+  budgetChosenTitle: z.string().optional(),
+  budgetRemainingTitle: z.string().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -43,15 +44,15 @@ export default function BegrootmoduleText(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      step1Title: props.step1Title || 'Uw selecties',
-      resourceCardTitle: props.resourceCardTitle || 'Selecteer een plan',
-      step2Title: props.step2Title || 'Overzicht van mijn selectie',
-      stemCodeTitle: props.stemCodeTitle || 'Vul je stemcode in',
-      stemCodeTitleSuccess: props.stemCodeTitleSuccess || 'Vul een andere stemcode in',
-      newsLetterTitle: props.newsLetterTitle || 'Hou mij op de hoogte',
-      panelTitle: props.panelTitle,
-      budgetChosenTitle: props.budgetChosenTitle,
-      budgetRemainingTitle: props.budgetRemainingTitle,
+      step1Title: props.step1Title ?? 'Uw selecties',
+      resourceCardTitle: props.resourceCardTitle ?? 'Selecteer een inzending',
+      step2Title: props.step2Title ?? 'Overzicht van mijn selectie',
+      stemCodeTitle: props.stemCodeTitle ?? 'Vul je stemcode in',
+      stemCodeTitleSuccess: props.stemCodeTitleSuccess ?? 'Vul een andere stemcode in',
+      newsLetterTitle: props.newsLetterTitle ?? 'Hou mij op de hoogte',
+      panelTitle: props.panelTitle ?? '',
+      budgetChosenTitle: props.budgetChosenTitle ?? "Inzendingen gekozen",
+      budgetRemainingTitle: props.budgetRemainingTitle ?? "Nog te kiezen",
     },
   });
 
@@ -90,7 +91,7 @@ export default function BegrootmoduleText(
             name="resourceCardTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Titel plannen kaart</FormLabel>
+                <FormLabel>Titel inzendingen kaart</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -195,6 +196,7 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Titel</FormLabel>
+                <FormDescription>Het panel wordt bovenin stap 1 en 2 getoond en bevat informatie over wat er is gekozen en hoeveel de gebruiker nog kan kiezen.</FormDescription>
                 <FormControl>
                   <Input
                     {...field}
@@ -213,7 +215,8 @@ export default function BegrootmoduleText(
             name="budgetChosenTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Regel 1</FormLabel>
+                <FormLabel>'Gekozen' tekst</FormLabel>
+                <FormDescription>Hier komt informatie bij te staan over hoeveel er al is gekozen.</FormDescription>
                 <FormControl>
                   <Input
                     {...field}
@@ -232,7 +235,8 @@ export default function BegrootmoduleText(
             name="budgetRemainingTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Regel 2</FormLabel>
+                <FormLabel>'Nog over' tekst</FormLabel>
+                <FormDescription>Hier komt informatie bij te staan over hoeveel er nog gekozen kan worden.</FormDescription>
                 <FormControl>
                   <Input
                     {...field}

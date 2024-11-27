@@ -45,13 +45,13 @@ export const BudgetStatusPanel = ({
             </>
           ) : (
             <>
-              <Heading4>{title || 'Totaal aantal plannen'}</Heading4>
+              {title && (<Heading4>{title}</Heading4>)}
               <Paragraph className="info-budget-label">
-                <span>{budgetChosenTitle || 'Gekozen plannen:'}</span>
+                {budgetChosenTitle && (<span>{budgetChosenTitle}</span>)}
                 <span><Strong>{nrOfResourcesSelected}</Strong></span>
               </Paragraph>
               <Paragraph className="info-budget-label">
-                <span>{budgetRemainingTitle || 'Beschikbare plannen:'}</span>
+                {budgetRemainingTitle && (<span>{budgetRemainingTitle}</span>)}
                 <span>
                   <Strong>{Math.max(maxNrOfResources - nrOfResourcesSelected, 0)}</Strong>
                 </span>
