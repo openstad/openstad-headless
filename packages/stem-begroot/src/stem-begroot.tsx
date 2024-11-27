@@ -80,7 +80,10 @@ function StemBegroot({
     api: props.api,
   });
 
-
+  const {data: allTags} = datastore.useTags({
+    projectId: props.projectId,
+    type: ''
+  });
 
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
@@ -104,7 +107,7 @@ function StemBegroot({
     .map((t) => Number.parseInt(t));
 
   const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo);
-  const [sort, setSort] = useState<string | undefined>();
+  const [sort, setSort] = useState<string | undefined>(props.defaultSorting || undefined);
   const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
   const [itemsPerPage, setPageSize] = useState<number>(
@@ -539,6 +542,8 @@ function StemBegroot({
               statusIdsToLimitResourcesTo={statusIdsToLimitResourcesTo || []}
               tagIdsToLimitResourcesTo={tags}
               sort={sort}
+              allTags={allTags}
+              tags={tags}
             />
             <Spacer size={3} />
 

@@ -27,6 +27,8 @@ export const StemBegrootResourceList = ({
   resourceListColumns = 3,
   statusIdsToLimitResourcesTo = [],
   sort = '',
+  allTags = [],
+  tags = [],
   header
 }: {
   resourceListColumns?: number;
@@ -45,6 +47,8 @@ export const StemBegrootResourceList = ({
   showVoteCount?: boolean;
   showOriginalResource?: boolean;
   originalResourceUrl?: string;
+  allTags?: Array<any>;
+  tags?: Array<any>;
   header?: React.JSX.Element;
 }) => {
   // @ts-ignore
