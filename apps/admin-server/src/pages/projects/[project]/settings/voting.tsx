@@ -75,9 +75,9 @@ export default function ProjectSettingsVoting() {
     () => ({
       isViewable: data?.config?.[category]?.isViewable || false,
       isActive: data?.config?.[category]?.isActive || false,
-      withExisting: data?.config?.[category]?.withExisting || null,
-      requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
-      voteType: data?.config?.[category]?.voteType || null,
+      withExisting: data?.config?.[category]?.withExisting || "error",
+      requiredUserRole: data?.config?.[category]?.requiredUserRole || "anonymous",
+      voteType: data?.config?.[category]?.voteType || "likes",
       minResources: data?.config?.[category]?.minResources || 0,
       maxResources: data?.config?.[category]?.maxResources || 0,
       minBudget: data?.config?.[category]?.minBudget || 0,
