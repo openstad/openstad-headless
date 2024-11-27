@@ -12,43 +12,45 @@ type Props = {
   isSimpleView?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 const Stepper = (props: Props) => {
-  const { steps, currentStep = 0, isSimpleView } = props;
+  const { steps, currentStep = 0, isSimpleView = false } = props;
 
   return (
-    <div {...props} className={`stepper ${props.className}`} aria-hidden="true">
-      {steps.map((step, index) => (
-        <React.Fragment key={step}>
-          {isSimpleView === true && index !== 1 && (
-            <>
-              <div className="step-container">
-                <div
-                  className={`step-icon ${currentStep === index ? 'active' : ''} ${
-                    currentStep > index ? 'done' : ''
-                  }`}>
-                  <Paragraph>{index >= 1 ? index : 1}</Paragraph>
+    <div {...props} className={`stepper ${props.className ?? ''}`} aria-hidden="true">
+      {steps.map((step, index) => {
+        return (
+          <React.Fragment key={index}>
+            {isSimpleView === true && index !== 1 && (
+              <>
+                <div className="step-container">
+                  <div
+                    className={`step-icon ${currentStep === index ? 'active' : ''} ${
+                      currentStep > index ? 'done' : ''
+                    }`}>
+                    <Paragraph>{index >= 1 ? index : 1}</Paragraph>
+                  </div>
+                  <Paragraph> {step}</Paragraph>
                 </div>
-                <Paragraph> {step}</Paragraph>
-              </div>
-              <div className="step-divider"></div>
-            </>
-          )}
+                <div className="step-divider"></div>
+              </>
+            )}
 
-          {isSimpleView === false && (
-            <>
-              <div className="step-container">
-                <div
-                  className={`step-icon ${currentStep === index ? 'active' : ''} ${
-                    currentStep > index ? 'done' : ''
-                  }`}>
-                  <Paragraph>{index + 1}</Paragraph>
+            {isSimpleView === false && (
+              <>
+                <div className="step-container">
+                  <div
+                    className={`step-icon ${currentStep === index ? 'active' : ''} ${
+                      currentStep > index ? 'done' : ''
+                    }`}>
+                    <Paragraph>{index + 1}</Paragraph>
+                  </div>
+                  <Paragraph> {step}</Paragraph>
                 </div>
-                <Paragraph> {step}</Paragraph>
-              </div>
-              <div className="step-divider"></div>
-            </>
-          )}
-        </React.Fragment>
-      ))}
+                <div className="step-divider"></div>
+              </>
+            )}
+          </React.Fragment>
+        )}
+      )}
     </div>
   );
 };

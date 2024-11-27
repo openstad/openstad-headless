@@ -66,6 +66,10 @@ export type StemBegrootWidgetProps = BaseProps &
     resetText?: string;
     applyText?: string;
     searchPlaceholder?: string;
+    step1Tab?: string;
+    step2Tab?: string;
+    step3Tab?: string;
+    step4Tab?: string;
   };
 
 function StemBegroot({
@@ -73,6 +77,10 @@ function StemBegroot({
   onlyIncludeTagIds = '',
   onlyIncludeStatusIds = '',
   resourceListColumns = 3,
+  step1Tab = '',
+  step2Tab = '',
+  step3Tab = '',
+  step4Tab = '',
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -281,6 +289,13 @@ function StemBegroot({
         : 'Voeg toe';
   };
 
+  const steps = [
+    step1Tab || 'Kies',
+    step2Tab || 'Overzicht',
+    step3Tab || 'Stemcode',
+    step4Tab || 'Stem'
+  ];
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -318,7 +333,7 @@ function StemBegroot({
       <div className="osc">
         <Stepper
           currentStep={currentStep}
-          steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
+          steps={steps}
           isSimpleView={props.isSimpleView}
         />
         <Spacer size={1} />

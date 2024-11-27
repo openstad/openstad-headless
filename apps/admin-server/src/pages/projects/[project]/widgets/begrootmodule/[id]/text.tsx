@@ -28,6 +28,10 @@ const formSchema = z.object({
   panelTitle: z.string().optional(),
   budgetChosenTitle: z.string().optional(),
   budgetRemainingTitle: z.string().optional(),
+  step1Tab: z.string().optional(),
+  step2Tab: z.string().optional(),
+  step3Tab: z.string().optional(),
+  step4Tab: z.string().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -44,6 +48,10 @@ export default function BegrootmoduleText(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      step1Tab: props.step1Tab ?? 'Kies',
+      step2Tab: props.step2Tab ?? 'Overzicht',
+      step3Tab: props.step3Tab ?? 'Stemcode',
+      step4Tab: props.step4Tab ?? 'Stem',
       step1Title: props.step1Title ?? 'Uw selecties',
       resourceCardTitle: props.resourceCardTitle ?? 'Selecteer een inzending',
       step2Title: props.step2Title ?? 'Overzicht van mijn selectie',
@@ -63,7 +71,91 @@ export default function BegrootmoduleText(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/2 grid grid-cols-1 gap-4">
+          className="lg:w-full grid grid-cols-1 gap-4">
+
+          <div className="w-full grid-cols-4 grid gap-4">
+
+            <FormField
+              control={form.control}
+              name="step1Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 1 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="step2Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 2 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="step3Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 3 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="step4Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 4 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+          </div>
 
           <Heading size="lg">Stap 1:</Heading>
           <FormField
