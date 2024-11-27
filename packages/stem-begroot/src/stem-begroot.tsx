@@ -50,6 +50,7 @@ export type StemBegrootWidgetProps = BaseProps &
     textActiveSearch?: string;
     itemsPerPage?: number;
     onlyIncludeTagIds: string;
+    onlyIncludeStatusIds?: string;
     resourceListColumns?: number;
     showInfoMenu?: boolean;
     isSimpleView?: boolean;
@@ -70,6 +71,7 @@ export type StemBegrootWidgetProps = BaseProps &
 function StemBegroot({
   notEnoughBudgetText = 'Niet genoeg budget',
   onlyIncludeTagIds = '',
+  onlyIncludeStatusIds = '',
   resourceListColumns = 3,
   ...props
 }: StemBegrootWidgetProps) {
@@ -90,6 +92,12 @@ function StemBegroot({
     useState<boolean>(false);
 
   const tagIdsToLimitResourcesTo = onlyIncludeTagIds
+    .trim()
+    .split(',')
+    .filter((t) => t && !isNaN(+t.trim()))
+    .map((t) => Number.parseInt(t));
+
+  const statusIdsToLimitResourcesTo = onlyIncludeStatusIds
     .trim()
     .split(',')
     .filter((t) => t && !isNaN(+t.trim()))
@@ -528,6 +536,9 @@ function StemBegroot({
                   setSelectedResources(resources);
                 }
               }}
+              statusIdsToLimitResourcesTo={statusIdsToLimitResourcesTo || []}
+              tagIdsToLimitResourcesTo={tags}
+              sort={sort}
             />
             <Spacer size={3} />
 
