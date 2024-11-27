@@ -89,6 +89,15 @@ export const StemBegrootResourceList = ({
       if (sort === 'createdAt_asc') {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
+      if (sort === 'votes_desc' || sort === 'ranking') {
+        return (b.yes || 0) - (a.yes || 0);
+      }
+      if (sort === 'votes_asc') {
+        return (a.yes || 0) - (b.yes || 0);
+      }
+      if (sort === 'title') {
+        return a.title.localeCompare(b.title);
+      }
       return 0;
     });
 
