@@ -27,7 +27,7 @@ const formSchema = z.object({
   showVoteCount: z.boolean(),
   notEnoughBudgetText: z.string(),
   showOriginalResource: z.boolean(),
-  originalResourceUrl: z.string().url(),
+  originalResourceUrl: z.string().url().optional(),
   resourceListColumns: z.coerce.number({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
@@ -141,28 +141,31 @@ export default function BegrootmoduleDisplay(
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="originalResourceUrl"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>
-                  URL van de oorspronkelijke inzending
-                  <InfoDialog content={'TODO'} />
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
+          { form.watch('showOriginalResource') &&(
+            <FormField
+              control={form.control}
+              name="originalResourceUrl"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>
+                    URL van de oorspronkelijke inzending
+                    <InfoDialog content={'TODO'} />
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormObjectSelectField
             form={form}
