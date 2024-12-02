@@ -262,10 +262,10 @@ useEffect(() => {
                         <SelectItem value="count">Aantallen</SelectItem>
                         <SelectItem value="budgeting">Begroten</SelectItem>
                         <SelectItem value="countPerTheme">
-                          Aantal per taggroep
+                          Aantal per tag(groep)
                         </SelectItem>
                         <SelectItem value="budgetingPerTheme">
-                          Begroten per taggroep
+                          Begroten per tag(groep)
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -280,8 +280,8 @@ useEffect(() => {
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is de minimum hoeveelheid resources waar iemand op kan stemmen?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
+                        Wat is de minimum hoeveelheid inzendingen waar iemand op kan stemmen?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep)'} />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="1" {...field} />
@@ -298,8 +298,8 @@ useEffect(() => {
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is de maximum hoeveelheid resources waar iemand op kan stemmen?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
+                        Wat is de maximum hoeveelheid inzendingen waar iemand op kan stemmen?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep'} />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100" {...field} />
