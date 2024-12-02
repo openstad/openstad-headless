@@ -22,15 +22,17 @@ import { Step4 } from './step-4';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Heading } from '@utrecht/component-library-react';
+import useTags from "@openstad-headless/admin-server/src/hooks/use-tag";
 
 export type StemBegrootWidgetProps = BaseProps &
   ProjectSettingProps & {
-    step1: string;
-    step2: string;
-    step3: string;
-    step3success: string;
-    voteMessage: string;
-    thankMessage: string;
+    step0?: string;
+    step1?: string;
+    step2?: string;
+    step3?: string;
+    step3success?: string;
+    voteMessage?: string;
+    thankMessage?: string;
     showNewsletterButton: boolean;
     notEnoughBudgetText?: string;
     displayPagination?: boolean;
@@ -70,6 +72,9 @@ export type StemBegrootWidgetProps = BaseProps &
     step2Tab?: string;
     step3Tab?: string;
     step4Tab?: string;
+    tagTypeSelector?: string;
+    tagTypeTag?: string;
+    tagTypeTagGroup?: Array<string>
   };
 
 function StemBegroot({
@@ -81,6 +86,7 @@ function StemBegroot({
   step2Tab = '',
   step3Tab = '',
   step4Tab = '',
+  step0 = '',
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -93,14 +99,18 @@ function StemBegroot({
     type: ''
   });
 
+  const startingStep = props?.votes?.voteType === "countPerTheme" || props?.votes?.voteType === "budgetPerTheme" ? -1 : 0;
+
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState<number>(startingStep);
   const [lastStep, setLastStep] = useState<number>(0);
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const [navAfterLogin, setNavAfterLogin] = useState<boolean>();
   const [shouldReloadSelectedResources, setReloadSelectedResources] =
     useState<boolean>(false);
+
+  const [activeTagTab, setActiveTagTab] = useState<string>('');
 
   const tagIdsToLimitResourcesTo = onlyIncludeTagIds
     .trim()
@@ -296,6 +306,11 @@ function StemBegroot({
     step4Tab || 'Stem'
   ];
 
+  const typeSelector = props.tagTypeSelector || 'tag';
+  const tagsToDisplay = typeSelector === 'tag'
+    ? allTags.filter((tag: { type: string }) => tag.type === props.tagTypeTag).map((tag: {name: string}) => tag.name)
+    : props?.tagTypeTagGroup || [];
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -346,6 +361,27 @@ function StemBegroot({
 
 
         <section className="begroot-step-panel">
+          {currentStep === -1 && (
+            <div className="vote-per-theme-container">
+              <div className="vote-per-theme-intro" dangerouslySetInnerHTML={{__html: step0}}></div>
+              <div className="themes-container">
+                {tagsToDisplay.map((tag: string) => (
+                  <div className="theme" key={tag}>
+                    <Button
+                      appearance="primary-action-button"
+                      onClick={() => {
+                        setActiveTagTab(tag);
+                        setCurrentStep(0);
+                      }}
+                    >
+                      {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {currentStep === 0 ? (
             <>
               <StemBegrootBudgetList
@@ -451,7 +487,7 @@ function StemBegroot({
             ) : null}
 
             {/* Dont show on voting step if you are on step 2 your not logged in*/}
-            {currentStep !== 2 ? (
+            {(currentStep !== 2 && currentStep !== -1) ? (
               <Button
                 appearance="primary-action-button"
                 onClick={async () => {

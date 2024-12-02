@@ -262,10 +262,10 @@ useEffect(() => {
                         <SelectItem value="count">Aantallen</SelectItem>
                         <SelectItem value="budgeting">Begroten</SelectItem>
                         <SelectItem value="countPerTheme">
-                          Aantal per thema
+                          Aantal per taggroep
                         </SelectItem>
                         <SelectItem value="budgetingPerTheme">
-                          Begroten per thema
+                          Begroten per taggroep
                         </SelectItem>
                       </SelectContent>
                     </Select>
