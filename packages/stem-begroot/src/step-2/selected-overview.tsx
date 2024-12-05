@@ -127,7 +127,7 @@ export const BegrotenSelectedOverview = ({
       ) : (
         <div className="begroot-step-2-instruction-budget-status-panel">
           <Paragraph>{introText}</Paragraph>
-          {showInfoMenu && (
+          {showInfoMenu ? (
             <BudgetStatusPanel
               typeIsBudgeting={typeIsBudgeting}
               maxNrOfResources={maxNrOfResources}
@@ -139,8 +139,9 @@ export const BegrotenSelectedOverview = ({
               budgetChosenTitle={budgetChosenTitle}
               budgetRemainingTitle={budgetRemainingTitle}
             />
-          )}
-          <Spacer size={1.5}/>
+          ) :
+            <Spacer size={1.5}/>
+          }
 
           {resourcesToShow.map((resource) => {
             let defaultImage = '';
@@ -160,22 +161,26 @@ export const BegrotenSelectedOverview = ({
             const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
 
             return (
-              <div key={`budget-overview-row-${resource.id}`} className="budget-two-text-row-spaced">
-                <section className={`budget-overview-row ${hasImages}`}>
-                  <Image
-                    className="budget-overview-image"
-                    src={resourceImages}
-                  />
-                  <div className="budget-resource-container">
-                    <Paragraph>{resource.title}</Paragraph>
-                    {typeIsBudgeting ? (
-                      <Paragraph>
-                        <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
-                      </Paragraph>
-                    ) : null}
-                  </div>
-                </section>
-              </div>
+              <React.Fragment key={`budget-overview-row-${resource.id}`}>
+                <div className="budget-two-text-row-spaced">
+                  <section className={`budget-overview-row ${hasImages}`}>
+                    <Image
+                      className="budget-overview-image"
+                      src={resourceImages}
+                    />
+                    <div className="budget-resource-container">
+                      <Paragraph>{resource.title}</Paragraph>
+                      {typeIsBudgeting ? (
+                        <Paragraph>
+                          <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
+                        </Paragraph>
+                      ) : null}
+                    </div>
+                  </section>
+                </div>
+
+              <Spacer size={1} />
+            </React.Fragment>
             );
           })}
         </div>
