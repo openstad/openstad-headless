@@ -648,13 +648,13 @@ function StemBegroot({
           ) : null}
 
           {currentStep === 2 ? (
-            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3} stemCodeTitle={props.stemCodeTitle} />
+            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3 || ''} stemCodeTitle={props.stemCodeTitle} />
           ) : null}
 
           {currentStep === 3 ? (
             <Step3Success
               loginUrl={`${props?.login?.url}`}
-              step3success={props.step3success}
+              step3success={props.step3success || ''}
               stemCodeTitleSuccess={props.stemCodeTitleSuccess}
             />
           ) : null}
@@ -664,8 +664,8 @@ function StemBegroot({
           {currentStep === 4 ? (
             <Step4
               loginUrl={`${props?.login?.url}`}
-              thankMessage={props.thankMessage}
-              voteMessage={props.voteMessage}
+              thankMessage={props.thankMessage || ''}
+              voteMessage={props.voteMessage || ''}
               showNewsletterButton={props.showNewsletterButton}
               newsLetterTitle={props.newsLetterTitle}
             />

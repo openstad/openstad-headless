@@ -115,6 +115,8 @@ export const StemBegrootResourceDetailDialog = ({
                           center={resource.location}
                           map={{'areaId': areaId}}
                           />
+                      } else {
+                        return <></>;
                       }
                     }}
 

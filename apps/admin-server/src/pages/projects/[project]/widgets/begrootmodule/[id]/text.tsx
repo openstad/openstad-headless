@@ -307,7 +307,7 @@ export default function BegrootmoduleText(
             name="budgetChosenTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>'Gekozen' tekst</FormLabel>
+                <FormLabel>&apos;Gekozen&apos; tekst</FormLabel>
                 <FormDescription>Hier komt informatie bij te staan over hoeveel er al is gekozen.</FormDescription>
                 <FormControl>
                   <Input
@@ -327,7 +327,7 @@ export default function BegrootmoduleText(
             name="budgetRemainingTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>'Nog over' tekst</FormLabel>
+                <FormLabel>&apos;Nog over&apos; tekst</FormLabel>
                 <FormDescription>Hier komt informatie bij te staan over hoeveel er nog gekozen kan worden.</FormDescription>
                 <FormControl>
                   <Input

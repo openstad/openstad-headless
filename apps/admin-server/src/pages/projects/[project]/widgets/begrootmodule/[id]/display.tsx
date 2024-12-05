@@ -263,7 +263,7 @@ export default function BegrootmoduleDisplay(
                         </FormControl>
                         <SelectContent>
                           {tagGroupNames?.map((item, index) => (
-                            <SelectItem value={item}>
+                            <SelectItem value={item} key={index}>
                               {item}
                             </SelectItem>
                           ))}
