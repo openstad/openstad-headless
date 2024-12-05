@@ -216,7 +216,7 @@ export default function BegrootmoduleDisplay(
             items={[{ value: 1 }, { value: 2 }, { value: 3 }]}
           />
 
-          { (voteType === 'countPerTheme' || voteType === 'budgetingPerTheme') && (
+          { (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && (
             <>
               <FormField
                 control={form.control}

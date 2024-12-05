@@ -60,13 +60,6 @@ export const StemBegrootResourceDetailDialog = ({
         buttonText={{ next: 'Volgende inzending', previous: 'Vorige inzending' }}
         items={resources && resources.length > 0 ? resources : []}
         itemRenderer={(resource) => {
-          const theme = resource.tags
-            ?.filter((t: any) => t.type === 'theme')
-            ?.at(0);
-          const area = resource.tags
-            ?.filter((t: any) => t.type === 'area')
-            ?.at(0);
-
           const canUseButton = resourceBtnEnabled(resource);
           const primaryButtonText = resourceBtnTextHandler(resource);
           const originalUrl = defineOriginalUrl(resource);
@@ -98,7 +91,10 @@ export const StemBegrootResourceDetailDialog = ({
 
             if (resourceImages.length === 0) {
                 resourceImages = [{ url: defaultImage || '' }];
+
+              if (!defaultImage) {
                 hasImages = 'resource-has-no-images';
+              }
             }
 
           return (
@@ -112,7 +108,7 @@ export const StemBegrootResourceDetailDialog = ({
                     itemRenderer={(i) => {
                       if (i.url) {
                         return <Image src={i.url} />
-                      } else {
+                      } else if (resource.location) {
                         return <ResourceDetailMap
                           resourceId={resource.id}
                           {...resource}

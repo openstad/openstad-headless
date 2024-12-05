@@ -24,6 +24,17 @@ import '@utrecht/design-tokens/dist/root.css';
 import { Button, Heading } from '@utrecht/component-library-react';
 import useTags from "@openstad-headless/admin-server/src/hooks/use-tag";
 
+type TagTypeSingle = {
+  min: number;
+  max: number;
+  current: number;
+  selectedResources: Array<any>;
+}
+
+export type TagType = {
+  [key: string]: TagTypeSingle;
+}
+
 export type StemBegrootWidgetProps = BaseProps &
   ProjectSettingProps & {
     step0?: string;
@@ -99,7 +110,7 @@ function StemBegroot({
     type: ''
   });
 
-  const startingStep = props?.votes?.voteType === "countPerTheme" || props?.votes?.voteType === "budgetPerTheme" ? -1 : 0;
+  const startingStep = props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag" ? -1 : 0;
 
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
@@ -107,8 +118,8 @@ function StemBegroot({
   const [lastStep, setLastStep] = useState<number>(0);
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const [navAfterLogin, setNavAfterLogin] = useState<boolean>();
-  const [shouldReloadSelectedResources, setReloadSelectedResources] =
-    useState<boolean>(false);
+  // const [shouldReloadSelectedResources, setReloadSelectedResources] =
+  //   useState<boolean>(false);
 
   const [activeTagTab, setActiveTagTab] = useState<string>('');
 
@@ -123,6 +134,8 @@ function StemBegroot({
     .split(',')
     .filter((t) => t && !isNaN(+t.trim()))
     .map((t) => Number.parseInt(t));
+
+  const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
   const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo);
   const [sort, setSort] = useState<string | undefined>(props.defaultSorting || undefined);
@@ -143,15 +156,28 @@ function StemBegroot({
 
   // Replace with type when available from datastore
   const [selectedResources, setSelectedResources] = useState<any[]>([]);
-  const selectedBudgets: Array<number> = selectedResources.map(
-    (r) => r.budget || 0
-  );
 
   const session = new SessionStorage({ projectId: props.projectId });
-  const budgetUsed: number = selectedResources.reduce(
-    (total, cv) => total + cv.budget,
-    0
-  );
+
+  const selectedBudgets: Array<number> = (() => {
+    if (props.votes.voteType === "budgetingPerTag") {
+      const activeTag = tagCounter.find(tagObj => tagObj[activeTagTab]);
+      if (!activeTag) return [];
+
+      return activeTag[activeTagTab].selectedResources.map((r) => r.budget || 0);
+    }
+
+    return selectedResources.map((r) => r.budget || 0)
+  })();
+
+  const budgetUsed = (() => {
+    if (props.votes.voteType === "budgetingPerTag") {
+      const activeTag = tagCounter.find(tagObj => tagObj[activeTagTab]);
+      return activeTag ? activeTag[activeTagTab].current : 0;
+    }
+
+    return selectedResources.reduce((total, resource) => total + resource.budget, 0);
+  })();
 
   const usedBudgetList = (
     <BudgetUsedList
@@ -185,31 +211,56 @@ function StemBegroot({
 
   // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
-    let pending = session.get('osc-resource-vote-pending');
-    if (
-      pending &&
-      resources?.records?.length > 0 &&
-      selectedResources.length === 0
-    ) {
-      setReloadSelectedResources(true);
+    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+      const pendingPerTag = session.get('osc-resource-vote-pending-per-tag');
+
+      console.log( 'pendingPerTag', pendingPerTag );
+
+      if (pendingPerTag) {
+        setTagCounter((prevTagCounter) =>
+          prevTagCounter.map((tagObj) => {
+            const tagName = Object.keys(tagObj)[0];
+            if (pendingPerTag[tagName]) {
+              const selectedResourceIds = Object.keys(pendingPerTag[tagName]).map(Number);
+
+              const resourcesThatArePending: Array<any> = resources?.records?.filter(
+                (r: any) => selectedResourceIds && selectedResourceIds.includes(r.id)
+              ) || [];
+
+              return {
+                [tagName]: {
+                  ...tagObj[tagName],
+                  selectedResources: resourcesThatArePending,
+                  current: selectedResourceIds.length,
+                },
+              };
+            }
+
+            return tagObj;
+          })
+        );
+      }
+    } else {
+      let pending = session.get('osc-resource-vote-pending');
+      if (
+        pending &&
+        resources?.records?.length > 0 &&
+        selectedResources.length === 0
+      ) {
+        setSelectedResources(resources.records.filter((r: any) => pending[r.id]));
+      }
     }
   }, [resources?.records]);
 
-  // if shouldReloadSelectedResources reload the selectedresources from the pendings
-  useEffect(() => {
-    let pending = session.get('osc-resource-vote-pending');
-    if (shouldReloadSelectedResources) {
-      const resourcesThatArePending: Array<any> =
-        resources?.records?.filter((r: any) => pending && r.id in pending) ||
-        [];
-      setSelectedResources(resourcesThatArePending);
-      setReloadSelectedResources(false);
-    }
-  }, [shouldReloadSelectedResources]);
-
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
-    let pending = session.get('osc-resource-vote-pending');
+    let pending;
+
+    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+      pending = session.get('osc-resource-vote-pending-per-tag');
+    } else {
+      pending = session.get('osc-resource-vote-pending');
+    }
 
     if (
       pending &&
@@ -219,17 +270,34 @@ function StemBegroot({
     ) {
       setCurrentStep(3);
     }
-  }, [currentUser, currentStep, selectedResources]);
+  }, [currentUser, currentStep, selectedResources, tagCounter]);
 
   function prepareForVote(e: React.MouseEvent<HTMLElement, MouseEvent> | null) {
     if (e) e.stopPropagation();
-    const resourcesToVoteFor: { [key: string]: any } = {};
-    (selectedResources.length ? selectedResources : []).forEach(
-      (resource: any) => {
-        resourcesToVoteFor[resource.id] = 'yes';
-      }
-    );
-    session.set('osc-resource-vote-pending', resourcesToVoteFor);
+
+    if (props.votes.voteType !== 'countPerTag' && props.votes.voteType !== 'budgetingPerTag') {
+      const resourcesToVoteFor: { [key: string]: any } = {};
+      (selectedResources.length ? selectedResources : []).forEach(
+        (resource: any) => {
+          resourcesToVoteFor[resource.id] = 'yes';
+        }
+      );
+      session.set('osc-resource-vote-pending', resourcesToVoteFor);
+    } else {
+      const resourcesToVoteForPerTag: { [tag: string]: { [key: string]: any } } = {};
+
+      tagCounter.forEach((tagObj) => {
+        const tagName = Object.keys(tagObj)[0];
+        const selectedResourcesForTag = tagObj[tagName].selectedResources;
+
+        resourcesToVoteForPerTag[tagName] = {};
+        selectedResourcesForTag.forEach((resource: any) => {
+          resourcesToVoteForPerTag[tagName][resource.id] = 'yes';
+        });
+      });
+
+      session.set('osc-resource-vote-pending-per-tag', resourcesToVoteForPerTag);
+    }
   }
 
   async function doVote(resources: Array<any>) {
@@ -248,8 +316,16 @@ function StemBegroot({
     }
   }
 
-  const isInSelected = (resource: { id: number }) =>
-    selectedResources.find((r) => r.id === resource.id);
+  const isInSelected = (resource: { id: number }) => {
+    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+      const activeTag = tagCounter.find(tagObj => tagObj[activeTagTab]);
+      if (!activeTag) return false;
+
+      return activeTag[activeTagTab].selectedResources.some((res) => res.id === resource.id);
+    }
+
+    return selectedResources.some((r) => r.id === resource.id);
+  };
 
   const getOriginalResourceUrl = (resource: {
     extraData: { originalId: number | string };
@@ -268,6 +344,23 @@ function StemBegroot({
 
   // For now only support budgeting and count
   const resourceSelectable = (resource: { id: number; budget: number }) => {
+    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+      const activeTag = tagCounter.find(tagObj => tagObj[activeTagTab]);
+      if (!activeTag) return false;
+
+      if (activeTag[activeTagTab].selectedResources.some((r) => r.id === resource.id)) {
+        return true;
+      }
+
+      if (props.votes.voteType === "countPerTag") {
+        return activeTag[activeTagTab].current < activeTag[activeTagTab].max;
+      } else if (props.votes.voteType === "budgetingPerTag") {
+        return (
+          activeTag[activeTagTab].current + resource.budget <= activeTag[activeTagTab].max
+        );
+      }
+    }
+
     if (props.votes.voteType === 'budgeting') {
       return (
         isInSelected(resource) ||
@@ -283,7 +376,7 @@ function StemBegroot({
   };
 
   const createItemBtnString = (resource: { id: number; budget: number }) => {
-    if (props.votes.voteType === 'budgeting') {
+    if (props.votes.voteType === 'budgeting' || props.votes.voteType === "budgetingPerTag") {
       return !isInSelected(resource) &&
         !(resource.budget <= props.votes.maxBudget - budgetUsed)
         ? notEnoughBudgetText
@@ -311,6 +404,39 @@ function StemBegroot({
     ? allTags.filter((tag: { type: string }) => tag.type === props.tagTypeTag).map((tag: {name: string}) => tag.name)
     : props?.tagTypeTagGroup || [];
 
+  useEffect(() => {
+    if (props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag") {
+      if (tagsToDisplay.length > 0) {
+        const tagCounter: Array<TagType> = tagsToDisplay.map((tag: string) => {
+          return {
+            [tag]: {
+              min: 1,
+              max: props?.votes?.voteType === "countPerTag" ? props.votes.maxResources || 1 : props.votes.maxBudget || 1,
+              current: 0,
+              selectedResources: []
+            }
+          }
+        });
+
+        setTagCounter(tagCounter);
+      }
+    }
+  }, [tagsToDisplay]);
+
+  useEffect(() => {
+    if (props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag") {
+      if (activeTagTab) {
+        const activeTag = tagCounter.find(tagObj => tagObj[activeTagTab]);
+        if (activeTag) {
+          setSelectedResources(activeTag[activeTagTab].selectedResources);
+        }
+      }
+    }
+  }, [activeTagTab]);
+
+  const [filteredResources, setFilteredResources] = useState<any[]>([]);
+  const resourcesToUse = filteredResources.length ? filteredResources : resources?.records || [];
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -320,7 +446,7 @@ function StemBegroot({
         showVoteCount={props.showVoteCount}
         showOriginalResource={props.showOriginalResource}
         originalResourceUrl={props.originalResourceUrl}
-        resources={resources?.records?.length ? resources.records : []}
+        resources={resourcesToUse}
         resourceBtnEnabled={resourceSelectable}
         resourceBtnTextHandler={createItemBtnString}
         defineOriginalUrl={getOriginalResourceUrl}
@@ -328,18 +454,40 @@ function StemBegroot({
         setOpenDetailDialog={setOpenDetailDialog}
         isSimpleView={Boolean(props.isSimpleView)}
         onPrimaryButtonClick={(resource) => {
-          session.remove('osc-resource-vote-pending');
+          if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+            session.remove('osc-resource-vote-pending-per-tag');
 
-          const resourceInBudgetList = selectedResources.find(
-            (r) => r.id === resource.id
-          );
+            if (activeTagTab) {
+              const activeTag = tagCounter.find(tagObj => tagObj[activeTagTab]);
+              if (activeTag) {
+                const selectedResources = activeTag[activeTagTab].selectedResources;
+                const resourceInTagList = selectedResources.find((r) => r.id === resource.id);
 
-          if (resourceInBudgetList) {
-            setSelectedResources(
-              selectedResources.filter((r) => r.id !== resource.id)
-            );
+                if (resourceInTagList) {
+                  activeTag[activeTagTab].selectedResources = selectedResources.filter((r) => r.id !== resource.id);
+                  activeTag[activeTagTab].current -= props.votes.voteType === "budgetingPerTag" ? resource.budget : 1;
+                } else {
+                  activeTag[activeTagTab].selectedResources.push(resource);
+                  activeTag[activeTagTab].current += props.votes.voteType === "budgetingPerTag" ? resource.budget : 1;
+                }
+
+                setTagCounter([...tagCounter]);
+              }
+            }
           } else {
-            setSelectedResources([...selectedResources, resource]);
+            session.remove('osc-resource-vote-pending');
+
+            const resourceInBudgetList = selectedResources.find(
+              (r) => r.id === resource.id
+            );
+
+            if (resourceInBudgetList) {
+              setSelectedResources(
+                selectedResources.filter((r) => r.id !== resource.id)
+              );
+            } else {
+              setSelectedResources([...selectedResources, resource]);
+            }
           }
         }}
         resourceDetailIndex={resourceDetailIndex}
@@ -353,7 +501,7 @@ function StemBegroot({
         />
         <Spacer size={1} />
 
-        {props.votes.voteType === 'budgeting' ?
+        {(props.votes.voteType === 'budgeting' || props?.votes?.voteType === 'budgetingPerTag' ) ?
           <>
             {usedBudgetList}
             <Spacer size={1.5} />
@@ -396,32 +544,83 @@ function StemBegroot({
                 allResourceInList={resources?.records}
                 selectedResources={selectedResources}
                 maxNrOfResources={props.votes.maxResources || 0}
-                typeIsBudgeting={props.votes.voteType === 'budgeting'}
-                onSelectedResourceRemove={(r) => {
+                typeIsBudgeting={props.votes.voteType === 'budgeting' || props.votes.voteType === 'budgetingPerTag'}
+                tagsToDisplay={tagsToDisplay}
+                activeTagTab={activeTagTab}
+                setActiveTagTab={setActiveTagTab}
+                typeIsPerTag={props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag"}
+                onSelectedResourceRemove={(resource: {id: number, budget: number}) => {
                   session.remove('osc-resource-vote-pending');
+                  session.remove('osc-resource-vote-pending-per-tag');
+
+                  if (props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag") {
+                    setTagCounter(prevTagCounter => {
+                      return prevTagCounter.map(tagObj => {
+                        if (tagObj[activeTagTab]) {
+                          const updatedSelectedResources = tagObj[activeTagTab].selectedResources.filter((selectedResource: {id: number}) => selectedResource.id !== resource.id);
+                          const updatedCurrentCount = tagObj[activeTagTab].current - (props.votes.voteType === "budgetingPerTag" ? resource.budget : 1);
+
+                          return {
+                            [activeTagTab]: {
+                              ...tagObj[activeTagTab],
+                              selectedResources: updatedSelectedResources,
+                              current: updatedCurrentCount
+                            }
+                          };
+                        }
+                        return tagObj;
+                      });
+                    });
+                  }
+
                   setSelectedResources(
-                    selectedResources.filter((resource) => resource.id !== r.id)
+                    selectedResources.filter((r) => r.id !== resource.id)
                   );
                 }}
                 decideCanAddMore={() => {
-                  let notUsedResources = resources?.records.filter(
-                    (allR: { id: number }) =>
-                      !selectedResources.find(
-                        (selectedR) => allR.id === selectedR.id
-                      )
-                  );
+                  if (props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag") {
+                    const activeTagData = tagCounter.find(tagObj => tagObj[activeTagTab]);
+                    if (!activeTagData) return false;
 
-                  const canAddMore =
-                    props.votes.voteType === 'budgeting'
+                    const activeTag = activeTagData[activeTagTab];
+                    const maxLimit = activeTag.max;
+                    const currentCount = activeTag.current;
+
+                    if (props.votes.voteType === "countPerTag") {
+                      return currentCount < maxLimit;
+                    }
+
+                    if (props.votes.voteType === "budgetingPerTag") {
+                      let notUsedResources = filteredResources.filter(
+                        (allR: { id: number }) =>
+                          !selectedResources.find(
+                            (selectedR) => allR.id === selectedR.id
+                          )
+                      );
+
+                      return notUsedResources.some(
+                        (r: { budget: number }) =>
+                          r.budget <= (maxLimit - currentCount)
+                      );
+                    }
+                  } else {
+                    let notUsedResources = resources?.records.filter(
+                      (allR: { id: number }) =>
+                        !selectedResources.find(
+                          (selectedR) => allR.id === selectedR.id
+                        )
+                    );
+
+                    return props.votes.voteType === 'budgeting'
                       ? notUsedResources.some(
                         (r: { budget: number }) =>
                           r.budget < props.votes.maxBudget - budgetUsed
                       )
                       : Math.max(
-                        props.votes.maxResources - selectedResources.length,
-                        0
-                      ) > 0;
-                  return canAddMore;
+                      props.votes.maxResources - selectedResources.length,
+                      0
+                    ) > 0;
+                  }
                 }}
               />
             </>
@@ -440,7 +639,9 @@ function StemBegroot({
                 selectedResources={selectedResources}
                 maxBudget={props.votes.maxBudget}
                 maxNrOfResources={props.votes.maxResources || 0}
-                typeIsBudgeting={props.votes.voteType === 'budgeting'}
+                typeIsBudgeting={props.votes.voteType === 'budgeting' || props.votes.voteType === 'budgetingPerTag'}
+                typeIsPerTag={props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag"}
+                tagCounter={tagCounter}
                 showInfoMenu={props.showInfoMenu}
               />
             </>
@@ -471,7 +672,7 @@ function StemBegroot({
           ) : null}
 
           <div className="begroot-step-panel-navigation-section">
-            {currentStep > 0 && currentStep < 4 ? (
+            {currentStep > 0 && currentStep < 3 ? (
               <Button
                 appearance="secondary-action-button"
                 onClick={() => {
@@ -492,6 +693,19 @@ function StemBegroot({
                 appearance="primary-action-button"
                 onClick={async () => {
                   if (currentStep === 0) {
+                    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+                      const unmetTag = tagCounter.find(tagObj => {
+                        const key = Object.keys(tagObj)[0];
+                        return tagObj[key].current < tagObj[key].min;
+                      });
+
+                      if (unmetTag) {
+                        const tagName = Object.keys(unmetTag)[0];
+                        setActiveTagTab(tagName);
+                        return;
+                      }
+                    }
+
                     prepareForVote(null);
                   }
 
@@ -501,12 +715,33 @@ function StemBegroot({
 
                   if (currentStep === 3) {
                     try {
-                      await doVote(selectedResources);
+                      if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+                        let allResourcesToVote: any[] = [];
+
+                        for (const tagObj of tagCounter) {
+                          const tagName = Object.keys(tagObj)[0];
+                          const resourcesToVote = tagObj[tagName].selectedResources.map((resourceSelected: { id: number }) => {
+                            return resources.records.find((resource: { id: number }) => resource.id === resourceSelected.id);
+                          }).filter(Boolean);
+
+                          allResourcesToVote = allResourcesToVote.concat(resourcesToVote);
+                        }
+
+                        const uniqueResourcesToVote = Array.from(new Set(allResourcesToVote.map((r) => r.id)))
+                          .map(id => allResourcesToVote.find((r) => r.id === id));
+
+                        if (uniqueResourcesToVote.length > 0) {
+                          await doVote(uniqueResourcesToVote);
+                        }
+
+                        session.remove('osc-resource-vote-pending-per-tag');
+                      } else {
+                        await doVote(selectedResources);
+                        session.remove('osc-resource-vote-pending');
+                      }
                       setCurrentStep(currentStep + 1);
                     } catch (err: any) {
                       notifyVoteMessage(err.message, true);
-                    } finally {
-                      session.remove('osc-resource-vote-pending');
                     }
                   } else if (currentStep === 4) {
                     currentUser.logout({ url: location.href });
@@ -514,10 +749,48 @@ function StemBegroot({
                     setCurrentStep(currentStep + 1);
                   }
                 }}
-                disabled={selectedResources.length === 0}>
-                {currentStep < 3 ? 'Volgende' : null}
-                {currentStep === 3 ? 'Stem indienen' : null}
-                {currentStep === 4 ? 'Klaar' : null}
+                disabled={(() => {
+                  if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+                    const unmetTags = tagCounter.filter(tagObj => {
+                      const key = Object.keys(tagObj)[0];
+                      return tagObj[key].current < tagObj[key].min;
+                    });
+
+                    if (unmetTags.length === 0) {
+                      return false;
+                    }
+
+                    if (unmetTags.length === 1 && Object.keys(unmetTags[0])[0] === activeTagTab) {
+                      return true;
+                    }
+                  }
+
+                  return (props?.votes?.voteType === 'likes' || props?.votes?.voteType === 'budgeting') && selectedResources.length === 0;
+                })()}
+              >
+                {(() => {
+                  if (currentStep < 3) {
+                    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+                      const unmetTags = tagCounter.filter(tagObj => {
+                        const key = Object.keys(tagObj)[0];
+                        return tagObj[key].current < tagObj[key].min;
+                      });
+
+                      const nextUnmetTag = unmetTags.find(tagObj => {
+                        const key = Object.keys(tagObj)[0];
+                        return key !== activeTagTab;
+                      });
+
+                      if (nextUnmetTag) {
+                        const tagName = Object.keys(nextUnmetTag)[0];
+                        return `Kies voor ${tagName.charAt(0).toUpperCase() + tagName.slice(1)}`;
+                      }
+                    }
+                    return 'Volgende';
+                  }
+                  if (currentStep === 3) return 'Stem indienen';
+                  if (currentStep === 4) return 'Klaar';
+                })()}
               </Button>
             ) : null}
           </div>
@@ -577,17 +850,34 @@ function StemBegroot({
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 session.remove('osc-resource-vote-pending');
+                session.remove('osc-resource-vote-pending-per-tag');
 
-                const resourceIndex = selectedResources.findIndex(
-                  (r) => r.id === resource.id
-                );
+                let newTagCounter = [...tagCounter];
 
-                if (resourceIndex === -1) {
-                  setSelectedResources([...selectedResources, resource]);
+                if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+                  newTagCounter = newTagCounter.map((tagObj) => {
+                    if (tagObj[activeTagTab]) {
+                      if (isInSelected(resource)) {
+                        tagObj[activeTagTab].current -= props.votes.voteType === "budgetingPerTag" ? resource.budget : 1;
+                        tagObj[activeTagTab].selectedResources = tagObj[activeTagTab].selectedResources.filter((selectedResource: {id: number}) => selectedResource.id !== resource.id);
+                      } else {
+                        tagObj[activeTagTab].current += props.votes.voteType === "budgetingPerTag" ? resource.budget : 1;
+                        tagObj[activeTagTab].selectedResources.push(resource);
+                      }
+                    }
+                    return tagObj;
+                  });
+
+                  setTagCounter(newTagCounter);
                 } else {
-                  const resources = [...selectedResources];
-                  resources.splice(resourceIndex, 1);
-                  setSelectedResources(resources);
+                  const resourceIndex = selectedResources.findIndex((r) => r.id === resource.id);
+                  if (resourceIndex === -1) {
+                    setSelectedResources([...selectedResources, resource]);
+                  } else {
+                    const updatedResources = [...selectedResources];
+                    updatedResources.splice(resourceIndex, 1);
+                    setSelectedResources(updatedResources);
+                  }
                 }
               }}
               statusIdsToLimitResourcesTo={statusIdsToLimitResourcesTo || []}
@@ -595,6 +885,11 @@ function StemBegroot({
               sort={sort}
               allTags={allTags}
               tags={tags}
+              activeTagTab={activeTagTab}
+              setFilteredResources={setFilteredResources}
+              filteredResources={filteredResources}
+              voteType={props?.votes?.voteType || 'likes'}
+              typeSelector={typeSelector}
             />
             <Spacer size={3} />
 

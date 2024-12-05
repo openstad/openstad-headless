@@ -51,7 +51,7 @@ export default function BegrootmoduleExplanation(
       step0: props.step0 ?? `<h4>Kies jouw favoriete inzendingen per thema!</h4>
 <ol type="1">
 <li>Selecteer hieronder een thema om de inzendingen voor dat thema te bekijken</li>
-<li>Kies jouw favoriete inzendingen voor dat thema${voteType === 'budgetingPerTheme' ? 'binnen het beschikbare budget' : ''}</li>
+<li>Kies jouw favoriete inzendingen voor dat thema${voteType === 'budgetingPerTag' ? 'binnen het beschikbare budget' : ''}</li>
 <li>Ga naar het volgende thema om hetzelfde te doen</li>
 <li>Klaar en tevreden? In stap 3 vul je ter controle de stemcode in. Tot slot verstuur je in stap 4 je stem</li>
 </ol>`,
@@ -84,7 +84,7 @@ export default function BegrootmoduleExplanation(
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 gap-4">
 
-          { (voteType === 'countPerTheme' || voteType === 'budgetingPerTheme') && (
+          { (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && (
             <FormField
               control={form.control}
               name="step0"

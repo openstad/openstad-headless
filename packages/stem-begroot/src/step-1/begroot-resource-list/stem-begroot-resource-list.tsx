@@ -29,6 +29,11 @@ export const StemBegrootResourceList = ({
   sort = '',
   allTags = [],
   tags = [],
+  activeTagTab = '',
+  voteType = 'likes',
+  typeSelector = 'tag',
+  setFilteredResources,
+  filteredResources = [],
   header
 }: {
   resourceListColumns?: number;
@@ -50,6 +55,11 @@ export const StemBegrootResourceList = ({
   allTags?: Array<any>;
   tags?: Array<any>;
   header?: React.JSX.Element;
+  activeTagTab?: string;
+  typeSelector?: string;
+  voteType?: string;
+  setFilteredResources?: (resources: Array<any>) => void;
+  filteredResources?: Array<any>;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -79,6 +89,16 @@ export const StemBegrootResourceList = ({
         });
       })
   )
+    ?.filter((resource: any) => {
+      if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
+        if (typeSelector === 'tag') {
+          return resource.tags.some((tag: { name: string }) => tag.name === activeTagTab);
+        } else {
+          return resource.tags.some((tag: { type: string }) => tag.type === activeTagTab);
+        }
+      }
+      return true;
+    })
     ?.filter((resource: any) =>
       (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.some((o: { id: number }) => o.id === statusId))
     )
@@ -100,6 +120,12 @@ export const StemBegrootResourceList = ({
       }
       return 0;
     });
+
+  if ( (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && setFilteredResources) {
+    if (JSON.stringify(filtered) !== JSON.stringify(filteredResources)) {
+      setFilteredResources(filtered);
+    }
+  }
 
   return (
     <List
