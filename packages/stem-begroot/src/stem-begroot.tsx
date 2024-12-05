@@ -214,8 +214,6 @@ function StemBegroot({
     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
       const pendingPerTag = session.get('osc-resource-vote-pending-per-tag');
 
-      console.log( 'pendingPerTag', pendingPerTag );
-
       if (pendingPerTag) {
         setTagCounter((prevTagCounter) =>
           prevTagCounter.map((tagObj) => {
