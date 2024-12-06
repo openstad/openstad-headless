@@ -51,7 +51,7 @@ export const BegrotenSelectedOverview = ({
   return (
     <>
       {typeIsPerTag ? (
-        <div className="begroot-step-2-instruction-budget-status-panel">
+        <div className="begroot-step-2-instruction-budget-status-panel per-tag">
           <Paragraph>{introText}</Paragraph>
           <Spacer size={1}/>
 
@@ -61,9 +61,6 @@ export const BegrotenSelectedOverview = ({
 
             return (
               <React.Fragment key={`selected-resources-${tagName}`}>
-                <Spacer size={4}/>
-                <Spacer size={4}/>
-
                 <div className="tag-selected-resources-container" >
                   <Heading5>{tagName.charAt(0).toUpperCase() + tagName.slice(1)}</Heading5>
                   <Spacer size={1}/>
