@@ -265,3 +265,23 @@ section.osc-begrootmodule-resource-detail-photo
 .osc-begrootmodule-resource-detail .osc-begrootmodule-resource-detail-photo.resource-has-no-images .image-container img {
   display: none;
 }
+
+.begroot-step-panel .themes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.begroot-step-panel .budget-list-selections + .themes-container {
+  margin-top: 15px;
+}
+
+.begroot-step-2-instruction-budget-status-panel .tag-selected-resources-container h5 {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.begroot-step-panel .begroot-step-2-instruction-budget-status-panel.per-tag {
+  gap: 20px;
+}

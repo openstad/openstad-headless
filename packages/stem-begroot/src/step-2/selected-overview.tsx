@@ -1,10 +1,11 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Image, Spacer } from '@openstad-headless/ui/src';
 import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Heading5, Paragraph, Strong } from '@utrecht/component-library-react';
+import { TagType } from "../stem-begroot";
 
 type Props = {
   selectedResources: Array<any>;
@@ -18,6 +19,8 @@ type Props = {
   panelTitle?: string;
   budgetChosenTitle?: string;
   budgetRemainingTitle?: string;
+  typeIsPerTag?: boolean;
+  tagCounter?: Array<TagType>;
 };
 
 export const BegrotenSelectedOverview = ({
@@ -32,69 +35,153 @@ export const BegrotenSelectedOverview = ({
   panelTitle,
   budgetChosenTitle,
   budgetRemainingTitle,
+  typeIsPerTag = false,
+  tagCounter = []
 }: Props) => {
+  let resourcesToShow = selectedResources;
+
+  if (typeIsPerTag) {
+    resourcesToShow = tagCounter.reduce((acc: Array<any>, tagObj) => {
+      const tagKey = Object.keys(tagObj)[0];
+      const tagResources = tagObj[tagKey].selectedResources;
+      return [...acc, ...tagResources];
+    }, []);
+  }
+
   return (
     <>
-      <div className="begroot-step-2-instruction-budget-status-panel">
-        <Paragraph>{introText}</Paragraph>
-        {showInfoMenu && (
-          <BudgetStatusPanel
-            typeIsBudgeting={typeIsBudgeting}
-            maxNrOfResources={maxNrOfResources}
-            nrOfResourcesSelected={selectedResources.length}
-            maxBudget={maxBudget}
-            budgetUsed={budgetUsed}
-            showInfoMenu={showInfoMenu}
-            title={panelTitle}
-            budgetChosenTitle={budgetChosenTitle}
-            budgetRemainingTitle={budgetRemainingTitle}
-          />
-        )}
-      </div>
+      {typeIsPerTag ? (
+        <div className="begroot-step-2-instruction-budget-status-panel per-tag">
+          <Paragraph>{introText}</Paragraph>
+          <Spacer size={1}/>
 
-      <Spacer size={1.5} />
-      <div className="budget-overview-panel">
-        <Heading5>{step2Title}</Heading5>
-        <Spacer size={1} />
+          {tagCounter.map((tagObj) => {
+            const tagName = Object.keys(tagObj)[0];
+            const tagData = tagObj[tagName];
 
-        {selectedResources.map((resource) => {
-          let defaultImage = '';
+            return (
+              <React.Fragment key={`selected-resources-${tagName}`}>
+                <div className="tag-selected-resources-container" >
+                  <Heading5>{tagName.charAt(0).toUpperCase() + tagName.slice(1)}</Heading5>
+                  <Spacer size={1}/>
+                  {tagData.selectedResources.map((resource) => {
+                    let defaultImage = '';
 
-          interface Tag {
-            name: string;
-            defaultResourceImage?: string;
-          }
+                    interface Tag {
+                      name: string;
+                      defaultResourceImage?: string;
+                    }
 
-          if (Array.isArray(resource?.tags)) {
-            const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
-            const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
-            defaultImage = tagWithImage?.defaultResourceImage || '';
-          }
+                    if (Array.isArray(resource?.tags)) {
+                      const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+                      const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+                      defaultImage = tagWithImage?.defaultResourceImage || '';
+                    }
 
-          const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
-          const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
+                    const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
+                    const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
 
-          return (
-            <div key={`budget-overview-row-${resource.id}`} className="budget-two-text-row-spaced">
-              <section className={`budget-overview-row ${hasImages}`}>
-                <Image
-                  className="budget-overview-image"
-                  src={resource.images?.at(0)?.url || defaultImage}
-                />
-                <div className="budget-resource-container">
-                  <Paragraph>{resource.title}</Paragraph>
-                  {typeIsBudgeting ? (
-                    <Paragraph>
-                      <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
-                    </Paragraph>
-                  ) : null}
+                    return (
+                      <div key={`budget-overview-row-${resource.id}`} className="budget-two-text-row-spaced">
+                        <section className={`budget-overview-row ${hasImages}`}>
+                          <Image
+                            className="budget-overview-image"
+                            src={resourceImages}
+                          />
+                          <div className="budget-resource-container">
+                            <Paragraph>{resource.title}</Paragraph>
+                            {typeIsBudgeting ? (
+                              <Paragraph>
+                                <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
+                              </Paragraph>
+                            ) : null}
+                          </div>
+                        </section>
+                      </div>
+                    );
+                  })}
                 </div>
-              </section>
 
-            </div>
-          )
-        })}
-      </div>
+                <div className="tag-panel-container">
+                  {showInfoMenu && (
+                    <BudgetStatusPanel
+                      typeIsBudgeting={typeIsBudgeting}
+                      maxNrOfResources={tagData.max}
+                      nrOfResourcesSelected={tagData.current}
+                      maxBudget={maxBudget}
+                      budgetUsed={tagData.current}
+                      showInfoMenu={showInfoMenu}
+                      title={panelTitle}
+                      budgetChosenTitle={budgetChosenTitle}
+                      budgetRemainingTitle={budgetRemainingTitle}
+                    />
+                  )}
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="begroot-step-2-instruction-budget-status-panel">
+          <Paragraph>{introText}</Paragraph>
+          {showInfoMenu ? (
+            <BudgetStatusPanel
+              typeIsBudgeting={typeIsBudgeting}
+              maxNrOfResources={maxNrOfResources}
+              nrOfResourcesSelected={resourcesToShow.length}
+              maxBudget={maxBudget}
+              budgetUsed={budgetUsed}
+              showInfoMenu={showInfoMenu}
+              title={panelTitle}
+              budgetChosenTitle={budgetChosenTitle}
+              budgetRemainingTitle={budgetRemainingTitle}
+            />
+          ) :
+            <Spacer size={1.5}/>
+          }
+
+          {resourcesToShow.map((resource) => {
+            let defaultImage = '';
+
+            interface Tag {
+              name: string;
+              defaultResourceImage?: string;
+            }
+
+            if (Array.isArray(resource?.tags)) {
+              const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+              const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+              defaultImage = tagWithImage?.defaultResourceImage || '';
+            }
+
+            const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
+            const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
+
+            return (
+              <React.Fragment key={`budget-overview-row-${resource.id}`}>
+                <div className="budget-two-text-row-spaced">
+                  <section className={`budget-overview-row ${hasImages}`}>
+                    <Image
+                      className="budget-overview-image"
+                      src={resourceImages}
+                    />
+                    <div className="budget-resource-container">
+                      <Paragraph>{resource.title}</Paragraph>
+                      {typeIsBudgeting ? (
+                        <Paragraph>
+                          <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
+                        </Paragraph>
+                      ) : null}
+                    </div>
+                  </section>
+                </div>
+
+              <Spacer size={1} />
+            </React.Fragment>
+            );
+          })}
+        </div>
+      )}
     </>
   );
 };

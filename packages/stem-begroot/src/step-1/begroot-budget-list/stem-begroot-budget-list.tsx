@@ -1,5 +1,5 @@
 import './stem-begroot-budget-list.css';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
 import "@utrecht/component-library-css";
@@ -21,6 +21,10 @@ export const StemBegrootBudgetList = ({
   panelTitle,
   budgetChosenTitle,
   budgetRemainingTitle,
+  tagsToDisplay,
+  activeTagTab = '',
+  typeIsPerTag = false,
+  setActiveTagTab
 }: {
   allResourceInList: Array<any>
   selectedResources: Array<any>;
@@ -30,12 +34,16 @@ export const StemBegrootBudgetList = ({
   introText?: string;
   showInfoMenu?: boolean;
   decideCanAddMore: () => boolean;
-  onSelectedResourceRemove: (resource: { id: number }) => void;
+  onSelectedResourceRemove: (resource: { id: number, budget: number }) => void;
   step1Title: string;
   resourceCardTitle: string;
   panelTitle?: string;
   budgetChosenTitle?: string;
   budgetRemainingTitle?: string;
+  tagsToDisplay?: Array<string>;
+  activeTagTab?: string;
+  typeIsPerTag?: boolean;
+  setActiveTagTab?: Dispatch<SetStateAction<string>>;
 }) => {
   const budgetUsed = selectedResources.reduce(
     (total, cv) => total + cv.budget,
@@ -136,7 +144,27 @@ export const StemBegrootBudgetList = ({
             ) : null}
           </div>
         </div>
-        <div></div>
+
+        { (typeIsPerTag && !!tagsToDisplay) && (
+          <div className="themes-container">
+            {tagsToDisplay?.map((tag: string) => (
+              <div className={`theme ${tag === activeTagTab ? 'active' : ''}`} key={tag}>
+                <Button
+                  appearance="primary-action-button"
+                  disabled={tag === activeTagTab}
+                  onClick={() => {
+                    if (!!setActiveTagTab) {
+                      setActiveTagTab(tag);
+                    }
+                  }}
+                >
+                  {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
       </section>
     </>
   );
