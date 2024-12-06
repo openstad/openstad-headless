@@ -225,11 +225,13 @@ function StemBegroot({
                 (r: any) => selectedResourceIds && selectedResourceIds.includes(r.id)
               ) || [];
 
+              const currentCount = props.votes.voteType === "budgetingPerTag" ? resourcesThatArePending.reduce((total, r) => total + r.budget, 0) : resourcesThatArePending.length;
+
               return {
                 [tagName]: {
                   ...tagObj[tagName],
                   selectedResources: resourcesThatArePending,
-                  current: selectedResourceIds.length,
+                  current: currentCount,
                 },
               };
             }
