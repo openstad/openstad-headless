@@ -100,3 +100,11 @@
  padding: 0;
  position: absolute;
 }
+
+.comment-item .reaction-container .cancel-reply {
+ width: 100%;
+ max-width: 100%;
+ background: var(--utrecht-button-secondary-action-background-color, #ff0021);
+ color: var(--utrecht-button-secondary-action-color, white);
+ border: 1px solid var(--utrecht-button-secondary-action-border-color, #ff0021);
+}
