@@ -266,6 +266,8 @@ function Comment({
                 toggleReplyForm();
               }}
             />
+            <Spacer size={.5} />
+            <Button className={'cancel-reply'} onClick={toggleReplyForm}> Annuleren </Button>
             <Spacer size={1} />
           </div>
         </div>
