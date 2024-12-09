@@ -341,9 +341,6 @@ router.route('/*')
 		if (!( budget >= req.project.config.votes.minBudget && budget <= req.project.config.votes.maxBudget )) {
 		  err = createError(400, 'Budget klopt niet');
 		}
-		if (!( req.votes.length >= req.project.config.votes.minResources && req.votes.length <= req.project.config.votes.maxResources )) {
-		  err = createError(400, 'Aantal resources klopt niet');
-		}
 		if (err) {
 			if (transaction) {
 				return transaction.rollback()
@@ -357,10 +354,10 @@ router.route('/*')
 		}
   })
 
-  // validaties voor voteType=count-per-theme
+  // validaties voor voteType=countPerTag
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.project.config.votes.voteType != 'count-per-theme') return next();
+		if (req.project.config.votes.voteType != 'countPerTag') return next();
     let themes = req.project.config.votes.themes || [];
     let totalNoOfVotes = 0;
     req.votes.forEach((vote) => {
@@ -400,10 +397,10 @@ router.route('/*')
 		}
 	})
 
-  // validaties voor voteType=budgeting-per-theme
+  // validaties voor voteType=budgetingPerTag
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.project.config.votes.voteType != 'budgeting-per-theme') return next();
+		if (req.project.config.votes.voteType != 'budgetingPerTag') return next();
     let themes = req.project.config.votes.themes || [];
 		req.votes.forEach((vote) => {
 			let resource = req.resources.find(resource => resource.id == vote.resourceId);
@@ -458,9 +455,9 @@ router.route('/*')
 				break;
 
 			case 'count':
-			case 'count-per-theme':
+			case 'countPerTag':
 			case 'budgeting':
-			case 'budgeting-per-theme':
+			case 'budgetingPerTag':
 				req.votes.map( vote => actions.push({ action: 'create', vote: vote}) );
 				req.existingVotes.map( vote => actions.push({ action: 'delete', vote: vote}) );
 				break;
