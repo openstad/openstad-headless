@@ -340,9 +340,14 @@ function DocumentMap({
             [topRight[0], topRight[1]]
           ];
 
-          map.flyToBounds(topBounds, { animate: true, duration: 0.2 });
+          try {
+            map.flyToBounds(topBounds, { animate: true, duration: 0.2 });
+            map.scrollWheelZoom.disable();
+          } catch (e) {
+            // Fall back to entire document view
+            map.fitBounds(bounds as LatLngBoundsLiteral);
+          }
         }
-        map.scrollWheelZoom.disable();
         setIsBoundsSet(true);
       }
     }, [map, bounds, isBoundsSet]);
@@ -504,7 +509,7 @@ function DocumentMap({
     const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, color, ...props }) => {
       const markerRef = useRef<any>(null);
       const isDefaultColor = color === '#555588';
-  
+
       return (
           <Marker
               {...props}
@@ -640,7 +645,7 @@ function DocumentMap({
         setManualFocus(false);
       }
     }, []);
-  
+
     const [showButton, setShowButton] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
