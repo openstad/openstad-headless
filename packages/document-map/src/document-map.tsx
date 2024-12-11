@@ -261,10 +261,19 @@ function DocumentMap({
   };
 
 
-  const imageBounds: LatLngBoundsLiteral = [
-    [0, docWidth / 2],
-    [-docHeight, -docWidth / 2]
-  ];
+  const [imageBounds, setImageBounds] = useState<LatLngBoundsLiteral>([
+    [0, 1920 / 2],
+    [-1080, -1920 / 2]
+  ]);
+
+  useEffect(() => {
+    if (docWidth && !Number.isNaN(docWidth) && docHeight && !Number.isNaN(docHeight)) {
+      setImageBounds([
+        [0, docWidth / 2],
+        [-docHeight, -docWidth / 2]
+      ]);
+    }
+  }, [docWidth, docHeight]);
 
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -306,9 +315,13 @@ function DocumentMap({
 
     useEffect(() => {
       if (map && imageBounds && !isBoundsSet) {
-        map.fitBounds(imageBounds);
-        map.scrollWheelZoom.disable();
-        setIsBoundsSet(true);
+        try {
+          map.fitBounds(imageBounds);
+          map.scrollWheelZoom.disable();
+          setIsBoundsSet(true);
+        } catch (e) {
+          console.error (e);
+        }
       }
     }, [map, imageBounds, isBoundsSet]);
 
@@ -471,7 +484,7 @@ function DocumentMap({
     const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, color, ...props }) => {
       const markerRef = useRef<any>(null);
       const isDefaultColor = color === '#555588';
-  
+
       return (
           <Marker
               {...props}
@@ -593,7 +606,7 @@ function DocumentMap({
         setManualFocus(false);
       }
     }, []);
-  
+
     const [showButton, setShowButton] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
