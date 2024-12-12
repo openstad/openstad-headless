@@ -647,11 +647,12 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor', 'mapIcon'],
+            attributes: ['id', 'type', 'seqnr', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
         ],
+        order: [[db.Tag, 'seqnr', 'ASC']],
       },
 
       includeStatuses: {
@@ -659,11 +660,12 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
+            attributes: ['id', 'name', 'seqnr', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
         ],
+        order: [[db.Status, 'seqnr', 'ASC']],
       },
 
       selectTags: function (tags) {
