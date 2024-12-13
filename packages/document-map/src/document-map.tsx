@@ -738,7 +738,12 @@ function DocumentMap({
                 .filter((comment: any) => !!comment.location)
                 .map((comment: any, index: number) => {
 
-                  const firstTag = comment.tags && comment.tags[0];
+                  const firstTag = comment.tags
+                    ? comment.tags
+                    .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
+                    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || comment.tags[0]
+                    : false;
+
                   const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
 
                   return (

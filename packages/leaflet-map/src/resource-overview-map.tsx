@@ -92,10 +92,18 @@ const ResourceOverviewMap = ({
         }
       }
 
-      const firstStatus = resource.statuses && resource.statuses[0];
+      const firstStatus = resource.statuses
+        ? resource.statuses
+        .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
+        .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+        : false;
       let MapIconImage = firstStatus && firstStatus.mapIcon ? firstStatus.mapIcon : '';
 
-      const firstTag = resource.tags && resource.tags[0];
+      const firstTag = resource.tags
+        ? resource.tags
+        .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
+        .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
+        : false;
       MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : MapIconImage;
       const MapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '';
 

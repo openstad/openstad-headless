@@ -201,7 +201,12 @@ const defaultItemRenderer = (
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
-  const firstStatus = resource.statuses && resource.statuses.length > 0 ? resource.statuses[0] : null;
+  const firstStatus = resource.statuses
+    ? resource.statuses
+    .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
+    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+    : false;
+
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
   const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
 
