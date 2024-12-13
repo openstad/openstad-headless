@@ -652,7 +652,6 @@ module.exports = function (db, sequelize, DataTypes) {
             required: false,
           },
         ],
-        order: [[db.Tag, 'seqnr', 'ASC']],
       },
 
       includeStatuses: {
@@ -665,7 +664,6 @@ module.exports = function (db, sequelize, DataTypes) {
             required: false,
           },
         ],
-        order: [[db.Status, 'seqnr', 'ASC']],
       },
 
       selectTags: function (tags) {
