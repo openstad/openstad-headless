@@ -196,7 +196,7 @@ module.exports = {
       },
       voteType: {
         type: 'enum',
-        values: ['likes', 'count', 'budgeting', 'count-per-theme', 'budgeting-per-theme'],
+        values: ['likes', 'count', 'budgeting', 'countPerTag', 'budgetingPerTag'],
         default: 'likes',
       },
       voteValues: {
