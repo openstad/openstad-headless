@@ -91,6 +91,17 @@ function Form({
         }
     }, [formValues]);
 
+    const scrollTop = () => {
+        const formWidget = document.querySelector('.form-widget');
+        if (formWidget) {
+            const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+                top: elementPosition,
+                behavior: 'smooth'
+            });
+        }
+    }
+
     const componentMap: { [key: string]: React.ComponentType<ComponentFieldProps> } = {
         text: TextInput as React.ComponentType<ComponentFieldProps>,
         range: RangeSlider as React.ComponentType<ComponentFieldProps>,
@@ -151,14 +162,7 @@ function Form({
                                 className="osc-prev-button"
                                 onClick={() => {
                                     setCurrentPage && setCurrentPage(currentPage - 1);
-                                    const formWidget = document.querySelector('.form-widget');
-                                    if (formWidget) {
-                                        const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
-                                        window.scrollTo({
-                                            top: elementPosition,
-                                            behavior: 'smooth'
-                                        });
-                                    }
+                                    scrollTop();
                                 }}
                             >
                                 Vorige
@@ -169,14 +173,7 @@ function Form({
                             type="submit"
                             disabled={submitDisabled}
                             onClick={() => {
-                                const formWidget = document.querySelector('.form-widget');
-                                if (formWidget) {
-                                    const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
-                                    window.scrollTo({
-                                        top: elementPosition,
-                                        behavior: 'smooth'
-                                    });
-                                }
+                                scrollTop();
                             }}
                         >
                             {submitText}
