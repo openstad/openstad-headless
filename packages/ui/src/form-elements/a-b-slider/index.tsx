@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import './a-b-slider.css'
-import {Accordion, AccordionProvider, AccordionSection, Paragraph, Strong} from "@utrecht/component-library-react";
-import {Spacer} from "../../spacer";
+import { Accordion, AccordionProvider, AccordionSection, Paragraph, Strong } from "@utrecht/component-library-react";
+import { Spacer } from "../../spacer";
 
 export type RangeSliderProps = {
     title: string;
@@ -48,15 +48,15 @@ const RangeSlider: FC<RangeSliderProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
-   infoImage = '',
+    infoImage = '',
 }) => {
     const randomId = Math.random().toString(36).substring(7);
     const [rangeValue, setRangeValue] = useState(undefined);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
-            let {html} = this.props;
-            return <Paragraph dangerouslySetInnerHTML={{__html: html}}/>;
+            let { html } = this.props;
+            return <Paragraph dangerouslySetInnerHTML={{ __html: html }} />;
         }
     }
 
@@ -66,7 +66,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
             )}
             {description && (
-                <Paragraph dangerouslySetInnerHTML={{__html: description}}></Paragraph>
+                <Paragraph dangerouslySetInnerHTML={{ __html: description }}></Paragraph>
             )}
             {showMoreInfo && (
                 <>
@@ -86,7 +86,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
 
             {infoImage && (
                 <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
+                    <img src={infoImage} alt="" />
                     <Spacer size={.5} />
                 </figure>
             )}
@@ -94,19 +94,23 @@ const RangeSlider: FC<RangeSliderProps> = ({
             <div className="a-b-info-container">
                 <div className="a-b-title label-a">
                     {showLabels && (<p className="label">A</p>)}
-                    <div className="a-b-info">
-                        <Paragraph><Strong>{titleA}</Strong></Paragraph>
-                        <Paragraph>{descriptionA}</Paragraph>
-                        {!!imageA && (<figure><img src={imageA} alt={`${titleA} - ${descriptionA}`} /></figure>)}
-                    </div>
+                    {titleA || descriptionA || imageA && (
+                        <div className="a-b-info">
+                            {titleA && <Paragraph><Strong>{titleA}</Strong></Paragraph>}
+                            {descriptionA && <Paragraph>{descriptionA}</Paragraph>}
+                            {!!imageA && (<figure><img src={imageA} alt={`${titleA} - ${descriptionA}`} /></figure>)}
+                        </div>
+                    )}
                 </div>
                 <div className="a-b-title label-b">
                     {showLabels && (<p className="label">B</p>)}
-                    <div className="a-b-info">
-                        <Paragraph><Strong>{titleB}</Strong></Paragraph>
-                        <Paragraph>{descriptionB}</Paragraph>
-                        {!!imageB && (<figure><img src={imageB} alt={`${titleB} - ${descriptionB}`} /></figure>)}
-                    </div>
+                    {titleB || descriptionB || imageB && (
+                        <div className="a-b-info">
+                            {titleB && <Paragraph><Strong>{titleB}</Strong></Paragraph>}
+                            {descriptionB && <Paragraph>{descriptionB}</Paragraph>}
+                            {!!imageB && (<figure><img src={imageB} alt={`${titleB} - ${descriptionB}`} /></figure>)}
+                        </div>
+                    )}
                 </div>
             </div>
             <div className='range-bar-container'>

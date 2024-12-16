@@ -25,3 +25,8 @@
 figure.info-image-container {
  aspect-ratio: unset;
 }
+
+.button-group{
+    display: flex;
+    gap: 1rem;
+}

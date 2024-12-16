@@ -919,7 +919,7 @@ export default function WidgetChoiceGuideItems(
                         name="sliderTitleUnderA"
                         render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Label onder slider A</FormLabel>
+                        <FormLabel>Uitleg bij A</FormLabel>
                         <FormControl>
                         <Input {...field} />
                         </FormControl>
@@ -933,7 +933,7 @@ export default function WidgetChoiceGuideItems(
                         name="sliderTitleUnderB"
                         render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Label onder slider B</FormLabel>
+                        <FormLabel>Uitleg bij B</FormLabel>
                         <FormControl>
                         <Input {...field} />
                         </FormControl>
@@ -947,7 +947,7 @@ export default function WidgetChoiceGuideItems(
                         name="explanationA"
                         render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Uitleg bij A</FormLabel>
+                        <FormLabel>Label onder slider A</FormLabel>
                         <FormControl>
                         <Input {...field} />
                         </FormControl>
@@ -961,7 +961,7 @@ export default function WidgetChoiceGuideItems(
                         name="explanationB"
                         render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Uitleg bij B</FormLabel>
+                        <FormLabel>Label onder slider B</FormLabel>
                         <FormControl>
                         <Input {...field} />
                         </FormControl>
