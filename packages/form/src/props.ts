@@ -22,9 +22,9 @@ export type FormProps = {
     secondaryLabel?: string;
     secondaryHandler?: (values: { [p: string]: string | Record<number, never> | []}) => void;
     placeholder?: string;
-    currentPage: any;
-    setCurrentPage: (page: number) => void;
-    prevPage: any;
+    currentPage?: any;
+    setCurrentPage?: (page: number) => void;
+    prevPage?: any;
 }
 
 type CombinedFieldPropsWithType =
