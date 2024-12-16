@@ -150,7 +150,7 @@ function Form({
                                 type="button"
                                 className="osc-prev-button"
                                 onClick={() => {
-                                    setCurrentPage(currentPage - 1);
+                                    setCurrentPage && setCurrentPage(currentPage - 1);
                                     const formWidget = document.querySelector('.form-widget');
                                     if (formWidget) {
                                         const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
