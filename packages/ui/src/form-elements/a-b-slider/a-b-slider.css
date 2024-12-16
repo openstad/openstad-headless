@@ -104,3 +104,8 @@
     cursor: pointer;
     border-radius: 50%;
   }
+
+
+  .osc .osc-choiceguide-container .question-type-range  .a-b-info-container:has(.a-b-title:empty) {
+    display: none;
+  }

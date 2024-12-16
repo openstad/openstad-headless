@@ -128,20 +128,12 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     secondaryLabel={saveConceptButton || ""}
                     getValuesOnChange={setCurrentAnswers}
                     allowResetAfterSubmit={false}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    prevPage={currentPage > 0 ? currentPage - 1 : null}
                     {...props}
                   />
                   <Toaster />
-                  <div className="osc-choiceguide-navigation">
-                      {currentPage > 0 && (
-                        <button
-                          type="button"
-                          className="osc-prev-button"
-                          onClick={() => setCurrentPage((prevPage) => prevPage - 1)}
-                        >
-                            Vorige
-                        </button>
-                      )}
-                  </div>
               </div>
               <div className="osc-choiceguide-sidebar-container" ref={sidebarRef}>
                   <ChoiceGuideSidebar

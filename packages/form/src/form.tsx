@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import type {CombinedFieldPropsWithType, ComponentFieldProps, FormProps} from "./props";
+import React, { useEffect, useRef, useState } from 'react';
+import type { CombinedFieldPropsWithType, ComponentFieldProps, FormProps } from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
 import CheckboxField from "@openstad-headless/ui/src/form-elements/checkbox";
@@ -22,16 +22,19 @@ import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 
 function Form({
-      title = 'Form Widget',
-      fields = [],
-      submitText = 'Verzenden',
-      submitHandler = () => {},
-      submitDisabled = false,
-      secondaryLabel = '',
-      secondaryHandler = () => {},
-      getValuesOnChange = () => {},
-      allowResetAfterSubmit = true,
-      ...props
+    title = 'Form Widget',
+    fields = [],
+    submitText = 'Verzenden',
+    submitHandler = () => { },
+    submitDisabled = false,
+    secondaryLabel = '',
+    secondaryHandler = () => { },
+    getValuesOnChange = () => { },
+    allowResetAfterSubmit = true,
+    currentPage,
+    setCurrentPage,
+    prevPage,
+    ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
     fields.forEach((field) => {
@@ -71,7 +74,7 @@ function Form({
         }
     };
 
-    const handleInputChange = (event: { name: string, value: FormValue}) => {
+    const handleInputChange = (event: { name: string, value: FormValue }) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
     };
@@ -138,15 +141,47 @@ function Form({
                     ))}
                     {secondaryLabel && (
                         <Button appearance='primary-action-button' onClick={() => secondaryHandler(formValues)}
-                                type="button">{secondaryLabel}</Button>
+                            type="button">{secondaryLabel}</Button>
                     )}
-                    <Button
-                        appearance='primary-action-button'
-                        type="submit"
-                        disabled={submitDisabled}
-                    >
-                        {submitText}
-                    </Button>
+                    <div className="button-group">
+                        {currentPage > 0 && (
+                            <Button
+                                appearance='secondary-action-button'
+                                type="button"
+                                className="osc-prev-button"
+                                onClick={() => {
+                                    setCurrentPage(currentPage - 1);
+                                    const formWidget = document.querySelector('.form-widget');
+                                    if (formWidget) {
+                                        const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
+                                        window.scrollTo({
+                                            top: elementPosition,
+                                            behavior: 'smooth'
+                                        });
+                                    }
+                                }}
+                            >
+                                Vorige
+                            </Button>
+                        )}
+                        <Button
+                            appearance='primary-action-button'
+                            type="submit"
+                            disabled={submitDisabled}
+                            onClick={() => {
+                                const formWidget = document.querySelector('.form-widget');
+                                if (formWidget) {
+                                    const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
+                                    window.scrollTo({
+                                        top: elementPosition,
+                                        behavior: 'smooth'
+                                    });
+                                }
+                            }}
+                        >
+                            {submitText}
+                        </Button>
+                    </div>
                 </form>
             </div>
         </div>
