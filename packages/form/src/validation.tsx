@@ -12,7 +12,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             let min = field.minCharacters || 0;
             let minWarning = field.minCharactersWarning || 'Tekst moet minimaal {minCharacters} karakters bevatten';
 
-            if (field.fieldRequired && min === 0) {
+            if (field.fieldRequired && min == 0) {
                 min = 1;
                 minWarning = field.requiredWarning || 'Dit veld is verplicht';
             } else {
@@ -23,7 +23,11 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             let maxWarning = field.maxCharactersWarning || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
             maxWarning = maxWarning.replace('{maxCharacters}', max.toString());
 
-            return z.string().min(min, minWarning).max(max, maxWarning).optional();
+            if (field.fieldRequired) {
+                return z.string().min(min, minWarning).max(max, maxWarning);
+            } else {
+                return z.string().min(min, minWarning).max(max, maxWarning).optional();
+            }
 
         case 'checkbox':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {

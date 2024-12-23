@@ -49,7 +49,7 @@ export const calculateScoreForItem = (
         Object.keys(answers).forEach((answerKey) => {
             const answerByName = answers[answerKey];
 
-            if (answerByName === "") return;
+            if (answerByName === "" || typeof answerByName !== 'string') return;
 
             let answerArray;
 

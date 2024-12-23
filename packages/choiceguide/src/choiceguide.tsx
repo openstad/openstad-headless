@@ -19,7 +19,8 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         introTitle,
         introDescription,
         noOfQuestionsToShow,
-        afterUrl
+        afterUrl,
+        choicesType
     } = choiceGuide;
 
     const formFields = InitializeFormFields(items, props);
@@ -136,13 +137,15 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                   <Toaster />
               </div>
               <div className="osc-choiceguide-sidebar-container" ref={sidebarRef}>
-                  <ChoiceGuideSidebar
-                    {...choiceGuide}
-                    choiceOptions={choiceOption?.choiceOptions}
-                    weights={weights}
-                    answers={answers}
-                    widgetId={widgetId}
-                  />
+                  {choicesType !== 'hidden' && (
+                      <ChoiceGuideSidebar
+                        {...choiceGuide}
+                        choiceOptions={choiceOption?.choiceOptions}
+                        weights={weights}
+                        answers={answers}
+                        widgetId={widgetId}
+                      />
+                  )}
               </div>
           </div>
       </div>

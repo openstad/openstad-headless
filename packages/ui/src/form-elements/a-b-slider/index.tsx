@@ -94,7 +94,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
             <div className="a-b-info-container">
                 <div className="a-b-title label-a">
                     {showLabels && (<p className="label">A</p>)}
-                    {titleA || descriptionA || imageA && (
+                    {(titleA || descriptionA || imageA) && (
                         <div className="a-b-info">
                             {titleA && <Paragraph><Strong>{titleA}</Strong></Paragraph>}
                             {descriptionA && <Paragraph>{descriptionA}</Paragraph>}
@@ -103,8 +103,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     )}
                 </div>
                 <div className="a-b-title label-b">
-                    {showLabels && (<p className="label">B</p>)}
-                    {titleB || descriptionB || imageB && (
+                {showLabels && (<p className="label">B</p>)}
+                    {(titleB || descriptionB || imageB) && (
                         <div className="a-b-info">
                             {titleB && <Paragraph><Strong>{titleB}</Strong></Paragraph>}
                             {descriptionB && <Paragraph>{descriptionB}</Paragraph>}
