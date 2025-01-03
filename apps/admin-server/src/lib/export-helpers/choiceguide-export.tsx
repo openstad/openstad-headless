@@ -28,7 +28,7 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
         title = `${title}   ${explanationA} - ${explanationB}`;
       }
 
-      const newKey = item.type + '-' + (index + 1);
+      const newKey = item.type + '-' + item.trigger;
 
       acc[newKey] = title;
       return acc;
