@@ -45,7 +45,7 @@ export type Option = {
 };
 
 export type Title = {
-  text: string;
+  text?: string;
   key: string;
   isOtherOption?: boolean;
 };

@@ -96,7 +96,7 @@ export type Option = {
 };
 
 export type Title = {
-    text: string;
+    text?: string;
     key: string;
     weights?: Record<string, Weight>;
 };
