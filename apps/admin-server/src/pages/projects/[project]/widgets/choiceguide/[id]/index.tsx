@@ -87,13 +87,13 @@ export default function WidgetChoiceGuide({
           </Tabs>
 
           <div className='py-6 mt-6 bg-white rounded-md'>
-              {/*{previewConfig ? (*/}
-              {/*  <WidgetPreview*/}
-              {/*    type="choiceguide"*/}
-              {/*    config={previewConfig}*/}
-              {/*    projectId={projectId as string}*/}
-              {/*  />*/}
-              {/*) : null}*/}
+              {previewConfig ? (
+                <WidgetPreview
+                  type="choiceguide"
+                  config={previewConfig}
+                  projectId={projectId as string}
+                />
+              ) : null}
             </div>
         </div>
       </PageLayout>

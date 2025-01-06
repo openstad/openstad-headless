@@ -54,7 +54,7 @@ const formSchema = z.object({
       z.object({
         trigger: z.string(),
         titles: z.array(z.object({
-          text: z.string(),
+          text: z.string().optional(),
           key: z.string(),
           weights: z.record(weightSchema).optional()
         }))
@@ -459,30 +459,25 @@ export default function WidgetChoiceGuideItems(
                     <Heading size="xl">Antwoordopties</Heading>
                     <Separator className="mt-2" />
                     {hasList() && (
-                      <>
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.titles.0.key`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Optie key</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.titles.0.text`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Optie tekst</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
+                      (() => {
+                        const activeOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+
+                        return (
+                          <>
+                            <FormField
+                              control={form.control}
+                              name={`options.${activeOption}.titles.0.key`}
+                              render={({field}) => (
+                                <FormItem>
+                                  <FormLabel>Optie tekst</FormLabel>
+                                  <Input {...field} />
+                                  <FormMessage/>
+                                </FormItem>
+                              )}
+                            />
+                          </>
+                        );
+                      })()
                     )}
 
                     <Button
@@ -555,7 +550,7 @@ export default function WidgetChoiceGuideItems(
                               <span
                                 className="py-3 px-2 w-full"
                                 onClick={() => setOption(option)}>
-                                                                {option?.titles?.[0].text}
+                                                                {option?.titles?.[0].key}
                                                             </span>
                               <span className="py-3 px-2">
                                                                 <X
