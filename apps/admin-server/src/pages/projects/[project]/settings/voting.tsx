@@ -41,6 +41,8 @@ const formSchema = z.object({
     'budgeting',
     'countPerTag',
     'budgetingPerTag',
+    'countPerTheme',
+    'budgetingPerTheme',
   ]).optional(),
   minResources: z.coerce.number().gt(-1).optional(),
   maxResources: z.coerce.number().gt(-1).optional(),
@@ -71,18 +73,31 @@ export default function ProjectSettingsVoting() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const defaults = useCallback(
-    () => ({
+  const defaults = useCallback(() => {
+    const voteType = data?.config?.[category]?.voteType;
+
+    const correctedVoteType = (() => {
+      switch (voteType) {
+        case 'countPerTheme':
+          return 'countPerTag';
+        case 'budgetingPerTheme':
+          return 'budgetingPerTag';
+        default:
+          return voteType || 'likes';
+      }
+    })();
+
+    return {
       isViewable: data?.config?.[category]?.isViewable || false,
       isActive: data?.config?.[category]?.isActive || false,
       withExisting: data?.config?.[category]?.withExisting || "error",
       requiredUserRole: data?.config?.[category]?.requiredUserRole || "anonymous",
-      voteType: data?.config?.[category]?.voteType || "likes",
+      voteType: correctedVoteType,
       minResources: data?.config?.[category]?.minResources || 0,
       maxResources: data?.config?.[category]?.maxResources || 0,
       minBudget: data?.config?.[category]?.minBudget || 0,
       maxBudget: data?.config?.[category]?.maxBudget || 0,
-    }),
+    }},
     [data?.config]
   );
 
