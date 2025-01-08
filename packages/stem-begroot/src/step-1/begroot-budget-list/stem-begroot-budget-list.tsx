@@ -103,7 +103,7 @@ export const StemBegrootBudgetList = ({
                         onClick={() => {
                           onSelectedResourceRemove(resource);
                         }}
-                        className="subtle-button"
+                        className="primary-action-button"
                         icon="ri-close-line"
                         iconOnly={true}
                         text='Item verwijderen'
