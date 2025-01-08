@@ -7,6 +7,7 @@ module.exports = function( req, res, next ) {
     sort = sort.map( column => {
       switch (column) {
         case 'votes_desc':
+        case 'ranking':
           return [ 'yes', 'DESC' ];
           break;
         case 'votes_asc':

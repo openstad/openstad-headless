@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,15 +19,19 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  step1Title: z.string(),
-  resourceCardTitle: z.string(),
-  step2Title: z.string(),
-  stemCodeTitle: z.string(),
-  stemCodeTitleSuccess: z.string(),
-  newsLetterTitle: z.string(),
-  panelTitle: z.string(),
-  budgetChosenTitle: z.string(),
-  budgetRemainingTitle: z.string(),
+  step1Title: z.string().optional(),
+  resourceCardTitle: z.string().optional(),
+  step2Title: z.string().optional(),
+  stemCodeTitle: z.string().optional(),
+  stemCodeTitleSuccess: z.string().optional(),
+  newsLetterTitle: z.string().optional(),
+  panelTitle: z.string().optional(),
+  budgetChosenTitle: z.string().optional(),
+  budgetRemainingTitle: z.string().optional(),
+  step1Tab: z.string().optional(),
+  step2Tab: z.string().optional(),
+  step3Tab: z.string().optional(),
+  step4Tab: z.string().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -43,15 +48,19 @@ export default function BegrootmoduleText(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      step1Title: props.step1Title || 'Uw selecties',
-      resourceCardTitle: props.resourceCardTitle || 'Selecteer een plan',
-      step2Title: props.step2Title || 'Overzicht van mijn selectie',
-      stemCodeTitle: props.stemCodeTitle || 'Vul je stemcode in',
-      stemCodeTitleSuccess: props.stemCodeTitleSuccess || 'Vul een andere stemcode in',
-      newsLetterTitle: props.newsLetterTitle || 'Hou mij op de hoogte',
-      panelTitle: props.panelTitle,
-      budgetChosenTitle: props.budgetChosenTitle,
-      budgetRemainingTitle: props.budgetRemainingTitle,
+      step1Tab: props.step1Tab ?? 'Kies',
+      step2Tab: props.step2Tab ?? 'Overzicht',
+      step3Tab: props.step3Tab ?? 'Stemcode',
+      step4Tab: props.step4Tab ?? 'Stem',
+      step1Title: props.step1Title ?? 'Uw selecties',
+      resourceCardTitle: props.resourceCardTitle ?? 'Selecteer een inzending',
+      step2Title: props.step2Title ?? 'Overzicht van mijn selectie',
+      stemCodeTitle: props.stemCodeTitle ?? 'Vul je stemcode in',
+      stemCodeTitleSuccess: props.stemCodeTitleSuccess ?? 'Vul een andere stemcode in',
+      newsLetterTitle: props.newsLetterTitle ?? 'Hou mij op de hoogte',
+      panelTitle: props.panelTitle ?? '',
+      budgetChosenTitle: props.budgetChosenTitle ?? "Inzendingen gekozen",
+      budgetRemainingTitle: props.budgetRemainingTitle ?? "Nog te kiezen",
     },
   });
 
@@ -62,7 +71,91 @@ export default function BegrootmoduleText(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/2 grid grid-cols-1 gap-4">
+          className="lg:w-full grid grid-cols-1 gap-4">
+
+          <div className="w-full grid-cols-4 grid gap-4">
+
+            <FormField
+              control={form.control}
+              name="step1Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 1 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="step2Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 2 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="step3Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 3 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="step4Tab"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Tab 4 titel</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+          </div>
 
           <Heading size="lg">Stap 1:</Heading>
           <FormField
@@ -90,7 +183,7 @@ export default function BegrootmoduleText(
             name="resourceCardTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Titel plannen kaart</FormLabel>
+                <FormLabel>Titel inzendingen kaart</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -195,6 +288,7 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Titel</FormLabel>
+                <FormDescription>Het panel wordt bovenin stap 1 en 2 getoond en bevat informatie over wat er is gekozen en hoeveel de gebruiker nog kan kiezen.</FormDescription>
                 <FormControl>
                   <Input
                     {...field}
@@ -213,7 +307,8 @@ export default function BegrootmoduleText(
             name="budgetChosenTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Regel 1</FormLabel>
+                <FormLabel>&apos;Gekozen&apos; tekst</FormLabel>
+                <FormDescription>Hier komt informatie bij te staan over hoeveel er al is gekozen.</FormDescription>
                 <FormControl>
                   <Input
                     {...field}
@@ -232,7 +327,8 @@ export default function BegrootmoduleText(
             name="budgetRemainingTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Regel 2</FormLabel>
+                <FormLabel>&apos;Nog over&apos; tekst</FormLabel>
+                <FormDescription>Hier komt informatie bij te staan over hoeveel er nog gekozen kan worden.</FormDescription>
                 <FormControl>
                   <Input
                     {...field}
