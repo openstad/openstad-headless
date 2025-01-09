@@ -27,6 +27,10 @@ RUN npm install -w $WORKSPACE
 
 RUN npm run build-packages --if-present --prefix=$WORKSPACE
 
+# Generate and store release ID dynamically
+RUN releaseId=$(node -e "console.log(require('./apps/cms-server/apos-build/release-id.json').releaseId)") && \
+    echo "APOS_RELEASE_ID=$releaseId" >> /opt/openstad-headless/.env
+
 # Development image
 FROM builder AS development
 ENV NODE_ENV=${NODE_ENV:-development}
