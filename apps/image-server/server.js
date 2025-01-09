@@ -113,7 +113,6 @@ app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*' )
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override');
-  res.header('Access-Control-Allow-Credentials', 'true');
   next()
 })
 
@@ -126,47 +125,6 @@ app.get('/image/*',
      */
     imageHandler(req, res);
   });
-
-
-/**
- *  The url for creating one Image
- */
-app.post('/image',
-  imageUpload.single('image'), (req, res, next) => {
-    const fileName = req.file.filename || req.file.key;
-    let url = `${process.env.APP_URL}/image/${fileName}`;
-
-    let protocol = '';
-
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
-    }
-
-    res.send(JSON.stringify({
-      name: req.file.name,
-      url: protocol + url
-    }));
-  });
-
-app.post('/images',
-  imageUpload.array('image', 30), (req, res, next) => {
-        res.send(JSON.stringify(req.files.map((file) => {
-            let url = `${process.env.APP_URL}/image/${file.filename}`;
-
-            let protocol = '';
-
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-              protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
-            }
-
-            return {
-                name: file.originalname,
-                url: protocol + url
-            }
-        })));
-    });
-
-
 
 const documentMulterConfig = {
   onError: function (err, next) {
@@ -222,6 +180,61 @@ app.get('/document/*',
     // return res.download(`${process.env.APP_URL}/document/${req.url}`);
     return res.download(`documents/${req.url}`);
   });
+
+app.use((req, res, next) => {
+  // Check that a token is provided
+  if (!req.headers['image-token']) {
+    return res.status(401).send('Unauthorized');
+  }
+  
+  const token = req.headers['image-token'];
+  const secret = process.env.IMAGE_VERIFICATION_TOKEN;
+  
+  // Check that the token is correct
+  if (token !== secret) {
+    return res.status(401).send('Unauthorized');
+  }
+  
+  next();
+});
+
+/**
+ *  The url for creating one Image
+ */
+app.post('/image',
+  imageUpload.single('image'), (req, res, next) => {
+    const fileName = req.file.filename || req.file.key;
+    let url = `${process.env.APP_URL}/image/${fileName}`;
+
+    let protocol = '';
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+    }
+
+    res.send(JSON.stringify({
+      name: req.file.name,
+      url: protocol + url
+    }));
+  });
+
+app.post('/images',
+  imageUpload.array('image', 30), (req, res, next) => {
+    res.send(JSON.stringify(req.files.map((file) => {
+        let url = `${process.env.APP_URL}/image/${file.filename}`;
+
+        let protocol = '';
+
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+        }
+
+        return {
+            name: file.originalname,
+            url: protocol + url
+        }
+    })));
+});
 
 /**
  *  The url for creating one Document

@@ -10,14 +10,8 @@ page or piece.') }}
 {% endblock %}
 
 {% block extraHead %}
-<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-<script type="text/javascript">
-  let logoutUrl = '{{ data.global.logoutUrl | safe }}'
-  if (typeof process == 'undefined') {
-    process = { env: {NODE_ENV: 'production'} };
-  }
-</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
 {% if data.global.favicon %}
   <link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}"/>
 {% endif %}
@@ -25,6 +19,7 @@ page or piece.') }}
 {% endblock %}
 
 {% block beforeMain %}
+<div id="logout-data" data-logout-url="{{ data.global.logoutUrl | safe }}"></div>
 
 <a class="skip-link utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href="#main">
   Ga naar de hoofdinhoud

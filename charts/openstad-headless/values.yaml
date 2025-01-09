@@ -160,7 +160,7 @@ admin:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
-        more_set_headers "X-Robots-Tag: noindex";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
     extraLabels: {}
     hosts: []
     ingressClassName: nginx

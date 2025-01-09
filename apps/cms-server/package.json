@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "build": "NODE_ENV=production node build @apostrophecms/asset:build"
   },
   "nodemonConfig": {
     "delay": 1000,
@@ -43,7 +44,7 @@
   "dependencies": {
     "@apostrophecms/blog": "^1.0.4",
     "@apostrophecms/seo": "^1.2.2",
-    "apostrophe": "^3.0.0",
+    "apostrophe": "^4.7.0",
     "dotenv": "^16.0.3",
     "express-basic-auth": "^1.2.1",
     "http-proxy-middleware": "^2.0.6",

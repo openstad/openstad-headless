@@ -24,6 +24,7 @@ import toast from 'react-hot-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import * as Switch from '@radix-ui/react-switch';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -47,7 +48,7 @@ export default function ProjectSettings() {
 
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading, updateProject } = useProject();
+  const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
@@ -171,6 +172,51 @@ export default function ProjectSettings() {
     }
   }
 
+  // const onCopy = (textToBeCopied: string, toastStart: string) => {
+  //   navigator.clipboard.writeText(textToBeCopied);
+  //   toast.success(`${toastStart} gekopieerd naar klembord`);
+  // };
+  //
+  // const [apiUrl, setApiUrl] = useState('');
+  // const [imgUrl, setImgUrl] = useState('');
+  // const [cdnUrls, setCdnUrls] = useState<string[]>([]);
+  // const [cssUrl, setCssUrl] = useState('');
+  //
+  // useEffect(() => {
+  //   if (!data || typeof data == 'undefined') return;
+  //
+  //   setCssUrl(data?.config?.project?.cssUrl || '');
+  //
+  //   if (data.config?.project?.cssUrl) {
+  //     setCssUrl(new URL(data.config.project.cssUrl).host);
+  //   }
+  //
+  //   setApiUrl(data.installationUrls?.api || '');
+  //   setImgUrl(data.installationUrls?.img || '');
+  //
+  //   const cdns = ['unpkg.com', 'openstad-cdn.nl'];
+  //
+  //   if (process.env.REACT_CDN) {
+  //     let reactCdn = process.env.REACT_CDN;
+  //     if (!reactCdn.startsWith('http')) {
+  //       reactCdn = `https://${reactCdn}`;
+  //     }
+  //     cdns.push(new URL(reactCdn).host);
+  //   }
+  //
+  //   if (process.env.REACT_DOM_CDN) {
+  //     let reactDomCdn = process.env.REACT_DOM_CDN;
+  //     if (!reactDomCdn.startsWith('http')) {
+  //       reactDomCdn = `https://${reactDomCdn}`;
+  //     }
+  //     cdns.push(new URL(reactDomCdn).host);
+  //   }
+  //
+  //   setCdnUrls(cdns);
+  // }, [data]);
+  //
+  // const cspHeader = `Content-Security-Policy: default-src 'self'; script-src 'self' ${apiUrl} ${cdnUrls.join(' ')}; style-src 'self' ${apiUrl} ${cdnUrls.join(' ')} ${cssUrl}; img-src 'self' ${imgUrl} data:; font-src ${cdnUrls.join(' ')} 'self'; connect-src ${apiUrl} 'self';`;
+
   return (
     <div>
       <PageLayout
@@ -189,6 +235,7 @@ export default function ProjectSettings() {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
+              {/*<TabsTrigger value="csp">Beveiligingsheaders</TabsTrigger>*/}
               <TabsTrigger value="projecthasended">Project beëindigen</TabsTrigger>
               <TabsTrigger value="advanced">
                 Project archiveren
@@ -312,6 +359,26 @@ export default function ProjectSettings() {
                 </Form>
               </div>
             </TabsContent>
+            {/*<TabsContent value={'csp'} className="p-0">*/}
+            {/*  <div className={'p-6 bg-white rounded-md'}>*/}
+            {/*    <Heading size={'xl'}>Content-Security-Policy header</Heading>*/}
+            {/*    <Separator className="my-4" />*/}
+            {/*    <div className="space-y-4">*/}
+            {/*      <div>*/}
+            {/*        Indien je gebruik wilt maken van de Content-Security-Policy header, dan vind je hieronder de standaardheader die je kunt gebruiken. Deze kun je naar wens aanpassen.*/}
+            {/*      </div>*/}
+
+            {/*      <div>*/}
+            {/*        <p>*/}
+            {/*          <Textarea disabled={true} value={cspHeader} />*/}
+            {/*        </p>*/}
+            {/*      </div>*/}
+            {/*      <div className="flex gap-4 p-0">*/}
+            {/*        <Button onClick={() => onCopy(cspHeader, 'Content-Security-Policy header')}>Kopieer Content-Security-Policy header</Button>*/}
+            {/*      </div>*/}
+            {/*    </div>*/}
+            {/*  </div>*/}
+            {/*</TabsContent>*/}
             <TabsContent value="projecthasended" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Heading size="xl">Project beëindigen</Heading>

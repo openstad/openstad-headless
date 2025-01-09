@@ -17,6 +17,7 @@ import { Spacer } from "@/components/ui/spacer";
 import AccordionUI from "@/components/ui/accordion";
 import { ImageUploader } from '@/components/image-uploader';
 import {ChoiceOptions, Item, Weight} from "@openstad-headless/choiceguide/src/props";
+import { useRouter } from 'next/router';
 
 const formSchema = z.object({
   choiceOptions: z.array(
@@ -40,6 +41,9 @@ const formSchema = z.object({
 
 export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   const category = 'choiceOption';
+
+  const router = useRouter();
+  const { project } = router.query;
 
   const {
     data: widget,
@@ -190,6 +194,7 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
                               <FormControl>
                                 <ImageUploader
                                   form={form}
+                                  project={project as string}
                                   imageLabel="Upload hier een afbeelding"
                                   fieldName={`choiceOptions.${index}.imageUploader`}
                                   allowedTypes={["image/*"]}

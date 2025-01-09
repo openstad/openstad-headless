@@ -8,6 +8,7 @@ const db = require('../../db');
 const service = require('./service');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
+const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 let router = express.Router({mergeParams: true});
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -127,24 +128,11 @@ router
     redirectUrl = redirectUrl || '/';
 
     const isAllowedRedirectDomain = (url, project) => {
-      let allowedDomains = project?.config?.allowedDomains || [];
-
-      try {
-        const baseUrlHost = process.env.BASE_DOMAIN || process.env.HOSTNAME;
-
-        if ( !!baseUrlHost ) {
-          allowedDomains.push(baseUrlHost);
-          allowedDomains.push('auth.' + baseUrlHost);
-          allowedDomains.push('api.' + baseUrlHost);
-          allowedDomains.push('admin.' + baseUrlHost);
-        }
-      } catch(err) {
-        console.error('Error processing allowed domains:', err);
-      }
+      let allowedDomains = prefillAllowedDomains(project?.config?.allowedDomains || []);
 
       if (project.url) {
         try {
-          let projectDomain = new URL(project.url).hostname;
+          let projectDomain = new URL(project.url).host;
           allowedDomains.push(projectDomain);
         } catch(err) {}
       }
@@ -154,7 +142,7 @@ router
       }
       let redirectUrlHost = '';
       try {
-        redirectUrlHost = new URL(url).hostname;
+        redirectUrlHost = new URL(url).host;
       } catch(err) {}
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
