@@ -1,6 +1,3 @@
-<style>
-  {{data.widget.formattedContainerStyles}}
-</style>
 <div id="{{data.widget.containerId}}" class="section
   {% if data.widget.sectionToggle %}
   {% if data.widget.sectionOpen %}open{% else %}closed{% endif %}
@@ -18,18 +15,16 @@
   {% if data.widget.removeTopMargin %} --mt-0 {% endif %}
   {% if data.widget.negativeMargin %} --negative {% endif %}
   {% if data.widget.customClass %} {{data.widget.customClass}} {% endif %}
-" style="
+  {% if data.widget.backgroundImage %} --background-image {% endif %}
+"
   {% if data.widget.backgroundImage %}
-  background-image:url({{ apos.attachments.url(data.widget.backgroundImage) }});
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
+  data-background-image="{{ apos.attachments.url(data.widget.backgroundImage) }}"
   {% endif %}
 
   {% if data.widget.customCSS %}
     {{data.widget.customCSS}}
   {% endif %}
+     data-openstad-section
   ">
   {% if data.widget.sectionToggle %}
   <a class="toggle-title"

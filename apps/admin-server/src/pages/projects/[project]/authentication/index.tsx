@@ -258,6 +258,7 @@ export default function ProjectAuthentication() {
                   <div className="col-span-full md:col-span-1 flex flex-col">
                   <ImageUploader
                     form={form}
+                    project={project as string}
                     imageLabel="Upload hier het logo voor de authenticatie omgeving"
                     fieldName="imageLogo"
                     allowedTypes={["image/*"]}
@@ -273,6 +274,7 @@ export default function ProjectAuthentication() {
                   <div className="col-span-full md:col-span-1 flex flex-col">
                     <ImageUploader
                       form={form}
+                      project={project as string}
                       imageLabel="Upload hier het favicon voor de authenticatie omgeving"
                       fieldName="imageFavicon"
                       allowedTypes={["image/*"]}

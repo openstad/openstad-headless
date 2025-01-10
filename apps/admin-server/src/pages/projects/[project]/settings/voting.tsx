@@ -39,6 +39,8 @@ const formSchema = z.object({
     'likes',
     'count',
     'budgeting',
+    'countPerTag',
+    'budgetingPerTag',
     'countPerTheme',
     'budgetingPerTheme',
   ]).optional(),
@@ -71,18 +73,31 @@ export default function ProjectSettingsVoting() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const defaults = useCallback(
-    () => ({
+  const defaults = useCallback(() => {
+    const voteType = data?.config?.[category]?.voteType;
+
+    const correctedVoteType = (() => {
+      switch (voteType) {
+        case 'countPerTheme':
+          return 'countPerTag';
+        case 'budgetingPerTheme':
+          return 'budgetingPerTag';
+        default:
+          return voteType || 'likes';
+      }
+    })();
+
+    return {
       isViewable: data?.config?.[category]?.isViewable || false,
       isActive: data?.config?.[category]?.isActive || false,
-      withExisting: data?.config?.[category]?.withExisting || null,
-      requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
-      voteType: data?.config?.[category]?.voteType || null,
+      withExisting: data?.config?.[category]?.withExisting || "error",
+      requiredUserRole: data?.config?.[category]?.requiredUserRole || "anonymous",
+      voteType: correctedVoteType,
       minResources: data?.config?.[category]?.minResources || 0,
       maxResources: data?.config?.[category]?.maxResources || 0,
       minBudget: data?.config?.[category]?.minBudget || 0,
       maxBudget: data?.config?.[category]?.maxBudget || 0,
-    }),
+    }},
     [data?.config]
   );
 
@@ -261,11 +276,11 @@ useEffect(() => {
                         <SelectItem value="likes">Likes</SelectItem>
                         <SelectItem value="count">Aantallen</SelectItem>
                         <SelectItem value="budgeting">Begroten</SelectItem>
-                        <SelectItem value="countPerTheme">
-                          Aantal per thema
+                        <SelectItem value="countPerTag">
+                          Aantal per tag(groep)
                         </SelectItem>
-                        <SelectItem value="budgetingPerTheme">
-                          Begroten per thema
+                        <SelectItem value="budgetingPerTag">
+                          Begroten per tag(groep)
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -273,15 +288,15 @@ useEffect(() => {
                   </FormItem>
                 )}
               />
-              {(fieldValue === 'countPerTheme' || fieldValue === 'count') && (
+              {(fieldValue === 'countPerTag' || fieldValue === 'count') && (
                 <FormField
                   control={form.control}
                   name="minResources"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is de minimum hoeveelheid resources waar iemand op kan stemmen?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
+                        Wat is de minimum hoeveelheid inzendingen{form.watch("voteType") === "countPerTag" ? " per tag(groep) " : " "}waar iemand op kan stemmen?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep)'} />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="1" {...field} />
@@ -291,15 +306,15 @@ useEffect(() => {
                   )}
                 />
               )}
-              {(fieldValue === 'countPerTheme' || fieldValue === 'count') && (
+              {(fieldValue === 'countPerTag' || fieldValue === 'count') && (
                 <FormField
                   control={form.control}
                   name="maxResources"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is de maximum hoeveelheid resources waar iemand op kan stemmen?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
+                        Wat is de maximum hoeveelheid inzendingen{form.watch("voteType") === "countPerTag" ? " per tag(groep) " : " "}waar iemand op kan stemmen?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep'} />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100" {...field} />
@@ -309,15 +324,15 @@ useEffect(() => {
                   )}
                 />
               )}
-              {(fieldValue === 'budgetingPerTheme' || fieldValue === 'budgeting') && (
+              {(fieldValue === 'budgetingPerTag' || fieldValue === 'budgeting') && (
                 <FormField
                   control={form.control}
                   name="minBudget"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is het minimum budget?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
+                        Wat is het minimum budget{form.watch("voteType") === "budgetingPerTag" ? " per tag(groep)" : " "}?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting, Begroten per tag(groep) '} />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="1" {...field} />
@@ -327,15 +342,15 @@ useEffect(() => {
                   )}
                 />
               )}
-              {(fieldValue === 'budgetingPerTheme' || fieldValue === 'budgeting') && (
+              {(fieldValue === 'budgetingPerTag' || fieldValue === 'budgeting') && (
                 <FormField
                   control={form.control}
                   name="maxBudget"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is het maximum budget?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
+                        Wat is het maximum budget{form.watch("voteType") === "budgetingPerTag" ? " per tag(groep)" : " "}?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting, Begroten per tag(groep) '} />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100" {...field} />

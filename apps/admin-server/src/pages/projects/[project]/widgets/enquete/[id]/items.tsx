@@ -29,6 +29,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
 import { Checkbox } from "@/components/ui/checkbox";
+import { useRouter } from 'next/router';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -77,6 +78,9 @@ export default function WidgetEnqueteItems(
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
+
+  const router = useRouter();
+  const { project } = router.query;
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -725,6 +729,7 @@ export default function WidgetEnqueteItems(
                       <>
                         <ImageUploader
                           form={form}
+                          project={project as string}
                           fieldName="imageUpload"
                           imageLabel="Afbeelding 1"
                           allowedTypes={["image/*"]}
@@ -772,6 +777,7 @@ export default function WidgetEnqueteItems(
                       <>
                         <ImageUploader
                           form={form}
+                          project={project as string}
                           fieldName="image1Upload"
                           imageLabel="Afbeelding 1"
                           allowedTypes={["image/*"]}
@@ -814,6 +820,7 @@ export default function WidgetEnqueteItems(
 
                         <ImageUploader
                           form={form}
+                          project={project as string}
                           fieldName="image2Upload"
                           imageLabel="Afbeelding 2"
                           allowedTypes={["image/*"]}

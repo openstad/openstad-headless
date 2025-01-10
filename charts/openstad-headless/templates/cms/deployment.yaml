@@ -50,6 +50,8 @@ spec:
                 name: {{ template "openstad.cms.secret.fullname" . }}
           - name: CMS_DEFAULTS
             value: "{}"
+          - name: NODE_ENV
+            value: production
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}

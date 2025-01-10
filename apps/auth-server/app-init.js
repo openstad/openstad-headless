@@ -42,6 +42,7 @@ const sessionStore = new MySQLStore({
     database: process.env.DB_NAME || process.env.DB_SESSIONS,
     user:     process.env.DB_USER,
     password: process.env.DB_PASSWORD,
+    connectionLimit: parseInt(process.env.DB_MAX_POOL_SIZE || process.env.maxPoolSize) || 5
 });
 
 let sessionCookieConfig;

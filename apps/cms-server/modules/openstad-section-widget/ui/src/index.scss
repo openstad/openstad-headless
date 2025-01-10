@@ -67,6 +67,13 @@
   padding-right: 0;
 }
 
+.section.--background-image {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
 // give standard margin bottom to columns in row, otherwise they are stacked
 .section>.container>.row>div {
  /* @media @phone {

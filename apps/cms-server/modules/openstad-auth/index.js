@@ -37,7 +37,8 @@ module.exports = {
     return {
       async enrich(req, res, next) {
         const projectId = req.project.id;
-        req.data.global.logoutUrl = `${process.env.API_URL}/auth/project/${projectId}/logout?useAuth=default&redirectUri=${req.protocol}://${req.hostname}${req.url}/api/v1/openstad-auth/logout`;
+        const encodedUrl = encodeURIComponent(`${req.protocol}://${req.hostname}${req.url}`.replace(/'/g, '%27'));
+        req.data.global.logoutUrl = `${process.env.API_URL}/auth/project/${projectId}/logout?useAuth=default&redirectUri=${encodedUrl}/api/v1/openstad-auth/logout`;
         return next();
       },
       async authenticate (req, res, next) {
