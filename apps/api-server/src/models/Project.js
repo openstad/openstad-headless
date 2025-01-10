@@ -98,12 +98,28 @@ module.exports = function (db, sequelize, DataTypes) {
     areaId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    
+    installationUrls: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return {
+          api: process.env.URL ? new URL(process.env.URL).host : '',
+          img: process.env.IMAGE_APP_URL ? new URL(process.env.IMAGE_APP_URL).host : '',
+        };
+      },
+      set(val) {
+        throw new Error('installationUrls is a virtual field and cannot be set');
+      },
+      auth: {
+        viewableBy: 'admin',
+      },
     }
 
   }, {
 
     defaultScope: {
-      attributes: { exclude: ['emailConfig'] }
+      attributes: { exclude: ['emailConfig', 'installationUrls'] }
     },
 
     hooks: {
@@ -228,6 +244,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
       includeEmailConfig: {
         attributes: {include: ['emailConfig']},
+      },
+      
+      includeInstallationUrls: {
+        attributes: {include: ['installationUrls']},
       },
 
       includeAreas: {

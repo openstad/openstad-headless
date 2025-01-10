@@ -289,6 +289,7 @@ export default function ProjectStatusEdit() {
                         form.resetField('mapIconUploader');
                         form.trigger('mapIcon');
                       }}
+                      project={project as string}
                     />
                     <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
                       {!!form.watch('mapIcon') && (

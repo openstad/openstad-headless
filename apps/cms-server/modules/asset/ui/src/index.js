@@ -1,5 +1,12 @@
 export default () => {
   apos.util.onReady(() => {
+    const globalOpenstadUserElement = document.getElementById('global-openstad-user');
+    
+    window.globalOpenStadUser = globalOpenstadUserElement ? {...globalOpenstadUserElement.dataset} : null;
+    
+    const logoutDataElement = document.getElementById('logout-data');
+    window.logoutUrl = logoutDataElement.getAttribute('data-logout-url');
+    
     const nav = document.querySelector('#navbar');
     const footer = document.querySelector('#footer-container');
     
@@ -12,8 +19,34 @@ export default () => {
     if (typeof footer !== 'undefined') {
       Footer.Footer.loadWidgetOnElement(footer, { ...footer.dataset });
     }
+    
+    const allowCookieButton = document.querySelector('#allow-cookie-button');
+    if (allowCookieButton) {
+      allowCookieButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.setCookieConsent(true);
+      });
+    }
+    
+    const denyCookieButton = document.querySelector('#deny-cookie-button');
+    if (denyCookieButton) {
+      denyCookieButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.setCookieConsent(false);
+      });
+    }
   });
 };
+
+if (typeof window.process == 'undefined') {
+  window.process = { env: {NODE_ENV: 'production'} };
+}
+
+window.setCookieConsent = function (allowCookies) {
+    let date = new Date();
+    document.cookie = "openstad-cookie-consent=" + (allowCookies ? '1' : '-1') + '; path=/; expires=Thu, 31 Dec '+(date.getFullYear() + 5)+' 23:59:00 UTC;';
+    document.location.reload();
+  };
 
 let isMobile = false;
 

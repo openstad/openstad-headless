@@ -54,6 +54,7 @@ services:
       args:
         - APP=api-server
         - PORT=${API_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-api-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -92,6 +93,7 @@ services:
       - BASE_DOMAIN=${BASE_DOMAIN}
       - ADMIN_DOMAIN=${ADMIN_DOMAIN}
       - FORCE_HTTP=${FORCE_HTTP}
+      - IMAGE_APP_URL_INTERNAL=http://openstad-image-server:${IMAGE_PORT_API}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -125,6 +127,7 @@ services:
       args:
         - APP=auth-server
         - PORT=${AUTH_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-auth-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -135,6 +138,8 @@ services:
     environment:
       - APP_URL=${AUTH_APP_URL}
       - PORT=${AUTH_PORT}
+      - CMS_URL=${CMS_URL}
+      - BASE_DOMAIN=${BASE_DOMAIN}
       # - ADMIN_REDIRECT_URL=${AUTH_ADMIN_REDIRECT_URL}
       - DB_HOST=${AUTH_DB_HOST}
       - DB_USER=${AUTH_DB_USER}
@@ -176,6 +181,7 @@ services:
       args:
         - APP=image-server
         - PORT=${IMAGE_PORT_API}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-image-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -202,6 +208,7 @@ services:
       - ./apps/image-server:/opt/openstad-headless/apps/image-server
       - openstad-image-server-node_modules:/opt/openstad-headless/apps/image-server/node_modules
       - openstad-image-server-images:/opt/openstad-headless/apps/image-server/images
+      - openstad-image-server-documents:/opt/openstad-headless/apps/image-server/documents
       - openstad-image-server-init:/opt/openstad-headless/apps/image-server/init
 
   openstad-admin-server:
@@ -212,6 +219,7 @@ services:
       args:
         - APP=admin-server
         - PORT=${ADMIN_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-admin-server:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
     restart: unless-stopped
@@ -236,13 +244,15 @@ services:
 
   openstad-cms-server:
     build:
-      target: development
+      target: release-with-packages
       context: .
       dockerfile: Dockerfile
       args:
         - APP=cms-server
         - PORT=${CMS_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
+    command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
     depends_on:
       openstad-redis:
         condition: service_healthy
@@ -262,6 +272,7 @@ services:
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - API_KEY=${API_FIXED_AUTH_KEY}
       - FORCE_HTTP=${FORCE_HTTP}
+      - APOS_RELEASE_ID=${APOS_RELEASE_ID}
     ports:
       - '${CMS_PORT}:${CMS_PORT}'
     volumes:
@@ -279,6 +290,7 @@ volumes:
   openstad-auth-server-init: {}
   openstad-image-server-node_modules: {}
   openstad-image-server-images: {}
+  openstad-image-server-documents: {}
   openstad-image-server-init: {}
   openstad-admin-server-node_modules: {}
   openstad-cms-server-node_modules: {}

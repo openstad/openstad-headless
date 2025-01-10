@@ -53,11 +53,15 @@ router.use( '/project/:projectId(\\d+)/action', require('./action') );
 router.use('/project/:projectId(\\d+)/widgets', require('./widget') );
 router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget') );
 
+
+router.use('/project/:projectId(\\d+)/upload', require('./upload'));
+
 // locks
 router.use( '/lock', require('./lock') );
 
 // To do test and fix log API
 //router.use( '/project/:projectId(\\d+)/log', require('./log') );
+
 
 router.use( '/image', require('./image-verification-link') );
 

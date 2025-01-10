@@ -125,6 +125,7 @@ export default function ProjectDatalayerEdit() {
                   form.resetField('iconUploader');
                   form.trigger('icon');
                 }}
+                project={project as string}
               />
               <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
                 {iconField.length > 0 && (
