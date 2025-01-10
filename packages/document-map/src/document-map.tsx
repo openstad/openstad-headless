@@ -931,7 +931,7 @@ function DocumentMap({
           {displayResourceInfo === 'right' && (
             <section className="content-intro desktoponly">
               {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-              {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+              {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
 
               {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
 
