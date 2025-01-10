@@ -180,12 +180,12 @@ module.exports = {
         label: 'Favicon',
         fileGroup: 'icons',
       },
-      cssExtras: {
-        type: 'string',
-        textarea: true,
-        def: '#logo-image {\n  max-height: 50px;\n}',
-        label: 'Extra CSS',
-      },
+      // cssExtras: {
+      //   type: 'string',
+      //   textarea: true,
+      //   def: '#logo-image {\n  max-height: 50px;\n}',
+      //   label: 'Extra CSS',
+      // },
       customCssLink: {
         type: 'string',
         label: 'URL voor CSS imports (optioneel)',

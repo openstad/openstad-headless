@@ -23,9 +23,33 @@ COPY --chown=node:node package*.json .
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/$APP ./apps/$APP
 
-RUN npm install -w $WORKSPACE
+RUN npm config set fetch-retry-maxtimeout 300000
+RUN npm config set fetch-retry-mintimeout 60000
+RUN npm config set fetch-timeout 300000
 
-RUN npm run build-packages --if-present --prefix=$WORKSPACE
+ARG BUILD_ENV=production
+ENV BUILD_ENV=${BUILD_ENV}
+
+# Retry logic for npm install and build-packages if BUILD_ENV is local
+RUN if [ "$BUILD_ENV" = "local" ]; then \
+    n=0; \
+    until [ "$n" -ge 5 ]; do \
+        npm install -w $WORKSPACE && break; \
+        n=$((n+1)); \
+        echo "Retrying npm install... attempt $n"; \
+        sleep 5; \
+    done; \
+    n=0; \
+    until [ "$n" -ge 5 ]; do \
+        npm run build-packages --if-present --prefix=$WORKSPACE && break; \
+        n=$((n+1)); \
+        echo "Retrying build-packages... attempt $n"; \
+        sleep 5; \
+    done; \
+else \
+    npm install -w $WORKSPACE && \
+    npm run build-packages --if-present --prefix=$WORKSPACE; \
+fi
 
 # Generate and store release ID dynamically
 # Alleen uitvoeren voor de cms-server

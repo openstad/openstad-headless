@@ -54,6 +54,7 @@ services:
       args:
         - APP=api-server
         - PORT=${API_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-api-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -126,6 +127,7 @@ services:
       args:
         - APP=auth-server
         - PORT=${AUTH_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-auth-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -179,6 +181,7 @@ services:
       args:
         - APP=image-server
         - PORT=${IMAGE_PORT_API}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-image-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -216,6 +219,7 @@ services:
       args:
         - APP=admin-server
         - PORT=${ADMIN_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-admin-server:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
     restart: unless-stopped
@@ -246,6 +250,7 @@ services:
       args:
         - APP=cms-server
         - PORT=${CMS_PORT}
+        - BUILD_ENV=${BUILD_ENV:-production}
     image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
     command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
     depends_on:
