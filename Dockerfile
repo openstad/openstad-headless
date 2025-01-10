@@ -28,8 +28,13 @@ RUN npm install -w $WORKSPACE
 RUN npm run build-packages --if-present --prefix=$WORKSPACE
 
 # Generate and store release ID dynamically
-RUN releaseId=$(node -e "console.log(require('./apps/cms-server/apos-build/release-id.json').releaseId)") && \
-    echo "APOS_RELEASE_ID=$releaseId" >> /opt/openstad-headless/.env
+# Alleen uitvoeren voor de cms-server
+RUN if [ "$APP" = "cms-server" ]; then \
+      releaseId=$(node -e "console.log(require('./apps/cms-server/apos-build/release-id.json').releaseId)"); \
+      echo "APOS_RELEASE_ID=$releaseId" >> /opt/openstad-headless/.env; \
+    else \
+      echo "Skipping APOS_RELEASE_ID for $APP"; \
+    fi
 
 # Development image
 FROM builder AS development
