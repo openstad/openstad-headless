@@ -166,6 +166,17 @@ function ResourceDetailWithMap({
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
+  const firstStatus = resource.statuses
+    ? resource.statuses
+    .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
+    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+    : false;
+
+  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+
+  const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
+
   return (
     <section className="osc-resource-detail-content osc-resource-detail-grid">
       {resource ? (
@@ -181,7 +192,7 @@ function ResourceDetailWithMap({
                     src={i.url}
                     imageFooter={
                       <div>
-                        <Paragraph className="osc-resource-detail-content-item-status">
+                        <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                           {resource.statuses
                             ?.map((s: { label: string }) => s.label)
                             ?.join(', ')}
