@@ -16,8 +16,17 @@
 }
 
 .leaflet-container a {
-  color: var(--_utrecht-button-appearance-color);
+  display: inline-block;
+  font-size: 18px;
+  color: var(--utrecht-button-primary-action-background-color);
 }
 .leaflet-bottom.leaflet-right{
   display: none;
+}
+
+
+.leaflet-popup .leaflet-popup-content{
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
 }
