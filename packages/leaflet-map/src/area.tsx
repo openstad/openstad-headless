@@ -151,7 +151,7 @@ export function Area({
                 <>
                   <Popup className={'leaflet-popup'}>
                     {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
-                    {item.url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={item.url}>Lees verder</a>}
+                    {item.url && <a className="pop-up-link" href={item.url}>Lees verder</a>}
                   </Popup>
                 </>
               }

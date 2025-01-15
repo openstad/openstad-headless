@@ -312,6 +312,8 @@ export default function BegrootmoduleDisplay(
                                             values = values.filter(value => value !== item);
                                           }
 
+                                          values = values.filter(value => tagGroupNames.includes(value));
+
                                           form.setValue('tagTypeTagGroup', values);
                                           props.onFieldChanged('tagTypeTagGroup', values);
                                         }}
