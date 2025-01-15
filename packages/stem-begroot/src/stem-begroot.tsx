@@ -654,9 +654,7 @@ function StemBegroot({
 
           {currentStep === 3 ? (
             <Step3Success
-              loginUrl={`${props?.login?.url}`}
               step3success={props.step3success || ''}
-              stemCodeTitleSuccess={props.stemCodeTitleSuccess}
             />
           ) : null}
 
@@ -685,6 +683,17 @@ function StemBegroot({
                   }
                 }}>
                 Vorige
+              </Button>
+            ) : null}
+
+            {currentStep === 3 ? (
+              <Button
+                appearance='secondary-action-button'
+                onClick={() => {
+                  const loginUrl = new URL(`${props?.login?.url}`);
+                  document.location.href = loginUrl.toString();
+                }}>
+                {props.stemCodeTitleSuccess}
               </Button>
             ) : null}
 
