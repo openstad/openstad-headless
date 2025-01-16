@@ -613,8 +613,8 @@ router.route('/:projectId') //(\\d+)
         if (adapter.service.updateClient) {
           let merged = merge.recursive({}, authConfig, {config: configData});
           await adapter.service.updateClient({ authConfig: merged, project });
-          delete req.body.config?.auth?.provider?.[authConfig.provider]?.authTypes;
-          delete req.body.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
+          // delete req.body.config?.auth?.provider?.[authConfig.provider]?.authTypes;
+          // delete req.body.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
           delete req.body.config?.auth?.provider?.[authConfig.provider]?.requiredUserFields;
           delete req.body.config?.auth?.provider?.[authConfig.provider]?.config;
         }
