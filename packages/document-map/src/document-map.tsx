@@ -868,7 +868,7 @@ function DocumentMap({
                     <Heading level={2}>Hoe werkt het?</Heading>
                     <Paragraph>{infoPopupContent}</Paragraph>
                     <Spacer size={1}/>
-                    <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
+                    <Button appearance='secondary-action-button' aria-label="Info venster sluiten" onClick={() => setModalOpen(false)}>
                       <i className="ri-close-fill"></i>
                       <span>Info venster sluiten</span>
                     </Button>
