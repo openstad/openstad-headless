@@ -21,7 +21,7 @@
 	  </p>
 		<form
 		method="post"
-		action="{{loginUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}"
+		action="{{loginUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}{% if isPriviligedRoute %}&priviligedRoute=admin{% endif %}"
 		class="validate-form"
 		>
 			<div class="form-group">
@@ -44,6 +44,10 @@
 			</div>
 			<input type="hidden" name="_csrf" value="{{csrfToken}}">
 			<input type="hidden" name="clientId" value="{{clientId}}">
+
+			{% if isPriviligedRoute %}
+			<input type="hidden" name="priviligedRoute" value="admin">
+			{% endif %}
 
 			<input type="submit" value="{{ buttonText if buttonText else 'Stuur link' }}" class="btn btn-primary">
 		</form>

@@ -106,7 +106,11 @@ exports.validate = (req, res, next) => {
 
   const allowedType = authTypes && authTypes.length > 0 ? authTypes.find(option => option.key === req.authType) : false;
 
-  const isPriviligedRoute = req.params.priviligedRoute === 'admin';
+  let isPriviligedRoute = req.params.priviligedRoute === 'admin';
+
+  if ( !isPriviligedRoute ) {
+    isPriviligedRoute = req?.query?.priviligedRoute === 'admin' || false;
+  }
 
   /**
    * Check if any login options are defined for the client, otherwise error!
