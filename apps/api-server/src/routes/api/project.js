@@ -604,12 +604,23 @@ router.route('/:projectId') //(\\d+)
     try {
       let providers = await authSettings.providers({ project });
       const configData = req.body.config?.auth?.provider?.openstad?.config || {};
+      const allowedDomains = req.body.config?.allowedDomains || false;
 
       for (let provider of providers) {
-        if ( Object.keys(configData).length === 0 ) continue;
+        if (
+            Object.keys(configData).length === 0
+            && !(!!allowedDomains && Object.keys(configData).length === 0)
+        ) {
+          continue;
+        }
 
         let authConfig = await authSettings.config({ project, useAuth: provider });
         let adapter = await authSettings.adapter({ authConfig });
+
+        if (!!allowedDomains) {
+          authConfig.allowedDomains = allowedDomains;
+        }
+
         if (adapter.service.updateClient) {
           let merged = merge.recursive({}, authConfig, {config: configData});
           await adapter.service.updateClient({ authConfig: merged, project });
