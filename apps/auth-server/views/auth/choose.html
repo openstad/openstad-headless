@@ -11,7 +11,7 @@
 			{% include 'elements/error-flash.html' %}
 
       {% for authType in authTypes %}
-        <a href="{{authType.loginUrl}}?clientId={{clientId}}&redirect_uri={{redirect_uri}}" class="btn btn-primary">
+				<a href="{{authType.loginUrl}}?clientId={{clientId}}&redirect_uri={{redirect_uri}}{% if isPriviligedRoute %}&priviligedRoute=admin{% endif %}" class="btn btn-primary">
           {{authType.label}}
         </a>
 				<hr />

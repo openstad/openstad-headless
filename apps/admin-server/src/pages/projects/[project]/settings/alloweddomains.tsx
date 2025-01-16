@@ -57,10 +57,14 @@ export default function ProjectSettingsWidgets() {
     });
 
     try {
-      const project = await updateProject({
+      const newProjectConf = {
         allowedDomains: out
-      });
-      if (project) {
+      };
+
+      const project = await updateProject(newProjectConf);
+      const doubleSave = await updateProject(newProjectConf);
+
+      if (project && doubleSave) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.')
