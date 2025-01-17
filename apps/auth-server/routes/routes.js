@@ -257,13 +257,13 @@ module.exports = function (app) {
     app.post('/password', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
 
     app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
-    app.get('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, clientMw.checkIfEmailRequired, authRequiredFields.index);
+    app.get('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.index);
     app.post('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.post);
 
     app.use('/auth/two-factor', [authMw.check, clientMw.withOne]);
-    app.get('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, clientMw.checkIfEmailRequired, authTwoFactor.index);
+    app.get('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.index);
     app.post('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.post);
-    app.get('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, clientMw.checkIfEmailRequired, authTwoFactor.configure);
+    app.get('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configure);
     app.post('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configurePost);
 
     app.use('/dialog', [bruteForce.global]);

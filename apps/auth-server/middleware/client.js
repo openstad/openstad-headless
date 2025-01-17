@@ -130,29 +130,6 @@ exports.validate = (req, res, next) => {
   next();
 }
 
-exports.checkIfEmailRequired =  (req, res, next) => {
-      const requiredFields = req.client.requiredUserFields;
-      const authTypes = req.client.authTypes;
-
-      // the Local & email
-      const emailAuthTypesEnabled = authTypes.indexOf('Url') !== -1 ||authTypes.indexOf('Local') !== -1;
-      const emailRequired = requiredFields.indexOf('email') !== -1;
-      const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-
-      // if UniqueCode isset
-      if (emailRequired && !req.user.email) {
-        if (emailAuthTypesEnabled) {
-          req.emailRequiredForAuth = true;
-          res.redirect(`/login?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
-        } else {
-          throw new Error('E-mail is required but no auth type enabled that is able to validate it properly');
-        }
-      } else {
-        next();
-      }
-}
-
-
 // this is an extra check to make sure a users has authenticated with an access token
 // otherwise a user can access with another acces token
 // not mega disaster since role is still checked
