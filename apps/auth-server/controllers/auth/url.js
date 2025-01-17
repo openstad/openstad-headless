@@ -24,6 +24,7 @@ const setNoCachHeadersMw = (req, res, next) => {
 exports.login = [setNoCachHeadersMw, (req, res) => {
     const config = req.client.config ? req.client.config : {};
     const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+    const priviligedRoute = (req.query && req.query.priviligedRoute && req.query.priviligedRoute === 'admin') || false;
 
     res.render('auth/url/login', {
         clientId: req.query.clientId,
@@ -34,6 +35,7 @@ exports.login = [setNoCachHeadersMw, (req, res) => {
         label: configAuthType && configAuthType.label ? configAuthType.label : false,
         helpText: configAuthType && configAuthType.helpText ? configAuthType.helpText : false,
         buttonText: configAuthType && configAuthType.buttonText ? configAuthType.buttonText : false,
+        isPriviligedRoute: priviligedRoute
     });
 }];
 
@@ -75,24 +77,35 @@ exports.register = (req, res, next) => {
 }
 
 const handleSending = async (req, res, next) => {
-    try {
-        const ispriviligedRoute = req.params.priviligedRoute === 'admin';
+    let isPriviligedRoute = req.params.priviligedRoute === 'admin';
 
-        if (ispriviligedRoute) {
-            req.user = await authService.validatePrivilegeUser(req.body.email,  req.client.id);
+    if ( !isPriviligedRoute ) {
+        isPriviligedRoute = req?.query?.priviligedRoute === 'admin' || false;
+    }
+
+    try {
+        if (isPriviligedRoute) {
+            req.user = await authService.validatePrivilegeUser(req.body.email, req.client.id);
         }
 
         await verificationService.sendVerification(req.user, req.client, req.redirectUrl);
 
-        req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
+        req.flash('success', { msg: 'De e-mail is verstuurd naar: ' + req.user.email });
 
         res.redirect('/auth/url/confirmation?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl || '/login?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl);
     } catch (err) {
         console.log('e-mail error', err);
-        req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-        res.redirect('/auth/url/login?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl);
+        req.flash('error', { msg: 'Het is niet gelukt om de e-mail te versturen!' });
+
+        let redirectUrl = '/auth/url/login?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl;
+
+        if (isPriviligedRoute) {
+            redirectUrl += '&priviligedRoute=admin';
+        }
+
+        res.redirect(redirectUrl);
     }
-}
+};
 
 //Todo: move these methods to the user service
 const createUser = async (email) => {
