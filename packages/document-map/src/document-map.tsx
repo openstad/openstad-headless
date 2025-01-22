@@ -881,6 +881,10 @@ function DocumentMap({
         <div className="content document-map-info-container" ref={contentRef}>
           {!isDefinitive && (
             <>
+              <div className='toggleMarkers'>
+                <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+                <FormLabel htmlFor="toggleMarkers"> <Paragraph>{addMarkerText}</Paragraph> </FormLabel>
+              </div>
               {displayLikes && (
                 <>
                   <Likes
@@ -920,16 +924,14 @@ function DocumentMap({
                   <Spacer size={2}/>
                 </div>
               )}
-              <div className='toggleMarkers'>
-                <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-                <FormLabel htmlFor="toggleMarkers"> <Paragraph>{addMarkerText}</Paragraph> </FormLabel>
-              </div>
+
             </>
           )}
 
           {displayResourceInfo === 'right' && (
             <section className="content-intro desktoponly">
-              {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+              {resource.title ? <Heading level={1} appearance='utrecht-heading-2'>{resource.title}</Heading> : null}
+              <Spacer size={1}/>
               {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
 
               {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
