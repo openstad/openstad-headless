@@ -178,6 +178,10 @@
   display: flex;
   gap: 0.5rem;
   float: right;
+  margin-bottom: .5rem;
+}
+.toggleMarkers + *{
+  clear: both;
 }
 .--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
   display: none;
