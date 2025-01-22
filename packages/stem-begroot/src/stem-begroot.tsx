@@ -665,8 +665,6 @@ function StemBegroot({
               loginUrl={`${props?.login?.url}`}
               thankMessage={props.thankMessage || ''}
               voteMessage={props.voteMessage || ''}
-              showNewsletterButton={props.showNewsletterButton}
-              newsLetterTitle={props.newsLetterTitle}
             />
           ) : null}
 
@@ -699,6 +697,16 @@ function StemBegroot({
 
             {/* Dont show on voting step if you are on step 2 your not logged in*/}
             {(currentStep !== 2 && currentStep !== -1) ? (
+              <>
+              {currentStep === 4 && props.showNewsletterButton && (
+                  <Button
+                    appearance='secondary-action-button'
+                    onClick={() => {
+                      // What should happen here?
+                    }}>
+                    {props.newsLetterTitle}
+                  </Button>
+              )}
               <Button
                 appearance="primary-action-button"
                 onClick={async () => {
@@ -801,6 +809,7 @@ function StemBegroot({
                   if (currentStep === 4) return 'Klaar';
                 })()}
               </Button>
+              </>
             ) : null}
           </div>
         </section>
