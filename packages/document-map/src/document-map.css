@@ -87,12 +87,22 @@
   width: 300px;
   margin-top: 8px;
 }
-.documentMap--container .map-container button {
-  width: 100%;
-  max-width: none;
-  display: block;
-}
+.documentMap--container .map-container .modal button {
+  aspect-ratio: 1;
+  min-width: auto;
+  min-height: auto;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  border: solid 2px;
 
+  position: absolute;
+    top: 25px;
+    right: 25px;
+}
+.documentMap--container .map-container .modal button span{
+  display: none;
+}
 .documentMap--container .content .comment {
   display: block;
   width: 100%;
