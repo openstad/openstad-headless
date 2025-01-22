@@ -864,13 +864,13 @@ function DocumentMap({
                       aria-modal="true"
                       tabIndex={-1}
                   >
-                    <Heading level={2}>Hoe werkt het?</Heading>
-                    <Paragraph>{infoPopupContent}</Paragraph>
-                    <Spacer size={1}/>
-                    <Button appearance='secondary-action-button' aria-label="Info venster sluiten" onClick={() => setModalOpen(false)}>
+                    <Button appearance='subtle-button' aria-label="Info venster sluiten" onClick={() => setModalOpen(false)}>
                       <i className="ri-close-fill"></i>
                       <span>Info venster sluiten</span>
                     </Button>
+                    <Heading level={3}>Hoe werkt het?</Heading>
+                    <Spacer size={1}/>
+                    <Paragraph>{infoPopupContent}</Paragraph>
                   </div>
                 </div>
               </>
