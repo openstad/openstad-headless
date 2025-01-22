@@ -1,38 +1,48 @@
-.account{
+.account {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   margin: 0 auto;
 }
 
-.account input{
+.account input {
   max-width: unset;
 }
 
-.account > div{
+.account > div {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 1rem;
   position: relative;
 }
 
-.account > div + div{
- border-block-start: solid 1px hsla(0, 0%, 0%, 0.10);
- padding-top: 2rem;
+.account > div + div {
+  border-block-start: solid 1px hsla(0, 0%, 0%, 0.1);
+  padding-top: 2rem;
 }
 
-.account > div:not(:has(h2)):has(.account-edit-button){
+.account > div:not(:has(h2)):has(.account-edit-button) {
   padding-top: 5rem;
 }
 
-
 .account h2,
-.account p{
+.account p {
   grid-column: span 2;
 }
 
-.account .account-edit-button{
+.account .account-edit-button {
   grid-column: 2;
   align-self: end;
   justify-self: end;
+}
+
+@media screen and (max-width: 700px) {
+  .account > div {
+    grid-template-columns: 1fr;
+  }
+  
+  .account .account-edit-button,
+  .account > div > *{
+    grid-column: 1;
+  }
 }
