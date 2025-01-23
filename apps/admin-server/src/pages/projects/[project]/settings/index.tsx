@@ -91,10 +91,15 @@ export default function ProjectSettings() {
 
   useEffect(() => {
     if (checkboxInitial) {
+      if (data?.config?.project?.projectToggle) {
+        setShowUrl(true);
+        setCheckboxInitial(false);
+      }
+
       if (data?.url) {
         form.setValue('projectToggle', true);
-        setShowUrl(true)
-        setCheckboxInitial(false)
+        setShowUrl(true);
+        setCheckboxInitial(false);
       }
       setProjectHasEnded(data?.config?.project?.projectHasEnded)
     }
