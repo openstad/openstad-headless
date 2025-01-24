@@ -80,7 +80,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                             }
                         ]}
                     />
-                    <Spacer size={.5} />
+                    <Spacer size={1.5} />
                 </>
             )}
 

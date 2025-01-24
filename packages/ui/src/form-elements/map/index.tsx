@@ -128,7 +128,7 @@ const MapField: FC<MapProps> = ({
                           }
                       ]}
                   />
-                  <Spacer size={.5} />
+                  <Spacer size={1.5} />
               </>
           )}
 

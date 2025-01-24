@@ -153,7 +153,7 @@ const TextInput: FC<TextInputProps> = ({
                             }
                         ]}
                     />
-                    <Spacer size={.5} />
+                    <Spacer size={1.5} />
                 </>
             )}
 
