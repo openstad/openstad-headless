@@ -19,6 +19,23 @@
 .like-widget-container.medium .like-option-container {
   grid-template-columns: 1fr 1fr;
 }
+
+.like-widget-container.medium .like-option-container .utrecht-button:first-of-type:last-of-type{
+  grid-column: span 2;
+}
+
+.like-widget-container.medium{
+  container-type: inline-size;
+}
+
+@container (max-width: 400px) {
+  .like-widget-container.medium .like-option-container{
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
 .like-option {
   max-width: unset;
 }
