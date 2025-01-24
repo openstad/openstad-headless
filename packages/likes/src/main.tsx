@@ -35,6 +35,6 @@ const config: LikeWidgetProps = {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Likes {...config} title="dsfsf" variant="large" />
+    <Likes {...config} title="Dit is een titel" variant="large" />
   </React.StrictMode>
 );
