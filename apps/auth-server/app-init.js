@@ -48,6 +48,11 @@ if (process.env.MYSQL_CA_CERT) {
   ssl.rejectUnauthorized = true
 }
 
+if (process.env.DB_REQUIRE_SSL) {
+  ssl.require = true
+  ssl.rejectUnauthorized = true
+}
+
 const mysqlConnectionPool = mysql.createPool({
   port:             process.env.DB_PORT || 3306,
   host:             process.env.DB_HOST,
