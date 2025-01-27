@@ -46,6 +46,9 @@ const dialectOptions = {
 
 const getDbPassword = async () => {
 	switch(dbConfig.authMethod) {
+		case 'azure-auth-token':
+			const { getAzureAuthToken } = require('./util/azure')
+			return await getAzureAuthToken()
 		default:
 			return dbConfig.password
 	}
