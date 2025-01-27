@@ -32,6 +32,11 @@ if (dbConfig.mysqlCaCert?.trim?.()) {
 	ssl.ca = [ dbConfig.mysqlCaCert ];
 }
 
+if (dbConfig.requireSsl) {
+	ssl.rejectUnauthorized = true;
+	ssl.require = true;
+}
+
 const dialectOptions = {
 	charset            : 'utf8',
 	multipleStatements : dbConfig.multipleStatements,

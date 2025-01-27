@@ -42,6 +42,7 @@ let defaultConfig = {
     mysqlSTGeoMode: process.env.DB_MYSQL_CA_CERT || process.env.API_DB_MYSQL_CA_CERTMYSQL_CA_CERT || process.env.MYSQL_ST_GEO_MODE,
     mysqlCaCert: process.env.DB_MYSQL_CA_CERT || process.env.API_DB_MYSQL_CA_CERT || process.env.MYSQL_CA_CERT,
     multipleStatements: true,
+    requireSsl: process.env.DB_REQUIRE_SSL || false
   },
 
 	express: {
