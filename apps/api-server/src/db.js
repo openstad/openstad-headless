@@ -23,17 +23,20 @@ if (dbConfig.mysqlSTGeoMode == 'on') {
 	}
 }
 
+const ssl = {
+	rejectUnauthorized: false
+}
+
+if (dbConfig.mysqlCaCert?.trim?.()) {
+	ssl.rejectUnauthorized = true;
+	ssl.ca = [ dbConfig.mysqlCaCert ];
+}
+
 const dialectOptions = {
 	charset            : 'utf8',
 	multipleStatements : dbConfig.multipleStatements,
-	socketPath         : dbConfig.socketPath
-}
-
-if (dbConfig.MYSQL_CA_CERT && dbConfig.MYSQL_CA_CERT.trim && dbConfig.MYSQL_CA_CERT.trim()) {
-	dialectOptions.ssl = {
-		rejectUnauthorized: true,
-		ca: [ dbConfig.MYSQL_CA_CERT ]
-	}
+	socketPath         : dbConfig.socketPath,
+	ssl
 }
 
 var sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
