@@ -101,7 +101,6 @@ let models = require('./models')(db, sequelize, Sequelize.DataTypes);
 
 // authentication mixins
 const mixins = require('./lib/sequelize-authorization/mixins');
-const { database } = require('../config/default');
 Object.keys(models).forEach((key) => {
   let model = models[key];
   model.can = model.prototype.can = mixins.can;
