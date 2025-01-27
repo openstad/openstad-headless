@@ -44,7 +44,19 @@ const dialectOptions = {
 	ssl
 }
 
-var sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
+const getDbPassword = async () => {
+	switch(dbConfig.authMethod) {
+		default:
+			return dbConfig.password
+	}
+}
+
+var sequelize = new Sequelize({
+	hooks: {
+		beforeConnect: async (config) => config.password = await getDbPassword()
+	},
+	username       : dbConfig.user,
+	database       : dbConfig.database,
 	dialect        : dbConfig.dialect,
 	host           : dbConfig.host,
 	port					 : dbConfig.port || 3306,
@@ -86,6 +98,7 @@ let models = require('./models')(db, sequelize, Sequelize.DataTypes);
 
 // authentication mixins
 const mixins = require('./lib/sequelize-authorization/mixins');
+const { database } = require('../config/default');
 Object.keys(models).forEach((key) => {
   let model = models[key];
   model.can = model.prototype.can = mixins.can;
