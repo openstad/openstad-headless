@@ -256,7 +256,16 @@ ul.osc-choices{
   padding: 0;
 }
 
+.osc-choiceguide-sidebar-container{
+  position: sticky;
+  top: 3rem;
+}
+
 @media only screen and (max-width: 768px){
+  .osc-choiceguide-sidebar-container{
+    position: relative;
+    top: 0;
+  }
   ul.osc-choices{
     position: fixed;
     bottom: 10px;
