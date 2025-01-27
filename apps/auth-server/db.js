@@ -2,14 +2,18 @@
 
 const { Sequelize } = require('sequelize');
 
-let dialectOptions;
-if (process.env.MYSQL_CA_CERT) {
-  dialectOptions = {
-    ssl: {
-      ca: process.env.MYSQL_CA_CERT
-    }
-  }
+const ssl = {
+  rejectUnauthorized: false
 }
+
+if (process.env.MYSQL_CA_CERT) {
+  ssl.ca = process.env.MYSQL_CA_CERT;
+  ssl.rejectUnauthorized = true;
+}
+
+const dialectOptions = {
+  ssl
+};
 
 let sequelize = new Sequelize({
 
