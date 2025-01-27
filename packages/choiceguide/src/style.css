@@ -278,3 +278,19 @@ figure.info-image-container {
   background-size: cover;
   /*  rotate thumb  */
 }
+
+
+
+ul.osc-choices{
+  margin: 0;
+  padding: 0;
+}
+
+@media only screen and (max-width: 768px){
+  ul.osc-choices{
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+  }
+}
