@@ -20,6 +20,7 @@ const replaceResourceVariablesFilter  = require('./nunjucks/replaceResourceVaria
 const flash                       = require('express-flash');
 const expressSession              = require('express-session');
 // const MemoryStore = expressSession.MemoryStore;
+const mysql                       = require('mysql2/promise');
 const MySQLStore                  = require('express-mysql-session')(expressSession);
 
 // Express configuration
@@ -38,14 +39,26 @@ app.use((req, res, next) => {
   next();
 });
 
-const sessionStore = new MySQLStore({
-    port:     3306,
-    host:     process.env.DB_HOST,
-    database: process.env.DB_NAME || process.env.DB_SESSIONS,
-    user:     process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    connectionLimit: parseInt(process.env.DB_MAX_POOL_SIZE || process.env.maxPoolSize) || 5
-});
+const ssl = {
+  rejectUnauthorized: false
+}
+
+if (process.env.MYSQL_CA_CERT) {
+  ssl.ca = process.env.MYSQL_CA_CERT
+  ssl.rejectUnauthorized = true
+}
+
+const mysqlConnectionPool = mysql.createPool({
+  port:             process.env.DB_PORT || 3306,
+  host:             process.env.DB_HOST,
+  database:         process.env.DB_NAME || process.env.DB_SESSIONS,
+  user:             process.env.DB_USER,
+  password:         process.env.DB_PASSWORD,
+  connectionLimit:  parseInt(process.env.DB_MAX_POOL_SIZE || process.env.maxPoolSize) || 5,
+  ssl
+})
+
+const sessionStore = new MySQLStore({}, mysqlConnectionPool);
 
 let sessionCookieConfig;
 
