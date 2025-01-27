@@ -21,6 +21,7 @@
     "build-packages": "node ./scripts/build-packages.js"
   },
   "dependencies": {
+    "@azure/identity": "^4.6.0",
     "@kubernetes/client-node": "^0.18.1",
     "@openstad-headless/account": "file:../../packages/account",
     "@openstad-headless/activity": "file:../../packages/activity",
