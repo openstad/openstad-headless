@@ -40,6 +40,7 @@ const formSchema = z.object({
     message: 'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.'
   }).optional(),
   basicAuthActive: z.coerce.boolean().optional(),
+  projectToggle: z.boolean().optional(),
 });
 
 
@@ -62,17 +63,17 @@ export default function ProjectSettings() {
     () => {
       const currentDate = new Date();
 
-
       return {
-      name: data?.name || '',
-      endDate: data?.config?.project?.endDate
-        ? new Date(data?.config?.project?.endDate)
-        : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
-      url: data?.url || '',
-      basicAuthActive: data?.config?.basicAuth?.active || false,
-      username: data?.config?.basicAuth?.username || '',
-      password: data?.config?.basicAuth?.password || '',
-    }
+        name: data?.name || '',
+        endDate: data?.config?.project?.endDate
+          ? new Date(data?.config?.project?.endDate)
+          : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
+        url: data?.url || '',
+        basicAuthActive: data?.config?.basicAuth?.active || false,
+        username: data?.config?.basicAuth?.username || '',
+        password: data?.config?.basicAuth?.password || '',
+        projectToggle: data?.config?.project?.projectToggle || false,
+      }
     },
     [data]
   );
@@ -90,9 +91,15 @@ export default function ProjectSettings() {
 
   useEffect(() => {
     if (checkboxInitial) {
+      if (data?.config?.project?.projectToggle) {
+        setShowUrl(true);
+        setCheckboxInitial(false);
+      }
+
       if (data?.url) {
-        setShowUrl(true)
-        setCheckboxInitial(false)
+        form.setValue('projectToggle', true);
+        setShowUrl(true);
+        setCheckboxInitial(false);
       }
       setProjectHasEnded(data?.config?.project?.projectHasEnded)
     }
@@ -108,7 +115,8 @@ export default function ProjectSettings() {
       const project = await updateProject(
         {
           project: {
-            endDate: values.endDate
+            endDate: values.endDate,
+            projectToggle: values.projectToggle,
           },
           basicAuth: {
             active: values.basicAuthActive,
@@ -269,19 +277,28 @@ export default function ProjectSettings() {
                       fieldInfo="Na deze datum is het automatisch niet meer mogelijk om plannen in te dienen, reacties te plaatsen en te stemmen."
                     />
 
-                    <div>
-                      <FormLabel>
-                        Wil je een website voor dit project?
-                      </FormLabel>
-                      <Switch.Root
-                        className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
-                        onCheckedChange={(e: boolean) => {
-                          setShowUrl(!showUrl)
-                        }}
-                        checked={showUrl}>
-                        <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                      </Switch.Root>
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="projectToggle"
+                      render={({ field }) => (
+                        <FormItem className="col-span-1">
+                          <FormLabel>
+                            Wil je een website voor dit project?
+                          </FormLabel>
+                          <Switch.Root
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                            onCheckedChange={(e: boolean) => {
+                              field.onChange(e);
+                              setShowUrl(!showUrl)
+                            }}
+                            checked={field.value}>
+                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                          </Switch.Root>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     {showUrl ? (
                       <FormField
                         control={form.control}
