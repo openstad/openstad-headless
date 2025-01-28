@@ -3,7 +3,7 @@ import React from 'react';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading5, Paragraph, Button } from "@utrecht/component-library-react";
+import { Heading3, Paragraph, Button } from "@utrecht/component-library-react";
 
 type Props = {
   loginUrl: string;
@@ -14,7 +14,7 @@ type Props = {
 export const Step3 = ({ step3, stemCodeTitle, step3Title, ...props }: Props) => {
   return (
     <>
-      <Heading5>{step3Title}</Heading5>
+      <Heading3>{step3Title}</Heading3>
       <Paragraph>{step3}</Paragraph>
       <Spacer size={2} />
       <Button
