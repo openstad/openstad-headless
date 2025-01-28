@@ -77,7 +77,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                             }
                         ]}
                     />
-                    <Spacer size={.5} />
+                    <Spacer size={1.5} />
                 </>
             )}
 

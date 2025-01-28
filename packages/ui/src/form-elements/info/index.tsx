@@ -53,7 +53,7 @@ const InfoField: FC<InfoFieldProps> = ({
                           }
                       ]}
                   />
-                  <Spacer size={.5} />
+                  <Spacer size={1.5} />
               </>
           )}
 

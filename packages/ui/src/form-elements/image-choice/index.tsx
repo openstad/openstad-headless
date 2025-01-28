@@ -7,7 +7,7 @@ import {
     RadioButton,
     Paragraph, FormFieldDescription, AccordionProvider,
 } from "@utrecht/component-library-react";
-import {Spacer} from "../../spacer";
+import { Spacer } from "../../spacer";
 
 export type ImageChoiceFieldProps = {
     title: string;
@@ -18,7 +18,7 @@ export type ImageChoiceFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -44,12 +44,12 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
-   infoImage = '',
+    infoImage = '',
 }) => {
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
-            let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            let { html } = this.props;
+            return <div dangerouslySetInnerHTML={{ __html: html }} />;
         }
     }
 
@@ -61,7 +61,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 </FieldsetLegend>
 
                 {description &&
-                  <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
                 }
 
                 {showMoreInfo && (
@@ -76,13 +76,14 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                 }
                             ]}
                         />
-                        <Spacer size={.5} />
+                        <Spacer size={1.5} />
+
                     </>
                 )}
 
                 {infoImage && (
                     <figure className="info-image-container">
-                        <img src={infoImage} alt=""/>
+                        <img src={infoImage} alt="" />
                         <Spacer size={.5} />
                     </figure>
                 )}
