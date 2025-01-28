@@ -1,6 +1,6 @@
 import { SecondaryButton, Spacer } from '@openstad-headless/ui/src';
 import React from 'react';
-import { Headin3, Paragraph, Button } from "@utrecht/component-library-react";
+import { Heading3, Paragraph, Button } from "@utrecht/component-library-react";
 
 type Props = {
   loginUrl: string;
