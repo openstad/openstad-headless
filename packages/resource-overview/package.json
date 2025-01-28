@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@openstad-headless/data-store": "file:../data-store",
+    "@openstad-headless/leaflet-map": "file:../leaflet-map",
     "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/types": "file:../types",
     "@openstad-headless/ui": "file:../ui",
-    "@openstad-headless/leaflet-map": "file:../leaflet-map",
     "@types/nunjucks": "^3.2.6",
     "@utrecht/component-library-css": "^3.0.1-alpha.18",
     "@utrecht/component-library-react": "^3.0.1-alpha.18",
@@ -22,6 +22,7 @@
     "copy": "^0.0.1",
     "nunjucks": "^3.2.4",
     "postcss": "^8.4.38",
+    "postcss-prefix-selector": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rooks": "^7.14.1"

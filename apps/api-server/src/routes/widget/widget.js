@@ -341,7 +341,7 @@ function getWidgetJavascriptOutput(
         const renderedWidgets = {};
         
         const currentScript = document.currentScript;
-          currentScript.insertAdjacentHTML('afterend', \`<div id="\${randomComponentId}"></div>\`);
+          currentScript.insertAdjacentHTML('afterend', \`<div class="openstad" id="\${randomComponentId}"></div>\`);
 
           const redirectUri = encodeURI(window.location.href);
           
