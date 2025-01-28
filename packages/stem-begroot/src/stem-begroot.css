@@ -285,3 +285,7 @@ section.osc-begrootmodule-resource-detail-photo
 .begroot-step-panel .begroot-step-2-instruction-budget-status-panel.per-tag {
   gap: 20px;
 }
+
+.step2Title{
+  grid-column: span 2;
+}
