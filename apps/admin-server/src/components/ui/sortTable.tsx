@@ -52,12 +52,16 @@ export const searchTable = (setData: Function, type?: string, delay: number = 25
         clearTimeout(timerId);
         timerId = setTimeout(() => {
             if (searchTerm.length >= 1) {
-                const searchResult = data.filter(item =>
-                    type ? String(eval(`item.${type}`)).toLowerCase().includes(searchTerm.toLowerCase())
-                        : Object.values(item).some(val =>
-                            String(val).toLowerCase().includes(searchTerm.toLowerCase())
-                        )
-                );
+                const searchResult = data.filter(item => {
+                    if (type) {
+                        const value = item[type];
+                        return String(value || '').toLowerCase().includes(searchTerm.toLowerCase());
+                    } else {
+                        return Object.values(item).some(val =>
+                          String(val || '').toLowerCase().includes(searchTerm.toLowerCase())
+                        );
+                    }
+                });
                 setData(searchResult);
             } else {
                 setData(originalData);
