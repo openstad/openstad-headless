@@ -174,6 +174,8 @@ or use an existing database server:
 DB_HOST=
 DB_USERNAME=
 DB_PASSWORD=
+DB_AUTH_METHOD=''
+DB_REQUIRE_SSL=
 API_DB_NAME=
 AUTH_DB_NAME=
 ```
