@@ -23,6 +23,8 @@ async function setupEnvVars() {
   process.env.DB_USERNAME = process.env.DB_USERNAME || 'openstad';
   process.env.DB_PASSWORD = process.env.DB_PASSWORD || generateRandomToken({ length: 32 });
   process.env.DB_BASE_NAME = process.env.DB_BASE_NAME || ''
+  process.env.DB_REQUIRE_SSL = process.env.DB_REQUIRE_SSL || false;
+  process.env.DB_AUTH_METHOD = process.env.DB_AUTH_METHOD || '';
 
   process.env.MESSAGESTREAMING_REDIS_URL = process.env.MESSAGESTREAMING_REDIS_URL || '';
 
@@ -69,6 +71,8 @@ async function setupEnvVars() {
   process.env.API_DB_PASSWORD = process.env.API_DB_PASSWORD || process.env.DB_PASSWORD;
   process.env.API_DB_NAME = process.env.API_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-api' :  'openstad-api' );
   process.env.API_DB_DIALECT = process.env.API_DB_DIALECT || process.env.DB_DIALECT || 'mariadb';
+  process.env.API_DB_REQUIRE_SSL = process.env.API_DB_REQUIRE_SSL || process.env.DB_REQUIRE_SSL || false;
+  process.env.API_DB_AUTH_METHOD = process.env.API_DB_AUTH_METHOD || process.env.DB_AUTH_METHOD || '';
 
   process.env.API_FROM_EMAIL_ADDRESS = process.env.API_FROM_EMAIL_ADDRESS || process.env.FROM_EMAIL_ADDRESS || '';
   process.env.API_SMTP_SECURE = process.env.API_SMTP_SECURE || process.env.SMTP_SECURE || false;
@@ -100,6 +104,8 @@ async function setupEnvVars() {
   process.env.AUTH_DB_USERNAME = process.env.AUTH_DB_USERNAME || process.env.DB_USERNAME || '';
   process.env.AUTH_DB_PASSWORD = process.env.AUTH_DB_PASSWORD || process.env.DB_PASSWORD || '';
   process.env.AUTH_DB_NAME = process.env.AUTH_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-auth' :  'openstad-auth' );
+  process.env.AUTH_DB_REQUIRE_SSL = process.env.AUTH_DB_REQUIRE_SSL || process.env.DB_REQUIRE_SSL || false;
+  process.env.AUTH_DB_AUTH_METHOD = process.env.AUTH_DB_AUTH_METHOD || process.env.DB_AUTH_METHOD || '';
 
   process.env.AUTH_MAIL_SERVER_URL = process.env.AUTH_MAIL_SERVER_URL || process.env.SMTP_HOST;
   process.env.AUTH_MAIL_SERVER_PORT = process.env.AUTH_MAIL_SERVER_PORT || process.env.SMTP_PORT;
@@ -164,6 +170,8 @@ DB_HOST=${process.env.DB_HOST}
 DB_USERNAME=${process.env.DB_USERNAME}
 DB_PASSWORD=${process.env.DB_PASSWORD}
 DB_BASE_NAME=${process.env.DB_BASE_NAME}
+DB_REQUIRE_SSL=${process.env.DB_REQUIRE_SSL}
+DB_AUTH_METHOD=${process.env.DB_AUTH_METHOD}
 
 MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
 MESSAGESTREAMING_POSTFIX=${process.env.MESSAGESTREAMING_POSTFIX || ''}
@@ -201,6 +209,8 @@ API_DATABASE_PASSWORD=${process.env.API_DB_PASSWORD}
 API_DB_NAME=${process.env.API_DB_NAME}
 API_DATABASE_DATABASE=${process.env.API_DB_NAME}
 API_DB_DIALECT=${process.env.API_DB_DIALECT}
+API_DB_REQUIRE_SSL=${process.env.API_DB_REQUIRE_SSL}
+API_DB_AUTH_METHOD=${process.env.API_DB_AUTH_METHOD}
 
 API_FROM_EMAIL_ADDRESS=${process.env.API_FROM_EMAIL_ADDRESS}
 API_SMTP_SECURE=${process.env.API_SMTP_SECURE}
@@ -225,6 +235,8 @@ AUTH_DB_HOST=${process.env.AUTH_DB_HOST || 'openstad-mysql'}
 AUTH_DB_USER=${process.env.AUTH_DB_USERNAME}
 AUTH_DB_PASSWORD=${process.env.AUTH_DB_PASSWORD}
 AUTH_DB_NAME=${process.env.AUTH_DB_NAME}
+AUTH_DB_REQUIRE_SSL=${process.env.AUTH_DB_REQUIRE_SSL}
+AUTH_DB_AUTH_METHOD=${process.env.AUTH_DB_AUTH_METHOD}
 
 AUTH_MAIL_SERVER_URL=${process.env.AUTH_MAIL_SERVER_URL}
 AUTH_MAIL_SERVER_PORT=${process.env.AUTH_MAIL_SERVER_PORT}
