@@ -15,9 +15,9 @@ export const prefix = () => ({
             return selector.replace(/^([^\s]*)/, `${prefix}`);
           }
 
-          if (filePath.match(/node_modules/)) {
-            return selector;
-          }
+          // if (filePath.match(/node_modules/)) {
+          //   return selector;
+          // }
 
           const annotation = rule.prev();
           if (annotation?.type === 'comment' && annotation.text.trim() === 'no-prefix') {
