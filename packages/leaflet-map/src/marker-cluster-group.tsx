@@ -22,10 +22,25 @@ export default function MarkerClusterGroup({
 
   let useIconCreateFunction = useCallback(
     function (cluster: MarkerCluster) {
-      // TODO: uitwerken default voor andere varianten dan amaps
-      if (iconCreateFunction && typeof iconCreateFunction == 'string') iconCreateFunction = eval(iconCreateFunction);
+      if (iconCreateFunction && typeof iconCreateFunction === 'string') {
+        const globalFunction = globalThis[iconCreateFunction];
+        if (typeof globalFunction === 'function') {
+          iconCreateFunction = globalFunction;
+        } else {
+          console.warn(`Function ${iconCreateFunction} does not exist in the global scope.`);
+          return null;
+        }
+      }
+
+      if (typeof iconCreateFunction !== 'function') {
+        console.warn(`iconCreateFunction is not a valid function.`);
+        return null;
+      }
+
       return iconCreateFunction(cluster, categorizeRef.current);
-    }, [markers]);
+    },
+    [markers]
+  );
 
   return (
     <LeafletMarkerClusterGroup {...props} iconCreateFunction={useIconCreateFunction} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover}>

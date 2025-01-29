@@ -472,37 +472,45 @@ function MapEventsListener({
 }: MapEventsListenerProps) {
   const map = useMapEvents({
     load: () => {
-      console.log('ONLOAD');
+      console.log("ONLOAD");
     },
     click: (e: LeafletMouseEvent) => {
       const targetElement = e.originalEvent.target as HTMLElement;
-      const isMarkerClick = targetElement.closest('.leaflet-marker-icon');
+      const isMarkerClick = targetElement.closest(".leaflet-marker-icon");
 
       if (isMarkerClick && onMarkerClick) {
-        let customEvent = new CustomEvent('osc-marker-click', { detail: e });
+        let customEvent = new CustomEvent("osc-marker-click", { detail: e });
         window.dispatchEvent(customEvent);
 
         onMarkerClick(e, map);
 
-        return; // Prevent further execution (e.g., placing a new marker)
+        return;
       }
 
       const areaLatLngs = area.map(parseLocation) as LatLng[];
       let isInArea = !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
 
-      let customEvent = new CustomEvent('osc-map-click', {
+      let customEvent = new CustomEvent("osc-map-click", {
         detail: { ...e, isInArea },
       });
       window.dispatchEvent(customEvent);
 
       if (onClick) {
-        if (onClick && typeof onClick == 'string') {
-          onClick = eval(onClick);
+        if (typeof onClick === "string") {
+          const resolvedFunction = globalThis[onClick];
+          if (typeof resolvedFunction === "function") {
+            onClick = resolvedFunction;
+          } else {
+            console.warn(`Function ${onClick} is not defined on globalThis.`);
+            return;
+          }
         }
-        onClick && onClick({ ...e, isInArea }, map);
+
+        onClick({ ...e, isInArea }, map);
       }
     },
   });
+
   return null;
 }
 
