@@ -32,14 +32,12 @@ But since this is usually a bad idea you may want to create the databases by han
 In SQL:
 ```
 CREATE DATABASE `openstad-api`;
-CREATE DATABASE `openstad-image-server`;
 CREATE DATABASE `openstad-oauth-server`;
 ```
 To make these databases accessible by a user:
 ```
 CREATE USER `USERNAME`@`%` IDENTIFIED BY 'PASSWORD';
 GRANT ALL ON `openstad-api`.* TO `USERNAME`@`%`;
-GRANT ALL ON `openstad-image-server`.* TO `USERNAME`@`%`;
 GRANT ALL ON `openstad-oauth-server`.* TO `USERNAME`@`%`;
 ```
 

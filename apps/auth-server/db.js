@@ -1,22 +1,33 @@
 'use strict';
 
 const { Sequelize } = require('sequelize');
+const getDbPassword = require('./utils/getDbPassword')
 
-let dialectOptions;
-if (process.env.MYSQL_CA_CERT) {
-  dialectOptions = {
-    ssl: {
-      ca: process.env.MYSQL_CA_CERT
-    }
-  }
+const ssl = {
+  rejectUnauthorized: false
 }
 
-let sequelize = new Sequelize({
+if (process.env.MYSQL_CA_CERT) {
+  ssl.ca = process.env.MYSQL_CA_CERT;
+  ssl.rejectUnauthorized = true;
+}
 
+if (process.env.DB_REQUIRE_SSL) {
+  ssl.require = true;
+  ssl.rejectUnauthorized = true;
+}
+
+const dialectOptions = {
+  ssl
+};
+
+let sequelize = new Sequelize({
+  hooks: {
+    beforeConnect: async (config) => config.password = await getDbPassword()
+  },
   host:     process.env.DB_HOST,
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
   port:     process.env.DB_PORT || '3306',
 
   dialect: process.env.DB_DIALECT || 'mysql',

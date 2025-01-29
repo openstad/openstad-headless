@@ -23,20 +23,43 @@ if (dbConfig.mysqlSTGeoMode == 'on') {
 	}
 }
 
+const ssl = {
+	rejectUnauthorized: false
+}
+
+if (dbConfig.mysqlCaCert?.trim?.()) {
+	ssl.rejectUnauthorized = true;
+	ssl.ca = [ dbConfig.mysqlCaCert ];
+}
+
+if (dbConfig.requireSsl) {
+	ssl.rejectUnauthorized = true;
+	ssl.require = true;
+}
+
 const dialectOptions = {
 	charset            : 'utf8',
 	multipleStatements : dbConfig.multipleStatements,
-	socketPath         : dbConfig.socketPath
+	socketPath         : dbConfig.socketPath,
+	ssl
 }
 
-if (dbConfig.MYSQL_CA_CERT && dbConfig.MYSQL_CA_CERT.trim && dbConfig.MYSQL_CA_CERT.trim()) {
-	dialectOptions.ssl = {
-		rejectUnauthorized: true,
-		ca: [ dbConfig.MYSQL_CA_CERT ]
+const getDbPassword = async () => {
+	switch(dbConfig.authMethod) {
+		case 'azure-auth-token':
+			const { getAzureAuthToken } = require('./util/azure')
+			return await getAzureAuthToken()
+		default:
+			return dbConfig.password
 	}
 }
 
-var sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
+var sequelize = new Sequelize({
+	hooks: {
+		beforeConnect: async (config) => config.password = await getDbPassword()
+	},
+	username       : dbConfig.user,
+	database       : dbConfig.database,
 	dialect        : dbConfig.dialect,
 	host           : dbConfig.host,
 	port					 : dbConfig.port || 3306,
