@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { prefix } from '../lib/prefix';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
@@ -7,11 +8,13 @@ export default defineConfig(({ command }) => {
   if (command === 'serve') {
     return {
       plugins: [react()],
+      css: prefix()
     };
     // During build, use the classic runtime and build as an IIFE so we can deliver it to the browser
   } else {
     return {
       plugins: [react({ jsxRuntime: 'classic' })],
+      css: prefix(),
       build: {
         lib: {
           formats: ['iife'],
