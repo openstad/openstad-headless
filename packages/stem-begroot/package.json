@@ -10,17 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
-    "@openstad-headless/types": "file:../types",
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
+    "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
+    "@openstad-headless/types": "file:../types",
     "@openstad-headless/ui": "file:../ui",
     "@utrecht/component-library-css": "^3.0.1-alpha.18",
     "@utrecht/component-library-react": "^3.0.1-alpha.18",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
-    "react-hot-toast": "^2.4.1",
+    "postcss": "^8.4.38",
+    "postcss-prefix-selector": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
     "rooks": "^7.14.1"
   },
   "devDependencies": {
