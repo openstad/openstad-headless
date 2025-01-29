@@ -9,6 +9,8 @@ export default async function middleware(req: NextRequest) {
   // ignore
   if (req.nextUrl.pathname.startsWith('/_next')) return res; // internal urls
   if (req.nextUrl.pathname.startsWith('/favicon') ) return res;
+  if (req.nextUrl.pathname.startsWith('/health')) return res;
+  if (req.nextUrl.pathname.startsWith('/api/health')) return res;
 
   // default page
   if (req.nextUrl.pathname.match(/^\/?$/)) { // home

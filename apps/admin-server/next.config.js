@@ -4,7 +4,15 @@ const nextConfig = {
   transpilePackages: [
     '@openstad-headless/*'
   ],
-  images: {domains: ['localhost', "localhost:31470"]}
+  images: {domains: ['localhost', "localhost:31470"]},
+  async rewrites() {
+    return [
+      {
+        source: '/health',
+        destination: '/api/health'
+      },
+    ]
+  }
 };
 
 module.exports = nextConfig;

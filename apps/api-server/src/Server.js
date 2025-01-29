@@ -31,6 +31,32 @@ module.exports  = {
   //  this
       // this.app.use(cors());
 
+	  this.app.get('/health', (req, res) => {
+		res.status(200).json({
+		  status: 'UP',
+		  message: 'Server is healthy',
+		  timestamp: new Date().toISOString(),
+		});
+	  });
+
+	  this.app.get('/db-health', async (req, res) => {
+		try {
+			await db.sequelize.authenticate();
+			res.status(200).json({
+				status: 'UP',
+				message: 'Database connection has been established successfully.',
+				timestamp: new Date().toISOString(),
+			  });
+		} catch (error) {
+			console.error('Unable to connect to the database:', error);
+			res.status(500).json({
+				status: 'DB_CONNECTION_ERROR',
+				message: 'Unable to connect to the database. See the logs for details.',
+				timestamp: new Date().toISOString(),
+			});
+		}
+	  });
+
       // Register statics first...
       this._initStatics();
 
