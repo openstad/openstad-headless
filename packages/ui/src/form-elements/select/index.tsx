@@ -79,7 +79,7 @@ const SelectField: FC<SelectFieldProps> = ({
                             }
                         ]}
                     />
-                    <Spacer size={.5} />
+                    <Spacer size={1.5} />
                 </>
             )}
 

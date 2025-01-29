@@ -1,6 +1,6 @@
 {
   "name": "@openstad-headless/lib",
-  "private":true,
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,5 +12,8 @@
     "react-dom": "^18.2.0"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^10.4.20"
+  }
 }

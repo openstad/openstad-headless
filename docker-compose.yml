@@ -48,14 +48,14 @@ services:
 
   openstad-api-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=api-server
         - PORT=${API_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-api-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-api-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -124,14 +124,14 @@ services:
 
   openstad-auth-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=auth-server
         - PORT=${AUTH_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-auth-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-auth-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -181,14 +181,14 @@ services:
 
   openstad-image-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=image-server
         - PORT=${IMAGE_PORT_API}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-image-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-image-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -219,14 +219,14 @@ services:
 
   openstad-admin-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=admin-server
         - PORT=${ADMIN_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-admin-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-admin-server}:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
     restart: unless-stopped
     environment:
@@ -250,14 +250,14 @@ services:
 
   openstad-cms-server:
     build:
-      target: release-with-packages
+      target: ${BUILD_TARGET:-release-with-packages}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=cms-server
         - PORT=${CMS_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-cms-server}:${RELEASE_VERSION:-latest}
     command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
     depends_on:
       openstad-redis:

@@ -116,6 +116,14 @@ app.use(function(req, res, next) {
   next()
 })
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'UP',
+    message: 'Server is healthy',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get('/image/*',
   function (req, res, next) {
     req.url = req.url.replace('/image', '');
@@ -279,7 +287,6 @@ app.post('/documents',
       }
     })));
   });
-
 
 app.use(function (err, req, res, next) {
   const status = err.status ? err.status : 500;
