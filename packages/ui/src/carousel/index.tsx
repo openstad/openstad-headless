@@ -29,8 +29,8 @@ export function Carousel({
   return (
     <div
       {...props}
-      className={`osc ${props.className} osc-carousel`}
-      style={{ width: '100%' }}>
+      className={`osc ${props.className} osc-carousel width-100`}
+    >
 
       {items.length > 1 && (
         <div className="carousel-button-container">

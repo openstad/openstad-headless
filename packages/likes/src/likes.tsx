@@ -185,7 +185,7 @@ function Likes({
           {props?.resources?.minimumYesVotes &&
             showProgressBar &&
             props.progressBarDescription && (
-              <Heading6 style={{ textAlign: 'start' }}>
+              <Heading6>
                 {props.progressBarDescription}
               </Heading6>
             )}

@@ -87,3 +87,7 @@
 .osc .like-widget-container p {
   text-align: center;
 }
+
+.osc .like-widget-container div h6 {
+  text-align: start;
+}

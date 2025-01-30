@@ -30,8 +30,8 @@ export const Dialog = ({
     <RadixDialog.Root open={open} onOpenChange={onOpenChange} {...props}>
       <RadixDialog.Portal>
         <RadixDialog.Overlay className="osc-DialogOverlay" />
-        <RadixDialog.Content style={{ zIndex: 1000 }} className="osc osc-DialogContent">
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 10px' }}>
+        <RadixDialog.Content className="osc osc-DialogContent">
+          <div>
             <RadixDialog.Close asChild>
               <IconButton
                 className="subtle-button"

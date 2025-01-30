@@ -397,17 +397,15 @@ const BaseMap = ({
     ...props,
   };
 
-  // <div style={{ width: '100%', aspectRatio: 16 / 9 }}>
-  // <div style={{ width: '100%', height: '100%' }}>
+  useEffect(() => {
+    document.documentElement.style.setProperty('--basemap-map-width', width);
+    document.documentElement.style.setProperty('--basemap-map-height', height ? `${height}px` : 'auto');
+    document.documentElement.style.setProperty('--basemap-map-aspect-ratio', height ? 'unset' : '16 / 9');
+  }, [width, height]);
 
-  let style = {
-    width: width,
-    height: height || undefined,
-    aspectRatio: height ? undefined : 16 / 9,
-  };
   return (
     <>
-      <div className="map-container" style={style}>
+      <div className="map-container osc-map">
         <MapContainer
           center={[definedCenterPoint.lat, definedCenterPoint.lng]}
           className="osc-base-map-widget-container"

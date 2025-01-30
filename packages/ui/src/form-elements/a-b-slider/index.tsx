@@ -60,6 +60,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
         }
     }
 
+    const getSliderClass = (rangeValue?: number) => {
+        if (rangeValue === undefined) return `slider-default`;
+        if (rangeValue <= 50) return `slider-left`;
+        return `slider-right`;
+    };
+
     return (
         <div className="a-b-slider-container">
             {title && (
@@ -135,23 +141,10 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
                     disabled={disabled}
                 />
-                <div className="slider_line-container"
-                    style={{
-                        marginLeft: rangeValue !== undefined ? rangeValue <= 50 ? '0' : '50%' : '0',
-                        transform: rangeValue !== undefined ? rangeValue <= 50 ? 'rotate(180deg) translateX(50%)' : 'rotate(0) translateX(0)' : '0',
-                        marginTop: `-24px`,
-                        pointerEvents: 'none',
-                        height: '8px',
-                    }}
-                >
+                <div className={`slider_line-container ${getSliderClass(rangeValue)}`} data-range={rangeValue}>
                     <div
                         className="slider_line-container--bar"
-                        style={{
-                            width: rangeValue !== undefined ? rangeValue <= 50 ? `${(50 - rangeValue)}%` : `${(rangeValue - 50) * 2}%` : '0%',
-                            height: '8px',
-                            backgroundColor: '#1371EF',
-                        }}
-                    ></div>
+                    />
                 </div>
             </div>
 
