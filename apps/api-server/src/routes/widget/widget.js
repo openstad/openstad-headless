@@ -267,9 +267,6 @@ function getWidgetJavascriptOutput(
 ) {
   // If we include remix icon in the components, we are sending a lot of data to the client
   // By using a CDN and loading it through a <link> tag, we reduce the size of the response and leverage browser cache
-  const remixIconCss =
-    process.env.REMIX_ICON_CDN ||
-    'https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css';
 
   let output = '';
   let widgetOutput = '';
@@ -357,7 +354,6 @@ function getWidgetJavascriptOutput(
           }
           
           document.querySelector('head').innerHTML += \`
-            <link href="${remixIconCss}" rel="stylesheet">
             <link href="${apiUrl}/api/project/\${config.projectId}/widget-css/${widgetType}" rel="stylesheet">
             ${extraCssFile}
             \${customCss}
