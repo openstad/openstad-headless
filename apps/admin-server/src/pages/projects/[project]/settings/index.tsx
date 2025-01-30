@@ -206,9 +206,7 @@ export default function ProjectSettings() {
     setImgUrl(data.installationUrls?.img || '');
 
     const cdns = [
-      'https://openstad-cdn.nl',
-      process.env.REACT_CDN_INTEGRITY || 'sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z',
-      process.env.REACT_DOM_CDN_INTEGRITY || 'sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1'
+      'https://openstad-cdn.nl'
     ];
 
     if (process.env.REACT_CDN) {
