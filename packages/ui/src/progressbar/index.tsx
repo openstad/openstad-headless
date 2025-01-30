@@ -7,13 +7,9 @@ const ProgressBar = (
 ) => {
   const { progress } = props;
 
-  const fillerStyles = {
-    width: `${progress}%`,
-  };
-
   return (
     <div className="progressbar">
-      <div className="progressbar-tracker" style={fillerStyles}></div>
+      <progress className="progressbar-tracker" value={progress} max="100" />
     </div>
   );
 };

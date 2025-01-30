@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {ChoiceGuideSidebarProps, ChoiceOptions, Score} from '../props';
 import ChoiceItem from './sidebarItem';
 import {calculateScoreForItem} from "../parts/scoreUtils";
 
 const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
   const [score, setScore] = useState<Score>({ x: 50, y: 50, z: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Calculate score for this item
   useEffect(() => {
@@ -15,9 +16,21 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
       props.choicesType
     );
     setScore(itemScore);
-  }, [props.choiceOption, props.answers, props.weights]);
+  }, [props.choiceOptions, props.answers, props.weights]);
 
-  const baseSize = document.getElementById(`osc-choice-container-${props.widgetId || ""}`)?.clientWidth || 180;
+  useEffect(() => {
+    if (containerRef.current) {
+      const baseSize = containerRef.current.clientWidth;
+      document.documentElement.style.setProperty('--choiceguide-base-size', `${baseSize}px`);
+      document.documentElement.style.setProperty('--choiceguide-half-base-size', `${baseSize / 2}px`);
+
+    }
+  }, [props.widgetId]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--choiceguide-score-x', `${score.x}%`);
+    document.documentElement.style.setProperty('--choiceguide-score-y', `${score.y}%`);
+  }, [score]);
 
   const [expanded, setExpanded] = useState(true);
 
@@ -30,7 +43,7 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
         <div>
           <div className="expand-content">
             {props.choicesType === 'plane' ? (
-              <div id="choice-plane" className="osc-choice-plane" style={{ height: baseSize }}>
+              <div id="choice-plane" className="osc-choice-plane">
 
                 {Object.entries(props.choiceOptions || {}).map(([key, choiceOption], index) => {
                   const option: ChoiceOptions = choiceOption as ChoiceOptions;
@@ -39,16 +52,16 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
                   let image = option && option.image || "";
                   if (image) {
                     imageHTML = (
-                      <img className="osc-choice-plane-background-image" src={image} style={{ width: baseSize / 2, height: baseSize / 2 }}/>
+                      <img className="osc-choice-plane-background-image" src={image} />
                     );
                   }
 
                   return (
-                    <div className="osc-choice-plane" style={{width: baseSize / 2, height: baseSize / 2}}>{imageHTML}</div>
+                    <div className="osc-choice-plane">{imageHTML}</div>
                   )
                 })}
 
-                <div className="osc-point" style={{top: `${score.y}%`, left: `${score.x}%`}}></div>
+                <div className="osc-point"></div>
               </div>
               ) : (
             <ul className="osc-choices">

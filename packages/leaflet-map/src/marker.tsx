@@ -40,28 +40,38 @@ let eventHandlers: {
 } = {};
 
 for (let eventname of ['click', 'mouseDown', 'mouseUp', 'dragStart', 'dragEnd']) {
-    let EventName = 'on' + eventname.charAt(0).toUpperCase() + eventname.slice(1);
-    eventname = eventname.toLowerCase();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    let onEvent = (props as any)[EventName] || [];
-    if (!Array.isArray(onEvent)) onEvent = [onEvent];
+  let EventName = 'on' + eventname.charAt(0).toUpperCase() + eventname.slice(1);
+  eventname = eventname.toLowerCase();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  let onEvent = (props as any)[EventName] || [];
+  if (!Array.isArray(onEvent)) onEvent = [onEvent];
 
-    if (EventName === 'onClick' && href) {
-        onEvent.push(() => {
-            document.location.href = href;
-        });
-    }
+  if (EventName === 'onClick' && href) {
+    onEvent.push(() => {
+      document.location.href = href;
+    });
+  }
 
-    if (onEvent.length) {
-        eventHandlers[eventname] = (e: LeafletMouseEvent) => {
-            onEvent.forEach((func: (e: LeafletMouseEvent, map: any) => void) => {
-                let customEvent = new CustomEvent('osc-map-marker-click', { detail: e });
-                window.dispatchEvent(customEvent);
-                if (typeof func === 'string') return eval(func)(e);
-                func(e, map);
-            });
-        };
-    }
+  if (onEvent.length) {
+    eventHandlers[eventname] = (e: LeafletMouseEvent) => {
+      onEvent.forEach((func: ((e: LeafletMouseEvent, map: any) => void) | string) => {
+        let customEvent = new CustomEvent('osc-map-marker-click', { detail: e });
+        window.dispatchEvent(customEvent);
+
+        if (typeof func === 'string') {
+          const resolvedFunction = (globalThis as Record<string, any>)[func];
+
+          if (typeof resolvedFunction === 'function') {
+            resolvedFunction(e, map);
+          } else {
+            console.warn(`Function "${func}" is not defined on globalThis.`);
+          }
+        } else {
+          func(e, map);
+        }
+      });
+    };
+  }
 }
 
   let draggable = eventHandlers['dragstart'] || eventHandlers['dragend'];

@@ -1,5 +1,15 @@
 import React from 'react';
+import './index.css';
 
 export function Spacer({ size = 1 }: { size?: number }) {
-  return <div style={{ marginBottom: `${size}rem` }}></div>;
+  const correctSize: string = isNaN(size)
+    ? "1"
+    : (
+      size.toString().startsWith(".")
+        ? size.toString().replace(".", "0.")
+        : size.toString()
+      );
+  const sizeClass = `spacer-${correctSize.replace(".", "-")}`;
+
+  return <div className={sizeClass}></div>;
 }

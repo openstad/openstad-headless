@@ -7,6 +7,10 @@
     /* gap: 1rem; */
 }
 
+.osc-carousel.width-100 {
+    width: 100%;
+}
+
 .carousel-items {
     flex: 1;
 }

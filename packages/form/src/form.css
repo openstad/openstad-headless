@@ -30,3 +30,8 @@ figure.info-image-container {
     display: flex;
     gap: 1rem;
 }
+
+html body .question .marginTop10.marginBottom15 {
+    margin-top: 10px;
+    margin-bottom: 15px;
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChoiceOptions, Score } from '../props';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
 
@@ -37,29 +37,37 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
       const percentage = parseInt((2 * (score.x - 50)).toString()) || 0;
       const backgroundColor = calculateColor(score.x, props.choicesPreferenceMinColor, props.choicesPreferenceMaxColor);
 
-      const style = {
-        backgroundColor,
-        width: percentage >= 0 ? `${percentage / 2}%` : `${-percentage / 2}%`,
-        left: percentage >= 0 ? '50%' : 'auto',
-        right: percentage < 0 ? '50%' : 'auto',
-      };
+      document.documentElement.style.setProperty('--choiceguide-minus-to-plus-width', `${percentage >= 0 ? percentage / 2 : -percentage / 2}%`);
+      document.documentElement.style.setProperty('--choiceguide-minus-to-plus-bg', backgroundColor);
+
+      const getClass = (perc: number) => {
+        if (perc < 0) {
+          return 'osc-choice-bar-progress-negative';
+        } else {
+          return 'osc-choice-bar-progress-positive';
+        }
+      }
+
       return (
-        <div className="osc-choice-default">
+        <div className="osc-choice-default minus-to-plus">
           <h4>{props.choiceOption?.title}</h4>
           <div className="osc-choice-bar osc-from-center">
-            <div className="osc-choice-bar-progress" style={style}></div>
+            <div className={`osc-choice-bar-progress ${getClass(percentage)}`}></div>
           </div>
         </div>
       );
     } else {
       const percentageValue = parseInt(score.x.toString()) || 0;
+
+      document.documentElement.style.setProperty('--choiceguide-not-minus-to-plus-width', `${score.x}%`);
+      document.documentElement.style.setProperty('--choiceguide-not-minus-to-plus-bg', defaultBarColor.default);
+
       return (
-        <div className="osc-choice-default">
+        <div className="osc-choice-default not-minus-to-plus">
           <h4>{props.choiceOption?.title}</h4>
           <div className="osc-choice-bar">
             <div className="osc-choice-bar-mask"></div>
-            <div className="osc-choice-bar-progress"
-                 style={{width: `${score.x}%`, backgroundColor: defaultBarColor.default}}></div>
+            <div className="osc-choice-bar-progress"></div>
           </div>
         </div>
       );

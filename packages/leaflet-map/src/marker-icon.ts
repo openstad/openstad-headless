@@ -6,17 +6,24 @@ export default function MarkerIcon({
   iconCreateFunction = undefined,
   defaultIcon = undefined,
 }: MarkerIconType) {
-
   let result: any; // TODO
 
-	if (!icon) {
-		if (iconCreateFunction && typeof iconCreateFunction == 'string') {
-			iconCreateFunction = eval(iconCreateFunction);
-		}
-		if (iconCreateFunction && typeof iconCreateFunction == 'function') {
-			icon = iconCreateFunction();
-		}
-	}
+  if (!icon) {
+    if (iconCreateFunction && typeof iconCreateFunction === "string") {
+      const resolvedFunction = (globalThis as Record<string, any>)[iconCreateFunction];
+
+      if (typeof resolvedFunction === "function") {
+        iconCreateFunction = resolvedFunction;
+      } else {
+        iconCreateFunction = undefined;
+        console.warn(`Function ${iconCreateFunction} is not defined on globalThis.`);
+      }
+    }
+
+    if (iconCreateFunction && typeof iconCreateFunction === "function") {
+      icon = iconCreateFunction();
+    }
+  }
 
   // todo: afvangen of icon en defaultIcon nu al een LeafletIcon of LeafletDivIcon zijn
 
