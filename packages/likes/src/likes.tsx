@@ -1,4 +1,3 @@
-import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
