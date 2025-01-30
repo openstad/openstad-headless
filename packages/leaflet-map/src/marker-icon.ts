@@ -10,12 +10,13 @@ export default function MarkerIcon({
 
   if (!icon) {
     if (iconCreateFunction && typeof iconCreateFunction === "string") {
-      const resolvedFunction = globalThis[iconCreateFunction];
+      const resolvedFunction = (globalThis as Record<string, any>)[iconCreateFunction];
+
       if (typeof resolvedFunction === "function") {
         iconCreateFunction = resolvedFunction;
       } else {
-        console.warn(`Function ${iconCreateFunction} is not defined on globalThis.`);
         iconCreateFunction = undefined;
+        console.warn(`Function ${iconCreateFunction} is not defined on globalThis.`);
       }
     }
 
