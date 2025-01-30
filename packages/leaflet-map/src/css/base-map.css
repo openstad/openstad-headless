@@ -1,3 +1,15 @@
+:root {
+  --basemap-map-width: 100%;
+  --basemap-map-height: auto;
+  --basemap-map-aspect-ratio: 16/9;
+}
+
+.map-container.osc-map {
+  width: var(--basemap-map-width);
+  height: var(--basemap-map-height);
+  aspect-ratio: var(--basemap-map-aspect-ratio);
+}
+
 .osc-base-map-widget-container {
   margin: 0;
   padding: 0;

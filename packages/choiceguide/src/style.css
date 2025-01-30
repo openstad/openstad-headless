@@ -1,3 +1,14 @@
+:root {
+  --choiceguide-base-size: 180px;
+  --choiceguide-half-base-size: 90px;
+  --choiceguide-score-x: 50%;
+  --choiceguide-score-y: 50%;
+  --choiceguide-minus-to-plus-width: 0%;
+  --choiceguide-minus-to-plus-bg: #bed200;
+  --choiceguide-not-minus-to-plus-width: 0%;
+  --choiceguide-not-minus-to-plus-bg: #bed200;
+}
+
 .osc .osc-choiceguide-container .visually-hidden {
   clip: rect(1px, 1px, 1px, 1px);
   -webkit-clip-path: inset(50%);
@@ -37,14 +48,13 @@ figure.info-image-container {
 
 #choice-plane {
   position: relative;
-  width: 100%;
-  height: auto;
+  height: var(--choiceguide-base-size);
 }
 
 #choice-plane .osc-point {
   position: absolute;
-  top: 50px;
-  left: 50px;
+  top: var(--choiceguide-score-y);
+  left: var(--choiceguide-score-x);
   margin: -11px 0 0 -11px;
   width: 20px;
   height: 20px;
@@ -54,17 +64,17 @@ figure.info-image-container {
 
 #choice-plane .osc-choice-plane {
   position: relative;
-  width: 100%;
-  height: auto;
+  width: var(--choiceguide-half-base-size);
+  height: var(--choiceguide-half-base-size);
   float: left;
   display: inline-block;
 }
 
 #choice-plane .osc-choice-plane-background-image {
   position: relative;
-  width: 100%;
-  height: 100%;
   object-fit: cover;
+  width: var(--choiceguide-half-base-size);
+  height: var(--choiceguide-half-base-size);
 }
 
 .osc-choiceguide-container {
@@ -160,8 +170,28 @@ figure.info-image-container {
   top: 0;
   left: 0;
   height: 14px;
-  background-color: #bed200;
   border-top-left-radius: 7px;
+}
+
+.osc-choice-default.minus-to-plus .osc-choice-bar-progress {
+  background-color: var(--choiceguide-minus-to-plus-bg);
+  width: var(--choiceguide-minus-to-plus-width);
+}
+
+
+.osc-choice-default.not-minus-to-plus .osc-choice-bar-progress {
+  background-color: var(--choiceguide-not-minus-to-plus-bg);
+  width: var(--choiceguide-not-minus-to-plus-width);
+}
+
+.osc-choice-default .osc-choice-bar-progress.osc-choice-bar-progress-negative {
+  right: 50%;
+  left: auto;
+}
+
+.osc-choice-default .osc-choice-bar-progress.osc-choice-bar-progress-positive {
+  left: 50%;
+  right: auto;
 }
 
 .osc-choice-default .osc-choice-bar.osc-from-center::after {

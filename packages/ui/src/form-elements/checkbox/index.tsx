@@ -167,7 +167,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                             </Paragraph>
                         </FormField>
                         {choice.isOtherOption && selectedChoices.includes(choice.value) && (
-                            <div style={{ marginTop: '10px', marginBottom: '15px' }}>
+                            <div className="marginTop10 marginBottom15">
                                 <TextInput
                                     type="text"
                                     // @ts-ignore

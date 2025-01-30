@@ -10,14 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/types": "file:../types",
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
+    "@openstad-headless/types": "file:../types",
     "@openstad-headless/ui": "file:../ui",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hot-toast": "^2.4.1",
-    "remixicon": "^3.5.0"
+    "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.2.3",

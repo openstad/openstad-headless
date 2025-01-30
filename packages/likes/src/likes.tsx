@@ -1,4 +1,3 @@
-import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
@@ -185,7 +184,7 @@ function Likes({
           {props?.resources?.minimumYesVotes &&
             showProgressBar &&
             props.progressBarDescription && (
-              <Heading6 style={{ textAlign: 'start' }}>
+              <Heading6>
                 {props.progressBarDescription}
               </Heading6>
             )}

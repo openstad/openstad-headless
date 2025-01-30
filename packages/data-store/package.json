@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "swr": "^2.2.4",
-    "merge": "^2.1.1"
+    "merge": "^2.1.1",
+    "swr": "^2.2.4"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

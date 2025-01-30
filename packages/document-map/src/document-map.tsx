@@ -1,7 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { Comments } from '@openstad-headless/comments/src/comments';
 import hasRole from '../../lib/has-role';
-import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {

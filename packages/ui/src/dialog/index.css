@@ -26,7 +26,15 @@
   max-width: 82.5rem;
   overflow: auto;
   box-sizing: border-box;
+  z-index: 1000;
 }
+
+.osc-DialogContent > div {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 10px;
+}
+
 .osc-DialogContent:focus {
   outline: none;
 }

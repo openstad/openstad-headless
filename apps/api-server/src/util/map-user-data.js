@@ -49,7 +49,8 @@ module.exports = function mapUserData({ map = {}, user = {} }) {
     if ( typeof propMap == 'string' ) {
       try { // function?
         propMap = eval(propMap);
-      } catch(err) {}
+      } catch (err) {
+      }
     }
 
     if ( typeof propMap == 'function' ) {
