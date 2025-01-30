@@ -10,7 +10,6 @@ import {
   parseISO,
 } from 'date-fns';
 import { useEffect, useState } from 'react';
-import 'remixicon/fonts/remixicon.css';
 import './date-countdown-bar.css';
 
 import React from 'react';
