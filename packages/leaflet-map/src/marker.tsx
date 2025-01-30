@@ -59,11 +59,12 @@ for (let eventname of ['click', 'mouseDown', 'mouseUp', 'dragStart', 'dragEnd'])
         window.dispatchEvent(customEvent);
 
         if (typeof func === 'string') {
-          const resolvedFunction = globalThis[func];
+          const resolvedFunction = (globalThis as Record<string, any>)[func];
+
           if (typeof resolvedFunction === 'function') {
             resolvedFunction(e, map);
           } else {
-            console.warn(`Function ${func} is not defined on globalThis.`);
+            console.warn(`Function "${func}" is not defined on globalThis.`);
           }
         } else {
           func(e, map);
