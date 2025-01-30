@@ -19,7 +19,6 @@
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remixicon": "^3.5.0",
     "swr": "^2.2.4"
   },
   "devDependencies": {
