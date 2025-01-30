@@ -162,7 +162,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                             </Paragraph>
                         </FormField>
                         {choice.isOtherOption && selectedOption === choice.value && (
-                            <div style={{marginTop: '10px', marginBottom: '15px'}}>
+                            <div className="marginTop10 marginBottom15">
                                 <TextInput
                                     type="text"
                                     // @ts-ignore
