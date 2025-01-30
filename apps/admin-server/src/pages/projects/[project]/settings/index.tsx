@@ -207,8 +207,8 @@ export default function ProjectSettings() {
 
     const cdns = [
       'https://openstad-cdn.nl',
-      'sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z',
-      'sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1'
+      process.env.REACT_CDN_INTEGRITY || 'sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z',
+      process.env.REACT_DOM_CDN_INTEGRITY || 'sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1'
     ];
 
     if (process.env.REACT_CDN) {
@@ -216,7 +216,7 @@ export default function ProjectSettings() {
       if (!reactCdn.startsWith('http')) {
         reactCdn = `https://${reactCdn}`;
       }
-      cdns.push(new URL(reactCdn).host);
+      cdns.push(reactCdn);
     }
 
     if (process.env.REACT_DOM_CDN) {
@@ -224,7 +224,7 @@ export default function ProjectSettings() {
       if (!reactDomCdn.startsWith('http')) {
         reactDomCdn = `https://${reactDomCdn}`;
       }
-      cdns.push(new URL(reactDomCdn).host);
+      cdns.push(reactDomCdn);
     }
 
     setCdnUrls(cdns);
