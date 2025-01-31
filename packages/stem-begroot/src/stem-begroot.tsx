@@ -492,6 +492,16 @@ function StemBegroot({
           }
         }}
         resourceDetailIndex={resourceDetailIndex}
+        statusIdsToLimitResourcesTo={statusIdsToLimitResourcesTo || []}
+        tagIdsToLimitResourcesTo={tags}
+        sort={sort}
+        allTags={allTags}
+        tags={tags}
+        setFilteredResources={setFilteredResources}
+        filteredResources={filteredResources}
+        voteType={props?.votes?.voteType || 'likes'}
+        typeSelector={typeSelector}
+        activeTagTab={activeTagTab}
       />
 
       <div className="osc">
