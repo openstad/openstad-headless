@@ -1,6 +1,6 @@
 :root {
   --basemap-map-width: 100%;
-  --basemap-map-height: auto;
+  --basemap-map-height: 100%;
   --basemap-map-aspect-ratio: 16/9;
 }
 
