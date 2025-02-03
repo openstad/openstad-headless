@@ -34,6 +34,7 @@ export const StemBegrootResourceList = ({
   typeSelector = 'tag',
   setFilteredResources,
   filteredResources = [],
+  hideTagsForResources = false,
   header
 }: {
   resourceListColumns?: number;
@@ -60,6 +61,7 @@ export const StemBegrootResourceList = ({
   voteType?: string;
   setFilteredResources?: (resources: Array<any>) => void;
   filteredResources?: Array<any>;
+  hideTagsForResources?: boolean;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -165,16 +167,18 @@ export const StemBegrootResourceList = ({
                   <Image src={i.url} />
                 )}
               />
-              <section className="stembegroot-content-item-header">
-                <div className="stembegroot-content-item-header-taglist">
-                  <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>
-                  <div className="pill-grid stembegroot">
-                    {(resource.tags as Array<{ type: string; name: string }>)
-                      ?.filter((t) => t.type !== 'status')
-                      ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
+              {!hideTagsForResources && (
+                <section className="stembegroot-content-item-header">
+                  <div className="stembegroot-content-item-header-taglist">
+                    <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>
+                    <div className="pill-grid stembegroot">
+                      {(resource.tags as Array<{ type: string; name: string }>)
+                        ?.filter((t) => t.type !== 'status')
+                        ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
+                    </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              )}
               <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
               <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
               <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, 200)}}/>

@@ -87,7 +87,8 @@ export type StemBegrootWidgetProps = BaseProps &
     tagTypeTag?: string;
     overviewTitle?: string;
     step3Title?: string;
-    tagTypeTagGroup?: Array<string>
+    tagTypeTagGroup?: Array<string>;
+    hideTagsForResources?: boolean;
   };
 
 function StemBegroot({
@@ -102,6 +103,7 @@ function StemBegroot({
   step0 = '',
   overviewTitle = '',
   step3Title = '',
+  hideTagsForResources = false,
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -918,6 +920,7 @@ function StemBegroot({
               filteredResources={filteredResources}
               voteType={props?.votes?.voteType || 'likes'}
               typeSelector={typeSelector}
+              hideTagsForResources={hideTagsForResources}
             />
             <Spacer size={3} />
 

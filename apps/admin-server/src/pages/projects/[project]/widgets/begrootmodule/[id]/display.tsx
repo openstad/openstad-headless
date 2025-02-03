@@ -41,6 +41,7 @@ const formSchema = z.object({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
   showInfoMenu: z.boolean(),
+  hideTagsForResources: z.boolean(),
   tagTypeTagGroup: z.array(z.string()).optional(),
   tagTypeSelector: z.string().optional(),
   tagTypeTag: z.string().optional(),
@@ -77,6 +78,7 @@ export default function BegrootmoduleDisplay(
       tagTypeTagGroup: props.tagTypeTagGroup || [],
       tagTypeTag: props.tagTypeTag || '',
       tagTypeSelector: props.tagTypeSelector || 'tag',
+      hideTagsForResources: props.hideTagsForResources || false,
     },
   });
 
@@ -214,6 +216,20 @@ export default function BegrootmoduleDisplay(
               onFieldChange(key, value);
             }}
             items={[{ value: 1 }, { value: 2 }, { value: 3 }]}
+          />
+
+          <FormField
+            control={form.control}
+            name="hideTagsForResources"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Verberg tags bij de inzendingen
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           { (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && (
