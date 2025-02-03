@@ -21,18 +21,18 @@ export const Step4 = ({
       <Heading5>{voteMessage}</Heading5>
       <Paragraph>{thankMessage}</Paragraph>
 
-      {showNewsletterButton ? (
-        <>
-          <Spacer size={2} />
-          <Button
-            appearance='primary-action-button'
-            onClick={() => {
-              // What should happen here?
-            }}>
-            {newsLetterTitle}
-          </Button>
-        </>
-      ) : null}
+      {/*{showNewsletterButton ? (*/}
+      {/*  <>*/}
+      {/*    <Spacer size={2} />*/}
+      {/*    <Button*/}
+      {/*      appearance='primary-action-button'*/}
+      {/*      onClick={() => {*/}
+      {/*        // What should happen here?*/}
+      {/*      }}>*/}
+      {/*      {newsLetterTitle}*/}
+      {/*    </Button>*/}
+      {/*  </>*/}
+      {/*) : null}*/}
     </>
   );
 };

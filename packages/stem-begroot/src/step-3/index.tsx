@@ -9,11 +9,12 @@ type Props = {
   loginUrl: string;
   step3: string;
   stemCodeTitle: string;
+  step3Title: string;
 };
-export const Step3 = ({ step3, stemCodeTitle, ...props }: Props) => {
+export const Step3 = ({ step3, stemCodeTitle, step3Title, ...props }: Props) => {
   return (
     <>
-      <Heading5>Controleer stemcode</Heading5>
+      <Heading5>{step3Title}</Heading5>
       <Paragraph>{step3}</Paragraph>
       <Spacer size={2} />
       <Button
@@ -22,7 +23,7 @@ export const Step3 = ({ step3, stemCodeTitle, ...props }: Props) => {
           const loginUrl = new URL(props.loginUrl);
           document.location.href = loginUrl.toString();
         }}>
-        Vul je stemcode in
+        {stemCodeTitle}
       </Button>
     </>
   );
