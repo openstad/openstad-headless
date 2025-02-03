@@ -170,7 +170,7 @@ export default function BegrootmoduleDisplay(
             name="hideReadMore"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Verberg de 'lees meer' knop bij de inzendingen?</FormLabel>
+                <FormLabel>Verberg de &apos;lees meer&apos; knop bij de inzendingen?</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

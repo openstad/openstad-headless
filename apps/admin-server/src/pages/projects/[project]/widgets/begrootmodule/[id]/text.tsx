@@ -233,7 +233,7 @@ export default function BegrootmoduleText(
             name="step1Delete"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Tekst voor de knop 'Verwijder'</FormLabel>
+                <FormLabel>Tekst voor de knop &apos;Verwijder&apos;</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -253,7 +253,7 @@ export default function BegrootmoduleText(
             name="step1Add"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Tekst voor de knop 'Voeg toe'</FormLabel>
+                <FormLabel>Tekst voor de knop &apos;Voeg toe&apos;</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -275,7 +275,7 @@ export default function BegrootmoduleText(
               <FormItem className="col-span-1">
                 <FormLabel>Tekst wanneer het maximaal aantal om te selecteren is bereikt</FormLabel>
                 <FormDescription>
-                  Voor het type 'count' is dit standaard 'Maximaal aantal plannen bereikt'. Voor het type 'budget' is dit standaard 'Onvoldoende budget'.
+                  Voor het type &apos;count&apos; is dit standaard &apos;Maximaal aantal plannen bereikt&apos;. Voor het type &apos;budget&apos; is dit standaard &apos;Onvoldoende budget&apos;.
                 </FormDescription>
                 <FormControl>
                   <Input
