@@ -34,6 +34,8 @@ const formSchema = z.object({
   step4Tab: z.string().optional(),
   overviewTitle: z.string().optional(),
   step3Title: z.string().optional(),
+  step1Delete: z.string().optional(),
+  step1Add: z.string().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -56,6 +58,8 @@ export default function BegrootmoduleText(
       step4Tab: props.step4Tab ?? 'Stem',
       step1Title: props.step1Title ?? 'Uw selecties',
       resourceCardTitle: props.resourceCardTitle ?? 'Selecteer een inzending',
+      step1Delete: props.step1Delete ?? 'Verwijder',
+      step1Add: props.step1Add ?? 'Voeg toe',
       step2Title: props.step2Title ?? 'Overzicht van mijn selectie',
       step3Title: props.step3Title ?? "Controleer stemcode",
       stemCodeTitle: props.stemCodeTitle ?? 'Vul je stemcode in',
@@ -208,6 +212,46 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Titel inzendingen kaart</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="step1Delete"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Tekst voor de knop 'Verwijder'</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="step1Add"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Tekst voor de knop 'Voeg toe'</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
