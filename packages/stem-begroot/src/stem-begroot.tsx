@@ -85,6 +85,8 @@ export type StemBegrootWidgetProps = BaseProps &
     step4Tab?: string;
     tagTypeSelector?: string;
     tagTypeTag?: string;
+    overviewTitle?: string;
+    step3Title?: string;
     tagTypeTagGroup?: Array<string>
   };
 
@@ -98,6 +100,8 @@ function StemBegroot({
   step3Tab = '',
   step4Tab = '',
   step0 = '',
+  overviewTitle = '',
+  step3Title = '',
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -492,6 +496,16 @@ function StemBegroot({
           }
         }}
         resourceDetailIndex={resourceDetailIndex}
+        statusIdsToLimitResourcesTo={statusIdsToLimitResourcesTo || []}
+        tagIdsToLimitResourcesTo={tags}
+        sort={sort}
+        allTags={allTags}
+        tags={tags}
+        setFilteredResources={setFilteredResources}
+        filteredResources={filteredResources}
+        voteType={props?.votes?.voteType || 'likes'}
+        typeSelector={typeSelector}
+        activeTagTab={activeTagTab}
       />
 
       <div className="osc">
@@ -649,7 +663,12 @@ function StemBegroot({
           ) : null}
 
           {currentStep === 2 ? (
-            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3 || ''} stemCodeTitle={props.stemCodeTitle} />
+            <Step3
+              loginUrl={`${props?.login?.url}`}
+              step3={props.step3 || ''}
+              stemCodeTitle={props.stemCodeTitle}
+              step3Title={step3Title || ''}
+            />
           ) : null}
 
           {currentStep === 3 ? (
@@ -810,7 +829,7 @@ function StemBegroot({
             <StemBegrootResourceList
               header={
                 <>
-                  <Heading level={1} appearance="utrecht-heading-3">Plannen</Heading>
+                  <Heading level={1} appearance="utrecht-heading-3">{overviewTitle || "Plannen"}</Heading>
                   <Spacer size={1} />
                   {datastore ? (
                     <Filters

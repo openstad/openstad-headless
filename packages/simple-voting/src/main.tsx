@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { SimpleVoting, SimpleVotingWidgetProps } from './simple-voting.js';
+import { SimpleVoting } from './simple-voting.js';
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot.jsx';
 
-const config: SimpleVotingWidgetProps = {
+const config: StemBegrootWidgetProps = {
   api: {
     url: import.meta.env.VITE_API_URL,
   },

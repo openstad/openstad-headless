@@ -7,37 +7,7 @@ import { StemBegroot, StemBegrootWidgetProps } from '@openstad-headless/stem-beg
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 
-export type SimpleVotingWidgetProps = BaseProps &
-  ProjectSettingProps & {
-    step1: string;
-    step2: string;
-    step3: string;
-    step3success: string;
-    voteMessage: string;
-    thankMessage: string;
-    showNewsletterButton: boolean;
-    notEnoughBudgetText?: string;
-    displayPagination?: boolean;
-    displayRanking: boolean;
-    displayPriceLabel: boolean;
-    showVoteCount: boolean;
-    showOriginalResource: boolean;
-    originalResourceUrl?: string;
-    displayTagFilters?: boolean;
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
-    displayTagGroupName?: boolean;
-    defaultSorting?: string;
-    sorting?: Array<{ label: string; value: string }>;
-    displaySorting?: boolean;
-    displaySearch?: boolean;
-    displaySearchText?: boolean;
-    textActiveSearch?: string;
-    itemsPerPage?: number;
-    onlyIncludeTagIds: string;
-    resourceListColumns?: number;
-  };
-
-function SimpleVoting({ ...props }: SimpleVotingWidgetProps) {
+function SimpleVoting({ ...props }: StemBegrootWidgetProps) {
 
   const config = {
     ...props,
