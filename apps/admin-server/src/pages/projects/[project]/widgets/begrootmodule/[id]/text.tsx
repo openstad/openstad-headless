@@ -36,6 +36,7 @@ const formSchema = z.object({
   step3Title: z.string().optional(),
   step1Delete: z.string().optional(),
   step1Add: z.string().optional(),
+  step1MaxText: z.string().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -60,6 +61,7 @@ export default function BegrootmoduleText(
       resourceCardTitle: props.resourceCardTitle ?? 'Selecteer een inzending',
       step1Delete: props.step1Delete ?? 'Verwijder',
       step1Add: props.step1Add ?? 'Voeg toe',
+      step1MaxText: props.step1MaxText ?? '',
       step2Title: props.step2Title ?? 'Overzicht van mijn selectie',
       step3Title: props.step3Title ?? "Controleer stemcode",
       stemCodeTitle: props.stemCodeTitle ?? 'Vul je stemcode in',
@@ -252,6 +254,29 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Tekst voor de knop 'Voeg toe'</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="step1MaxText"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Tekst wanneer het maximaal aantal om te selecteren is bereikt</FormLabel>
+                <FormDescription>
+                  Voor het type 'count' is dit standaard 'Maximaal aantal plannen bereikt'. Voor het type 'budget' is dit standaard 'Onvoldoende budget'.
+                </FormDescription>
                 <FormControl>
                   <Input
                     {...field}

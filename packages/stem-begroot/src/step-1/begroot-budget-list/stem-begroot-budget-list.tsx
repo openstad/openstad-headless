@@ -24,7 +24,8 @@ export const StemBegrootBudgetList = ({
   tagsToDisplay,
   activeTagTab = '',
   typeIsPerTag = false,
-  setActiveTagTab
+  setActiveTagTab,
+  step1MaxText = '',
 }: {
   allResourceInList: Array<any>
   selectedResources: Array<any>;
@@ -44,6 +45,7 @@ export const StemBegrootBudgetList = ({
   activeTagTab?: string;
   typeIsPerTag?: boolean;
   setActiveTagTab?: Dispatch<SetStateAction<string>>;
+  step1MaxText?: string;
 }) => {
   const budgetUsed = selectedResources.reduce(
     (total, cv) => total + cv.budget,
@@ -79,8 +81,8 @@ export const StemBegrootBudgetList = ({
         {!canAddMore && allResourceInList.length > 0 ? (
           <Paragraph className="budget-list-status-text helptext error">
             {typeIsBudgeting
-              ? 'Onvoldoende budget'
-              : 'Maximaal aantal plannen bereikt'}
+              ? step1MaxText || 'Onvoldoende budget'
+              : step1MaxText || 'Maximaal aantal plannen bereikt'}
           </Paragraph>
         ) : null}
 

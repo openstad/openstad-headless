@@ -91,6 +91,7 @@ export type StemBegrootWidgetProps = BaseProps &
     hideTagsForResources?: boolean;
     step1Delete?: string;
     step1Add?: string;
+    step1MaxText?: string;
   };
 
 function StemBegroot({
@@ -108,6 +109,7 @@ function StemBegroot({
   hideTagsForResources = false,
   step1Delete = 'Verwijder',
   step1Add = 'Voeg toe',
+  step1MaxText = '',
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -570,6 +572,7 @@ function StemBegroot({
                 activeTagTab={activeTagTab}
                 setActiveTagTab={setActiveTagTab}
                 typeIsPerTag={props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag"}
+                step1MaxText={step1MaxText}
                 onSelectedResourceRemove={(resource: {id: number, budget: number}) => {
                   localStorage.removeItem('oscResourceVotePending');
                   localStorage.removeItem('oscResourceVotePendingPerTag');
