@@ -165,8 +165,6 @@ export const StemBegrootResourceDetailDialog = ({
 
             let resourceImages: any[] = [];
 
-            console.log( 'resource.location', resource?.location );
-
             if (resource?.location) {
               resourceImages.push({location: resource?.location});
             }
