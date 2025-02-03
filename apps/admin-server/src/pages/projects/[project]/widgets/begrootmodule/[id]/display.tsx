@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,7 +36,7 @@ const formSchema = z.object({
   showVoteCount: z.boolean(),
   notEnoughBudgetText: z.string(),
   showOriginalResource: z.boolean(),
-  originalResourceUrl: z.string().url().optional(),
+  originalResourceUrl: z.string().optional(),
   resourceListColumns: z.coerce.number({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
@@ -106,7 +106,7 @@ export default function BegrootmoduleDisplay(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="displayRanking"
@@ -145,7 +145,10 @@ export default function BegrootmoduleDisplay(
             name="showInfoMenu"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Toon informatie teksten</FormLabel>
+                <FormLabel>Weergeef teller met informatie</FormLabel>
+                <FormDescription>
+                  Weergeef een teller met informatie over het aantal geselecteerde inzendingen en de ruimte die nog beschikbaar is.
+                </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
