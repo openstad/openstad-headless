@@ -35,6 +35,7 @@ export const StemBegrootResourceList = ({
   setFilteredResources,
   filteredResources = [],
   hideTagsForResources = false,
+  hideReadMore = false,
   header
 }: {
   resourceListColumns?: number;
@@ -62,6 +63,7 @@ export const StemBegrootResourceList = ({
   setFilteredResources?: (resources: Array<any>) => void;
   filteredResources?: Array<any>;
   hideTagsForResources?: boolean;
+  hideReadMore?: boolean;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -228,15 +230,17 @@ export const StemBegrootResourceList = ({
               </div>
 
               <div className="osc-stem-begroot-content-item-footer">
-                <Button
-                  appearance='secondary-action-button'
-                  className="osc-stem-begroot-item-action-btn"
-                  onClick={(e) => {
-                    onResourcePlainClicked(resource, index);
-                    e.currentTarget.classList.add('active-resource');
-                  }}>
-                  Lees meer
-                </Button>
+                {!hideReadMore && (
+                  <Button
+                    appearance='secondary-action-button'
+                    className="osc-stem-begroot-item-action-btn"
+                    onClick={(e) => {
+                      onResourcePlainClicked(resource, index);
+                      e.currentTarget.classList.add('active-resource');
+                    }}>
+                    Lees meer
+                  </Button>
+                )}
                 <Button
                   disabled={primaryBtnDisabled}
                   className="osc-stem-begroot-item-action-btn"

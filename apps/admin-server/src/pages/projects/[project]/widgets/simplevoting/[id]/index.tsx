@@ -18,7 +18,6 @@ export const getServerSideProps = withApiUrl;
 import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 
 import WidgetPreview from '@/components/widget-preview';
-import SimpleVotingDisplay from './display';
 import BegrootmoduleExplanation from '../../begrootmodule/[id]/explanation';
 import WidgetStemBegrootSearch from '../../begrootmodule/[id]/search';
 import WidgetStemBegrootOverviewTags from '../../begrootmodule/[id]/tags';
@@ -26,6 +25,7 @@ import WidgetStemBegrootSorting from '../../begrootmodule/[id]/sorting';
 import WidgetStemBegrootPagination from '../../begrootmodule/[id]/pagination';
 import BegrootmoduleText from "@/pages/projects/[project]/widgets/begrootmodule/[id]/text";
 import WidgetStemBegrootInclude from "@/pages/projects/[project]/widgets/begrootmodule/[id]/include";
+import BegrootmoduleDisplay from "@/pages/projects/[project]/widgets/begrootmodule/[id]/display";
 
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
@@ -91,7 +91,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
             {previewConfig ? (
               <>
               <TabsContent value="display" className="p-0">
-                  <SimpleVotingDisplay {...totalPropPackage} />
+                  <BegrootmoduleDisplay {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="text" className="p-0">
                   <BegrootmoduleText {...totalPropPackage} />

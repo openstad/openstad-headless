@@ -1,5 +1,5 @@
 import './stem-begroot.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -89,6 +89,8 @@ export type StemBegrootWidgetProps = BaseProps &
     step3Title?: string;
     tagTypeTagGroup?: Array<string>;
     hideTagsForResources?: boolean;
+    hideReadMore?: boolean;
+    scrollWhenMaxReached?: boolean;
     step1Delete?: string;
     step1Add?: string;
     step1MaxText?: string;
@@ -107,6 +109,8 @@ function StemBegroot({
   overviewTitle = '',
   step3Title = '',
   hideTagsForResources = false,
+  hideReadMore = false,
+  scrollWhenMaxReached = false,
   step1Delete = 'Verwijder',
   step1Add = 'Voeg toe',
   step1MaxText = '',
@@ -450,6 +454,18 @@ function StemBegroot({
   const [filteredResources, setFilteredResources] = useState<any[]>([]);
   const resourcesToUse = filteredResources.length ? filteredResources : resources?.records || [];
 
+  const step1ContainerRef = useRef<HTMLDivElement | null>(null);
+  const scrollToElement = () => {
+    if (step1ContainerRef.current) {
+      const targetPosition = step1ContainerRef.current.getBoundingClientRect().top + window.pageYOffset - 100;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -531,7 +547,7 @@ function StemBegroot({
           </> : null}
 
 
-        <section className="begroot-step-panel">
+        <section className="begroot-step-panel" ref={step1ContainerRef}>
           {currentStep === -1 && (
             <div className="vote-per-theme-container">
               <div className="vote-per-theme-intro" dangerouslySetInnerHTML={{__html: step0}}></div>
@@ -602,6 +618,8 @@ function StemBegroot({
                   );
                 }}
                 decideCanAddMore={() => {
+                  let canAddMore = true;
+
                   if (props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag") {
                     const activeTagData = tagCounter.find(tagObj => tagObj[activeTagTab]);
                     if (!activeTagData) return false;
@@ -611,7 +629,7 @@ function StemBegroot({
                     const currentCount = activeTag.current;
 
                     if (props.votes.voteType === "countPerTag") {
-                      return currentCount < maxLimit;
+                      canAddMore = currentCount < maxLimit;
                     }
 
                     if (props.votes.voteType === "budgetingPerTag") {
@@ -622,7 +640,7 @@ function StemBegroot({
                           )
                       );
 
-                      return notUsedResources.some(
+                      canAddMore = notUsedResources.some(
                         (r: { budget: number }) =>
                           r.budget <= (maxLimit - currentCount)
                       );
@@ -635,7 +653,7 @@ function StemBegroot({
                         )
                     );
 
-                    return props.votes.voteType === 'budgeting'
+                    canAddMore = props.votes.voteType === 'budgeting'
                       ? notUsedResources.some(
                         (r: { budget: number }) =>
                           r.budget < props.votes.maxBudget - budgetUsed
@@ -645,6 +663,12 @@ function StemBegroot({
                       0
                     ) > 0;
                   }
+
+                  if (!canAddMore && scrollWhenMaxReached) {
+                    scrollToElement();
+                  }
+
+                  return canAddMore;
                 }}
               />
             </>
@@ -928,6 +952,7 @@ function StemBegroot({
               voteType={props?.votes?.voteType || 'likes'}
               typeSelector={typeSelector}
               hideTagsForResources={hideTagsForResources}
+              hideReadMore={hideReadMore}
             />
             <Spacer size={3} />
 
