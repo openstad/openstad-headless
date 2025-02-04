@@ -24,7 +24,6 @@ function SimpleVoting({ ...props }: StemBegrootWidgetProps) {
       voteType: 'count',
       withExisting: 'error',
     },
-    showInfoMenu: true,
     isSimpleView: true,
   }
   return (
