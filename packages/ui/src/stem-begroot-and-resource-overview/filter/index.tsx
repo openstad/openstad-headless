@@ -170,7 +170,7 @@ export function Filters({
     }
   };
 
-  return (
+  return !(props.displayTagFilters || props.displaySearch || props.displaySorting) ? null : (
     <section id="stem-begroot-filter">
       <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>
         {props.displaySearch ? (

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,13 +34,16 @@ const formSchema = z.object({
   displayRanking: z.boolean(),
   displayPriceLabel: z.boolean(),
   showVoteCount: z.boolean(),
+  hideReadMore: z.boolean(),
+  scrollWhenMaxReached: z.boolean(),
   notEnoughBudgetText: z.string(),
   showOriginalResource: z.boolean(),
-  originalResourceUrl: z.string().url().optional(),
+  originalResourceUrl: z.string().optional(),
   resourceListColumns: z.coerce.number({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
   showInfoMenu: z.boolean(),
+  hideTagsForResources: z.boolean(),
   tagTypeTagGroup: z.array(z.string()).optional(),
   tagTypeSelector: z.string().optional(),
   tagTypeTag: z.string().optional(),
@@ -71,12 +74,15 @@ export default function BegrootmoduleDisplay(
       showVoteCount: props.showVoteCount || false,
       notEnoughBudgetText: props.notEnoughBudgetText || 'Niet genoeg budget',
       showOriginalResource: props.showOriginalResource || false,
+      hideReadMore: props.hideReadMore || false,
+      scrollWhenMaxReached: props.scrollWhenMaxReached || false,
       originalResourceUrl: props.originalResourceUrl || '',
       resourceListColumns: props.resourceListColumns || 3,
-      showInfoMenu: props.showInfoMenu || false,
+      showInfoMenu: props.showInfoMenu === undefined ? true : props.showInfoMenu,
       tagTypeTagGroup: props.tagTypeTagGroup || [],
       tagTypeTag: props.tagTypeTag || '',
       tagTypeSelector: props.tagTypeSelector || 'tag',
+      hideTagsForResources: props.hideTagsForResources || false,
     },
   });
 
@@ -104,7 +110,7 @@ export default function BegrootmoduleDisplay(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="displayRanking"
@@ -138,17 +144,7 @@ export default function BegrootmoduleDisplay(
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="showInfoMenu"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Toon informatie teksten</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
           <FormField
             control={form.control}
             name="notEnoughBudgetText"
@@ -168,6 +164,61 @@ export default function BegrootmoduleDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="hideReadMore"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Verberg de &apos;lees meer&apos; knop bij de inzendingen?</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="hideTagsForResources"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Verberg tags bij de inzendingen
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showInfoMenu"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Weergeef teller met informatie</FormLabel>
+                <FormDescription>
+                  Weergeef een teller met informatie over het aantal geselecteerde inzendingen en de ruimte die nog beschikbaar is.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="scrollWhenMaxReached"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Forceer een scroll</FormLabel>
+                <FormDescription>Forceer een scroll naar de bovenkant van het element wanneer het maximaal aantal inzendingen is geselecteerd.</FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="showOriginalResource"
