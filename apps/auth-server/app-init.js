@@ -33,6 +33,8 @@ const initializeApp = async () => {
     app.set('port', process.env.PORT || 4000);
     app.use(express.static(path.join(__dirname, 'public')));
     
+    require('./routes/healthRoute')(app)
+    
     app.use(cookieParser());
     
     app.use((req, res, next) => {
@@ -106,6 +108,11 @@ const initializeApp = async () => {
     // static resources for stylesheets, images, javascript files
     
     require('./routes/routes')(app);
+
+    return app;
+  } catch (error) {
+    console.error('Failed to initialize the app:', error);
+    throw error;
   }
 }
 

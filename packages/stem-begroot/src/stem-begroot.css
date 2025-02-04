@@ -329,8 +329,4 @@ section.osc-begrootmodule-resource-detail-photo
 .budget-badge.budget-badge-primary.osc-budget-12 { flex: var(--osc-budget-12); }
 .budget-badge.budget-badge-primary.osc-budget-13 { flex: var(--osc-budget-13); }
 .budget-badge.budget-badge-primary.osc-budget-14 { flex: var(--osc-budget-14); }
-<<<<<<< HEAD
 .budget-badge.budget-badge-primary.osc-budget-15 { flex: var(--osc-budget-15); }
-=======
-.budget-badge.budget-badge-primary.osc-budget-15 { flex: var(--osc-budget-15); }
->>>>>>> 07f8f191c (feat: Remove all inline style)
