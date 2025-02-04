@@ -32,6 +32,8 @@ const formSchema = z.object({
   step2Tab: z.string().optional(),
   step3Tab: z.string().optional(),
   step4Tab: z.string().optional(),
+  overviewTitle: z.string().optional(),
+  step3Title: z.string().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -55,12 +57,14 @@ export default function BegrootmoduleText(
       step1Title: props.step1Title ?? 'Uw selecties',
       resourceCardTitle: props.resourceCardTitle ?? 'Selecteer een inzending',
       step2Title: props.step2Title ?? 'Overzicht van mijn selectie',
+      step3Title: props.step3Title ?? "Controleer stemcode",
       stemCodeTitle: props.stemCodeTitle ?? 'Vul je stemcode in',
       stemCodeTitleSuccess: props.stemCodeTitleSuccess ?? 'Vul een andere stemcode in',
       newsLetterTitle: props.newsLetterTitle ?? 'Hou mij op de hoogte',
       panelTitle: props.panelTitle ?? '',
       budgetChosenTitle: props.budgetChosenTitle ?? "Inzendingen gekozen",
       budgetRemainingTitle: props.budgetRemainingTitle ?? "Nog te kiezen",
+      overviewTitle: props.overviewTitle ?? "Plannen",
     },
   });
 
@@ -155,7 +159,27 @@ export default function BegrootmoduleText(
               )}
             />
 
+          <Heading size="lg">Inzendingen overzicht</Heading>
           </div>
+          <FormField
+            control={form.control}
+            name="overviewTitle"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Titel boven het overzicht van alle inzendingen</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Heading size="lg">Stap 1:</Heading>
           <FormField
@@ -220,6 +244,26 @@ export default function BegrootmoduleText(
           />
 
           <Heading size="lg">Stap 3:</Heading>
+          <FormField
+            control={form.control}
+            name="step3Title"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Titel boven de uitleg</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="stemCodeTitle"

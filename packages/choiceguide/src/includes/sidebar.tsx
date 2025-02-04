@@ -63,23 +63,23 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
 
                 <div className="osc-point"></div>
               </div>
-              ) : (
-            <ul className="osc-choices">
-              {Object.entries(props.choiceOptions || {}).map(([key, choiceOption], index) => (
-                <li key={index} className="osc-choice">
-                  <ChoiceItem
-                    choiceOption={choiceOption}
-                    answers={props.answers}
-                    weights={props.weights}
-                    choicesType={props.choicesType}
-                    choicesPreferenceMinColor={props.choicesPreferenceMinColor}
-                    choicesPreferenceMaxColor={props.choicesPreferenceMaxColor}
-                    showPageCountAndCurrentPageInButton={props.showPageCountAndCurrentPageInButton}
-                    startWithAllQuestionsAnswered={props.startWithAllQuestionsAnswered}
-                  />
-                </li>
-              ))}
-            </ul>
+            ) : (
+              <ul className="osc-choices">
+                {Object.entries(props.choiceOptions || {}).map(([key, choiceOption], index) => (
+                  <li key={index} className="osc-choice">
+                    <ChoiceItem
+                      choiceOption={choiceOption}
+                      answers={props.answers}
+                      weights={props.weights}
+                      choicesType={props.choicesType}
+                      choicesPreferenceMinColor={props.choicesPreferenceMinColor}
+                      choicesPreferenceMaxColor={props.choicesPreferenceMaxColor}
+                      showPageCountAndCurrentPageInButton={props.showPageCountAndCurrentPageInButton}
+                      startWithAllQuestionsAnswered={props.startWithAllQuestionsAnswered}
+                    />
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </div>

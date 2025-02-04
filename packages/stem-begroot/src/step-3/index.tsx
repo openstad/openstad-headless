@@ -9,11 +9,12 @@ type Props = {
   loginUrl: string;
   step3: string;
   stemCodeTitle: string;
+  step3Title: string;
 };
-export const Step3 = ({ step3, stemCodeTitle, ...props }: Props) => {
+export const Step3 = ({ step3, stemCodeTitle, step3Title, ...props }: Props) => {
   return (
     <>
-      <Heading3>Controleer stemcode</Heading3>
+      <Heading3>{step3Title}</Heading3>
       <Paragraph>{step3}</Paragraph>
       <Spacer size={2} />
       <Button

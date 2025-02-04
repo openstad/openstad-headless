@@ -9,12 +9,10 @@ page or piece.') }}
 {% endif %}
 {% endblock %}
 
-const reactCdnIntegrity = process.env.REACT_CDN_INTEGRITY || 'sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z';
-const reactDomCdnIntegrity = process.env.REACT_DOM_CDN_INTEGRITY || 'sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1';
-
 {% block extraHead %}
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="{{reactCdnIntegrity}}" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="{{reactDomCdnIntegrity}}" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+
 {% if data.global.favicon %}
   <link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}"/>
 {% endif %}

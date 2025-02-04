@@ -24,6 +24,8 @@ import WidgetStemBegrootSearch from '../../begrootmodule/[id]/search';
 import WidgetStemBegrootOverviewTags from '../../begrootmodule/[id]/tags';
 import WidgetStemBegrootSorting from '../../begrootmodule/[id]/sorting';
 import WidgetStemBegrootPagination from '../../begrootmodule/[id]/pagination';
+import BegrootmoduleText from "@/pages/projects/[project]/widgets/begrootmodule/[id]/text";
+import WidgetStemBegrootInclude from "@/pages/projects/[project]/widgets/begrootmodule/[id]/include";
 
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
@@ -76,11 +78,13 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
+              <TabsTrigger value="text">Teksten</TabsTrigger>
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
               <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
               <TabsTrigger value="pagination">Paginering</TabsTrigger>
+              <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
 
@@ -88,6 +92,9 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <>
               <TabsContent value="display" className="p-0">
                   <SimpleVotingDisplay {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="text" className="p-0">
+                  <BegrootmoduleText {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="explanation" className="p-0">
                   <BegrootmoduleExplanation {...totalPropPackage} />
@@ -103,6 +110,9 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="pagination" className="p-0">
                   <WidgetStemBegrootPagination {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="include" className="p-0">
+                  <WidgetStemBegrootInclude {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />
