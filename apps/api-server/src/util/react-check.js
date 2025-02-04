@@ -2,17 +2,9 @@ const reactJs =
   process.env.REACT_CDN ||
   'https://unpkg.com/react@18.3.1/umd/react.production.min.js';
 
-const reactHash =
-  process.env.REACT_CDN_INTEGRITY ||
-  'sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z';
-
 const reactDomJs =
   process.env.REACT_DOM_CDN ||
   'https://unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
-
-const reactDomHash =
-  process.env.REACT_DOM_CDN_INTEGRITY ||
-  'sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1';
 
 module.exports = `
   function triggerEvent(event) {
@@ -53,7 +45,6 @@ module.exports = `
       
       const script = document.createElement('script');
       script.src = reactDomUrl;
-      script.integrity = '${reactDomHash}';
       script.onload = function() {
         if (typeof window.createRoot === 'undefined' && typeof ReactDOM !== 'undefined' && typeof ReactDOM.createRoot !== 'undefined') {
           window.createRoot = ReactDOM.createRoot;
@@ -94,7 +85,6 @@ module.exports = `
   } else if (!hasReact && !window.OpenStadReactLoaded) {
     const script = document.createElement('script');
     script.src = '${reactJs}';
-    script.integrity = '${reactHash}';
     script.onload = (e) => {
       checkReactDom();
       console.log ('react js onload');
@@ -111,7 +101,6 @@ module.exports = `
     
     const script = document.createElement('script');
     script.src = '${reactJs}';
-    script.integrity = '${reactHash}';
     script.onload = (e) => {
       console.log ('react js onload');
       checkReactDom();
