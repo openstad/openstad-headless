@@ -34,7 +34,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
 
   const renderScore = () => {
     if (props.choicesType === 'minus-to-plus-100') {
-      const percentage = parseInt((2 * (score.x - 50)).toString()) || 0;
+      const percentage = parseFloat((2 * (score.x - 50)).toString()) || 0;
       const backgroundColor = calculateColor(score.x, props.choicesPreferenceMinColor, props.choicesPreferenceMaxColor);
 
       document.documentElement.style.setProperty('--choiceguide-minus-to-plus-width', `${percentage >= 0 ? percentage / 2 : -percentage / 2}%`);
@@ -48,18 +48,19 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
         }
       }
 
+      const percentageValue = percentage >= 0 ? percentage / 2 : -percentage / 2;
+
       return (
-        <div className="osc-choice-default minus-to-plus">
+        <div className="osc-choice-default minus-to-plus" data-score={Math.round(percentageValue)}>
           <h4>{props.choiceOption?.title}</h4>
           <div className="osc-choice-bar osc-from-center">
-            <div className={`osc-choice-bar-progress ${getClass(percentage)}`}></div>
+            <div className={`osc-choice-bar-progress ${getClass((percentage))}`}></div>
           </div>
         </div>
       );
     } else {
-      const percentageValue = parseInt(score.x.toString()) || 0;
+      const percentageValue = parseFloat(score.x.toString()) || 0;
 
-      document.documentElement.style.setProperty('--choiceguide-not-minus-to-plus-width', `${score.x}%`);
       document.documentElement.style.setProperty('--choiceguide-not-minus-to-plus-bg', defaultBarColor.default);
 
       return (
@@ -67,7 +68,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
           <h4>{props.choiceOption?.title}</h4>
           <div className="osc-choice-bar">
             <div className="osc-choice-bar-mask"></div>
-            <div className="osc-choice-bar-progress"></div>
+            <div className="osc-choice-bar-progress" data-score={Math.round(percentageValue)}></div>
           </div>
         </div>
       );

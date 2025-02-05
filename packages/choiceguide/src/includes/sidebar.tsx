@@ -61,7 +61,11 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
                   )
                 })}
 
-                <div className="osc-point"></div>
+                <div
+                  className="osc-point"
+                  data-score-x={Math.round(parseFloat((score.x).toString()))}
+                  data-score-y={Math.round(parseFloat((score.y).toString()))}
+                ></div>
               </div>
             ) : (
               <ul className="osc-choices">
