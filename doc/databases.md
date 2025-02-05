@@ -11,6 +11,13 @@ const db = require('db');
 should suffice; `db.ModelName.whatever` is now available for any action on the database.  
 The Sequelize package and instance are available as `db.Sequelize` and `db.sequelize`.
 
+### Database authentication - `DB_AUTH_METHOD`
+
+Depending on the context in which the software is running, you can choose a specific database authentication method. The username is always retrieved from an environment variable, but for the password this can be different:
+
+- **default**: By default the database password is also retrieved from an environment variable.
+- **azure-auth-token**: When running in Azure, using Entra ID. By setting the environment variable `DB_AUTH_METHOD` to `azure-auth-token`, the application uses Azure's token-based authentication to securely connect to the database. It relies on the following environment variables that should get injected by Azure; `AZURE_AUTHORITY_HOST`, `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` and `AZURE_FEDERATED_TOKEN_FILE`.
+
 ### Database initialisation
 
 For each of the servers the database can be setup using the (m.m.) command 

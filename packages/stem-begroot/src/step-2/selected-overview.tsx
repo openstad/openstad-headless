@@ -4,7 +4,7 @@ import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Heading5, Paragraph, Strong } from '@utrecht/component-library-react';
+import { Heading, Heading3,Heading5, Paragraph, Strong } from '@utrecht/component-library-react';
 import { TagType } from "../stem-begroot";
 
 type Props = {
@@ -158,6 +158,8 @@ export const BegrotenSelectedOverview = ({
             const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
 
             return (
+              <>
+              <Heading3 className='step2Title'>{step2Title}</Heading3>
               <React.Fragment key={`budget-overview-row-${resource.id}`}>
                 <div className="budget-two-text-row-spaced">
                   <section className={`budget-overview-row ${hasImages}`}>
@@ -178,6 +180,7 @@ export const BegrotenSelectedOverview = ({
 
               <Spacer size={1} />
             </React.Fragment>
+            </>
             );
           })}
         </div>

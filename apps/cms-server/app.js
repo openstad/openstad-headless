@@ -322,7 +322,6 @@ async function serveSite (req, res, siteConfig, forceRestart) {
 
 app.use(function (req, res, next) {
   // Remove redirects from URL
-
   const url = req.url;
 
   if (req.url.indexOf('//') > -1 || req.url.indexOf('%5C') > -1) {

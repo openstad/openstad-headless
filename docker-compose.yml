@@ -48,14 +48,14 @@ services:
 
   openstad-api-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=api-server
         - PORT=${API_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-api-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-api-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -71,6 +71,9 @@ services:
       - DB_PASSWORD=${API_DATABASE_PASSWORD}
       - DB_NAME=${API_DATABASE_DATABASE}
       - DB_HOST=${API_DATABASE_HOST}
+      - DB_DIALECT=${API_DB_DIALECT}
+      - DB_REQUIRE_SSL=${API_DB_REQUIRE_SSL}
+      - DB_AUTH_METHOD=${API_DB_AUTH_METHOD}
       - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
       - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
       - EMAILADDRESS=${API_EMAILADDRESS}
@@ -121,14 +124,14 @@ services:
 
   openstad-auth-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=auth-server
         - PORT=${AUTH_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-auth-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-auth-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -145,6 +148,9 @@ services:
       - DB_USER=${AUTH_DB_USER}
       - DB_PASSWORD=${AUTH_DB_PASSWORD}
       - DB_NAME=${AUTH_DB_NAME}
+      - DB_DIALECT=${AUTH_DB_DIALECT}
+      - DB_REQUIRE_SSL=${AUTH_DB_REQUIRE_SSL}
+      - DB_AUTH_METHOD=${AUTH_DB_AUTH_METHOD}
       - MAIL_SERVER_URL=${AUTH_MAIL_SERVER_URL}
       - MAIL_SERVER_PORT=${AUTH_MAIL_SERVER_PORT}
       - MAIL_SERVER_SECURE=${AUTH_MAIL_SERVER_SECURE}
@@ -175,14 +181,14 @@ services:
 
   openstad-image-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=image-server
         - PORT=${IMAGE_PORT_API}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-image-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-image-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -213,14 +219,14 @@ services:
 
   openstad-admin-server:
     build:
-      target: development
+      target: ${BUILD_TARGET:-development}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=admin-server
         - PORT=${ADMIN_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-admin-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-admin-server}:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
     restart: unless-stopped
     environment:
@@ -244,14 +250,14 @@ services:
 
   openstad-cms-server:
     build:
-      target: release-with-packages
+      target: ${BUILD_TARGET:-release-with-packages}
       context: .
       dockerfile: Dockerfile
       args:
         - APP=cms-server
         - PORT=${CMS_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
-    image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
+    image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-cms-server}:${RELEASE_VERSION:-latest}
     command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
     depends_on:
       openstad-redis:
