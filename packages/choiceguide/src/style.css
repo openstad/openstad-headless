@@ -42,6 +42,13 @@ figure.info-image-container {
   max-height: 300px;
 }
 
+figure.info-image-container img {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 100%;
+  height: 300px;
+}
+
 #choice-plane {
   position: relative;
   height: var(--choiceguide-base-size);
@@ -357,12 +364,6 @@ ul.osc-choices{
 }
 #footer-container footer{
   z-index: 50;
-}
-.osc-choiceguide-container .osc-choiceguide-form .question figure.info-image-container img {
-  -o-object-fit: cover;
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
 }
 
 .osc-choice-default .osc-choice-bar-progress[data-score="0"] {width: 0%;}
