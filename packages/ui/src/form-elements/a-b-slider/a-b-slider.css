@@ -120,7 +120,7 @@
 .a-b-slider-container .range-bar-container .slider_line-container--bar {
   height: 8px;
   background-color: #1371EF;
-  transition: width 0.2s ease-in-out, transform 0.2s ease-in-out;
+  transition: none !important;
 }
 
 .a-b-slider-container .range-bar-container .slider-left {

@@ -29,19 +29,21 @@ export const Dialog = ({
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange} {...props}>
       <RadixDialog.Portal>
-        <RadixDialog.Overlay className="osc-DialogOverlay" />
-        <RadixDialog.Content className="osc osc-DialogContent">
-          <div>
-            <RadixDialog.Close asChild>
-              <IconButton
-                className="subtle-button"
-                icon="ri-close-line"
-                aria-label="Sluiten"
-              />
-            </RadixDialog.Close>
-          </div>
-          {children}
-        </RadixDialog.Content>
+        <div className="openstad">
+          <RadixDialog.Overlay className="osc-DialogOverlay" />
+          <RadixDialog.Content className="osc osc-DialogContent">
+            <div>
+              <RadixDialog.Close asChild>
+                <IconButton
+                  className="subtle-button"
+                  icon="ri-close-line"
+                  aria-label="Sluiten"
+                />
+              </RadixDialog.Close>
+            </div>
+            {children}
+          </RadixDialog.Content>
+        </div>
       </RadixDialog.Portal>
     </RadixDialog.Root>
   );
