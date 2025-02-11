@@ -4,7 +4,7 @@
   "description": "OpenStad API server",
   "main": "server.js",
   "scripts": {
-    "start": "node ./scripts/migrate-database.js && node server.js",
+    "start": "node server.js",
     "predev": "./scripts/predev.sh",
     "dev": "node nodemon-watch-server.js",
     "lint": "node ./scripts/lint",
