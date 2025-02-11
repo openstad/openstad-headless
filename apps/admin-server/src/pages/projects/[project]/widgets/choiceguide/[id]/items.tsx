@@ -31,9 +31,9 @@ import {useWidgetConfig} from "@/hooks/use-widget-config";
 import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/choiceguide/src/props';
 
 const weightSchema: z.ZodSchema = z.object({
-  weightX: z.string().optional(),
-  weightY: z.string().optional(),
-  weightAB: z.string().optional(),
+  weightX: z.any().optional(),
+  weightY: z.any().optional(),
+  weightAB: z.any().optional(),
   choice: z.record(z.lazy(() => weightSchema)).optional(),
 });
 
