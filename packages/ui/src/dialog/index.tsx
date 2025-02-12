@@ -18,8 +18,11 @@ export const Dialog = ({
   children,
   open,
   onOpenChange,
+  className,
   ...props
-}: PropsWithChildren<RadixDialog.DialogProps>) => {
+}: PropsWithChildren<RadixDialog.DialogProps & {
+  className?: string;
+}>) => {
   useEffect(() => {
     if (!open) {
       focusActiveResource();
@@ -31,7 +34,7 @@ export const Dialog = ({
       <RadixDialog.Portal>
         <div className="openstad">
           <RadixDialog.Overlay className="osc-DialogOverlay" />
-          <RadixDialog.Content className="osc osc-DialogContent">
+          <RadixDialog.Content className={`osc osc-DialogContent ${className}`}>
             <div>
               <RadixDialog.Close asChild>
                 <IconButton

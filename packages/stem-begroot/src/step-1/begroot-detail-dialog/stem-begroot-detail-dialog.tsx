@@ -147,6 +147,7 @@ export const StemBegrootResourceDetailDialog = ({
     <Dialog
       open={openDetailDialog}
       onOpenChange={setOpenDetailDialog}
+      className="begrootmodule-dialog"
       children={
         <Carousel
           startIndex={resourceDetailIndex}
