@@ -140,6 +140,8 @@ export const BegrotenSelectedOverview = ({
             <Spacer size={1.5}/>
           }
 
+          <Heading3 className='step2Title'>{step2Title}</Heading3>
+
           {resourcesToShow.map((resource) => {
             let defaultImage = '';
 
@@ -159,7 +161,6 @@ export const BegrotenSelectedOverview = ({
 
             return (
               <>
-              <Heading3 className='step2Title'>{step2Title}</Heading3>
               <React.Fragment key={`budget-overview-row-${resource.id}`}>
                 <div className="budget-two-text-row-spaced">
                   <section className={`budget-overview-row ${hasImages}`}>
