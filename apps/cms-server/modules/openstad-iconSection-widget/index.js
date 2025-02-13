@@ -57,7 +57,7 @@ module.exports = {
             target: {
               label: 'Open link in nieuw venster',
               type: 'boolean',
-              def: true
+              def: false
             }
           }
         }
