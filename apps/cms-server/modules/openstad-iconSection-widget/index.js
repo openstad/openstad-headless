@@ -54,6 +54,11 @@ module.exports = {
               label: 'Link url',
               type: 'url'
             },
+            target: {
+              label: 'Open link in nieuw venster',
+              type: 'boolean',
+              def: false
+            }
           }
         }
       }
