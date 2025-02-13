@@ -626,7 +626,7 @@ router.route('/:projectId') //(\\d+)
           await adapter.service.updateClient({ authConfig: merged, project });
           // delete req.body.config?.auth?.provider?.[authConfig.provider]?.authTypes;
           // delete req.body.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
-          delete req.body.config?.auth?.provider?.[authConfig.provider]?.requiredUserFields;
+          // delete req.body.config?.auth?.provider?.[authConfig.provider]?.requiredUserFields;
           delete req.body.config?.auth?.provider?.[authConfig.provider]?.config;
         }
       }

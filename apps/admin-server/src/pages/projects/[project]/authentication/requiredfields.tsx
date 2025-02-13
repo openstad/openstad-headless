@@ -102,7 +102,7 @@ export default function ProjectAuthenticationRequiredFields() {
   
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const project = await updateProject({
+      const updatedConfig = {
         auth: {
           provider: {
             openstad: {
@@ -119,8 +119,12 @@ export default function ProjectAuthenticationRequiredFields() {
             }
           }
         }
-      });
-      if (project) {
+      };
+
+      const project = await updateProject(updatedConfig);
+      const doubleSave = await updateProject(updatedConfig);
+
+      if ( doubleSave && project ) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.')

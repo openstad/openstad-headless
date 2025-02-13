@@ -1,6 +1,6 @@
 import './stem-begroot-detail-dialog.css';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Icon,
   IconButton,
@@ -72,6 +72,7 @@ export const StemBegrootResourceDetailDialog = ({
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
+  const [carouselIndexSetter, setCarouselIndexSetter] = useState<((index: number) => void) | null>(null);
 
   const groupedTags: { [key: string]: number[] } = {};
 
@@ -136,15 +137,23 @@ export const StemBegrootResourceDetailDialog = ({
     }
   }
 
+  const handleBeforeIndexChange = () => {
+    if (carouselIndexSetter) {
+      carouselIndexSetter(0);
+    }
+  };
+
   return (
     <Dialog
       open={openDetailDialog}
       onOpenChange={setOpenDetailDialog}
+      className="begrootmodule-dialog"
       children={
         <Carousel
           startIndex={resourceDetailIndex}
           buttonText={{next: 'Volgende inzending', previous: 'Vorige inzending'}}
           items={filtered || []}
+          beforeIndexChange={handleBeforeIndexChange}
           itemRenderer={(resource) => {
             const canUseButton = resourceBtnEnabled(resource);
             const primaryButtonText = resourceBtnTextHandler(resource);
@@ -191,6 +200,7 @@ export const StemBegrootResourceDetailDialog = ({
                     <Carousel
                       items={resourceImages}
                       buttonText={{next: 'Volgende afbeelding', previous: 'Vorige afbeelding'}}
+                      setIndexInParent={setCarouselIndexSetter}
                       itemRenderer={(i) => {
                         if (i.url) {
                           return <Image src={i.url}/>

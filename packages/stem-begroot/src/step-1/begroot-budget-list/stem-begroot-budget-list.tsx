@@ -56,24 +56,28 @@ export const StemBegrootBudgetList = ({
 
   return (
     <>
-      {showInfoMenu && (
+      {(showInfoMenu || !!introText) && (
         <section className="stem-begroot-budget-list">
-          <div className="stem-begroot-budget-list-used-budgets">
-            <div className="stem-begroot-helptext-and-budget-section-helptext">
-              <Paragraph>{introText}</Paragraph>
+          {!!introText && (
+            <div className="stem-begroot-budget-list-used-budgets">
+              <div className="stem-begroot-helptext-and-budget-section-helptext">
+                <Paragraph>{introText}</Paragraph>
+              </div>
             </div>
-          </div>
-          <BudgetStatusPanel
-            typeIsBudgeting={typeIsBudgeting}
-            maxNrOfResources={maxNrOfResources}
-            nrOfResourcesSelected={selectedResources.length}
-            maxBudget={maxBudget}
-            budgetUsed={budgetUsed}
-            showInfoMenu={showInfoMenu}
-            title={panelTitle}
-            budgetChosenTitle={budgetChosenTitle}
-            budgetRemainingTitle={budgetRemainingTitle}
-          />
+          )}
+          {showInfoMenu && (
+            <BudgetStatusPanel
+              typeIsBudgeting={typeIsBudgeting}
+              maxNrOfResources={maxNrOfResources}
+              nrOfResourcesSelected={selectedResources.length}
+              maxBudget={maxBudget}
+              budgetUsed={budgetUsed}
+              showInfoMenu={showInfoMenu}
+              title={panelTitle}
+              budgetChosenTitle={budgetChosenTitle}
+              budgetRemainingTitle={budgetRemainingTitle}
+            />
+          )}
         </section>
       )}
       <section className="budget-list-container">
