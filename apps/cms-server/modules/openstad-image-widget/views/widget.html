@@ -1,6 +1,6 @@
 <img
   id="{{data.widget.imageId}}"
-  src="{{apos.attachment.url(data.widget.uploadedImage)}}"
+  src="{{apos.attachment.url(data.widget.uploadedImage, { size: data.widget.imageSize | default('full') })}}"
   title="{{data.widget.uploadedImageTitle}}"
   alt="{{data.widget.uploadedImageAlt}}"
   class="image-component {% if data.widget.banner %} --negative {% endif %} {{data.widget.height}} {{data.widget.objectFit}}"

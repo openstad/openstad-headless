@@ -38,7 +38,7 @@ const renderCards = (items) => {
                 }
                 {item.href && (
                   <div>
-                    <Link href={item.href}>{item.linkText}</Link>
+                    <Link href={item.href} target={( typeof(item.target) !== "undefined" && item.target === false) ? '_self' : '_blank'}>{item.linkText}</Link>
                   </div>
                 )}
               </div>

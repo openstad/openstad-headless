@@ -16,9 +16,10 @@ interface Item {
   title?: string;
   size?: string;
   fit?: string;
+  imagesize?: string;
 }
 
-function Carousel({ images, title, size = 'large', fit = 'cover' }: Item) {
+function Carousel({ images, title, size = 'large', fit = 'cover', imagesize = 'full' }: Item) {
   const image = JSON.parse(images);
   const titleVisible = title === 'true' ? true : false;
 
@@ -43,7 +44,7 @@ function Carousel({ images, title, size = 'large', fit = 'cover' }: Item) {
         itemRenderer={(i) => (
           i._image.length > 0 ? (
             <Image
-              src={i._image[0].attachment?._urls.full}
+              src={i._image[0].attachment?._urls[imagesize] !== undefined ? i._image[0].attachment?._urls[imagesize] : i._image[0].attachment?._urls?.full}
               alt={i._image[0].alt || ''}
               imageFooter={titleVisible ? <Paragraph>{i._image[0].title}</Paragraph> : ''}
             />
