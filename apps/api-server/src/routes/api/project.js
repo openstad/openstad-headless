@@ -821,7 +821,9 @@ router.route('/:projectId(\\d+)/widget-css/:widgetType')
     let css = '';
     
     widgetSettings.css.forEach((file) => {
-      css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+      try {
+        css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+      } catch (e) {}
     });
     
     res.setHeader('Content-Type', 'text/css');

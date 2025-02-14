@@ -1,0 +1,50 @@
+.osc-distribution-modules-item-content .form-container {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  grid-gap: 1rem;
+  border: solid 1px var(--nlds-enquete-background-color,var(--nlds-default-background-color, #F0F4F8));
+}
+
+.osc-distribution-modules-item-content .form-container {
+  color: var(--osc-card-foreground);
+  padding: 1.5rem;
+  display: grid;
+  gap: 0.3rem 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.osc-distribution-modules-item-content .form-container .button-group {
+  grid-column: 1 / 2;
+}
+
+.osc-distribution-modules-item-content .form-container .utrecht-form-field .utrecht-form-field-description:empty{
+  margin: 0;
+}
+.osc-distribution-modules-item-content .form-container .utrecht-form-field-error-message.error-message:empty{
+  display: none;
+}
+
+.osc-distribution-modules-item-content button[type="submit"] {
+  margin: 0 0 10px 10px;
+}
+
+.osc-distribution-modules-item-content button[type="submit"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.osc-distribution-modules-item-content label.utrecht-form-label{
+  margin-block-end: 6px;
+}
+
+.osc-distribution-modules-item-content .--label-grid{
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.osc-distribution-modules-item-content .question-type-text textarea,
+.osc-distribution-modules-item-content .question-type-text input[type="text"]{
+  max-width: none;
+}

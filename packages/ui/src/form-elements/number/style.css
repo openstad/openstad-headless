@@ -1,0 +1,17 @@
+.form-container .question .utrecht-form-field__input.help-text-active {
+ padding-bottom: 20px;
+ position: relative;
+}
+
+.form-container .question .utrecht-form-field__input .help-text {
+ font-size: 12px;
+ position: absolute;
+
+ /* Defaults */
+ bottom: 0;
+ left: 0;
+ right: auto;
+ top: auto;
+ margin: 0;
+
+}
