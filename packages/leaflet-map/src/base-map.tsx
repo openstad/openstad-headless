@@ -213,10 +213,7 @@ const BaseMap = ({
     if (autoZoomAndCenter) {
     if (autoZoomAndCenter === 'area' && area) {
         const updatedArea = Array.isArray(area[0]) ? area : [area];
-        // Korte timeout om te zorgen dat de animatie te zien is. (inzomen van heel NL naar je polygoon)
-        setTimeout(() => {
           return setBoundsAndCenter(updatedArea as any);
-        }, 200);
       }
       if (currentMarkers?.length) {
         return setBoundsAndCenter(currentMarkers as any);
@@ -226,7 +223,7 @@ const BaseMap = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef, area]);
+  }, [mapRef, area, center]);
 
   // markers
   useEffect(() => {
