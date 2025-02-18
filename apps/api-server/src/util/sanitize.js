@@ -1,7 +1,7 @@
 var sanitize = require('sanitize-html');
 
 const removeEmojis = (text) => {
-	return !!test ? text.replace(/\p{Emoji}/gu, '') : text;
+	return !!text ? text.replace(/\p{Emoji}/gu, '') : text;
 };
 
 // Decorator for the sanitize function
