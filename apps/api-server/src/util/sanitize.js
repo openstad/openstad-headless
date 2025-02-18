@@ -1,12 +1,16 @@
 var sanitize = require('sanitize-html');
 
+const removeEmojis = (text) => {
+	return text.replace(/\p{Emoji}/gu, '');
+};
+
 // Decorator for the sanitize function
 // This prevents the bug where sanitize returns the string 'null' when null is passed
 const sanitizeIfNotNull = (text, tags) => {
 	if (text === null) {
 		return null;
 	}
-	
+	text = removeEmojis(text);
 	return sanitize(text, tags);
 }
 
