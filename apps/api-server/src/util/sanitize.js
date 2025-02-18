@@ -4,6 +4,20 @@ const removeEmojis = (text) => {
 	return !!text ? text.replace(/\p{Emoji}/gu, '') : text;
 };
 
+const normalizeUnicodeText = (text) => {
+	if (!text) return text;
+
+	return text.replace(/\uD835[\uDC00-\uDFFF]/g, char => {
+		const code = char.codePointAt(0);
+
+		if (code >= 0x1D400 && code <= 0x1D7FF) {
+			return String.fromCharCode(code - 0x1D400 + 65);
+		}
+
+		return char;
+	});
+}
+
 // Decorator for the sanitize function
 // This prevents the bug where sanitize returns the string 'null' when null is passed
 const sanitizeIfNotNull = (text, tags) => {
@@ -11,6 +25,7 @@ const sanitizeIfNotNull = (text, tags) => {
 		return null;
 	}
 	text = removeEmojis(text);
+	text = normalizeUnicodeText(text);
 	return sanitize(text, tags);
 }
 
