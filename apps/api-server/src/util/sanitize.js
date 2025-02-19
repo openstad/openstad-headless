@@ -4,26 +4,23 @@ const removeEmojis = (text) => {
 	return !!text ? text.replace(/\p{Emoji}/gu, '') : text;
 };
 
-const normalizeUnicodeText = (text) => {
+const normalizeUnicodeText = (text: string) => {
 	if (!text) return text;
 
-	const unicodeMap = {
-		'𝗔': 'A', '𝗕': 'B', '𝗖': 'C', '𝗗': 'D', '𝗘': 'E', '𝗙': 'F', '𝗚': 'G', '𝗛': 'H', '𝗜': 'I', '𝗝': 'J',
-		'𝗞': 'K', '𝗟': 'L', '𝗠': 'M', '𝗡': 'N', '𝗢': 'O', '𝗣': 'P', '𝗤': 'Q', '𝗥': 'R', '𝗦': 'S', '𝗧': 'T',
-		'𝗨': 'U', '𝗩': 'V', '𝗪': 'W', '𝗫': 'X', '𝗬': 'Y', '𝗭': 'Z',
-		'𝗮': 'a', '𝗯': 'b', '𝗰': 'c', '𝗱': 'd', '𝗲': 'e', '𝗳': 'f', '𝗴': 'g', '𝗵': 'h', '𝗶': 'i', '𝗷': 'j',
-		'𝗸': 'k', '𝗹': 'l', '𝗺': 'm', '𝗻': 'n', '𝗼': 'o', '𝗽': 'p', '𝗾': 'q', '𝗿': 'r', '𝘀': 's', '𝘁': 't',
-		'𝘂': 'u', '𝘃': 'v', '𝘄': 'w', '𝘅': 'x', '𝘆': 'y', '𝘇': 'z',
-		'𝘈': 'A', '𝘉': 'B', '𝘊': 'C', '𝘋': 'D', '𝘌': 'E', '𝘍': 'F', '𝘎': 'G', '𝘏': 'H', '𝘐': 'I', '𝘑': 'J',
-		'𝘒': 'K', '𝘓': 'L', '𝘔': 'M', '𝘕': 'N', '𝘖': 'O', '𝘗': 'P', '𝘘': 'Q', '𝘙': 'R', '𝘚': 'S', '𝘛': 'T',
-		'𝘜': 'U', '𝘝': 'V', '𝘞': 'W', '𝘟': 'X', '𝘠': 'Y', '𝘡': 'Z',
-		'𝘢': 'a', '𝘣': 'b', '𝘤': 'c', '𝘥': 'd', '𝘦': 'e', '𝘧': 'f', '𝘨': 'g', '𝘩': 'h', '𝘪': 'i', '𝘫': 'j',
-		'𝘬': 'k', '𝘭': 'l', '𝘮': 'm', '𝘯': 'n', '𝘰': 'o', '𝘱': 'p', '𝘲': 'q', '𝘳': 'r', '𝘴': 's', '𝘵': 't',
-		'𝘶': 'u', '𝘷': 'v', '𝘸': 'w', '𝘹': 'x', '𝘺': 'y', '𝘻': 'z'
-	};
+	return Array.from(text).map((char: string) => {
+		const codePoint = char.codePointAt(0);
+		if (codePoint >= 0x1D400 && codePoint <= 0x1D7FF) {
+			const isLowercase = (codePoint >= 0x1D41A && codePoint <= 0x1D433) || (codePoint >= 0x1D44E && codePoint <= 0x1D454) || (codePoint >= 0x1D456 && codePoint <= 0x1D467) || (codePoint >= 0x1D482 && codePoint <= 0x1D49B) || (codePoint >= 0x1D4B6 && codePoint <= 0x1D4B9) || (codePoint >= 0x1D4BB && codePoint <= 0x1D4BB) || (codePoint >= 0x1D4BD && codePoint <= 0x1D4C3) || (codePoint >= 0x1D4C5 && codePoint <= 0x1D4CF) || (codePoint >= 0x1D4EA && codePoint <= 0x1D503) || (codePoint >= 0x1D51E && codePoint <= 0x1D537) || (codePoint >= 0x1D552 && codePoint <= 0x1D56B) || (codePoint >= 0x1D586 && codePoint <= 0x1D59F) || (codePoint >= 0x1D5BA && codePoint <= 0x1D5D3) || (codePoint >= 0x1D5EE && codePoint <= 0x1D607) || (codePoint >= 0x1D622 && codePoint <= 0x1D63B) || (codePoint >= 0x1D656 && codePoint <= 0x1D66F) || (codePoint >= 0x1D68A && codePoint <= 0x1D6A5) || (codePoint >= 0x1D6C2 && codePoint <= 0x1D6DA) || (codePoint >= 0x1D6DC && codePoint <= 0x1D6E1) || (codePoint >= 0x1D6FC && codePoint <= 0x1D714) || (codePoint >= 0x1D716 && codePoint <= 0x1D71B) || (codePoint >= 0x1D736 && codePoint <= 0x1D74E) || (codePoint >= 0x1D750 && codePoint <= 0x1D755) || (codePoint >= 0x1D770 && codePoint <= 0x1D788) || (codePoint >= 0x1D78A && codePoint <= 0x1D78F) || (codePoint >= 0x1D7AA && codePoint <= 0x1D7C2) || (codePoint >= 0x1D7C4 && codePoint <= 0x1D7C9);
+			const normalizedChar = String.fromCharCode(
+				(codePoint - 0x1D400) % 26 + (isLowercase ? 97 : 65)
+			);
 
-	return text.split('').map(char => unicodeMap[char] || char).join('');
-}
+			return normalizedChar;
+		}
+
+		return char;
+	}).join('');
+};
 
 // Decorator for the sanitize function
 // This prevents the bug where sanitize returns the string 'null' when null is passed
