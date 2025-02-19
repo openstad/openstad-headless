@@ -4,10 +4,10 @@ const removeEmojis = (text) => {
 	return !!text ? text.replace(/\p{Emoji}/gu, '') : text;
 };
 
-const normalizeUnicodeText = (text: string) => {
+const normalizeUnicodeText = (text) => {
 	if (!text) return text;
 
-	return Array.from(text).map((char: string) => {
+	return Array.from(text).map((char) => {
 		const codePoint = char.codePointAt(0);
 		if (codePoint >= 0x1D400 && codePoint <= 0x1D7FF) {
 			const isLowercase = (codePoint >= 0x1D41A && codePoint <= 0x1D433) || (codePoint >= 0x1D44E && codePoint <= 0x1D454) || (codePoint >= 0x1D456 && codePoint <= 0x1D467) || (codePoint >= 0x1D482 && codePoint <= 0x1D49B) || (codePoint >= 0x1D4B6 && codePoint <= 0x1D4B9) || (codePoint >= 0x1D4BB && codePoint <= 0x1D4BB) || (codePoint >= 0x1D4BD && codePoint <= 0x1D4C3) || (codePoint >= 0x1D4C5 && codePoint <= 0x1D4CF) || (codePoint >= 0x1D4EA && codePoint <= 0x1D503) || (codePoint >= 0x1D51E && codePoint <= 0x1D537) || (codePoint >= 0x1D552 && codePoint <= 0x1D56B) || (codePoint >= 0x1D586 && codePoint <= 0x1D59F) || (codePoint >= 0x1D5BA && codePoint <= 0x1D5D3) || (codePoint >= 0x1D5EE && codePoint <= 0x1D607) || (codePoint >= 0x1D622 && codePoint <= 0x1D63B) || (codePoint >= 0x1D656 && codePoint <= 0x1D66F) || (codePoint >= 0x1D68A && codePoint <= 0x1D6A5) || (codePoint >= 0x1D6C2 && codePoint <= 0x1D6DA) || (codePoint >= 0x1D6DC && codePoint <= 0x1D6E1) || (codePoint >= 0x1D6FC && codePoint <= 0x1D714) || (codePoint >= 0x1D716 && codePoint <= 0x1D71B) || (codePoint >= 0x1D736 && codePoint <= 0x1D74E) || (codePoint >= 0x1D750 && codePoint <= 0x1D755) || (codePoint >= 0x1D770 && codePoint <= 0x1D788) || (codePoint >= 0x1D78A && codePoint <= 0x1D78F) || (codePoint >= 0x1D7AA && codePoint <= 0x1D7C2) || (codePoint >= 0x1D7C4 && codePoint <= 0x1D7C9);
