@@ -1,5 +1,3 @@
-import nunjucks from 'nunjucks';
-
 type Tag = {
   label?: string;
   name?: string;
@@ -101,16 +99,16 @@ function formatDate(dateStr: string, formatStr: string): string {
 }
 
 // Apply filters to Nunjucks environment
-export function applyFilters(env: nunjucks.Environment) {
-  env.addFilter('dump', dump);
-  env.addFilter('cleanArray', cleanArray);
-  env.addFilter('capitalize', capitalize);
-  env.addFilter('truncate', truncate);
-  env.addFilter('lowercase', lowercase);
-  env.addFilter('uppercase', uppercase);
-  env.addFilter('replace', replace);
-  env.addFilter('tags', tags);
-  env.addFilter('status', status);
-  env.addFilter('tagGroup', tagGroup);
-  env.addFilter('formatDate', formatDate);
+export default {
+  'dump': dump,
+  'cleanArray': cleanArray,
+  'capitalize': capitalize,
+  'truncate': truncate,
+  'lowercase': lowercase,
+  'uppercase': uppercase,
+  'replace': replace,
+  'tags': tags,
+  'status': status,
+  'tagGroup': tagGroup,
+  'formatDate': formatDate
 }
