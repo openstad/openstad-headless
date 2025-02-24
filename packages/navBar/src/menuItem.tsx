@@ -34,7 +34,7 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
   };
 
   const getCurrentPage = (e: string) => {
-    return document.title.split('-')[0].includes(e) ? 'page' : undefined;
+    return window.location.href.includes(e.replaceAll(' ', '-')) ? 'page' : undefined;
   }
 
 

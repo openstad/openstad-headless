@@ -20,7 +20,10 @@ function NavBar({ home, content, prefix = '' }: Item) {
   }, [])
 
   const getCurrentPage = (e: string) => {
-    return document.title.split('-')[0].includes(e) ? 'page' : undefined;
+    if (e === 'Home') {
+      return window.location.pathname === '/' ? 'page' : undefined;
+    }
+
   }
 
 
