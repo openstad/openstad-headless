@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
@@ -22,6 +23,7 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   afterSubmitUrl: z.string().optional(),
+  showProgress: z.boolean().optional(),
 });
 
 export default function WidgetDistributionModuleGeneral(
@@ -38,6 +40,7 @@ export default function WidgetDistributionModuleGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
+      showProgress: props.showProgress || false
     },
   });
 
@@ -103,6 +106,20 @@ export default function WidgetDistributionModuleGeneral(
                       onFieldChange(field.name, e.target.value);
                     }}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showProgress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Progressiebalk tonen?</FormLabel>
+                <FormControl>
+                  {YesNoSelect(field, props)}
                 </FormControl>
                 <FormMessage />
               </FormItem>

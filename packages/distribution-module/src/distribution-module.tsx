@@ -38,6 +38,7 @@ export type DistributionModuleProps =
     pointsErrorMessage?: string;
     prependText?: string;
     appendText?: string;
+    showProgress?: boolean;
 };
 
 export type Item = {
@@ -132,6 +133,15 @@ function DistributionModule(props: DistributionModuleProps) {
                                     </Paragraph>
                                 </div>
                             </div>
+
+                            {props.showProgress && (
+                              <progress
+                                className={`osc-distribution-modules-content__points__progress`}
+                                value={props.total - distributeLeft}
+                                max={props.total}
+                              />
+                            )}
+
                             <div className={`osc-distribution-modules-content__points__error`}>
                                 {(distributeLeft < 0 && (props.pointsErrorTitle || props.pointsErrorMessage)) && (
                                     <Banner
@@ -158,6 +168,15 @@ function DistributionModule(props: DistributionModuleProps) {
                                     </Paragraph>
                                 </div>
                             </div>
+
+                            {props.showProgress && (
+                              <progress
+                                className={`osc-distribution-modules-content__points__progress`}
+                                value={props.total - distributeLeft}
+                                max={props.total}
+                              />
+                            )}
+
                             <div className={`osc-distribution-modules-content__budget__error`}>
                                 {(distributeLeft < 0 && (props.budgetErrorTitle || props.budgetErrorMessage)) && (
                                     <Banner
@@ -173,13 +192,13 @@ function DistributionModule(props: DistributionModuleProps) {
                 </div>
 
                 <Form
+                    {...props}
                     fields={props.items || []}
                     submitHandler={onSubmit}
                     title=""
                     submitText="Versturen"
                     getValuesOnChange={valuesChanged}
                     submitDisabled={distributeLeft !== 0}
-                    {...props}
                 />
             </div>
 

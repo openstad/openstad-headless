@@ -48,3 +48,22 @@
 .osc-distribution-modules-item-content .question-type-text input[type="text"]{
   max-width: none;
 }
+
+.osc-distribution-modules-item-content .osc {
+  min-height: 155px;
+  height: 155px;
+}
+
+.osc-distribution-modules-content__points__progress {
+  border-radius: 4px;
+  width: 100%;
+  height: 22px;
+}
+.osc-distribution-modules-content__points__progress::-webkit-progress-bar {
+  background-color: #b6b6b6;
+  border-radius: 4px;
+}
+.osc-distribution-modules-content__points__progress::-webkit-progress-value {
+  background-color: #4646ff;
+  border-radius: 4px;
+}
