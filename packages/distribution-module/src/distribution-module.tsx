@@ -121,13 +121,13 @@ function DistributionModule(props: DistributionModuleProps) {
                 <div className={`osc-distribution-modules-content`}>
                     {props.choice === 'points' && (
                         <>
-                            <div className={`osc-distribution-modules-content__points`}>
-                                <div className={`osc-distribution-modules-content__points__remaining`}>
+                            <div className={`osc-distribution-modules-content-container`}>
+                                <div className={`osc-distribution-modules-content__remaining`}>
                                     <Paragraph>{props.pointsTotalText}</Paragraph>
                                     <Paragraph>{props.total || 0} <span className={'append'}>{props.appendText}</span>
                                     </Paragraph>
                                 </div>
-                                <div className={`osc-distribution-modules-content__points__leftover`}>
+                                <div className={`osc-distribution-modules-content__leftover`}>
                                     <Paragraph>{props.pointsLeftoverText}</Paragraph>
                                     <Paragraph>{distributeLeft} <span className={'append'}>{props.appendText}</span>
                                     </Paragraph>
@@ -136,13 +136,13 @@ function DistributionModule(props: DistributionModuleProps) {
 
                             {props.showProgress && (
                               <progress
-                                className={`osc-distribution-modules-content__points__progress`}
+                                className={`osc-distribution-modules-content__progress`}
                                 value={props.total - distributeLeft}
                                 max={props.total}
                               />
                             )}
 
-                            <div className={`osc-distribution-modules-content__points__error`}>
+                            <div className={`osc-distribution-modules-content__error`}>
                                 {(distributeLeft < 0 && (props.pointsErrorTitle || props.pointsErrorMessage)) && (
                                     <Banner
                                         big={true}
@@ -156,13 +156,13 @@ function DistributionModule(props: DistributionModuleProps) {
                     )}
                     {props.choice === 'budget' && (
                         <>
-                            <div className={`osc-distribution-modules-content__budget`}>
-                                <div className={`osc-distribution-modules-content__budget__remaining`}>
+                            <div className={`osc-distribution-modules-content-container`}>
+                                <div className={`osc-distribution-modules-content__remaining`}>
                                     <Paragraph>{props.budgetTotalText}</Paragraph>
                                     <Paragraph><span className={'prepend'}>{props.prependText}</span> {props.total || 0}
                                     </Paragraph>
                                 </div>
-                                <div className={`osc-distribution-modules-content__budget__leftover`}>
+                                <div className={`osc-distribution-modules-content__leftover`}>
                                     <Paragraph>{props.budgetLeftoverText}</Paragraph>
                                     <Paragraph><span className={'prepend'}>{props.prependText}</span> {distributeLeft}
                                     </Paragraph>
@@ -171,13 +171,13 @@ function DistributionModule(props: DistributionModuleProps) {
 
                             {props.showProgress && (
                               <progress
-                                className={`osc-distribution-modules-content__points__progress`}
+                                className={`osc-distribution-modules-content__progress`}
                                 value={props.total - distributeLeft}
                                 max={props.total}
                               />
                             )}
 
-                            <div className={`osc-distribution-modules-content__budget__error`}>
+                            <div className={`osc-distribution-modules-content__error`}>
                                 {(distributeLeft < 0 && (props.budgetErrorTitle || props.budgetErrorMessage)) && (
                                     <Banner
                                         big={true}
