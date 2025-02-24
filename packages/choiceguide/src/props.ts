@@ -88,6 +88,7 @@ export type Item = {
     labelB?: string;
     imageA?: string;
     imageB?: string;
+    defaultValue?: string;
 };
 
 export type Option = {
@@ -99,6 +100,8 @@ export type Title = {
     text?: string;
     key: string;
     weights?: Record<string, Weight>;
+    isOtherOption?: boolean;
+    defaultValue?: boolean;
 };
 
 export type Weight = {

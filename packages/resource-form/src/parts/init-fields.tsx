@@ -50,6 +50,10 @@ export const InitializeFormFields = (items, data) => {
                 placeholder: item.placeholder
             };
 
+            if ( item.defaultValue ) {
+                fieldData['defaultValue'] = item.defaultValue;
+            }
+
             switch (item.type) {
                 case 'checkbox':
                 case 'select':
@@ -58,9 +62,23 @@ export const InitializeFormFields = (items, data) => {
                         item.options &&
                         item.options.length > 0
                     ) {
+                        const defaultValue: string[] = [];
+
                         fieldData['choices'] = item.options.map((option) => {
-                            return { value: option.titles[0].key, label: option.titles[0].key, isOtherOption: option.titles[0].isOtherOption}
+                            if (option.titles[0].defaultValue) {
+                                defaultValue.push(option.titles[0].key);
+                            }
+                            return {
+                                value: option.titles[0].key,
+                                label: option.titles[0].key,
+                                isOtherOption: option.titles[0].isOtherOption,
+                                defaultValue: option.titles[0].defaultValue
+                            }
                         });
+
+                        if (defaultValue.length > 0) {
+                            fieldData['defaultValue'] = defaultValue;
+                        }
                     }
                     break;
                 case 'imageUpload':

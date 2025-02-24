@@ -62,6 +62,7 @@ export type Item = {
     }>;
     options?: Array<Option>;
     placeholder?: string,
+    defaultValue?: string,
 };
 
 export type Option = {
@@ -77,6 +78,7 @@ export type Title = {
     text?: string;
     key: string;
     isOtherOption?: boolean;
+    defaultValue?: boolean;
     weights?: Record<string, Weight>;
 };
 

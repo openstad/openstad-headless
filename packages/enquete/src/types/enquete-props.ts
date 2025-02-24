@@ -37,6 +37,7 @@ export type Item = {
   fieldRequired?: boolean;
   showSmileys?: boolean;
   placeholder?: string;
+  defaultValue?: string;
 };
 
 export type Option = {
@@ -48,6 +49,7 @@ export type Title = {
   text?: string;
   key: string;
   isOtherOption?: boolean;
+  defaultValue?: boolean;
 };
 
 export type Confirmation = {
