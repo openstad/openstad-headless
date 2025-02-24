@@ -172,6 +172,14 @@
   width: 100%;
 }
 
+.osc-distribution-modules-item-content.visible-disabled .form-widget .form-container {
+  opacity: 0.4;
+}
+
+.osc-distribution-modules-item-content.visible-disabled .form-widget .form-container > .question.question-type-number .utrecht-form-field__input {
+  background-color: #c5c5c5;
+}
+
 @media only screen and (max-width: 600px) {
   .osc-distribution-modules-item-content .osc-distribution-modules-content-container {
     flex-direction: column;

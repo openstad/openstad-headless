@@ -18,12 +18,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import React from "react";
 
 const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   afterSubmitUrl: z.string().optional(),
   showProgress: z.boolean().optional(),
+  formVisibility: z.string().optional(),
 });
 
 export default function WidgetDistributionModuleGeneral(
@@ -40,7 +43,8 @@ export default function WidgetDistributionModuleGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
-      showProgress: props.showProgress || false
+      showProgress: props.showProgress || false,
+      formVisibility: props?.formVisibility || 'always',
     },
   });
 
@@ -121,6 +125,30 @@ export default function WidgetDistributionModuleGeneral(
                 <FormControl>
                   {YesNoSelect(field, props)}
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="formVisibility"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Voor wie is de module zichtbaar?</FormLabel>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kies een optie" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="always">Iedereen</SelectItem>
+                    <SelectItem value="users">Ingelogde gebruikers en admins</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

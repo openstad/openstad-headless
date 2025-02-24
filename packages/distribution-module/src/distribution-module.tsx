@@ -16,7 +16,9 @@ import {
     Paragraph,
     Heading2,
     Heading3,
+    Heading6,
 } from '@utrecht/component-library-react';
+import hasRole from '../../lib/has-role';
 
 export type DistributionModuleProps =
     BaseProps &
@@ -38,6 +40,7 @@ export type DistributionModuleProps =
     pointsErrorMessage?: string;
     prependText?: string;
     appendText?: string;
+    formVisibility?: string;
     showProgress?: boolean;
 };
 
@@ -51,13 +54,19 @@ export type Item = {
 
 function DistributionModule(props: DistributionModuleProps) {
     const notifyCreate = () =>
-        toast.success('DistributionModule ingediend', {position: 'bottom-center'});
+        toast.success('Verdeling ingediend', {position: 'bottom-center'});
 
     const datastore = new DataStore(props);
 
     const {create: createSubmission} = datastore.useSubmissions({
         projectId: props.projectId,
     });
+
+    const {
+        data: currentUser
+    } = datastore.useCurrentUser({ ...props });
+
+    const formOnlyVisibleForUsers = !!props.formVisibility && props.formVisibility === 'users';
 
     const [distributeLeft, setDistributeLeft] = React.useState(props.total || 0);
 
@@ -86,6 +95,7 @@ function DistributionModule(props: DistributionModuleProps) {
                 prepend,
                 append,
                 format: choice,
+                disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
             };
         });
     }
@@ -110,7 +120,7 @@ function DistributionModule(props: DistributionModuleProps) {
 
     return (
         <div className="osc">
-            <div className="osc-distribution-modules-item-content">
+            <div className={`osc-distribution-modules-item-content ${(formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) ? 'visible-disabled' : ''}`}>
                 {props.title && <Heading2>{props.title}</Heading2>}
                 <div className="osc-distribution-modules-item-description">
                     {props.description && (
@@ -190,6 +200,25 @@ function DistributionModule(props: DistributionModuleProps) {
                         </>
                     )}
                 </div>
+
+                {
+                  (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
+                    <>
+                        <Banner className="big">
+                            <Heading6>Inloggen om deel te nemen.</Heading6>
+                            <Spacer size={1} />
+                            <Button
+                              type="button"
+                              onClick={() => {
+                                  document.location.href = props.login?.url || '';
+                              }}>
+                                Inloggen
+                            </Button>
+                        </Banner>
+                        <Spacer size={2} />
+                    </>
+                  )
+                }
 
                 <Form
                     {...props}
