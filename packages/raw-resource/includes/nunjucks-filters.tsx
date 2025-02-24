@@ -101,6 +101,20 @@ function formatDate(dateStr: string, formatStr: string): string {
 }
 
 // Apply filters to Nunjucks environment
+export default {
+  'dump': dump,
+  'cleanArray': cleanArray,
+  'capitalize': capitalize,
+  'truncate': truncate,
+  'lowercase': lowercase,
+  'uppercase': uppercase,
+  'replace': replace,
+  'tags': tags,
+  'status': status,
+  'tagGroup': tagGroup,
+  'formatDate': formatDate
+}
+
 export function applyFilters(env: nunjucks.Environment) {
   env.addFilter('dump', dump);
   env.addFilter('cleanArray', cleanArray);

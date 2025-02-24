@@ -14,8 +14,6 @@
     "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/types": "file:../types",
     "@openstad-headless/ui": "file:../ui",
-    "@types/nunjucks": "^3.2.6",
-    "nunjucks": "^3.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "swr": "^2.2.4"
