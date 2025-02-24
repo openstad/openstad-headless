@@ -49,7 +49,7 @@ function RawResource(props: RawResourceWidgetProps) {
 
         let rendered = updatedProps.rawInput;
 
-        const varMapping = {
+        const varMapping: { [key: string]: any } = {
           // here you can add variables that are available in the template
           projectId: updatedProps.projectId,
           resource: resource,
@@ -74,7 +74,7 @@ function RawResource(props: RawResourceWidgetProps) {
 
         // Get all variables fom the string
         const regex = /\{\{([^}]*)\}\}/g
-        const varsInString = [...updatedProps.rawInput.matchAll(regex)];
+        const varsInString = Array.from(updatedProps.rawInput.matchAll(regex));
 
 
         if (varsInString && varsInString.length) {
@@ -106,7 +106,7 @@ function RawResource(props: RawResourceWidgetProps) {
                 // So we need to split the filter name and the arguments
                 const filterParts = filter.split('(');
                 const filterName = filterParts[0];
-                let filterArgs = [];
+                let filterArgs: string[] = [];
                 if (filterParts.length > 1) {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                   filterArgs = filterParts[1].replace(')', '').split(',').map(f => f.trim().replaceAll("'", "").replaceAll('"', ''));
