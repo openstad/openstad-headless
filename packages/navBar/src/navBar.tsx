@@ -19,6 +19,14 @@ function NavBar({ home, content, prefix = '' }: Item) {
     document.dispatchEvent(event);
   }, [])
 
+  const getCurrentPage = (e: string) => {
+    if (e === 'Home') {
+      return window.location.pathname === '/' ? 'page' : undefined;
+    }
+
+  }
+
+
   return (
     <div className='container'>
       <nav id="main-menu">
@@ -29,7 +37,7 @@ function NavBar({ home, content, prefix = '' }: Item) {
                 key={index}
                 className="item-container"
               >
-                <Link className="level-1" key={index} href={item._url} aria-current="page">{item.title}</Link>
+                <Link className="level-1" key={index} href={item._url} aria-current={getCurrentPage(item.title)}>{item.title}</Link>
               </div>
             )
           })
