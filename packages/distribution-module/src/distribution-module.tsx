@@ -100,8 +100,8 @@ function DistributionModule(props: DistributionModuleProps) {
         });
     }
 
-    const valuesChanged = (values: { [p: string]: string }) => {
-        const checkIfValuesAreNotEmpty = Object.values(values).filter((value: string) => value !== '');
+    const valuesChanged = (values: { [p: string]: string | [] | Record<number, never> }) => {
+        const checkIfValuesAreNotEmpty = Object.values(values).filter((value): value is string => typeof value === "string" && value !== "");
 
         if (checkIfValuesAreNotEmpty.length === 0) {
             setDistributeLeft(props.total);
@@ -109,9 +109,7 @@ function DistributionModule(props: DistributionModuleProps) {
         }
 
         const total = props.total;
-        const valuesTotal = Object.values(values).reduce((acc: number, value: string) => {
-            return acc + parseInt(value || "0")
-        }, 0);
+        const valuesTotal = checkIfValuesAreNotEmpty.reduce((acc: number, value) => acc + parseInt(value || "0"), 0);
 
         const left = total - valuesTotal;
 

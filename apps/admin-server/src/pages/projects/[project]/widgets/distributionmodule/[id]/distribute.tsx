@@ -9,9 +9,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
@@ -39,7 +37,8 @@ export default function WidgetDistributionModuleDistribute(
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
+    const validChoice = values.choice === "points" || values.choice === "budget" ? values.choice : "budget";
+    props.updateConfig({ ...props, ...values, choice: validChoice });
   }
 
   type PropsKeys = keyof (DistributionModuleProps);
