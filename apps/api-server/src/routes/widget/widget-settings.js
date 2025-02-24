@@ -252,6 +252,17 @@ let moduleDefinitions = {
     defaultConfig: {
       projectId: null,
     },
+  },
+  distributionmodule: {
+    packageName: '@openstad-headless/distribution-module',
+    directory: 'distribution-module',
+    js: ['dist/distribution-module.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessDistributionModule',
+    componentName: 'DistributionModule',
+    defaultConfig: {
+      projectId: null,
+    },
   }
 };
 

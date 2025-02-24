@@ -10,6 +10,7 @@ import type { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/h
 import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-elements/image-choice";
 import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
 import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
+import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/number";
 
 export type FormProps = {
     title?: string;
@@ -29,6 +30,7 @@ export type FormProps = {
 
 type CombinedFieldPropsWithType =
     | ({ type?: 'text' } & TextInputProps)
+    | ({ type?: 'number' } & NumberInputProps)
     | ({ type?: 'tickmark-slider' } & TickmarkSliderProps)
     | ({ type?: 'range' } & RangeSliderProps)
     | ({ type?: 'checkbox' } & CheckboxFieldProps)
@@ -59,6 +61,7 @@ type CombinedFieldProps = (
     DocumentUploadProps |
     HiddenInputProps |
     ImageChoiceFieldProps |
+    NumberInputProps |
     InfoFieldProps
 );
 

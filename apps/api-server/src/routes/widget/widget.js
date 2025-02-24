@@ -303,6 +303,26 @@ function getWidgetJavascriptOutput(
       }
     });
 
+  } else if ( widgetSettings.componentName === 'DistributionModule' ) {
+
+    widgetSettings.js.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/distribution-module', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`JS file not found: ${filePath}`);
+      } else {
+        widgetOutput += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
+    widgetSettings.css.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/distribution-module', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`CSS file not found: ${filePath}`);
+      } else {
+        css += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
   } else {
     widgetSettings.js.forEach((file) => {
       console.log(`${widgetSettings.packageName}/${file}`);
