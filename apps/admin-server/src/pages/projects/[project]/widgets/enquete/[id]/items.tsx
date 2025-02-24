@@ -28,8 +28,8 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
-import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from 'next/router';
+import {YesNoSelect} from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -45,7 +45,7 @@ const formSchema = z.object({
     .array(
       z.object({
         trigger: z.string(),
-        titles: z.array(z.object({ text: z.string().optional(), key: z.string(), isOtherOption: z.boolean().optional() })),
+        titles: z.array(z.object({ text: z.string().optional(), key: z.string(), isOtherOption: z.boolean().optional(), defaultValue: z.boolean().optional() })),
       })
     )
     .optional(),
@@ -65,6 +65,7 @@ const formSchema = z.object({
   fieldRequired: z.boolean().optional(),
   showSmileys: z.boolean().optional(),
   placeholder: z.string().optional(),
+  defaultValue: z.string().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -120,6 +121,7 @@ export default function WidgetEnqueteItems(
           imageDescription: values.imageDescription || '',
           fieldRequired: values.fieldRequired || false,
           showSmileys: values.showSmileys || false,
+          defaultValue: values.defaultValue || '',
           placeholder: values.placeholder || '',
         },
       ]);
@@ -182,6 +184,7 @@ export default function WidgetEnqueteItems(
     imageDescription: '',
     fieldRequired: false,
     showSmileys: false,
+    defaultValue: '',
     placeholder: '',
   });
 
@@ -226,6 +229,7 @@ export default function WidgetEnqueteItems(
         imageDescription: selectedItem.imageDescription || '',
         fieldRequired: selectedItem.fieldRequired || false,
         showSmileys: selectedItem.showSmileys || false,
+        defaultValue: selectedItem.defaultValue || '',
         placeholder: selectedItem.placeholder || '',
       });
       setOptions(selectedItem.options || []);
@@ -421,7 +425,8 @@ export default function WidgetEnqueteItems(
                     <Separator className="mt-2" />
                     {hasList() && (
                       (() => {
-                        const activeOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                        const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                        const activeOption = currentOption !== -1 ? currentOption : options.length;
 
                         return (
                           <>
@@ -440,7 +445,7 @@ export default function WidgetEnqueteItems(
                             <FormField
                               control={form.control}
                               // @ts-ignore
-                              name={`options.${activeOption}.isOtherOption`}
+                              name={`options.${activeOption}.titles.0.isOtherOption`}
                               render={({field}) => (
                                 <>
                                   <FormItem
@@ -451,11 +456,7 @@ export default function WidgetEnqueteItems(
                                       flexDirection: 'row',
                                       marginTop: '10px'
                                     }}>
-                                    <Checkbox
-                                      onCheckedChange={(checked: boolean) => {
-                                        form.setValue(`options.${activeOption}.titles.0.isOtherOption`, checked);
-                                      }}
-                                    />
+                                    {YesNoSelect(field, props)}
                                     <FormLabel
                                       style={{marginTop: 0, marginLeft: '6px'}}>Is &apos;Anders, namelijk...&apos;</FormLabel>
                                     <FormMessage/>
@@ -468,6 +469,36 @@ export default function WidgetEnqueteItems(
                                 </>
                               )}
                             />
+
+                            { form.watch('questionType') === 'multiple' && (
+                              <FormField
+                                control={form.control}
+                                // @ts-ignore
+                                name={`options.${activeOption}.titles.0.defaultValue`}
+                                render={({field}) => (
+                                  <>
+                                    <FormItem
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        flexDirection: 'row',
+                                        marginTop: '10px'
+                                      }}>
+                                      {YesNoSelect(field, props)}
+                                      <FormLabel
+                                        style={{marginTop: 0, marginLeft: '6px'}}>Standaard aangevinkt?</FormLabel>
+                                      <FormMessage/>
+                                    </FormItem>
+                                    <FormDescription>
+                                      Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                    </FormDescription>
+                                  </>
+                                )}
+                              />
+                            )}
+
+
                           </>
                           );
                         })()
@@ -942,6 +973,20 @@ export default function WidgetEnqueteItems(
                                 <SelectItem value="true">Ja</SelectItem>
                               </SelectContent>
                             </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('questionType') === 'open' && (
+                      <FormField
+                        control={form.control}
+                        name="defaultValue"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Standaard ingevulde waarde</FormLabel>
+                            <Input {...field} />
                             <FormMessage />
                           </FormItem>
                         )}
