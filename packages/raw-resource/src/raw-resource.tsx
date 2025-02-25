@@ -33,9 +33,12 @@ function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
     splitVarName.shift();
 
     splitVarName.forEach((vn) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       if (varValue && varValue[vn]) {
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        varValue = varValue[vn];
+        varValue = varValue[vn] as string;
       } else {
         varValue = '';
       }
