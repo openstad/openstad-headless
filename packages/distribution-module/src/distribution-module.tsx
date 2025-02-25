@@ -116,6 +116,10 @@ function DistributionModule(props: DistributionModuleProps) {
         setDistributeLeft(left);
     }
 
+    const formatNumber = (num: string | number) => {
+        return (num + '').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
     return (
         <div className="osc">
             <div className={`osc-distribution-modules-item-content ${(formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) ? 'visible-disabled' : ''}`}>
@@ -132,12 +136,12 @@ function DistributionModule(props: DistributionModuleProps) {
                             <div className={`osc-distribution-modules-content-container`}>
                                 <div className={`osc-distribution-modules-content__remaining`}>
                                     <Paragraph>{props.pointsTotalText}</Paragraph>
-                                    <Paragraph>{props.total || 0} <span className={'append'}>{props.appendText}</span>
+                                    <Paragraph>{formatNumber(props.total || 0)} <span className={'append'}>{props.appendText}</span>
                                     </Paragraph>
                                 </div>
                                 <div className={`osc-distribution-modules-content__leftover`}>
                                     <Paragraph>{props.pointsLeftoverText}</Paragraph>
-                                    <Paragraph>{distributeLeft} <span className={'append'}>{props.appendText}</span>
+                                    <Paragraph>{formatNumber(distributeLeft)} <span className={'append'}>{props.appendText}</span>
                                     </Paragraph>
                                 </div>
                             </div>
@@ -167,12 +171,12 @@ function DistributionModule(props: DistributionModuleProps) {
                             <div className={`osc-distribution-modules-content-container`}>
                                 <div className={`osc-distribution-modules-content__remaining`}>
                                     <Paragraph>{props.budgetTotalText}</Paragraph>
-                                    <Paragraph><span className={'prepend'}>{props.prependText}</span> {props.total || 0}
+                                    <Paragraph><span className={'prepend'}>{props.prependText}</span> {formatNumber(props.total || 0)}
                                     </Paragraph>
                                 </div>
                                 <div className={`osc-distribution-modules-content__leftover`}>
                                     <Paragraph>{props.budgetLeftoverText}</Paragraph>
-                                    <Paragraph><span className={'prepend'}>{props.prependText}</span> {distributeLeft}
+                                    <Paragraph><span className={'prepend'}>{props.prependText}</span> {formatNumber(distributeLeft)}
                                     </Paragraph>
                                 </div>
                             </div>
