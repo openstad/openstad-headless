@@ -84,9 +84,9 @@ function DistributionModule(props: DistributionModuleProps) {
 
     if (props.items) {
         props.items = props.items.map((item) => {
-            const choice = props.choice === 'budget';
-            const prepend = choice ? props.prependText : '';
-            const append = !choice ? props.appendText : '';
+            const isBudget = props.choice === 'budget';
+            const prepend = isBudget ? props.prependText : '';
+            const append = !isBudget ? props.appendText : '';
 
             return {
                 ...item,
@@ -94,7 +94,7 @@ function DistributionModule(props: DistributionModuleProps) {
                 fieldKey: item.title || item.description,
                 prepend,
                 append,
-                format: choice,
+                format: true,
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
             };
         });
