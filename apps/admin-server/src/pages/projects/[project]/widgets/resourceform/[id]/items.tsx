@@ -29,7 +29,7 @@ import { defaultFormValues } from "@openstad-headless/resource-form/src/parts/de
 import useTags from "@/hooks/use-tags";
 import { useRouter } from "next/router";
 import InfoDialog from '@/components/ui/info-hover';
-import { Checkbox } from "@/components/ui/checkbox";
+import {YesNoSelect} from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
     trigger: z.string(),
@@ -46,6 +46,7 @@ const formSchema = z.object({
     variant: z.string().optional(),
     multiple: z.boolean().optional(),
     placeholder: z.string().optional(),
+    defaultValue: z.string().optional(),
     images: z
         .array(z.object({ image: z.any().optional(), src: z.string() }))
         .optional(),
@@ -53,7 +54,7 @@ const formSchema = z.object({
         .array(
             z.object({
                 trigger: z.string(),
-                titles: z.array(z.object({ text: z.string().optional(), key: z.string(), isOtherOption: z.boolean().optional() })),
+                titles: z.array(z.object({ text: z.string().optional(), key: z.string(), isOtherOption: z.boolean().optional() , defaultValue: z.boolean().optional() })),
                 images: z
                     .array(z.object({ image: z.any().optional(), src: z.string() }))
                     .optional(),
@@ -100,6 +101,7 @@ export default function WidgetResourceFormItems(
                     title: values.title,
                     description: values.description,
                     placeholder: values.placeholder,
+                    defaultValue: values.defaultValue,
                     type: values.type,
                     tags: values.tags || firstTagType,
                     fieldType: values.fieldType,
@@ -155,6 +157,7 @@ export default function WidgetResourceFormItems(
         title: '',
         description: '',
         placeholder: '',
+        defaultValue: '',
         type: '',
         tags: firstTagType,
         fieldType: '',
@@ -192,6 +195,7 @@ export default function WidgetResourceFormItems(
                 title: selectedItem.title || '',
                 description: selectedItem.description || '',
                 placeholder: selectedItem.placeholder || '',
+                defaultValue: selectedItem.defaultValue || '',
                 type: selectedItem.type || '',
                 tags: selectedItem.tags || firstTagType,
                 fieldType: selectedItem.fieldType || '',
@@ -434,7 +438,8 @@ export default function WidgetResourceFormItems(
                                         <Separator className="mt-2" />
                                         {hasList() && (
                                           (() => {
-                                              const activeOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                                              const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                                              const activeOption = currentOption !== -1 ? currentOption : options.length;
 
                                               return (
                                                 <>
@@ -453,7 +458,7 @@ export default function WidgetResourceFormItems(
                                                     <FormField
                                                       control={form.control}
                                                       // @ts-ignore
-                                                      name={`options.${activeOption}.isOtherOption`}
+                                                      name={`options.${activeOption}.titles.0.isOtherOption`}
                                                       render={({field}) => (
                                                         <>
                                                             <FormItem
@@ -464,11 +469,7 @@ export default function WidgetResourceFormItems(
                                                                   flexDirection: 'row',
                                                                   marginTop: '10px'
                                                               }}>
-                                                                <Checkbox
-                                                                  onCheckedChange={(checked: boolean) => {
-                                                                      form.setValue(`options.${activeOption}.titles.0.isOtherOption`, checked);
-                                                                  }}
-                                                                />
+                                                                {YesNoSelect(field, props)}
                                                                 <FormLabel
                                                                   style={{marginTop: 0, marginLeft: '6px'}}>Is &apos;Anders, namelijk...&apos;</FormLabel>
                                                                 <FormMessage/>
@@ -481,6 +482,35 @@ export default function WidgetResourceFormItems(
                                                         </>
                                                       )}
                                                     />
+
+                                                    { form.watch('type') === 'checkbox' && (
+                                                      <FormField
+                                                        control={form.control}
+                                                        // @ts-ignore
+                                                        name={`options.${activeOption}.titles.0.defaultValue`}
+                                                        render={({field}) => (
+                                                          <>
+                                                              <FormItem
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'flex-start',
+                                                                    flexDirection: 'row',
+                                                                    marginTop: '10px'
+                                                                }}>
+                                                                  {YesNoSelect(field, props)}
+                                                                  <FormLabel
+                                                                    style={{marginTop: 0, marginLeft: '6px'}}>Standaard aangevinkt?</FormLabel>
+                                                                  <FormMessage/>
+                                                              </FormItem>
+                                                              <FormDescription>
+                                                                  Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                                              </FormDescription>
+                                                          </>
+                                                        )}
+                                                      />
+                                                    )}
+
                                                 </>
                                               );
                                           })()
@@ -955,6 +985,20 @@ export default function WidgetResourceFormItems(
                                                 )
                                             }}
                                         />
+
+                                        { ['text', 'title', 'summary', 'description', 'estimate', 'role', 'phone', 'advice', 'budget'].includes(form.watch('type') || '') && (
+                                          <FormField
+                                            control={form.control}
+                                            name="defaultValue"
+                                            render={({ field }) => (
+                                              <FormItem>
+                                                  <FormLabel>Standaard ingevulde waarde</FormLabel>
+                                                  <Input {...field} />
+                                                  <FormMessage />
+                                              </FormItem>
+                                            )}
+                                          />
+                                        )}
 
                                         {hasOptions() && (
                                             <FormItem>

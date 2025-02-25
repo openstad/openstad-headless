@@ -15,7 +15,7 @@ import { useEffect } from "react";
 export type RadioboxFieldProps = {
     title: string;
     description?: string;
-    choices?: { value: string, label: string, isOtherOption?: boolean }[];
+    choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
@@ -103,7 +103,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
             } else {
                 return choice;
             }
-        }) as [{ value: string, label: string, isOtherOption?: boolean }];
+        }) as [{ value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }];
     }
 
     return (

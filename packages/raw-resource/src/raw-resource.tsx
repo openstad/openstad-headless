@@ -4,14 +4,9 @@ import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { Spacer } from '@openstad-headless/ui/src';
-import nunjucks from 'nunjucks';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
-import { applyFilters } from '../includes/nunjucks-filters';
+import { renderRawTemplate } from '../includes/template-render';
 
-// Initialize Nunjucks environment
-const nunjucksEnv = new nunjucks.Environment();
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-applyFilters(nunjucksEnv);
 
 export type RawResourceWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -32,54 +27,21 @@ function RawResource(props: RawResourceWidgetProps) {
     targetUrl: props.resourceIdRelativePath,
   })); // todo: make it a number throughout the code
 
-  props.resourceId = resourceId
+  const updatedProps = { ...props, resourceId };
 
   const datastore = new DataStore({
-    projectId: props.projectId,
+    projectId: updatedProps.projectId,
     resourceId: resourceId,
-    api: props.api,
+    api: updatedProps.api,
   });
 
-  const { data: resource } = resourceId ? datastore.useResource(props) : { data: null };
+  const { data: resource } = resourceId ? datastore.useResource(updatedProps) : { data: null };
 
   const stylingClasses =
-    props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
+    updatedProps.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
     '';
 
-
-  let render = (() => {
-    if (props.rawInput) {
-      if (resourceId) {
-        return nunjucksEnv.renderString(props.rawInput, {
-          // here you can add variables that are available in the template
-          projectId: props.projectId,
-          resource: resource,
-          user: resource.user,
-          startDateHumanized: resource.startDateHumanized,
-          status: resource.statuses,
-          tags: resource.tags,
-          title: resource.title,
-          summary: resource.summary,
-          description: resource.description,
-          images: resource.images,
-          budget: resource.budget,
-          extraData: resource.extraData,
-          location: resource.location,
-          modBreak: resource.modBreak,
-          modBreakDateHumanized: resource.modBreakDateHumanized,
-          progress: resource.progress,
-          createDateHumanized: resource.createDateHumanized,
-          publishDateHumanized: resource.publishDateHumanized,
-          publishDate: resource.publishDate,
-        });
-      }
-      return nunjucksEnv.renderString(props.rawInput, {
-        projectId: props.projectId,
-      });
-    }
-    return '';
-  })();
-
+  let render = renderRawTemplate(updatedProps, resource, resourceId, true);
   render = render.replace(/&amp;amp;/g, '&');
 
   return (

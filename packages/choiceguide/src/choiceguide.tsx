@@ -13,9 +13,8 @@ import { FormValue } from "@openstad-headless/form/src/form";
 import { Heading4, Paragraph } from "@utrecht/component-library-react";
 
 function ChoiceGuide(props: ChoiceGuideProps) {
-    const { choiceGuide, items, choiceOption, widgetId } = props;
+    const { choiceGuide = {}, items, choiceOption, widgetId } = props;
     const {
-        submit: { submitButton, saveConceptButton } = {},
         introTitle,
         introDescription,
         noOfQuestionsToShow,
@@ -124,9 +123,9 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                   <Form
                     fields={currentFields}
                     title=""
-                    submitText={currentPage < totalPages - 1 ? "Volgende" : (submitButton || "Versturen")}
+                    submitText={currentPage < totalPages - 1 ? "Volgende" : "Versturen"}
                     submitHandler={onSubmit}
-                    secondaryLabel={saveConceptButton || ""}
+                    secondaryLabel={""}
                     getValuesOnChange={setCurrentAnswers}
                     allowResetAfterSubmit={false}
                     currentPage={currentPage}

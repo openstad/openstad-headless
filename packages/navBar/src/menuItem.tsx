@@ -7,7 +7,7 @@ interface Item {
   item: any;
   prefix?: string;
   open: boolean;
-  setOpenIndex: (index: any ) => void;
+  setOpenIndex: (index: any) => void;
 };
 
 function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
@@ -26,11 +26,17 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
     };
   }, []);
 
+
   const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-  if (!ref.current?.contains(event.relatedTarget as Node)) {
-    setOpenIndex(null);
+    if (!ref.current?.contains(event.relatedTarget as Node)) {
+      setOpenIndex(null);
+    }
+  };
+
+  const getCurrentPage = (e: string) => {
+    return window.location.href.includes(e.replaceAll(' ', '-')) ? 'page' : undefined;
   }
-};
+
 
   return (
     <div
@@ -38,7 +44,7 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
       className="item-container"
       onMouseEnter={() => setOpenIndex(index)}
     >
-      <Link className="level-1" href={`${prefix}${item.slug}`} aria-current="page">{item.title}</Link>
+      <Link className="level-1" href={`${prefix}${item.slug}`} aria-current={getCurrentPage(item.title)}>{item.title}</Link>
       {item._children.length > 0 && (
         <>
           <button className="toggle-submenu" onClick={() => setOpenIndex(index)}>
@@ -48,7 +54,7 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
           {open && (
             <div className="submenu" onMouseLeave={() => setOpenIndex(null)} onBlur={handleBlur} tabIndex={-1} ref={ref}>
               {item._children && item._children.map((child: any, childIndex: number) => (
-                <Link className="level-2" key={`${index}-${childIndex}`} href={`${prefix}${child.slug}`} aria-current="page">{child.title}</Link>
+                <Link className="level-2" key={`${index}-${childIndex}`} href={`${prefix}${child.slug}`} aria-current={getCurrentPage(child.title)}>{child.title}</Link>
               ))}
             </div>
           )}

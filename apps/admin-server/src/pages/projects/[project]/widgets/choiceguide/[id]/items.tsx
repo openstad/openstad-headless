@@ -29,6 +29,7 @@ import { useRouter } from "next/router";
 import {ImageUploader} from "@/components/image-uploader";
 import {useWidgetConfig} from "@/hooks/use-widget-config";
 import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/choiceguide/src/props';
+import {YesNoSelect} from "@/lib/form-widget-helpers";
 
 const weightSchema: z.ZodSchema = z.object({
   weightX: z.any().optional(),
@@ -56,7 +57,9 @@ const formSchema = z.object({
         titles: z.array(z.object({
           text: z.string().optional(),
           key: z.string(),
-          weights: z.record(weightSchema).optional()
+          weights: z.record(weightSchema).optional(),
+          isOtherOption: z.boolean().optional(),
+          defaultValue: z.boolean().optional()
         }))
       })
     )
@@ -76,6 +79,7 @@ const formSchema = z.object({
   imageB: z.string().optional(),
   imageUploadA: z.string().optional(),
   imageUploadB: z.string().optional(),
+  defaultValue: z.string().optional(),
   weights: z.record(weightSchema).optional(),
 });
 
@@ -148,6 +152,7 @@ export default function WidgetChoiceGuideItems(
           explanationB: values.explanationB || '',
           imageA: values.imageA || '',
           imageB: values.imageB || '',
+          defaultValue: values.defaultValue || '',
           weights: values.weights || {}
         },
       ]);
@@ -208,6 +213,7 @@ export default function WidgetChoiceGuideItems(
     explanationB: '',
     imageA: '',
     imageB: '',
+    defaultValue: '',
     weights: {}
   });
 
@@ -255,6 +261,7 @@ export default function WidgetChoiceGuideItems(
         explanationB: selectedItem.explanationB || '',
         imageA: selectedItem.imageA || '',
         imageB: selectedItem.imageB || '',
+        defaultValue: selectedItem.defaultValue || '',
         weights: selectedItem.weights || {}
       });
       setOptions(selectedItem.options || []);
@@ -460,7 +467,8 @@ export default function WidgetChoiceGuideItems(
                     <Separator className="mt-2" />
                     {hasList() && (
                       (() => {
-                        const activeOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                        const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                        const activeOption = currentOption !== -1 ? currentOption : options.length;
 
                         return (
                           <>
@@ -475,6 +483,62 @@ export default function WidgetChoiceGuideItems(
                                 </FormItem>
                               )}
                             />
+
+                            <FormField
+                              control={form.control}
+                              // @ts-ignore
+                              name={`options.${activeOption}.titles.0.isOtherOption`}
+                              render={({field}) => (
+                                <>
+                                  <FormItem
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'flex-start',
+                                      flexDirection: 'row',
+                                      marginTop: '10px'
+                                    }}>
+                                    {YesNoSelect(field, props)}
+                                    <FormLabel
+                                      style={{marginTop: 0, marginLeft: '6px'}}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                    <FormMessage/>
+                                  </FormItem>
+                                  <FormDescription>
+                                    Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
+                                    formulier.
+                                    Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                  </FormDescription>
+                                </>
+                              )}
+                            />
+
+                            { form.watch('type') === 'checkbox' && (
+                              <FormField
+                                control={form.control}
+                                // @ts-ignore
+                                name={`options.${activeOption}.titles.0.defaultValue`}
+                                render={({field}) => (
+                                  <>
+                                    <FormItem
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        flexDirection: 'row',
+                                        marginTop: '10px'
+                                      }}>
+                                      {YesNoSelect(field, props)}
+                                      <FormLabel
+                                        style={{marginTop: 0, marginLeft: '6px'}}>Standaard aangevinkt?</FormLabel>
+                                      <FormMessage/>
+                                    </FormItem>
+                                    <FormDescription>
+                                      Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                    </FormDescription>
+                                  </>
+                                )}
+                              />
+                            )}
                           </>
                         );
                       })()
@@ -1046,6 +1110,20 @@ export default function WidgetChoiceGuideItems(
                             )}
                           </div>
                         </div>
+                      )}
+
+                      {form.watch('type') === 'text' && (
+                        <FormField
+                          control={form.control}
+                          name="defaultValue"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Standaard ingevulde waarde</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       )}
 
                       {hasOptions() && (
