@@ -114,17 +114,3 @@ export default {
   'tagGroup': tagGroup,
   'formatDate': formatDate
 }
-
-export function applyFilters(env: nunjucks.Environment) {
-  env.addFilter('dump', dump);
-  env.addFilter('cleanArray', cleanArray);
-  env.addFilter('capitalize', capitalize);
-  env.addFilter('truncate', truncate);
-  env.addFilter('lowercase', lowercase);
-  env.addFilter('uppercase', uppercase);
-  env.addFilter('replace', replace);
-  env.addFilter('tags', tags);
-  env.addFilter('status', status);
-  env.addFilter('tagGroup', tagGroup);
-  env.addFilter('formatDate', formatDate);
-}
