@@ -38,6 +38,7 @@ function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
       if (varValue && varValue[vn]) {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // @ts-expect-error any
         varValue = varValue[vn] as string;
       } else {
         varValue = '';
