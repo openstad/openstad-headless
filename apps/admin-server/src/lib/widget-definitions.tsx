@@ -109,6 +109,11 @@ export const WidgetDefinitions = {
     description: 'Module voor gebruikersactiviteit',
     image: '/widget_preview/activity_preview.png',
   },
+  distributionmodule: {
+    name: 'Verdeel module',
+    description: 'Module voor het verdelen van punten of budget',
+    image: '/widget_preview/distributionmodule_preview.png',
+  },
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;
