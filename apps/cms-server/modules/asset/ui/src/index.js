@@ -20,7 +20,7 @@ export default () => {
       Footer.Footer.loadWidgetOnElement(footer, { ...footer.dataset });
     }
     
-    const allowCookieButton = document.querySelector('#allow-cookie-button');
+    const allowCookieButton = document.querySelector('#allow-cookie-button'); 
     if (allowCookieButton) {
       allowCookieButton.addEventListener('click', (e) => {
         e.preventDefault();
@@ -37,7 +37,6 @@ export default () => {
     }
   });
 };
-
 if (typeof window.process == 'undefined') {
   window.process = { env: {NODE_ENV: 'production'} };
 }
@@ -90,11 +89,11 @@ function adjustMenu() {
 
   closeButton.setAttribute('aria-controls', 'main-menu');
   closeButton.setAttribute('aria-expanded', 'false');
-  mainMenuContainer.setAttribute('aria-hidden', 'true');
+  mainMenuContainer.setAttribute('aria-hidden', 'false');
 
   function closeMenu() {
     closeButton.setAttribute('aria-expanded', 'false');
-    mainMenuContainer.setAttribute('aria-hidden', 'true');
+    mainMenuContainer.setAttribute('aria-hidden', 'false');
     navContainer.classList.remove('--show');
     closeButtonSpan.textContent = 'Menu tonen';
   }
