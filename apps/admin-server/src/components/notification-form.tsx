@@ -24,7 +24,7 @@ import {
 
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { fetchSessionUser } from '@/auth';
-import { applyFilters } from '@openstad-headless/raw-resource/includes/nunjucks-filters';
+import { applyFilters } from '@/lib/nunjucks-filters';
 
 const nunjucksEnv = new nunjucks.Environment();
 applyFilters(nunjucksEnv);
