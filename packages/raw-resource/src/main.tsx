@@ -20,8 +20,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       rawInput={
         "<h1>Plan:</h1>" +
         "<b>Title:</b>{{ title | replace('Lorem', 'Florem') }}<br />" +
-        "<em>Afbeeldingen:</em>{{ resource.images | dump }}<br />" +
-        "<b>Kleuren:</b>{{ resource | tagGroup('kleur') }}"
+        "<em>Resource:</em>{{ resource | dump }}<br />" +
+        "{% if resource.viewableByRole = 'all' %}Iedereen mag dit zien!{% else %}Niet iedereen mag dit zien helaas.{% endif %}<br />" +
+        "{% if resource.startDateHumanized %}Datum: {{ resource.startDateHumanized }}{% endif %}<br />" +
+        "{% if resource.location.lat %}Breedtegraad: {{ resource.location.lat }}{% endif %}<br />"
     }
     />
   </React.StrictMode>
