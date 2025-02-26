@@ -107,7 +107,7 @@ spec:
             value: {{ .Values.api.emailAddress }}
 
           - name: DISABLE_PROJECT_ISSUE_WARNINGS
-            value: {{ .Values.api.disableProjectIssueWarnings }}
+            value: "{{ .Values.api.disableProjectIssueWarnings }}"
 
           - name: AUTH_JWTSECRET
             valueFrom:
