@@ -384,7 +384,7 @@ function DocumentMap({
         });
 
         const addNewCommentToComments = [...filteredComments, newComment];
-        const newIndex = addNewCommentToComments.length - 1;
+        const newIndex = newComment?.id;
 
         setFilteredComments(addNewCommentToComments);
         setPopupPosition(null);
@@ -515,7 +515,7 @@ function DocumentMap({
               ref={markerRef}
               icon={MarkerIcon({
                 icon: {
-                  className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''}`,
+                  className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''} id-${index}`,
                   color: !isDefaultColor ? color : undefined,
                 },
               })}
@@ -735,7 +735,7 @@ function DocumentMap({
               <MapEvents />
               {filteredComments && filteredComments
                 .filter((comment: any) => !!comment.location)
-                .map((comment: any, index: number) => {
+                .map((comment: any) => {
 
                   const firstTag = comment.tags
                     ? comment.tags
@@ -747,9 +747,9 @@ function DocumentMap({
 
                   return (
                       <MarkerWithId
-                          key={index}
-                          id={`marker-${index}`}
-                          index={index}
+                          key={comment?.id}
+                          id={`marker-${comment?.id}`}
+                          index={comment?.id}
                           position={comment.location}
                           color={documentMapIconColor}
                       />

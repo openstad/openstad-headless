@@ -93,7 +93,11 @@ function Comment({
     comments.forEach((comment) => comment.classList.remove('selected'));
 
     if (!isAlreadySelected) {
-      markerIcons[index]?.classList.toggle('--highlightedIcon');
+      markerIcons.forEach((markerIcon) => {
+        if (markerIcon.classList.contains(`id-${index}`)) {
+          markerIcon.classList.add('--highlightedIcon');
+        }
+      })
       document.getElementById(`comment-${index}`)?.classList.toggle('selected');
     }
   }
@@ -129,7 +133,7 @@ function Comment({
   }
 
   return (
-    <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${index}`} onClick={findLocation(index || 0)}>
+    <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${comment?.id}`} onClick={findLocation(comment?.id || 0)}>
       <section className="comment-item-header">
         <Heading level={4} appearance='utrecht-heading-6' className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
