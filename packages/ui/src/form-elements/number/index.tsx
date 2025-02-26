@@ -22,6 +22,7 @@ export type NumberInputProps = {
     prepend?: string;
     append?: string;
     type?: string;
+    placeholder?: string;
 }
 
 const NumberInput: FC<NumberInputProps> = ({
@@ -35,6 +36,7 @@ const NumberInput: FC<NumberInputProps> = ({
     format = false,
     prepend,
     append,
+    placeholder = '',
 }) => {
   const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   const [value, setValue] = useState(defaultValue);
@@ -119,6 +121,7 @@ const NumberInput: FC<NumberInputProps> = ({
           }}
           disabled={disabled}
           autoComplete="off"
+          placeholder={placeholder}
         />
         {append && <span className="utrecht-form-field__append">{append}</span>}
       </div>
