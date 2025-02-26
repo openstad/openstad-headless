@@ -106,6 +106,9 @@ spec:
           - name: NOTIFICATIONS_ADMIN_EMAILADDRESS
             value: {{ .Values.api.emailAddress }}
 
+          - name: DISABLE_PROJECT_ISSUE_WARNINGS
+            value: {{ .Values.api.disableProjectIssueWarnings }}
+
           - name: AUTH_JWTSECRET
             valueFrom:
               secretKeyRef:
