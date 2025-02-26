@@ -17,7 +17,7 @@ module.exports = {
     name: 'send-enddate-notifications',
     task: async (next) => {
       
-      if (!!process.env.DISABLE_PROJECT_ISSUE_WARNINGS) return;
+      if (process.env.DISABLE_PROJECT_ISSUE_WARNINGS && process.env.DISABLE_PROJECT_ISSUE_WARNINGS === "true") return;
 
       let endDateConfig = config.notifications.sendEndDateNotifications;
 

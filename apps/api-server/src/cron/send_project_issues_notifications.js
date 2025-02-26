@@ -18,8 +18,8 @@ module.exports = {
   onTick: UseLock.createLockedExecutable({
     name: 'send-project-issues-notifications',
     task: async (next) => {
-
-      if (!!process.env.DISABLE_PROJECT_ISSUE_WARNINGS) return;
+      
+      if (process.env.DISABLE_PROJECT_ISSUE_WARNINGS && process.env.DISABLE_PROJECT_ISSUE_WARNINGS === "true") return;
       
       try {
 
