@@ -8,7 +8,7 @@ metadata:
     {{- include "openstad.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ template "openstad.image.fullname" . }}-deployment
 spec:
-  replicas: {{ .Values.image.replicas }}
+  replicas: {{ .Values.image.replicas | default 1 }}
   selector:
     matchLabels:
       app: {{ .Values.image.label }}

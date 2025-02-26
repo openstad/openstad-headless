@@ -7,7 +7,7 @@ const UseLock = require('../lib/use-lock');
 // Purpose
 // -------
 // Send emails to projectmanagers just before the enddate of their project is reached
-// 
+//
 // Runs every day
 module.exports = {
   // cronTime: '*/10 * * * * *',
@@ -16,6 +16,8 @@ module.exports = {
   onTick: UseLock.createLockedExecutable({
     name: 'send-enddate-notifications',
     task: async (next) => {
+      
+      if (process.env.DISABLE_PROJECT_ISSUE_WARNINGS && process.env.DISABLE_PROJECT_ISSUE_WARNINGS === "true") return;
 
       let endDateConfig = config.notifications.sendEndDateNotifications;
 
@@ -98,4 +100,3 @@ module.exports = {
   })
 
 };
-

@@ -93,23 +93,36 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['maxCharacters'] = item.maxCharacters || '';
                     fieldData['rows'] = 5;
                     fieldData['placeholder'] = item.placeholder || '';
+                    fieldData['defaultValue'] = item.defaultValue || '';
                     break;
                 case 'multiplechoice':
                 case 'multiple':
                     fieldData['type'] = item.questionType === 'multiplechoice' ? 'radiobox' : 'checkbox';
+
+                    const defaultValue: string[] = [];
 
                     if (
                         item.options &&
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
+                            if (option.titles[0].defaultValue) {
+                                defaultValue.push(option.titles[0].key);
+                            }
+
                             return {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
-                                isOtherOption: option.titles[0].isOtherOption
+                                isOtherOption: option.titles[0].isOtherOption,
+                                defaultValue: option.titles[0].defaultValue
                             };
                         });
                     }
+
+                    if (defaultValue.length > 0) {
+                        fieldData['defaultValue'] = defaultValue;
+                    }
+
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';

@@ -13,7 +13,7 @@ import TextInput from "../text";
 export type CheckboxFieldProps = {
     title: string;
     description?: string;
-    choices?: { value: string, label: string, isOtherOption?: boolean }[];
+    choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
@@ -39,7 +39,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        moreInfoContent = '',
    infoImage = '',
 }) => {
-    const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
+    const defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
@@ -107,7 +108,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
             } else {
                 return choice;
             }
-        }) as [{ value: string, label: string, isOtherOption?: boolean }];
+        }) as [{ value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }];
     }
 
     return (

@@ -6,9 +6,9 @@
   bottom: 0;
   z-index: 1;
 
- /* @media @phone {
-    top: 113px;
-  }*/
+//  /* @media @phone {
+//     top: 113px;
+//   }*/
 
   .full-screen-section-inner {
     position: relative;
@@ -72,13 +72,6 @@
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-}
-
-// give standard margin bottom to columns in row, otherwise they are stacked
-.section>.container>.row>div {
- /* @media @phone {
-    margin-bottom: 40px;
-  }*/
 }
 
 .howDoesItWork {

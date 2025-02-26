@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, useEffect, useState} from "react";
 import {
     AccordionProvider,
     FormField,
@@ -96,10 +96,13 @@ const MapField: FC<MapProps> = ({
         return {lat: avgLat, lng: avgLng};
     }
 
-    let center: LocationType | undefined = undefined;
-    if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
-      center = calculateCenter(props.area);
-    }
+    const [currentCenter, setCurrentCenter] = useState<LocationType | undefined>(undefined);
+
+    useEffect( () => {
+        if (polygon.length > 0) {
+            setCurrentCenter( calculateCenter(polygon) );
+        }
+    }, [polygon] );
 
     const zoom = {
         minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
@@ -147,7 +150,7 @@ const MapField: FC<MapProps> = ({
               <EditorMap
                   {...props}
                   fieldName={fieldKey}
-                  center={center}
+                  center={currentCenter}
                   onChange={onChange}
                   fieldRequired={fieldRequired}
                   markerIcon={undefined}

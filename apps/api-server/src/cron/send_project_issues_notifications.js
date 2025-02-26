@@ -8,7 +8,7 @@ const projectsWithIssues = require('../services/projects-with-issues');
 // Purpose
 // -------
 // Send emails to projectmanagers just before the enddate of their project is reached
-// 
+//
 // Runs every day
 module.exports = {
   // cronTime: '*/10 * * * * *',
@@ -18,7 +18,9 @@ module.exports = {
   onTick: UseLock.createLockedExecutable({
     name: 'send-project-issues-notifications',
     task: async (next) => {
-
+      
+      if (process.env.DISABLE_PROJECT_ISSUE_WARNINGS && process.env.DISABLE_PROJECT_ISSUE_WARNINGS === "true") return;
+      
       try {
 
         let notificationsToBeSent = {};

@@ -12,8 +12,6 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import {elipsizeHTML} from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
-import nunjucks from 'nunjucks';
-import { applyFilters } from '../../raw-resource/includes/nunjucks-filters';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
 import '@utrecht/component-library-css';
@@ -24,6 +22,7 @@ import {
   Button,
 } from '@utrecht/component-library-react';
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -123,11 +122,6 @@ const defaultHeaderRenderer = (
   );
 };
 
-// Initialize Nunjucks environment
-const nunjucksEnv = new nunjucks.Environment();
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-applyFilters(nunjucksEnv);
-
 const defaultItemRenderer = (
   resource: any,
   props: ResourceOverviewWidgetProps,
@@ -139,26 +133,9 @@ const defaultItemRenderer = (
     }
 
     try {
-      const render = nunjucksEnv.renderString(props.rawInput, {
-        // here you can add variables that are available in the template
-        projectId: props.projectId,
-        resource: resource,
-        user: resource.user,
-        startDateHumanized: resource.startDateHumanized,
-        status: resource.status,
-        title: resource.title,
-        summary: resource.summary,
-        description: resource.description,
-        images: resource.images,
-        budget: resource.budget,
-        extraData: resource.extraData,
-        location: resource.location,
-        modBreak: resource.modBreak,
-        modBreakDateHumanized: resource.modBreakDateHumanized,
-        progress: resource.progress,
-        createDateHumanized: resource.createDateHumanized,
-        publishDateHumanized: resource.publishDateHumanized,
-      });
+      let render = renderRawTemplate(props, resource, '', false);
+      render = render.replace(/&amp;amp;/g, '&');
+
       return (
         <div
           dangerouslySetInnerHTML={{
@@ -168,6 +145,7 @@ const defaultItemRenderer = (
     } catch (e) {
       console.error('De template kon niet worden geparsed: ', e);
     }
+
     return <Paragraph>Er is een fout in de template</Paragraph>;
   }
 

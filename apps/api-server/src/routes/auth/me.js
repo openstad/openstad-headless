@@ -18,7 +18,7 @@ router
         where: { id: req.user.id, projectId: req.params.projectId }
       });
 
-      userNickName = user.nickName || '';
+      userNickName = user?.nickName || '';
     } catch (error) {
       next(error);
     }

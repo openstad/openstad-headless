@@ -124,7 +124,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
           <div className="container py-6 mt-6 bg-white rounded-md">
             {previewConfig && (
               <WidgetPreview
-                type="begrootmodule"
+                type="simplevoting"
                 config={previewConfig}
                 projectId={projectId as string}
               />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import '../index.css';
 import './index.css';
 import { IconButton } from '../iconbutton';
@@ -13,6 +13,8 @@ type Props = {
     next?: string;
     previous?: string;
   }
+  beforeIndexChange?: () => void;
+  setIndexInParent?: (setter: (index: number) => void) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export function Carousel({
@@ -20,11 +22,27 @@ export function Carousel({
   items = [],
   itemRenderer,
   buttonText,
+  beforeIndexChange = () => {},
+  setIndexInParent = () => {},
   ...props
 }: Props) {
   const [index, setIndex] = useState<number>(startIndex);
 
   if (items.length === 0) return null;
+
+  useEffect(() => {
+    if (setIndexInParent) {
+      setIndexInParent(() => setIndex);
+    }
+  }, [setIndexInParent]);
+
+  const handleIndexChange = (newIndex: number) => {
+    if (beforeIndexChange) {
+      beforeIndexChange();
+    }
+
+    setIndex(newIndex);
+  };
 
   return (
     <div
@@ -41,7 +59,7 @@ export function Carousel({
               disabled={index === 0}
               text={buttonText?.previous || 'Vorige slide'}
               iconOnly={true}
-              onClick={() => setIndex(index - 1)}
+              onClick={() => handleIndexChange(index - 1)}
             />
           </div>
           <div className="osc-carousel-navigation-button-wrapper osc-carousel-next">
@@ -51,7 +69,7 @@ export function Carousel({
               disabled={index === items.length - 1}
               text={buttonText?.next || 'Volgende slide'}
               iconOnly={true}
-              onClick={() => setIndex(index + 1)}
+              onClick={() => handleIndexChange(index + 1)}
             />
           </div>
         </div>

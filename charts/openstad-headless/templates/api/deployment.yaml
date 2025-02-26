@@ -8,7 +8,7 @@ metadata:
     {{- include "openstad.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ template "openstad.api.fullname" . }}-deployment
 spec:
-  replicas: {{ .Values.api.replicas }}
+  replicas: {{ .Values.api.replicas | default 1 }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -48,7 +48,7 @@ spec:
               secretKeyRef:
                 name: openstad-db-credentials
                 key: hostname
-            
+
           - name: DB_PORT
             valueFrom:
               secretKeyRef:
@@ -66,7 +66,7 @@ spec:
               secretKeyRef:
                 name: {{ template "openstad.api.secret.fullname" . }}
                 key: database
-          
+
           - name: EMAILADDRESS
             value: {{ .Values.api.emailAddress }}
 
@@ -75,13 +75,13 @@ spec:
 
           - name: MAIL_FROM
             value: {{ .Values.secrets.mail.api.emailFrom | default "Openstad" }}
-          
+
           - name: MAIL_TRANSPORT_SMTP_PORT
             valueFrom:
               secretKeyRef:
                 key: port
                 name: {{ template "openstad.email.secret.fullname" . }}
-          
+
           - name: MAIL_TRANSPORT_SMTP_HOST
             valueFrom:
               secretKeyRef:
@@ -90,13 +90,13 @@ spec:
 
           - name: MAIL_TRANSPORT_SMTP_REQUIRESSL
             value: "true"
-          
+
           - name: MAIL_TRANSPORT_SMTP_AUTH_USER
             valueFrom:
               secretKeyRef:
                 key: username
                 name: {{ template "openstad.email.secret.fullname" . }}
-          
+
           - name: MAIL_TRANSPORT_SMTP_AUTH_PASS
             valueFrom:
               secretKeyRef:
@@ -106,21 +106,24 @@ spec:
           - name: NOTIFICATIONS_ADMIN_EMAILADDRESS
             value: {{ .Values.api.emailAddress }}
 
+          - name: DISABLE_PROJECT_ISSUE_WARNINGS
+            value: "{{ .Values.api.disableProjectIssueWarnings }}"
+
           - name: AUTH_JWTSECRET
             valueFrom:
               secretKeyRef:
                 key: jwtSecret
                 name: {{ template "openstad.api.secret.fullname" . }}
-          
+
           - name: AUTH_FIXEDAUTHTOKENS
             valueFrom:
               secretKeyRef:
                 key: fixedAuthTokens
                 name: {{ template "openstad.api.secret.fullname" . }}
-          
+
           - name: AUTH_ADAPTER_OPENSTAD_SERVERURL
             value: https://{{ template "openstad.auth.url" . }}
-          
+
           - name: AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL
             value: http://{{ template "openstad.auth.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.auth.service.httpPort }}
 
@@ -137,7 +140,7 @@ spec:
               secretKeyRef:
                 key: verificationToken
                 name: {{ template "openstad.image.secret.fullname" . }}
-          
+
           - name: NODE_ENV
             value: production
 
@@ -234,7 +237,7 @@ spec:
                 secretKeyRef:
                   name: {{ template "openstad.api.secret.fullname" . }}
                   key: database
-            
+
             - name: EMAILADDRESS
               value: {{ .Values.api.emailAddress }}
 
@@ -243,13 +246,13 @@ spec:
 
             - name: MAIL_FROM
               value: {{ .Values.secrets.mail.api.emailFrom | default "Openstad" }}
-            
+
             - name: MAIL_TRANSPORT_SMTP_PORT
               valueFrom:
                 secretKeyRef:
                   key: port
                   name: {{ template "openstad.email.secret.fullname" . }}
-            
+
             - name: MAIL_TRANSPORT_SMTP_HOST
               valueFrom:
                 secretKeyRef:
@@ -258,13 +261,13 @@ spec:
 
             - name: MAIL_TRANSPORT_SMTP_REQUIRESSL
               value: "true"
-            
+
             - name: MAIL_TRANSPORT_SMTP_AUTH_USER
               valueFrom:
                 secretKeyRef:
                   key: username
                   name: {{ template "openstad.email.secret.fullname" . }}
-            
+
             - name: MAIL_TRANSPORT_SMTP_AUTH_PASS
               valueFrom:
                 secretKeyRef:
@@ -279,16 +282,16 @@ spec:
                 secretKeyRef:
                   key: jwtSecret
                   name: {{ template "openstad.api.secret.fullname" . }}
-            
+
             - name: AUTH_FIXEDAUTHTOKENS
               valueFrom:
                 secretKeyRef:
                   key: fixedAuthTokens
                   name: {{ template "openstad.api.secret.fullname" . }}
-            
+
             - name: AUTH_ADAPTER_OPENSTAD_SERVERURL
               value: https://{{ template "openstad.auth.url" . }}
-            
+
             - name: AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL
               value: http://{{ template "openstad.auth.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.auth.service.httpPort }}
 
@@ -300,7 +303,7 @@ spec:
                 secretKeyRef:
                   key: verificationToken
                   name: {{ template "openstad.image.secret.fullname" . }}
-            
+
             - name: NODE_ENV
               value: production
 
