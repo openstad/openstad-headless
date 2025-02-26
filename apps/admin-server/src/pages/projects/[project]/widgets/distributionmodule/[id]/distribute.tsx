@@ -18,7 +18,7 @@ import * as z from 'zod';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
-  total: z.number(),
+  total: z.any(),
   choice: z.string(),
   budgetTotalText: z.string().optional(),
   budgetLeftoverText: z.string().optional(),
