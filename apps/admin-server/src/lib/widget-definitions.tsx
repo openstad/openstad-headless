@@ -12,7 +12,7 @@ export const WidgetDefinitions = {
   choiceguideResults: {
     name: 'Keuzewijzer resultaat',
     description: 'Keuzewijzer resultaat',
-    image: '/widget_preview/keuzewijzer_preview.png',
+    image: '/widget_preview/keuzewijzerresultaten-preview.png',
   },
   comments: {
     name: 'Reacties',
@@ -62,7 +62,7 @@ export const WidgetDefinitions = {
   likes: {
     name: 'Like',
     description: 'Likemodule',
-    image: '/widget_preview/likes_preview.png',
+    image: '/widget_preview/likes-preview.png',
   },
   rawresource: {
     name: 'Inzending maatwerk',
@@ -108,6 +108,11 @@ export const WidgetDefinitions = {
     name: 'Gebruikersactiviteit',
     description: 'Module voor gebruikersactiviteit',
     image: '/widget_preview/activity_preview.png',
+  },
+  distributionmodule: {
+    name: 'Verdeel module',
+    description: 'Module voor het verdelen van punten of budget',
+    image: '/widget_preview/verdeelmodule-preview.png',
   },
 };
 

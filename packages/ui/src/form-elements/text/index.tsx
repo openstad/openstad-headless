@@ -102,7 +102,7 @@ const TextInput: FC<TextInputProps> = ({
     }
 
     const getAutocomplete = (fieldKey: string) => {
-        switch (fieldKey.toLocaleLowerCase()) {
+        switch (fieldKey?.toLocaleLowerCase()) {
             case 'mail':
                 return 'email';
             case 'tel':

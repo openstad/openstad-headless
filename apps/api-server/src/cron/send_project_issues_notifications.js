@@ -8,7 +8,7 @@ const projectsWithIssues = require('../services/projects-with-issues');
 // Purpose
 // -------
 // Send emails to projectmanagers just before the enddate of their project is reached
-// 
+//
 // Runs every day
 module.exports = {
   // cronTime: '*/10 * * * * *',
@@ -19,6 +19,8 @@ module.exports = {
     name: 'send-project-issues-notifications',
     task: async (next) => {
 
+      if (!!process.env.DISABLE_PROJECT_ISSUE_WARNINGS) return;
+      
       try {
 
         let notificationsToBeSent = {};

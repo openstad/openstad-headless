@@ -23,6 +23,7 @@
     "@openstad-headless/choiceguide": "file:../../packages/choiceguide",
     "@openstad-headless/choiceguide-results": "file:../../packages/choiceguide-results",
     "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",
+    "@openstad-headless/distribution-module": "file:../../packages/distribution-module",
     "@openstad-headless/document-map": "file:../../packages/document-map",
     "@openstad-headless/enquete": "file:../../packages/enquete",
     "@openstad-headless/form": "file:../../packages/form",

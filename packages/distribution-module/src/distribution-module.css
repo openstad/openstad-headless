@@ -1,0 +1,175 @@
+.osc-distribution-modules-item-content .form-container .utrecht-form-field .utrecht-form-field-description:empty{
+  margin: 0;
+}
+.osc-distribution-modules-item-content .form-container .utrecht-form-field-error-message.error-message:empty{
+  display: none;
+}
+
+.osc-distribution-modules-item-content button[type="submit"] {
+  margin: 0 0 10px 10px;
+}
+
+.osc-distribution-modules-item-content button[type="submit"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.osc-distribution-modules-item-content label.utrecht-form-label{
+  margin-block-end: 6px;
+}
+
+.osc-distribution-modules-item-content .--label-grid{
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.osc-distribution-modules-item-content .question-type-text textarea,
+.osc-distribution-modules-item-content .question-type-text input[type="text"]{
+  max-width: none;
+}
+
+.osc-distribution-modules-item-content .osc {
+  min-height: 155px;
+  height: 155px;
+}
+
+.osc-distribution-modules-content progress {
+  border-radius: 4px;
+  width: 100%;
+  height: 40px;
+}
+.osc-distribution-modules-content progress::-webkit-progress-bar {
+  background-color: #b6b6b6;
+  border-radius: 4px;
+}
+.osc-distribution-modules-content progress::-webkit-progress-value {
+  background-color: #4646ff;
+  border-radius: 4px;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-item-description {
+  margin: 10px 0 30px;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content-container {
+  display: flex;
+  margin: 20px 0;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__leftover,
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__remaining {
+  display: flex;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__leftover > p,
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__remaining > p {
+  margin-right: 35px;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__leftover > p:last-child,
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__remaining > p:last-child {
+  font-weight: bold;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__error > .banner {
+  margin: 20px 0 35px;
+  background-color: #ffb6b6;
+  border-radius: 4px;
+  border: 3px solid #340000;
+  align-items: flex-start;
+  padding: 20px 20px 20px 50px;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__error > .banner h3:before {
+  content: "!";
+  font-family: 'sans-serif' !important;
+  font-size: 16px;
+  font-weight: bold;
+  color: #340000;
+  position: absolute;
+  top: 3px;
+  left: -35px;
+  border: 2px solid #340000;
+  border-radius: 50%;
+  margin: 0;
+  padding: 1px 7px 0 8px;
+  line-height: 1.1;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__error > .banner h3,
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__error > .banner p {
+  color: #340000;
+}
+
+.osc-distribution-modules-item-content .osc-distribution-modules-content .osc-distribution-modules-content__error > .banner h3 {
+  font-weight: bold;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.osc-distribution-modules-item-content .form-widget .form-container {
+  max-width: 700px;
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.osc-distribution-modules-item-content .form-widget .form-container > .button-group {
+  width: 100%;
+}
+
+.osc-distribution-modules-item-content .form-widget .form-container > .question {
+  width: calc(50% - 15px);
+}
+
+.osc-distribution-modules-item-content .form-widget .form-container > .question.question-type-number .utrecht-form-field__input {
+  display: flex;
+  align-items: center;
+  border: 1px solid grey;
+  padding-left: 14px;
+  border-radius: 4px;
+}
+
+.osc-distribution-modules-item-content .form-widget .form-container > .question.question-type-number .utrecht-form-field__input .utrecht-form-field__prepend,
+.osc-distribution-modules-item-content .form-widget .form-container > .question.question-type-number .utrecht-form-field__input .utrecht-form-field__append {
+  white-space: nowrap;
+}
+
+.osc-distribution-modules-item-content .form-widget .form-container > .question.question-type-number .utrecht-form-field__input .utrecht-textbox {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: 4px;
+}
+
+.osc-distribution-modules-item-content .form-widget .form-container > .question.question-type-number .utrecht-form-field-description {
+  margin: 2px 0 10px;
+}
+
+.osc-distribution-modules-item-content.visible-disabled .form-widget .form-container {
+  opacity: 0.4;
+}
+
+.osc-distribution-modules-item-content.visible-disabled .form-widget .form-container > .question.question-type-number .utrecht-form-field__input {
+  background-color: #c5c5c5;
+}
+
+@media only screen and (max-width: 600px) {
+  .osc-distribution-modules-item-content .osc-distribution-modules-content-container {
+    flex-direction: column;
+  }
+
+  .osc-distribution-modules-item-content .form-widget .form-container {
+    gap: 10px;
+  }
+
+  .osc-distribution-modules-item-content .form-widget .form-container > .question {
+    width: 100%;
+  }
+}
