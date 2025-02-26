@@ -8,7 +8,7 @@ metadata:
     {{- include "openstad.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ template "openstad.auth.fullname" . }}-deployment
 spec:
-  replicas: {{ .Values.auth.replicas }}
+  replicas: {{ .Values.auth.replicas | default 1 }}
   selector:
     matchLabels:
       app: {{ .Values.auth.label }}
