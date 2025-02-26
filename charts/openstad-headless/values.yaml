@@ -290,7 +290,7 @@ api:
   # Inject extra environment variables
   extraEnvVars: []
 
-  disableProjectIssueWarnings: false
+  disableProjectIssueWarnings: "false"
 
   # Resources:
   resources:
