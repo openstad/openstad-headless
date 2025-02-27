@@ -356,7 +356,16 @@ export default function WidgetChoiceGuideItems(
   }, [ form.watch('type') ])
 
   function handleSaveItems() {
-    props.updateConfig({ ...props, items });
+    const updatedProps = { ...props };
+
+    Object.keys(updatedProps).forEach((key: string) => {
+      if (key.startsWith("options.")) {
+        // @ts-ignore
+        delete updatedProps[key];
+      }
+    });
+
+    props.updateConfig({ ...updatedProps, items });
     window.location.reload();
   }
 

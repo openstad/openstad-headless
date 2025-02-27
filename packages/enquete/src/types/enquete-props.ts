@@ -22,12 +22,6 @@ export type Item = {
   minCharacters?: string;
   maxCharacters?: string;
   variant?: string;
-  image1?: string;
-  text1?: string;
-  key1?: string;
-  image2?: string;
-  text2?: string;
-  key2?: string;
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
@@ -38,6 +32,15 @@ export type Item = {
   showSmileys?: boolean;
   placeholder?: string;
   defaultValue?: string;
+  imageOptionUpload?: string;
+
+  // Keeping this for backwards compatibility
+  image1?: string;
+  text1?: string;
+  key1?: string;
+  image2?: string;
+  text2?: string;
+  key2?: string;
 };
 
 export type Option = {
@@ -50,6 +53,8 @@ export type Title = {
   key: string;
   isOtherOption?: boolean;
   defaultValue?: boolean;
+  image?: string;
+  hideLabel?: boolean;
 };
 
 export type Confirmation = {

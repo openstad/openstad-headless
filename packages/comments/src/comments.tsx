@@ -282,7 +282,7 @@ function CommentsInner({
           ?.map((comment: any, index: number) => {
 
           let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
-          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === index} />;
+          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
         })}
         <Toaster />
       </section>
