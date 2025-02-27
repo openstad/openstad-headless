@@ -30,6 +30,7 @@ import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
+import {ProjectSettingProps} from "@openstad-headless/types";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -320,8 +321,18 @@ export default function WidgetEnqueteItems(
   }
 
   function handleSaveItems() {
-    props.updateConfig({ ...props, items });
+    const updatedProps = { ...props };
+
+    Object.keys(updatedProps).forEach((key: string) => {
+      if (key.startsWith("options.")) {
+        // @ts-ignore
+        delete updatedProps[key];
+      }
+    });
+
+    props.updateConfig({ ...updatedProps, items });
   }
+
 
   const hasOptions = () => {
     switch (form.watch('questionType')) {
