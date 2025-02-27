@@ -1,12 +1,6 @@
 var sanitize = require('sanitize-html');
 const _ = require('lodash');
 
-
-
-const removeEmojis = (text) => {
-	return !!text ? text.replace(/\p{Emoji}/gu, '') : text;
-};
-
 // Normalize unicode text by Compatibility Decomposition
 // this will remove the unicode characters that are not in the ASCII range
 // We also use the deburr method from lodash to remove diacritics
@@ -24,7 +18,6 @@ const sanitizeIfNotNull = (text, tags) => {
 	if (text === null) {
 		return null;
 	}
-	text = removeEmojis(text);
 	text = normalizeUnicodeText(text);
 	return sanitize(text, tags);
 }
