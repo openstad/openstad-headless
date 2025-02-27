@@ -280,8 +280,16 @@ export default function WidgetResourceFormItems(
     }
 
     function handleSaveItems() {
-        console.log(items, props);
-        props.updateConfig({ ...props, items });
+        const updatedProps = { ...props };
+
+        Object.keys(updatedProps).forEach((key: string) => {
+            if (key.startsWith("options.")) {
+                // @ts-ignore
+                delete updatedProps[key];
+            }
+        });
+
+        props.updateConfig({ ...updatedProps, items });
     }
 
     const hasOptions = () => {
