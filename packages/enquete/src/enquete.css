@@ -105,6 +105,12 @@
   gap: 1rem;
 }
 
+@media only screen and (max-width: 767px) {
+  .question-type-imageChoice .image-choice-container {
+    grid-template-columns: 1fr;
+  }
+}
+
 .question-type-imageChoice .image-choice-container label figure figcaption {
   margin-top: 10px;
   display: flex;
