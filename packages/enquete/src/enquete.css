@@ -100,12 +100,9 @@
 }
 
 .question-type-imageChoice .image-choice-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-}
-
-.question-type-imageChoice .image-choice-container > * {
-  flex: 1;
 }
 
 label.utrecht-form-label{

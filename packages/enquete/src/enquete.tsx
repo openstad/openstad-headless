@@ -126,18 +126,31 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';
-                    fieldData['choices'] = [
-                        {
-                            label: item?.text1 || '',
-                            value: item?.key1 || '',
-                            imageSrc: item?.image1 || ''
-                        },
-                        {
-                            label: item?.text2 || '',
-                            value: item?.key2 || '',
-                            imageSrc: item?.image2 || ''
-                        }
-                    ];
+
+                    if ( item.options && item.options.length > 0 ) {
+                        fieldData['choices'] = item.options.map((option) => {
+                            return {
+                                value: option.titles[0].key,
+                                label: option.titles[0].key,
+                                imageSrc: option.titles[0].image,
+                                imageAlt: option.titles[0].key,
+                                showLabel: option.titles[0].showLabel
+                            };
+                        });
+                    } else {
+                        fieldData['choices'] = [
+                            {
+                                label: item?.text1 || '',
+                                value: item?.key1 || '',
+                                imageSrc: item?.image1 || ''
+                            },
+                            {
+                                label: item?.text2 || '',
+                                value: item?.key2 || '',
+                                imageSrc: item?.image2 || ''
+                            }
+                        ];
+                    }
 
                     break;
                 case 'imageUpload':
