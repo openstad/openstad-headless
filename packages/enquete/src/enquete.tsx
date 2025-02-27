@@ -134,7 +134,7 @@ function Enquete(props: EnqueteWidgetProps) {
                                 label: option.titles[0].key,
                                 imageSrc: option.titles[0].image,
                                 imageAlt: option.titles[0].key,
-                                showLabel: option.titles[0].showLabel
+                                hideLabel: option.titles[0].hideLabel
                             };
                         });
                     } else {

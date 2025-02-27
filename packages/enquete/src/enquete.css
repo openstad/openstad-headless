@@ -105,6 +105,16 @@
   gap: 1rem;
 }
 
+.question-type-imageChoice .image-choice-container label figure figcaption {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.question-type-imageChoice .image-choice-container > .utrecht-form-field--radio {
+  display: inline-block;
+}
+
 label.utrecht-form-label{
   margin-block-end: 6px;
 }

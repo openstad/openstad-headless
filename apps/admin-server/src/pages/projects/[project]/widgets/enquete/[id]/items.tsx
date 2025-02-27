@@ -52,7 +52,7 @@ const formSchema = z.object({
           image: z.string().optional(),
           isOtherOption: z.boolean().optional(),
           defaultValue: z.boolean().optional(),
-          showLabel: z.boolean().optional()
+          hideLabel: z.boolean().optional()
         })),
       })
     )
@@ -555,7 +555,7 @@ export default function WidgetEnqueteItems(
                                     <FormLabel>Titel</FormLabel>
                                     <FormDescription>
                                       Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                      De titel kan ook gebruikt worden als bijschrift onder de afbeelding als je de optie selecteert om de titel te tonen.
+                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
                                     </FormDescription>
                                     <Input {...field} />
                                     <FormMessage />
@@ -566,7 +566,7 @@ export default function WidgetEnqueteItems(
                               <FormField
                                 control={form.control}
                                 // @ts-ignore
-                                name={`options.${activeOption}.titles.0.showLabel`}
+                                name={`options.${activeOption}.titles.0.hideLabel`}
                                 render={({field}) => (
                                   <>
                                     <FormItem
@@ -579,11 +579,11 @@ export default function WidgetEnqueteItems(
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{marginTop: 0, marginLeft: '6px'}}>Titel tonen?</FormLabel>
+                                        style={{marginTop: 0, marginLeft: '6px'}}>Titel verbergen?</FormLabel>
                                       <FormMessage/>
                                     </FormItem>
                                     <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding getoond.
+                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
                                     </FormDescription>
                                   </>
                                 )}
