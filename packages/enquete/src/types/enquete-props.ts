@@ -54,7 +54,7 @@ export type Title = {
   isOtherOption?: boolean;
   defaultValue?: boolean;
   image?: string;
-  showLabel?: boolean;
+  hideLabel?: boolean;
 };
 
 export type Confirmation = {
