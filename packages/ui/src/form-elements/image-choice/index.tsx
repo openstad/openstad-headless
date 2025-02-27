@@ -31,6 +31,7 @@ export type ChoiceItem = {
     imageSrc: string;
     imageDescription: string;
     imageAlt: string;
+    showLabel?: boolean;
 }
 
 const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
@@ -106,7 +107,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                     />
                                     <figure>
                                         <img src={choice.imageSrc} alt={choice.imageAlt} />
-                                        {choice.label && (
+                                        { (choice.label && choice.showLabel) && (
                                             <figcaption>{choice.label}</figcaption>
                                         )}
                                     </figure>
