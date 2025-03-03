@@ -97,6 +97,7 @@ services:
       - ADMIN_DOMAIN=${ADMIN_DOMAIN}
       - FORCE_HTTP=${FORCE_HTTP}
       - IMAGE_APP_URL_INTERNAL=http://openstad-image-server:${IMAGE_PORT_API}
+      - ALLOW_CONFIG_MUTATIONS=true
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
