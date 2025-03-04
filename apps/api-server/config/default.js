@@ -63,7 +63,7 @@ let defaultConfig = {
 	},
 
 	mail: {
-	  from: process.env.FROM_EMAIL_ADDRESS || process.env.API_EMAILADDRESS || 'info@openstad.org',
+	  from: process.env.FROM_EMAIL_ADDRESS || process.env.API_EMAILADDRESS || 'email@not.set',
 		method: 'smtp',
 		transport: {
 			smtp: {
