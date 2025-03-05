@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ChoiceGuideProps, WeightOverview } from "./props.js";
 import { InitializeFormFields } from "./parts/init-fields.js";
-import toast, { Toaster } from 'react-hot-toast';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
@@ -11,6 +10,8 @@ import { InitializeWeights } from "./parts/init-weights.js";
 import { FormValue } from "@openstad-headless/form/src/form";
 
 import { Heading4, Paragraph } from "@utrecht/component-library-react";
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
 function ChoiceGuide(props: ChoiceGuideProps) {
     const { choiceGuide = {}, items, choiceOption, widgetId } = props;
@@ -63,11 +64,8 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const totalPages = Math.ceil(formFields.length / questionsPerPage);
     const currentFields = formFields.slice(currentPage * questionsPerPage, (currentPage + 1) * questionsPerPage);
 
-    const notifySuccess = () =>
-      toast.success('Versturen gelukt', { position: 'bottom-center' });
-
-    const notifyFailed = () =>
-      toast.error('Versturen mislukt', { position: 'bottom-center' });
+    const notifySuccess = () => NotificationService.addNotification("Versturen gelukt", "success");
+    const notifyFailed = () => NotificationService.addNotification("Versturen mislukt", "error");
 
     const { create: createChoicesguideResult } = datastore.useChoicesguide({
         projectId: props.projectId,
@@ -133,7 +131,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     prevPage={currentPage > 0 ? currentPage - 1 : null}
                     {...props}
                   />
-                  <Toaster />
+                  <NotificationProvider />
               </div>
               <div className="osc-choiceguide-sidebar-container" ref={sidebarRef}>
                   {choicesType !== 'hidden' && (

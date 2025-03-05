@@ -11,7 +11,6 @@ import {
 import hasRole from '../../lib/has-role';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import React from 'react';
-import toast, { Toaster } from 'react-hot-toast';
 import Form from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
@@ -19,13 +18,14 @@ import {
     Heading2,
     Heading6,
 } from '@utrecht/component-library-react';
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
     EnquetePropsType;
 
 function Enquete(props: EnqueteWidgetProps) {
-    const notifyCreate = () =>
-        toast.success('Enquete ingediend', { position: 'bottom-center' });
+    const notifyCreate = () => NotificationService.addNotification("Enquete ingediend", "success");
 
     const datastore = new DataStore(props);
 
@@ -231,7 +231,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 />
             </div>
 
-            <Toaster />
+            <NotificationProvider />
         </div>
     );
 }

@@ -29,8 +29,9 @@ import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { Filters } from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 import SelectField from "@openstad-headless/ui/src/form-elements/select";
 import { MultiSelect } from "@openstad-headless/ui/src";
-import toast, { Toaster } from "react-hot-toast";
 import { Spacer } from '@openstad-headless/ui/src';
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -354,11 +355,8 @@ function DocumentMap({
     return null;
   };
 
-  const notifySuccess = () =>
-    toast.success('Uw reactie is succesvol geplaatst!', { position: 'top-center' });
-
-  const notifyFailed = () =>
-    toast.error('Uw reactie kon niet geplaatst worden', { position: 'top-center' });
+  const notifySuccess = () => NotificationService.addNotification("Uw reactie is succesvol geplaatst!", "success");
+  const notifyFailed = () => NotificationService.addNotification("Uw reactie kon niet geplaatst worden", "error");
 
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
@@ -988,6 +986,8 @@ function DocumentMap({
           >
             <i className="ri-arrow-up-line"></i>
           </button>
+
+        <NotificationProvider />
 
       </div>
 
