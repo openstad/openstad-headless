@@ -10,7 +10,6 @@ import {
     Spacer,
 } from '@openstad-headless/ui/src';
 import {ProjectSettingProps, BaseProps} from '@openstad-headless/types';
-import toast, {Toaster} from 'react-hot-toast';
 import Form from "@openstad-headless/form/src/form";
 import {
     Paragraph,
@@ -19,6 +18,8 @@ import {
     Heading6,
 } from '@utrecht/component-library-react';
 import hasRole from '../../lib/has-role';
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
 export type DistributionModuleProps =
     BaseProps &
@@ -53,8 +54,7 @@ export type Item = {
 };
 
 function DistributionModule(props: DistributionModuleProps) {
-    const notifyCreate = () =>
-        toast.success('Verdeling ingediend', {position: 'bottom-center'});
+    const notifyCreate = () => NotificationService.addNotification("Verdeling ingediend", "success");
 
     const datastore = new DataStore(props);
 
@@ -233,7 +233,7 @@ function DistributionModule(props: DistributionModuleProps) {
                 />
             </div>
 
-            <Toaster/>
+            <NotificationProvider />
         </div>
     );
 }
