@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from "react";
-import toast, { Toaster } from 'react-hot-toast';
 import {
     AccordionProvider,
     FormField,
@@ -19,6 +18,8 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import {Spacer} from "../../spacer";
 import DataStore from '@openstad-headless/data-store/src';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
+import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 
 const filePondSettings = {
     labelIdle: "Sleep document(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
@@ -173,6 +174,8 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
         });
     }, []);
 
+    const notifyFailed = (message: string) => NotificationService.addNotification(message, "error");
+
     return (
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
@@ -244,14 +247,13 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                                 resolve(true);
                             }
                         }).catch(error => {
-                            toast.error(error, { position: 'bottom-center' });
+                            notifyFailed(error);
                             return false;
                         });
                     }}
                     {...filePondSettings}
                 />
-
-                <Toaster />
+                <NotificationProvider />
             </div>
         </FormField>
     );

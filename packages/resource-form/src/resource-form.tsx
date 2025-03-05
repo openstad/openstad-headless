@@ -3,11 +3,12 @@ import hasRole from '../../lib/has-role';
 import type {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
 import {InitializeFormFields} from "./parts/init-fields.js";
-import toast, { Toaster } from 'react-hot-toast';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
 import { Heading } from '@utrecht/component-library-react';
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
+import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
@@ -33,11 +34,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
     const formFields = InitializeFormFields(props.items, props);
 
-    const notifySuccess = () =>
-        toast.success('Idee indienen gelukt', { position: 'bottom-center' });
-
-    const notifyFailed = () =>
-        toast.error('Idee indienen mislukt', { position: 'bottom-center' });
+    const notifySuccess = () => NotificationService.addNotification("Idee indienen gelukt", "success");
+    const notifyFailed = () => NotificationService.addNotification("Idee indienen mislukt", "error");
 
     const addTagsToFormData = (formData) => {
         const tags = [];
@@ -153,8 +151,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         {...props}
                     />
                 )}
-
-                <Toaster />
+                <NotificationProvider />
             </div>
         </div>
     );

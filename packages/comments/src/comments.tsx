@@ -13,8 +13,9 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Paragraph, Heading3, Heading } from '@utrecht/component-library-react';
 import { CommentFormProps } from './types/comment-form-props';
-import toast, {Toaster} from "react-hot-toast";
 import {Filters} from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
@@ -133,11 +134,8 @@ function CommentsInner({
 
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
 
-  const notifySuccess = () =>
-      toast.success('Reactie succesvol geplaatst', { position: 'bottom-center' });
-
-  const notifyFailed = () =>
-      toast.error('Reactie plaatsen mislukt', { position: 'bottom-center' });
+  const notifySuccess = () => NotificationService.addNotification("Reactie succesvol geplaatst", "success");
+  const notifyFailed = () => NotificationService.addNotification("Reactie plaatsen mislukt", "error");
 
   const defaultSetRefreshComments = () => {};
 
@@ -284,7 +282,7 @@ function CommentsInner({
           let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
           return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
         })}
-        <Toaster />
+        <NotificationProvider />
       </section>
     </CommentWidgetContext.Provider>
   );
