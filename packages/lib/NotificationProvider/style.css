@@ -1,4 +1,4 @@
-.notification-container {
+.openstad.notification-container {
  position: fixed;
  bottom: 20px;
  left: 50%;
@@ -20,7 +20,6 @@
  }
 }
 
-/* 🔹 **Animatie: Notificatie verdwijnt - kleiner worden en naar beneden zakken** */
 @keyframes fadeOutScale {
  from {
   opacity: 1;
@@ -32,13 +31,12 @@
  }
 }
 
-/* 🔥 Deze class wordt toegevoegd voordat een notificatie wordt verwijderd */
-.notification.fade-out {
+.openstad.notification-container .notification.fade-out {
  animation: fadeOutScale 0.25s ease-in-out;
  opacity: 0;
 }
 
-.notification {
+.openstad.notification-container .notification {
  display: flex;
  align-items: center;
  background: #fff;
@@ -56,7 +54,7 @@
  animation: slideInScale 0.25s ease-in-out;
 }
 
-.notification-message {
+.openstad.notification-container .notification-message {
  display: flex;
  justify-content: center;
  margin: 4px 10px;
@@ -66,7 +64,7 @@
  font-family: ui-sans-serif, system-ui, sans-serif;
 }
 
-.notification-icon {
+.openstad.notification-container .notification-icon {
  font-size: 18px;
  margin-right: 10px;
  position: relative;

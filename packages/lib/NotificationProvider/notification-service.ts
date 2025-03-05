@@ -1,9 +1,8 @@
-// 📌 notification-service.ts
 class NotificationService {
   private static instance: NotificationService;
   private listeners: ((message: string, type: "success" | "error") => void)[] = [];
 
-  private constructor() {} // Singleton: zorgt ervoor dat maar één instantie bestaat
+  private constructor() {}
 
   static getInstance() {
     if (!NotificationService.instance) {
@@ -12,12 +11,10 @@ class NotificationService {
     return NotificationService.instance;
   }
 
-  // ✅ Voeg een notificatie toe en trigger alle listeners
   addNotification(message: string, type: "success" | "error") {
     this.listeners.forEach((listener) => listener(message, type));
   }
 
-  // ✅ Registreer een listener in `<NotificationToaster />`
   registerListener(callback: (message: string, type: "success" | "error") => void) {
     this.listeners.push(callback);
     return () => {
@@ -26,5 +23,4 @@ class NotificationService {
   }
 }
 
-// Exporteer de singleton instance
 export default NotificationService.getInstance();
