@@ -1,7 +1,7 @@
 :root {
   --basemap-map-width: 100%;
   --basemap-map-height: 100%;
-  --basemap-map-aspect-ratio: 16/9;
+  --basemap-map-aspect-ratio: unset;
 }
 
 .map-container.osc-map {
@@ -16,7 +16,6 @@
   width: 100%;
   height: 100%;
   z-index: 1;
-
 }
 
 .osc-base-map-widget-container .osc-map-marker-faded {
@@ -41,4 +40,20 @@
   display: flex;
   flex-direction: column;
   gap: .5rem;
+}
+
+.skip-link {
+  clip: rect(1px, 1px, 1px, 1px);
+  -webkit-clip-path: inset(50%);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+}
+
+.osc .resource-card--link .osc-resource-overview-content-item-footer .icon > p {
+  margin: 0;
 }
