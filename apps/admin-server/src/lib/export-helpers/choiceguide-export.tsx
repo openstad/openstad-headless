@@ -33,7 +33,7 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
 
       fieldKeyToTitleMap.set(newKey, title);
 
-      if (item.type === "checkbox" && item.options) {
+      if (item.options && Array.isArray(item.options) && item.options.length > 0) {
         item.options.forEach((option: {titles: [{key?: string, title?: string, isOtherOption?: boolean}], trigger: string}) => {
           if (!!option.titles && Array.isArray(option.titles) && option.titles.length > 0 && option.titles[0].isOtherOption) {
             const otherTitle = `${option.titles[0].key || option.titles[0].title || 'Anders, namelijk'}`;
