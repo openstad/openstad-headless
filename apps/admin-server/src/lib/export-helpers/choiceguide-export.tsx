@@ -15,12 +15,13 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
       weights = {};
     }
 
-    const fieldKeyToTitleMap = items.reduce((acc: any, item: any, index: number) => {
+    const fieldKeyToTitleMap = new Map();
+    items.forEach((item: any) => {
       if (item.type === 'none') {
-        return acc;
+        return;
       }
 
-      let title = item.title || `Item ${index + 1}`;
+      let title = item.title || item.description;
 
       if (item.type === 'a-b-slider') {
         const explanationA = item.explanationA || 'A';
@@ -30,9 +31,20 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
 
       const newKey = item.type + '-' + item.trigger;
 
-      acc[newKey] = title;
-      return acc;
-    }, {});
+      fieldKeyToTitleMap.set(newKey, title);
+
+      if (item.options && Array.isArray(item.options) && item.options.length > 0) {
+        item.options.forEach((option: {titles: [{key?: string, title?: string, isOtherOption?: boolean}], trigger: string}) => {
+          if (!!option.titles && Array.isArray(option.titles) && option.titles.length > 0 && option.titles[0].isOtherOption) {
+            const otherTitle = `${option.titles[0].key || option.titles[0].title || 'Anders, namelijk'}`;
+            const otherKey = `${newKey}_${option.trigger}_other`;
+
+            fieldKeyToTitleMap.set(otherKey, otherTitle);
+          }
+        });
+      }
+
+    });
 
     data = data.map((row: any) => {
       const scores: { [key: string]: any } = {};
@@ -46,23 +58,28 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
         }
       });
 
-      const updatedResult = Object.keys(row?.result || {}).reduce((acc: any, key: any) => {
-        const newKey = fieldKeyToTitleMap[key] || key;
-        acc[newKey] = row?.result[key];
-        return acc;
-      }, {});
+      const rowMap = new Map();
+      fieldKeyToTitleMap.forEach((value, key) => {
+        const index = Array.from(fieldKeyToTitleMap.keys()).indexOf(key);
+
+        if (row?.result && row?.result[key]) {
+          rowMap.set(index, {'result': row?.result[key], 'value': value });
+        } else {
+          rowMap.set(index, {'result': '-', 'value': value});
+        }
+      });
 
       Object.keys(scores).forEach((key: any) => {
-        updatedResult[`Score: ${key}`] = scores[key];
+        const index = rowMap.size;
+        rowMap.set(index, {'result': scores[key], 'value': `Score: ${key}` });
       });
 
       return {
         ...row,
-        result: updatedResult
+        result: Object.fromEntries(rowMap)
       };
     });
   }
-
 
   function transformString() {
     widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
@@ -96,43 +113,24 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
     return value;
   };
 
-  const createRow = (rowData: any, keys: any) => {
-    const rowValues = keys.map((key: any) => {
-      return normalizeData(rowData[key]);
-    });
-
-    return rowValues.join(';');
-  };
-
-  const allKeys = data.reduce(
-    (acc: any, curr: any) => {
-      const filteredKeys = Object.keys(curr.result).filter(key => !key.includes('none'));
-      return [...acc, ...filteredKeys];
-    },
-    ['ID', 'Aangemaakt op', 'Project ID', 'Widget', 'Gebruikers ID']
-  );
-  const columns = Array.from(new Set(allKeys));
-
-  const headerRow = [...columns].join(';');
+  const headerRow = [
+    'ID',
+    'Aangemaakt op',
+    'Project ID',
+    'Widget',
+    'Gebruikers ID',
+    ...Object.values(data[0].result).map((item: any) => item.value)
+  ].join(';');
 
   const dataRows = data.map((row: any) => {
-    const filteredResult = Object.keys(row.result)
-        .filter(key => !key.includes('none'))
-        .reduce((acc: any, key) => {
-          acc[key] = row.result[key];
-          return acc;
-        }, {});
-
-    const rowData= {
-      ID: row.id,
-      'Aangemaakt op' : row.createdAt,
-      'Project ID' : row.projectId,
-      'Widget' : widgetName,
-      'Gebruikers ID' : row.userId,
-      ...filteredResult,
-    };
-
-    return createRow(rowData, columns);
+    return [
+      row.id,
+      row.createdAt,
+      row.projectId,
+      widgetName,
+      row.userId,
+      ...Object.values(row.result).map((item: any) => normalizeData(item.result))
+    ].join(';');
   });
 
   const csv = [headerRow, ...dataRows].join('\n');
