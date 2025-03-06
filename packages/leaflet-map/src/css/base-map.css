@@ -43,10 +43,15 @@
 }
 
 .skip-link {
+  clip: rect(1px, 1px, 1px, 1px);
+  -webkit-clip-path: inset(50%);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
   position: absolute;
-  z-index: -1;
-  top: 10px;
-  left: 10px;
 }
 
 .osc .resource-card--link .osc-resource-overview-content-item-footer .icon > p {
