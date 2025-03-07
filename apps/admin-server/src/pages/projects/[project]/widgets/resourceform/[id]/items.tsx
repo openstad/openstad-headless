@@ -971,12 +971,7 @@ export default function WidgetResourceFormItems(
                                                         <FormLabel>Is dit veld zichtbaar voor iedereen of alleen admin gebruikers?</FormLabel>
                                                         <Select
                                                             onValueChange={(e: string) => field.onChange(e === 'true')}
-                                                            value={
-                                                                type === 'budget'
-                                                                    ? 'true'
-                                                                    : (field.value ? 'true' : 'false')
-                                                            }
-                                                            disabled={type === 'budget'}
+                                                            value={field.value ? 'true' : 'false'}
                                                         >
                                                             <FormControl>
                                                                 <SelectTrigger>
