@@ -15,6 +15,7 @@ import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetChoiceGuideItems from "@/pages/projects/[project]/widgets/choiceguide/[id]/items";
 import WidgetChoiceGuideChoiceOptions from "@/pages/projects/[project]/widgets/choiceguide/[id]/choiceOptions";
+import WidgetChoiceGuideGeneralSettings from "@/pages/projects/[project]/widgets/choiceguide/[id]/settings";
 
 export const getServerSideProps = withApiUrl;
 
@@ -50,9 +51,10 @@ export default function WidgetChoiceGuide({
         <div className="container py-6">
           <Tabs defaultValue="form">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="form">Instellingen</TabsTrigger>
+              <TabsTrigger value="form">Formulier instellingen</TabsTrigger>
               <TabsTrigger value="items">Velden</TabsTrigger>
               <TabsTrigger value="choiceOptions">Keuze opties</TabsTrigger>
+              <TabsTrigger value="generalSettings">Algemene instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
@@ -80,6 +82,9 @@ export default function WidgetChoiceGuide({
             </TabsContent>
             <TabsContent value="choiceOptions" className="p-0">
               <WidgetChoiceGuideChoiceOptions />
+            </TabsContent>
+            <TabsContent value="generalSettings" className="p-0">
+              <WidgetChoiceGuideGeneralSettings />
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
