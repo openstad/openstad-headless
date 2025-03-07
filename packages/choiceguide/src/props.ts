@@ -1,6 +1,7 @@
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type ChoiceGuideProps = ChoiceGuide &
+    ChoiceGuideGeneralSettings &
     BaseProps &
     ProjectSettingProps &
     ExtraProjectSettings;
@@ -27,7 +28,16 @@ type ExtraProjectSettings = {
         choiceOptions: ChoiceOptions[] };
     items?: Array<Item>;
     widgetId?: string;
+    generalSettings?: ChoiceGuideGeneralSettings
 }
+
+export type ChoiceGuideGeneralSettings = {
+    submitButtonText?: string;
+    nextButtonText?: string;
+    loginText?: string;
+    loginTextButton?: string;
+    loginRequired?: boolean;
+};
 
 export type ChoiceGuideSidebarProps = {
     choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
