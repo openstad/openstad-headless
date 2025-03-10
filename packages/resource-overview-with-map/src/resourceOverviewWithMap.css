@@ -37,7 +37,7 @@
 }
 .resourceOverviewWithMap-container .map-container {
   aspect-ratio: unset !important;
-  height: 100%;
+  height: 100% !important;
 }
 
 .resourceOverviewWithMap-container #map {
