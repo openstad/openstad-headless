@@ -51,6 +51,8 @@ else \
     npm run build-packages --if-present --prefix=$WORKSPACE; \
 fi
 
+RUN npm cache clean --force
+
 # Generate and store release ID dynamically
 # Alleen uitvoeren voor de cms-server
 RUN if [ "$APP" = "cms-server" ]; then \
