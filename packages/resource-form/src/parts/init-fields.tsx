@@ -94,6 +94,9 @@ export const InitializeFormFields = (items, data) => {
                         });
                     }
                     break;
+                case 'budget':
+                    fieldData['format'] = true;
+                    break;
                 
             }
 

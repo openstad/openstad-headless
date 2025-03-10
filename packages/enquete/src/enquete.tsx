@@ -59,6 +59,8 @@ function Enquete(props: EnqueteWidgetProps) {
             }
         }
 
+        formData.embeddedUrl = window.location.href;
+
         const result = await createSubmission(formData, props.widgetId);
 
         if (result) {

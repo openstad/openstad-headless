@@ -92,7 +92,7 @@ export default function ChoicesSelectorForm(props: ChoiceGuide) {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Instellingen</Heading>
+        <Heading size="xl">Formulier instellingen</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
