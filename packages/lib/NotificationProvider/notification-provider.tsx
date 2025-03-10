@@ -31,7 +31,7 @@ const NotificationProvider = () => {
   return (
     <div className="notification-container openstad">
       {notifications.map(({ id, message, type, fadeOut }) => (
-        <div key={id} className={`notification ${fadeOut ? "fade-out" : ""}`}>
+        <div key={id} className={`notification ${fadeOut ? "fade-out" : ""} ${type}`}>
                 <span className="notification-icon">
                         {type === "success" ? "✅️" : "❌"}
                     </span>
