@@ -274,7 +274,6 @@ function getWidgetJavascriptOutput(
 
   const data = JSON.parse(widgetConfig)
 
-  const extraCssFile = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
   const apiUrl = process.env.URL ?? '';
 
 
@@ -366,18 +365,26 @@ function getWidgetJavascriptOutput(
           const redirectUri = encodeURI(window.location.href);
           
           const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
-          let customCss = '';
           
-          if (config.project.cssCustom) {
-            const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
-            customCss = \`<link href ="\${customCssUrl}" rel ="stylesheet">\`;
+          const head = document.querySelector('head');
+
+          const widgetCssUrl = \`${apiUrl}/api/project/${config.projectId}/widget-css/${widgetType}\`;
+          if (!head.querySelector(\`link[href="${widgetCssUrl}"]\`)) {
+            head.innerHTML += \`<link href="${widgetCssUrl}" rel="stylesheet">\`;
           }
           
-          document.querySelector('head').innerHTML += \`
-            <link href="${apiUrl}/api/project/\${config.projectId}/widget-css/${widgetType}" rel="stylesheet">
-            ${extraCssFile}
-            \${customCss}
-          \`;
+          if (data.project?.cssUrl) {
+            if (!head.querySelector(\`link[href="${data.project.cssUrl}"]\`)) {
+              head.innerHTML += \`<link href="${data.project.cssUrl}" rel="stylesheet">\`;
+            }
+          }
+          
+          if (config.project.cssCustom) {
+            const customCssUrl = \`${apiUrl}/api/project/${config.projectId}/css/${randomComponentId}\`;
+            if (!head.querySelector(\`link[href="${customCssUrl}"]\`)) {
+              head.innerHTML += \`<link href="${customCssUrl}" rel="stylesheet">\`;
+            }
+          }
           
           function renderWidget () {
             
