@@ -24,6 +24,8 @@ export type CheckboxFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    maxChoices?: string,
+    maxChoicesMessage?: string,
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -37,11 +39,16 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        showMoreInfo = false,
        moreInfoButton = 'Meer informatie',
        moreInfoContent = '',
-   infoImage = '',
+       infoImage = '',
+       maxChoices = '',
+       maxChoicesMessage = '',
 }) => {
     const defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
     const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+
+    const maxChoicesNum = parseInt(maxChoices, 10) || 0;
+    const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
 
     useEffect(() => {
         const initialOtherOptionValues: { [key: string]: string } = {};
@@ -161,12 +168,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                         required={fieldRequired}
                                         checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
                                         onChange={(e) => handleChoiceChange(e, index)}
-                                        disabled={disabled}
+                                        disabled={disabled || (maxReached && !selectedChoices.includes(choice.value))}
                                     />
                                     <span>{choice && choice.label}</span>
                                 </FormLabel>
                             </Paragraph>
                         </FormField>
+
                         {choice.isOtherOption && selectedChoices.includes(choice.value) && (
                             <div className="marginTop10 marginBottom15">
                                 <TextInput
@@ -181,6 +189,10 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                         )}
                     </>
                 ))}
+
+                {maxReached && maxChoicesMessage && (
+                  <em>{maxChoicesMessage}</em>
+                )}
             </Fieldset>
         </div>
     );

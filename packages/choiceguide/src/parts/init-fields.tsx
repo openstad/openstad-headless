@@ -70,6 +70,14 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                             fieldData['defaultValue'] = defaultValue;
                         }
                     }
+
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'imageUpload':
                     fieldData['allowedTypes'] = item.allowedTypes || ["image/*"];

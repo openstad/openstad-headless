@@ -125,6 +125,13 @@ function Enquete(props: EnqueteWidgetProps) {
                         fieldData['defaultValue'] = defaultValue;
                     }
 
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';

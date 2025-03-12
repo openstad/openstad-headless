@@ -99,6 +99,8 @@ export type Item = {
     imageA?: string;
     imageB?: string;
     defaultValue?: string;
+    maxChoices?: string,
+    maxChoicesMessage?: string,
 };
 
 export type Option = {
