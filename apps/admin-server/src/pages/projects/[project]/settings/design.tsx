@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Prism from 'prismjs';
 
 const formSchema = z.object({
-  cssUrl: z.string().optional(),
+  cssUrls: z.array(z.object({ url: z.string().optional() })).optional(),
   cssCustom: z.string().optional(),
 });
 
@@ -34,16 +34,21 @@ export default function ProjectSettingsDesign() {
   const { project } = router.query;
   const { data, updateProject } = useProject();
 
-  const defaults = useCallback(
-    () => {
-      return {
-        cssUrl: data?.config?.project?.cssUrl || '',
-        cssCustom: data?.config?.project?.cssCustom || '',
+  const defaults = useCallback(() => {
+    let existingCssUrl = data?.config?.project?.cssUrl ?? '';
 
-      }
-    },
-    [data]
-  );
+    let urlsArray = [];
+    if (Array.isArray(existingCssUrl)) {
+      urlsArray = existingCssUrl.map((url) => ({ url }));
+    } else if (typeof existingCssUrl === 'string' && existingCssUrl.trim() !== '') {
+      urlsArray = [{ url: existingCssUrl }];
+    }
+
+    return {
+      cssUrls: urlsArray,
+      cssCustom: data?.config?.project?.cssCustom || '',
+    };
+  }, [data]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -54,15 +59,21 @@ export default function ProjectSettingsDesign() {
     form.reset(defaults());
   }, [form, defaults]);
 
+  const { fields, append, remove } = useFieldArray({
+    name: 'cssUrls',
+    control: form.control,
+  });
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      const cssUrlsArray = values.cssUrls?.map((item) => item.url.trim()).filter(Boolean) || [];
+
       const project = await updateProject({
         project: {
-          cssUrl: values.cssUrl,
+          cssUrl: cssUrlsArray.length > 0 ? cssUrlsArray : '',
           cssCustom: values.cssCustom,
         },
-      },
-      );
+      });
       if (project) {
         toast.success('Project aangepast!');
       } else {
@@ -144,19 +155,24 @@ export default function ProjectSettingsDesign() {
               onSubmit={form.handleSubmit(onSubmit)}
               className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
 
-              <FormField
-                control={form.control}
-                name="cssUrl"
-                render={({ field }) => (
-                  <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                    <FormLabel>Geef de URL voor de huisstijl op (css bestand)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Url" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <Heading size="lg">CSS URL's</Heading>
+              {fields.map((item, index) => (
+                <div key={item.id} className="flex gap-2 items-center">
+                  <Controller
+                    control={form.control}
+                    name={`cssUrls.${index}.url`}
+                    render={({ field }) => (
+                      <Input {...field} placeholder="Voer een CSS URL in" className="w-full" />
+                    )}
+                  />
+                  <Button type="button" onClick={() => remove(index)} variant="secondary" className={'text-primary-foreground'}>
+                    ✖
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" onClick={() => append({ url: '' })} variant="default">
+                + URL toevoegen
+              </Button>
 
               <FormField
                 control={form.control}
