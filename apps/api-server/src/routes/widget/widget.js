@@ -276,9 +276,7 @@ function getWidgetJavascriptOutput(
 
   const apiUrl = process.env.URL ?? '';
 
-
-
-
+  const extraCssFile = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
 
 
   // TODO: Fix this, it's a hack to get the ChoiceGuide to work
@@ -324,8 +322,6 @@ function getWidgetJavascriptOutput(
 
   } else {
     widgetSettings.js.forEach((file) => {
-      console.log(`${widgetSettings.packageName}/${file}`);
-      console.log(require.resolve(`${widgetSettings.packageName}/${file}`));
       widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
     });
 
@@ -366,23 +362,25 @@ function getWidgetJavascriptOutput(
           
           const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
           
+          let customCss = '';
+  
           const head = document.querySelector('head');
-
-          const widgetCssUrl = \`${apiUrl}/api/project/${config.projectId}/widget-css/${widgetType}\`;
-          if (!head.querySelector(\`link[href="${widgetCssUrl}"]\`)) {
-            head.innerHTML += \`<link href="${widgetCssUrl}" rel="stylesheet">\`;
-          }
+          if (config.project?.cssCustom) {
+            const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
+            customCss = \`<link href="\${customCssUrl}" rel="stylesheet">\`;
           
-          if (data.project?.cssUrl) {
-            if (!head.querySelector(\`link[href="${data.project.cssUrl}"]\`)) {
-              head.innerHTML += \`<link href="${data.project.cssUrl}" rel="stylesheet">\`;
+            if (customCss && !head.querySelector(\`link[href="\${customCssUrl}"]\`)) {
+              head.innerHTML += customCss;
             }
           }
           
-          if (config.project.cssCustom) {
-            const customCssUrl = \`${apiUrl}/api/project/${config.projectId}/css/${randomComponentId}\`;
-            if (!head.querySelector(\`link[href="${customCssUrl}"]\`)) {
-              head.innerHTML += \`<link href="${customCssUrl}" rel="stylesheet">\`;
+          if (!head.querySelector('link[href="${apiUrl}/api/project/\${config.projectId}/widget-css/${widgetType}"]')) {
+            head.innerHTML += \`<link href="${apiUrl}/api/project/\${config.projectId}/widget-css/${widgetType}" rel="stylesheet">\`;
+          }
+          
+          if (config.project?.cssUrl) {
+            if (!head.querySelector(\`link[href="\${config.project.cssUrl}"]\`)) {
+              head.innerHTML += \`<link href="\${config.project.cssUrl}" rel="stylesheet">\`;
             }
           }
           
