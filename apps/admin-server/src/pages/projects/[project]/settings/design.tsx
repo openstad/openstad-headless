@@ -37,7 +37,7 @@ export default function ProjectSettingsDesign() {
   const defaults = useCallback(() => {
     let existingCssUrl = data?.config?.project?.cssUrl ?? '';
 
-    let urlsArray = [];
+    let urlsArray: Array<{ url: string }> = [];
     if (Array.isArray(existingCssUrl)) {
       urlsArray = existingCssUrl.map((url) => ({ url }));
     } else if (typeof existingCssUrl === 'string' && existingCssUrl.trim() !== '') {
@@ -66,7 +66,7 @@ export default function ProjectSettingsDesign() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const cssUrlsArray = values.cssUrls?.map((item) => item.url.trim()).filter(Boolean) || [];
+      const cssUrlsArray = values.cssUrls?.map((item) => item?.url?.trim() ?? '').filter(Boolean) || [];
 
       const project = await updateProject({
         project: {
@@ -155,7 +155,7 @@ export default function ProjectSettingsDesign() {
               onSubmit={form.handleSubmit(onSubmit)}
               className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
 
-              <Heading size="lg">CSS URL's</Heading>
+              <Heading size="lg">CSS URL&apos;s</Heading>
               {fields.map((item, index) => (
                 <div key={item.id} className="flex gap-2 items-center">
                   <Controller
