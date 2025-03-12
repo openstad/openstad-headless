@@ -276,9 +276,6 @@ function getWidgetJavascriptOutput(
 
   const apiUrl = process.env.URL ?? '';
 
-  const extraCssFile = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
-
-
   // TODO: Fix this, it's a hack to get the ChoiceGuide to work
   if ( widgetSettings.componentName === 'ChoiceGuide' ) {
 
