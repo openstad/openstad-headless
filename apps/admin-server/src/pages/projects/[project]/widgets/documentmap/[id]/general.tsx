@@ -29,7 +29,7 @@ const formSchema = z.object({
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
-  itemsPerPage: z.coerce.number(),
+  itemsPerPage: z.coerce.number().optional(),
   displayPagination: z.boolean().optional()
 });
 type FormData = z.infer<typeof formSchema>;
