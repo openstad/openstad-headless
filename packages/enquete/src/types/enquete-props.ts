@@ -29,6 +29,8 @@ export type Item = {
   imageAlt?: string;
   imageDescription?: string;
   fieldRequired?: boolean;
+  maxChoices?: string,
+  maxChoicesMessage?: string,
   showSmileys?: boolean;
   placeholder?: string;
   defaultValue?: string;

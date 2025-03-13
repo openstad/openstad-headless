@@ -63,6 +63,8 @@ const formSchema = z.object({
   imageDescription: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
+  maxChoices: z.string().optional(),
+  maxChoicesMessage: z.string().optional(),
   showSmileys: z.boolean().optional(),
   placeholder: z.string().optional(),
   defaultValue: z.string().optional(),
@@ -125,6 +127,8 @@ export default function WidgetEnqueteItems(
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
           fieldRequired: values.fieldRequired || false,
+          maxChoices: values.maxChoices || '',
+          maxChoicesMessage: values.maxChoicesMessage || '',
           showSmileys: values.showSmileys || false,
           defaultValue: values.defaultValue || '',
           placeholder: values.placeholder || '',
@@ -190,6 +194,8 @@ export default function WidgetEnqueteItems(
     imageAlt: '',
     imageDescription: '',
     fieldRequired: false,
+    maxChoices: '',
+    maxChoicesMessage: '',
     showSmileys: false,
     defaultValue: '',
     placeholder: '',
@@ -237,6 +243,8 @@ export default function WidgetEnqueteItems(
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
         fieldRequired: selectedItem.fieldRequired || false,
+        maxChoices: selectedItem.maxChoices || '',
+        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         showSmileys: selectedItem.showSmileys || false,
         defaultValue: selectedItem.defaultValue || '',
         placeholder: selectedItem.placeholder || '',
@@ -990,6 +998,41 @@ export default function WidgetEnqueteItems(
                           </FormItem>
                         )}
                       />
+                    )}
+
+                    {form.watch('questionType') === 'multiple' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="maxChoices"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Maximaal te selecteren opties</FormLabel>
+                              <FormDescription>
+                                <em className='text-xs'>Als je wilt dat er maximaal een aantal opties geselecteerd kunnen worden, vul dan hier het aantal in.</em>
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="maxChoicesMessage"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Maximaal aantal bereikt melding
+                              </FormLabel>
+                              <FormDescription>
+                                <em className='text-xs'>Als het maximaal aantal opties is geselecteerd, geef dan een melding aan de gebruiker. Dit is optioneel.</em>
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
 
                     {hasOptions() && (
