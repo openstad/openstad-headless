@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext } from 'react';
 import './index.css';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../lib/has-role';
-import { Banner } from '@openstad-headless/ui/src';
+import {Banner, Paginator} from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
@@ -44,6 +44,9 @@ export type CommentsWidgetProps = BaseProps &
     defaultSorting?: string;
     sorting?: Array<{ value: string; label: string }>;
     setRefreshComments?: React.Dispatch<any>;
+    itemsPerPage?: number;
+    displayPagination?: boolean;
+    onGoToLastPage?: (goToLastPage: () => void) => void;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -58,10 +61,28 @@ function CommentsInner({
   formIntro,
   selectedComment,
   loginText,
+  itemsPerPage,
+  onGoToLastPage,
+  displayPagination = false,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
+  const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(displayPagination ? itemsPerPage || 9999 : 9999 );
+
+  const goToLastPage = () => {
+    if (totalPages > 0 && displayPagination) {
+      setPage(totalPages - 1);
+    }
+  };
+
+  useEffect(() => {
+    if (onGoToLastPage) {
+      onGoToLastPage(goToLastPage);
+    }
+  }, [onGoToLastPage, totalPages]);
 
   const refreshComments = () => {
     setRefreshKey(prevKey => prevKey + 1); // Increment the key to trigger a refresh
@@ -185,6 +206,12 @@ function CommentsInner({
     }
   }, [comments]);
 
+  useEffect(() => {
+    if (comments && Array.isArray(comments) && comments.length > 0 && displayPagination) {
+      setTotalPages(Math.ceil(comments.length / pageSize));
+    }
+  }, [comments, pageSize]);
+
     return (
     <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: refreshComments || defaultSetRefreshComments }}>
       <section className="osc">
@@ -277,11 +304,26 @@ function CommentsInner({
             const dateB = new Date(b.createdAt).getTime();
             return sort === 'createdAt_desc' ? dateB - dateA : dateA - dateB;
           })
+          .slice(page * pageSize, (page + 1) * pageSize)
           ?.map((comment: any, index: number) => {
 
           let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
           return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
         })}
+
+        {displayPagination && (
+          <>
+            <Spacer size={4} />
+            <div className="osc-comments-paginator col-span-full">
+              <Paginator
+                page={page || 0}
+                totalPages={totalPages || 1}
+                onPageChange={(newPage) => setPage(newPage)}
+              />
+            </div>
+          </>
+        )}
+
         <NotificationProvider />
       </section>
     </CommentWidgetContext.Provider>
@@ -297,6 +339,7 @@ function Comments({
   selectedComment,
   loginText = 'Inloggen om deel te nemen aan de discussie.',
   setRefreshComments = () => {},
+  onGoToLastPage,
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(false);
@@ -323,6 +366,7 @@ function Comments({
         selectedComment={selectedComment}
         loginText={loginText}
         setRefreshComments={triggerRefresh}
+        onGoToLastPage={onGoToLastPage}
         {...props}
       />
     </div>
