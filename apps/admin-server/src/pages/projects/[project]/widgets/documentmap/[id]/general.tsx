@@ -29,6 +29,8 @@ const formSchema = z.object({
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
+  itemsPerPage: z.coerce.number(),
+  displayPagination: z.boolean().optional()
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -57,6 +59,8 @@ export default function DocumentGeneral(
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
       entireDocumentVisible: props.entireDocumentVisible || 'entirely',
+      itemsPerPage: props?.itemsPerPage || 9999,
+      displayPagination: props?.displayPagination || false,
     },
   });
 
@@ -240,6 +244,49 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="displayPagination"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Paginering tonen</FormLabel>
+              <FormControl>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    props.onFieldChanged(field.name, e);
+                    field.onChange(e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        { !!form.watch('displayPagination') && (
+          <FormField
+            control={form.control}
+            name="itemsPerPage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hoeveelheid items per pagina</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field}
+                         placeholder="9999"
+                         {...field}
+                         onChange={(e) => {
+                           onFieldChange(field.name, e.target.value);
+                           field.onChange(e);
+                         }} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button
           type="submit"
