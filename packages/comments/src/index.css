@@ -108,3 +108,7 @@
  color: var(--utrecht-button-secondary-action-color, white);
  border: 1px solid var(--utrecht-button-secondary-action-border-color, #ff0021);
 }
+
+.osc-comments-paginator .osc-paginator {
+ justify-content: center;
+}
