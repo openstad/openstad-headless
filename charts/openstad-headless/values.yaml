@@ -113,7 +113,7 @@ host:
 persistence:
   #configure the cloud-specific storageClassName, will use the clouds default if not specified
   storageClassName:
-  annotations: '{}'
+  annotations: {}
 
 admin:
   # Configure how many replicas exists of this service

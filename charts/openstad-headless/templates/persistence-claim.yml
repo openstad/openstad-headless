@@ -4,7 +4,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: image-data-claim
   namespace: {{ .Release.Namespace }}
-  annotations: {{ .Values.persistence.annotations }}
+{{- if (.Values.persistence.annotations)}}
+  annotations:
+{{ toYaml .Values.persistence.annotations | indent 4 }}
+{{- end}}
 spec:
 {{- if (and .Values.persistence .Values.persistence.storageClassName) }}
   storageClassName: {{ .Values.persistence.storageClassName }}
@@ -24,7 +27,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: docs-data-claim
   namespace: {{ .Release.Namespace }}
-  annotations: {{ .Values.persistence.annotations }}
+{{- if (.Values.persistence.annotations)}}
+  annotations:
+{{ toYaml .Values.persistence.annotations | indent 4 }}
+{{- end}}
 spec:
 {{- if (and .Values.persistence .Values.persistence.storageClassName) }}
   storageClassName: {{ .Values.persistence.storageClassName }}
@@ -44,7 +50,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: cms-data-claim
   namespace: {{ .Release.Namespace }}
-  annotations: {{ .Values.persistence.annotations }}
+{{- if (.Values.persistence.annotations)}}
+  annotations:
+{{ toYaml .Values.persistence.annotations | indent 4 }}
+{{- end}}
 spec:
 {{- if (and .Values.persistence .Values.persistence.storageClassName) }}
   storageClassName: {{ .Values.persistence.storageClassName }}
