@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -130,15 +130,27 @@ export default function WidgetResourceOverviewGeneral(
                     Link (relatief) naar de specifieke inzending
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Bijv: /resources/[id]"
-                      type="text"
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
+
+                    {!!props.selectedProjects && props.selectedProjects?.length > 0 ? (
+                      <div style={{backgroundColor: 'goldenrod', padding: '15px 20px', margin: '10px 0 20px'}}>
+                        <FormDescription
+                          style={{color: 'black', textAlign: 'center'}}
+                        >
+                          Deze optie is instelbaar per project bij het tabblad 'Instellingen multi project'.
+                        </FormDescription>
+                      </div>
+                    ) : (
+                      <Input
+                        placeholder="Bijv: /resources/[id]"
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    )}
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>
