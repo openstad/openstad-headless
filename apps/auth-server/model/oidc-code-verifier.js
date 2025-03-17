@@ -3,29 +3,27 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (db, sequelize, Sequelize) => {
-  let OidcCodeVerifier = sequelize.define(
+  return sequelize.define(
     'oidc_code_verifier',
     {
-      id: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        primaryKey: true,
+      id:        {
+        type:         DataTypes.UUID,
+        allowNull:    false,
+        primaryKey:   true,
         defaultValue: DataTypes.UUIDV4,
       },
-      verifier: {
-        type: DataTypes.STRING,
+      verifier:  {
+        type:      DataTypes.STRING,
         allowNull: false,
       },
       createdAt: {
-        type: DataTypes.DATE,
+        type:      DataTypes.DATE,
         allowNull: false,
       },
       updatedAt: {
-        type: DataTypes.DATE,
+        type:      DataTypes.DATE,
         allowNull: false,
       },
     },
   );
-
-  return OidcCodeVerifier;
 };
