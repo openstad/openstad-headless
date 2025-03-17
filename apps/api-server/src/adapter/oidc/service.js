@@ -31,4 +31,28 @@ service.fetchUserData = async function fetchUserData({ authConfig, accessToken }
 
 }
 
+service.saveCodeVerifier = async function saveCodeVerifier({ codeVerifier }) {
+  
+  // const insertedRecord = await db.OidcCodeVerifier.create({ verifier: codeVerifier });
+  try {
+
+    let url = `${authConfig.serverUrlInternal}/api/save-code-verifier?verifier=${codeVerifier}`;
+    let response = await fetch(url, {
+	    headers: {
+        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+      method: 'post',
+      body: '{}',
+    })
+    if (!response.ok) {
+      throw new Error('OpenStad.service.saveCodeVerifier: failed')
+    }
+    let result = await response.json();
+    return result;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
+}
+
 module.exports = service;

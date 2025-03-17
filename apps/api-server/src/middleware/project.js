@@ -19,8 +19,15 @@ module.exports = function( req, res, next ) {
 
   let projectId = getProjectId(req.path);
   if (req.path.match('^(/api/project(/issues)?/?)$')) projectId = 1; // list projects only on admin site
-
-  if (!projectId || typeof projectId !== 'number') return next(new createError(400, 'Project niet gevonden for path: ' + req.path));
+  
+  if ((!projectId || typeof projectId !== 'number') && (req.cookies && req.cookies.projectId)) {
+    // Try to get project ID from cookie
+    projectId = parseInt(req.cookies.projectId, 10);
+  }
+  
+  console.log ('project id', projectId);
+  
+  if (!projectId || typeof projectId !== 'number' || projectId <= 0) return next(new createError(400, 'Project niet gevonden for path: ' + req.path));
 
   const where = { id: projectId }
 

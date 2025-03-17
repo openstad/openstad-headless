@@ -29,6 +29,8 @@ const umzug = new Umzug({
     if( !migrations.length ) {
 		  console.log('No new migrations');
 	  }
+    
+    await db.sequelize.sync();
   }
   process.exit();
 })();
