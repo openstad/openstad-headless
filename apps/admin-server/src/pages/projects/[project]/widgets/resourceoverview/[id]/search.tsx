@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -54,7 +54,18 @@ export default function WidgetResourceOverviewSearch(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/3 grid grid-cols-1 gap-4">
+          className="lg:w-1/2 grid grid-cols-1 gap-4">
+
+          {!!props.selectedProjects && props.selectedProjects?.length > 0 && (
+            <div style={{backgroundColor: 'red', padding: '15px 20px', margin: '10px 0 20px'}}>
+              <FormDescription
+                style={{color: 'white', textAlign: 'center'}}
+              >
+                Opties op deze pagina zijn nog niet beschikbaar voor de multi project widget.
+              </FormDescription>
+            </div>
+          )}
+
           <FormField
             control={form.control}
             name="displaySearch"
