@@ -101,6 +101,9 @@ export default function WidgetResourceOverviewTags(
     if (props.selectedProjects?.length) {
       const fetchTagsForProjects = async () => {
         const tagsByProject: { [key: string]: Tag[] } = {};
+
+        if ( !props.selectedProjects ) return;
+
         for (const project of props.selectedProjects) {
           const projectTags = await fetchTags(project.id);
 
@@ -132,7 +135,7 @@ export default function WidgetResourceOverviewTags(
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 gap-4">
 
-          {props.selectedProjects?.length > 0 && (
+          {props.selectedProjects && props.selectedProjects?.length > 0 && (
             <div style={{backgroundColor: 'red', padding: '15px 20px', margin: '10px 0 20px'}}>
               <FormDescription
                 style={{color: 'white', textAlign: 'center'}}
@@ -175,14 +178,14 @@ export default function WidgetResourceOverviewTags(
                   <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
                 </div>
 
-                {props.selectedProjects?.length > 0 ? (
+                {props.selectedProjects && props.selectedProjects?.length > 0 ? (
                   Object.entries(projectTags).map(([projectId, tags]) => (
                       <div
                         key={projectId}
                         style={{margin: '30px 0 0'}}
                       >
                         <Heading
-                          size="lg">{props.selectedProjects.find(p => (p.id).toString() === projectId)?.name}</Heading>
+                          size="lg">{props.selectedProjects?.find(p => (p.id).toString() === projectId)?.name}</Heading>
                         <Separator className="my-2"/>
                         {(tagGroupNamesPerProject[projectId] || []).map((groupName, index) => (
                           <div

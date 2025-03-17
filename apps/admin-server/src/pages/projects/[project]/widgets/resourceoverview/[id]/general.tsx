@@ -136,7 +136,7 @@ export default function WidgetResourceOverviewGeneral(
                         <FormDescription
                           style={{color: 'black', textAlign: 'center'}}
                         >
-                          Deze optie is instelbaar per project bij het tabblad 'Instellingen multi project'.
+                          Deze optie is instelbaar per project bij het tabblad &apos;Instellingen multi project&apos;.
                         </FormDescription>
                       </div>
                     ) : (

@@ -43,7 +43,14 @@ export default function WidgetMultiProjectSettings(
   });
 
   async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
+    const updatedValues = {
+      ...values,
+      selectedProjects: values.selectedProjects?.map(project => ({
+        ...project,
+        id: project.id || 0,
+      })) || [],
+    };
+    props.updateConfig({ ...props, ...updatedValues });
   }
 
   return (
@@ -83,7 +90,7 @@ export default function WidgetMultiProjectSettings(
                       <div className="lg:w-full flex flex-row items-center gap-x-2" style={{marginLeft: '40px', display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
                         <FormField
                           control={form.control}
-                          name={`selectedProjects.${field.value.findIndex(p => p.id === project.id)}.detailPageLink`}
+                          name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.label`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel
@@ -104,7 +111,7 @@ export default function WidgetMultiProjectSettings(
                         />
                         <FormField
                           control={form.control}
-                          name={`selectedProjects.${field.value.findIndex(p => p.id === project.id)}.label`}
+                          name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.label`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel

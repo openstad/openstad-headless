@@ -4,7 +4,7 @@ import { ResourceOverviewWidgetProps, ResourceOverview } from '@openstad-headles
 import '../../resource-overview/src/resource-overview.css';
 
 export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
-  selectedProjects: {
+  selectedProjects?: {
     id: string;
     name: string;
     detailPageLink?: string;
@@ -27,7 +27,7 @@ function MultiProjectResourceOverview({
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const newProjects = props.selectedProjects.filter(project => !resourceCache.current.has(project.id));
+        const newProjects = props.selectedProjects && props.selectedProjects.filter(project => !resourceCache.current.has(project.id)) || [];
 
         if (newProjects.length === 0) return;
 
