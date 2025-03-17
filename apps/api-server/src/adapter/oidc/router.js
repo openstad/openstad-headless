@@ -8,6 +8,7 @@ const db = require('../../db');
 const service = require('./service');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const crypto = require('crypto');
 
 let router = express.Router({mergeParams: true});
 
@@ -104,10 +105,18 @@ router
     console.log(req.query.redirectUri, req.project.id, await isRedirectAllowed(req.project.id, req.query.redirectUri));
     // Check if redirect domain is allowed
     if(req.query.redirectUri && req.project.id && await isRedirectAllowed(req.project.id, req.query.redirectUri)){
-      let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
+      let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;// + '&acr_values=loa:low';
       url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
-      url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri));
-      console.log ('req authconfig', req.authConfig);
+      const apiUrlWithHttpsForTestingPurposes = config.url.replace('http://', 'https://');
+      
+      // Set cookies for digest login
+      res.cookie('useAuth', req.authConfig.provider, { path: '/', httpOnly: true, secure: true });
+      res.cookie('redirectUri', req.query.redirectUri, { path: '/', httpOnly: true, secure: true });
+      res.cookie('projectId', req.project.id, { path: '/', httpOnly: true, secure: true });
+      
+      
+      url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(apiUrlWithHttpsForTestingPurposes + '/auth/digest-login'));
+      console.log ('req authconfig', req.authConfig, url);
       res.redirect(url);
     }else if(req.query.redirectUri){
       return next(createError(403, 'redirectUri not found in allowlist.'));
@@ -120,7 +129,11 @@ router
 
 router
   .route('(/project/:projectId)?/digest-login')
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
+    
+    // Return a text response "Je bent succesvol ingelogd!" to the client
+    return res.send('Je bent succesvol ingelogd!');
+    
     
     // get accesstoken for code
     let code = req.query.code;
@@ -136,8 +149,37 @@ router
     }
 
     let contentType = req.authConfig.serverExchangeContentType || 'application/json';
-    if (contentType == 'application/x-www-form-urlencoded') data = `client_id=${encodeURIComponent(req.authConfig.clientId)}&client_secret=${encodeURIComponent(req.authConfig.clientSecret)}&code=${encodeURIComponent(code)}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.returnTo)}`;
+    if (contentType == 'application/x-www-form-urlencoded') data = `client_id=${encodeURIComponent(req.authConfig.clientId)}&client_secret=${encodeURIComponent(req.authConfig.clientSecret)}&code=${encodeURIComponent(code)}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(config.url + '/auth//digest-login')}`;
 
+    const pkceEnabled = !!req.authConfig.pkceEnabled || false;
+    
+    // If we have a Proof Key for Code Exchange flow enabled for the Authorization Code Flow, we must provide a code_verifier and code_challenge to the authorization server
+    // Example docs: https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-pkce
+    if (pkceEnabled) {
+      // 1. Generate a code_verifier
+      const codeVerifier = crypto.randomBytes(32).toString('hex');
+    
+      // 2. Generate a code_challenge based on the code_verifier
+      const codeChallenge = crypto
+        .createHash('sha256')
+        .update(codeVerifier)
+        .digest('base64url');
+    
+      // 3. Send the code_challenge along with the authorization request
+      data.code_challenge = codeChallenge;
+      data.code_challenge_method = 'S256';
+    
+      // 4. Save the code_verifier in the database
+      const codeVerifierUuid = await service.saveCodeVerifier(codeVerifier);
+      
+      console.log ('insertedRecord', insertedRecord, codeVerifier);
+    
+      // 5. Save the uuid for this code_verifier in a cookie
+      //res.cookie('pkce_uuid', codeVerifier, { path: '/', httpOnly: true, secure: true });
+    }
+    
+    console.log ('check access token', url, data, contentType, 't23')
+    
     fetch(url, {
       method: 'POST',
       headers: {
@@ -146,6 +188,7 @@ router
       body: data
     })
 	    .then((response) => {
+        console.log ('response', response, response.json(), response.status)
 		    if (!response.ok) throw Error(response)
 		    return response.json();
 	    })

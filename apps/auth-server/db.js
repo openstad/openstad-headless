@@ -59,6 +59,7 @@ db.Role = require('./model/role')(db, sequelize, Sequelize);
 db.UniqueCode = require('./model/unique~code')(db, sequelize, Sequelize);
 db.User = require('./model/user')(db, sequelize, Sequelize);
 db.UserRole = require('./model/user-role')(db, sequelize, Sequelize);
+db.OidcCodeVerifier = require('./model/oidc-code-verifier')(db, sequelize, Sequelize);
 
 // invoke associations and scopes
 for (let modelName in sequelize.models) {
