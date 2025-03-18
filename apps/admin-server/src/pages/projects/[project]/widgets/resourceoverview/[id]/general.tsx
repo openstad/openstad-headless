@@ -20,7 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Input } from '@/components/ui/input';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,8 +33,8 @@ const formSchema = z.object({
 });
 
 export default function WidgetResourceOverviewGeneral(
-  props: ResourceOverviewWidgetProps &
-    EditFieldProps<ResourceOverviewWidgetProps>
+  props: MultiProjectResourceOverviewProps &
+    EditFieldProps<MultiProjectResourceOverviewProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
@@ -52,6 +52,10 @@ export default function WidgetResourceOverviewGeneral(
       rawInput: props?.rawInput || '',
     },
   });
+
+  if ( props.widgetName ) {
+    console.log( 'props.widgetName', props.widgetName );
+  }
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -131,7 +135,7 @@ export default function WidgetResourceOverviewGeneral(
                   </FormLabel>
                   <FormControl>
 
-                    {!!props.selectedProjects && props.selectedProjects?.length > 0 ? (
+                    {!!props.widgetName && props.widgetName === 'multiprojectresourceoverview' ? (
                       <div style={{backgroundColor: 'goldenrod', padding: '15px 20px', margin: '10px 0 20px'}}>
                         <FormDescription
                           style={{color: 'black', textAlign: 'center'}}

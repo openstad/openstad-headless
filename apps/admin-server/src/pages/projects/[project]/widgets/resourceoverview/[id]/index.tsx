@@ -16,7 +16,7 @@ import WidgetResourceOverviewInclude from './include';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import {
@@ -40,16 +40,16 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceOverviewWidgetProps>();
+    useWidgetConfig<MultiProjectResourceOverviewProps>();
   const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceOverviewWidgetProps>({
+    useWidgetPreview<MultiProjectResourceOverviewProps>({
       projectId,
     });
 
   const totalPropPackage = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: ResourceOverviewWidgetProps) =>
+    updateConfig: (config: MultiProjectResourceOverviewProps) =>
       updateConfig({ ...widget.config, ...config }),
 
     onFieldChanged: (key: string, value: any) => {
@@ -115,7 +115,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsContent value="general" className="p-0">
                       <WidgetResourcesMapMap
                         {...extractConfig<
-                          ResourceOverviewWidgetProps,
+                          MultiProjectResourceOverviewProps,
                           ResourceOverviewMapWidgetTabProps
                         >({
                           previewConfig: previewConfig,
@@ -128,7 +128,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsContent value="buttons" className="p-0">
                       <WidgetResourcesMapButton
                         {...extractConfig<
-                          ResourceOverviewWidgetProps,
+                          MultiProjectResourceOverviewProps,
                           ResourceOverviewMapWidgetTabProps
                         >({
                           previewConfig: previewConfig,
@@ -141,7 +141,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsContent value="polygons" className="p-0">
                       <WidgetResourcesMapPolygons
                         {...extractConfig<
-                          ResourceOverviewWidgetProps,
+                          MultiProjectResourceOverviewProps,
                           ResourceOverviewMapWidgetTabProps
                         >({
                           previewConfig,
@@ -180,7 +180,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                       <LikesDisplay
                           omitSchemaKeys={['resourceId']}
                           {...extractConfig<
-                              ResourceOverviewWidgetProps,
+                              MultiProjectResourceOverviewProps,
                               LikeWidgetTabProps
                           >({
                             subWidgetKey: 'resourceOverviewMapWidget',

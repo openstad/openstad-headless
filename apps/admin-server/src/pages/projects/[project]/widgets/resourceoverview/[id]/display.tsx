@@ -13,7 +13,7 @@ import { Heading } from '@/components/ui/typography';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -56,8 +56,8 @@ const formSchema = z.object({
 });
 
 export default function WidgetResourceOverviewDisplay(
-  props: ResourceOverviewWidgetProps &
-    EditFieldProps<ResourceOverviewWidgetProps>
+  props: MultiProjectResourceOverviewProps &
+    EditFieldProps<MultiProjectResourceOverviewProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {

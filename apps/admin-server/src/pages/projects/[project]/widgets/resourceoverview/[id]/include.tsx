@@ -15,7 +15,7 @@ import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import useStatuses from "@/hooks/use-statuses";
@@ -27,8 +27,8 @@ const formSchema = z.object({
 });
 
 export default function WidgetResourceOverviewInclude(
-  props: ResourceOverviewWidgetProps &
-    EditFieldProps<ResourceOverviewWidgetProps>
+  props: MultiProjectResourceOverviewProps &
+    EditFieldProps<MultiProjectResourceOverviewProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
@@ -65,7 +65,7 @@ export default function WidgetResourceOverviewInclude(
           onSubmit={form.handleSubmit(onSubmit)}
           className="grid gap-4">
 
-          {!!props.selectedProjects && props.selectedProjects?.length > 0 && (
+          {!!props.widgetName && props.widgetName === 'multiprojectresourceoverview' && (
             <div style={{backgroundColor: 'red', padding: '15px 20px', margin: '10px 0 20px'}}>
               <FormDescription
                 style={{color: 'white', textAlign: 'center'}}

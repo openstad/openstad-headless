@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -56,7 +57,14 @@ export default function WidgetMultiProjectSettings(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Paginering</Heading>
+        <Heading size="xl">
+          Instellingen voor het &apos;Multi project inzendingen overzicht&apos;
+        </Heading>
+        <FormDescription>
+          Selecteer de projecten die je wilt tonen in het overzicht.<br />
+          Je kunt per project een link naar de detailpagina en een label voor in het overzicht opgeven.<br />
+          Voor de detailpagina kun je linken naar de juiste inzending door [id] te gebruiken, bijvoorbeeld /resources/[id]
+        </FormDescription>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -90,7 +98,7 @@ export default function WidgetMultiProjectSettings(
                       <div className="lg:w-full flex flex-row items-center gap-x-2" style={{marginLeft: '40px', display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
                         <FormField
                           control={form.control}
-                          name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.label`}
+                          name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.detailPageLink`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel

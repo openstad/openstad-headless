@@ -16,7 +16,7 @@ import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useEffect, useState } from 'react';
@@ -34,6 +34,7 @@ const formSchema = z.object({
         type: z.string(),
         label: z.string().optional(),
         multiple: z.boolean(),
+        projectId: z.string().optional()
       })
     )
     .refine((value) => value.some((item) => item), {
@@ -49,8 +50,8 @@ type Tag = {
 };
 
 export default function WidgetResourceOverviewTags(
-  props: ResourceOverviewWidgetProps &
-    EditFieldProps<ResourceOverviewWidgetProps>
+  props: MultiProjectResourceOverviewProps &
+    EditFieldProps<MultiProjectResourceOverviewProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);
@@ -135,16 +136,6 @@ export default function WidgetResourceOverviewTags(
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 gap-4">
 
-          {props.selectedProjects && props.selectedProjects?.length > 0 && (
-            <div style={{backgroundColor: 'red', padding: '15px 20px', margin: '10px 0 20px'}}>
-              <FormDescription
-                style={{color: 'white', textAlign: 'center'}}
-              >
-                Opties op deze pagina zijn nog niet beschikbaar voor de multi project widget.
-              </FormDescription>
-            </div>
-          )}
-
           <FormField
             control={form.control}
             name="displayTagFilters"
@@ -205,7 +196,9 @@ export default function WidgetResourceOverviewTags(
                                       <Checkbox
                                         checked={
                                           field.value?.findIndex(
-                                            (el) => el.type === groupName
+                                            (el) =>
+                                              el.type === groupName
+                                              && (!el.projectId || (el.projectId === projectId))
                                           ) > -1
                                         }
                                         onCheckedChange={(checked: any) => {
@@ -214,7 +207,8 @@ export default function WidgetResourceOverviewTags(
                                               groupName,
                                               checked,
                                               field.value,
-                                              'type'
+                                              'type',
+                                              projectId
                                             );
 
                                           field.onChange(updatedFields);
@@ -246,7 +240,13 @@ export default function WidgetResourceOverviewTags(
                                       <Input
                                         placeholder="Groep label"
                                         key={`${groupName}-label-input-field`}
-                                        defaultValue={field.value.at(index)?.label}
+                                        defaultValue={
+                                          field.value?.find(
+                                            (el) =>
+                                              el.type === groupName &&
+                                              (!el.projectId || el.projectId === projectId)
+                                          )?.label || ''
+                                        }
                                         disabled={
                                           field.value.find(
                                             (g) => g.type === groupName
@@ -256,7 +256,9 @@ export default function WidgetResourceOverviewTags(
                                           const groups = field.value;
 
                                           const groupIndex = groups.findIndex(
-                                            (g) => g.type === groupName
+                                            (g) =>
+                                              g.type === groupName &&
+                                              (!g.projectId || (g.projectId === projectId))
                                           );
 
                                           const existingGroup = groups[groupIndex];
@@ -291,7 +293,9 @@ export default function WidgetResourceOverviewTags(
                                         checked={
                                           field.value?.findIndex(
                                             (el) =>
-                                              el.type === groupName && el.multiple
+                                              el.type === groupName
+                                              && (!el.projectId || (el.projectId === projectId))
+                                              && el.multiple
                                           ) > -1
                                         }
                                         onCheckedChange={(checked: any) => {
@@ -299,7 +303,8 @@ export default function WidgetResourceOverviewTags(
                                             groupName,
                                             checked,
                                             field.value,
-                                            'multiple'
+                                            'multiple',
+                                            projectId
                                           );
                                           field.onChange(groups);
                                           props.onFieldChanged(field.name, groups);
