@@ -43,6 +43,11 @@ function Form({
             //@ts-expect-error
             initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
             initialFormValues[field.fieldKey] = field.type === 'map' ? {} : initialFormValues[field.fieldKey];
+
+            if (field.type === 'tickmark-slider') {
+                //@ts-expect-error
+                initialFormValues[field.fieldKey] = Math.ceil((field?.fieldOptions?.length || 2) / 2).toString();
+            }
         }
     });
 
