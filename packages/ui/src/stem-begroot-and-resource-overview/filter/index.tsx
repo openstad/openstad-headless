@@ -28,12 +28,13 @@ type Props = {
   displaySearch: boolean;
   itemsPerPage?: number;
   displayTagFilters: boolean;
-  tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+  tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
   tagsLimitation?: Array<number>;
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
   showActiveTags?: boolean;
+  quickFixTags?: Array<{ id: number; name: string }>;
 };
 
 export function Filters({
@@ -199,6 +200,8 @@ export function Filters({
                     onUpdateFilter={(updatedTag, updatedLabel) => {
                       updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel);
                     }}
+                    tagGroupProjectId={tagGroup.projectId || ''}
+                    quickFixTags={props.quickFixTags || []}
                   />
                 );
               } else {
@@ -214,6 +217,8 @@ export function Filters({
                     onUpdateFilter={(updatedTag) =>
                       updateTagListSingle(tagGroup.type, updatedTag)
                     }
+                    tagGroupProjectId={tagGroup.projectId || ''}
+                    quickFixTags={props.quickFixTags || []}
                   />
                 );
               }

@@ -71,7 +71,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
@@ -100,6 +100,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       label?: string;
     }[];
     multiProjectResources?: any[];
+    quickFixTags?: Array<{ id: number; name: string }>;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -172,7 +173,18 @@ const defaultItemRenderer = (
 
   const getUrl = () => {
     let location = document.location;
-    let newUrl = props?.itemLink?.replace('[id]', resource.id);
+
+    let urlToUse = props?.itemLink;
+
+    if ( !!props.selectedProjects && props.selectedProjects.length > 0 ) {
+      const project = props.selectedProjects.find(project => project.id === resource.projectId);
+
+      if (project) {
+        urlToUse = project.detailPageLink;
+      }
+    }
+
+    let newUrl = urlToUse?.replace('[id]', resource.id);
     if (!newUrl?.startsWith('http')) {
       if (!newUrl?.startsWith('/')) {
         newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'
@@ -367,6 +379,7 @@ function ResourceOverview({
   onFilteredResourcesChange,
   multiProjectResources = [],
   selectedProjects = [],
+  quickFixTags = [],
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -638,6 +651,7 @@ function ResourceOverview({
                 }
                 setSearch(f.search.text);
               }}
+              quickFixTags={quickFixTags || []}
             />
           ) : null}
 

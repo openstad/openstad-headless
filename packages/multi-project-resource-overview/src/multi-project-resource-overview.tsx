@@ -4,6 +4,7 @@ import { ResourceOverviewWidgetProps, ResourceOverview } from '@openstad-headles
 import '../../resource-overview/src/resource-overview.css';
 
 export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
+  widgetName?: string;
   selectedProjects?: {
     id: string;
     name: string;
@@ -16,8 +17,10 @@ function MultiProjectResourceOverview({
   ...props
 }: MultiProjectResourceOverviewProps) {
   const [resources, setResources] = useState<Array<any>>([]);
+  const [tags, setTags] = useState<Array<any>>([]);
 
   const resourceCache = useRef(new Map());
+  const tagsCache = useRef(new Map());
 
   const fetchResource = async (url: string) => {
     const response = await fetch(url);
@@ -59,11 +62,43 @@ function MultiProjectResourceOverview({
     fetchResources();
   }, [props.selectedProjects]);
 
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const newTagGroups =
+          props.tagGroups?.filter(
+            tagGroup => !tagsCache.current.has(`${tagGroup.projectId}-${tagGroup.type}`)
+          ) || [];
+
+        if (newTagGroups.length === 0) return;
+
+        const fetchedTags = await Promise.all(
+          newTagGroups.map(async (tagGroup) => {
+            const url = `${props?.api?.url}/api/project/${tagGroup.projectId}/tag?type=${tagGroup.type}`;
+            const data = await fetchResource(url);
+
+            tagsCache.current.set(`${tagGroup.projectId}-${tagGroup.type}`, data);
+            return data;
+          })
+        );
+
+        const allTags = [...Array.from(tagsCache.current.values()).flat()];
+
+        setTags(allTags);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+
+    fetchTags();
+  }, [props.tagGroups]);
+
   return (
     <ResourceOverview
       {...props}
       multiProjectResources={resources || []}
       selectedProjects={props.selectedProjects}
+      quickFixTags={tags || []}
     />
   );
 }

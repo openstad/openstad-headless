@@ -317,6 +317,26 @@ function getWidgetJavascriptOutput(
       }
     });
 
+  } else if ( widgetSettings.componentName === 'MultiProjectResourceOverview' ) {
+
+    widgetSettings.js.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`JS file not found: ${filePath}`);
+      } else {
+        widgetOutput += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
+    widgetSettings.css.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`CSS file not found: ${filePath}`);
+      } else {
+        css += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
   } else {
     widgetSettings.js.forEach((file) => {
       widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');

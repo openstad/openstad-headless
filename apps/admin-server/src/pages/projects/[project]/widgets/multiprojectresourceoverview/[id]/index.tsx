@@ -62,6 +62,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
     },
     projectId,
     selectedProjects: widget?.config?.selectedProjects || [],
+    widgetName: 'multiprojectresourceoverview',
   };
 
   return (
@@ -83,7 +84,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="settings">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
