@@ -18,18 +18,20 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
     const [filteredResources, setFilteredResources] = useState<any[]>([]);
 
     return (
-        <div className="resourceOverviewWithMap-container">
-            <div className="detail-container">
-                <ResourceOverview
+        <div className="map-wrapper">
+            <div className="resourceOverviewWithMap-container">
+                <div className="detail-container">
+                    <ResourceOverview
+                        {...props}
+                        onFilteredResourcesChange={setFilteredResources} // Pass the callback function
+                    />
+                </div>
+                <ResourceOverviewMap
                     {...props}
-                    onFilteredResourcesChange={setFilteredResources} // Pass the callback function
+                    {...props.resourceOverviewMapWidget}
+                    givenResources={filteredResources.length > 0 ? filteredResources : undefined}
                 />
-            </div>
-            <ResourceOverviewMap
-                {...props}
-                {...props.resourceOverviewMapWidget}
-                givenResources={filteredResources.length > 0 ? filteredResources : undefined}
-            />
+        </div>
         </div>
     );
 }
