@@ -229,6 +229,7 @@ services:
         - PORT=${ADMIN_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-admin-server}:${RELEASE_VERSION:-latest}
+    command: ["npm", "run", "dev-https", "--prefix=apps/admin-server"]
     container_name: openstad-admin-server
     restart: unless-stopped
     environment:
