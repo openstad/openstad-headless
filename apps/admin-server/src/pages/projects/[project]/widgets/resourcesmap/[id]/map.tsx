@@ -269,7 +269,7 @@ export default function WidgetResourcesMapMap(
               }}
               className="lg:w-full lg:col-span-2"
             >
-              <strong>Let op!</strong> Wanneer je een andere kaartweergave kiest dan de "Nederlandse Kaart", en je hebt een Content
+              <strong>Let op!</strong> Wanneer je een andere kaartweergave kiest dan de &quot;Nederlandse Kaart&quot;, en je hebt een Content
               Security Policy (CSP) ingesteld, moet je ervoor zorgen dat je de juiste headers toevoegt aan je
               CSP. <br /> <br />
               Lees meer over CSP instellingen voor kaartweergaven bij <strong>Projectinstellingen &gt; Algemeen &gt; Beveiligingsheaders</strong>

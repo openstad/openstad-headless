@@ -417,7 +417,7 @@ export default function ProjectSettings() {
                     <section>
                       <br/>
                       <Heading size={'lg'}>Nederlandse Kaart</Heading>
-                      <p>De "Nederlandse Kaart" variant maakt gebruik van <mark>https://service.pdok.nl</mark>.
+                      <p>De &quot;Nederlandse Kaart&quot; variant maakt gebruik van <mark>https://service.pdok.nl</mark>.
                         Deze bron is al opgenomen in de <code>img-src</code> in de CSP, aangezien het de standaard kaart
                         is.</p>
                     </section>
@@ -425,7 +425,7 @@ export default function ProjectSettings() {
                     <section>
                       <br/>
                       <Heading size={'lg'}>Amsterdam Kaart</Heading>
-                      <p>De "Amsterdam Kaart" variant haalt tegels van de volgende subdomeinen van de stad
+                      <p>De &quot;Amsterdam Kaart&quot; variant haalt tegels van de volgende subdomeinen van de stad
                         Amsterdam:</p>
                       <ul>
                         <mark>https://t1.data.amsterdam.nl</mark>
@@ -464,7 +464,7 @@ export default function ProjectSettings() {
                     <section>
                       <br/>
                       <Heading size={'lg'}>CartoDB Light</Heading>
-                      <p>De "CartoDB Light" variant haalt tegels op van de volgende subdomeinen:</p>
+                      <p>De &quot;CartoDB Light&quot; variant haalt tegels op van de volgende subdomeinen:</p>
                       <ul>
                         <mark>https://a.basemaps.cartocdn.com</mark>
                         <br/>
