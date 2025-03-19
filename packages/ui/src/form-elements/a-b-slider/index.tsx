@@ -26,6 +26,8 @@ export type RangeSliderProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 
@@ -49,8 +51,9 @@ const RangeSlider: FC<RangeSliderProps> = ({
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
     infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
 }) => {
-    const randomId = Math.random().toString(36).substring(7);
     const [rangeValue, setRangeValue] = useState(undefined);
 
     class HtmlContent extends React.Component<{ html: any }> {
@@ -140,6 +143,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     }}
                     aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
                     disabled={disabled}
+                    aria-invalid={fieldInvalid}
+                    aria-describedby={`${randomId}_error`}
                 />
                 <div className={`slider_line-container ${getSliderClass(rangeValue)}`} data-range={rangeValue}>
                     <div

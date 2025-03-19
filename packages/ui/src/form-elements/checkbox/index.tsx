@@ -26,6 +26,8 @@ export type CheckboxFieldProps = {
     infoImage?: string;
     maxChoices?: string,
     maxChoicesMessage?: string,
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -42,6 +44,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        infoImage = '',
        maxChoices = '',
        maxChoicesMessage = '',
+       randomId= '',
+       fieldInvalid= false,
 }) => {
     const defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
     const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
@@ -120,7 +124,11 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
     return (
         <div className="question">
-            <Fieldset role="group">
+            <Fieldset
+              role="group"
+              aria-invalid={fieldInvalid}
+              aria-describedby={`${randomId}_error`}
+            >
                 <FieldsetLegend>
                     {title}
                 </FieldsetLegend>
@@ -184,6 +192,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                     fieldKey={`${fieldKey}_${index}_other`}
                                     title=""
                                     defaultValue={otherOptionValues[`${fieldKey}_${index}_other`]}
+                                    fieldInvalid={false}
+                                    randomId={`${fieldKey}_${index}`}
                                 />
                             </div>
                         )}
@@ -191,7 +201,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 ))}
 
                 {maxReached && maxChoicesMessage && (
-                  <em>{maxChoicesMessage}</em>
+                  <em aria-live="polite">{maxChoicesMessage}</em>
                 )}
             </Fieldset>
         </div>
