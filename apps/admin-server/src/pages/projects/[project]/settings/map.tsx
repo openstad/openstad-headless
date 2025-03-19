@@ -213,11 +213,32 @@ export default function ProjectSettingsMap() {
                 )}
               />
 
+              {form.watch('tilesVariant') !== 'nlmaps' && (
+                <p
+                  style={{
+                    backgroundColor: '#d69e2e',
+                    color: 'black',
+                    padding: '15px',
+                    borderLeft: '4px solid black',
+                    borderTopRightRadius: '5px',
+                    borderBottomRightRadius: '5px',
+                    marginTop: '10px',
+                    fontSize: '13px'
+                  }}
+                  className="lg:w-full lg:col-span-2"
+                >
+                  <strong>Let op!</strong> Wanneer je een andere kaartweergave kiest dan de &quot;Nederlandse Kaart&quot;, en je hebt een Content
+                  Security Policy (CSP) ingesteld, moet je ervoor zorgen dat je de juiste headers toevoegt aan je
+                  CSP. <br /> <br />
+                  Lees meer over CSP instellingen voor kaartweergaven bij <strong>Projectinstellingen &gt; Algemeen &gt; Beveiligingsheaders</strong>
+                </p>
+              )}
+
               {form.watch('tilesVariant') === 'custom' && (
                 <FormField
                   control={form.control}
                   name="customUrl"
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
                         Aangepaste URL
