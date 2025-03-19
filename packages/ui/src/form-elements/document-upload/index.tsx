@@ -71,6 +71,8 @@ export type DocumentUploadProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const DocumentUploadField: FC<DocumentUploadProps> = ({
@@ -92,13 +94,12 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
-   infoImage = '',
+    infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
     ...props
 }) => {
     const datastore = new DataStore({ props });
-    const randomID =
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
 
     const [documents, setDocuments] = useState<FilePondFile[]>([]);
     const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, url: string }[]>([]);
@@ -179,7 +180,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     return (
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomID}>{title}</FormLabel>
+                <FormLabel htmlFor={randomId}>{title}</FormLabel>
             </Paragraph>
             {description &&
               <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
@@ -229,7 +230,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                         fetch: props?.imageUrl + '/documents',
                         revert: null,
                     }}
-                    id={randomID}
+                    id={randomId}
                     required={fieldRequired}
                     disabled={disabled}
                     acceptedFileTypes={typeof acceptAttribute === 'string' ? [acceptAttribute] : acceptAttribute}
@@ -251,6 +252,8 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                             return false;
                         });
                     }}
+                    aria-invalid={fieldInvalid}
+                    aria-describedby={`${randomId}_error`}
                     {...filePondSettings}
                 />
                 <NotificationProvider />

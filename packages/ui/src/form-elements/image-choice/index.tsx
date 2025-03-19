@@ -23,6 +23,8 @@ export type ImageChoiceFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 export type ChoiceItem = {
@@ -46,6 +48,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
     infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
 }) => {
     const [selectedValue, setSelectedValue] = useState<string | null>(null);
 
@@ -68,7 +72,10 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
     return (
         <div className="question">
-            <Fieldset>
+            <Fieldset
+                aria-invalid={fieldInvalid}
+                aria-describedby={`${randomId}_error`}
+            >
                 <FieldsetLegend>
                     {title}
                 </FieldsetLegend>

@@ -124,7 +124,7 @@ function Form({
         none: InfoField as React.ComponentType<ComponentFieldProps>,
     };
 
-    const renderField = (field: ComponentFieldProps, index: number) => {
+    const renderField = (field: ComponentFieldProps, index: number, randomId: string, fieldInvalid: boolean) => {
         if (!field.type) {
             return null;
         }
@@ -136,6 +136,8 @@ function Form({
                     index={index}
                     onChange={handleInputChange}
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
+                    randomId={randomId}
+                    fieldInvalid={fieldInvalid}
                     {...field}
                 />
             );
@@ -149,17 +151,36 @@ function Form({
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
-                    {fields.map((field: ComponentFieldProps, index: number) => (
-                        <div className={`question question-type-${field.type}`} key={index}>
-                            {renderField(field, index)}
-                            <FormFieldErrorMessage className="error-message">
-                                {field.fieldKey && formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
-                            </FormFieldErrorMessage>
-                        </div>
-                    ))}
+                    {fields.map((field: ComponentFieldProps, index: number) => {
+                        const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                        const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
+
+                        return (
+                            <div className={`question question-type-${field.type}`} key={index}>
+                                {renderField(field, index, randomId, fieldInvalid)}
+                                <FormFieldErrorMessage className="error-message">
+                                    {field.fieldKey && formErrors[field.fieldKey] &&
+                                      <span
+                                        id={`${randomId}_error`}
+                                        aria-live="assertive"
+                                      >
+                                          {formErrors[field.fieldKey]}
+                                      </span>
+                                    }
+                                </FormFieldErrorMessage>
+                            </div>
+                        );
+                      }
+                    )}
                     {secondaryLabel && (
-                        <Button appearance='primary-action-button' onClick={() => secondaryHandler(formValues)}
-                            type="button">{secondaryLabel}</Button>
+                        <Button
+                          appearance='primary-action-button'
+                          onClick={() => secondaryHandler(formValues)}
+                          type="button"
+                          aria-label={secondaryLabel}
+                        >
+                            {secondaryLabel}
+                        </Button>
                     )}
                     <div className="button-group">
                         {currentPage > 0 && (
@@ -171,6 +192,7 @@ function Form({
                                     setCurrentPage && setCurrentPage(currentPage - 1);
                                     scrollTop();
                                 }}
+                                aria-label="Vorige"
                             >
                                 Vorige
                             </Button>
@@ -182,6 +204,7 @@ function Form({
                             onClick={() => {
                                 scrollTop();
                             }}
+                            aria-label={submitText}
                         >
                             {submitText}
                         </Button>

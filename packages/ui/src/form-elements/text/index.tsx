@@ -33,6 +33,8 @@ export type TextInputProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -54,9 +56,10 @@ const TextInput: FC<TextInputProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
-   infoImage = '',
+    infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
 }) => {
-    const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
 
     class HtmlContent extends React.Component<{ html: any }> {
@@ -131,7 +134,7 @@ const TextInput: FC<TextInputProps> = ({
         <FormField type="text">
             {title && (
                 <Paragraph className="utrecht-form-field__label">
-                    <FormLabel htmlFor={randomID}>{title}</FormLabel>
+                    <FormLabel htmlFor={randomId}>{title}</FormLabel>
                 </Paragraph>
             )}
             {description &&
@@ -166,7 +169,7 @@ const TextInput: FC<TextInputProps> = ({
 
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
                 <InputComponent
-                    id={randomID}
+                    id={randomId}
                     name={fieldKey}
                     required={fieldRequired}
                     type={getType(fieldKey)}
@@ -187,6 +190,8 @@ const TextInput: FC<TextInputProps> = ({
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     autoComplete={getAutocomplete(fieldKey)}
+                    aria-invalid={fieldInvalid}
+                    aria-describedby={`${randomId}_error`}
                 />
                 {isFocused && helpText &&
                   <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
