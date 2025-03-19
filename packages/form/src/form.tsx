@@ -177,7 +177,6 @@ function Form({
                           appearance='primary-action-button'
                           onClick={() => secondaryHandler(formValues)}
                           type="button"
-                          aria-label={secondaryLabel}
                         >
                             {secondaryLabel}
                         </Button>
@@ -192,7 +191,6 @@ function Form({
                                     setCurrentPage && setCurrentPage(currentPage - 1);
                                     scrollTop();
                                 }}
-                                aria-label="Vorige"
                             >
                                 Vorige
                             </Button>
@@ -204,7 +202,6 @@ function Form({
                             onClick={() => {
                                 scrollTop();
                             }}
-                            aria-label={submitText}
                         >
                             {submitText}
                         </Button>
