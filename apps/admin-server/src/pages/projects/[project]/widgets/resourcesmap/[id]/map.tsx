@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,6 +25,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
 import { ResourceOverviewMapWidgetTabProps } from '.';
+import * as React from "react";
 
 type Tag = {
   id: number;
@@ -42,6 +43,7 @@ const formSchema = z.object({
     isActive: z.boolean().optional(),
   }),
   tilesVariant: z.string().optional(),
+  customUrl: z.string().optional(),
   width: z.string().optional(),
   height: z.string().optional(),
 });
@@ -72,6 +74,7 @@ export default function WidgetResourcesMapMap(
       clustering: props?.clustering || {},
       categorize: props?.categorize || {},
       tilesVariant: props?.tilesVariant || '',
+      customUrl: props?.customUrl || '',
       width: props?.width || '',
       height: props?.height || ''
     },
@@ -92,6 +95,14 @@ export default function WidgetResourcesMapMap(
       setGroupedNames(groupNames);
     }
   }, [tags]);
+
+  const tileLayerOptions = [
+    { value: 'nlmaps', label: 'Nederlandse Kaart' },
+    { value: 'amaps', label: 'Amsterdam Kaart' },
+    { value: 'openstreetmaps', label: 'OpenStreetMap' },
+    { value: 'n3s', label: 'CartoDB Light' },
+    { value: 'custom', label: 'Aangepaste Kaart' },
+  ];
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -232,15 +243,36 @@ export default function WidgetResourcesMapMap(
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="" disabled>Selecteer een optie</SelectItem>
-                    <SelectItem value="nlmaps">NL maps</SelectItem>
-                    <SelectItem value="amaps">Amsterdams</SelectItem>
-                    <SelectItem value="openstreetmaps">Open Street Maps</SelectItem>
+                    {tileLayerOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {form.watch('tilesVariant') === 'custom' && (
+            <FormField
+              control={form.control}
+              name="customUrl"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>
+                    Aangepaste URL
+                  </FormLabel>
+                  <FormDescription>{`Voer de URL in voor de aangepaste kaartweergave. Bijvoorbeeld: https://example.com/tiles/{z}/{x}/{y}.png`}</FormDescription>
+                  <FormControl>
+                    <Input placeholder="https://example.com/tiles/{z}/{x}/{y}.png" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
