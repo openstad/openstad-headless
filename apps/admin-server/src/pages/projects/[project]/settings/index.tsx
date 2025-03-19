@@ -395,7 +395,8 @@ export default function ProjectSettings() {
                 <Separator className="my-4" />
                 <div className="space-y-4">
                   <div>
-                    Indien je gebruik wilt maken van de Content-Security-Policy header, dan vind je hieronder de standaardheader die je kunt gebruiken. Deze kun je naar wens aanpassen.
+                    Indien je gebruik wilt maken van de Content-Security-Policy header, dan vind je hieronder de
+                    standaardheader die je kunt gebruiken. Deze kun je naar wens aanpassen.
                   </div>
 
                   <div>
@@ -404,18 +405,93 @@ export default function ProjectSettings() {
                     </p>
                   </div>
                   <div className="flex gap-4 p-0">
-                    <Button onClick={() => onCopy(cspHeader, 'Content-Security-Policy header')}>Kopieer Content-Security-Policy header</Button>
+                    <Button onClick={() => onCopy(cspHeader, 'Content-Security-Policy header')}>Kopieer
+                      Content-Security-Policy header</Button>
                   </div>
+
+                  <div className="csp-overview">
+                    <br/>
+                    <Separator className="my-4"/>
+                    <Heading size={'xl'}>Content Security Policy (CSP) Headers voor de verschillende Kaart Tegel Varianten</Heading>
+
+                    <section>
+                      <br/>
+                      <Heading size={'lg'}>Nederlandse Kaart</Heading>
+                      <p>De "Nederlandse Kaart" variant maakt gebruik van <mark>https://service.pdok.nl</mark>.
+                        Deze bron is al opgenomen in de <code>img-src</code> in de CSP, aangezien het de standaard kaart
+                        is.</p>
+                    </section>
+
+                    <section>
+                      <br/>
+                      <Heading size={'lg'}>Amsterdam Kaart</Heading>
+                      <p>De "Amsterdam Kaart" variant haalt tegels van de volgende subdomeinen van de stad
+                        Amsterdam:</p>
+                      <ul>
+                        <mark>https://t1.data.amsterdam.nl</mark>
+                        <br/>
+                        <mark>https://t2.data.amsterdam.nl</mark>
+                        <br/>
+                        <mark>https://t3.data.amsterdam.nl</mark>
+                        <br/>
+                        <mark>https://t4.data.amsterdam.nl</mark>
+                      </ul>
+                      <p>Zorg ervoor dat je deze subdomeinen toestaat in je CSP voor de <code>img-src</code>.</p>
+                      <p>Of sta toe door <mark>https://*.data.amsterdam.nl</mark> in de CSP voor
+                        de <code>img-src</code> op
+                        te nemen.
+                      </p>
+                    </section>
+
+                    <section>
+                      <br/>
+                      <Heading size={'lg'}>OpenStreetMap</Heading>
+                      <p>De OpenStreetMap tegels worden geladen van de subdomeinen:</p>
+                      <ul>
+                        <mark>https://a.tile.openstreetmap.org</mark>
+                        <br/>
+                        <mark>https://b.tile.openstreetmap.org</mark>
+                        <br/>
+                        <mark>https://c.tile.openstreetmap.org</mark>
+                      </ul>
+                      <p>Zorg ervoor dat je deze subdomeinen toestaat in je CSP voor de <code>img-src</code>.</p>
+                      <p>Of sta toe door <mark>https://*.tile.openstreetmap.org</mark> in de CSP voor
+                        de <code>img-src</code> op
+                        te nemen.
+                      </p>
+                    </section>
+
+                    <section>
+                      <br/>
+                      <Heading size={'lg'}>CartoDB Light</Heading>
+                      <p>De "CartoDB Light" variant haalt tegels op van de volgende subdomeinen:</p>
+                      <ul>
+                        <mark>https://a.basemaps.cartocdn.com</mark>
+                        <br/>
+                        <mark>https://b.basemaps.cartocdn.com</mark>
+                        <br/>
+                        <mark>https://c.basemaps.cartocdn.com</mark>
+                      </ul>
+                      <p>Zorg ervoor dat je deze subdomeinen toestaat in je CSP voor de <code>img-src</code>.</p>
+                      <p>Of sta toe door <mark>https://*.basemaps.cartocdn.com</mark> in de CSP voor
+                        de <code>img-src</code> op
+                        te nemen.
+                      </p>
+                    </section>
+                  </div>
+
+
                 </div>
               </div>
             </TabsContent>
             <TabsContent value="projecthasended" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Heading size="xl">Project beëindigen</Heading>
-                <Separator className="my-4" />
+                <Separator className="my-4"/>
                 <div className="space-y-4">
                   <div>
-                    Wanneer je het project beëindigt, sluiten automatisch de mogelijkheden om plannen in te dienen, reacties te plaatsen en te stemmen.
+                    Wanneer je het project beëindigt, sluiten automatisch de mogelijkheden om plannen in te dienen,
+                    reacties te plaatsen en te stemmen.
                   </div>
                   <div>
                     Project beëindigen
@@ -425,7 +501,8 @@ export default function ProjectSettings() {
                         setProjectHasEnded(!projectHasEnded)
                       }}
                       checked={projectHasEnded}>
-                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                      <Switch.Thumb
+                        className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]"/>
                     </Switch.Root>
                   </div>
                   <Button
@@ -439,14 +516,14 @@ export default function ProjectSettings() {
             <TabsContent value="advanced" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Heading size="xl">Project archiveren</Heading>
-                <Separator className="my-4" />
+                <Separator className="my-4"/>
                 <div className="space-y-4">
                   <div>
                     Let op! Deze actie is <b>definitief</b> en
                     <b> kan niet ongedaan gemaakt worden</b>.
                   </div>
                   <div className="space-y-2">
-                  Het project moet eerst zijn beëindigd voordat deze actie uitgevoerd kan worden.
+                    Het project moet eerst zijn beëindigd voordat deze actie uitgevoerd kan worden.
                   </div>
 
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
