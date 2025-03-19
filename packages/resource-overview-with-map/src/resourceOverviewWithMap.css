@@ -32,7 +32,7 @@
   grid-template-columns: 1fr 1fr;
 }
 
-.resourceOverviewWithMap-container .detail-container{
+.resourceOverviewWithMap-container .detail-container {
   overflow: scroll;
 }
 .resourceOverviewWithMap-container .map-container {
@@ -73,48 +73,81 @@
 .resourceOverviewWithMap-container .osc-resource-overview-content-item-footer {
   grid-column: 2;
 }
-.osc-filter-search-bar.utrecht-textbox{
+.osc-filter-search-bar.utrecht-textbox {
   max-width: revert;
   width: 100%;
 }
 
-@media only screen and (max-width: 1400px) {
+/* @media only screen and (max-width: 1400px) {
   .resourceOverviewWithMap-container {
     grid-template-columns: 3fr 2fr; 
   }
 
 }
+} */
 
-@media only screen and (max-width: 1000px) {
+/* Define containers */
+.map-wrapper {
+  container-type: inline-size;
+  container-name: resourceOverviewWithMapContainer;
+}
 
+.resourceOverviewWithMap-container .detail-container {
+  container-type: inline-size;
+  container-name: detailContainer;
+}
+
+.resourceOverviewWithMap-container .map-container--buttons {
+  container-type: inline-size;
+  container-name: MapContainerButtons;
+}
+
+@container resourceOverviewWithMapContainer (max-width: 1400px) {
+  .resourceOverviewWithMap-container {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+@container resourceOverviewWithMapContainer (max-width: 1000px) {
   .resourceOverviewWithMap-container {
     grid-template-columns: 1fr;
     height: auto;
     grid-template-rows: 250px auto;
   }
-
-  .resourceOverviewWithMap-container .map-container{
+  .resourceOverviewWithMap-container .map-container {
     grid-row: 1;
   }
-  .resourceOverviewWithMap-container .detail-container{
+  .resourceOverviewWithMap-container .detail-container {
     grid-row: 2;
   }
 
-  .resourceOverviewWithMap-container .map-buttons{
+  .resourceOverviewWithMap-container .map-buttons {
     flex-direction: row;
   }
 
-  .resourceOverviewWithMap-container .osc-resource-overview-content #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
+  .resourceOverviewWithMap-container
+    .osc-resource-overview-content
+    #stem-begroot-filter
+    .osc-resources-filter.osc-flex-columned {
     padding-inline: 1rem;
   }
-
 }
 
-@media only screen and (max-width: 768px) {
-  .resourceOverviewWithMap-container .resource-card--link{
+@container resourceOverviewWithMapContainer(max-width: 768px) {
+  .resourceOverviewWithMap-container .resource-card--link {
     display: block;
   }
-  .osc .image-container>img {
+  .osc .image-container > img {
     aspect-ratio: 16/5;
+  }
+}
+
+@container detailContainer (max-width: 600px) {
+  .resourceOverviewWithMap-container .resource-card--link {
+    display: flex;
+    flex-direction: column;
+  }
+  .resourceOverviewWithMap-container .osc-resource-overview-content #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
+    grid-template-columns: 1fr;
   }
 }
