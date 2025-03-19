@@ -1,0 +1,28 @@
+'use strict';
+
+const { DataTypes } = require('sequelize');
+
+module.exports = (db, sequelize) => {
+  return sequelize.define('oidc_code_verifiers', {
+    id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+    },
+    verifier: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+  }, {
+    paranoid: false,
+  });
+};

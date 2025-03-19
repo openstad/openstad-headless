@@ -2,6 +2,7 @@
 
 const memoryStorage = require('../../memoryStorage');
 const validate = require('../../validate');
+const db = require('../../db');
 
 /**
  * This endpoint is for verifying a token.  This has the same signature to
