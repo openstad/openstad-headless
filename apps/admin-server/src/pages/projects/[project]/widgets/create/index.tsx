@@ -55,7 +55,6 @@ export default function CreateWidget({ }: WithApiUrlProps) {
         }
     }
 
-    console.log( 'Widgets', filteredWidgets );
 
     return (
         <div>
