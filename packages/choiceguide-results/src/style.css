@@ -237,6 +237,10 @@ figure.info-image-container {
   /*  rotate thumb  */
 }
 
+.osc-choiceguide-results-container .osc-choices-container .expand-trigger {
+  display: none;
+}
+
 .osc-choice-default .osc-choice-bar-progress[data-score="0"] {width: 0%;}
 .osc-choice-default .osc-choice-bar-progress[data-score="1"] {width: 1%;}
 .osc-choice-default .osc-choice-bar-progress[data-score="2"] {width: 2%;}
