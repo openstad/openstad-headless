@@ -30,7 +30,9 @@ const formSchema = z.object({
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
   itemsPerPage: z.coerce.number().optional(),
-  displayPagination: z.boolean().optional()
+  displayPagination: z.boolean().optional(),
+  displayLikes: z.boolean().optional(),
+  largeDoc: z.boolean().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -40,8 +42,6 @@ export default function DocumentGeneral(
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
   const [disabled, setDisabled] = useState(false);
-  const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(props.accessibilityUrlVisible || false);
-  const [definitiveUrlVisible, setDefinitiveUrlVisible] = useState(props.definitiveUrlVisible || false);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -61,6 +61,8 @@ export default function DocumentGeneral(
       entireDocumentVisible: props.entireDocumentVisible || 'entirely',
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
+      displayLikes: props.displayLikes || false,
+      largeDoc: props.largeDoc || false,
     },
   });
 
