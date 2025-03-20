@@ -43,6 +43,8 @@ const formSchema = z.object({
     onlyForModerator: z.boolean().optional(),
     minCharacters: z.string().optional(),
     maxCharacters: z.string().optional(),
+    maxChoices: z.string().optional(),
+    maxChoicesMessage: z.string().optional(),
     variant: z.string().optional(),
     multiple: z.boolean().optional(),
     placeholder: z.string().optional(),
@@ -110,6 +112,8 @@ export default function WidgetResourceFormItems(
                     onlyForModerator: values.onlyForModerator || false,
                     minCharacters: values.minCharacters,
                     maxCharacters: values.maxCharacters,
+                    maxChoices: values.maxChoices || '',
+                    maxChoicesMessage: values.maxChoicesMessage || '',
                     variant: values.variant || 'text input',
                     multiple: values.multiple || false,
                     options: values.options || [],
@@ -166,6 +170,8 @@ export default function WidgetResourceFormItems(
         onlyForModerator: false,
         minCharacters: '',
         maxCharacters: '',
+        maxChoices: '',
+        maxChoicesMessage: '',
         variant: 'text input',
         multiple: false,
         options: [],
@@ -205,6 +211,8 @@ export default function WidgetResourceFormItems(
                 onlyForModerator: selectedItem.onlyForModerator || false,
                 minCharacters: selectedItem.minCharacters || '',
                 maxCharacters: selectedItem.maxCharacters || '',
+                maxChoices: selectedItem.maxChoices || '',
+                maxChoicesMessage: selectedItem.maxChoicesMessage || '',
                 variant: selectedItem.variant || '',
                 multiple: selectedItem.multiple || false,
             });
@@ -632,7 +640,7 @@ export default function WidgetResourceFormItems(
                                 <div>
                                     <Heading size="xl">Resource Formulier items</Heading>
                                     <Separator className="my-4" />
-                                    <div className="w-full lg:w-2/3 flex flex-col gap-y-2">
+                                    <div className="w-full lg:w-2/3 flex flex-col gap-y-4">
                                         <FormField
                                             control={form.control}
                                             name="type"
@@ -674,26 +682,6 @@ export default function WidgetResourceFormItems(
                                                     <FormMessage />
                                                 </FormItem>
                                             )}></FormField>
-                                        <FormField
-                                            control={form.control}
-                                            name="trigger"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <Input type="hidden" {...field} />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="fieldType"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <Input type="hidden" {...field} />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
                                         <FormField
                                             control={form.control}
                                             name="title"
@@ -934,6 +922,42 @@ export default function WidgetResourceFormItems(
                                                 )}
                                             </>
                                         )}
+
+                                        {form.watch('type') === 'checkbox' && (
+                                          <>
+                                              <FormField
+                                                control={form.control}
+                                                name="maxChoices"
+                                                render={({ field }) => (
+                                                  <FormItem>
+                                                      <FormLabel>Maximaal te selecteren opties</FormLabel>
+                                                      <FormDescription>
+                                                          <em className='text-xs'>Als je wilt dat er maximaal een aantal opties geselecteerd kunnen worden, vul dan hier het aantal in.</em>
+                                                      </FormDescription>
+                                                      <Input {...field} />
+                                                      <FormMessage />
+                                                  </FormItem>
+                                                )}
+                                              />
+                                              <FormField
+                                                control={form.control}
+                                                name="maxChoicesMessage"
+                                                render={({ field }) => (
+                                                  <FormItem>
+                                                      <FormLabel>
+                                                          Maximaal aantal bereikt melding
+                                                      </FormLabel>
+                                                      <FormDescription>
+                                                          <em className='text-xs'>Als het maximaal aantal opties is geselecteerd, geef dan een melding aan de gebruiker. Dit is optioneel.</em>
+                                                      </FormDescription>
+                                                      <Input {...field} />
+                                                      <FormMessage />
+                                                  </FormItem>
+                                                )}
+                                              />
+                                          </>
+                                        )}
+
                                         {(form.watch('type') === 'imageUpload' || form.watch('type') === 'documentUpload' || form.watch('type') === 'images') && (
                                             <FormField
                                                 control={form.control}
@@ -1014,6 +1038,27 @@ export default function WidgetResourceFormItems(
                                                 <FormMessage />
                                             </FormItem>
                                         )}
+
+                                        <FormField
+                                          control={form.control}
+                                          name="trigger"
+                                          render={({ field }) => (
+                                            <FormItem>
+                                                <Input type="hidden" {...field} />
+                                                <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                        <FormField
+                                          control={form.control}
+                                          name="fieldType"
+                                          render={({ field }) => (
+                                            <FormItem>
+                                                <Input type="hidden" {...field} />
+                                                <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
                                     </div>
                                 </div>
 

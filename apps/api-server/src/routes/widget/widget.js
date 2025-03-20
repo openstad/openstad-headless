@@ -274,13 +274,7 @@ function getWidgetJavascriptOutput(
 
   const data = JSON.parse(widgetConfig)
 
-  const extraCssFile = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
   const apiUrl = process.env.URL ?? '';
-
-
-
-
-
 
   // TODO: Fix this, it's a hack to get the ChoiceGuide to work
   if ( widgetSettings.componentName === 'ChoiceGuide' ) {
@@ -323,10 +317,28 @@ function getWidgetJavascriptOutput(
       }
     });
 
+  } else if ( widgetSettings.componentName === 'MultiProjectResourceOverview' ) {
+
+    widgetSettings.js.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`JS file not found: ${filePath}`);
+      } else {
+        widgetOutput += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
+    widgetSettings.css.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`CSS file not found: ${filePath}`);
+      } else {
+        css += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
   } else {
     widgetSettings.js.forEach((file) => {
-      console.log(`${widgetSettings.packageName}/${file}`);
-      console.log(require.resolve(`${widgetSettings.packageName}/${file}`));
       widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
     });
 
@@ -366,18 +378,59 @@ function getWidgetJavascriptOutput(
           const redirectUri = encodeURI(window.location.href);
           
           const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
-          let customCss = '';
           
-          if (config.project.cssCustom) {
-            const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
-            customCss = \`<link href ="\${customCssUrl}" rel ="stylesheet">\`;
+          function insertCssLinks(urls) {
+            const head = document.querySelector('head');
+            const body = document.querySelector('body');
+            const firstScript = body ? body.querySelector('script') : null;
+  
+            urls.forEach(url => {
+              const existingLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(link => link.href);
+              if (!existingLinks.includes(url)) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = url;
+  
+                if (head) {
+                  head.appendChild(link);
+                } else if (firstScript) {
+                  firstScript.parentNode.insertBefore(link, firstScript);
+                } else if (body) {
+                  body.appendChild(link);
+                }
+              }
+            });
+          }
+  
+          function normalizeCssUrls(cssUrls) {
+            if (!cssUrls) return [];
+          
+            if (typeof cssUrls === 'string') {
+              return [cssUrls];
+            }
+          
+            if (Array.isArray(cssUrls)) {
+              return cssUrls.filter(url => typeof url === 'string' && url.startsWith('http'));
+            }
+          
+            if (typeof cssUrls === 'object') {
+              return Object.values(cssUrls).filter(url => typeof url === 'string' && url.startsWith('http'));
+            }
+          
+            return [];
           }
           
-          document.querySelector('head').innerHTML += \`
-            <link href="${apiUrl}/api/project/\${config.projectId}/widget-css/${widgetType}" rel="stylesheet">
-            ${extraCssFile}
-            \${customCss}
-          \`;
+          let customCssUrls = normalizeCssUrls(config.project?.cssUrl);
+  
+          let customCss = '';
+          if (config.project?.cssCustom) {
+            const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
+            customCssUrls.push(customCssUrl);
+          }
+  
+          customCssUrls.push("${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}");
+  
+          insertCssLinks(customCssUrls);
           
           function renderWidget () {
             

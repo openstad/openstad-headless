@@ -48,6 +48,8 @@ const formSchema = z.object({
   onlyForModerator: z.boolean().optional(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
+  maxChoices: z.string().optional(),
+  maxChoicesMessage: z.string().optional(),
   variant: z.string().optional(),
   multiple: z.boolean().optional(),
   options: z
@@ -152,6 +154,8 @@ export default function WidgetChoiceGuideItems(
           explanationB: values.explanationB || '',
           imageA: values.imageA || '',
           imageB: values.imageB || '',
+          maxChoices: values.maxChoices || '',
+          maxChoicesMessage: values.maxChoicesMessage || '',
           defaultValue: values.defaultValue || '',
           weights: values.weights || {}
         },
@@ -213,6 +217,8 @@ export default function WidgetChoiceGuideItems(
     explanationB: '',
     imageA: '',
     imageB: '',
+    maxChoices: '',
+    maxChoicesMessage: '',
     defaultValue: '',
     weights: {}
   });
@@ -261,6 +267,8 @@ export default function WidgetChoiceGuideItems(
         explanationB: selectedItem.explanationB || '',
         imageA: selectedItem.imageA || '',
         imageB: selectedItem.imageB || '',
+        maxChoices: selectedItem.maxChoices || '',
+        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         defaultValue: selectedItem.defaultValue || '',
         weights: selectedItem.weights || {}
       });
@@ -1133,6 +1141,41 @@ export default function WidgetChoiceGuideItems(
                             </FormItem>
                           )}
                         />
+                      )}
+
+                      {form.watch('type') === 'checkbox' && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name="maxChoices"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Maximaal te selecteren opties</FormLabel>
+                                <FormDescription>
+                                  <em className='text-xs'>Als je wilt dat er maximaal een aantal opties geselecteerd kunnen worden, vul dan hier het aantal in.</em>
+                                </FormDescription>
+                                <Input {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="maxChoicesMessage"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Maximaal aantal bereikt melding
+                                </FormLabel>
+                                <FormDescription>
+                                  <em className='text-xs'>Als het maximaal aantal opties is geselecteerd, geef dan een melding aan de gebruiker. Dit is optioneel.</em>
+                                </FormDescription>
+                                <Input {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
                       )}
 
                       {hasOptions() && (

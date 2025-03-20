@@ -4,7 +4,8 @@ var config       = require('config')
 // Misc
 var util         = require('./util');
 var log          = require('debug')('app:http');
-const morgan     = require('morgan')
+const morgan     = require('morgan');
+const db 		 = require('./db');
 
 module.exports  = {
 	app: undefined,

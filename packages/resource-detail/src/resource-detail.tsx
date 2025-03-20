@@ -482,6 +482,8 @@ function ResourceDetail({
             placeholder={props.commentsWidget?.placeholder}
             loginText={props.commentsWidget?.loginText}
             closedText={props.commentsWidget?.closedText}
+            itemsPerPage={props.commentsWidget?.itemsPerPage}
+            displayPagination={props.commentsWidget?.displayPagination}
             sentiment={useSentiments[0]}
           />
 
@@ -497,6 +499,8 @@ function ResourceDetail({
               placeholder={props.commentsWidget_multiple?.placeholder}
               loginText={props.commentsWidget_multiple?.loginText}
               closedText={props.commentsWidget_multiple?.closedText}
+              itemsPerPage={props.commentsWidget?.itemsPerPage}
+              displayPagination={props.commentsWidget?.displayPagination}
               sentiment={useSentiments[1]}
             />
           )}

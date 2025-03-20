@@ -83,6 +83,8 @@ export type DocumentMapProps = BaseProps &
     closedText?: string;
     relativePathPrepend?: string;
     entireDocumentVisible?: 'entirely' | 'onlyTop';
+    itemsPerPage?: number;
+    displayPagination?: boolean;
   };
 
 
@@ -117,6 +119,8 @@ function DocumentMap({
   closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
   relativePathPrepend = '',
   entireDocumentVisible = 'onlyTop',
+  itemsPerPage = 9999,
+  displayPagination = false,
   ...props
 }: DocumentMapProps) {
 
@@ -380,6 +384,10 @@ function DocumentMap({
           sentiment: 'no sentiment',
           tags: allTags,
         });
+
+        if (goToLastPage && displayPagination) {
+          goToLastPage();
+        }
 
         const addNewCommentToComments = [...filteredComments, newComment];
         const newIndex = newComment?.id;
@@ -683,6 +691,7 @@ function DocumentMap({
     const configVotingEnabled = props?.votes?.isActive || false;
     const votingEnabled = configVotingEnabled && args.canComment;
 
+    const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
@@ -975,6 +984,9 @@ function DocumentMap({
                 emptyListText={emptyListText}
                 loginText={loginText}
                 closedText={closedText}
+                itemsPerPage={itemsPerPage}
+                displayPagination={displayPagination}
+                onGoToLastPage={setGoToLastPage}
               />
             </div>
           )}

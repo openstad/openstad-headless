@@ -386,7 +386,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
 
   if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
-    console.log('Basic auth enabled for project: ', req.site.url);
+
     return basicAuth({
       users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
       challenge: true
