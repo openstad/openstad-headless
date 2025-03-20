@@ -353,3 +353,22 @@ pre > code.diff-highlight.diff-highlight .token.inserted:not(.prefix) {
 .color-picker-component-container {
   display: flex;
 }
+
+.widgets-admin-overview-container .rounded-lg.border.bg-card.text-card-foreground.shadow-sm.beta {
+  position: relative;
+  border: 3px solid #decc00;
+}
+
+.widgets-admin-overview-container .rounded-lg.border.bg-card.text-card-foreground.shadow-sm.beta:before {
+  content: 'BETA';
+  background-color: #decc00;
+  top: 0;
+  left: 0;
+  right: auto;
+  bottom: auto;
+  padding: 4px 13px 4px 10px;
+  position: absolute;
+  border-bottom-right-radius: 13px;
+  color: black;
+  font-family: monospace;
+}
