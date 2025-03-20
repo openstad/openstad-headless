@@ -35,3 +35,11 @@ html body .question .marginTop10.marginBottom15 {
     margin-top: 10px;
     margin-bottom: 15px;
 }
+
+.utrecht-form-field.utrecht-form-field--checkbox .utrecht-form-label--checkbox .utrecht-checkbox--custom.utrecht-checkbox--html-input:disabled {
+ background-color: var(--utrecht-checkbox-disabled-background-color, var(--utrecht-checkbox-background-color));
+ border-color: var(--utrecht-checkbox-disabled-border-color, var(--utrecht-checkbox-border-color));
+ border-width: var(--utrecht-checkbox-disabled-border-width, var(--utrecht-checkbox-border-width));
+ cursor: var(--utrecht-action-disabled-cursor, not-allowed);
+ background-image: var(--utrecht-checkbox-disabled-background-image, none);
+}
