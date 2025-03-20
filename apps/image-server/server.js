@@ -41,7 +41,7 @@ const imageSteamConfig = {
   "storage": {
     "defaults": {
       "driver": "fs",
-      "path": "./images",
+      "path": process.env.IMAGES_DIR || "images/",
       "cacheTTS": process.env.CACHE_TTS || 86400 * 14, /* 24 * 14 hrs */
       "cacheOptimizedTTS": process.env.CACHE_OPTIMIZED_TTS || 86400 * 14, /*  24 * 14 hrs */
       "cacheArtifacts": process.env.CACHE_ARTIFACTS || true
