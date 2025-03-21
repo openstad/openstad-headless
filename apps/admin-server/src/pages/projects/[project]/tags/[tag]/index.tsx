@@ -12,6 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from '@/components/ui/form';
 import { undefinedToTrueOrProp, YesNoSelect } from '@/lib/form-widget-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -67,7 +68,7 @@ export default function ProjectTagEdit() {
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
-      useDifferentSubmitAddress: undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
+      useDifferentSubmitAddress: data?.useDifferentSubmitAddress || false,
       emails: data?.newSubmitAddress
         ? data.newSubmitAddress.split(',').map((address: string) => ({ address: address.trim() }))
         : [{ address: '' }],
@@ -199,7 +200,11 @@ export default function ProjectTagEdit() {
                         <FormItem>
                           <FormLabel>
                             Sequence nummer
-                            <InfoDialog content={'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'} />
+                            <FormDescription>
+                              Het sequence nummer veld bepaalt de volgorde van de tags.
+                              Wanneer je een nieuwe tag maakt of bijwerkt, wordt het nummer in een oplopende volgorde bijgewerkt.
+                              De volgorde wordt automatisch hernummerd bij het toevoegen of bewerken van een tag, zodat er geen gaten ontstaan in de nummering.
+                            </FormDescription>
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="" {...field} />

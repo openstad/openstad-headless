@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -124,8 +124,12 @@ export default function ProjectTagCreate() {
                   <FormItem>
                     <FormLabel>
                       Sequence nummer
-                      <InfoDialog content={'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'} />
-                      </FormLabel>
+                      <FormDescription>
+                        Het sequence nummer veld bepaalt de volgorde van de tags.
+                        Wanneer je een nieuwe tag maakt of bijwerkt, wordt het nummer in een oplopende volgorde bijgewerkt.
+                        De volgorde wordt automatisch hernummerd bij het toevoegen of bewerken van een tag, zodat er geen gaten ontstaan in de nummering.
+                      </FormDescription>
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="" {...field} />
                     </FormControl>
