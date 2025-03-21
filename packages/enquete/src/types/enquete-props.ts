@@ -1,9 +1,7 @@
 export type EnqueteProps = {
   widgetId?: number;
   afterSubmitUrl?: string;
-  displayTitle?: boolean;
   title?: string;
-  displayDescription?: boolean;
   description?: string;
   items?: Array<Item>;
   formVisibility?: string;

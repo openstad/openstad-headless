@@ -15,7 +15,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetEnqueteDisplay from './display';
 import WidgetEnqueteGeneral from './general';
 import WidgetEnqueteItems from './items';
 import React from "react";
@@ -57,7 +56,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="items">Items</TabsTrigger>
-              <TabsTrigger value="display">Weergave</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
@@ -82,24 +80,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             <TabsContent value="items" className="p-0">
               {previewConfig && (
                 <WidgetEnqueteItems
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
-              )}
-            </TabsContent>
-            <TabsContent value="display" className="p-0">
-              {previewConfig && (
-                <WidgetEnqueteDisplay
                   {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })

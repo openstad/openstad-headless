@@ -224,13 +224,8 @@ function Enquete(props: EnqueteWidgetProps) {
                 )}
 
             <div className="osc-enquete-item-content">
-                {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
-                <div className="osc-enquete-item-description">
-                    {props.displayDescription && props.description && (
-                        <Paragraph>{props.description}</Paragraph>
-                    )}
-                </div>
                 <Form
+                    description={props?.description || ""}
                     fields={formFields}
                     submitHandler={onSubmit}
                     title=""

@@ -14,6 +14,7 @@ import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/num
 
 export type FormProps = {
     title?: string;
+    description?: string;
     fields: Array<CombinedFieldProps>;
     submitText?: string;
     submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;

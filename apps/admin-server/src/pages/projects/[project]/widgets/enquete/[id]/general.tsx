@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,11 +17,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import React from "react";
+import InfoDialog from "@/components/ui/info-hover";
 
 const formSchema = z.object({
-  title: z.string(),
-  description: z.string(),
+  title: z.string().optional(),
+  description: z.string().optional(),
   afterSubmitUrl: z.string().optional(),
+  formVisibility: z.string().optional(),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -38,6 +42,7 @@ export default function WidgetEnqueteGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
+      formVisibility: props?.formVisibility || 'always',
     },
   });
 
@@ -50,13 +55,14 @@ export default function WidgetEnqueteGeneral(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-y-2 w-full lg:w-1/3">
+          className="flex flex-col w-full lg:w-2/3"
+          style={{rowGap: '1.8rem'}}>
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Enquête titel</FormLabel>
+                <FormLabel>Titel</FormLabel>
                 <Input
                   {...field}
                   onChange={(e) => {
@@ -73,7 +79,17 @@ export default function WidgetEnqueteGeneral(
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Enquête beschrijving</FormLabel>
+                <FormLabel>Beschrijving</FormLabel>
+                <FormDescription>
+                  Dit veld ondersteunt HTML-opmaak. Je kunt bijvoorbeeld:
+
+                  <ul>
+                    <li><strong>Vetgedrukte tekst</strong>: &lt;strong&gt;tekst&lt;/strong&gt;</li>
+                    <li><strong>Lijsten maken</strong>: &lt;ul&gt;&lt;li&gt;Item 1&lt;/li&gt;&lt;li&gt;Item
+                      2&lt;/li&gt;&lt;/ul&gt;</li>
+                    <li><strong>Links toevoegen</strong>: &lt;a href="https://voorbeeld.com"&gt;Klik hier&lt;/a&gt;</li>
+                  </ul>
+                </FormDescription>
                 <FormControl>
                   <Textarea
                     rows={6}
@@ -95,10 +111,15 @@ export default function WidgetEnqueteGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Url voor redirecten na opslaan (optioneel)</FormLabel>
+                <FormDescription>
+                  Geef een pad op waar de gebruiker na het invullen van de enquête naartoe wordt gestuurd.
+                  Bijvoorbeeld /bedankt of laat leeg voor geen redirect.
+                  Als er geen redirect is, wordt de gebruiker op de pagina gelaten en krijgt de gebruiker enkel kort een melding te zien dat de enquête is ingevuld.
+                </FormDescription>
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder='bijvoorbeeld /enquetes/[id] of laat leeg voor geen redirect'
+                    placeholder=''
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);
@@ -109,6 +130,29 @@ export default function WidgetEnqueteGeneral(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="formVisibility"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Voor wie is de enquête zichtbaar?</FormLabel>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kies een optie" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="always">Iedereen</SelectItem>
+                    <SelectItem value="users">Ingelogde gebruikers en admins</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}></FormField>
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

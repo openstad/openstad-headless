@@ -23,7 +23,8 @@ import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 
 function Form({
-    title = 'Form Widget',
+    title = '',
+    description = '',
     fields = [],
     submitText = 'Verzenden',
     submitHandler = () => { },
@@ -148,6 +149,11 @@ function Form({
         <div className="form-widget">
             <div className="form-widget-container">
                 {title && <h5 className="form-widget-title">{title}</h5>}
+                {!!description && (
+                    <div className="form-widget-description">
+                        <p dangerouslySetInnerHTML={{__html: description}}></p>
+                    </div>
+                )}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
