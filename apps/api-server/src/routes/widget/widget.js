@@ -394,7 +394,7 @@ function getWidgetJavascriptOutput(
                 link.rel = 'stylesheet';
                 link.href = url;
                 
-                if (loadFirst && head) {
+                if (loadFirst === true && head) {
                   head.insertBefore(link, head.firstChild);
                 } else if (head) {
                   head.appendChild(link);
@@ -411,20 +411,20 @@ function getWidgetJavascriptOutput(
             if (!cssUrls) return [];
           
             if (typeof cssUrls === 'string') {
-              return [{ 'url': cssUrls, 'loadFirst': 0 }];
+              return [{ 'url': cssUrls, 'loadFirst': false }];
             }
           
             if (Array.isArray(cssUrls)) {
               return cssUrls.map(url => ({
                 'url': url,
-                'loadFirst': 0
+                'loadFirst': false
               }));
             }
           
             if (typeof cssUrls === 'object') {
               return Object.values(cssUrls).map(url => ({
                 'url': url,
-                'loadFirst': 0
+                'loadFirst': false
               }));
             }
           
@@ -436,10 +436,10 @@ function getWidgetJavascriptOutput(
           let customCss = '';
           if (config.project?.cssCustom) {
             const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
-            customCssUrls.push({url: customCssUrl, loadFirst: 0});
+            customCssUrls.push({url: customCssUrl, loadFirst: false});
           }
   
-          customCssUrls.push({url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}", loadFirst: 1});
+          customCssUrls.push({url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}", loadFirst: true});
   
           insertCssLinks(customCssUrls);
           
