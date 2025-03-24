@@ -95,7 +95,7 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
-      
+
       // Temp log for use in k9s
       console.error({widgetBuildError: e});
       return next(
@@ -234,12 +234,12 @@ function setConfigsToOutput(
   widgetConfig,
   widgetId
 ) {
-  
+
   // Move general settings to the root to ensure we have the correct config
   if (widgetConfig.hasOwnProperty('general')) {
     widgetConfig = {...widgetConfig, ...widgetConfig.general};
   }
-  
+
   let config = merge.recursive(
     {},
     widgetSettings.Config,
@@ -360,7 +360,7 @@ function getWidgetJavascriptOutput(
   );
 
   const widgetConfigWithCorrectEscapes = widgetConfig.replaceAll('\\', '\\\\').replaceAll('`', '\\`');
-  
+
   // Create function to render component
   // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly
   // @todo: find a way around this so we don't have to provide the `process` variable
@@ -384,14 +384,19 @@ function getWidgetJavascriptOutput(
             const body = document.querySelector('body');
             const firstScript = body ? body.querySelector('script') : null;
   
-            urls.forEach(url => {
+            urls.forEach(urlObj => {
+              const url = urlObj?.url;
+              const loadFirst = urlObj?.loadFirst;
+              
               const existingLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(link => link.href);
               if (!existingLinks.includes(url)) {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
                 link.href = url;
-  
-                if (head) {
+                
+                if (loadFirst && head) {
+                  head.insertBefore(link, head.firstChild);
+                } else if (head) {
                   head.appendChild(link);
                 } else if (firstScript) {
                   firstScript.parentNode.insertBefore(link, firstScript);
@@ -406,15 +411,21 @@ function getWidgetJavascriptOutput(
             if (!cssUrls) return [];
           
             if (typeof cssUrls === 'string') {
-              return [cssUrls];
+              return [{ 'url': cssUrls, 'loadFirst': 0 }];
             }
           
             if (Array.isArray(cssUrls)) {
-              return cssUrls.filter(url => typeof url === 'string' && url.startsWith('http'));
+              return cssUrls.map(url => ({
+                'url': url,
+                'loadFirst': 0
+              }));
             }
           
             if (typeof cssUrls === 'object') {
-              return Object.values(cssUrls).filter(url => typeof url === 'string' && url.startsWith('http'));
+              return Object.values(cssUrls).map(url => ({
+                'url': url,
+                'loadFirst': 0
+              }));
             }
           
             return [];
@@ -425,10 +436,10 @@ function getWidgetJavascriptOutput(
           let customCss = '';
           if (config.project?.cssCustom) {
             const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
-            customCssUrls.push(customCssUrl);
+            customCssUrls.push({url: customCssUrl, loadFirst: 0});
           }
   
-          customCssUrls.push("${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}");
+          customCssUrls.push({url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}", loadFirst: 1});
   
           insertCssLinks(customCssUrls);
           
