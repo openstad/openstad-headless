@@ -47,6 +47,7 @@ export type CommentsWidgetProps = BaseProps &
     itemsPerPage?: number;
     displayPagination?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
+    subWidgetKey?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<

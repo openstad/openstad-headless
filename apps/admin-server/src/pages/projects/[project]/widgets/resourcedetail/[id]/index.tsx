@@ -116,6 +116,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   <TabsContent value="general" className="p-0">
                     <ArgumentsGeneral
                       omitSchemaKeys={['resourceId', 'sentiment']}
+                      subWidgetKey='commentsWidget'
                       {...extractConfig<
                         ResourceDetailWidgetProps,
                         ArgumentWidgetTabProps
@@ -132,6 +133,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     <div className="grid grid-cols-2">
                       <ArgumentsList
                         customTitle={'Titel Links'}
+                        subWidgetKey='commentsWidget'
                         {...extractConfig<
                           ResourceDetailWidgetProps,
                           ArgumentWidgetTabProps
@@ -145,6 +147,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
                       <ArgumentsList
                         customTitle={'Titel Rechts'}
+                        subWidgetKey='commentsWidget_multiple'
                         {...extractConfig<
                           ResourceDetailWidgetProps,
                           ArgumentWidgetTabProps
@@ -162,6 +165,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
                       <ArgumentsForm
                         customTitle={'Formulier Links'}
+                        subWidgetKey='commentsWidget'
                         {...extractConfig<
                           ResourceDetailWidgetProps,
                           ArgumentWidgetTabProps
@@ -178,6 +182,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
                       <ArgumentsForm
                         customTitle={'Formulier Rechts'}
+                        subWidgetKey='commentsWidget_multiple'
                         {...extractConfig<
                           ResourceDetailWidgetProps,
                           ArgumentWidgetTabProps

@@ -60,12 +60,18 @@ export default function ArgumentsGeneral({
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
+  let useSentimentDefaultValue = ["for", "against"];
+
+  if ( !!props.useSentiments ) {
+    useSentimentDefaultValue = typeof (props.useSentiments) === "string" ? JSON.parse(props.useSentiments) : props.useSentiments;
+  }
+
   const form = useForm<finalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
       resourceId: props.resourceId,
       sentiment: props.sentiment || 'for',
-      useSentiments: JSON.stringify(props.useSentiments || ["for","against"]),
+      useSentiments: JSON.stringify(useSentimentDefaultValue),
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
     },

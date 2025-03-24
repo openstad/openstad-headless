@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { ArgumentWidgetTabProps } from '.';
+import {useWidgetConfig} from "@/hooks/use-widget-config";
 
 const formSchema = z.object({
   title: z.string(),
@@ -29,6 +30,13 @@ export default function ArgumentsList({
   ...props
 }:ArgumentWidgetTabProps &
   EditFieldProps<ArgumentWidgetTabProps> & { omitSchemaKeys?: Array<SchemaKey> }) {
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useWidgetConfig<any>();
+
   const finalSchema = formSchema.omit(
     omitSchemaKeys.reduce(
       (prev, key) => Object.assign(prev, { [key]: true }),
@@ -49,8 +57,19 @@ export default function ArgumentsList({
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
-  function onSubmit(values: FinalSchemaInfer) {
-    props.updateConfig({ ...props, ...values });
+  async function onSubmit(values: FinalSchemaInfer) {
+    if ( !!props?.subWidgetKey ) {
+      const updatedData = {
+        ...widget.config[props.subWidgetKey],
+        ...values,
+      };
+
+      try {
+        await updateConfig({ [props.subWidgetKey]: updatedData });
+      } catch (error) {}
+    } else {
+      props.updateConfig({...props, ...values});
+    }
   }
 
   return (

@@ -15,6 +15,7 @@ import * as z from 'zod';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { ArgumentWidgetTabProps } from '.';
+import {useWidgetConfig} from "@/hooks/use-widget-config";
 
 const formSchema = z.object({
   formIntro: z.string(),
@@ -25,6 +26,12 @@ const formSchema = z.object({
 export default function ArgumentsForm(
   props: ArgumentWidgetTabProps & EditFieldProps<ArgumentWidgetTabProps>
 ) {
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useWidgetConfig<any>();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -34,8 +41,19 @@ export default function ArgumentsForm(
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    props.updateConfig({ ...props, ...values });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if ( !!props?.subWidgetKey ) {
+      const updatedData = {
+        ...widget.config[props.subWidgetKey],
+        ...values,
+      };
+
+      try {
+        await updateConfig({ [props.subWidgetKey]: updatedData });
+      } catch (error) {}
+    } else {
+      props.updateConfig({...props, ...values});
+    }
   }
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
