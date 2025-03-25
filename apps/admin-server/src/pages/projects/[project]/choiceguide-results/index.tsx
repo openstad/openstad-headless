@@ -17,15 +17,24 @@ export default function ProjectChoiceGuideResults() {
   const router = useRouter();
   const { project } = router.query;
 
-  if (!project) return;
-
   const [selectedWidget, setSelectedWidget] = useState<any>(null);
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const pageLimit = 50;
+  const [filterData, setFilterData] = useState<{ createdAt: string, id?: string }[]>([]);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+
+  const [activeWidget, setActiveWidget] = useState("0");
+  const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
   const { remove } = useChoiceGuideResults(project as string);
+
+  const { data: usersData } = useUsers();
+  const { data: widgetData } = useWidgetsHook(
+    project as string
+  );
 
   const fetchResults = async () => {
     try {
@@ -66,19 +75,7 @@ export default function ProjectChoiceGuideResults() {
         setFilterData(sortedData);
       }
     });
-  }, [page, selectedWidget]);
-
-  const [filterData, setFilterData] = useState<{ createdAt: string, id?: string }[]>([]);
-  const [filterSearchType, setFilterSearchType] = useState<string>('');
-  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
-
-  const [activeWidget, setActiveWidget] = useState("0");
-  const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
-
-  const { data: usersData } = useUsers();
-  const { data: widgetData } = useWidgetsHook(
-    project as string
-  );
+  }, [page, selectedWidget, project]);
 
   useEffect(() => {
     if (!!widgetData) {
