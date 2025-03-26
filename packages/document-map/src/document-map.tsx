@@ -87,6 +87,8 @@ export type DocumentMapProps = BaseProps &
     itemsPerPage?: number;
     displayPagination?: boolean;
     onlyAllowClickOnImage?: boolean;
+    popupNotLoggedInText?: string;
+    popupNotLoggedInButton?: string;
   };
 
 
@@ -124,6 +126,8 @@ function DocumentMap({
   itemsPerPage = 9999,
   displayPagination = false,
   onlyAllowClickOnImage = false,
+  popupNotLoggedInText = 'Om een reactie te plaatsen, moet je ingelogd zijn.',
+  popupNotLoggedInButton = 'Inloggen',
   ...props
 }: DocumentMapProps) {
 
@@ -782,18 +786,6 @@ function DocumentMap({
                 url={resource.images ? resource.images[0].url : ''}
                 bounds={bounds as LatLngBoundsLiteral}
                 aria-describedby={randomId}
-                eventHandlers={{
-                  click: (e) => {
-                    const bounds = e.target.getBounds();
-                    const clickedLatLng = e.latlng;
-
-                    if (bounds.contains(clickedLatLng)) {
-                      console.log("Klik op de afbeelding");
-                    } else {
-                      console.log("Klik buiten de afbeelding");
-                    }
-                  }
-                }}
               />
               {(popupPosition && !isDefinitive && args.canComment) && (
                 <Popup
@@ -804,7 +796,7 @@ function DocumentMap({
                 >
                   { !hasRole(currentUser, args.requiredUserRole) ? (
                     <>
-                      <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                      <Paragraph>{popupNotLoggedInText}</Paragraph>
                       <Spacer size={1} />
                       <Button
                         appearance="primary-action-button"
@@ -814,7 +806,7 @@ function DocumentMap({
                           }
                         }}
                         type="button">
-                        Inloggen
+                        {popupNotLoggedInButton}
                       </Button>
                     </>
                   ) :
