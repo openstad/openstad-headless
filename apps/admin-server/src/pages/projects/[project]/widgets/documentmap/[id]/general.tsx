@@ -8,7 +8,7 @@ import * as z from 'zod';
 import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel, FormMessage,
@@ -30,7 +30,8 @@ const formSchema = z.object({
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
   itemsPerPage: z.coerce.number().optional(),
-  displayPagination: z.boolean().optional()
+  displayPagination: z.boolean().optional(),
+  onlyAllowClickOnImage: z.boolean().optional()
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -61,6 +62,7 @@ export default function DocumentGeneral(
       entireDocumentVisible: props.entireDocumentVisible || 'entirely',
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
+      onlyAllowClickOnImage: props?.onlyAllowClickOnImage || false,
     },
   });
 
@@ -241,6 +243,31 @@ export default function DocumentGeneral(
                   <SelectItem value="onlyTop">Focus op de bovenkant</SelectItem>
                 </SelectContent>
               </Select>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="onlyAllowClickOnImage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Alleen markers op de afbeelding toelaten?</FormLabel>
+              <FormDescription>
+                Als dit aan staat kunnen gebruikers alleen op de afbeelding klikken en niet op de ruimte er omheen.
+              </FormDescription>
+              <FormControl>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    props.onFieldChanged(field.name, e);
+                    field.onChange(e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

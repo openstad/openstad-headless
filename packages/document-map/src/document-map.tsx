@@ -21,6 +21,7 @@ import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
 import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import L from 'leaflet';
 
 import 'leaflet/dist/leaflet.css';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -85,6 +86,7 @@ export type DocumentMapProps = BaseProps &
     entireDocumentVisible?: 'entirely' | 'onlyTop';
     itemsPerPage?: number;
     displayPagination?: boolean;
+    onlyAllowClickOnImage?: boolean;
   };
 
 
@@ -121,6 +123,7 @@ function DocumentMap({
   entireDocumentVisible = 'onlyTop',
   itemsPerPage = 9999,
   displayPagination = false,
+  onlyAllowClickOnImage = false,
   ...props
 }: DocumentMapProps) {
 
@@ -320,7 +323,20 @@ function DocumentMap({
   const MapEvents = () => {
     const map = useMapEvents({
       click: (e) => {
-        setPopupPosition(e.latlng);
+        if ( onlyAllowClickOnImage ) {
+          const imageBounds = bounds;
+          const clickedLatLng = e.latlng;
+
+          if (imageBounds && imageBounds.length) {
+            // @ts-ignore
+            const leafletBounds = L.latLngBounds(imageBounds);
+            if (leafletBounds.contains(clickedLatLng)) {
+              setPopupPosition(e.latlng);
+            }
+          }
+        } else {
+          setPopupPosition(e.latlng);
+        }
       },
       popupclose: () => {
         setSelectedCommentIndex(-1);
@@ -766,6 +782,18 @@ function DocumentMap({
                 url={resource.images ? resource.images[0].url : ''}
                 bounds={bounds as LatLngBoundsLiteral}
                 aria-describedby={randomId}
+                eventHandlers={{
+                  click: (e) => {
+                    const bounds = e.target.getBounds();
+                    const clickedLatLng = e.latlng;
+
+                    if (bounds.contains(clickedLatLng)) {
+                      console.log("Klik op de afbeelding");
+                    } else {
+                      console.log("Klik buiten de afbeelding");
+                    }
+                  }
+                }}
               />
               {(popupPosition && !isDefinitive && args.canComment) && (
                 <Popup
