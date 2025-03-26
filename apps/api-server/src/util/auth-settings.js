@@ -31,26 +31,40 @@ let createProjectConfig = function({ project, useOnlyDefinedOnProject = false })
 
 let getConfig = async function({  project, useAuth = 'default' }) {
 
+  
+  const db = require('../db');
   let projectConfig = createProjectConfig({ project })
-
+  
   if (useAuth == 'default' && projectConfig.default) useAuth = projectConfig.default;
 
   let authConfig = {
-    provider: useAuth,
+    provider:  useAuth,
     jwtSecret: projectConfig.jwtSecret
   }
-
-  let providerConfig = projectConfig.provider[ useAuth ] || {};
-  let adapterConfig = projectConfig.adapter[ providerConfig.adapter ] || {};
-  authConfig = merge.recursive( authConfig, adapterConfig );
-  authConfig = merge.recursive( authConfig, providerConfig );
-
-  if (!authConfig.jwtSecret || authConfig.jwtSecret == 'REPLACE THIS VALUE!!') { // todo: move this to a place where is called once, not every request
-    console.log('===========================');
-    console.log('jwtSecret is not configured');
-    console.log('¡¡ this should be fixed !!!');
-    console.log('===========================');
+  
+  // Check if we have an authProviderId in the project config
+  if (project && project.config && project.config.authProviderId) {
+    // log trace
+    let authProvider = await db.AuthProvider.findOne({ where: { id: project.config.authProviderId } });
+    if (authProvider) {
+      let providerConfig = authProvider.config || {};
+      let adapterConfig  = projectConfig.adapter[authProvider.type] || {}
+      authConfig = merge.recursive(authConfig, providerConfig, adapterConfig, {adapter: authProvider.type});
+    }
+  } else {
+    
+    let providerConfig = projectConfig.provider[useAuth] || {};
+    let adapterConfig  = projectConfig.adapter[providerConfig.adapter] || {};
+    authConfig         = merge.recursive(authConfig, adapterConfig);
+    authConfig         = merge.recursive(authConfig, providerConfig);
   }
+  
+    if (!authConfig.jwtSecret || authConfig.jwtSecret == 'REPLACE THIS VALUE!!') { // todo: move this to a place where is called once, not every request
+      console.log('===========================');
+      console.log('jwtSecret is not configured');
+      console.log('¡¡ this should be fixed !!!');
+      console.log('===========================');
+    }
 
   return authConfig;
 
