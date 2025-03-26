@@ -1,8 +1,6 @@
 'use strict';
 
-const { DataTypes } = require('sequelize');
-
-module.exports = (db, sequelize) => {
+module.exports = (db, sequelize, DataTypes) => {
   return sequelize.define('auth_providers', {
     name: {
       type: DataTypes.STRING(255),
