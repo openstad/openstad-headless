@@ -467,6 +467,14 @@ function StemBegroot({
     }
   };
 
+  const scrollToTop = () => {
+    const divElement = document.getElementById("stem-begroot-resource-selections-list");
+
+    if (divElement) {
+      divElement.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  }
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -971,7 +979,10 @@ function StemBegroot({
                 <Paginator
                   page={resources?.metadata?.page || 0}
                   totalPages={resources?.metadata?.pageCount || 1}
-                  onPageChange={(page) => setPage(page)}
+                  onPageChange={(page) => {
+                    setPage(page);
+                    scrollToTop();
+                  }}
                 />
               </div>
             )}

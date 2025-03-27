@@ -565,6 +565,16 @@ function ResourceOverview({
     return ` --${variant}`;
   }
 
+  const randomId = Math.random().toString(36).replace('0.', 'container_');
+
+  const scrollToTop = () => {
+    const divElement = document.getElementById(randomId);
+
+    if (divElement) {
+      divElement.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  }
+
   return (
     <>
       <Dialog
@@ -655,7 +665,7 @@ function ResourceOverview({
             />
           ) : null}
 
-          <section className="osc-resource-overview-resource-collection">
+          <section className="osc-resource-overview-resource-collection" id={randomId}>
             {filteredResources &&
               filteredResources
                 ?.slice(page * pageSize, (page + 1) * pageSize)
@@ -678,7 +688,10 @@ function ResourceOverview({
               <Paginator
                 page={page || 0}
                 totalPages={totalPages || 1}
-                onPageChange={(newPage) => setPage(newPage)}
+                onPageChange={(newPage) => {
+                  setPage(newPage);
+                  scrollToTop();
+                }}
               />
             </div>
           </>

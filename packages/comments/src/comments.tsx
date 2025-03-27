@@ -220,9 +220,19 @@ function CommentsInner({
     }
   }, [comments, pageSize]);
 
+  const randomId = Math.random().toString(36).replace('0.', 'container_');
+
+  const scrollToTop = () => {
+    const divElement = document.getElementById(randomId);
+
+    if (divElement) {
+      divElement.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  }
+
     return (
     <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: refreshComments || defaultSetRefreshComments }}>
-      <section className="osc">
+      <section className="osc" id={randomId}>
         <Heading3 className="comments-title">
           {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString()) }
           {!comments && title}
@@ -326,7 +336,10 @@ function CommentsInner({
               <Paginator
                 page={page || 0}
                 totalPages={totalPages || 1}
-                onPageChange={(newPage) => setPage(newPage)}
+                onPageChange={(newPage) => {
+                  setPage(newPage);
+                  scrollToTop();
+                }}
               />
             </div>
           </>
