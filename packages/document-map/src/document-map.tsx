@@ -482,7 +482,7 @@ function DocumentMap({
     color: string;
   }
 
-  const [overRidePage, setOverRidePage] = useState<number | null>(null);
+  const [overRidePage, setOverRidePage] = useState<number | undefined>(undefined);
 
   const scrollToComment = (index: number) => {
     let attempts = 0;
@@ -1017,7 +1017,6 @@ function DocumentMap({
                 itemsPerPage={itemsPerPage}
                 displayPagination={displayPagination}
                 onGoToLastPage={setGoToLastPage}
-                // onGoToPage={setGoToPage}
                 overRidePage={overRidePage}
               />
             </div>
