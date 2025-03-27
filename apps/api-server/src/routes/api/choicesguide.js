@@ -80,10 +80,21 @@ router.route('/')
 			req.scope.push({method: ['forProjectId', req.params.projectId]});
 		}
 
+		const { page = 0, limit = 9999999999, widgetId } = req.query;
+
+		if (widgetId) {
+			where.widgetId = widgetId;
+		}
+
 		try {
 			const result = await db.ChoicesGuideResult
 				.scope(...req.scope)
-				.findAndCountAll({where, offset: req.dbQuery.offset, limit: req.dbQuery.limit, order: req.dbQuery.order});
+				.findAndCountAll({
+					where,
+					offset: page * limit,
+					limit: parseInt(limit),
+					order: req.dbQuery.order
+				});
 
 			req.results = await Promise.all(result.rows.map(async (entry) => {
 				const widget = await db.Widget.findOne({
@@ -102,7 +113,14 @@ router.route('/')
 		}
 	})
 	.get(function(req, res, next) {
-		res.json(req.results);
+		res.json({
+			data: req.results,
+			pagination: {
+				page: req.dbQuery.page,
+				totalPages: req.dbQuery.totalPages,
+				totalCount: req.dbQuery.count
+			}
+		});
 	})
 
 // create choicesguide result
@@ -129,6 +147,21 @@ router.route('/')
 			})
 			.catch(next);
   });
+
+// delete choiceguide result
+// ---------
+router.route('/:choicesGuideId(\\d+)')
+	.delete(auth.can('ChoicesGuideResult', 'delete'))
+	.delete(function(req, res, next) {
+		const { choicesGuideId } = req.params;
+		db.ChoicesGuideResult.destroy({
+			where: { id: choicesGuideId }
+		})
+			.then(() => {
+				res.json({ message: 'ChoiceGuide result deleted successfully.' });
+			})
+			.catch(next);
+	});
 
 
 module.exports = router;

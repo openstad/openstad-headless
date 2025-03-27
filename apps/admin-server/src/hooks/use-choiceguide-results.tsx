@@ -1,9 +1,7 @@
 import useSWR from 'swr';
 
 export default function useChoiceGuideResults(projectId: string) {
-  const url = `/api/openstad/api/project/${projectId}/choicesguide`;
-
-  const { data, isLoading, error, mutate } = useSWR(projectId ? url : null);
+  let url = `/api/openstad/api/project/${projectId}/choicesguide`;
 
   async function remove(id: string|number) {
     const res = await fetch(`${url}/${id}`, {
@@ -13,15 +11,10 @@ export default function useChoiceGuideResults(projectId: string) {
       },
     });
 
-    if (res.ok) {
-      const existingData = [...data];
-      const updatedList = existingData.filter((ed) => ed.id !== id);
-      mutate(updatedList);
-      return updatedList;
-    } else {
+    if (!res.ok) {
       throw new Error('Could not remove the choiceguide result');
     }
   }
 
-  return { data, isLoading, error, remove };
+  return { remove };
 }
