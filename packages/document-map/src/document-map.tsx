@@ -482,7 +482,7 @@ function DocumentMap({
     color: string;
   }
 
-  const [overRidePage, setOverRidePage] = useState<number | undefined>(undefined);
+  const [overridePage, setoverridePage] = useState<number | undefined>(undefined);
 
   const scrollToComment = (index: number) => {
     let attempts = 0;
@@ -501,7 +501,7 @@ function DocumentMap({
         const currentComment = filteredComments?.findIndex((comment: any) => parseInt(comment.id) === index);
         const commentPage = Math.floor(currentComment / itemsPerPage);
 
-        setOverRidePage(commentPage);
+        setoverridePage(commentPage);
       }
 
       const commentElement = document.getElementById(`comment-${index}`);
@@ -1017,7 +1017,7 @@ function DocumentMap({
                 itemsPerPage={itemsPerPage}
                 displayPagination={displayPagination}
                 onGoToLastPage={setGoToLastPage}
-                overRidePage={overRidePage}
+                overridePage={overridePage}
               />
             </div>
           )}
