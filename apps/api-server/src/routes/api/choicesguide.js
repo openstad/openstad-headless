@@ -80,7 +80,7 @@ router.route('/')
 			req.scope.push({method: ['forProjectId', req.params.projectId]});
 		}
 
-		const { page = 0, limit = 10, widgetId } = req.query;
+		const { page = 0, limit = 9999999999, widgetId } = req.query;
 
 		if (widgetId) {
 			where.widgetId = widgetId;
