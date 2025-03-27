@@ -49,11 +49,11 @@ export const calculateScoreForItem = (
         Object.keys(answers).forEach((answerKey) => {
             const answerByName = answers[answerKey];
 
-            if (answerByName === "" || typeof answerByName !== 'string') return;
+            if ((answerByName === "" || typeof answerByName !== 'string') && typeof answerByName !== 'object') return;
 
             let answerArray;
 
-            if (answerByName.startsWith('[') && answerByName.endsWith(']')) {
+            if (typeof (answerByName) !== 'object' && answerByName.startsWith('[') && answerByName.endsWith(']')) {
                 answerArray = JSON.parse(answerByName);
             } else {
                 answerArray = [answerByName];
@@ -82,7 +82,18 @@ export const calculateScoreForItem = (
 
                             if (isNaN(number)) return;
 
-                            const fieldValue = Number(userAnswer);
+                            let fieldValue;
+
+                            if ( answerKey.startsWith('a-b-slider') && typeof (userAnswer) === 'object') {
+                                if ( userAnswer?.skipQuestion ) {
+                                    countScores['x'] - number;
+                                    return;
+                                }
+
+                                fieldValue = Number(userAnswer?.value) || 50;
+                            } else {
+                                fieldValue = Number(userAnswer);
+                            }
 
                             const reverseValue = optionWeights.hasOwnProperty('ab') && optionWeights.ab === 'A';
                             const valueBasedOnAB = reverseValue ? (100 - fieldValue) : fieldValue;

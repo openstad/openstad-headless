@@ -1,7 +1,15 @@
 import React, { FC, useState } from 'react';
 import './a-b-slider.css'
-import { Accordion, AccordionProvider, AccordionSection, Paragraph, Strong } from "@utrecht/component-library-react";
+import {
+    Accordion,
+    AccordionProvider,
+    AccordionSection,
+    Checkbox, FormLabel,
+    Paragraph,
+    Strong
+} from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
+import TextInput from "../text";
 
 export type RangeSliderProps = {
     title: string;
@@ -28,8 +36,13 @@ export type RangeSliderProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    skipQuestion?: boolean;
+    skipQuestionAllowExplanation?: boolean;
+    skipQuestionExplanation?: string;
+    skipQuestionLabel?: string;
 }
 
+type valueObject = {value: string, skipQuestion: boolean, skipQuestionExplanation: string | undefined};
 
 const RangeSlider: FC<RangeSliderProps> = ({
     title = '',
@@ -53,8 +66,18 @@ const RangeSlider: FC<RangeSliderProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    skipQuestion = false,
+    skipQuestionAllowExplanation = false,
+    skipQuestionExplanation = '',
+    skipQuestionLabel = 'Sla vraag over',
 }) => {
     const [rangeValue, setRangeValue] = useState(undefined);
+    const [skipSelected, setSkipSelected] = useState(false);
+    const [value, setValue] = useState<valueObject>({
+        value: '50',
+        skipQuestion: false,
+        skipQuestionExplanation: ''
+    });
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -68,6 +91,27 @@ const RangeSlider: FC<RangeSliderProps> = ({
         if (rangeValue <= 50) return `slider-left`;
         return `slider-right`;
     };
+
+    const changeValue = (key: 'value' | 'skipQuestion' | 'skipQuestionExplanation', newValue: any) => {
+        const currValue: valueObject = {...value};
+
+        if (key === 'value') {
+            currValue.value = newValue as string;
+        } else if (key === 'skipQuestion') {
+            currValue.skipQuestion = newValue as boolean;
+        } else if (key === 'skipQuestionExplanation') {
+            currValue.skipQuestionExplanation = newValue as string | undefined;
+        }
+
+        if ( onChange ) {
+            onChange({
+                name: fieldKey,
+                value: currValue,
+            });
+        }
+
+        setValue(currValue);
+    }
 
     return (
         <div className="a-b-slider-container">
@@ -134,12 +178,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     id={randomId}
                     onChange={(e) => {
                         setRangeValue(parseInt(e.target.value) as any);
-                        if (onChange) {
-                            onChange({
-                                name: fieldKey,
-                                value: e.target.value,
-                            });
-                        }
+                        changeValue('value', e.target.value);
                     }}
                     aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
                     disabled={disabled}
@@ -166,6 +205,42 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     <span className="label">{labelB}</span>
                 </Paragraph>
             </div>
+
+            { (skipQuestion && skipQuestionAllowExplanation) && (
+                <div className="skip-question-container">
+                    <Spacer size={2} />
+                    <FormLabel htmlFor={`${randomId}_skip`} type="checkbox" className="--label-grid">
+                        <Checkbox
+                          className="utrecht-form-field__input"
+                          id={`${randomId}_skip`}
+                          name={`${randomId}_skip`}
+                          value={skipQuestionLabel}
+                          required={false}
+                          checked={skipSelected}
+                          onChange={() => {
+                              setSkipSelected(!skipSelected);
+                              changeValue('skipQuestion', !skipSelected);
+                          }}
+                        />
+                        <span>{skipQuestionLabel}</span>
+                    </FormLabel>
+
+                    { skipSelected && (
+                        <div className="marginTop10 marginBottom15">
+                            <TextInput
+                                type="text"
+                                // @ts-ignore
+                                onChange={(e: { name: string; value: string }) => changeValue('skipQuestionExplanation', e.value || '')}
+                                fieldKey={`${randomId}_skip_explanation`}
+                                title={skipQuestionExplanation}
+                                fieldInvalid={false}
+                            />
+                        </div>
+                    )}
+
+                </div>
+            )}
+
         </div>
     );
 }
