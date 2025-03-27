@@ -112,10 +112,12 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
     const normalizeData = (value: any) => {
       let parsedValue;
 
-      try {
+       try {
         parsedValue = JSON.parse(value);
-      } catch (error) {
-        return value;
+      } catch (error) {}
+          
+      if ( typeof value === 'string' ) {
+        return `"${value}"`;
       }
 
       if (Array.isArray(parsedValue)) {
