@@ -11,7 +11,6 @@ import {
 import hasRole from '../../lib/has-role';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import React from 'react';
-import toast, { Toaster } from 'react-hot-toast';
 import Form from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
@@ -19,13 +18,14 @@ import {
     Heading2,
     Heading6,
 } from '@utrecht/component-library-react';
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
     EnquetePropsType;
 
 function Enquete(props: EnqueteWidgetProps) {
-    const notifyCreate = () =>
-        toast.success('Enquete ingediend', { position: 'bottom-center' });
+    const notifyCreate = () => NotificationService.addNotification("Enquete ingediend", "success");
 
     const datastore = new DataStore(props);
 
@@ -58,6 +58,8 @@ function Enquete(props: EnqueteWidgetProps) {
                 formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
             }
         }
+
+        formData.embeddedUrl = window.location.href;
 
         const result = await createSubmission(formData, props.widgetId);
 
@@ -123,21 +125,41 @@ function Enquete(props: EnqueteWidgetProps) {
                         fieldData['defaultValue'] = defaultValue;
                     }
 
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';
-                    fieldData['choices'] = [
-                        {
-                            label: item?.text1 || '',
-                            value: item?.key1 || '',
-                            imageSrc: item?.image1 || ''
-                        },
-                        {
-                            label: item?.text2 || '',
-                            value: item?.key2 || '',
-                            imageSrc: item?.image2 || ''
-                        }
-                    ];
+
+                    if ( item.options && item.options.length > 0 ) {
+                        fieldData['choices'] = item.options.map((option) => {
+                            return {
+                                value: option.titles[0].key,
+                                label: option.titles[0].key,
+                                imageSrc: option.titles[0].image,
+                                imageAlt: option.titles[0].key,
+                                hideLabel: option.titles[0].hideLabel
+                            };
+                        });
+                    } else {
+                        fieldData['choices'] = [
+                            {
+                                label: item?.text1 || '',
+                                value: item?.key1 || '',
+                                imageSrc: item?.image1 || ''
+                            },
+                            {
+                                label: item?.text2 || '',
+                                value: item?.key2 || '',
+                                imageSrc: item?.image2 || ''
+                            }
+                        ];
+                    }
 
                     break;
                 case 'imageUpload':
@@ -218,7 +240,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 />
             </div>
 
-            <Toaster />
+            <NotificationProvider />
         </div>
     );
 }

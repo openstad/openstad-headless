@@ -6,8 +6,8 @@ var util         = require('./util');
 var log          = require('debug')('app:http');
 const morgan     = require('morgan')
 const cookieParser = require('cookie-parser');
-
 const https = require('https');
+const db 		 = require('./db');
 
 module.exports  = {
 	app: undefined,

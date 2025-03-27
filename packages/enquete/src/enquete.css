@@ -100,12 +100,25 @@
 }
 
 .question-type-imageChoice .image-choice-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.question-type-imageChoice .image-choice-container > * {
-  flex: 1;
+@media only screen and (max-width: 767px) {
+  .question-type-imageChoice .image-choice-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.question-type-imageChoice .image-choice-container label figure figcaption {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.question-type-imageChoice .image-choice-container > .utrecht-form-field--radio {
+  display: inline-block;
 }
 
 label.utrecht-form-label{

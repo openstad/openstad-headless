@@ -41,6 +41,7 @@
     "@openstad-headless/resource-detail": "file:../../packages/resource-detail",
     "@openstad-headless/resource-detail-with-map": "file:../../packages/resource-detail-with-map",
     "@openstad-headless/resource-form": "file:../../packages/resource-form",
+    "@openstad-headless/multi-project-resource-overview": "file:../../packages/multi-project-resource-overview",
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
     "@openstad-headless/resource-overview-with-map": "file:../../packages/resource-overview-with-map",
     "@openstad-headless/simple-voting": "file:../../packages/simple-voting",

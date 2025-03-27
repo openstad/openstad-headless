@@ -23,6 +23,8 @@ export type ImageChoiceFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 export type ChoiceItem = {
@@ -31,6 +33,7 @@ export type ChoiceItem = {
     imageSrc: string;
     imageDescription: string;
     imageAlt: string;
+    hideLabel?: boolean;
 }
 
 const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
@@ -45,7 +48,21 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
     infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
 }) => {
+    const [selectedValue, setSelectedValue] = useState<string | null>(null);
+
+    const handleSelection = (choiceValue: string) => {
+        setSelectedValue(choiceValue);
+        if (onChange) {
+            onChange({
+                name: fieldKey,
+                value: choiceValue
+            });
+        }
+    };
+
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let { html } = this.props;
@@ -55,7 +72,10 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
     return (
         <div className="question">
-            <Fieldset>
+            <Fieldset
+                aria-invalid={fieldInvalid}
+                aria-describedby={`${randomId}_error`}
+            >
                 <FieldsetLegend>
                     {title}
                 </FieldsetLegend>
@@ -89,31 +109,33 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 )}
 
                 <div className={"image-choice-container"}>
-                    {choices?.map((choice, index) => (
-                        <FormField type="radio" key={index}>
-                            <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
-                                <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio">
-                                    <RadioButton
-                                        className="radio-field-input"
-                                        id={`${fieldKey}_${index}`}
-                                        name={fieldKey}
-                                        required={fieldRequired}
-                                        onChange={() => onChange ? onChange({
-                                            name: fieldKey,
-                                            value: choice.value
-                                        }) : null}
-                                        disabled={disabled}
-                                    />
-                                    <figure>
-                                        <img src={choice.imageSrc} alt={choice.imageAlt} />
-                                        {choice.label && (
-                                            <figcaption>{choice.label}</figcaption>
-                                        )}
-                                    </figure>
-                                </FormLabel>
-                            </Paragraph>
-                        </FormField>
-                    ))}
+                    {choices?.map((choice, index) => {
+                        const isSelected = selectedValue === choice.value;
+                        return (
+                          <FormField type="radio" key={index}>
+                              <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
+                                  <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio" className={isSelected ? "selected" : ""}>
+                                      <figure>
+                                          <img src={choice.imageSrc} alt={choice.imageAlt} />
+                                          <figcaption>
+                                              <RadioButton
+                                                className="radio-field-input"
+                                                id={`${fieldKey}_${index}`}
+                                                name={fieldKey}
+                                                required={fieldRequired}
+                                                onChange={() => handleSelection(choice.value)}
+                                                disabled={disabled}
+                                              />
+                                                  {(choice.label && !choice.hideLabel) && (
+                                                      choice.label
+                                                  )}
+                                          </figcaption>
+                                      </figure>
+                                  </FormLabel>
+                              </Paragraph>
+                          </FormField>
+                        );
+                    })}
                 </div>
             </Fieldset>
         </div>

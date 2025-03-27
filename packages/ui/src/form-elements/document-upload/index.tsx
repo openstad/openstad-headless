@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from "react";
-import toast, { Toaster } from 'react-hot-toast';
 import {
     AccordionProvider,
     FormField,
@@ -19,6 +18,8 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import {Spacer} from "../../spacer";
 import DataStore from '@openstad-headless/data-store/src';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
+import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 
 const filePondSettings = {
     labelIdle: "Sleep document(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
@@ -70,6 +71,8 @@ export type DocumentUploadProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const DocumentUploadField: FC<DocumentUploadProps> = ({
@@ -91,13 +94,12 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
-   infoImage = '',
+    infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
     ...props
 }) => {
     const datastore = new DataStore({ props });
-    const randomID =
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
 
     const [documents, setDocuments] = useState<FilePondFile[]>([]);
     const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, url: string }[]>([]);
@@ -173,10 +175,12 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
         });
     }, []);
 
+    const notifyFailed = (message: string) => NotificationService.addNotification(message, "error");
+
     return (
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomID}>{title}</FormLabel>
+                <FormLabel htmlFor={randomId}>{title}</FormLabel>
             </Paragraph>
             {description &&
               <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
@@ -226,7 +230,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                         fetch: props?.imageUrl + '/documents',
                         revert: null,
                     }}
-                    id={randomID}
+                    id={randomId}
                     required={fieldRequired}
                     disabled={disabled}
                     acceptedFileTypes={typeof acceptAttribute === 'string' ? [acceptAttribute] : acceptAttribute}
@@ -244,14 +248,15 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                                 resolve(true);
                             }
                         }).catch(error => {
-                            toast.error(error, { position: 'bottom-center' });
+                            notifyFailed(error);
                             return false;
                         });
                     }}
+                    aria-invalid={fieldInvalid}
+                    aria-describedby={`${randomId}_error`}
                     {...filePondSettings}
                 />
-
-                <Toaster />
+                <NotificationProvider />
             </div>
         </FormField>
     );

@@ -86,9 +86,9 @@ export default function CreateWidget({ }: WithApiUrlProps) {
                     </div>
 
 
-                    <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-3 clear-right">
+                    <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-3 clear-right widgets-admin-overview-container">
                         {filteredWidgets.map((type, key) => (
-                            <Card key={key}>
+                            <Card key={key} className={type[0] === "multiprojectresourceoverview" ? 'beta' : ''}>
                                 <CardHeader>
                                     <img src={type[1].image} />
                                     <h2 className="text-lg font-regular">

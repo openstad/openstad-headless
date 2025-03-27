@@ -84,7 +84,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
           if (managerTypes.find(type => type == instance.type)) {
             let defaultRecipient = project.emailConfig?.notifications?.projectmanagerAddress;
             
-            if (defaultRecipient === 'info@openstad.org') {
+            if (defaultRecipient === 'email@not.set') {
               defaultRecipient = '';
             }
 

@@ -2,6 +2,7 @@
 const fs = require('fs');
 const fields = require('./lib/fields');
 const arrangeFields = require('./lib/arrangeFields');
+const projectService = require('../../../services/projects');
 
 module.exports = {
   options: {
@@ -22,6 +23,17 @@ module.exports = {
         req.project = self.apos.options.project;
         req.data.global.projectTitle = req.project.title;
         req.data.prefix = self.apos.options.prefix || '';
+
+        try {
+          if (!!req.project.id){
+            const project = await projectService.fetchOne(req.project.id);
+
+            if (project) {
+              const customCssUrls = project.config?.project?.cssUrl || [];
+              req.data.customCssUrls = Array.isArray(customCssUrls) ? customCssUrls : [customCssUrls];
+            }
+          }
+        } catch (error) {}
 
         // system defaults
         let cmsDefaults = process.env.CMS_DEFAULTS;
@@ -186,23 +198,23 @@ module.exports = {
       //   def: '#logo-image {\n  max-height: 50px;\n}',
       //   label: 'Extra CSS',
       // },
-      customCssLink: {
-        type: 'string',
-        label: 'URL voor CSS imports (optioneel)',
-      },
-      customCssLink: {
-        type: 'array',
-        label: 'URL voor CSS imports (optioneel)',
-        inline: true,
-        fields: {
-          add: {
-            item: {
-              type: 'string',
-              label: 'URL voor CSS imports (optioneel)',
-            },
-          },
-        },
-      },
+      // customCssLink: {
+      //   type: 'string',
+      //   label: 'URL voor CSS imports (optioneel)',
+      // },
+      // customCssLink: {
+      //   type: 'array',
+      //   label: 'URL voor CSS imports (optioneel)',
+      //   inline: true,
+      //   fields: {
+      //     add: {
+      //       item: {
+      //         type: 'string',
+      //         label: 'URL voor CSS imports (optioneel)',
+      //       },
+      //     },
+      //   },
+      // },
       compactMenu: {
         type: 'boolean',
         label: 'Compacte weergave van het hoofdmenu.',
@@ -330,7 +342,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: ['customCssLink', 'favicon', 'compactMenu'],
+        fields: ['favicon', 'compactMenu'],
       },
       login: {
         label: 'Menu instellingen',

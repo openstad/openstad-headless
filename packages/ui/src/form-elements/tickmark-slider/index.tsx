@@ -21,6 +21,8 @@ export type TickmarkSliderProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -39,7 +41,9 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
-   infoImage = '',
+    infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
@@ -115,6 +119,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                     }
                 }}
                 disabled={disabled}
+                aria-invalid={fieldInvalid}
+                aria-describedby={`${randomId}_error`}
             />
             <div className={`range-slider-labels ${showSmileys && 'smiley-scale'}`} aria-hidden="true">
                 {fieldOptions.map((option, key) => (

@@ -10,6 +10,12 @@
   {% endfor %}
 {% endif %}
 
+{% if data.customCssUrls %}
+  {% for customCssUrl in data.customCssUrls %}
+    <link rel="stylesheet" href="{{ customCssUrl }}">
+  {% endfor %}
+{% endif %}
+
 {% if data.global.favicon %}
   <link rel="icon" type="image/x-icon" href="{{ data.global.favicon }}">
 {% endif %}

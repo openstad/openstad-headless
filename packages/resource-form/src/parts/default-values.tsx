@@ -149,5 +149,20 @@ export const defaultFormValues = [
         "multiple": true,
         "options": [],
         "fieldType": "text"
+    },
+    {
+        "trigger": "13",
+        "title": "Budget",
+        "description": "Welk budget heb je nodig van de gemeente voor de uitvoering?",
+        "type": "budget",
+        "fieldKey": "budget",
+        "fieldRequired": false,
+        "onlyForModerator": false,
+        "minCharacters": "",
+        "maxCharacters": "",
+        "variant": "text input",
+        "multiple": true,
+        "options": [],
+        "fieldType": "number"
     }
 ]

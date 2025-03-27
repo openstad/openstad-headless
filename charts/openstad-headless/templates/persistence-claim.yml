@@ -4,7 +4,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: image-data-claim
   namespace: {{ .Release.Namespace }}
-  annotations: {{ .Values.persistence.annotations }}
+{{- if (.Values.persistence.annotations)}}
+  annotations:
+{{ toYaml .Values.persistence.annotations | indent 4 }}
+{{- end}}
 spec:
 {{- if (and .Values.persistence .Values.persistence.storageClassName) }}
   storageClassName: {{ .Values.persistence.storageClassName }}
@@ -13,14 +16,21 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: {{ .Values.image.volumes.data.size }}
+  {{- if (and .Values.persistence .Values.persistence.image .Values.persistence.image.size) }}
+      storage: {{ .Values.persistence.image.size | default "1Gi" }}
+  {{- else}}
+      storage: 1Gi
+  {{- end}}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: docs-data-claim
   namespace: {{ .Release.Namespace }}
-  annotations: {{ .Values.persistence.annotations }}
+{{- if (.Values.persistence.annotations)}}
+  annotations:
+{{ toYaml .Values.persistence.annotations | indent 4 }}
+{{- end}}
 spec:
 {{- if (and .Values.persistence .Values.persistence.storageClassName) }}
   storageClassName: {{ .Values.persistence.storageClassName }}
@@ -29,14 +39,21 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: {{ .Values.image.volumes.data.size }}
+  {{- if (and .Values.persistence .Values.persistence.docs .Values.persistence.docs.size) }}
+      storage: {{ .Values.persistence.docs.size | default "1Gi" }}
+  {{- else}}
+      storage: 1Gi
+  {{- end}}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: cms-data-claim
   namespace: {{ .Release.Namespace }}
-  annotations: {{ .Values.persistence.annotations }}
+{{- if (.Values.persistence.annotations)}}
+  annotations:
+{{ toYaml .Values.persistence.annotations | indent 4 }}
+{{- end}}
 spec:
 {{- if (and .Values.persistence .Values.persistence.storageClassName) }}
   storageClassName: {{ .Values.persistence.storageClassName }}
@@ -45,4 +62,8 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: {{ .Values.cms.volumes.data.size }}
+  {{- if (and .Values.persistence .Values.persistence.cms .Values.persistence.cms.size) }}
+      storage: {{ .Values.persistence.cms.size | default "1Gi" }}
+  {{- else}}
+      storage: 1Gi
+  {{- end}}

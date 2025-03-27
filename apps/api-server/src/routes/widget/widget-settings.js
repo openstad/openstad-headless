@@ -66,6 +66,17 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
+  multiprojectresourceoverview: {
+    packageName: '@openstad-headless/multi-project-resource-overview',
+    directory: 'multi-project-resource-overview',
+    js: ['dist/multi-project-resource-overview.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessMultiProjectResourceOverview',
+    componentName: 'MultiProjectResourceOverview',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   resourcedetail: {
     packageName: '@openstad-headless/resource-detail',
     directory: 'resource-detail',

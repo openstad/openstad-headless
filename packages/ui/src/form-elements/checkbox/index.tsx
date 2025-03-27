@@ -24,6 +24,10 @@ export type CheckboxFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    maxChoices?: string,
+    maxChoicesMessage?: string,
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -37,11 +41,18 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        showMoreInfo = false,
        moreInfoButton = 'Meer informatie',
        moreInfoContent = '',
-   infoImage = '',
+       infoImage = '',
+       maxChoices = '',
+       maxChoicesMessage = '',
+       randomId= '',
+       fieldInvalid= false,
 }) => {
     const defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
     const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+
+    const maxChoicesNum = parseInt(maxChoices, 10) || 0;
+    const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
 
     useEffect(() => {
         const initialOtherOptionValues: { [key: string]: string } = {};
@@ -113,7 +124,11 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
     return (
         <div className="question">
-            <Fieldset role="group">
+            <Fieldset
+              role="group"
+              aria-invalid={fieldInvalid}
+              aria-describedby={`${randomId}_error`}
+            >
                 <FieldsetLegend>
                     {title}
                 </FieldsetLegend>
@@ -161,12 +176,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                         required={fieldRequired}
                                         checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
                                         onChange={(e) => handleChoiceChange(e, index)}
-                                        disabled={disabled}
+                                        disabled={disabled || (maxReached && !selectedChoices.includes(choice.value))}
                                     />
                                     <span>{choice && choice.label}</span>
                                 </FormLabel>
                             </Paragraph>
                         </FormField>
+
                         {choice.isOtherOption && selectedChoices.includes(choice.value) && (
                             <div className="marginTop10 marginBottom15">
                                 <TextInput
@@ -176,11 +192,17 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                     fieldKey={`${fieldKey}_${index}_other`}
                                     title=""
                                     defaultValue={otherOptionValues[`${fieldKey}_${index}_other`]}
+                                    fieldInvalid={false}
+                                    randomId={`${fieldKey}_${index}`}
                                 />
                             </div>
                         )}
                     </>
                 ))}
+
+                {maxReached && maxChoicesMessage && (
+                  <em aria-live="polite">{maxChoicesMessage}</em>
+                )}
             </Fieldset>
         </div>
     );

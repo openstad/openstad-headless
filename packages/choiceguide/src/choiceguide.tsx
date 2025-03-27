@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ChoiceGuideProps, WeightOverview } from "./props.js";
 import { InitializeFormFields } from "./parts/init-fields.js";
-import toast, { Toaster } from 'react-hot-toast';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
@@ -10,10 +9,14 @@ import './style.css';
 import { InitializeWeights } from "./parts/init-weights.js";
 import { FormValue } from "@openstad-headless/form/src/form";
 
-import { Heading4, Paragraph } from "@utrecht/component-library-react";
+import { Heading4, Heading6, Paragraph } from "@utrecht/component-library-react";
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import hasRole from '../../lib/has-role';
+import {Banner, Button, Spacer} from "@openstad-headless/ui/src";
 
 function ChoiceGuide(props: ChoiceGuideProps) {
-    const { choiceGuide = {}, items, choiceOption, widgetId } = props;
+    const { choiceGuide = {}, items, choiceOption, widgetId, generalSettings = {} } = props;
     const {
         introTitle,
         introDescription,
@@ -22,7 +25,29 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         choicesType
     } = choiceGuide;
 
-    const formFields = InitializeFormFields(items, props);
+    const {
+        submitButtonText,
+        nextButtonText,
+        loginRequired,
+        loginText,
+        loginTextButton
+    } = generalSettings;
+
+    const datastore: any = new DataStore({
+        projectId: props.projectId,
+        api: props.api,
+    });
+
+    const {
+        data: currentUser,
+        error: currentUserError,
+        isLoading: currentUserIsLoading,
+    } = datastore.useCurrentUser({ ...props });
+
+    const onlyShowForUsers = typeof loginRequired !== 'undefined' && loginRequired
+    const showForm = onlyShowForUsers ? !!hasRole(currentUser, 'member') : true;
+
+    const formFields = InitializeFormFields(items, props, showForm);
 
     const defaultAnswers = formFields.reduce((acc, item) => {
         acc[item.fieldKey] = item?.defaultValue;
@@ -48,31 +73,16 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         setAnswers(updatedAnswers);
     }, [currentAnswers]);
 
-    const datastore: any = new DataStore({
-        projectId: props.projectId,
-        api: props.api,
-    });
-
-    const {
-        data: currentUser,
-        error: currentUserError,
-        isLoading: currentUserIsLoading,
-    } = datastore.useCurrentUser({ ...props });
-
     const questionsPerPage = Number(noOfQuestionsToShow) || 100;
     const totalPages = Math.ceil(formFields.length / questionsPerPage);
     const currentFields = formFields.slice(currentPage * questionsPerPage, (currentPage + 1) * questionsPerPage);
 
-    const notifySuccess = () =>
-      toast.success('Versturen gelukt', { position: 'bottom-center' });
-
-    const notifyFailed = () =>
-      toast.error('Versturen mislukt', { position: 'bottom-center' });
+    const notifySuccess = () => NotificationService.addNotification("Versturen gelukt", "success");
+    const notifyFailed = () => NotificationService.addNotification("Versturen mislukt", "error");
 
     const { create: createChoicesguideResult } = datastore.useChoicesguide({
         projectId: props.projectId,
     });
-
     const onSubmit = async (formData: any) => {
         setCompleteAnswers((prevAnswers) => ({
             ...prevAnswers,
@@ -112,6 +122,24 @@ function ChoiceGuide(props: ChoiceGuideProps) {
       <div className="osc">
           <div className="osc-choiceguide-container" ref={containerRef}>
               <div className="osc-choiceguide-form">
+
+                  { !showForm && (
+                      <>
+                          <Banner className="big">
+                              <Heading6>{ loginText || "Inloggen om deel te nemen."}</Heading6>
+                              <Spacer size={1} />
+                              <Button
+                                type="button"
+                                onClick={() => {
+                                    document.location.href = props.login?.url || '';
+                                }}>
+                                  { loginTextButton || "Inloggen"}
+                              </Button>
+                          </Banner>
+                          <Spacer size={2} />
+                      </>
+                  )}
+
                   <div className="osc-choiceguide-intro">
                       {introTitle && <Heading4>{introTitle}</Heading4>}
                       <div className="osc-choiceguide-intro-description">
@@ -123,7 +151,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                   <Form
                     fields={currentFields}
                     title=""
-                    submitText={currentPage < totalPages - 1 ? "Volgende" : "Versturen"}
+                    submitText={currentPage < totalPages - 1 ? (nextButtonText || "Volgende") : (submitButtonText || "Versturen")}
                     submitHandler={onSubmit}
                     secondaryLabel={""}
                     getValuesOnChange={setCurrentAnswers}
@@ -131,9 +159,10 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     prevPage={currentPage > 0 ? currentPage - 1 : null}
+                    submitDisabled={!showForm}
                     {...props}
                   />
-                  <Toaster />
+                  <NotificationProvider />
               </div>
               <div className="osc-choiceguide-sidebar-container" ref={sidebarRef}>
                   {choicesType !== 'hidden' && (

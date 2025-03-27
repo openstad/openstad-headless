@@ -114,6 +114,11 @@ export const WidgetDefinitions = {
     description: 'Module voor het verdelen van punten of budget',
     image: '/widget_preview/verdeelmodule-preview.png',
   },
+  multiprojectresourceoverview: {
+    name: 'Multi project inzending overzicht',
+    description: 'Overview van inzendingen van meerdere projecten',
+    image: '/widget_preview/multiproject-inzendingenoverzicht-preview.png',
+  },
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;

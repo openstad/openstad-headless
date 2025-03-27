@@ -26,6 +26,8 @@ export type SelectFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
@@ -40,7 +42,9 @@ const SelectField: FC<SelectFieldProps> = ({
       showMoreInfo = false,
       moreInfoButton = 'Meer informatie',
       moreInfoContent = '',
-   infoImage = '',
+      infoImage = '',
+      randomId = '',
+      fieldInvalid = false,
 }) => {
     choices = choices.map((choice) => {
       if (typeof choice === 'string') {
@@ -100,6 +104,8 @@ const SelectField: FC<SelectFieldProps> = ({
                         value: e.target.value
                     }) : null }
                     disabled={disabled}
+                    aria-invalid={fieldInvalid}
+                    aria-describedby={`${randomId}_error`}
                 >
                     <SelectOption value="">
                         {defaultOption}

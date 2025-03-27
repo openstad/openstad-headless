@@ -29,8 +29,9 @@ import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { Filters } from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 import SelectField from "@openstad-headless/ui/src/form-elements/select";
 import { MultiSelect } from "@openstad-headless/ui/src";
-import toast, { Toaster } from "react-hot-toast";
 import { Spacer } from '@openstad-headless/ui/src';
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -82,6 +83,8 @@ export type DocumentMapProps = BaseProps &
     closedText?: string;
     relativePathPrepend?: string;
     entireDocumentVisible?: 'entirely' | 'onlyTop';
+    itemsPerPage?: number;
+    displayPagination?: boolean;
   };
 
 
@@ -116,6 +119,8 @@ function DocumentMap({
   closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
   relativePathPrepend = '',
   entireDocumentVisible = 'onlyTop',
+  itemsPerPage = 9999,
+  displayPagination = false,
   ...props
 }: DocumentMapProps) {
 
@@ -354,11 +359,8 @@ function DocumentMap({
     return null;
   };
 
-  const notifySuccess = () =>
-    toast.success('Uw reactie is succesvol geplaatst!', { position: 'top-center' });
-
-  const notifyFailed = () =>
-    toast.error('Uw reactie kon niet geplaatst worden', { position: 'top-center' });
+  const notifySuccess = () => NotificationService.addNotification("Uw reactie is succesvol geplaatst!", "success");
+  const notifyFailed = () => NotificationService.addNotification("Uw reactie kon niet geplaatst worden", "error");
 
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
@@ -382,6 +384,10 @@ function DocumentMap({
           sentiment: 'no sentiment',
           tags: allTags,
         });
+
+        if (goToLastPage && displayPagination) {
+          goToLastPage();
+        }
 
         const addNewCommentToComments = [...filteredComments, newComment];
         const newIndex = newComment?.id;
@@ -685,6 +691,7 @@ function DocumentMap({
     const configVotingEnabled = props?.votes?.isActive || false;
     const votingEnabled = configVotingEnabled && args.canComment;
 
+    const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
@@ -977,6 +984,9 @@ function DocumentMap({
                 emptyListText={emptyListText}
                 loginText={loginText}
                 closedText={closedText}
+                itemsPerPage={itemsPerPage}
+                displayPagination={displayPagination}
+                onGoToLastPage={setGoToLastPage}
               />
             </div>
           )}
@@ -988,6 +998,8 @@ function DocumentMap({
           >
             <i className="ri-arrow-up-line"></i>
           </button>
+
+        <NotificationProvider />
 
       </div>
 

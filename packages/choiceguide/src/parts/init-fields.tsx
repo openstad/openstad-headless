@@ -5,7 +5,7 @@ const getMinMaxByField = (key, data) => {
     return !!data && typeof data.resources !== 'undefined' && typeof data.resources[key] !== 'undefined' ? data.resources[key] : '';
 }
 
-export const InitializeFormFields = (items, data) => {
+export const InitializeFormFields = (items, data, showForm = true) => {
     const formFields: FieldProps[] = [];
 
     if (typeof (items) === 'object' && items.length > 0
@@ -39,7 +39,8 @@ export const InitializeFormFields = (items, data) => {
                 labelB: item.explanationB || '',
                 imageA: item.imageA || '',
                 imageB: item.imageB || '',
-                showLabels: false
+                showLabels: false,
+                disabled: !showForm,
             };
 
             switch (item.type) {
@@ -69,6 +70,14 @@ export const InitializeFormFields = (items, data) => {
                             fieldData['defaultValue'] = defaultValue;
                         }
                     }
+
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'imageUpload':
                     fieldData['allowedTypes'] = item.allowedTypes || ["image/*"];

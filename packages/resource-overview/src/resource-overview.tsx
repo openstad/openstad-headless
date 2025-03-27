@@ -71,7 +71,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
@@ -93,6 +93,14 @@ export type ResourceOverviewWidgetProps = BaseProps &
     clickableImage?: boolean;
     displayBudget?: boolean;
     displayTags?: boolean;
+    selectedProjects?: {
+      id: string;
+      name: string;
+      detailPageLink?: string;
+      label?: string;
+    }[];
+    multiProjectResources?: any[];
+    quickFixTags?: Array<{ id: number; name: string }>;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -165,7 +173,18 @@ const defaultItemRenderer = (
 
   const getUrl = () => {
     let location = document.location;
-    let newUrl = props?.itemLink?.replace('[id]', resource.id);
+
+    let urlToUse = props?.itemLink;
+
+    if ( !!props.selectedProjects && props.selectedProjects.length > 0 ) {
+      const project = props.selectedProjects.find(project => project.id === resource.projectId);
+
+      if (project) {
+        urlToUse = project.detailPageLink;
+      }
+    }
+
+    let newUrl = urlToUse?.replace('[id]', resource.id);
     if (!newUrl?.startsWith('http')) {
       if (!newUrl?.startsWith('/')) {
         newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'
@@ -190,11 +209,15 @@ const defaultItemRenderer = (
 
   const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
+  const multiProjectLabel = props.selectedProjects && props.selectedProjects.length > 1
+                                              ? props.selectedProjects.find(project => project.id === resource.projectId)?.label
+                                              : '';
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className={`resource-card--link ${hasImages}`}>
+          className={`resource-card--link ${hasImages}`} data-projectid={ resource.projectId || '' } >
 
           <Carousel
             items={resourceImages}
@@ -208,9 +231,13 @@ const defaultItemRenderer = (
                         className={`${hasImages} ${statusClasses}`}
                     >
                       <Paragraph className="osc-resource-overview-content-item-status">
-                        {resource.statuses?.map((statusTag: any) => (
-                          <span className="status-label">{statusTag.label}</span>
-                        ))}
+                        {!!multiProjectLabel ? (
+                          <span className="status-label">{multiProjectLabel}</span>
+                        ) : (
+                          resource.statuses?.map((statusTag: any) => (
+                            <span className="status-label" key={statusTag.label}>{statusTag.label}</span>
+                          ))
+                        )}
                       </Paragraph>
                     </div>
                     )
@@ -260,7 +287,7 @@ const defaultItemRenderer = (
         </div>
 
       ) : (
-        <div className={`resource-card--link ${hasImages}`}>
+        <div className={`resource-card--link ${hasImages}`} data-projectid={ resource.projectId || '' }>
           <Carousel
             items={resourceImages}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
@@ -273,9 +300,13 @@ const defaultItemRenderer = (
                       className={`${hasImages} ${statusClasses}`}
                     >
                       <Paragraph className="osc-resource-overview-content-item-status">
-                        {resource.statuses?.map((statusTag: any) => (
-                          <span className="status-label">{statusTag.label}</span>
-                        ))}
+                        {!!multiProjectLabel ? (
+                          <span className="status-label">{multiProjectLabel}</span>
+                        ) : (
+                          resource.statuses?.map((statusTag: any) => (
+                            <span className="status-label">{statusTag.label}</span>
+                          ))
+                        )}
                       </Paragraph>
                     </div>
                   )
@@ -346,6 +377,9 @@ function ResourceOverview({
   documentsDesc = '',
   displayVariant = '',
   onFilteredResourcesChange,
+  multiProjectResources = [],
+  selectedProjects = [],
+  quickFixTags = [],
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -379,8 +413,8 @@ function ResourceOverview({
     props.defaultSorting || undefined
   );
 
-  const [resources, setResources] = useState([]);
-  const [filteredResources, setFilteredResources] = useState([]);
+  const [resources, setResources] = useState< Array<any> >([]);
+  const [filteredResources, setFilteredResources] = useState< Array<any> >([]);
 
   const { data: resourcesWithPagination } = datastore.useResources({
     pageSize: 999999,
@@ -393,10 +427,12 @@ function ResourceOverview({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (resourcesWithPagination) {
+    if (selectedProjects.length === 0 && resourcesWithPagination) {
       setResources(resourcesWithPagination.records || []);
+    } else {
+      setResources(multiProjectResources);
     }
-  }, [resourcesWithPagination, pageSize]);
+  }, [multiProjectResources, selectedProjects, resourcesWithPagination, pageSize]);
 
   const {data: allTags} = datastore.useTags({
     projectId: props.projectId,
@@ -442,6 +478,20 @@ function ResourceOverview({
           if (sort === 'createdAt_asc') {
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           }
+          if ( multiProjectResources.length > 0 ) {
+            if (sort === 'title') {
+              return a.title.localeCompare(b.title);
+            }
+            if (sort === 'votes_desc') {
+              return b.yes - a.yes;
+            }
+            if (sort === 'votes_asc' || sort === 'ranking') {
+              return a.yes - b.yes;
+            }
+            if (sort === 'random') {
+              return Math.random() - 0.5;
+            }
+          }
           return 0;
         });
 
@@ -470,11 +520,21 @@ function ResourceOverview({
   const onResourceClick = useCallback(
     (resource: any, index: number) => {
       if (displayType === 'cardrow') {
-        if (!props.itemLink) {
+        let urlToUse = props.itemLink;
+
+        if ( selectedProjects.length > 0 ) {
+          const project = selectedProjects.find(project => project.id === resource.projectId);
+
+          if (project) {
+            urlToUse = project.detailPageLink;
+          }
+        }
+
+        if (!urlToUse) {
           console.error('Link to child resource is not set');
         } else {
           let location = document.location;
-          let newUrl = props.itemLink.replace('[id]', resource.id);
+          let newUrl = urlToUse.replace('[id]', resource.id);
           if (!newUrl.startsWith('http')) {
             if (!newUrl.startsWith('/')) {
               newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'
@@ -591,6 +651,7 @@ function ResourceOverview({
                 }
                 setSearch(f.search.text);
               }}
+              quickFixTags={quickFixTags || []}
             />
           ) : null}
 
@@ -601,7 +662,7 @@ function ResourceOverview({
                 ?.map((resource: any, index: number) => {
                   return (
                     <React.Fragment key={`resource-item-${resource.id}`}>
-                      {renderItem(resource, { ...props, displayType }, () => {
+                      {renderItem(resource, { ...props, displayType, selectedProjects }, () => {
                         onResourceClick(resource, index);
                       })}
                     </React.Fragment>

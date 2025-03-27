@@ -26,6 +26,8 @@ export type RadioboxFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -39,7 +41,9 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
-   infoImage = '',
+    infoImage = '',
+    randomId = '',
+    fieldInvalid = false,
 }) => {
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
@@ -108,7 +112,11 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
 
     return (
         <div className="question">
-            <Fieldset role="radiogroup">
+            <Fieldset
+                role="radiogroup"
+                aria-invalid={fieldInvalid}
+                aria-describedby={`${randomId}_error`}
+            >
                 <FieldsetLegend>
                     {title}
                 </FieldsetLegend>
@@ -169,6 +177,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                     onChange={(e: { name: string; value: string }) => handleOtherOptionChange(e)}
                                     fieldKey={`${fieldKey}_${index}_other`}
                                     title=""
+                                    fieldInvalid={false}
+                                    randomId={`${fieldKey}_${index}`}
                                 />
                             </div>
                         )}

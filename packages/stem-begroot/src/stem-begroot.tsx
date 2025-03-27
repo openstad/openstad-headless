@@ -12,7 +12,6 @@ import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/
 import { StemBegrootResourceList } from './step-1/begroot-resource-list/stem-begroot-resource-list';
 import { BudgetUsedList } from './reuseables/used-budget-component';
 import { BegrotenSelectedOverview } from './step-2/selected-overview';
-import toast, { Toaster } from 'react-hot-toast';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 
 import { Step3Success } from './step-3-success';
@@ -23,6 +22,8 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Heading } from '@utrecht/component-library-react';
 import useTags from "@openstad-headless/admin-server/src/hooks/use-tag";
+import NotificationService from "../../lib/NotificationProvider/notification-service";
+import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
 type TagTypeSingle = {
   min: number;
@@ -205,7 +206,7 @@ function StemBegroot({
 
   const notifyVoteMessage = (message: string, isError: boolean = false) => {
     if (isError) {
-      toast.error(message, { position: 'top-center' });
+      NotificationService.addNotification(message, "error");
     }
   };
 
@@ -978,7 +979,7 @@ function StemBegroot({
             <Spacer size={2} />
           </>
         ) : null}
-        <Toaster />
+        <NotificationProvider />
       </div>
     </>
   );

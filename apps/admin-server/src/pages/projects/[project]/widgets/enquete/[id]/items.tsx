@@ -30,6 +30,7 @@ import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
+import {ProjectSettingProps} from "@openstad-headless/types";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -45,10 +46,31 @@ const formSchema = z.object({
     .array(
       z.object({
         trigger: z.string(),
-        titles: z.array(z.object({ text: z.string().optional(), key: z.string(), isOtherOption: z.boolean().optional(), defaultValue: z.boolean().optional() })),
+        titles: z.array(z.object({
+          text: z.string().optional(),
+          key: z.string(),
+          image: z.string().optional(),
+          isOtherOption: z.boolean().optional(),
+          defaultValue: z.boolean().optional(),
+          hideLabel: z.boolean().optional()
+        })),
       })
     )
     .optional(),
+  multiple: z.boolean().optional(),
+  image: z.string().optional(),
+  imageAlt: z.string().optional(),
+  imageDescription: z.string().optional(),
+  imageUpload: z.string().optional(),
+  fieldRequired: z.boolean().optional(),
+  maxChoices: z.string().optional(),
+  maxChoicesMessage: z.string().optional(),
+  showSmileys: z.boolean().optional(),
+  placeholder: z.string().optional(),
+  defaultValue: z.string().optional(),
+  imageOptionUpload: z.string().optional(),
+
+  // Keeping these for backwards compatibility
   image1Upload: z.string().optional(),
   image1: z.string().optional(),
   text1: z.string().optional(),
@@ -57,15 +79,6 @@ const formSchema = z.object({
   image2Upload: z.string().optional(),
   text2: z.string().optional(),
   key2: z.string().optional(),
-  multiple: z.boolean().optional(),
-  image: z.string().optional(),
-  imageAlt: z.string().optional(),
-  imageDescription: z.string().optional(),
-  imageUpload: z.string().optional(),
-  fieldRequired: z.boolean().optional(),
-  showSmileys: z.boolean().optional(),
-  placeholder: z.string().optional(),
-  defaultValue: z.string().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -109,20 +122,24 @@ export default function WidgetEnqueteItems(
           maxCharacters: values.maxCharacters,
           variant: values.variant || 'text input',
           options: values.options || [],
+          multiple: values.multiple || false,
+          image: values.image || '',
+          imageAlt: values.imageAlt || '',
+          imageDescription: values.imageDescription || '',
+          fieldRequired: values.fieldRequired || false,
+          maxChoices: values.maxChoices || '',
+          maxChoicesMessage: values.maxChoicesMessage || '',
+          showSmileys: values.showSmileys || false,
+          defaultValue: values.defaultValue || '',
+          placeholder: values.placeholder || '',
+
+          // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
           key1: values.key1 || '',
           image2: values.image2 || '',
           text2: values.text2 || '',
           key2: values.key2 || '',
-          multiple: values.multiple || false,
-          image: values.image || '',
-          imageAlt: values.imageAlt || '',
-          imageDescription: values.imageDescription || '',
-          fieldRequired: values.fieldRequired || false,
-          showSmileys: values.showSmileys || false,
-          defaultValue: values.defaultValue || '',
-          placeholder: values.placeholder || '',
         },
       ]);
     }
@@ -172,20 +189,24 @@ export default function WidgetEnqueteItems(
     maxCharacters: '',
     variant: 'text input',
     options: [],
+    multiple: false,
+    image: '',
+    imageAlt: '',
+    imageDescription: '',
+    fieldRequired: false,
+    maxChoices: '',
+    maxChoicesMessage: '',
+    showSmileys: false,
+    defaultValue: '',
+    placeholder: '',
+
+    // Keeping these for backwards compatibility
     image1: '',
     text1: '',
     key1: '',
     image2: '',
     text2: '',
     key2: '',
-    multiple: false,
-    image: '',
-    imageAlt: '',
-    imageDescription: '',
-    fieldRequired: false,
-    showSmileys: false,
-    defaultValue: '',
-    placeholder: '',
   });
 
   const form = useForm<FormData>({
@@ -217,20 +238,24 @@ export default function WidgetEnqueteItems(
         maxCharacters: selectedItem.maxCharacters || '',
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
+        multiple: selectedItem.multiple || false,
+        image: selectedItem.image || '',
+        imageAlt: selectedItem.imageAlt || '',
+        imageDescription: selectedItem.imageDescription || '',
+        fieldRequired: selectedItem.fieldRequired || false,
+        maxChoices: selectedItem.maxChoices || '',
+        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
+        showSmileys: selectedItem.showSmileys || false,
+        defaultValue: selectedItem.defaultValue || '',
+        placeholder: selectedItem.placeholder || '',
+
+        // Keeping these for backwards compatibility
         image1: selectedItem.image1 || '',
         text1: selectedItem.text1 || '',
         key1: selectedItem.key1 || '',
         image2: selectedItem.image2 || '',
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
-        multiple: selectedItem.multiple || false,
-        image: selectedItem.image || '',
-        imageAlt: selectedItem.imageAlt || '',
-        imageDescription: selectedItem.imageDescription || '',
-        fieldRequired: selectedItem.fieldRequired || false,
-        showSmileys: selectedItem.showSmileys || false,
-        defaultValue: selectedItem.defaultValue || '',
-        placeholder: selectedItem.placeholder || '',
       });
       setOptions(selectedItem.options || []);
     }
@@ -304,14 +329,24 @@ export default function WidgetEnqueteItems(
   }
 
   function handleSaveItems() {
-    props.updateConfig({ ...props, items });
+    const updatedProps = { ...props };
+
+    Object.keys(updatedProps).forEach((key: string) => {
+      if (key.startsWith("options.")) {
+        // @ts-ignore
+        delete updatedProps[key];
+      }
+    });
+
+    props.updateConfig({ ...updatedProps, items });
   }
+
 
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
-        return true;
       case 'multiple':
+      case 'images':
         return true;
       default:
         return false;
@@ -321,8 +356,8 @@ export default function WidgetEnqueteItems(
   const hasList = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
-        return true;
       case 'multiple':
+      case 'images':
         return true;
       default:
         return false;
@@ -428,7 +463,7 @@ export default function WidgetEnqueteItems(
                         const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
                         const activeOption = currentOption !== -1 ? currentOption : options.length;
 
-                        return (
+                        return form.watch("questionType") !== "images" ? (
                           <>
                             <FormField
                               control={form.control}
@@ -497,9 +532,71 @@ export default function WidgetEnqueteItems(
                                 )}
                               />
                             )}
-
-
                           </>
+                          ) : (
+                            <>
+                              <ImageUploader
+                                form={form}
+                                project={project as string}
+                                fieldName="imageOptionUpload"
+                                imageLabel="Afbeelding"
+                                allowedTypes={["image/*"]}
+                                onImageUploaded={(imageResult) => {
+                                  const image = imageResult ? imageResult.url : '';
+
+                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                  form.resetField('imageOptionUpload');
+                                }}
+                              />
+
+                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                                <div style={{ position: 'relative' }}>
+                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                </div>
+                              )}
+
+                              <FormField
+                                control={form.control}
+                                name={`options.${activeOption}.titles.0.key`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Titel</FormLabel>
+                                    <FormDescription>
+                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                    </FormDescription>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                // @ts-ignore
+                                name={`options.${activeOption}.titles.0.hideLabel`}
+                                render={({field}) => (
+                                  <>
+                                    <FormItem
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        flexDirection: 'row',
+                                        marginTop: '10px'
+                                      }}>
+                                      {YesNoSelect(field, props)}
+                                      <FormLabel
+                                        style={{marginTop: 0, marginLeft: '6px'}}>Titel verbergen?</FormLabel>
+                                      <FormMessage/>
+                                    </FormItem>
+                                    <FormDescription>
+                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                    </FormDescription>
+                                  </>
+                                )}
+                              />
+                            </>
                           );
                         })()
                       )}
@@ -688,7 +785,7 @@ export default function WidgetEnqueteItems(
                                 Informatie blok
                               </SelectItem>
                               <SelectItem value="images">
-                                Twee antwoordopties met afbeeldingen
+                                Antwoordopties met afbeeldingen
                               </SelectItem>
                               <SelectItem value="multiplechoice">
                                 Multiplechoice
@@ -804,96 +901,6 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    {form.watch('questionType') === 'images' && (
-                      <>
-                        <ImageUploader
-                          form={form}
-                          project={project as string}
-                          fieldName="image1Upload"
-                          imageLabel="Afbeelding 1"
-                          allowedTypes={["image/*"]}
-                          onImageUploaded={(imageResult) => {
-                            const image = imageResult ? imageResult.url : '';
-
-                            form.setValue("image1", image);
-                            form.resetField('image1Upload');
-                          }}
-                        />
-
-                        {!!form.getValues('image1') && (
-                          <div style={{ position: 'relative' }}>
-                            <img src={form.getValues('image1')} />
-                          </div>
-                        )}
-
-                        <FormField
-                          control={form.control}
-                          name="key1"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Key afbeelding 1</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="text1"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Titel afbeelding 1</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <ImageUploader
-                          form={form}
-                          project={project as string}
-                          fieldName="image2Upload"
-                          imageLabel="Afbeelding 2"
-                          allowedTypes={["image/*"]}
-                          onImageUploaded={(imageResult) => {
-                            const image = imageResult ? imageResult.url : '';
-
-                            form.setValue("image2", image);
-                            form.resetField('image2Upload');
-                          }}
-                        />
-
-                        {!!form.getValues('image2') && (
-                          <div style={{ position: 'relative' }}>
-                            <img src={form.getValues('image2')} />
-                          </div>
-                        )}
-
-                        <FormField
-                          control={form.control}
-                          name="key2"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Key afbeelding 2</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="text2"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Titel afbeelding 2</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    )}
-
                     {form.watch('questionType') === 'imageUpload' && (
                       <FormField
                         control={form.control}
@@ -991,6 +998,41 @@ export default function WidgetEnqueteItems(
                           </FormItem>
                         )}
                       />
+                    )}
+
+                    {form.watch('questionType') === 'multiple' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="maxChoices"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Maximaal te selecteren opties</FormLabel>
+                              <FormDescription>
+                                <em className='text-xs'>Als je wilt dat er maximaal een aantal opties geselecteerd kunnen worden, vul dan hier het aantal in.</em>
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="maxChoicesMessage"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Maximaal aantal bereikt melding
+                              </FormLabel>
+                              <FormDescription>
+                                <em className='text-xs'>Als het maximaal aantal opties is geselecteerd, geef dan een melding aan de gebruiker. Dit is optioneel.</em>
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
 
                     {hasOptions() && (
