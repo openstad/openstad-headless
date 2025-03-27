@@ -102,12 +102,14 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
 
     try {
       parsedValue = JSON.parse(value);
-    } catch (error) {
-      return value;
-    }
+    } catch (error) {}
 
     if (Array.isArray(parsedValue)) {
       return [...parsedValue].join(', ')
+    }
+
+    if ( typeof value === 'string' ) {
+      return `"${value}"`;
     }
 
     return value;

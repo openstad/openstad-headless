@@ -45,6 +45,7 @@ function Comment({
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
   const [isReplyFormActive, setIsReplyFormActive] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   function toggleReplyForm() {
     // todo: scrollto
@@ -140,17 +141,41 @@ function Comment({
           {args.comment.user && args.comment.user.role === 'admin' ? <span className='--isAdmin'>{adminLabel}</span> : null}
         </Heading>
         {canEdit() || canDelete() ? (
-          <DropDownMenu
-            items={[
-              { label: 'Bewerken', onClick: () => toggleEditForm() },
-              {
-                label: 'Verwijderen',
-                onClick: () => {
-                  if (args.comment && confirm('Weet u het zeker?'))
-                    args.comment.delete(args.comment.id);
-                },
-              },
-            ]}/>
+          <div className="edit-delete-button-group">
+            <Button appearance="subtle-button" onClick={() => setIsOpen(!isOpen)}>
+              <div>
+                <i className={isOpen ? "ri-close-fill" : "ri-more-fill"}></i>
+                <span className="sr-only">Bewerken</span>
+              </div>
+            </Button>
+
+            {isOpen && (
+              <div className="DropdownMenuContent">
+                  <ButtonGroup direction='column'>
+                    <Button
+                      appearance='secondary-action-button'
+                      className="DropdownMenuItem"
+                      onClick={() => {
+                        setIsOpen(false);
+                        toggleEditForm();
+                      }}
+                    >
+                      Bewerken
+                    </Button>
+                    <Button
+                      appearance='secondary-action-button'
+                      className="DropdownMenuItem"
+                      onClick={() => {
+                        if (args.comment && confirm('Weet u het zeker?'))
+                          args.comment.delete(args.comment.id);
+                      }}
+                    >
+                      Verwijderen
+                    </Button>
+                  </ButtonGroup>
+              </div>
+            )}
+          </div>
         ) : null}
       </section>
 
