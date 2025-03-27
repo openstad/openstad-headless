@@ -21,6 +21,7 @@ import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
 import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import L from 'leaflet';
 
 import 'leaflet/dist/leaflet.css';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -85,6 +86,9 @@ export type DocumentMapProps = BaseProps &
     entireDocumentVisible?: 'entirely' | 'onlyTop';
     itemsPerPage?: number;
     displayPagination?: boolean;
+    onlyAllowClickOnImage?: boolean;
+    popupNotLoggedInText?: string;
+    popupNotLoggedInButton?: string;
   };
 
 
@@ -121,6 +125,9 @@ function DocumentMap({
   entireDocumentVisible = 'onlyTop',
   itemsPerPage = 9999,
   displayPagination = false,
+  onlyAllowClickOnImage = false,
+  popupNotLoggedInText = 'Om een reactie te plaatsen, moet je ingelogd zijn.',
+  popupNotLoggedInButton = 'Inloggen',
   ...props
 }: DocumentMapProps) {
 
@@ -320,7 +327,20 @@ function DocumentMap({
   const MapEvents = () => {
     const map = useMapEvents({
       click: (e) => {
-        setPopupPosition(e.latlng);
+        if ( onlyAllowClickOnImage ) {
+          const imageBounds = bounds;
+          const clickedLatLng = e.latlng;
+
+          if (imageBounds && imageBounds.length) {
+            // @ts-ignore
+            const leafletBounds = L.latLngBounds(imageBounds);
+            if (leafletBounds.contains(clickedLatLng)) {
+              setPopupPosition(e.latlng);
+            }
+          }
+        } else {
+          setPopupPosition(e.latlng);
+        }
       },
       popupclose: () => {
         setSelectedCommentIndex(-1);
@@ -462,18 +482,27 @@ function DocumentMap({
     color: string;
   }
 
+  const [overridePage, setoverridePage] = useState<number | undefined>(undefined);
+
   const scrollToComment = (index: number) => {
     let attempts = 0;
     const maxAttempts = 10;
     const interval = 100;
 
     const tryScrollToComment = () => {
-      const filteredComments = Array.from(document.getElementsByClassName('comment-item'));
-      filteredComments.forEach((comment, i) => {
+      const getAllComments = Array.from(document.getElementsByClassName('comment-item'));
+      getAllComments.forEach((comment, i) => {
         if (i !== index) {
           comment.classList.remove('selected');
         }
       });
+
+      if (displayPagination) {
+        const currentComment = filteredComments?.findIndex((comment: any) => parseInt(comment.id) === index);
+        const commentPage = Math.floor(currentComment / itemsPerPage);
+
+        setoverridePage(commentPage);
+      }
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
@@ -691,6 +720,7 @@ function DocumentMap({
     const configVotingEnabled = props?.votes?.isActive || false;
     const votingEnabled = configVotingEnabled && args.canComment;
 
+    // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
     const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
     return !bounds ? null : (
@@ -776,7 +806,7 @@ function DocumentMap({
                 >
                   { !hasRole(currentUser, args.requiredUserRole) ? (
                     <>
-                      <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                      <Paragraph>{popupNotLoggedInText}</Paragraph>
                       <Spacer size={1} />
                       <Button
                         appearance="primary-action-button"
@@ -786,7 +816,7 @@ function DocumentMap({
                           }
                         }}
                         type="button">
-                        Inloggen
+                        {popupNotLoggedInButton}
                       </Button>
                     </>
                   ) :
@@ -987,6 +1017,7 @@ function DocumentMap({
                 itemsPerPage={itemsPerPage}
                 displayPagination={displayPagination}
                 onGoToLastPage={setGoToLastPage}
+                overridePage={overridePage}
               />
             </div>
           )}

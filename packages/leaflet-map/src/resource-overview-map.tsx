@@ -270,6 +270,14 @@ const ResourceOverviewMap = ({
 
   const visibleMapDataLayers = mapDataLayers.filter(layer => activeLayers[layer.id]);
 
+  if ( !!props?.map && typeof(props?.map) === 'object' ) {
+    props.map = {
+      ...props.map,
+      tilesVariant: props?.tilesVariant || props?.map?.tilesVariant || 'nlmaps',
+      customUrl: props?.customUrl || props?.map?.customUrl || '',
+    }
+  }
+
   return ((polygon && center) || !areaId) ? (
     <div className='map-container--buttons'>
       <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
