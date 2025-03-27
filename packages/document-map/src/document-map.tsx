@@ -482,18 +482,27 @@ function DocumentMap({
     color: string;
   }
 
+  const [overRidePage, setOverRidePage] = useState<number | null>(null);
+
   const scrollToComment = (index: number) => {
     let attempts = 0;
     const maxAttempts = 10;
     const interval = 100;
 
     const tryScrollToComment = () => {
-      const filteredComments = Array.from(document.getElementsByClassName('comment-item'));
-      filteredComments.forEach((comment, i) => {
+      const getAllComments = Array.from(document.getElementsByClassName('comment-item'));
+      getAllComments.forEach((comment, i) => {
         if (i !== index) {
           comment.classList.remove('selected');
         }
       });
+
+      if (displayPagination) {
+        const currentComment = filteredComments?.findIndex((comment: any) => parseInt(comment.id) === index);
+        const commentPage = Math.floor(currentComment / itemsPerPage);
+
+        setOverRidePage(commentPage);
+      }
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
@@ -711,6 +720,7 @@ function DocumentMap({
     const configVotingEnabled = props?.votes?.isActive || false;
     const votingEnabled = configVotingEnabled && args.canComment;
 
+    // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
     const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
     return !bounds ? null : (
@@ -1007,6 +1017,8 @@ function DocumentMap({
                 itemsPerPage={itemsPerPage}
                 displayPagination={displayPagination}
                 onGoToLastPage={setGoToLastPage}
+                // onGoToPage={setGoToPage}
+                overRidePage={overRidePage}
               />
             </div>
           )}

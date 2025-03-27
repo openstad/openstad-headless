@@ -45,6 +45,7 @@ export type CommentsWidgetProps = BaseProps &
     sorting?: Array<{ value: string; label: string }>;
     setRefreshComments?: React.Dispatch<any>;
     itemsPerPage?: number;
+    overRidePage?: number;
     displayPagination?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
@@ -64,6 +65,7 @@ function CommentsInner({
   itemsPerPage,
   onGoToLastPage,
   displayPagination = false,
+  overRidePage = 0,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   ...props
 }: CommentsWidgetProps) {
@@ -82,7 +84,13 @@ function CommentsInner({
     if (onGoToLastPage) {
       onGoToLastPage(goToLastPage);
     }
-  }, [onGoToLastPage, totalPages]);
+  }, [onGoToLastPage]);
+
+  useEffect(() => {
+    if (overRidePage !== page) {
+      setPage(overRidePage);
+    }
+  }, [overRidePage]);
 
   const refreshComments = () => {
     setRefreshKey(prevKey => prevKey + 1); // Increment the key to trigger a refresh
@@ -340,6 +348,7 @@ function Comments({
   loginText = 'Inloggen om deel te nemen aan de discussie.',
   setRefreshComments = () => {},
   onGoToLastPage,
+  overRidePage,
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(false);
@@ -367,6 +376,7 @@ function Comments({
         loginText={loginText}
         setRefreshComments={triggerRefresh}
         onGoToLastPage={onGoToLastPage}
+        overRidePage={overRidePage}
         {...props}
       />
     </div>
