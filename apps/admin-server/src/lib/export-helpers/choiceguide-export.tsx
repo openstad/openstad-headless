@@ -4,15 +4,57 @@ import {useEffect, useState} from "react";
 
 export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string, limit: number) => {
   const fetchResults = async () => {
-    try {
-      let url = `/api/openstad/api/project/${project}/choicesguide?page=0&limit=${limit}&widgetId=${selectedWidget?.id}`;
-      const response = await fetch(url);
-      return response.json();
-    } catch (error) {}
+    let allData: any = [];
+    let page = 0;
+    let hasMoreData = true;
+    const maxRetries = 3;
+    const retryDelay = 2000;
+
+    const fetchBatch = async (page: number, retries: number = 0) => {
+      try {
+        const url = `/api/openstad/api/project/${project}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          console.error('Error fetching data:', response.statusText);
+          throw new Error('Failed to fetch');
+        }
+
+        const data = await response.json();
+        const currentBatch = data?.data || [];
+
+        if (currentBatch.length < 50) {
+          hasMoreData = false;
+        }
+
+        return currentBatch;
+      } catch (error) {
+        if (retries < maxRetries) {
+          console.log(`Retrying batch ${page}, attempt ${retries + 1}...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return fetchBatch(page, retries + 1);
+        } else {
+          console.error(`Batch ${page} failed after ${maxRetries} retries`);
+          return [];
+        }
+      }
+    };
+
+    while (hasMoreData) {
+      const currentBatch = await fetchBatch(page);
+
+      if (currentBatch.length > 0) {
+        allData = [...allData, ...currentBatch];
+      }
+
+      page += 1;
+    }
+
+    return allData;
   };
 
   fetchResults().then((data) => {
-    data = data?.data || [];
+    data = data || [];
 
     if (selectedWidget && selectedWidget?.config && selectedWidget?.config?.items && !!data) {
 
@@ -117,7 +159,10 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       } catch (error) {}
           
       if ( typeof value === 'string' ) {
-        return `"${value}"`;
+        let escapedValue = value.replace(/(\r\n|\r\r|\n\n|\n|\r)+/g, '\n');
+        escapedValue = escapedValue.replace(/"/g, "'");
+
+        return `"${escapedValue}"`;
       }
 
       if (Array.isArray(parsedValue)) {
