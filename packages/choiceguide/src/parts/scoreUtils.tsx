@@ -86,11 +86,18 @@ export const calculateScoreForItem = (
 
                             if ( answerKey.startsWith('a-b-slider') && typeof (userAnswer) === 'object') {
                                 if ( userAnswer?.skipQuestion ) {
-                                    countScores['x'] - number;
+                                    countScores['x'] -= number;
+                                    countScores['y'] -= number;
+                                    countScores['z'] -= number;
                                     return;
                                 }
 
-                                fieldValue = Number(userAnswer?.value) || 50;
+                                try {
+                                    fieldValue = Number(userAnswer?.value);
+                                } catch (e) {
+                                    fieldValue = 50;
+                                }
+
                             } else {
                                 fieldValue = Number(userAnswer);
                             }
