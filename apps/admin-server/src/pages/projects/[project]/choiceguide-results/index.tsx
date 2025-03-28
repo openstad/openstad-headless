@@ -21,7 +21,7 @@ export default function ProjectChoiceGuideResults() {
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const pageLimit = 5;
+  const pageLimit = 100;
   const [filterData, setFilterData] = useState<{ createdAt: string, id?: string }[]>([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
