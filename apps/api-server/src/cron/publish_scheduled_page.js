@@ -11,31 +11,33 @@ const UseLock = require('../lib/use-lock');
 // Runs every hour
 
 
-// module.exports = {
-//     cronTime: '59 * * * *',
-//     runOnInit: false,
-//     onTick: UseLock.createLockedExecutable({
-//         name: 'publish-scheduled-page',
-//         task: async (next) => {
-//             try {
-//                 await db.models['apostrophe-pages']
-//                     .update({
-//                         publishedAt: Sequelize.fn('NOW')
-//                     }, {
-//                         where: {
-//                             scheduledPublishDate: {
-//                                 [Op.lte]: Sequelize.fn('NOW')
-//                             },
-//                             publishedAt: null
-//                         }
-//                     });
-//
-//                 log('Scheduled pages published successfully');
-//                 return next();
-//             } catch (err) {
-//                 log('Error in publish-scheduled-page cron:', err);
-//                 next(err);
-//             }
-//         }
-//     })
-// };
+module.exports = {
+    // Set to 1 day, so it doesn't run for now
+    cronTime: '1 1 1 1 *',
+    // cronTime: '59 * * * *',
+    runOnInit: false,
+    onTick: UseLock.createLockedExecutable({
+        name: 'publish-scheduled-page',
+        task: async (next) => {
+            try {
+                // await db.models['apostrophe-pages']
+                //     .update({
+                //         publishedAt: Sequelize.fn('NOW')
+                //     }, {
+                //         where: {
+                //             scheduledPublishDate: {
+                //                 [Op.lte]: Sequelize.fn('NOW')
+                //             },
+                //             publishedAt: null
+                //         }
+                //     });
+                //
+                // log('Scheduled pages published successfully');
+                return next();
+            } catch (err) {
+                // log('Error in publish-scheduled-page cron:', err);
+                next(err);
+            }
+        }
+    })
+};
