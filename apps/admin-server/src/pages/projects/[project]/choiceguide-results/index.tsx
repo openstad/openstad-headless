@@ -21,7 +21,7 @@ export default function ProjectChoiceGuideResults() {
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const pageLimit = 50;
+  const pageLimit = 5;
   const [filterData, setFilterData] = useState<{ createdAt: string, id?: string }[]>([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
@@ -36,8 +36,12 @@ export default function ProjectChoiceGuideResults() {
     project as string
   );
 
+  const [totalCount, setTotalCount] = useState(0);
+
   const fetchResults = async () => {
     try {
+      if (!project) return;
+
       let url = `/api/openstad/api/project/${project}/choicesguide?page=${page}&limit=${pageLimit}`;
 
       if (selectedWidget?.id && selectedWidget?.id !== '0') {
@@ -65,13 +69,15 @@ export default function ProjectChoiceGuideResults() {
     fetchResults().then((results) => {
       if (results) {
         const data = results?.data || [];
+        const totalCount = results?.pagination?.totalCount || 50;
 
-        const pageCount = Math.ceil(data?.pagination?.totalCount / pageLimit);
+        const pageCount = Math.ceil(totalCount / pageLimit);
         setTotalPages(pageCount);
 
         let loadedChoiceGuideResults = (data || []) as { createdAt: string }[];
         const sortedData = loadedChoiceGuideResults.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 
+        setTotalCount(totalCount);
         setFilterData(sortedData);
       }
     });
@@ -151,7 +157,7 @@ export default function ProjectChoiceGuideResults() {
               <Button
                 className="text-xs p-2"
                 type="submit"
-                onClick={() => exportChoiceGuideToCSV(activeWidget, selectedWidget, project as string)}
+                onClick={() => exportChoiceGuideToCSV(activeWidget, selectedWidget, project as string, (totalCount + 1))}
                 disabled={activeWidget === "0"}
               >
                 Exporteer inzendingen .csv
@@ -273,11 +279,13 @@ export default function ProjectChoiceGuideResults() {
                 })}
               </ul>
 
-              <Paginator
-                page={page || 0}
-                totalPages={totalPages || 1}
-                onPageChange={(newPage) => setPage(newPage)}
-              />
+              {totalPages > 0 && (
+                <Paginator
+                  page={page || 0}
+                  totalPages={totalPages || 1}
+                  onPageChange={(newPage) => setPage(newPage)}
+                />
+              )}
 
             </div>
           </div>

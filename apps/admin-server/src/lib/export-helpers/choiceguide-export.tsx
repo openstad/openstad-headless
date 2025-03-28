@@ -2,10 +2,10 @@ import {calculateScoreForItem} from "../../../../../packages/choiceguide/src/par
 import {InitializeWeights} from "../../../../../packages/choiceguide/src/parts/init-weights";
 import {useEffect, useState} from "react";
 
-export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string) => {
+export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string, limit: number) => {
   const fetchResults = async () => {
     try {
-      let url = `/api/openstad/api/project/${project}/choicesguide?widgetId=${selectedWidget?.id}`;
+      let url = `/api/openstad/api/project/${project}/choicesguide?page=0&limit=${limit}&widgetId=${selectedWidget?.id}`;
       const response = await fetch(url);
       return response.json();
     } catch (error) {}
