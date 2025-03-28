@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -23,6 +23,7 @@ import {
 } from '@utrecht/component-library-react';
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
+import {useRaf} from "rooks";
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -565,14 +566,17 @@ function ResourceOverview({
     return ` --${variant}`;
   }
 
-  const randomId = Math.random().toString(36).replace('0.', 'container_');
+  const randomIdRef = useRef(Math.random().toString(36).replace('0.', 'container_'));
+  const randomId = randomIdRef.current;
 
-  const scrollToTop = () => {
-    const divElement = document.getElementById(randomId);
+  const scrollToTop = (randomId: string) => {
+    setTimeout(() => {
+      const divElement = document.getElementById(randomId);
 
-    if (divElement) {
-      divElement.scrollIntoView({ block: "start", behavior: "auto" });
-    }
+      if (divElement) {
+        divElement.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+    }, 200);
   }
 
   return (
@@ -690,7 +694,7 @@ function ResourceOverview({
                 totalPages={totalPages || 1}
                 onPageChange={(newPage) => {
                   setPage(newPage);
-                  scrollToTop();
+                  scrollToTop(randomId);
                 }}
               />
             </div>
