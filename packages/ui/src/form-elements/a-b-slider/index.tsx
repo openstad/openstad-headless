@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import './a-b-slider.css'
 import {
     Accordion,
@@ -73,6 +73,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
 }) => {
     const [rangeValue, setRangeValue] = useState(undefined);
     const [skipSelected, setSkipSelected] = useState(false);
+    const [fieldDisabled, setFieldDisabled] = useState(false);
     const [value, setValue] = useState<valueObject>({
         value: '50',
         skipQuestion: false,
@@ -112,6 +113,11 @@ const RangeSlider: FC<RangeSliderProps> = ({
 
         setValue(currValue);
     }
+
+    useEffect(() => {
+        setFieldDisabled(skipSelected);
+        changeValue('skipQuestion', skipSelected);
+    }, [skipSelected]);
 
     return (
         <div className="a-b-slider-container">
@@ -181,7 +187,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                         changeValue('value', e.target.value);
                     }}
                     aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
-                    disabled={disabled}
+                    disabled={disabled || fieldDisabled}
                     aria-invalid={fieldInvalid}
                     aria-describedby={`${randomId}_error`}
                 />
@@ -219,7 +225,6 @@ const RangeSlider: FC<RangeSliderProps> = ({
                           checked={skipSelected}
                           onChange={() => {
                               setSkipSelected(!skipSelected);
-                              changeValue('skipQuestion', !skipSelected);
                           }}
                         />
                         <span>{skipQuestionLabel}</span>
@@ -227,6 +232,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
 
                     { skipSelected && (
                         <div className="marginTop10 marginBottom15">
+                            <Spacer size={2} />
                             <TextInput
                                 type="text"
                                 // @ts-ignore

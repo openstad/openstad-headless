@@ -138,6 +138,19 @@
   transform: none;
 }
 
+input[type='range'][disabled].a-to-b-range::-webkit-slider-thumb,
+input[type='range'][disabled].a-to-b-range::-moz-range-thumb,
+input[type='range'][disabled].a-to-b-range::-ms-thumb,
+input[type='range'][disabled].a-to-b-range + .slider_line-container .slider_line-container--bar {
+  display: none;
+}
+
+.skip-question-container input[type='checkbox'] {
+  margin-top: 0;
+  margin-right: 9px;
+  margin-bottom: 0;
+}
+
 .a-b-slider-container .range-bar-container .slider_line-container[data-range="undefined"] .slider_line-container--bar { width: 0%; }
 .a-b-slider-container .range-bar-container .slider_line-container[data-range="0"] .slider_line-container--bar { width: 50%; }
 .a-b-slider-container .range-bar-container .slider_line-container[data-range="5"] .slider_line-container--bar { width: 45%; }

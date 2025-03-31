@@ -108,6 +108,14 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
       return [...parsedValue].join(', ')
     }
 
+    if ( value && typeof value === 'object' ) {
+      if (value.skipQuestion) {
+        return value?.skipQuestionExplanation || '-';
+      } else {
+        return value?.value || '-';
+      }
+    }
+
     if ( typeof value === 'string' ) {
       return `"${value}"`;
     }
