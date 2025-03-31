@@ -1152,6 +1152,9 @@ export default function WidgetChoiceGuideItems(
                                   <FormLabel>
                                     Mogelijkheid om deze vraag over te slaan?
                                   </FormLabel>
+                                  <FormDescription>
+                                    Als je wilt dat de gebruiker de vraag kan overslaan, selecteer dan 'Ja'. Als de gebruiker de vraag overslaat, wordt de vraag niet meegenomen in de weging.
+                                  </FormDescription>
                                   <Select
                                     onValueChange={(e: string) => field.onChange(e === 'true')}
                                     value={field.value ? 'true' : 'false'}
