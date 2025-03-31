@@ -40,12 +40,14 @@ export default function ProjectChoiceGuideResults() {
 
   const fetchResults = async () => {
     try {
-      if (!project || isNaN(page) || isNaN(pageLimit)) {
+      const projectNumber = parseInt(project as string);
+
+      if (isNaN(projectNumber) || isNaN(page) || isNaN(pageLimit)) {
         toast.error('Invalid project');
         return;
       }
 
-      let url = `/api/openstad/api/project/${project}/choicesguide?page=${page}&limit=${pageLimit}`;
+      let url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=${pageLimit}`;
 
       if (selectedWidget?.id && selectedWidget?.id !== '0') {
         url += `&widgetId=${selectedWidget?.id}`;

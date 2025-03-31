@@ -9,14 +9,15 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
     let hasMoreData = true;
     const maxRetries = 3;
     const retryDelay = 2000;
+    const projectNumber = parseInt(project as string);
 
-    if (!selectedWidget || !selectedWidget?.id || !project || isNaN(limit) || isNaN(page)) {
+    if (!selectedWidget || !selectedWidget?.id || isNaN(projectNumber) || isNaN(limit) || isNaN(page)) {
       return [];
     }
 
     const fetchBatch = async (page: number, retries: number = 0) => {
       try {
-        const url = `/api/openstad/api/project/${project}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}`;
+        const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}`;
         const response = await fetch(url);
 
         if (!response.ok) {
