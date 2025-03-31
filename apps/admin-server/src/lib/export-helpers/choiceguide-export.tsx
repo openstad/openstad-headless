@@ -10,6 +10,10 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
     const maxRetries = 3;
     const retryDelay = 2000;
 
+    if (!selectedWidget || !selectedWidget?.id || !project || isNaN(limit) || isNaN(page)) {
+      return [];
+    }
+
     const fetchBatch = async (page: number, retries: number = 0) => {
       try {
         const url = `/api/openstad/api/project/${project}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}`;
