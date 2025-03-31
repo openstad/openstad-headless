@@ -229,6 +229,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                           value={skipQuestionLabel}
                           required={false}
                           checked={skipSelected}
+                          disabled={disabled}
                           onChange={() => {
                               setSkipSelected(!skipSelected);
                           }}
@@ -245,6 +246,9 @@ const RangeSlider: FC<RangeSliderProps> = ({
                                 fieldKey={`${randomId}_skip_explanation`}
                                 title={skipQuestionExplanation}
                                 fieldInvalid={false}
+                                disabled={disabled}
+                                variant="textarea"
+                                rows={4}
                             />
                         </div>
                     )}
