@@ -154,6 +154,8 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       return `export-${widgetName}-${currentDate}`;
     }
 
+    const fileName = transformString();
+
     const normalizeData = (value: any) => {
       let parsedValue;
 
