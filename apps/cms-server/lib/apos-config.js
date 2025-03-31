@@ -13,7 +13,7 @@ module.exports = {
     '@apostrophecms/blog-page': {},
     '@apostrophecms/import-export': {},
     '@apostrophecms/redirect': {},
-    '@apostrophecms/scheduled-publishing': {},
+    // '@apostrophecms/scheduled-publishing': {},
     '@apostrophecms/anchors': {},
     'openstad-login': { },
     'openstad-section-widget': { },
