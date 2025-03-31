@@ -10,6 +10,7 @@ import {
 } from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
 import TextInput from "../text";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type RangeSliderProps = {
     title: string;
@@ -29,7 +30,7 @@ export type RangeSliderProps = {
     maxCharacters?: number;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | valueObject | [] }) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -118,6 +119,11 @@ const RangeSlider: FC<RangeSliderProps> = ({
         setFieldDisabled(skipSelected);
         changeValue('skipQuestion', skipSelected);
     }, [skipSelected]);
+
+    const handleInputChange = (event: { name: string, value: FormValue }) => {
+        const { value } = event;
+        changeValue('skipQuestionExplanation', value || '')
+    };
 
     return (
         <div className="a-b-slider-container">
@@ -235,8 +241,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                             <Spacer size={2} />
                             <TextInput
                                 type="text"
-                                // @ts-ignore
-                                onChange={(e: { name: string; value: string }) => changeValue('skipQuestionExplanation', e.value || '')}
+                                onChange={handleInputChange}
                                 fieldKey={`${randomId}_skip_explanation`}
                                 title={skipQuestionExplanation}
                                 fieldInvalid={false}
