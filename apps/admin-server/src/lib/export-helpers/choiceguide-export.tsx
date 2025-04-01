@@ -162,6 +162,10 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
        try {
         parsedValue = JSON.parse(value);
       } catch (error) {}
+
+      if (Array.isArray(parsedValue)) {
+        return [...parsedValue].join(', ')
+      }
         
       if ( value && typeof value === 'object' ) {
         if (value.skipQuestion) {
@@ -176,10 +180,6 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         escapedValue = escapedValue.replace(/"/g, "'");
 
         return `"${escapedValue}"`;
-      }
-
-      if (Array.isArray(parsedValue)) {
-        return [...parsedValue].join(', ')
       }
 
       return value;
