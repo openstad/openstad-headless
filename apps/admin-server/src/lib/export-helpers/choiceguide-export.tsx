@@ -166,6 +166,14 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       if (Array.isArray(parsedValue)) {
         return [...parsedValue].join(', ')
       }
+        
+      if ( value && typeof value === 'object' ) {
+        if (value.skipQuestion) {
+          return value?.skipQuestionExplanation || '-';
+        } else {
+          return value?.value || '-';
+        }
+      }
           
       if ( typeof value === 'string' ) {
         let escapedValue = value.replace(/(\r\n|\r\r|\n\n|\n|\r)+/g, '\n');

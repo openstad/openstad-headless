@@ -25,7 +25,7 @@ export type TextInputProps = {
     placeholder?: string;
     defaultValue?: string;
     disabled?: boolean;
-    rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
+    rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined | number;
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
     reset?: (resetFn: () => void) => void;

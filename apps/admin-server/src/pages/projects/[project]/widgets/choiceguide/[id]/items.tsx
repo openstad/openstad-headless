@@ -83,6 +83,10 @@ const formSchema = z.object({
   imageUploadB: z.string().optional(),
   defaultValue: z.string().optional(),
   weights: z.record(weightSchema).optional(),
+  skipQuestion: z.boolean().optional(),
+  skipQuestionAllowExplanation: z.boolean().optional(),
+  skipQuestionExplanation: z.string().optional(),
+  skipQuestionLabel: z.string().optional(),
 });
 
 
@@ -157,7 +161,11 @@ export default function WidgetChoiceGuideItems(
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
           defaultValue: values.defaultValue || '',
-          weights: values.weights || {}
+          weights: values.weights || {},
+          skipQuestion: values.skipQuestion || false,
+          skipQuestionAllowExplanation: values.skipQuestionAllowExplanation || false,
+          skipQuestionExplanation: values.skipQuestionExplanation || '',
+          skipQuestionLabel: values.skipQuestionLabel || 'Sla vraag over',
         },
       ]);
     }
@@ -220,7 +228,11 @@ export default function WidgetChoiceGuideItems(
     maxChoices: '',
     maxChoicesMessage: '',
     defaultValue: '',
-    weights: {}
+    weights: {},
+    skipQuestion: false,
+    skipQuestionAllowExplanation: false,
+    skipQuestionExplanation: '',
+    skipQuestionLabel: 'Sla vraag over',
   });
 
   const form = useForm<FormData>({
@@ -270,7 +282,11 @@ export default function WidgetChoiceGuideItems(
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         defaultValue: selectedItem.defaultValue || '',
-        weights: selectedItem.weights || {}
+        weights: selectedItem.weights || {},
+        skipQuestion: selectedItem.skipQuestion || false,
+        skipQuestionAllowExplanation: selectedItem.skipQuestionAllowExplanation || false,
+        skipQuestionExplanation: selectedItem.skipQuestionExplanation || '',
+        skipQuestionLabel: selectedItem.skipQuestionLabel || 'Sla vraag over',
       });
       setOptions(selectedItem.options || []);
       setActiveTab('1');
@@ -1123,6 +1139,98 @@ export default function WidgetChoiceGuideItems(
                                       </Button>
                                     </div>
                                 </section>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="col-span-full md:col-span-1 flex flex-col gap-y-4 mb-4">
+                            <FormField
+                              control={form.control}
+                              name="skipQuestion"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Mogelijkheid om deze vraag over te slaan?
+                                  </FormLabel>
+                                  <FormDescription>
+                                    Als je wil dat de gebruiker de vraag kan overslaan, selecteer dan &apos;Ja&apos;. Als de gebruiker de vraag overslaat, wordt de vraag niet meegenomen in de weging.
+                                  </FormDescription>
+                                  <Select
+                                    onValueChange={(e: string) => field.onChange(e === 'true')}
+                                    value={field.value ? 'true' : 'false'}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Nee" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="true">Ja</SelectItem>
+                                      <SelectItem value="false">Nee</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            { form.watch("skipQuestion") && (
+                              <>
+                                <FormField
+                                  control={form.control}
+                                  name="skipQuestionLabel"
+                                  render={({field}) => (
+                                    <FormItem>
+                                      <FormLabel>Tekst bij de checkbox voor het overslaan</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="skipQuestionAllowExplanation"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>
+                                        Mogelijkheid voor de gebruiker om toelichting te geven voor het overslaan?
+                                      </FormLabel>
+                                      <Select
+                                        onValueChange={(e: string) => field.onChange(e === 'true')}
+                                        value={field.value ? 'true' : 'false'}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Nee" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="true">Ja</SelectItem>
+                                          <SelectItem value="false">Nee</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                { form.watch("skipQuestionAllowExplanation") && (
+                                  <FormField
+                                    control={form.control}
+                                    name="skipQuestionExplanation"
+                                    render={({field}) => (
+                                      <FormItem>
+                                        <FormLabel>Titel boven het tekstveld van de toelichting</FormLabel>
+                                        <FormControl>
+                                          <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                )}
                               </>
                             )}
                           </div>
