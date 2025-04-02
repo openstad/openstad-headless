@@ -23,6 +23,9 @@ router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/comment', r
 router.use( '/project/:projectId(\\d+)/resource', require('./resource') );
 //router.use( '/project/:projectId(\\d+)/resource', require('./resource.old') );
 
+// Multi resources
+router.use( '/project/multi-resource', require('./multi-resource') );
+
 // polls
 router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/poll', require('./poll') );
 

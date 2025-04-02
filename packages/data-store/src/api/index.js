@@ -14,6 +14,7 @@ import submissions from './submissions';
 import commentsByProject from './commentsByProject';
 import choiceGuideResults from './choiceGuideResults';
 import userActivity from './user-activity';
+import multiResources from './multiResources';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -122,6 +123,11 @@ function API(props = {}) {
 
   self.userActivity = {
     fetch: userActivity.fetch.bind(self),
+  };
+
+  self.multiResources = {
+    fetch: multiResources.fetch.bind(self),
+    submitLike: multiResources.submitLike.bind(self)
   };
 
   if (props.logMethods) {
