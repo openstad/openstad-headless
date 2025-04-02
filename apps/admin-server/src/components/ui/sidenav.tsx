@@ -6,10 +6,11 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { FolderOpen, LogOut, Users, AlertTriangle } from 'lucide-react';
+import { FolderOpen, LogOut, Users, AlertTriangle, UnplugIcon } from 'lucide-react';
 import { Logo } from './logo';
 import { useContext } from 'react';
 import { SessionContext } from '../../auth';
+import { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
 
 export function Sidenav({
   className,
@@ -21,10 +22,7 @@ export function Sidenav({
   const router = useRouter();
   const [location, setLocation] = useState('');
   const sessionData = useContext(SessionContext);
-
-  useEffect(() => {
-    setLocation(router.pathname);
-  }, [router]);
+  const authProvidersEnabled = useAuthProvidersEnabledCheck();
 
   return (
     <nav
@@ -76,6 +74,24 @@ export function Sidenav({
               }
             />
             {narrow ? '' : 'Gebruikers'}
+          </Button>
+        </Link>
+        ) : null }
+        {sessionData?.role == 'superuser' && authProvidersEnabled === true ? (
+        <Link href="/auth-providers">
+          <Button
+            variant={location.startsWith('/auth-providers') ? 'secondary' : 'ghost'}
+            className={cn(
+              'w-full flex flex-row justify-start',
+              narrow ? 'p-0 h-10 w-10 justify-center' : null
+            )}>
+            <UnplugIcon
+              size="20"
+              className={
+                location.startsWith('/auth-providers') ? 'text-brand' : 'text-foreground'
+              }
+            />
+            {narrow ? '' : 'Auth providers'}
           </Button>
         </Link>
         ) : null }
