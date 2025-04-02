@@ -76,5 +76,6 @@ router.use( '/datalayer', require('./datalayer') );
 
 router.use( '/repo', require('./template') ); // backwards compatibility
 router.use( '/template', require('./template') );
+router.use( '/auth-provider', require('./auth-provider') );
 
 module.exports = router;

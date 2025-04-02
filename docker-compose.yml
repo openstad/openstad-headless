@@ -244,6 +244,7 @@ services:
       - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
       - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
+      - ENABLE_AUTH_PROVIDERS=${ENABLE_AUTH_PROVIDERS}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:

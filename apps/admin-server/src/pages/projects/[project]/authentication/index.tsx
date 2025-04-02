@@ -26,6 +26,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import InfoDialog from '@/components/ui/info-hover';
 import {ImageUploader} from "@/components/image-uploader";
 import {X} from "lucide-react";
+import useAuthProvidersList, { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
 
 const authTypes = [
   {
@@ -56,6 +57,7 @@ const formSchema = z.object({
   logo: z.string().optional(),
   imageFavicon: z.string().optional(),
   favicon: z.string().optional(),
+  authProviderId: z.string().optional(),
   cssUrl: z.string().optional(),
   clientDisclaimerUrl: z.string().optional(),
   clientStylesheets: z.array(z.object({
@@ -81,6 +83,7 @@ export default function ProjectAuthentication() {
       defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
       logo: data?.config?.auth?.provider?.openstad?.config?.styling?.logo,
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
+      authProviderId: data?.config?.authProviderId ? 'id-' + data?.config?.authProviderId : null,
       clientDisclaimerUrl: data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
       cssUrl: (Array.isArray(data?.config?.auth?.provider?.openstad?.config?.clientStylesheets) && data?.config?.auth?.provider?.openstad?.config?.clientStylesheets?.length)
         ? data?.config?.auth?.provider?.openstad?.config?.clientStylesheets[0]?.url
@@ -93,6 +96,9 @@ export default function ProjectAuthentication() {
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
+
+  const authProvidersEnabled = useAuthProvidersEnabledCheck();
+  const { data: authProviders, isLoading, error } = useAuthProvidersList();
 
   useEffect(() => {
     form.reset(defaults());
@@ -134,11 +140,12 @@ export default function ProjectAuthentication() {
                 styling: {
                   logo: values.logo,
                   favicon: values.favicon,
-                },
+                }
               },
             }
           }
-        }
+        },
+        authProviderId: (values?.authProviderId?.indexOf('id-') === 0) ? values.authProviderId.substring(3) : null
       }
 
       if (values.cssUrl) {
@@ -162,8 +169,13 @@ export default function ProjectAuthentication() {
 
   const [showEmailFields, setShowEmailFields] = useState(false)
   useEffect(() => {
+    // Get form values
+    const formValues = form.getValues();
     // data is not available right away
-    setShowEmailFields(data?.config?.auth?.provider?.openstad?.authTypes?.includes('Url'));
+    setShowEmailFields(formValues.authTypes?.includes('Url'));
+    setShowAuthSettings((formValues.authProviderId ?? null) == null);
+
+    console.log ('formValues', formValues);
   }, [data]);
 
   const infoDialogContents: { [key: string]: string } = {
@@ -172,6 +184,8 @@ export default function ProjectAuthentication() {
     'Phonenumber': 'SMS verificatie',
     'Local': 'Wachtwoord',
   }
+
+  const [showAuthSettings, setShowAuthSettings] = useState(true);
 
   return (
     <div>
@@ -199,6 +213,52 @@ export default function ProjectAuthentication() {
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6">
+                {authProvidersEnabled && (
+                <FormField
+                control={form.control}
+                name="authProviderId"
+                render={() => (
+                  <FormItem className="col-span-full">
+                    <div>
+
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <FormField name="authProviderId" defaultValue="" control={form.control}
+                                 render={({ field }) => {
+                                   return (
+                                     <FormItem>
+                                       <FormLabel>
+                                         Authenticatie provider
+                                       </FormLabel>
+                                       <Select
+                                         onValueChange={(e) => {
+                                           field.onChange(e);
+                                           setShowAuthSettings(e == null || e == '' || typeof e == 'undefined');
+                                         }}
+                                         value={field.value}>
+                                         <FormControl>
+                                           <SelectTrigger>
+                                             <SelectValue placeholder="Geen - standaard Openstad authenticatie" />
+                                           </SelectTrigger>
+                                         </FormControl>
+                                         <SelectContent>
+                                           <SelectItem value="">Geen - standaard Openstad authenticatie</SelectItem>
+                                           {authProviders && authProviders.map((provider) => (
+                                             <SelectItem key={`auth-provider-${provider.id}`}
+                                                         value={`id-${provider.id}`}>{provider.name}</SelectItem>
+                                           ))}
+                                         </SelectContent>
+                                       </Select>
+                                       <FormMessage />
+                                     </FormItem>
+                                   );
+                                 }}></FormField>
+                    </div>
+                  </FormItem>
+                )} />
+                )}
+                {showAuthSettings && (
+                  <>
                 <FormField
                 control={form.control}
                 name="authTypes"
@@ -447,6 +507,7 @@ export default function ProjectAuthentication() {
 
               </>
               ) : null}
+                </>)}
 
                 <Button type="submit">Opslaan</Button>
               </form>
