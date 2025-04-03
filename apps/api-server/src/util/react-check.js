@@ -1,10 +1,10 @@
 const reactJs =
   process.env.REACT_CDN ||
-  'https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js';
+  'https://www.unpkg.com/react@18.3.1/umd/react.production.min.js';
 
 const reactDomJs =
   process.env.REACT_DOM_CDN ||
-  'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js';
+  'https://www.unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
 
 module.exports = `
   function triggerEvent(event) {
