@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { ResourceOverviewWidgetProps, ResourceOverview } from '@openstad-headless/resource-overview/src/resource-overview';
 import '../../resource-overview/src/resource-overview.css';
+import DataStore from "@openstad-headless/data-store/src";
 
 export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
   widgetName?: string;
@@ -21,6 +22,26 @@ function MultiProjectResourceOverview({
 
   const resourceCache = useRef(new Map());
   const tagsCache = useRef(new Map());
+
+  // const datastore = new DataStore({
+  //   projectId: props.projectId,
+  //   api: props.api,
+  // });
+  //
+  // const search = '';
+  // const sort = '';
+  // const projectIds = props.selectedProjects?.map(project => project.id) || [];
+  //
+  // const { data: resourcesWithPagination } = datastore.useMultiResources({
+  //   projectIds,
+  //   pageSize: 999999,
+  //   ...props,
+  //   search,
+  //   tags,
+  //   sort,
+  // });
+  //
+  // console.log( 'resourcesWithPagination', resourcesWithPagination )
 
   const fetchResource = async (url: string) => {
     const response = await fetch(url);
@@ -101,6 +122,13 @@ function MultiProjectResourceOverview({
       quickFixTags={tags || []}
     />
   );
+
+  // return (
+  //   <>
+  //   <h1>Loading...</h1>
+  //   <p>{resourcesWithPagination?.records?.length || 0}</p>
+  //   </>
+  // );
 }
 
 MultiProjectResourceOverview.loadWidget = loadWidget;
