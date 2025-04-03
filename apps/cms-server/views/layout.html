@@ -10,8 +10,8 @@ page or piece.') }}
 {% endblock %}
 
 {% block extraHead %}
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="{{data.global.reactCdn}}" crossorigin="anonymous"></script>
+<script src="{{data.global.reactDomCdn}}" crossorigin="anonymous"></script>
 
 {% if data.global.favicon %}
   <link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}"/>
