@@ -20,7 +20,7 @@ De huidige leden zijn:
 
 - Daniël Hoekzema (Gemeente Haarlemmermeer)
 - David Bos (Gemeente Den Haag)
-- May-Britt Janssen (Gemeente Amsterdam)
+- May-Britt Jansen (Gemeente Amsterdam)
 - Bart Nieuwenweg (Draad)
 
 ### Verantwoordelijkheden
