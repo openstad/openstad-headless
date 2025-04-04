@@ -1,7 +1,11 @@
 import useSWR from 'swr';
 
-export default function useTag(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/tag`;
+export default function useTag(projectId?: string, includeGlobalTags?: boolean) {
+  let url = `/api/openstad/api/project/${projectId}/tag`;
+
+  if (includeGlobalTags) {
+    url += '?includeGlobalTags=true';
+  }
 
   const tagListSwr = useSWR(projectId ? url : null);
 

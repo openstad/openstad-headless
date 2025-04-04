@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-export default function useResources(projectId?: string) {
+export default function useResources(projectId?: string, includeGlobalTags?: boolean) {
   const url = `/api/openstad/api/project/${projectId}/resource?includeUserVote=1&includeVoteCount=1`;
 
   const resourcesListSwr = useSWR(projectId ? url : null);
@@ -24,7 +24,11 @@ export default function useResources(projectId?: string) {
   }
 
   async function update(id: number, body: any) {
-    const updateUrl = `/api/openstad/api/project/${projectId}/resource/${id}?includeUserVote=1`;
+    let updateUrl = `/api/openstad/api/project/${projectId}/resource/${id}?includeUserVote=1`;
+
+    if (includeGlobalTags) {
+      updateUrl += '&includeGlobalTags=true';
+    }
 
     const res = await fetch(updateUrl, {
       method: 'PUT',

@@ -47,11 +47,12 @@ const formSchema = z.object({
   emails: z.array(z.object({ address: z.string() })).optional(),
 });
 
-export default function ProjectTagEdit() {
+export default function ProjectTagEdit({ preset }: { preset?: string }) {
   const router = useRouter();
   const { project, tag } = router.query;
+  const isGlobal = !!preset && preset === 'global';
   const { data, isLoading, updateTag } = useTag(
-    project as string,
+    isGlobal ? "0" : project as string,
     tag as string
   );
 
@@ -129,21 +130,34 @@ export default function ProjectTagEdit() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Tags',
-            url: `/projects/${project}/tags`,
-          },
-          {
-            name: 'Tag aanpassen',
-            url: `/projects/${project}/tags/${tag}`,
-          },
-        ]}>
+        pageHeader={isGlobal ? "Instellingen" : "Projecten"}
+        breadcrumbs={isGlobal ? [
+            {
+              name: 'Instellingen',
+              url: '/settings',
+            },
+            {
+              name: 'Tag aanpassen',
+              url: `/settings/globaltags/${tag}`,
+            },
+          ]
+          :
+          [
+            {
+              name: 'Projecten',
+              url: '/projects',
+            },
+            {
+              name: 'Tags',
+              url: `/projects/${project}/tags`,
+            },
+            {
+              name: 'Tag aanpassen',
+              url: `/projects/${project}/tags/${tag}`,
+            },
+          ]
+        }
+      >
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
@@ -151,9 +165,11 @@ export default function ProjectTagEdit() {
               <TabsTrigger value="displaysettings">
                 Weergave
               </TabsTrigger>
-              <TabsTrigger value="notification">
-                Notificatie opties
-              </TabsTrigger>
+              { !isGlobal && (
+                <TabsTrigger value="notification">
+                  Notificatie opties
+                </TabsTrigger>
+              )}
               <TabsTrigger value="imagesettings">
                 Afbeelding
               </TabsTrigger>
@@ -208,19 +224,21 @@ export default function ProjectTagEdit() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="addToNewResources"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Voeg deze tag automatisch toe aan nieuwe resources
-                          </FormLabel>
-                          {YesNoSelect(field, {})}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    { !isGlobal && (
+                      <FormField
+                        control={form.control}
+                        name="addToNewResources"
+                        render={({field}) => (
+                          <FormItem>
+                            <FormLabel>
+                              Voeg deze tag automatisch toe aan nieuwe resources
+                            </FormLabel>
+                            {YesNoSelect(field, {})}
+                            <FormMessage/>
+                          </FormItem>
+                        )}
+                      />
+                    )}
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
                     </Button>
@@ -327,93 +345,37 @@ export default function ProjectTagEdit() {
                         </FormItem>
                       )}
                     />
+                    { !isGlobal && (
                       <FormField
-                          control={form.control}
-                          name="documentMapIconColor"
-                          render={({ field }) => {
-                              const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                  const newColor = e.target.value;
-                                  field.onChange(newColor);
-                              };
+                        control={form.control}
+                        name="documentMapIconColor"
+                        render={({field}) => {
+                          const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                            const newColor = e.target.value;
+                            field.onChange(newColor);
+                          };
 
-                              const handleResetColor = () => {
-                                  const resetColor = "#555588";
-                                  field.onChange(resetColor);
-                              };
+                          const handleResetColor = () => {
+                            const resetColor = "#555588";
+                            field.onChange(resetColor);
+                          };
 
-                              return (
-                                  <FormItem>
-                                      <FormLabel>Icon kleur op de kaart</FormLabel>
-                                      <FormControl>
-                                          <div>
-                                              <ColorPicker value={field.value || "#555588"} onChange={handleColorChange} />
-                                              <button type="button" onClick={handleResetColor}>
-                                                  Reset
-                                              </button>
-                                          </div>
-                                      </FormControl>
-                                      <FormMessage />
-                                  </FormItem>
-                              );
-                          }}
+                          return (
+                            <FormItem>
+                              <FormLabel>Icon kleur op de kaart</FormLabel>
+                              <FormControl>
+                                <div>
+                                  <ColorPicker value={field.value || "#555588"} onChange={handleColorChange}/>
+                                  <button type="button" onClick={handleResetColor}>
+                                    Reset
+                                  </button>
+                                </div>
+                              </FormControl>
+                              <FormMessage/>
+                            </FormItem>
+                          );
+                        }}
                       />
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
-                </Form>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="notification" className="p-0">
-              <div className="p-6 bg-white rounded-md">
-                <Form {...form}>
-                  <Heading size="xl">Notificatie opties</Heading>
-                  <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
-
-                    <FormField
-                      control={form.control}
-                      name="useDifferentSubmitAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Nieuwe inzendingen van resources met deze tag moeten worden bevestigd via een ander e-mailadres
-                          </FormLabel>
-                          {YesNoSelect(field, {})}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {form.watch('useDifferentSubmitAddress') && (
-                      <>
-                        {fields.map((field, index) => (
-                          <div key={field.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                            <Controller
-                              control={form.control}
-                              name={`emails.${index}.address`}
-                              render={({ field }) => (
-                                <input
-                                  {...field}
-                                  style={{
-                                    flex: 1,
-                                    marginRight: '10px',
-                                    padding: '5px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #ccc',
-                                    maxWidth: '500px',
-                                  }}
-                                  placeholder="Enter email address"
-                                />
-                              )}
-                            />
-                            <button type="button" onClick={() => remove(index)}> Verwijderen</button>
-                          </div>
-                        ))}
-                        <button type="button" onClick={() => append({ address: '' })}>Add Email</button>
-                      </>
                     )}
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
@@ -422,6 +384,67 @@ export default function ProjectTagEdit() {
                 </Form>
               </div>
             </TabsContent>
+
+            { !isGlobal && (
+              <TabsContent value="notification" className="p-0">
+                <div className="p-6 bg-white rounded-md">
+                  <Form {...form}>
+                    <Heading size="xl">Notificatie opties</Heading>
+                    <Separator className="my-4"/>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="lg:w-1/2 grid grid-cols-1 gap-4">
+
+                      <FormField
+                        control={form.control}
+                        name="useDifferentSubmitAddress"
+                        render={({field}) => (
+                          <FormItem>
+                            <FormLabel>
+                              Nieuwe inzendingen van resources met deze tag moeten worden bevestigd via een ander
+                              e-mailadres
+                            </FormLabel>
+                            {YesNoSelect(field, {})}
+                            <FormMessage/>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch('useDifferentSubmitAddress') && (
+                        <>
+                          {fields.map((field, index) => (
+                            <div key={field.id} style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+                              <Controller
+                                control={form.control}
+                                name={`emails.${index}.address`}
+                                render={({field}) => (
+                                  <input
+                                    {...field}
+                                    style={{
+                                      flex: 1,
+                                      marginRight: '10px',
+                                      padding: '5px',
+                                      borderRadius: '4px',
+                                      border: '1px solid #ccc',
+                                      maxWidth: '500px',
+                                    }}
+                                    placeholder="Enter email address"
+                                  />
+                                )}
+                              />
+                              <button type="button" onClick={() => remove(index)}> Verwijderen</button>
+                            </div>
+                          ))}
+                          <button type="button" onClick={() => append({address: ''})}>Add Email</button>
+                        </>
+                      )}
+                      <Button className="w-fit col-span-full" type="submit">
+                        Opslaan
+                      </Button>
+                    </form>
+                  </Form>
+                </div>
+              </TabsContent>
+            )}
 
             <TabsContent value="imagesettings" className="p-0">
               <div className="p-6 bg-white rounded-md">

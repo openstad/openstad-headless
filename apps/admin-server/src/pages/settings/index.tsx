@@ -1,18 +1,12 @@
 import React from 'react';
 import { PageLayout } from '../../components/ui/page-layout';
-import { useRouter } from 'next/router'
 import { Tabs, TabsContent, TabsList, TabsTrigger} from '../../components/ui/tabs'
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { CounterWidgetProps } from '@openstad-headless/counter/src/counter';
 import { WithApiUrlProps } from '@/lib/server-side-props-definition';
+import ProjectTags from '../projects/[project]/tags';
 
 export default function GlobalSettings({
   apiUrl
 }: WithApiUrlProps) {
-  const router = useRouter();
-  const id = router.query.id;
-  const projectId = router.query.project as string;
-
   return (
     <div>
       <PageLayout
@@ -33,7 +27,9 @@ export default function GlobalSettings({
               <TabsTrigger value="display">Tags</TabsTrigger>
             </TabsList>
             <TabsContent value='display' className='p-0'>
-              Tags
+              <ProjectTags
+                preset="global"
+              />
             </TabsContent>
           </Tabs>
         </div>

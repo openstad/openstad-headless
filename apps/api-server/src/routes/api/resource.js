@@ -520,7 +520,8 @@ router
     }
 
     const projectId = req.params.projectId;
-    const tagEntities = await getValidTags(projectId, tags, req.user);
+    const canBeGlobal = req?.query?.includeGlobalTags === true;
+    const tagEntities = await getValidTags(projectId, tags, canBeGlobal);
     
     const resourceInstance = req.results;
     resourceInstance.setTags(tagEntities).then((result) => {
@@ -629,11 +630,16 @@ router
   });
 
 // Get all valid tags of the project based on given ids
-async function getValidTags(projectId, tags) {
+async function getValidTags(projectId, tags, canBeGlobal) {
   const uniqueIds = Array.from(new Set(tags));
 
+  const whereClause = {
+    id: { [Op.in]: uniqueIds },
+    projectId: canBeGlobal ? { [Op.or]: [projectId, 0] } : projectId,
+  };
+
   const tagsOfProject = await db.Tag.findAll({
-    where: { projectId, id: { [Op.in]: uniqueIds } },
+    where: whereClause,
   });
 
   return tagsOfProject;
