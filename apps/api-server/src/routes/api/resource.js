@@ -520,7 +520,7 @@ router
     }
 
     const projectId = req.params.projectId;
-    const canBeGlobal = req?.query?.includeGlobalTags === true;
+    const canBeGlobal = req?.query?.includeGlobalTags === 'true';
     const tagEntities = await getValidTags(projectId, tags, canBeGlobal);
     
     const resourceInstance = req.results;
