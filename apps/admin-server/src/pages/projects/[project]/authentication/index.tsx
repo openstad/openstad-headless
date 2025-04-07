@@ -83,7 +83,7 @@ export default function ProjectAuthentication() {
       defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
       logo: data?.config?.auth?.provider?.openstad?.config?.styling?.logo,
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
-      authProviderId: data?.config?.authProviderId ? 'id-' + data?.config?.authProviderId : null,
+      authProviderId: data?.config?.authProviderId ? 'id-' + data?.config?.authProviderId : undefined,
       clientDisclaimerUrl: data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
       cssUrl: (Array.isArray(data?.config?.auth?.provider?.openstad?.config?.clientStylesheets) && data?.config?.auth?.provider?.openstad?.config?.clientStylesheets?.length)
         ? data?.config?.auth?.provider?.openstad?.config?.clientStylesheets[0]?.url
@@ -243,7 +243,7 @@ export default function ProjectAuthentication() {
                                          </FormControl>
                                          <SelectContent>
                                            <SelectItem value="">Geen - standaard Openstad authenticatie</SelectItem>
-                                           {authProviders && authProviders.map((provider) => (
+                                           {authProviders && authProviders.map((provider: { id: string; name: string }) => (
                                              <SelectItem key={`auth-provider-${provider.id}`}
                                                          value={`id-${provider.id}`}>{provider.name}</SelectItem>
                                            ))}

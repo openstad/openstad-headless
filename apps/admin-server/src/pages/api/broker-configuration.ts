@@ -1,4 +1,7 @@
-export default async function getBrokerConfigurationFromUrl(req, res) {
+import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest } from 'next/server';
+
+export default async function getBrokerConfigurationFromUrl(req: NextRequest | NextApiRequest, res: NextApiResponse) {
 
   // Extract the URL from the request body
   const { url } = req.body;
@@ -16,8 +19,22 @@ export default async function getBrokerConfigurationFromUrl(req, res) {
     return res.status(400).json({ error: 'Invalid broker configuration' });
   }
 
-  const sanitizedData = {
-    pkceEnabled: "false"
+  const sanitizedData : {
+    serverUrl: string;
+    serverLoginPath: string;
+    serverLogoutPath: string;
+    serverUserInfoPath: string;
+    serverExchangeCodePath: string;
+    serverExchangeContentType: string;
+    pkceEnabled: "false" | "true";
+  } = {
+    pkceEnabled: "false",
+    serverUrl: "",
+    serverLoginPath: "",
+    serverLogoutPath: "",
+    serverUserInfoPath: "",
+    serverExchangeCodePath: "",
+    serverExchangeContentType: "application/json",
   }
 
   if (data?.id_token_signing_alg_values_supported && data?.id_token_signing_alg_values_supported.length > 0) {
@@ -60,9 +77,7 @@ export default async function getBrokerConfigurationFromUrl(req, res) {
   }
 
   sanitizedData.serverLoginPath = sanitizedData.serverLoginPath + `?client_id=[[clientId]]&redirect_uri=[[redirectUri]]&response_type=code&scope=openid%20irma-demo.gemeente.personalData.fullname%20irma-demo.sidn-pbdf.email.email%20irma-demo.sidn-pbdf.uniqueid.uniqueid&code_challenge=[[codeChallenge]]&code_challenge_method=S256&response_mode=query`;
-
-  const serverExchangeContentType = data?.token_endpoint_auth_methods_supported?.includes('client_secret_post') ? 'application/x-www-form-urlencoded' : 'application/json';
-  sanitizedData.serverExchangeContentType = serverExchangeContentType;
+  sanitizedData.serverExchangeContentType = data?.token_endpoint_auth_methods_supported?.includes('client_secret_post') ? 'application/x-www-form-urlencoded' : 'application/json';
 
   res.status(200).json(sanitizedData);
 

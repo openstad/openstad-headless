@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 import useAuthProvidersList, { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
 import { useRouter } from 'next/router';
 import { PageLayout } from '@/components/ui/page-layout';
@@ -8,7 +8,7 @@ import { ChevronRight, Plus } from 'lucide-react';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 
-function AuthProvidersLayout({ children }) {
+function AuthProvidersLayout({ children }: { children: ReactNode }) {
   return (
     <div>
       <PageLayout

@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 
 import { Button } from '@/components/ui/button';
 import { useAuthProvider } from '@/hooks/use-auth-providers';
+import { fetchBrokerConfig } from '@/lib/fetch-broker-config';
 
 
 import { useCallback, useEffect } from 'react';
@@ -79,7 +80,7 @@ function CreateAuthProvider() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('submit');
     try {
-      const brokerConfigLoaded = await fetchBrokerConfig(null);
+      const brokerConfigLoaded = await fetchBrokerConfig(null, values, form.setValue);
       if (!brokerConfigLoaded) {
         throw new Error('Kon broker configuratie niet ophalen');
       }
@@ -90,52 +91,6 @@ function CreateAuthProvider() {
       await router.push(`/auth-providers/${provider.id}`);
     } catch (err: any) {
       toast.error(err.message || 'Auth provider kon niet worden aangemaakt');
-    }
-  }
-
-  async function fetchBrokerConfig(e) {
-    if (e) {
-      e.preventDefault();
-    }
-    try {
-      const values = form.getValues();
-      console.log('values', values);
-      if (!values?.config?.brokerConfiguration) {
-        return;
-      }
-
-      // Ensure the URL is valid
-      const url = new URL(values?.config?.brokerConfiguration);
-      if (!url) {
-        return;
-      }
-      // Fetch the broker configuration
-      const res = await fetch('/api/broker-configuration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: url.toString() }),
-      });
-
-      const data = await res.json();
-
-      // Check if res is ok
-      if (!res.ok) {
-        throw new Error('Kon broker configuratie niet ophalen');
-      }
-
-      // Loop through data, and set the values in the form
-      for (const [key, value] of Object.entries(data)) {
-        console.log('setting value', key, value);
-        form.setValue(`config.${key}`, value);
-      }
-
-      console.log('Broker config data', data);
-      return true;
-      //toast.success('Broker configuratie is opgehaald');
-    } catch (err: any) {
-      return false;
     }
   }
 
