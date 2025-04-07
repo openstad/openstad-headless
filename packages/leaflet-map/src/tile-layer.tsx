@@ -1,3 +1,4 @@
+import React from 'react';
 import { TileLayer as LeafletTileLayer } from 'react-leaflet'
 import type { MapTilesProps } from './types/map-tiles-props';
 import { useEffect, useState } from 'react';

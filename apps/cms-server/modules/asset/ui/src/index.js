@@ -1,17 +1,21 @@
 export default () => {
   apos.util.onReady(() => {
-    const globalOpenstadUserElement = document.getElementById('global-openstad-user');
-    
-    window.globalOpenStadUser = globalOpenstadUserElement ? {...globalOpenstadUserElement.dataset} : null;
-    
+    const globalOpenstadUserElement = document.getElementById(
+      'global-openstad-user'
+    );
+
+    window.globalOpenStadUser = globalOpenstadUserElement
+      ? { ...globalOpenstadUserElement.dataset }
+      : null;
+
     const logoutDataElement = document.getElementById('logout-data');
     window.logoutUrl = logoutDataElement.getAttribute('data-logout-url');
-    
+
     const nav = document.querySelector('#navbar');
     const footer = document.querySelector('#footer-container');
-    
+
     document.addEventListener('navBarLoaded', adjustMenu);
-    
+
     if (typeof nav !== 'undefined') {
       NavBar.NavBar.loadWidgetOnElement(nav, { ...nav.dataset });
     }
@@ -19,15 +23,15 @@ export default () => {
     if (typeof footer !== 'undefined') {
       Footer.Footer.loadWidgetOnElement(footer, { ...footer.dataset });
     }
-    
-    const allowCookieButton = document.querySelector('#allow-cookie-button'); 
+
+    const allowCookieButton = document.querySelector('#allow-cookie-button');
     if (allowCookieButton) {
       allowCookieButton.addEventListener('click', (e) => {
         e.preventDefault();
         window.setCookieConsent(true);
       });
     }
-    
+
     const denyCookieButton = document.querySelector('#deny-cookie-button');
     if (denyCookieButton) {
       denyCookieButton.addEventListener('click', (e) => {
@@ -38,14 +42,19 @@ export default () => {
   });
 };
 if (typeof window.process == 'undefined') {
-  window.process = { env: {NODE_ENV: 'production'} };
+  window.process = { env: { NODE_ENV: 'production' } };
 }
 
 window.setCookieConsent = function (allowCookies) {
-    let date = new Date();
-    document.cookie = "openstad-cookie-consent=" + (allowCookies ? '1' : '-1') + '; path=/; expires=Thu, 31 Dec '+(date.getFullYear() + 5)+' 23:59:00 UTC;';
-    document.location.reload();
-  };
+  let date = new Date();
+  document.cookie =
+    'openstad-cookie-consent=' +
+    (allowCookies ? '1' : '-1') +
+    '; path=/; expires=Thu, 31 Dec ' +
+    (date.getFullYear() + 5) +
+    ' 23:59:00 UTC;';
+  document.location.reload();
+};
 
 let isMobile = false;
 
@@ -89,45 +98,14 @@ function adjustMenu() {
 
   closeButton.setAttribute('aria-controls', 'main-menu');
   closeButton.setAttribute('aria-expanded', 'false');
-  mainMenuContainer.setAttribute('aria-hidden', 'false');
+  mainMenuContainer.setAttribute('aria-hidden', 'true');
 
-  function closeMenu() {
-    closeButton.setAttribute('aria-expanded', 'false');
-    mainMenuContainer.setAttribute('aria-hidden', 'false');
-    navContainer.classList.remove('--show');
-    closeButtonSpan.textContent = 'Menu tonen';
-  }
+  closeButton.replaceWith(closeButton.cloneNode(true));
+  const newCloseButton = document.querySelector('.close-button');
 
-  function trapFocus(element) {
-    const focusableElements = element.querySelectorAll('a, button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])');
-    const firstFocusableElement = focusableElements[0];
-    const lastFocusableElement = focusableElements[focusableElements.length - 1];
-  
-    element.addEventListener('keydown', (event) => {
-      const isTabPressed = (event.key === 'Tab' || event.keyCode === 9);
-  
-      if (!isTabPressed) {
-        return;
-      }
-  
-      if (event.shiftKey) {
-        if (document.activeElement === firstFocusableElement) {
-          lastFocusableElement.focus();
-          event.preventDefault();
-        }
-      } else {
-        if (document.activeElement === lastFocusableElement) {
-          firstFocusableElement.focus();
-          event.preventDefault();
-        }
-      }
-    });
-  }
-  
-
-  closeButton.addEventListener('click', () => {
-    const isExpanded = closeButton.getAttribute('aria-expanded') === 'true';
-    closeButton.setAttribute('aria-expanded', !isExpanded);
+  newCloseButton.addEventListener('click', () => {
+    const isExpanded = newCloseButton.getAttribute('aria-expanded') === 'true';
+    newCloseButton.setAttribute('aria-expanded', !isExpanded);
     mainMenuContainer.setAttribute('aria-hidden', isExpanded);
 
     navContainer.classList.toggle('--show');
@@ -139,7 +117,10 @@ function adjustMenu() {
   });
 
   navbar.addEventListener('focusout', (event) => {
-    if (!navbar.contains(event.relatedTarget) && !header.contains(event.relatedTarget)) {
+    if (
+      !navbar.contains(event.relatedTarget) &&
+      !header.contains(event.relatedTarget)
+    ) {
       closeMenu();
     }
   });

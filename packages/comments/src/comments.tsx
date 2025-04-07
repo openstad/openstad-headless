@@ -45,6 +45,7 @@ export type CommentsWidgetProps = BaseProps &
     sorting?: Array<{ value: string; label: string }>;
     setRefreshComments?: React.Dispatch<any>;
     itemsPerPage?: number;
+    overridePage?: number;
     displayPagination?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
@@ -64,6 +65,7 @@ function CommentsInner({
   itemsPerPage,
   onGoToLastPage,
   displayPagination = false,
+  overridePage = 0,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   ...props
 }: CommentsWidgetProps) {
@@ -82,7 +84,13 @@ function CommentsInner({
     if (onGoToLastPage) {
       onGoToLastPage(goToLastPage);
     }
-  }, [onGoToLastPage, totalPages]);
+  }, [onGoToLastPage]);
+
+  useEffect(() => {
+    if (overridePage !== page) {
+      setPage(overridePage);
+    }
+  }, [overridePage]);
 
   const refreshComments = () => {
     setRefreshKey(prevKey => prevKey + 1); // Increment the key to trigger a refresh
@@ -212,9 +220,19 @@ function CommentsInner({
     }
   }, [comments, pageSize]);
 
+  const randomId = Math.random().toString(36).replace('0.', 'container_');
+
+  const scrollToTop = () => {
+    const divElement = document.getElementById(randomId);
+
+    if (divElement) {
+      divElement.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  }
+
     return (
     <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: refreshComments || defaultSetRefreshComments }}>
-      <section className="osc">
+      <section className="osc" id={randomId}>
         <Heading3 className="comments-title">
           {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString()) }
           {!comments && title}
@@ -318,7 +336,10 @@ function CommentsInner({
               <Paginator
                 page={page || 0}
                 totalPages={totalPages || 1}
-                onPageChange={(newPage) => setPage(newPage)}
+                onPageChange={(newPage) => {
+                  setPage(newPage);
+                  scrollToTop();
+                }}
               />
             </div>
           </>
@@ -340,6 +361,7 @@ function Comments({
   loginText = 'Inloggen om deel te nemen aan de discussie.',
   setRefreshComments = () => {},
   onGoToLastPage,
+  overridePage,
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(false);
@@ -367,6 +389,7 @@ function Comments({
         loginText={loginText}
         setRefreshComments={triggerRefresh}
         onGoToLastPage={onGoToLastPage}
+        overridePage={overridePage}
         {...props}
       />
     </div>

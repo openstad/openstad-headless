@@ -32,6 +32,10 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-admin-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "openstad.cdn.secret.fullname" -}}
+{{- printf "%s-cdn-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "openstad.adminer.fullname" -}}
 {{- printf "%s-%s" (include "openstad.fullname" .) .Values.adminer.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

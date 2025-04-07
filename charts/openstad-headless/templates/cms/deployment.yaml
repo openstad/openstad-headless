@@ -48,6 +48,16 @@ spec:
               secretKeyRef:
                 key: mongodbPrefix
                 name: {{ template "openstad.cms.secret.fullname" . }}
+          - name: REACT_CDN
+            valueFrom:
+              secretKeyRef:
+                key: reactUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+          - name: REACT_DOM_CDN
+            valueFrom:
+              secretKeyRef:
+                key: reactDomUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
           - name: CMS_DEFAULTS
             value: "{}"
           - name: NODE_ENV

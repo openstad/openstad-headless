@@ -147,6 +147,18 @@ spec:
           - name: CMS_URL
             value: https://{{ template "openstad.cms.url" . }}
 
+          - name: REACT_CDN
+            valueFrom:
+              secretKeyRef:
+                key: reactUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
+          - name: REACT_DOM_CDN
+            valueFrom:
+              secretKeyRef:
+                key: reactDomUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
 
@@ -309,6 +321,18 @@ spec:
 
             - name: CMS_URL
               value: https://{{ template "openstad.cms.url" . }}
+
+            - name: REACT_CDN
+              valueFrom:
+                secretKeyRef:
+                  key: reactUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: REACT_DOM_CDN
+              valueFrom:
+                secretKeyRef:
+                  key: reactDomUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
 
             - name: BASE_DOMAIN
               value: {{ .Values.host.base }}

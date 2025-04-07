@@ -33,6 +33,8 @@ const formSchema = z.object({
     infoPopupButtonText: z.string().optional(),
     openInfoPopupOnInit: z.string().optional(),
     relativePathPrepend: z.string().optional(),
+    popupNotLoggedInText: z.string().optional(),
+    popupNotLoggedInButton: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -62,6 +64,8 @@ export default function DocumentContent(
             largeDoc: props?.largeDoc || false,
             infoPopupButtonText: props?.infoPopupButtonText || '',
             relativePathPrepend: props?.relativePathPrepend || '',
+            popupNotLoggedInText: props?.popupNotLoggedInText || 'Om een reactie te plaatsen, moet je ingelogd zijn.',
+            popupNotLoggedInButton: props?.popupNotLoggedInButton || 'Inloggen',
         },
     });
 
@@ -163,6 +167,38 @@ export default function DocumentContent(
                             <FormItem>
                                 <FormLabel>
                                     Wat is de tekst bij het reactie overzicht wanneer je niet bent ingelogd?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="popupNotLoggedInText"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Welke tekst staat in de pop-up wanneer je niet bent ingelogd?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="popupNotLoggedInButton"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Welke tekst heeft de knop in de pop-up wanneer je niet bent ingelogd?
                                 </FormLabel>
                                 <FormControl>
                                     <Input {...field} />

@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -23,6 +23,7 @@ import {
 } from '@utrecht/component-library-react';
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
+import {useRaf} from "rooks";
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -565,6 +566,19 @@ function ResourceOverview({
     return ` --${variant}`;
   }
 
+  const randomIdRef = useRef(Math.random().toString(36).replace('0.', 'container_'));
+  const randomId = randomIdRef.current;
+
+  const scrollToTop = (randomId: string) => {
+    setTimeout(() => {
+      const divElement = document.getElementById(randomId);
+
+      if (divElement) {
+        divElement.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+    }, 200);
+  }
+
   return (
     <>
       <Dialog
@@ -655,7 +669,7 @@ function ResourceOverview({
             />
           ) : null}
 
-          <section className="osc-resource-overview-resource-collection">
+          <section className="osc-resource-overview-resource-collection" id={randomId}>
             {filteredResources &&
               filteredResources
                 ?.slice(page * pageSize, (page + 1) * pageSize)
@@ -678,7 +692,10 @@ function ResourceOverview({
               <Paginator
                 page={page || 0}
                 totalPages={totalPages || 1}
-                onPageChange={(newPage) => setPage(newPage)}
+                onPageChange={(newPage) => {
+                  setPage(newPage);
+                  scrollToTop(randomId);
+                }}
               />
             </div>
           </>

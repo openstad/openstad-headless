@@ -101,6 +101,10 @@ export type Item = {
     defaultValue?: string;
     maxChoices?: string,
     maxChoicesMessage?: string,
+    skipQuestion?: boolean;
+    skipQuestionAllowExplanation?: boolean;
+    skipQuestionExplanation?: string;
+    skipQuestionLabel?: string;
 };
 
 export type Option = {

@@ -112,3 +112,20 @@
 .osc-comments-paginator .osc-paginator {
  justify-content: center;
 }
+
+.comment-item .comment-item-header {
+ position: relative;
+ z-index: 1;
+}
+
+.comment-item .comment-item-header .edit-delete-button-group {
+ position: relative;
+}
+
+.comment-item .comment-item-header .edit-delete-button-group .DropdownMenuContent {
+ position: absolute;
+ top: 100%;
+ left: auto;
+ right: 0;
+ min-width: 170px;
+}
