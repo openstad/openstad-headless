@@ -6,5 +6,5 @@ import { NextApiResponse } from "next/types";
  * If we use NEXT_PUBLIC_ in this application, it will be defined in build time.
  */
 export default function handler(res: NextApiResponse) {
-  res.status(200).json({ authProvidersEnabled: process.env.ENABLE_AUTH_PROVIDERS });
+  res.json({ authProvidersEnabled: process.env.ENABLE_AUTH_PROVIDERS });
 }

@@ -79,6 +79,6 @@ export default async function getBrokerConfigurationFromUrl(req: NextRequest | N
   sanitizedData.serverLoginPath = sanitizedData.serverLoginPath + `?client_id=[[clientId]]&redirect_uri=[[redirectUri]]&response_type=code&scope=openid%20irma-demo.gemeente.personalData.fullname%20irma-demo.sidn-pbdf.email.email%20irma-demo.sidn-pbdf.uniqueid.uniqueid&code_challenge=[[codeChallenge]]&code_challenge_method=S256&response_mode=query`;
   sanitizedData.serverExchangeContentType = data?.token_endpoint_auth_methods_supported?.includes('client_secret_post') ? 'application/x-www-form-urlencoded' : 'application/json';
 
-  res.status(200).json(sanitizedData);
+  res.json(sanitizedData);
 
 }
