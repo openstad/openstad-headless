@@ -100,7 +100,6 @@ services:
       - ALLOW_CONFIG_MUTATIONS=true
     ports:
       - '31410:31410'
-      - '31499:31499'
     volumes:
       - ./apps/api-server:/opt/openstad-headless/apps/api-server
       - openstad-api-server-node_modules:/opt/openstad-headless/apps/api-server/node_modules
@@ -240,7 +239,7 @@ services:
       - OAUTH_URL=${AUTH_APP_URL}
       - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
       - API_URL=${API_URL}
-      - API_URL_INTERNAL=http://openstad-api-server:31499
+      - API_URL_INTERNAL=http://openstad-api-server:31410
       - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
       - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
@@ -279,7 +278,7 @@ services:
       - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
       - CMS_DEFAULTS=${CMS_DEFAULTS}
       - API_URL=${API_URL}
-      - API_URL_INTERNAL=http://openstad-api-server:31499
+      - API_URL_INTERNAL=http://openstad-api-server:31410
       - API_KEY=${API_FIXED_AUTH_KEY}
       - FORCE_HTTP=${FORCE_HTTP}
       - APOS_RELEASE_ID=${APOS_RELEASE_ID}
