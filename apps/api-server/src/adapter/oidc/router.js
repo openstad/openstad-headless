@@ -128,10 +128,7 @@ router
     ) {
       let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath; // + '&acr_values=loa:low';
       url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
-      const apiUrlWithHttpsForTestingPurposes = config.url.replace(
-        'http://',
-        'https://'
-      );
+      const apiUrl = config.url;
 
       const pkceEnabled = !!req.authConfig.pkceEnabled || false;
 
@@ -197,7 +194,7 @@ router
       url = url.replace(
         /\[\[redirectUri\]\]/,
         encodeURIComponent(
-          apiUrlWithHttpsForTestingPurposes + '/auth/digest-login'
+          apiUrl + '/auth/digest-login'
         )
       );
       console.log('req authconfig', req.authConfig, url);
