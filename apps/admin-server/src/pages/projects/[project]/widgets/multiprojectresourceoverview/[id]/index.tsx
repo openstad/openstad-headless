@@ -11,8 +11,6 @@ import WidgetResourceOverviewDisplay from '../../resourceoverview/[id]/display';
 import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
 import WidgetResourceOverviewPagination from '../../resourceoverview/[id]/pagination';
 import WidgetResourceOverviewSearch from '../../resourceoverview/[id]/search';
-import WidgetResourceOverviewTags from '../../resourceoverview/[id]/tags';
-import WidgetResourceOverviewInclude from '../../resourceoverview/[id]/include';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -31,6 +29,8 @@ import { extractConfig } from '@/lib/sub-widget-helper';
 import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
 import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
 import WidgetMultiProjectSettings from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/settings";
+import WidgetMultiProjectInclude from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/include";
+import WidgetMultiProjectTags from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/tags";
 
 export const getServerSideProps = withApiUrl;
 
@@ -166,10 +166,10 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                   <WidgetResourceOverviewSearch {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="tags" className="p-0">
-                  <WidgetResourceOverviewTags {...totalPropPackage} />
+                  <WidgetMultiProjectTags {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="include" className="p-0">
-                  <WidgetResourceOverviewInclude {...totalPropPackage} />
+                  <WidgetMultiProjectInclude {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="likes" className="p-0">
                   {previewConfig && (

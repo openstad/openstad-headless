@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -49,12 +49,12 @@ type Tag = {
   type: string;
 };
 
-export default function WidgetResourceOverviewTags(
+export default function WidgetMultiProjectTags(
   props: ResourceOverviewWidgetProps &
     EditFieldProps<ResourceOverviewWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const { data: tags } = useTags(props.projectId);
+  const { data: tags } = useTags("0");
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
