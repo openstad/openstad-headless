@@ -54,22 +54,6 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
             return mapSchema.optional();
 
-        case 'range':
-            return z
-              .object({
-                  value: z.string(),
-                  skipQuestion: z.boolean().optional(),
-              })
-              .superRefine((data, ctx) => {
-                  if (!data.skipQuestion && data.value === '') {
-                      ctx.addIssue({
-                          code: z.ZodIssueCode.custom,
-                          message: 'Dit veld is verplicht',
-                          path: ['value'],
-                      });
-                  }
-              });
-
         case 'radiobox':
         case 'select':
         case 'tickmark-slider':
@@ -81,6 +65,12 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
                 return undefined;
             }
         case 'hidden':
+            return undefined;
+
+        // Default value for range is "50", so it's never empty.
+        // If skipQuestion is true, the value is ignored anyway.
+        // Therefore, we don't need validation here.
+        case 'range':
             return undefined;
 
         default:
