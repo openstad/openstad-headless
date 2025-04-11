@@ -821,7 +821,7 @@ function DocumentMap({
 
             {isTouchDevice && showOverlay && (
               <div className="touch-overlay show">
-                <i className="ri-hand">&#xEF89;</i>
+                <i className="ri-">&#xEF89;</i>
                 Use two fingers to navigate <br />
                 and zoom in or out
               </div>
