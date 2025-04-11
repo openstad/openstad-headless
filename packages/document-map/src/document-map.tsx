@@ -484,6 +484,14 @@ function DocumentMap({
 
   const [overridePage, setoverridePage] = useState<number | undefined>(undefined);
 
+  const isScrollable = function (ele: HTMLElement) {
+    const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
+    const overflowYStyle = window.getComputedStyle(ele).overflowY;
+    const isOverflowHidden = overflowYStyle.indexOf('hidden') !== -1;
+
+    return hasScrollableContent && !isOverflowHidden;
+  };
+
   const scrollToComment = (index: number) => {
     let attempts = 0;
     const maxAttempts = 10;
@@ -516,14 +524,16 @@ function DocumentMap({
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
           const commentTop = commentRect.top + scrollTop;
 
-          if (window.innerWidth <= 1000) {
-            window.scrollTo({
-              top: commentTop,
+          const canScrollCommentContainer = isScrollable(containerEl);
+
+          if (canScrollCommentContainer) {
+            containerEl.scrollTo({
+              top: commentEl.offsetTop - containerEl.offsetTop,
               behavior: 'smooth'
             });
           } else {
-            containerEl.scrollTo({
-              top: commentEl.offsetTop - containerEl.offsetTop,
+            window.scrollTo({
+              top: commentTop,
               behavior: 'smooth'
             });
           }
@@ -746,7 +756,7 @@ function DocumentMap({
 
         const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
 
-        if (e.touches.length === 1 && dragDifference > 10 && !showOverlay) {
+        if (e.touches.length === 1 && dragDifference > 20 && !showOverlay) {
           setShowOverlay(true);
         } else if (!!showOverlay) {
           setShowOverlay(false);
