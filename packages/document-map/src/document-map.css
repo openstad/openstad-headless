@@ -453,6 +453,10 @@ section.comment-item-footer .utrecht-button--disabled:before,
   flex-direction: column;
   padding: 30px;
   text-align: center;
+
+  @media only screen and (max-width: 479px) {
+    font-size: 1.15em;
+  }
 }
 
 .documentMap--container .touch-overlay.show {
