@@ -124,6 +124,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                           subWidgetKey: 'resourceOverviewMapWidget',
                           updateConfig,
                           updatePreview,
+                          widgetName: 'multiprojectresourceoverview',
                         })}
                       />
                     </TabsContent>

@@ -104,6 +104,8 @@ export default function WidgetResourcesMapMap(
     { value: 'custom', label: 'Aangepaste Kaart' },
   ];
 
+  console.log( 'props', props );
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -122,15 +124,25 @@ export default function WidgetResourcesMapMap(
                   Link naar de specifieke inzending
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Bijv: /resource?openstadResourceId=[id]"
-                    type="text"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
+                  {!!props?.widgetName && props?.widgetName === 'multiprojectresourceoverview' ? (
+                    <div style={{backgroundColor: 'goldenrod', padding: '15px 20px', margin: '10px 0 20px'}}>
+                      <FormDescription
+                        style={{color: 'black', textAlign: 'center'}}
+                      >
+                        Deze optie is instelbaar per project bij het tabblad &apos;Instellingen multi project&apos;.
+                      </FormDescription>
+                    </div>
+                  ) : (
+                    <Input
+                      placeholder="Bijv: /resource?openstadResourceId=[id]"
+                      type="text"
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -38,7 +38,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
       resources?: any,
       title?: string,
       displayHeader?: boolean,
-      displayMap?: boolean
+      displayMap?: boolean,
+      selectedProjects?: any[]
     ) => React.JSX.Element; renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
@@ -111,7 +112,8 @@ const defaultHeaderRenderer = (
   resources?: any,
   title?: string,
   displayHeader?: boolean,
-  displayMap?: boolean
+  displayMap?: boolean,
+  selectedProjects?: any[]
 ) => {
   return (
     <>
@@ -120,6 +122,7 @@ const defaultHeaderRenderer = (
           {...widgetProps}
           {...widgetProps.resourceOverviewMapWidget}
           givenResources={resources}
+          selectedProjects={selectedProjects}
         />
       }
       {displayHeader &&
@@ -378,9 +381,7 @@ function ResourceOverview({
   documentsDesc = '',
   displayVariant = '',
   onFilteredResourcesChange,
-  multiProjectResources = [],
   selectedProjects = [],
-  quickFixTags = [],
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -417,23 +418,25 @@ function ResourceOverview({
   const [resources, setResources] = useState< Array<any> >([]);
   const [filteredResources, setFilteredResources] = useState< Array<any> >([]);
 
+  const projectIds = selectedProjects?.map(project => project.id) || [];
+
   const { data: resourcesWithPagination } = datastore.useResources({
     pageSize: 999999,
     ...props,
     search,
     tags,
     sort,
+    projectIds: projectIds || [],
+    allowMultipleProjects: selectedProjects && selectedProjects.length > 1
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (selectedProjects.length === 0 && resourcesWithPagination) {
+    if (resourcesWithPagination) {
       setResources(resourcesWithPagination.records || []);
-    } else {
-      setResources(multiProjectResources);
     }
-  }, [multiProjectResources, selectedProjects, resourcesWithPagination, pageSize]);
+  }, [resourcesWithPagination, pageSize]);
 
   const {data: allTags} = datastore.useTags({
     projectId: props.projectId,
@@ -479,7 +482,7 @@ function ResourceOverview({
           if (sort === 'createdAt_asc') {
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           }
-          if ( multiProjectResources.length > 0 ) {
+          if ( projectIds.length > 0 ) {
             if (sort === 'title') {
               return a.title.localeCompare(b.title);
             }
@@ -620,7 +623,7 @@ function ResourceOverview({
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
 
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap, selectedProjects) : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -665,7 +668,6 @@ function ResourceOverview({
                 }
                 setSearch(f.search.text);
               }}
-              quickFixTags={quickFixTags || []}
             />
           ) : null}
 

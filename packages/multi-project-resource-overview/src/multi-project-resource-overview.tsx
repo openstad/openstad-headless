@@ -23,26 +23,6 @@ function MultiProjectResourceOverview({
   const resourceCache = useRef(new Map());
   const tagsCache = useRef(new Map());
 
-  // const datastore = new DataStore({
-  //   projectId: props.projectId,
-  //   api: props.api,
-  // });
-  //
-  // const search = '';
-  // const sort = '';
-  // const projectIds = props.selectedProjects?.map(project => project.id) || [];
-  //
-  // const { data: resourcesWithPagination } = datastore.useMultiResources({
-  //   projectIds,
-  //   pageSize: 999999,
-  //   ...props,
-  //   search,
-  //   tags,
-  //   sort,
-  // });
-  //
-  // console.log( 'resourcesWithPagination', resourcesWithPagination )
-
   const fetchResource = async (url: string) => {
     const response = await fetch(url);
     return response.json();
@@ -117,9 +97,9 @@ function MultiProjectResourceOverview({
   return (
     <ResourceOverview
       {...props}
-      multiProjectResources={resources || []}
+      // multiProjectResources={resources || []}
       selectedProjects={props.selectedProjects}
-      quickFixTags={tags || []}
+      // quickFixTags={tags || []}
     />
   );
 

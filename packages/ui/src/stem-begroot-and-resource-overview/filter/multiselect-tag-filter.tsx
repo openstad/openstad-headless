@@ -14,7 +14,6 @@ type Props = {
   selected?: number[];
   onUpdateFilter?: (filter: any, label?: string) => void;
   onlyIncludeIds?: number[];
-  quickFixTags?: TagDefinition[];
   tagGroupProjectId?: any;
 };
 
@@ -26,18 +25,27 @@ const MultiSelectTagFilter = ({
   onUpdateFilter,
   selected = [],
   onlyIncludeIds = [],
-  quickFixTags = [],
   ...props
 }: Props) => {
 
   if(!dataStore || !dataStore.useTags) {
     return <p>Cannot render tagfilter, missing data source</p>
   }
-  
-  const {data:tags} = dataStore.useTags({
+
+  const useTagsConfig: {
+    type: string;
+    onlyIncludeIds: number[];
+    projectId?: string;
+  } = {
     type: tagType,
     onlyIncludeIds,
-  });
+  }
+
+  if ( typeof props?.tagGroupProjectId === 'string' && props?.tagGroupProjectId === "0"  ) {
+    useTagsConfig.projectId = props.tagGroupProjectId;
+  }
+  
+  const {data:tags} = dataStore.useTags(useTagsConfig);
 
   const randomId = Math.random().toString(36).substring(7);
 
@@ -49,8 +57,6 @@ const MultiSelectTagFilter = ({
     }
   }
 
-  const filterTags = quickFixTags.length > 0 ? (quickFixTags.filter(tag => tag.projectId === parseInt(props.tagGroupProjectId))) : tags;
-
   return (
     <div className="form-element">
       <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder || 'Selecteer item'}</FormLabel>
@@ -60,7 +66,7 @@ const MultiSelectTagFilter = ({
         onItemSelected={(value, label) => {
           onUpdateFilter && onUpdateFilter(value, label);
         }}
-        options={(filterTags || []).map((tag: TagDefinition) => ({
+        options={(tags || []).map((tag: TagDefinition) => ({
           value: tag.id,
           label: tag.name,
           checked: selected.includes(tag.id),

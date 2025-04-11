@@ -141,12 +141,19 @@ export default function WidgetMultiProjectTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
+                                    const projectId = tags.find(
+                                      (tag: {type: string}) => tag.type === groupName
+                                    )?.projectId;
+
+                                    console.log( 'ID!', projectId, tags );
+
                                     const updatedFields =
                                       handleTagCheckboxGroupChange(
                                         groupName,
                                         checked,
                                         field.value,
-                                        'type'
+                                        'type',
+                                        projectId
                                       );
 
                                     field.onChange(updatedFields);
@@ -227,11 +234,16 @@ export default function WidgetMultiProjectTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
+                                    const projectId = tags.find(
+                                      (tag: {type: string}) => tag.type === groupName
+                                    )?.projectId;
+
                                     const groups = handleTagCheckboxGroupChange(
                                       groupName,
                                       checked,
                                       field.value,
-                                      'multiple'
+                                      'multiple',
+                                      projectId
                                     );
                                     field.onChange(groups);
                                     props.onFieldChanged(field.name, groups);

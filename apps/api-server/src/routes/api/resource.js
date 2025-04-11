@@ -105,6 +105,13 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeUser');
   }
 
+  if (req?.query?.projectIds && typeof req?.query?.projectIds === "object") {
+    let projectIds = req.query.projectIds;
+
+    if (!Array.isArray(projectIds)) projectIds = [projectIds];
+    req.scope.push({ method: ['selectProjectIds', projectIds] });
+  }
+
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
   // todo? volgens mij wordt dit niet meer gebruikt
   // if (req.query.highlighted) {
@@ -125,11 +132,16 @@ router
     let { dbQuery } = req;
 
     dbQuery.where = {
-      projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
       deletedAt: null,
     };
+
+    let projectIds = req?.query?.projectIds || [];
+
+    if (!Array.isArray(projectIds) || ( Array.isArray(projectIds) && projectIds.length === 0 ) ) {
+        dbQuery.where.projectId = req.params.projectId;
+    }
 
     if (dbQuery.hasOwnProperty('order')) {
       /**

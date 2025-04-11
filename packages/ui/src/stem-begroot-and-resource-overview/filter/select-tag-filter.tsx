@@ -14,7 +14,6 @@ type Props = {
   onlyIncludeIds?: number[];
   onUpdateFilter?: (filter: string) => void;
   title: string;
-  quickFixTags?: TagDefinition[];
   tagGroupProjectId?: any;
 };
 
@@ -22,15 +21,25 @@ type TagDefinition = { id: number; name: string; projectId?: any };
 
 const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
   (
-    { onlyIncludeIds = [], dataStore, tagType, onUpdateFilter, quickFixTags = [], ...props },
+    { onlyIncludeIds = [], dataStore, tagType, onUpdateFilter, ...props },
     ref
   ) => {
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
 
-    const { data: tags } = dataStore.useTags({
+    const useTagsConfig: {
+      type: string;
+      onlyIncludeIds: number[];
+      projectId?: string;
+    } = {
       type: tagType,
       onlyIncludeIds,
-    });
+    }
+
+    if ( typeof props?.tagGroupProjectId === 'string' && props?.tagGroupProjectId === "0" ) {
+      useTagsConfig.projectId = props.tagGroupProjectId;
+    }
+
+    const {data:tags} = dataStore.useTags(useTagsConfig);
 
     if (!dataStore || !dataStore.useTags) {
       return <p>Cannot render tagfilter, missing data source</p>
@@ -45,16 +54,14 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
       }
     }
 
-    const filterTags = quickFixTags.length > 0 ? (quickFixTags.filter(tag => tag.projectId === parseInt(props.tagGroupProjectId))) : tags;
-
     return (
-      filterTags.length > 0 && (
+      tags.length > 0 && (
         <div className="form-element">
           <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
           <Select
             id={getRandomId(props.placeholder)}
             ref={ref}
-            options={(filterTags || []).map((tag: TagDefinition) => ({
+            options={(tags || []).map((tag: TagDefinition) => ({
               value: tag.id,
               label: tag.name,
             }))}

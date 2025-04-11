@@ -56,16 +56,6 @@ export default function WidgetResourceOverviewSearch(
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 gap-4">
 
-          {!!props.widgetName && props.widgetName === 'multiprojectresourceoverview' && (
-            <div style={{backgroundColor: 'red', padding: '15px 20px', margin: '10px 0 20px'}}>
-              <FormDescription
-                style={{color: 'white', textAlign: 'center'}}
-              >
-                Opties op deze pagina zijn nog niet beschikbaar voor de multi project widget.
-              </FormDescription>
-            </div>
-          )}
-
           <FormField
             control={form.control}
             name="displaySearch"

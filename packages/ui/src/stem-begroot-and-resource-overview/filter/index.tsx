@@ -34,7 +34,6 @@ type Props = {
   resetText: string;
   applyText: string;
   showActiveTags?: boolean;
-  quickFixTags?: Array<{ id: number; name: string }>;
 };
 
 export function Filters({
@@ -201,7 +200,6 @@ export function Filters({
                       updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel);
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
-                    quickFixTags={props.quickFixTags || []}
                   />
                 );
               } else {
@@ -218,7 +216,6 @@ export function Filters({
                       updateTagListSingle(tagGroup.type, updatedTag)
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
-                    quickFixTags={props.quickFixTags || []}
                   />
                 );
               }

@@ -1,6 +1,6 @@
 export default {
   fetch: async function (
-    { projectId, page, pageSize, search, tags, sort, statuses },
+    { projectId, page, pageSize, search, tags, sort, statuses, projectIds, allowMultipleProjects },
     options
   ) {
     const params = new URLSearchParams();
@@ -29,6 +29,14 @@ export default {
       params.append('page', 0);
       params.append('pageSize', pageSize);
     }
+
+    if (projectIds && projectIds.length > 0 && allowMultipleProjects) {
+      projectIds.forEach((projectId) => params.append('projectIds', projectId));
+    }
+
+    console.log( 'params', params.toString() );
+    console.log( 'projectIds', JSON.stringify(projectIds) );
+    console.log( 'allowMultipleProjects', JSON.stringify(allowMultipleProjects) );
 
     let url = `/api/project/${projectId}/resource?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1&includeCommentsCount=1&${params.toString()}`;
     return this.fetch(url, options);

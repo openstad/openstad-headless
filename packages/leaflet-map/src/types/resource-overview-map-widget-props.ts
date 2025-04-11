@@ -18,8 +18,10 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
       label?: string;
       href?: string;
     }
-    givenResources?: Array<any>
-    resourceOverviewMapWidget?: dataLayerArray
+    givenResources?: Array<any>;
+    resourceOverviewMapWidget?: dataLayerArray;
+    selectedProjects?: Array<any>;
+    widgetName?: string;
   };
 
 export type dataLayerArray = {
