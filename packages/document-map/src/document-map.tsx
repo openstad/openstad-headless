@@ -733,20 +733,24 @@ function DocumentMap({
     }, []);
 
     let lastTouchPositionY = 0;
+    let startTouchPositionY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
       lastTouchPositionY = e.touches[0].clientY;
-
-      if (e.touches.length === 1) {
-        setShowOverlay(true);
-      } else {
-        setShowOverlay(false);
-      }
+      startTouchPositionY = e.touches[0].clientY;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         e.stopPropagation();
+
+        const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
+
+        if (e.touches.length === 1 && dragDifference > 10 && !showOverlay) {
+          setShowOverlay(true);
+        } else if (!!showOverlay) {
+          setShowOverlay(false);
+        }
 
         const deltaY = e.touches[0].clientY - lastTouchPositionY;
         window.scrollBy(0, -deltaY);
