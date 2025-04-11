@@ -723,6 +723,61 @@ function DocumentMap({
     // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
     const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+    const [showOverlay, setShowOverlay] = useState(false);
+
+    useEffect(() => {
+      if ('ontouchstart' in window) {
+        setIsTouchDevice(true);
+      }
+    }, []);
+
+    let lastTouchPositionY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      lastTouchPositionY = e.touches[0].clientY;
+
+      if (e.touches.length === 1) {
+        setShowOverlay(true);
+      } else {
+        setShowOverlay(false);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        e.stopPropagation();
+
+        const deltaY = e.touches[0].clientY - lastTouchPositionY;
+        window.scrollBy(0, -deltaY);
+
+        lastTouchPositionY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setShowOverlay(false);
+    };
+
+    useEffect(() => {
+      if (isTouchDevice) {
+        const mapElement = mapRef.current?.getContainer();
+        if (mapElement) {
+          mapElement.addEventListener('touchstart', handleTouchStart);
+          mapElement.addEventListener('touchend', handleTouchEnd);
+          mapElement.addEventListener('touchmove', handleTouchMove);
+        }
+
+        return () => {
+          if (mapElement) {
+            mapElement.removeEventListener('touchstart', handleTouchStart);
+            mapElement.removeEventListener('touchmove', handleTouchMove);
+            mapElement.removeEventListener('touchend', handleTouchEnd);
+          }
+        };
+      }
+    }, [mapRef?.current, isTouchDevice]);
+
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
@@ -759,6 +814,15 @@ function DocumentMap({
             </div>
           )}
           <div className='document-container'>
+
+            {isTouchDevice && showOverlay && (
+              <div className="touch-overlay show">
+                <i className="ri-hand">&#xEF89;</i>
+                Use two fingers to navigate <br />
+                and zoom in or out
+              </div>
+            )}
+
             <MapContainer
                 ref={mapRef}
                 center={[0, 0]}
