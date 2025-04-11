@@ -746,13 +746,17 @@ function DocumentMap({
     let startTouchPositionY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
-      lastTouchPositionY = e.touches[0].clientY;
-      startTouchPositionY = e.touches[0].clientY;
+      if ( e.touches.length === 1 ) {
+        lastTouchPositionY = e.touches[0].clientY;
+        startTouchPositionY = e.touches[0].clientY;
+      }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         e.stopPropagation();
+
+        if ( startTouchPositionY === 0 ) return;
 
         const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
 
@@ -766,6 +770,8 @@ function DocumentMap({
         window.scrollBy(0, -deltaY);
 
         lastTouchPositionY = e.touches[0].clientY;
+      } else if (e.touches.length === 2) {
+        startTouchPositionY = 0;
       }
     };
 
