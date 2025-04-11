@@ -484,6 +484,14 @@ function DocumentMap({
 
   const [overridePage, setoverridePage] = useState<number | undefined>(undefined);
 
+  const isScrollable = function (ele: HTMLElement) {
+    const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
+    const overflowYStyle = window.getComputedStyle(ele).overflowY;
+    const isOverflowHidden = overflowYStyle.indexOf('hidden') !== -1;
+
+    return hasScrollableContent && !isOverflowHidden;
+  };
+
   const scrollToComment = (index: number) => {
     let attempts = 0;
     const maxAttempts = 10;
@@ -516,14 +524,16 @@ function DocumentMap({
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
           const commentTop = commentRect.top + scrollTop;
 
-          if (window.innerWidth <= 1000) {
-            window.scrollTo({
-              top: commentTop,
+          const canScrollCommentContainer = isScrollable(containerEl);
+
+          if (canScrollCommentContainer) {
+            containerEl.scrollTo({
+              top: commentEl.offsetTop - containerEl.offsetTop,
               behavior: 'smooth'
             });
           } else {
-            containerEl.scrollTo({
-              top: commentEl.offsetTop - containerEl.offsetTop,
+            window.scrollTo({
+              top: commentTop,
               behavior: 'smooth'
             });
           }
@@ -733,20 +743,24 @@ function DocumentMap({
     }, []);
 
     let lastTouchPositionY = 0;
+    let startTouchPositionY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
       lastTouchPositionY = e.touches[0].clientY;
-
-      if (e.touches.length === 1) {
-        setShowOverlay(true);
-      } else {
-        setShowOverlay(false);
-      }
+      startTouchPositionY = e.touches[0].clientY;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         e.stopPropagation();
+
+        const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
+
+        if (e.touches.length === 1 && dragDifference > 20 && !showOverlay) {
+          setShowOverlay(true);
+        } else if (!!showOverlay) {
+          setShowOverlay(false);
+        }
 
         const deltaY = e.touches[0].clientY - lastTouchPositionY;
         window.scrollBy(0, -deltaY);
@@ -817,7 +831,7 @@ function DocumentMap({
 
             {isTouchDevice && showOverlay && (
               <div className="touch-overlay show">
-                <i className="ri-hand">&#xEF89;</i>
+                <i className="ri-">&#xEF89;</i>
                 Use two fingers to navigate <br />
                 and zoom in or out
               </div>
