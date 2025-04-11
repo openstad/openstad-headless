@@ -307,7 +307,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                         form.resetField('mapIconUploader');
                         form.trigger('mapIcon');
                       }}
-                      project={project as string}
+                      project={isGlobal ? "0" : project as string}
                     />
                     <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
                       {!!form.watch('mapIcon') && (
@@ -457,7 +457,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
 
                     <ImageUploader
                       form={form}
-                      project={project as string}
+                      project={isGlobal ? "0" : project as string}
                       imageLabel="Upload hier een afbeelding die vervolgens automatisch wordt ingesteld als de standaardafbeelding voor de resource die aan deze tag is gekoppeld"
                       fieldName="image"
                       allowedTypes={["image/*"]}

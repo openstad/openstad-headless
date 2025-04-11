@@ -27,7 +27,7 @@ const formSchema = z.object({
   name: z.string(),
   type: z.string(),
   seqnr: z.coerce.number(),
-  addToNewResources: z.boolean(),
+  addToNewResources: z.boolean().optional(),
 });
 
 export default function ProjectTagCreate({ preset }: { preset?: string }) {
@@ -44,7 +44,7 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tag = await createTag(values.name, values.type, values.seqnr, values.addToNewResources);
+    const tag = await createTag(values.name, values.type, values.seqnr, false);
     if (tag?.id) {
       toast.success('Tag aangemaakt!');
       router.push(isGlobal ? "/settings" : `/projects/${project}/tags`);
