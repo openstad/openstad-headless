@@ -755,6 +755,7 @@ function DocumentMap({
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         e.stopPropagation();
+        e.preventDefault();
 
         if ( startTouchPositionY === 0 ) return;
 
@@ -785,13 +786,13 @@ function DocumentMap({
         if (mapElement) {
           mapElement.addEventListener('touchstart', handleTouchStart);
           mapElement.addEventListener('touchend', handleTouchEnd);
-          mapElement.addEventListener('touchmove', handleTouchMove);
+          mapElement.addEventListener('touchmove', handleTouchMove, { passive: false });
         }
 
         return () => {
           if (mapElement) {
             mapElement.removeEventListener('touchstart', handleTouchStart);
-            mapElement.removeEventListener('touchmove', handleTouchMove);
+            mapElement.removeEventListener('touchmove', handleTouchMove, { passive: false });
             mapElement.removeEventListener('touchend', handleTouchEnd);
           }
         };
