@@ -745,8 +745,12 @@ function DocumentMap({
     let lastTouchPositionY = 0;
     let startTouchPositionY = 0;
 
+    const leafletMap = mapRef?.current;
     const handleTouchStart = (e: TouchEvent) => {
-      if ( e.touches.length === 1 ) {
+      if (e.touches.length === 2) {
+        leafletMap?.dragging.enable();
+        leafletMap?.touchZoom.enable();
+      } else if ( e.touches.length === 1 ) {
         lastTouchPositionY = e.touches[0].clientY;
         startTouchPositionY = e.touches[0].clientY;
       }
@@ -754,21 +758,19 @@ function DocumentMap({
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 1) {
-        e.stopPropagation();
-        e.preventDefault();
-
         if ( startTouchPositionY === 0 ) return;
 
         const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
 
         if (e.touches.length === 1 && dragDifference > 20 && !showOverlay) {
+          leafletMap?.dragging.disable();
+          leafletMap?.touchZoom.disable();
           setShowOverlay(true);
         } else if (!!showOverlay) {
+          leafletMap?.dragging.enable();
+          leafletMap?.touchZoom.enable();
           setShowOverlay(false);
         }
-
-        const deltaY = e.touches[0].clientY - lastTouchPositionY;
-        window.scrollBy(0, -deltaY);
 
         lastTouchPositionY = e.touches[0].clientY;
       } else if (e.touches.length === 2) {
@@ -786,16 +788,21 @@ function DocumentMap({
         if (mapElement) {
           mapElement.addEventListener('touchstart', handleTouchStart);
           mapElement.addEventListener('touchend', handleTouchEnd);
-          mapElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+          mapElement.addEventListener('touchmove', handleTouchMove);
         }
 
         return () => {
           if (mapElement) {
             mapElement.removeEventListener('touchstart', handleTouchStart);
-            mapElement.removeEventListener('touchmove', handleTouchMove, { passive: false });
             mapElement.removeEventListener('touchend', handleTouchEnd);
+            mapElement.removeEventListener('touchmove', handleTouchMove);
           }
         };
+      } else {
+        leafletMap?.dragging.enable();
+        leafletMap?.touchZoom.enable();
+        leafletMap?.scrollWheelZoom.enable();
+        leafletMap?.doubleClickZoom.enable();
       }
     }, [mapRef?.current, isTouchDevice]);
 
@@ -853,6 +860,11 @@ function DocumentMap({
                 zoom={zoom}
                 zoomSnap={0}
                 maxBounds={popupPosition ? undefined : bounds as LatLngBoundsLiteral}
+
+                dragging={false}
+                touchZoom={false}
+                scrollWheelZoom={false}
+                doubleClickZoom={false}
             >
               <MapEvents />
               {filteredComments && filteredComments
