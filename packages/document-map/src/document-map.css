@@ -468,3 +468,7 @@ section.comment-item-footer .utrecht-button--disabled:before,
   font-weight: 200;
   font-size: 36px;
 }
+
+.documentMap--container .disable-touch-action {
+  touch-action: none;
+}
