@@ -48,7 +48,7 @@ export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: a
         }
 
         if (Array.isArray(parsedValue)) {
-          return [...parsedValue].join(', ')
+          return [...parsedValue].join(' | ')
         }
 
     return value;
