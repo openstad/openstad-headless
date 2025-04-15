@@ -750,6 +750,8 @@ function DocumentMap({
       if (e.touches.length === 2) {
         leafletMap?.dragging.enable();
         leafletMap?.touchZoom.enable();
+
+        leafletMap?.getContainer()?.classList?.add('disable-touch-action');
       } else if ( e.touches.length === 1 ) {
         lastTouchPositionY = e.touches[0].clientY;
         startTouchPositionY = e.touches[0].clientY;
@@ -779,6 +781,7 @@ function DocumentMap({
     };
 
     const handleTouchEnd = () => {
+      leafletMap?.getContainer()?.classList?.remove('disable-touch-action');
       setShowOverlay(false);
     };
 
