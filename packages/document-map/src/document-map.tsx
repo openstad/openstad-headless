@@ -89,6 +89,8 @@ export type DocumentMapProps = BaseProps &
     onlyAllowClickOnImage?: boolean;
     popupNotLoggedInText?: string;
     popupNotLoggedInButton?: string;
+    minCharactersWarning?: string;
+    maxCharactersWarning?: string;
   };
 
 
@@ -307,14 +309,17 @@ function DocumentMap({
     let helpText = '';
 
     const min = props.comments?.descriptionMinLength || 0;
-    let minWarning = `Nog minimaal ${min - count} karakters`;
+
+    const minWarningText = props?.minCharactersWarning || 'Nog minimaal {minCharacters} karakters';
+    let minWarning = minWarningText.replace('{minCharacters}', (min - count).toString());
 
     const max = props.comments?.descriptionMaxLength || Infinity;
 
     if (count < min) {
       helpText = minWarning;
     } else if (count > max) {
-      helpText = `Je hebt ${count - max} karakters teveel`;
+      const maxWarningText = props?.maxCharactersWarning || 'Je hebt {maxCharacters} karakters teveel';
+      helpText = maxWarningText.replace('{maxCharacters}', (count - max).toString());
     } else {
       helpText = '';
     }

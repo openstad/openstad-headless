@@ -118,6 +118,8 @@ function CommentsInner({
     requiredUserRole: props.comments?.requiredUserRole || 'member',
     descriptionMinLength: props.comments?.descriptionMinLength || 30,
     descriptionMaxLength: props.comments?.descriptionMaxLength || 500,
+    minCharactersWarning: props?.comments?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+    maxCharactersWarning: props?.comments?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
     adminLabel: props.comments?.adminLabel || 'admin',
     ...props,
   } as CommentsWidgetProps;

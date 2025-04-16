@@ -39,6 +39,8 @@ export type ProjectSettingProps = {
     descriptionMinLength: number,
     descriptionMaxLength: number,
     adminLabel: string,
+    minCharactersWarning?: string,
+    maxCharactersWarning?: string,
   };
   users: {
     canCreateNewUsers: boolean;

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,6 +22,8 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   afterSubmitUrl: z.string().optional(),
+  minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
+  maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -38,6 +40,8 @@ export default function WidgetEnqueteGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
+      minCharactersWarning: props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
     },
   });
 
@@ -50,7 +54,7 @@ export default function WidgetEnqueteGeneral(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-y-2 w-full lg:w-1/3">
+          className="flex flex-col gap-y-4 w-full lg:w-1/3">
           <FormField
             control={form.control}
             name="title"
@@ -105,6 +109,44 @@ export default function WidgetEnqueteGeneral(
                     }}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="minCharactersWarning"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Waarschuwing voor minimaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst die getoond wordt als het aantal karakters onder de minimum waarde ligt. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="maxCharactersWarning"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Waarschuwing voor maximaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
                 <FormMessage />
               </FormItem>
             )}

@@ -40,6 +40,8 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 imageB: item.imageB || '',
                 showLabels: false,
                 disabled: !showForm,
+                maxCharactersWarning: data?.choiceGuide?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+                minCharactersWarning: data?.choiceGuide?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
             };
 
             switch (item.type) {
