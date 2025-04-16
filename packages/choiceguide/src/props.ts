@@ -20,6 +20,8 @@ export type ChoiceGuide = {
     afterUrl?: string;
     introTitle?: string;
     introDescription?: string;
+    minCharactersWarning?: string;
+    maxCharactersWarning?: string;
 };
 
 type ExtraProjectSettings = {

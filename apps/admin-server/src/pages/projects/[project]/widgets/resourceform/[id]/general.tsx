@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -40,7 +40,8 @@ const formSchema = z.object({
     }
   ),
   hideAdmin: z.boolean(),
-  // organiseForm: z.enum(['static', 'staticAppended', 'dynamic']),
+  minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
+  maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -60,7 +61,8 @@ export default function WidgetResourceFormGeneral() {
       formName: widget?.config?.[category]?.formName || '',
       redirectUrl: widget?.config?.[category]?.redirectUrl || '',
       hideAdmin: widget?.config?.[category]?.hideAdmin || false,
-      // organiseForm: widget?.config?.[category]?.organiseForm || 'static',
+      minCharactersWarning: widget?.config?.[category]?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning: widget?.config?.[category]?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
     }),
     [widget?.config]
   );
@@ -172,32 +174,45 @@ export default function WidgetResourceFormGeneral() {
               </FormItem>
             )}
           />
-          {/*<FormField*/}
-          {/*  control={form.control}*/}
-          {/*  name="organiseForm"*/}
-          {/*  render={({ field }) => (*/}
-          {/*    <FormItem className="mt-auto">*/}
-          {/*      <FormLabel>*/}
-          {/*        Hoe moeten de velden van het formulier opgesteld worden?*/}
-          {/*      </FormLabel>*/}
-          {/*      <Select onValueChange={field.onChange} value={field.value}>*/}
-          {/*        <FormControl>*/}
-          {/*          <SelectTrigger>*/}
-          {/*            <SelectValue placeholder="Statisch (standaard)" />*/}
-          {/*          </SelectTrigger>*/}
-          {/*        </FormControl>*/}
-          {/*        <SelectContent>*/}
-          {/*          <SelectItem value="static">Statisch (standaard)</SelectItem>*/}
-          {/*          <SelectItem value="staticAppended">*/}
-          {/*            Statisch, met dynamische velden toegevoegd*/}
-          {/*          </SelectItem>*/}
-          {/*          <SelectItem value="dynamic">Dynamisch</SelectItem>*/}
-          {/*        </SelectContent>*/}
-          {/*      </Select>*/}
-          {/*      <FormMessage />*/}
-          {/*    </FormItem>*/}
-          {/*  )}*/}
-          {/*/>*/}
+
+          <FormField
+            control={form.control}
+            name="minCharactersWarning"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Waarschuwing voor minimaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst die getoond wordt als het aantal karakters onder de minimum waarde ligt. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="maxCharactersWarning"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Waarschuwing voor maximaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

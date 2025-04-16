@@ -18,6 +18,8 @@ function CommentForm({
   activeMode = '',
   sentiment = '',
   disableSubmit = false,
+  maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
+  minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
   ...props
 }: CommentFormProps) {
   const commentsContext = useContext(CommentWidgetContext);
@@ -26,6 +28,8 @@ function CommentForm({
     comment,
     descriptionMinLength,
     descriptionMaxLength,
+    maxCharactersWarning,
+    minCharactersWarning,
     ...props,
   } as CommentFormProps;
 
@@ -42,6 +46,8 @@ function CommentForm({
     fieldKey: 'description',
     placeholder: commentsContext?.placeholder,
     defaultValue: !parentId ? args.comment?.description : '',
+    maxCharactersWarning: maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+    minCharactersWarning: minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
   });
 
   formFields.push({

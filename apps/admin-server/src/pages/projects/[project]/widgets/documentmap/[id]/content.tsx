@@ -35,6 +35,8 @@ const formSchema = z.object({
     relativePathPrepend: z.string().optional(),
     popupNotLoggedInText: z.string().optional(),
     popupNotLoggedInButton: z.string().optional(),
+    minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} karakters"),
+    maxCharactersWarning: z.string().optional().default("Je hebt {maxCharacters} karakters teveel"),
 });
 
 export default function DocumentContent(
@@ -66,6 +68,8 @@ export default function DocumentContent(
             relativePathPrepend: props?.relativePathPrepend || '',
             popupNotLoggedInText: props?.popupNotLoggedInText || 'Om een reactie te plaatsen, moet je ingelogd zijn.',
             popupNotLoggedInButton: props?.popupNotLoggedInButton || 'Inloggen',
+            minCharactersWarning: props?.minCharactersWarning || 'Nog minimaal {minCharacters} karakters',
+            maxCharactersWarning: props?.maxCharactersWarning || 'Je hebt {maxCharacters} karakters teveel',
         },
     });
 
@@ -206,6 +210,44 @@ export default function DocumentContent(
                                 <FormMessage />
                             </FormItem>
                         )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="minCharactersWarning"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Waarschuwing voor minimaal aantal karakters
+                          </FormLabel>
+                          <FormDescription>
+                            {`Dit is de tekst die getoond wordt als het aantal karakters onder de minimum waarde ligt. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                          </FormDescription>
+                          <Input
+                            {...field}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="maxCharactersWarning"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Waarschuwing voor maximaal aantal karakters
+                          </FormLabel>
+                          <FormDescription>
+                            {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                          </FormDescription>
+                          <Input
+                            {...field}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
 
                     <Heading size="lg" className="mt-8 mb-2">Marker Gerelateerd</Heading>
