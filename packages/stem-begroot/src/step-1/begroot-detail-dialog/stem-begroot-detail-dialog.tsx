@@ -102,9 +102,9 @@ export const StemBegrootResourceDetailDialog = ({
     ?.filter((resource: any) => {
       if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
         if (typeSelector === 'tag') {
-          return resource.tags.some((tag: { name: string }) => tag.name === activeTagTab);
+          return resource.tags?.some((tag: { name: string }) => tag.name === activeTagTab);
         } else {
-          return resource.tags.some((tag: { type: string }) => tag.type === activeTagTab);
+          return resource.tags?.some((tag: { type: string }) => tag.type === activeTagTab);
         }
       }
       return true;

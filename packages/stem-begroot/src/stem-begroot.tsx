@@ -264,7 +264,7 @@ function StemBegroot({
         resources?.records?.length > 0 &&
         selectedResources.length === 0
       ) {
-        setSelectedResources(resources.records.filter((r: any) => pending[r.id]));
+        setSelectedResources(resources?.records?.filter((r: any) => pending[r.id]));
       }
     }
   }, [resources?.records]);
@@ -424,8 +424,12 @@ function StemBegroot({
 
   useEffect(() => {
     if (props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag") {
-      if (tagsToDisplay.length > 0) {
-        const tagCounter: Array<TagType> = tagsToDisplay.map((tag: string) => {
+      if (
+        tagsToDisplay.length > 0
+        &&
+        ( !Array.isArray(tagCounter) || (Array.isArray(tagCounter) && tagCounter.length === 0) )
+      ) {
+        const tagCounterNew: Array<TagType> = tagsToDisplay.map((tag: string) => {
           return {
             [tag]: {
               min: 1,
@@ -436,7 +440,7 @@ function StemBegroot({
           }
         });
 
-        setTagCounter(tagCounter);
+        setTagCounter(tagCounterNew);
       }
     }
   }, [tagsToDisplay]);
@@ -773,13 +777,18 @@ function StemBegroot({
                 onClick={async () => {
                   if (currentStep === 0) {
                     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
-                      const unmetTag = tagCounter.find(tagObj => {
+                      const unmetTags = tagCounter.filter(tagObj => {
                         const key = Object.keys(tagObj)[0];
                         return tagObj[key].current < tagObj[key].min;
                       });
 
-                      if (unmetTag) {
-                        const tagName = Object.keys(unmetTag)[0];
+                      const nextUnmetTag = unmetTags.find(tagObj => {
+                        const key = Object.keys(tagObj)[0];
+                        return key !== activeTagTab;
+                      });
+
+                      if (nextUnmetTag) {
+                        const tagName = Object.keys(nextUnmetTag)[0];
                         setActiveTagTab(tagName);
                         return;
                       }
@@ -800,7 +809,7 @@ function StemBegroot({
                         for (const tagObj of tagCounter) {
                           const tagName = Object.keys(tagObj)[0];
                           const resourcesToVote = tagObj[tagName].selectedResources.map((resourceSelected: { id: number }) => {
-                            return resources.records.find((resource: { id: number }) => resource.id === resourceSelected.id);
+                            return resources?.records?.find((resource: { id: number }) => resource.id === resourceSelected.id);
                           }).filter(Boolean);
 
                           allResourcesToVote = allResourcesToVote.concat(resourcesToVote);
