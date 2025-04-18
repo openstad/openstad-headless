@@ -98,7 +98,26 @@ export default function ProjectAuthentication() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      let updatedConfig = {
+      let updatedConfig: {
+        auth: {
+          provider: {
+            openstad: {
+              authTypes: string[];
+              config: {
+                fromEmail?: string;
+                fromName?: string;
+                contactEmail?: string;
+                defaultRoleId?: string;
+                styling: {
+                  logo?: string;
+                  favicon?: string;
+                };
+                clientStylesheets?: { url: string }[];
+              };
+            };
+          };
+        };
+      } = {
         auth: {
           provider: {
             openstad: {
