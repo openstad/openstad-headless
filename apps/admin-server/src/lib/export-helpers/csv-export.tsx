@@ -70,18 +70,19 @@ export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: a
     dynamicColumns = selectedWidget.config.items.map((item: any) => item.title || item.fieldKey);
   }
 
-  const allSubmittedKeys = new Set<string>();
+  const allSubmittedKeys: string[] = [];
   data.forEach((row: any) => {
     if (row?.submittedData) {
       Object.keys(row.submittedData).forEach(key => {
         const title = selectedWidget?.config?.items?.find((item: any) => item.fieldKey === key)?.title || key;
-        allSubmittedKeys.add(title);
+        if (!allSubmittedKeys.includes(title)) {
+          allSubmittedKeys.push(title);
+        }
       });
     }
   });
 
-  const extraDynamicColumns = Array.from(allSubmittedKeys).filter(key => !dynamicColumns.includes(key));
-
+  const extraDynamicColumns = allSubmittedKeys.filter(key => !dynamicColumns.includes(key));
   const columns = [...fixedColumns, ...dynamicColumns, ...extraDynamicColumns];
 
   const headerRow = [...columns].join(';');
