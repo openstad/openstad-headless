@@ -1,7 +1,5 @@
 export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: any) => {
 
-  console.log( "selectedWidget?.config?.items", selectedWidget?.config?.items );
-
   if ( selectedWidget && selectedWidget?.config && selectedWidget?.config?.items ) {
 
     const fieldKeyToTitleMap = selectedWidget?.config?.items.reduce((acc: any, item: any) => {
