@@ -1,5 +1,7 @@
 export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: any) => {
 
+  console.log( "selectedWidget?.config?.items", selectedWidget?.config?.items );
+
   if ( selectedWidget && selectedWidget?.config && selectedWidget?.config?.items ) {
 
     const fieldKeyToTitleMap = selectedWidget?.config?.items.reduce((acc: any, item: any) => {
@@ -62,11 +64,27 @@ export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: a
     return rowValues.join(';');
   };
 
-  const allKeys = data.reduce(
-    (acc: any, curr: any) => [...acc, ...Object.keys(curr.submittedData)],
-    ['ID', 'Aangemaakt op', 'Project ID', 'Widget', 'Gebruikers ID']
-  );
-  const columns = Array.from(new Set(allKeys));
+  const fixedColumns = ['ID', 'Aangemaakt op', 'Project ID', 'Widget', 'Gebruikers ID'];
+
+  let dynamicColumns: string[] = [];
+
+  if (selectedWidget?.config?.items?.length > 0) {
+    dynamicColumns = selectedWidget.config.items.map((item: any) => item.title || item.fieldKey);
+  }
+
+  const allSubmittedKeys = new Set<string>();
+  data.forEach((row: any) => {
+    if (row?.submittedData) {
+      Object.keys(row.submittedData).forEach(key => {
+        const title = selectedWidget?.config?.items?.find((item: any) => item.fieldKey === key)?.title || key;
+        allSubmittedKeys.add(title);
+      });
+    }
+  });
+
+  const extraDynamicColumns = Array.from(allSubmittedKeys).filter(key => !dynamicColumns.includes(key));
+
+  const columns = [...fixedColumns, ...dynamicColumns, ...extraDynamicColumns];
 
   const headerRow = [...columns].join(';');
 
