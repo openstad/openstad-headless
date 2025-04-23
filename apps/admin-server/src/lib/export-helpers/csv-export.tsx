@@ -54,60 +54,72 @@ export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: a
     return value;
   };
 
-  const createRow = (rowData: any, keys: any) => {
-    const rowValues = keys.map((key: any) => {
-      return normalizeData(rowData[key]);
-    });
-
-    return rowValues.join(';');
-  };
-
   const fixedColumns = ['ID', 'Aangemaakt op', 'Project ID', 'Widget', 'Gebruikers ID'];
 
   let dynamicColumns: string[] = [];
+  const fieldKeyToTitleMap = new Map();
 
   if (selectedWidget?.config?.items?.length > 0) {
-    dynamicColumns = selectedWidget.config.items.map((item: any) => item.title || item.fieldKey);
+    selectedWidget.config.items.forEach((item: any) => {
+      if (item.questionType === 'none' && selectedWidget?.type !== "distributionmodule") return;
+
+      const title = item.title || item.fieldKey;
+      if (title) {
+        dynamicColumns.push(title);
+        fieldKeyToTitleMap.set(item.fieldKey || title, title);
+      }
+
+      if (item.options && Array.isArray(item.options)) {
+        item.options.forEach((option: any, index: number) => {
+          const titles = option.titles;
+          if (
+            titles &&
+            Array.isArray(titles) &&
+            titles.length > 0 &&
+            titles[0].isOtherOption
+          ) {
+            const otherKey = `${item.fieldKey}_${index}_other`;
+
+            const hasOtherData = data.some((row: any) => !!row?.submittedData?.[otherKey]);
+
+            const otherTitle = titles[0].key || titles[0].title || 'Anders, namelijk';
+            if (hasOtherData && otherTitle) {
+              dynamicColumns.push(otherTitle);
+              fieldKeyToTitleMap.set(otherKey, otherTitle);
+            }
+          }
+        });
+      }
+    });
   }
 
-  const allSubmittedKeys: string[] = [];
-  data.forEach((row: any) => {
-    if (row?.submittedData) {
-      Object.keys(row.submittedData).forEach(key => {
-        const title = selectedWidget?.config?.items?.find((item: any) => item.fieldKey === key)?.title || key;
-        if (!allSubmittedKeys.includes(title)) {
-          allSubmittedKeys.push(title);
-        }
-      });
-    }
-  });
+  const columns = [...fixedColumns, ...dynamicColumns];
 
-  const extraDynamicColumns = allSubmittedKeys.filter(key => !dynamicColumns.includes(key));
-  const columns = [...fixedColumns, ...dynamicColumns, ...extraDynamicColumns];
+  if (selectedWidget?.type !== "distributionmodule") {
+    columns.push('Embedded URL');
+  }
 
   const headerRow = [...columns].join(';');
 
   const dataRows = data.map((row: any) => {
-    const rowData = {
-      ID: row.id || ' ',
-      'Aangemaakt op': row.createdAt || ' ',
-      'Project ID': row.projectId || ' ',
-      'Widget': widgetName || ' ',
-      'Gebruikers ID': row.userId || ' ',
-      ...Object.fromEntries(
-        Object.entries(row.submittedData).map(([key, value]) => {
-          if (typeof value === 'object' && value !== null) {
-            const flattenedValue = Object.entries(value)
-              .map(([subKey, subValue]) => `${subKey}: ${subValue.url || subValue}`)
-              .join(', ');
-            return [key, flattenedValue];
-          } else {
-            return [key, JSON.stringify(value)];
-          }
-        })
-      ),
-    };
-    return createRow(rowData, columns);
+    const rowData = [
+      row.id || ' ',
+      row.createdAt || ' ',
+      row.projectId || ' ',
+      widgetName || ' ',
+      row.userId || ' ',
+      ...Array.from(fieldKeyToTitleMap.entries()).map(([key, title]) => {
+        const keyToUse = key?.endsWith('_other') ? key : title;
+        const rawValue = row.submittedData?.[keyToUse];
+        return normalizeData(rawValue);
+      }),
+    ];
+
+    if (selectedWidget?.type !== "distributionmodule") {
+      rowData.push(row?.submittedData?.embeddedUrl || '');
+    }
+
+    return rowData.join(';');
   });
 
   const csv = [headerRow, ...dataRows].join('\n');
