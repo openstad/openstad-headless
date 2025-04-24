@@ -388,25 +388,34 @@ function ResourceOverview({
     api: props.api,
   });
 
-  // const recourceTagsInclude = only
-  const tagIdsToLimitResourcesTo = onlyIncludeTagIds
-    .trim()
-    .split(',')
-    .filter((t) => t && !isNaN(+t.trim()))
-    .map((t) => Number.parseInt(t));
+  const stringToArray = (str: string) => {
+    return str
+      .trim()
+      .split(',')
+      .filter((t) => t && !isNaN(+t.trim()))
+      .map((t) => Number.parseInt(t));
+  }
 
-  const statusIdsToLimitResourcesTo = onlyIncludeStatusIds
-    .trim()
-    .split(',')
-    .filter((t) => t && !isNaN(+t.trim()))
-    .map((t) => Number.parseInt(t));
+  // const recourceTagsInclude = only
+  const tagIdsToLimitResourcesTo = stringToArray(onlyIncludeTagIds);
+  const statusIdsToLimitResourcesTo = stringToArray(onlyIncludeStatusIds);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTagIds = urlParams.get('tagIds');
+  const urlStatusIds = urlParams.get('statusIds');
+
+  const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : undefined;
+  const urlStatusIdsArray = urlStatusIds ? stringToArray(urlStatusIds) : undefined;
 
   const [open, setOpen] = React.useState(false);
 
+  const initTags = urlTagIdsArray && urlTagIdsArray.length > 0 ? urlTagIdsArray : tagIdsToLimitResourcesTo || [];
+  const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
+
   // Filters that when changed reupdate the useResources value automatically
   const [search, setSearch] = useState<string>('');
-  const [statuses, setStatuses] = useState<number[]>(statusIdsToLimitResourcesTo || []);
-  const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo || []);
+  const [statuses, setStatuses] = useState<number[]>(initStatuses);
+  const [tags, setTags] = useState<number[]>(initTags);
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(itemsPerPage || 10);
@@ -666,6 +675,7 @@ function ResourceOverview({
                 setSearch(f.search.text);
               }}
               quickFixTags={quickFixTags || []}
+              preFilterTags={urlTagIdsArray}
             />
           ) : null}
 

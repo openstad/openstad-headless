@@ -35,6 +35,7 @@ type Props = {
   applyText: string;
   showActiveTags?: boolean;
   quickFixTags?: Array<{ id: number; name: string }>;
+  preFilterTags?: Array<number>;
 };
 
 export function Filters({
@@ -46,6 +47,7 @@ export function Filters({
   onUpdateFilter,
   className = '',
   showActiveTags = false,
+  preFilterTags = undefined,
   ...props
 }: Props) {
   const defaultFilter: Filter = {
@@ -61,6 +63,7 @@ export function Filters({
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
   const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
   const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
+  const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
 
   const search = useDebounce(setSearch, 300);
 
@@ -88,7 +91,7 @@ export function Filters({
     });
   }
 
-  const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel?: string) => {
+  const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel?: string, forceSelected?: boolean) => {
     const existingTags = selectedOptions[tagType];
     const selectedDraft: { type?: string, id: number, label?: string }[] = [...(newActiveTagsDraft || [])];
     const selected = [...(existingTags || [])];
@@ -96,14 +99,18 @@ export function Filters({
     const tagIndex = selectedDraft.findIndex((tag: { type?: string, id: number, label?: string }) => tag.id === updatedTag);
 
     if (tagIndex !== -1) {
-      selectedDraft.splice(tagIndex, 1);
+      if (!forceSelected) {
+        selectedDraft.splice(tagIndex, 1);
+      }
     } else {
       selectedDraft.push({ id: updatedTag, label: updatedLabel, type: tagType });
     }
 
     if (selected.includes(updatedTag)) {
-      const index = selected.indexOf(updatedTag);
-      selected.splice(index, 1);
+      if (!forceSelected) {
+        const index = selected.indexOf(updatedTag);
+        selected.splice(index, 1);
+      }
     } else {
       selected.push(updatedTag);
     }
@@ -159,6 +166,7 @@ export function Filters({
   }, [tagState]);
 
   const handleSubmit = (e?: any, updatedFilter?: Filter, updatedTags?: any) => {
+    setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
     updateFilter(filterToSubmit);
@@ -197,11 +205,13 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onlyIncludeIds={tagsLimitation}
-                    onUpdateFilter={(updatedTag, updatedLabel) => {
-                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel);
+                    onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
+                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel, forceSelected || false);
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
                     quickFixTags={props.quickFixTags || []}
+                    preFilterTags={preFilterTags}
+                    parentStopUsingDefaultValue={stopUsingDefaultValue}
                   />
                 );
               } else {
@@ -219,6 +229,8 @@ export function Filters({
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
                     quickFixTags={props.quickFixTags || []}
+                    preFilterTags={preFilterTags}
+                    parentStopUsingDefaultValue={stopUsingDefaultValue}
                   />
                 );
               }
@@ -258,6 +270,7 @@ export function Filters({
               if (inputsInFilter) {
                 inputsInFilter.forEach((i) => (i.value = ''));
               }
+              setStopUsingDefaultValue(true);
               setSelected({});
               setNewActiveTagsDraft([]);
               setActiveTags([]);
