@@ -43,12 +43,33 @@ export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: a
 
         try {
           parsedValue = JSON.parse(value);
-        } catch (error) {
-          return value;
-        }
+        } catch (error) {}
 
         if (Array.isArray(parsedValue)) {
           return [...parsedValue].join(' | ')
+        }
+
+        if (typeof value === 'object') {
+          if ( Array.isArray(value) && value.length > 0 ) {
+            if ( typeof(value[0]) === 'object' ) {
+              return value.map((item: any) => {
+                return Object.entries(item)
+                  .map(([key, val]) => `${key}: ${val}`)
+                  .join(', ');
+              }).join(' | ')
+            }
+          }
+
+          return Object.entries(value)
+            .map(([key, val]) => `${key}: ${val}`)
+            .join(', ');
+        }
+
+        if ( typeof value === 'string' ) {
+          let escapedValue = value.replace(/(\r\n|\r\r|\n\n|\n|\r)+/g, '\n');
+          escapedValue = escapedValue.replace(/"/g, "'");
+
+          return `"${escapedValue}"`;
         }
 
     return value;
