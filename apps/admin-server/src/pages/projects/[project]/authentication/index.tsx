@@ -57,6 +57,7 @@ const formSchema = z.object({
   imageFavicon: z.string().optional(),
   favicon: z.string().optional(),
   cssUrl: z.string().optional(),
+  clientDisclaimerUrl: z.string().optional(),
   clientStylesheets: z.array(z.object({
     url: z.string().optional(),
   })).optional(),
@@ -80,6 +81,7 @@ export default function ProjectAuthentication() {
       defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
       logo: data?.config?.auth?.provider?.openstad?.config?.styling?.logo,
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
+      clientDisclaimerUrl: data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
       cssUrl: (Array.isArray(data?.config?.auth?.provider?.openstad?.config?.clientStylesheets) && data?.config?.auth?.provider?.openstad?.config?.clientStylesheets?.length)
         ? data?.config?.auth?.provider?.openstad?.config?.clientStylesheets[0]?.url
         : '',
@@ -108,6 +110,7 @@ export default function ProjectAuthentication() {
                 fromName?: string;
                 contactEmail?: string;
                 defaultRoleId?: string;
+                clientDisclaimerUrl?: string;
                 styling: {
                   logo?: string;
                   favicon?: string;
@@ -127,6 +130,7 @@ export default function ProjectAuthentication() {
                 fromName: values.fromName,
                 contactEmail: values.contactEmail,
                 defaultRoleId: values.defaultRoleId,
+                clientDisclaimerUrl: values.clientDisclaimerUrl,
                 styling: {
                   logo: values.logo,
                   favicon: values.favicon,
@@ -295,6 +299,20 @@ export default function ProjectAuthentication() {
                   render={({ field }) => (
                     <FormItem className="col-span-full">
                       <FormLabel>CSS url voor de authenticatie omgeving</FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientDisclaimerUrl"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>Privacyverklaring URL voor de authenticatie omgeving</FormLabel>
                       <FormControl>
                         <Input placeholder="" {...field} />
                       </FormControl>

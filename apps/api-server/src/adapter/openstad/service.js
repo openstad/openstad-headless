@@ -348,7 +348,7 @@ service.updateClient = async function({ authConfig, project }) {
     }
 
     // Update these properties (if they exist in the authConfig or client config), else keep the existing value
-    const properties = ['fromEmail', 'fromName', 'contactEmail', 'defaultRoleId', 'requiredFields', 'twoFactor', 'configureTwoFactor', "clientStylesheets"];
+    const properties = ['fromEmail', 'fromName', 'contactEmail', 'defaultRoleId', 'requiredFields', 'twoFactor', 'configureTwoFactor', "clientStylesheets", "clientDisclaimerUrl"];
     properties.forEach(property => {
       if (authConfig?.config && authConfig.config[property]) {
         newClientConfig[property] = authConfig.config[property];
