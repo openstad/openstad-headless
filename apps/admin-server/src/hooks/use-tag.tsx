@@ -2,7 +2,8 @@ import useSWR from 'swr';
 
 export default function useTags(projectId?: string, id?: string) {
 
-  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+  // Global tags have projectId = 0, therefore this check is different from the others
+  if (projectId !== null && projectId !== undefined && (!/^\d+$/.test(projectId.toString()))) {
     projectId = undefined;
   }
 
