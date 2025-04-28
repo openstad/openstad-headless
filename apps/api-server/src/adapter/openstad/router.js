@@ -164,8 +164,6 @@ router
     let code = req.query.code;
     if (!code) throw createError(403, 'Je bent niet ingelogd');
 
-    console.log( "Req first", req );
-
     let url = `${req.authConfig.serverUrlInternal}/oauth/token`;
     let data = {
       client_id: req.authConfig.clientId,
@@ -311,7 +309,7 @@ router
     });
   })
   .get(function (req, res, next) {
-    res.redirect();
+    res.redirect(req.redirectUrl);
   });
 
 // ----------------------------------------------------------------------------------------------------
