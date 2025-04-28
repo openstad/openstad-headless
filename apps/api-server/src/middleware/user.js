@@ -51,6 +51,8 @@ module.exports = async function getUser( req, res, next ) {
 
     const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) || {};
 
+    console.log ('user entity', userEntity);
+    
     req.user = userEntity
     
     return next();
@@ -114,9 +116,10 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
   let dbUser;
   
   try {
-
+    
     let where = { id: userId };
-
+    
+    
     if (!isFixed) {
       if (projectId) {
         where = Object.assign(where, {
@@ -133,9 +136,13 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
         where.role = 'admin';
       }
     }
-
+    
+    console.log ('get user instance, where', where);
+    
     dbUser = await db.User.findOne({ where });
 
+    console.log ('get user instance, dbUser', dbUser);
+    
     if (isFixed) {
       if (!dbUser.projectId || dbUser.projectId == config.admin.projectId) dbUser.role = 'superuser'; // !dbUser.projectId is backwards compatibility
       return dbUser;
@@ -180,11 +187,13 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
       // superusers mogen dingen over projecten heen, mindere goden alleen binnen hun eigen project
       mergedUser.role = 'superuser';
     }
+    
+    console.log ('get user instance, mergedUser', mergedUser, service);
 
     return mergedUser;
     
   } catch(err) {
-    console.log(err);
+    console.log('get user instance err', err);
     return await resetUserToken(dbUser);
   }
 
