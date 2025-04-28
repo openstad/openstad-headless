@@ -164,6 +164,8 @@ router
     let code = req.query.code;
     if (!code) throw createError(403, 'Je bent niet ingelogd');
 
+    console.log( "Req first", req );
+
     let url = `${req.authConfig.serverUrlInternal}/oauth/token`;
     let data = {
       client_id: req.authConfig.clientId,
@@ -283,7 +285,19 @@ router
     const isPrivileged = privilegedRoles.includes(userRole);
 
     if (!isPrivileged) {
-        return next(createError(403, 'Je hebt geen toegang tot deze omgeving'));
+        let logoutUrl = '/signout';
+
+        try {
+            if (req.redirectUrl) {
+                const url = new URL(req.redirectUrl);
+                logoutUrl = `${url.origin}/signout`;
+            }
+        } catch (e) {}
+
+        return res.status(403).json({
+            error: 'Je hebt geen toegang tot deze omgeving',
+            logoutLink: logoutUrl
+        });
     }
 
     return next();
@@ -297,7 +311,7 @@ router
     });
   })
   .get(function (req, res, next) {
-    res.redirect(req.redirectUrl);
+    res.redirect();
   });
 
 // ----------------------------------------------------------------------------------------------------
