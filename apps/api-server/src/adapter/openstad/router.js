@@ -271,6 +271,24 @@ router
       .catch(next)
   })
   .get(function (req, res, next) {
+    if (!req?.userData?.projectId || (req?.userData?.projectId && req?.userData?.projectId !== 1)) return next();
+
+    const privilegedRoles = [
+      'admin',
+      'moderator',
+      'editor'
+    ];
+
+    const userRole = req?.userData?.role || "";
+    const isPrivileged = privilegedRoles.includes(userRole);
+
+    if (!isPrivileged) {
+        return next(createError(403, 'Je hebt geen toegang tot deze omgeving'));
+    }
+
+    return next();
+  })
+  .get(function (req, res, next) {
     if (!req.redirectUrl.match('[[jwt]]')) return next();
     jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
       if (err) return next(err)
