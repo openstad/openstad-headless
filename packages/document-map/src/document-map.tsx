@@ -742,72 +742,57 @@ function DocumentMap({
       }
     }, []);
 
-    let lastTouchPositionY = 0;
-    let startTouchPositionY = 0;
+  let lastTouchPositionY = 0;
+  let startTouchPositionY = 0;
+  const handleTouchStart = (e: TouchEvent) => {
+    if ( e.touches.length === 1 ) {
+      lastTouchPositionY = e.touches[0].clientY;
+      startTouchPositionY = e.touches[0].clientY;
+    }
+  };
+  const handleTouchMove = (e: TouchEvent) => {
+    if (e.touches.length === 1) {
+      e.stopPropagation();
+      e.preventDefault();
 
-    const leafletMap = mapRef?.current;
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        leafletMap?.dragging.enable();
-        leafletMap?.touchZoom.enable();
+      if ( startTouchPositionY === 0 ) return;
 
-        leafletMap?.getContainer()?.classList?.add('disable-touch-action');
-      } else if ( e.touches.length === 1 ) {
-        lastTouchPositionY = e.touches[0].clientY;
-        startTouchPositionY = e.touches[0].clientY;
+      const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
+      if (e.touches.length === 1 && dragDifference > 20 && !showOverlay) {
+        setShowOverlay(true);
+      } else if (!!showOverlay) {
+        setShowOverlay(false);
       }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        if ( startTouchPositionY === 0 ) return;
-
-        const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
-
-        if (e.touches.length === 1 && dragDifference > 20 && !showOverlay) {
-          leafletMap?.dragging.disable();
-          leafletMap?.touchZoom.disable();
-          setShowOverlay(true);
-        } else if (!!showOverlay) {
-          leafletMap?.dragging.enable();
-          leafletMap?.touchZoom.enable();
-          setShowOverlay(false);
-        }
-
-        lastTouchPositionY = e.touches[0].clientY;
-      } else if (e.touches.length === 2) {
-        startTouchPositionY = 0;
+      const deltaY = e.touches[0].clientY - lastTouchPositionY;
+      window.scrollBy(0, -deltaY);
+      lastTouchPositionY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      startTouchPositionY = 0;
+    }
+  };
+  const handleTouchEnd = () => {
+    setShowOverlay(false);
+  };
+  useEffect(() => {
+    if (isTouchDevice) {
+      const mapElement = mapRef.current?.getContainer();
+      if (mapElement) {
+        mapElement.addEventListener('touchstart', handleTouchStart);
+        mapElement.addEventListener('touchend', handleTouchEnd);
+        mapElement.addEventListener('touchmove', handleTouchMove);
+        mapElement.addEventListener('touchmove', handleTouchMove, { passive: false });
       }
-    };
 
-    const handleTouchEnd = () => {
-      leafletMap?.getContainer()?.classList?.remove('disable-touch-action');
-      setShowOverlay(false);
-    };
-
-    useEffect(() => {
-      if (isTouchDevice) {
-        const mapElement = mapRef.current?.getContainer();
+      return () => {
         if (mapElement) {
-          mapElement.addEventListener('touchstart', handleTouchStart);
-          mapElement.addEventListener('touchend', handleTouchEnd);
-          mapElement.addEventListener('touchmove', handleTouchMove);
+          mapElement.removeEventListener('touchstart', handleTouchStart);
+          mapElement.removeEventListener('touchmove', handleTouchMove);
+          mapElement.removeEventListener('touchmove', handleTouchMove, { passive: false });
+          mapElement.removeEventListener('touchend', handleTouchEnd);
         }
-
-        return () => {
-          if (mapElement) {
-            mapElement.removeEventListener('touchstart', handleTouchStart);
-            mapElement.removeEventListener('touchend', handleTouchEnd);
-            mapElement.removeEventListener('touchmove', handleTouchMove);
-          }
-        };
-      } else {
-        leafletMap?.dragging.enable();
-        leafletMap?.touchZoom.enable();
-        leafletMap?.scrollWheelZoom.enable();
-        leafletMap?.doubleClickZoom.enable();
-      }
-    }, [mapRef?.current, isTouchDevice]);
+      };
+    }
+  }, [mapRef?.current, isTouchDevice]);
 
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
