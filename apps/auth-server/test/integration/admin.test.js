@@ -28,8 +28,8 @@ describe('Grant Type Client', () => {
 
   it('should able to login with basic auth', async (done) => {
 
-    const clientId = 'trustedClient';
-    const clientSecret = 'ssh-otherpassword';
+    const clientId = '';
+    const clientSecret = '';
 
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
@@ -41,8 +41,8 @@ describe('Grant Type Client', () => {
   });
 
   it('should get all users', (done) => {
-    const clientId = 'trustedClient';
-    const clientSecret = 'ssh-otherpassword';
+    const clientId = '';
+    const clientSecret = '';
 
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 

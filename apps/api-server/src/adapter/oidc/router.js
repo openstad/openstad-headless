@@ -234,8 +234,10 @@ router
 
     let returnTo = req.query.returnTo;
     returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
+    returnTo = String(returnTo);
+
     let redirectUrl = returnTo ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false;
-    redirectUrl = redirectUrl || (req.query.returnTo ? req.query.returnTo + (req.query.returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false);
+    redirectUrl = redirectUrl || (req.query.returnTo ? String(req.query.returnTo) + (String(req.query.returnTo).includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false);
     redirectUrl = redirectUrl || '/';
 
     // todo: deze afvanging moet veel eerder!!!
