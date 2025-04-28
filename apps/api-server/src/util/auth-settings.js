@@ -76,6 +76,7 @@ let getAdapter = async function({  authConfig, project, useAuth = 'default' }){
 
   try {
     let adapter = await require(path.normalize(__dirname + '/../..') + '/' + authConfig.modulePath);
+    console.log ('getAdapter', adapter);
     return adapter;
   } catch(err) {
     console.log(err);
