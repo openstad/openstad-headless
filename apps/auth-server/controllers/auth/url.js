@@ -104,7 +104,7 @@ const handleSending = async (req, res, next) => {
 
         let redirectUrl = '/auth/url/login?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl;
 
-        if (isPriviligedRoute) {
+        if (isPrivilegedRoute) {
             redirectUrl += '&priviligedRoute=admin';
         }
 
