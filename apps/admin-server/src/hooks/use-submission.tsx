@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
 export default function useSubmissions(projectId?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
   const url = `/api/openstad/api/project/${projectId}/submission`;
 
   const { data, isLoading, error, mutate } = useSWR(projectId ? url : null);

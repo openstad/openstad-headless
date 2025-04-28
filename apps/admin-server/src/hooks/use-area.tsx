@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
 export default function useArea(areaId?: string) {
+  if (areaId && (!/^\d+$/.test(areaId.toString()))) {
+    areaId = undefined;
+  }
+
   let url = `/api/openstad/api/area/${areaId}`;
 
   const areaSwr = useSWR( url );

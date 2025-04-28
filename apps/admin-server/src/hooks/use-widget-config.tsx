@@ -4,8 +4,15 @@ import useSWR from 'swr';
 
 export function useWidgetConfig<R>() {
   const router = useRouter();
-  const id = router.query.id;
-  const projectId = router.query.project;
+  let id = router.query.id;
+  let projectId = router.query.project;
+
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+  if (id && (!/^\d+$/.test(id.toString()))) {
+    id = undefined;
+  }
 
   const swr = useSWR(
     projectId && id

@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
-export default function useChoiceGuideResults(projectId: string) {
+export default function useChoiceGuideResults(projectId?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
   let url = `/api/openstad/api/project/${projectId}/choicesguide`;
 
   async function remove(id: string|number) {

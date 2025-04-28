@@ -15,7 +15,7 @@ export const DocumentUploader: React.FC<{
   onDocumentUploaded?: (documentObject: {url: string} ) => void;
   documentLabel?: string;
   allowedTypes?: string[];
-  project: string;
+  project?: string;
 }> = ({ form, fieldName, onDocumentUploaded, allowedTypes, documentLabel = 'Document', project }) => {
   const [document, setDocument] = React.useState<{url: string, name: string}>();
   const [documentUrl, setDocumentUrl] = React.useState<string>('');
@@ -31,6 +31,10 @@ export const DocumentUploader: React.FC<{
 
   async function uploadDocument(data: any) {
     let document = prepareDocument(data);
+
+    if (project && (!/^\d+$/.test(project.toString()))) {
+      project = undefined;
+    }
 
     const response = await fetch(`/api/openstad/api/project/${project}/upload/document`, {
       method: 'POST',

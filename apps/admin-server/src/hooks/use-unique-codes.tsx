@@ -1,6 +1,9 @@
 import useSWR from "swr";
 
-export default function useUniqueCodes(projectId: string) {
+export default function useUniqueCodes(projectId?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
 
   const params = new URLSearchParams();
   params.set('useAuth', 'openstad');

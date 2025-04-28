@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
 export default function useComments(projectId?: string, includes?: string, getFromComments?: boolean) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
   const includeString = includes ? includes : '?includeComments=1&includeRepliesOnComments=1';
   getFromComments = getFromComments ? getFromComments : false;
 

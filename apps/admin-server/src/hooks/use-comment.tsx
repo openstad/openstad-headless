@@ -1,6 +1,14 @@
 import useSWR from 'swr';
 
 export default function useComment(projectId?: string, id?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
+  if (id && (!/^\d+$/.test(id.toString()))) {
+    id = undefined;
+  }
+
   const url = `/api/openstad/api/project/${projectId}/comment/${id}`;
 
   const commentSwr = useSWR(projectId && id ? url : null);

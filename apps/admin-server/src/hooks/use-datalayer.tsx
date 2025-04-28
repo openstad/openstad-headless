@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
 export default function useArea(layerId?: string) {
+    if (layerId && (!/^\d+$/.test(layerId.toString()))) {
+        layerId = undefined;
+    }
+
     let url = `/api/openstad/api/datalayer/${layerId}`;
 
     const datalayerSwr = useSWR( url );

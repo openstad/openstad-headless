@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
 export default function useVotes(projectId?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
   const url = `/api/openstad/api/project/${projectId}/vote`;
 
   const { data, isLoading, error, mutate } = useSWR(projectId ? url : null);

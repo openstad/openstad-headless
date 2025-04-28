@@ -2,11 +2,17 @@ import { WidgetDefinition } from '@/lib/widget-definitions';
 import useSWR from 'swr';
 
 export function useWidgetsHook(projectId?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
   let url = `/api/openstad/api/project/${projectId}/widgets`;
 
   const widgetsSwr = useSWR(projectId ? url : null);
 
   async function createWidget(typeId: string, description: string) {
+
+
     const res = await fetch(url, {
       method: 'POST',
       headers: {

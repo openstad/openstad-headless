@@ -1,6 +1,15 @@
 import useSWR from 'swr';
 
 export default function useTags(projectId?: string, id?: string) {
+
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
+  if (id && (!/^\d+$/.test(id.toString()))) {
+    id = undefined;
+  }
+
   const url = `/api/openstad/api/project/${projectId}/tag/${id}`;
 
   const tagSwr = useSWR(projectId && id ? url : null);

@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
 export default function useNotificationTemplate(projectId?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+
   let url = `/api/openstad/notification/project/${projectId}/template`;
 
   const notificationTemplateSwr = useSWR(projectId ? url : null);

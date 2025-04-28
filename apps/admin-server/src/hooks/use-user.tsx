@@ -5,6 +5,11 @@ export default function useUser() {
 
   const router = useRouter();
   let userId = router.query.user || '';
+
+  if (userId && (!/^\d+$/.test(userId.toString()))) {
+    userId = undefined;
+  }
+
   if (Array.isArray(userId)) userId = userId[0];
   userId = atob(userId);
 

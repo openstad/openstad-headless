@@ -1,6 +1,13 @@
 import useSWR from 'swr';
 
 export default function useStatuses(projectId?: string, id?: string) {
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
+  if (id && (!/^\d+$/.test(id.toString()))) {
+    id = undefined;
+  }
+
   const url = `/api/openstad/api/project/${projectId}/status/${id}`;
 
   const statuseswr = useSWR(projectId && id ? url : null);

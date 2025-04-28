@@ -16,7 +16,7 @@ export const ImageUploader: React.FC<{
   imageLabel?: string;
   description?: string;
   allowedTypes?: string[];
-  project: string;
+  project?: string;
 }> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding', description = '', project }) => {
   const [file, setFile] = React.useState<{url: string}>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
@@ -32,6 +32,11 @@ export const ImageUploader: React.FC<{
 
   async function uploadImage(data: any) {
     let image = prepareFile(data);
+
+    if (project && (!/^\d+$/.test(project.toString()))) {
+      project = undefined;
+    }
+
     const response = await fetch(`/api/openstad/api/project/${project}/upload/image`, {
       method: 'POST',
       body: image

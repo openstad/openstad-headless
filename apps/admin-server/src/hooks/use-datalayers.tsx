@@ -1,6 +1,10 @@
 import useSWR from 'swr';
 
 export default function useDatalayers(projectId?: string) {
+    if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+        projectId = undefined;
+    }
+
     let url = `/api/openstad/api/datalayer`;
 
     const datalayerSwr = useSWR(projectId ? url : null);

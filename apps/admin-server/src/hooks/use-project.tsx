@@ -3,7 +3,11 @@ import useSWR from 'swr';
 
 export function useProject(scopes?: Array<string>) {
   const router = useRouter();
-  const projectId = router.query.project;
+  let projectId = router.query.project;
+
+  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
+    projectId = undefined;
+  }
 
   let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig']
   if (scopes) useScopes = useScopes.concat(scopes);

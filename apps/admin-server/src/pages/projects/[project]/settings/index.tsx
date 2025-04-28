@@ -161,8 +161,13 @@ export default function ProjectSettings() {
       return;
     }
 
+    if (project && (!/^\d+$/.test(project.toString()))) {
+      toast.error('Project ID is ongeldig.');
+      return;
+    }
+
     try {
-      const res = await fetch(`/api/openstad/api/project/${project as string}`, {
+      const res = await fetch(`/api/openstad/api/project/${project}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
