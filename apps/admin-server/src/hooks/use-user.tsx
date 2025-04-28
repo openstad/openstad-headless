@@ -7,7 +7,7 @@ export default function useUser() {
   let userId = router.query.user || '';
 
   if (userId && (!/^\d+$/.test(userId.toString()))) {
-    userId = undefined;
+    userId = [];
   }
 
   if (Array.isArray(userId)) userId = userId[0];
