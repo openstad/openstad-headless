@@ -1,19 +1,15 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useTags(projectId?: string, id?: string) {
 
   // Global tags have projectId = 0, therefore this check is different from the others
-  if (projectId !== null && projectId !== undefined && (!/^\d+$/.test(projectId.toString()))) {
-    projectId = undefined;
-  }
+  const projectNumber: number | undefined = validateProjectNumber(projectId, true);
+  const useId: number | undefined = validateProjectNumber(id);
 
-  if (id && (!/^\d+$/.test(id.toString()))) {
-    id = undefined;
-  }
+  const url = `/api/openstad/api/project/${projectNumber}/tag/${useId}`;
 
-  const url = `/api/openstad/api/project/${projectId}/tag/${id}`;
-
-  const tagSwr = useSWR(projectId && id ? url : null);
+  const tagSwr = useSWR(projectNumber && useId ? url : null);
 
   async function updateTag(
     name: string | undefined,
@@ -36,8 +32,8 @@ export default function useTags(projectId?: string, id?: string) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        projectId,
-        id,
+        projectId: projectNumber,
+        id: useId,
         name,
         type,
         seqnr,

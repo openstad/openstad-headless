@@ -1,29 +1,33 @@
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useUser() {
 
   const router = useRouter();
   let userId = router.query.user || '';
 
-  if (userId && (!/^\d+$/.test(userId.toString()))) {
-    userId = [];
-  }
-
-  if (Array.isArray(userId)) userId = userId[0];
-  userId = atob(userId);
-
+  let userDecode = '';
   let url = '';
-  if (userId) {
-    url = `/api/openstad/api/user/${userId}`;
+
+  if (typeof userId === 'string' && /^[A-Za-z0-9+/]+={0,2}$/.test(userId)) {
+    try {
+      userDecode = atob(userId);
+    } catch (e) {
+      console.error('Invalid base64 string');
+    }
   }
 
-  let match = userId.match(/^(.+)-\*-(.+)$/);
-  if (match) {
-    url = `/api/openstad/api/user?&byIdpUser[identifier]=${match[2]}&byIdpUser[provider]=${match[1]}`
+  if (userDecode) {
+    const match = userDecode.match(/^(.+)-\*-(.+)$/);
+    if (match) {
+      url = `/api/openstad/api/user?byIdpUser[identifier]=${encodeURIComponent(match[2])}&byIdpUser[provider]=${encodeURIComponent(match[1])}`;
+    } else {
+      url = `/api/openstad/api/user/${encodeURIComponent(userDecode)}`;
+    }
   }
 
-  const userSwr = useSWR(url);
+  const userSwr = useSWR(url ? url : null);
 
   async function updateUser(body: any) {
 

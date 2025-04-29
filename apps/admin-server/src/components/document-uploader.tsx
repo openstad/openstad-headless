@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from './ui/form';
 import { Input } from './ui/input';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
@@ -32,11 +33,9 @@ export const DocumentUploader: React.FC<{
   async function uploadDocument(data: any) {
     let document = prepareDocument(data);
 
-    if (project && (!/^\d+$/.test(project.toString()))) {
-      project = undefined;
-    }
+    const projectNumber: number | undefined = validateProjectNumber(project);
 
-    const response = await fetch(`/api/openstad/api/project/${project}/upload/document`, {
+    const response = await fetch(`/api/openstad/api/project/${projectNumber}/upload/document`, {
       method: 'POST',
       body: document
     })

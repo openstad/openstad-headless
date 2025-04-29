@@ -1,22 +1,23 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useNotificationTemplate(projectId?: string) {
-  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
-    projectId = undefined;
-  }
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  let url = `/api/openstad/notification/project/${projectId}/template`;
+  let url = `/api/openstad/notification/project/${projectNumber}/template`;
 
-  const notificationTemplateSwr = useSWR(projectId ? url : null);
+  const notificationTemplateSwr = useSWR(projectNumber ? url : null);
 
   async function create(projectId: string, engine: string, type: string, label: string, subject: string, body: string) {
+    const projectNumber: number | undefined = validateProjectNumber(projectId);
+
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        projectId: projectId,
+        projectId: projectNumber,
         engine: engine,
         type: type,
         label: label,
@@ -36,7 +37,7 @@ export default function useNotificationTemplate(projectId?: string) {
   }
   
   async function update(id: string, label: string, subject: string, body: string) {
-    let url = `/api/openstad/notification/project/${projectId}/template/${id}`;
+    let url = `/api/openstad/notification/project/${projectNumber}/template/${id}`;
     const res = await fetch(url, {
       method: 'PUT',
       headers: {

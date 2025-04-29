@@ -1,13 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useChoiceGuides(projectId?: string) {
-  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
-    projectId = undefined;
-  }
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const url = `/api/openstad/api/project/${projectId}/choicesguide/`;
+  const url = `/api/openstad/api/project/${projectNumber}/choicesguide/`;
 
-  const choiceGuidesSwr = useSWR(projectId ? url : null);
+  const choiceGuidesSwr = useSWR(projectNumber ? url : null);
 
   return {...choiceGuidesSwr}
 }

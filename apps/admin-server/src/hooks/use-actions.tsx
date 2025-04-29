@@ -1,13 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useActions(projectId?: string) {
-  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
-    projectId = undefined;
-  }
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const url = `/api/openstad/api/project/${projectId}/action`;
+  const url = `/api/openstad/api/project/${projectNumber}/action`;
 
-  const actionListSwr = useSWR(projectId ? url : null);
+  const actionListSwr = useSWR(projectNumber ? url : null);
 
   return {...actionListSwr}
 }
