@@ -25,6 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import * as Switch from '@radix-ui/react-switch';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -51,13 +52,7 @@ export default function ProjectSettings() {
   let { project } = router.query;
   const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
 
-  let projectNumber: number | undefined = undefined;
-
-  if (typeof project === 'string' && /^\d+$/.test(project)) {
-    projectNumber = Number(project);
-  } else if (typeof project === 'number') {
-    projectNumber = project;
-  }
+  let projectNumber: number | undefined = validateProjectNumber(project);
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
