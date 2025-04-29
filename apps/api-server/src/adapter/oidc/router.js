@@ -236,8 +236,12 @@ router
 
       let redirectUrlHost = '';
       try {
-        redirectUrlHost = new URL(url).host;
-        return allowedDomains.includes(redirectUrlHost);
+        const parsedUrl = new URL(url);
+
+        return (
+          allowedDomains.includes(parsedUrl.host) &&
+          parsedUrl.protocol === 'https:'
+        );
       } catch (err) {
         return false;
       }
@@ -256,6 +260,10 @@ router
     let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
     redirectUrl = redirectUrl || '/';
 
+    if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+      return res.status(500).json({ status: 'Redirect domain not allowed' });
+    }
+
     //check if redirect domain is allowed
     if (redirectUrl.match('[[jwt]]')) {
       jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
@@ -264,11 +272,11 @@ router
       });
     }
 
-    if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+    if (isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+      return res.redirect(redirectUrl);
+    } else {
       return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
-    
-    return res.redirect(redirectUrl);
   })
 
 // ----------------------------------------------------------------------------------------------------
