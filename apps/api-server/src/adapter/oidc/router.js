@@ -269,9 +269,14 @@ router
       jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
         if (err) return next(err)
         redirectUrl = redirectUrl.replace('[[jwt]]', token);
+        // Revalidate redirectUrl after adding the token
+        if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+          return res.status(500).json({ status: 'Redirect domain not allowed' });
+        }
       });
     }
 
+    // Revalidate redirectUrl after modification
     if (isSafeRedirectUrl(redirectUrl, allowedDomains)) {
       return res.redirect(redirectUrl);
     } else {
