@@ -231,21 +231,6 @@ router
       .catch(next)
   })
   .get(function (req, res, next) {
-
-    let returnTo = (req.query.returnTo && isAllowedRedirectDomain( req.query.returnTo, req.project && req.project.config && req.project.config.allowedDomains))
-        ? req.query.returnTo
-        : false;
-    returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
-    returnTo = String(returnTo);
-
-    let redirectUrl = returnTo ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false;
-    redirectUrl = redirectUrl
-        || (req.query.returnTo && isAllowedRedirectDomain( req.query.returnTo, req.project && req.project.config && req.project.config.allowedDomains))
-            ? String(req.query.returnTo) + (String(req.query.returnTo).includes('?') ? '&' : '?') + 'jwt=[[jwt]]'
-            : false;
-    redirectUrl = redirectUrl || '/';
-
-    // todo: deze afvanging moet veel eerder!!!
     const isAllowedRedirectDomain = (url, allowedDomains) => {
       allowedDomains = prefillAllowedDomains(allowedDomains || []);
 
@@ -258,24 +243,32 @@ router
       return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
     }
 
-    //check if redirect domain is allowed
-    if (isAllowedRedirectDomain(redirectUrl, req.project && req.project.config && req.project.config.allowedDomains)) {
-      if (redirectUrl.match('[[jwt]]')) {
-        jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
-          if (err) return next(err)
-          req.redirectUrl = redirectUrl.replace('[[jwt]]', token);
-          return next();
-        });
-      } else {
-        req.redirectUrl = redirectUrl;
-        return next();
-      }
-    } else {
-      res.status(500).json({
-        status: 'Redirect domain not allowed'
-      });
+    const allowedDomains = req.project?.config?.allowedDomains || [];
+
+    const rawReturnTo = req.query.returnTo;
+    const afterLoginRedirect = req.authConfig?.afterLoginRedirectUri || '';
+
+    let returnTo = (rawReturnTo && isAllowedRedirectDomain(rawReturnTo, allowedDomains)) ? rawReturnTo : afterLoginRedirect;
+    returnTo = String(returnTo);
+
+    let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
+    redirectUrl = redirectUrl || '/';
+
+    if (!isAllowedRedirectDomain(redirectUrl, allowedDomains)) {
+      return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
 
+    //check if redirect domain is allowed
+    if (redirectUrl.match('[[jwt]]')) {
+      jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+        if (err) return next(err)
+        req.redirectUrl = redirectUrl.replace('[[jwt]]', token);
+        return next();
+      });
+    } else {
+      req.redirectUrl = redirectUrl;
+      return next();
+    }
   })
   .get(function (req, res, next) {
     res.redirect(req.redirectUrl);
