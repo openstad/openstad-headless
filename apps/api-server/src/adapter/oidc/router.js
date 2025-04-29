@@ -231,30 +231,32 @@ router
       .catch(next)
   })
   .get(function (req, res, next) {
-    const isAllowedRedirectDomain = (url, allowedDomains) => {
+    const isSafeRedirectUrl = (url, allowedDomains) => {
       allowedDomains = prefillAllowedDomains(allowedDomains || []);
 
       let redirectUrlHost = '';
       try {
         redirectUrlHost = new URL(url).host;
-      } catch (err) {}
-
-      // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
-      return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
+        return allowedDomains.includes(redirectUrlHost);
+      } catch (err) {
+        return false;
+      }
     }
 
     const allowedDomains = req.project?.config?.allowedDomains || [];
 
-    const rawReturnTo = req.query.returnTo;
     const afterLoginRedirect = req.authConfig?.afterLoginRedirectUri || '';
 
-    let returnTo = (rawReturnTo && isAllowedRedirectDomain(rawReturnTo, allowedDomains)) ? rawReturnTo : afterLoginRedirect;
-    returnTo = String(returnTo);
-
+    let returnTo = String(afterLoginRedirect);
+    
+    if (isSafeRedirectUrl(req.query.returnTo, allowedDomains)) {
+      returnTo = String(req.query.returnTo);
+    }
+    
     let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
     redirectUrl = redirectUrl || '/';
 
-    if (!isAllowedRedirectDomain(redirectUrl, allowedDomains)) {
+    if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
       return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
 
@@ -262,17 +264,12 @@ router
     if (redirectUrl.match('[[jwt]]')) {
       jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
         if (err) return next(err)
-        req.redirectUrl = redirectUrl.replace('[[jwt]]', token);
-        return next();
+        redirectUrl = redirectUrl.replace('[[jwt]]', token);
       });
-    } else {
-      req.redirectUrl = redirectUrl;
-      return next();
     }
+    
+    return res.redirect(redirectUrl);
   })
-  .get(function (req, res, next) {
-    res.redirect(req.redirectUrl);
-  });
 
 // ----------------------------------------------------------------------------------------------------
 // logout
