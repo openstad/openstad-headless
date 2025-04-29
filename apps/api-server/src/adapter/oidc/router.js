@@ -262,17 +262,12 @@ router
     if (redirectUrl.match('[[jwt]]')) {
       jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
         if (err) return next(err)
-        req.redirectUrl = redirectUrl.replace('[[jwt]]', token);
-        return next();
+        redirectUrl = redirectUrl.replace('[[jwt]]', token);
       });
-    } else {
-      req.redirectUrl = redirectUrl;
-      return next();
     }
+    
+    return res.redirect(redirectUrl);
   })
-  .get(function (req, res, next) {
-    res.redirect(req.redirectUrl);
-  });
 
 // ----------------------------------------------------------------------------------------------------
 // logout
