@@ -365,7 +365,23 @@ router
       .catch(next);
   })
   .get(function (req, res, next) {
-    const isSafeRedirectUrl = (url, allowedDomains) => {
+    let returnTo = req.query.returnTo;
+    returnTo = returnTo || (req.cookies && req.cookies['redirectUri']); //
+    returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
+    let redirectUrl = returnTo
+      ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]'
+      : false;
+    redirectUrl =
+      redirectUrl ||
+      (req.query.returnTo
+        ? req.query.returnTo +
+          (req.query.returnTo.includes('?') ? '&' : '?') +
+          'jwt=[[jwt]]'
+        : false);
+    redirectUrl = redirectUrl || '/';
+
+    // todo: deze afvanging moet veel eerder!!!
+    const isAllowedRedirectDomain = (url, allowedDomains) => {
       allowedDomains = prefillAllowedDomains(allowedDomains || []);
 
       let redirectUrlHost = '';
@@ -404,7 +420,7 @@ router
     res.clearCookie('useAuth', { path: '/' });
     res.clearCookie('projectId', { path: '/' });
     
-    let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
+    let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
     redirectUrl = redirectUrl || '/';
 
     if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
