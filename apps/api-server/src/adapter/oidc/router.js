@@ -369,14 +369,14 @@ router
     returnTo = returnTo || (req.cookies && req.cookies['redirectUri']); //
     returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
     let redirectUrl = returnTo
-      ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]'
+      ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]'
       : false;
     redirectUrl =
       redirectUrl ||
       (req.query.returnTo
         ? req.query.returnTo +
           (req.query.returnTo.includes('?') ? '&' : '?') +
-          'jwt=[[jwt]]'
+          'openstadlogintoken=[[jwt]]'
         : false);
     redirectUrl = redirectUrl || '/';
 
