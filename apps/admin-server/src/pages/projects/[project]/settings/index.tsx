@@ -51,10 +51,10 @@ export default function ProjectSettings() {
   let { project } = router.query;
   const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
 
-  if (project && (!/^\d+$/.test(project.toString()))) {
-    project = undefined;
-  } else {
+  if (typeof project === 'string' && /^\d+$/.test(project)) {
     project = Number(project);
+  } else {
+    project = undefined;
   }
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
