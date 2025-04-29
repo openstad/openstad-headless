@@ -245,13 +245,12 @@ router
 
     const allowedDomains = req.project?.config?.allowedDomains || [];
 
-    const rawReturnTo = req.query.returnTo;
     const afterLoginRedirect = req.authConfig?.afterLoginRedirectUri || '';
 
     let returnTo = String(afterLoginRedirect);
     
-    if (isSafeRedirectUrl(rawReturnTo, allowedDomains)) {
-      returnTo = String(rawReturnTo);
+    if (isSafeRedirectUrl(req.query.returnTo, allowedDomains)) {
+      returnTo = String(req.query.returnTo);
     }
     
     let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
