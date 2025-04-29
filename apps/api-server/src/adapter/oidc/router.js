@@ -256,16 +256,16 @@ router
     let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
     redirectUrl = redirectUrl || '/';
 
-    if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
-      return res.status(500).json({ status: 'Redirect domain not allowed' });
-    }
-
     //check if redirect domain is allowed
     if (redirectUrl.match('[[jwt]]')) {
       jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
         if (err) return next(err)
         redirectUrl = redirectUrl.replace('[[jwt]]', token);
       });
+    }
+
+    if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+      return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
     
     return res.redirect(redirectUrl);
