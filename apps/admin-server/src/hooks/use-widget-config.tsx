@@ -1,25 +1,15 @@
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useWidgetConfig<R>() {
   const router = useRouter();
   let id = router.query.id;
   let projectId = router.query.project;
 
-  let projectNumber: number | undefined = undefined;
-  if (typeof projectId === 'string' && /^\d+$/.test(projectId)) {
-    projectNumber = Number(projectId);
-  } else if (typeof projectId === 'number') {
-    projectNumber = projectId;
-  }
-
-  let useId: number | undefined = undefined;
-  if (typeof id === 'string' && /^\d+$/.test(id)) {
-    useId = Number(id);
-  } else if (typeof id === 'number') {
-    useId = id;
-  }
+  let projectNumber: number | undefined = validateProjectNumber(projectId);
+  let useId: number | undefined = validateProjectNumber(id);
 
   const swr = useSWR(
     projectNumber && useId

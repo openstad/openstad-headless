@@ -1,16 +1,12 @@
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useProject(scopes?: Array<string>) {
   const router = useRouter();
   let projectId = router.query.project;
 
-  let projectNumber: number | undefined = undefined;
-  if (typeof projectId === 'string' && /^\d+$/.test(projectId)) {
-    projectNumber = Number(projectId);
-  } else if (typeof projectId === 'number') {
-    projectNumber = projectId;
-  }
+  let projectNumber: number | undefined = validateProjectNumber(projectId)
 
   let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig']
   if (scopes) useScopes = useScopes.concat(scopes);
