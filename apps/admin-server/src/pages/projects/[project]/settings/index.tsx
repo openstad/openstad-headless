@@ -48,8 +48,14 @@ const formSchema = z.object({
 export default function ProjectSettings() {
 
   const router = useRouter();
-  const { project } = router.query;
+  let { project } = router.query;
   const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
+
+  if (project && (!/^\d+$/.test(project.toString()))) {
+    project = undefined;
+  } else {
+    project = Number(project);
+  }
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
@@ -158,11 +164,6 @@ export default function ProjectSettings() {
   async function archiveProject() {
     if (!data?.config?.project?.projectHasEnded) {
       toast.error('Het project moet eerst beëindigd worden voordat deze actie uitgevoerd kan worden.');
-      return;
-    }
-
-    if (project && (!/^\d+$/.test(project.toString()))) {
-      toast.error('Project ID is ongeldig.');
       return;
     }
 
