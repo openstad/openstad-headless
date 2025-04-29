@@ -7,16 +7,23 @@ export function useWidgetConfig<R>() {
   let id = router.query.id;
   let projectId = router.query.project;
 
-  if (projectId && (!/^\d+$/.test(projectId.toString()))) {
-    projectId = undefined;
+  let projectNumber: number | undefined = undefined;
+  if (typeof projectId === 'string' && /^\d+$/.test(projectId)) {
+    projectNumber = Number(projectId);
+  } else if (typeof projectId === 'number') {
+    projectNumber = projectId;
   }
-  if (id && (!/^\d+$/.test(id.toString()))) {
-    id = undefined;
+
+  let useId: number | undefined = undefined;
+  if (typeof id === 'string' && /^\d+$/.test(id)) {
+    useId = Number(id);
+  } else if (typeof id === 'number') {
+    useId = id;
   }
 
   const swr = useSWR(
-    projectId && id
-      ? `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`
+    projectNumber && useId
+      ? `/api/openstad/api/project/${projectNumber}/widgets/${useId}?includeType=1`
       : null
   );
 
@@ -28,7 +35,7 @@ export function useWidgetConfig<R>() {
 
     try {
       const res = await fetch(
-        `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`,
+        `/api/openstad/api/project/${projectNumber}/widgets/${useId}?includeType=1`,
         {
           method: 'PUT',
           headers: {

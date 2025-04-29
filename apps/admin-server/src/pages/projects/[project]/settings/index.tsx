@@ -55,6 +55,8 @@ export default function ProjectSettings() {
 
   if (typeof project === 'string' && /^\d+$/.test(project)) {
     projectNumber = Number(project);
+  } else if (typeof project === 'number') {
+    projectNumber = project;
   }
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
