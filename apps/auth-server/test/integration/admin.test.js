@@ -22,8 +22,11 @@ const umzug = new Umzug({
 
 let agent;
 
-const clientId = process.env.CLIENT_ID || 'defaultClient';
-const clientSecret = process.env.CLIENT_SECRET || 'defaultSecret';
+const randomId = (Math.random().toString(36).substring(2, 8)).toUpperCase();
+const randomSecret = (Math.random().toString(36).substring(2, 8)).toUpperCase();
+
+const clientId = process.env.CLIENT_ID || randomId;
+const clientSecret = process.env.CLIENT_SECRET || randomSecret;
 
 /**
  * Tests for the Grant Type of Client.
