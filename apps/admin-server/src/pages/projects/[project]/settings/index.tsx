@@ -51,10 +51,10 @@ export default function ProjectSettings() {
   let { project } = router.query;
   const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
 
+  let projectNumber: number | undefined = undefined;
+
   if (typeof project === 'string' && /^\d+$/.test(project)) {
-    project = Number(project);
-  } else {
-    project = undefined;
+    projectNumber = Number(project);
   }
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
@@ -168,7 +168,7 @@ export default function ProjectSettings() {
     }
 
     try {
-      const res = await fetch(`/api/openstad/api/project/${project}`, {
+      const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +255,7 @@ export default function ProjectSettings() {
           },
           {
             name: 'Instellingen',
-            url: `/projects/${project}/settings`,
+            url: `/projects/${projectNumber}/settings`,
           },
         ]}>
         <div className="container py-6">
