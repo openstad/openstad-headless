@@ -232,12 +232,17 @@ router
   })
   .get(function (req, res, next) {
 
-    let returnTo = req.query.returnTo;
+    let returnTo = (req.query.returnTo && isAllowedRedirectDomain( req.query.returnTo, req.project && req.project.config && req.project.config.allowedDomains))
+        ? req.query.returnTo
+        : false;
     returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
     returnTo = String(returnTo);
 
     let redirectUrl = returnTo ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false;
-    redirectUrl = redirectUrl || (req.query.returnTo ? String(req.query.returnTo) + (String(req.query.returnTo).includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false);
+    redirectUrl = redirectUrl
+        || (req.query.returnTo && isAllowedRedirectDomain( req.query.returnTo, req.project && req.project.config && req.project.config.allowedDomains))
+            ? String(req.query.returnTo) + (String(req.query.returnTo).includes('?') ? '&' : '?') + 'jwt=[[jwt]]'
+            : false;
     redirectUrl = redirectUrl || '/';
 
     // todo: deze afvanging moet veel eerder!!!
