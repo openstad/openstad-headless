@@ -3,9 +3,27 @@
 const supertest = require('supertest');
 const app = require('../../app-init');
 
-const db = require('../../knex/knex');
+const db = require('../../db');
+
+const { Umzug, SequelizeStorage } = require('umzug');
+
+const umzug = new Umzug({
+  migrations: {
+    glob: './migrations/*.js',
+    params: [
+            db.sequelize.getQueryInterface(),
+            db.Sequelize // Sequelize constructor - the required module
+        ],
+     },
+  context: db.sequelize.getQueryInterface(),
+  storage: new SequelizeStorage({ sequelize: db.sequelize, tableName : 'migrations' }),
+  logger: console,
+});
 
 let agent;
+
+const clientId = process.env.CLIENT_ID || 'defaultClient';
+const clientSecret = process.env.CLIENT_SECRET || 'defaultSecret';
 
 /**
  * Tests for the Grant Type of Client.
@@ -19,17 +37,14 @@ describe('Grant Type Client', () => {
     process.env.ENVIRONMENT = 'test';
     agent = supertest.agent(app);
 
-    await db.migrate.latest();
+    await umzug.up();
 
-    await db.raw("insert into clients (`id`, `name`, `redirectUrl`, `description`, `clientId`, `clientSecret`, `authTypes`) values(1, 'test', 'test', 'test', 'trustedClient', 'ssh-otherpassword', '[\"UniqueCode\"]');");
+    await db.Sequelize.query(`insert into clients (\`id\`, \`name\`, \`redirectUrl\`, \`description\`, \`clientId\`, \`clientSecret\`, \`authTypes\`) values(1, 'test', 'test', 'test', ${clientId}, ${clientSecret}, '["UniqueCode"]');`);
 
   });
 
 
   it('should able to login with basic auth', async (done) => {
-
-    const clientId = '';
-    const clientSecret = '';
 
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
@@ -41,8 +56,6 @@ describe('Grant Type Client', () => {
   });
 
   it('should get all users', (done) => {
-    const clientId = '';
-    const clientSecret = '';
 
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
