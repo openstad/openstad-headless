@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useArea(areaId?: string) {
-  let url = `/api/openstad/api/area/${areaId}`;
+  const areaNumber: number | undefined = validateProjectNumber(areaId);
 
-  const areaSwr = useSWR( url );
+  let url = `/api/openstad/api/area/${areaNumber}`;
+
+  const areaSwr = useSWR(areaNumber ? url : null);
 
   async function updateArea(name: string, geoJSON: string) {
     const res = await fetch(url, {

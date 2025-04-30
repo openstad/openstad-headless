@@ -1,7 +1,10 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useChoiceGuideResults(projectId: string) {
-  let url = `/api/openstad/api/project/${projectId}/choicesguide`;
+export default function useChoiceGuideResults(projectId?: string) {
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
+
+  let url = `/api/openstad/api/project/${projectNumber}/choicesguide`;
 
   async function remove(id: string|number) {
     const res = await fetch(`${url}/${id}`, {

@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useDatalayers(projectId?: string) {
+    const projectNumber: number | undefined = validateProjectNumber(projectId);
+
     let url = `/api/openstad/api/datalayer`;
 
-    const datalayerSwr = useSWR(projectId ? url : null);
+    const datalayerSwr = useSWR(projectNumber ? url : null);
 
     async function createDatalayer(name: string, layer: string) {
         const res = await fetch(url, {
@@ -17,7 +20,7 @@ export default function useDatalayers(projectId?: string) {
     }
 
     async function removeDatalayer(id: number) {
-        const deleteUrl = `/api/openstad/api/project/${projectId}/datalayer/${id}`;
+        const deleteUrl = `/api/openstad/api/project/${projectNumber}/datalayer/${id}`;
 
         const res = await fetch(deleteUrl, {
             method: 'DELETE',

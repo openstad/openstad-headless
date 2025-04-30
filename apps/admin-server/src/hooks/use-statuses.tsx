@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useStatus(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/status`;
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const statusListSwr = useSWR(projectId ? url : null);
+  const url = `/api/openstad/api/project/${projectNumber}/status`;
+
+  const statusListSwr = useSWR(projectNumber ? url : null);
 
   async function createStatus(name: string, seqnr: number, addToNewResources: boolean) {
     const res = await fetch(url, {
@@ -11,14 +14,14 @@ export default function useStatus(projectId?: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId, name, seqnr, addToNewResources }),
+      body: JSON.stringify({ projectId: projectNumber, name, seqnr, addToNewResources }),
     });
 
     return await res.json();
   }
 
   async function removeStatus(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectId}/status/${id}`;
+    const deleteUrl = `/api/openstad/api/project/${projectNumber}/status/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',

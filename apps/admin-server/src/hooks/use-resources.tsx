@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useResources(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/resource?includeUserVote=1&includeVoteCount=1`;
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const resourcesListSwr = useSWR(projectId ? url : null);
+  const url = `/api/openstad/api/project/${projectNumber}/resource?includeUserVote=1&includeVoteCount=1`;
+
+  const resourcesListSwr = useSWR(projectNumber ? url : null);
 
   async function create(body: any) {
     const res = await fetch(url, {
@@ -24,7 +27,7 @@ export default function useResources(projectId?: string) {
   }
 
   async function update(id: number, body: any) {
-    const updateUrl = `/api/openstad/api/project/${projectId}/resource/${id}?includeUserVote=1`;
+    const updateUrl = `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
 
     const res = await fetch(updateUrl, {
       method: 'PUT',
@@ -47,7 +50,7 @@ export default function useResources(projectId?: string) {
   }
 
   async function remove(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectId}/resource/${id}?includeUserVote=1`;
+    const deleteUrl = `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',

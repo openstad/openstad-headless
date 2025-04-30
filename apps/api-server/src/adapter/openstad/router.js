@@ -122,9 +122,10 @@ router
     // check redirect first
     let returnTo = req.query.returnTo;
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
+    returnTo = String(returnTo);
     if (!returnTo.match(/\[\[jwt\]\]/) ) returnTo = returnTo + (returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
     let redirectUrl = returnTo;
-    redirectUrl = redirectUrl || (req.query.returnTo ? req.query.returnTo + (req.query.returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]' : false);
+    redirectUrl = redirectUrl || (req.query.returnTo ? String(req.query.returnTo) + (String(req.query.returnTo).includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]' : false);
     redirectUrl = redirectUrl || '/';
 
     const isAllowedRedirectDomain = (url, project) => {

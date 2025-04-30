@@ -1,15 +1,19 @@
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useWidgetConfig<R>() {
   const router = useRouter();
-  const id = router.query.id;
-  const projectId = router.query.project;
+  let id = router.query.id;
+  let projectId = router.query.project;
+
+  let projectNumber: number | undefined = validateProjectNumber(projectId);
+  let useId: number | undefined = validateProjectNumber(id);
 
   const swr = useSWR(
-    projectId && id
-      ? `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`
+    projectNumber && useId
+      ? `/api/openstad/api/project/${projectNumber}/widgets/${useId}?includeType=1`
       : null
   );
 
@@ -21,7 +25,7 @@ export function useWidgetConfig<R>() {
 
     try {
       const res = await fetch(
-        `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`,
+        `/api/openstad/api/project/${projectNumber}/widgets/${useId}?includeType=1`,
         {
           method: 'PUT',
           headers: {

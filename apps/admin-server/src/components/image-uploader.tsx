@@ -8,6 +8,7 @@ import {
     FormMessage,
 } from './ui/form';
 import { Input } from './ui/input';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export const ImageUploader: React.FC<{
   form: UseFormReturn<any>;
@@ -16,7 +17,7 @@ export const ImageUploader: React.FC<{
   imageLabel?: string;
   description?: string;
   allowedTypes?: string[];
-  project: string;
+  project?: string;
 }> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding', description = '', project }) => {
   const [file, setFile] = React.useState<{url: string}>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
@@ -32,7 +33,10 @@ export const ImageUploader: React.FC<{
 
   async function uploadImage(data: any) {
     let image = prepareFile(data);
-    const response = await fetch(`/api/openstad/api/project/${project}/upload/image`, {
+
+    const projectNumber: number | undefined = validateProjectNumber(project);
+
+    const response = await fetch(`/api/openstad/api/project/${projectNumber}/upload/image`, {
       method: 'POST',
       body: image
     })
