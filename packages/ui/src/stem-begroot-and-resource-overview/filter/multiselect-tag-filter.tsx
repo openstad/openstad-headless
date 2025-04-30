@@ -66,7 +66,7 @@ const MultiSelectTagFilter = ({
 
   useEffect(() => {
     if ((!stopUsingDefaultValue && !parentStopUsingDefaultValue) && preFilterTags && preFilterTags.length > 0 && onUpdateFilter) {
-      preFilterTags.forEach(async (tagId) => {
+      preFilterTags.forEach((tagId) => {
         const tag = filterTags.find((tag: TagDefinition) => tag.id === tagId);
 
         if (tag) {
