@@ -235,7 +235,7 @@ export function Filters({
                     placeholder={tagGroup.label}
                     onlyIncludeIds={tagsLimitation}
                     onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
-                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel, forceSelected || false);
+                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
                     quickFixTags={props.quickFixTags || []}

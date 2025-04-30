@@ -83,7 +83,7 @@ const MultiSelectTagFilter = ({
     }
   }, [preFilterTags]);
 
-  const combinedSelects = stopUsingDefaultValue ? selected : [...new Set([...selected, ...prefilterTagsSelected])];
+  const combinedSelects = stopUsingDefaultValue ? selected : Array.from( new Set([...selected, ...prefilterTagsSelected]) );
 
   return (
     <div className="form-element">
