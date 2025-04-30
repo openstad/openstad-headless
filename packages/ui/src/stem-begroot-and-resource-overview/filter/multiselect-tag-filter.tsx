@@ -44,6 +44,7 @@ const MultiSelectTagFilter = ({
   });
 
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState(false);
+  const [prefilterTagsSelected, setPrefilterTagsSelected] = useState<number[]>([]);
 
   useEffect(() => {
     if (parentStopUsingDefaultValue) {
@@ -64,19 +65,25 @@ const MultiSelectTagFilter = ({
   const filterTags = quickFixTags.length > 0 ? (quickFixTags.filter(tag => tag.projectId === parseInt(props.tagGroupProjectId))) : tags;
 
   useEffect(() => {
-    if (!stopUsingDefaultValue && preFilterTags && preFilterTags.length > 0 && onUpdateFilter) {
-      preFilterTags.forEach((tagId) => {
+    if ((!stopUsingDefaultValue && !parentStopUsingDefaultValue) && preFilterTags && preFilterTags.length > 0 && onUpdateFilter) {
+      preFilterTags.forEach(async (tagId) => {
         const tag = filterTags.find((tag: TagDefinition) => tag.id === tagId);
+
         if (tag) {
           onUpdateFilter(tag.id, tag.name, true);
 
-          if ( !selected.includes(tag.id) ) {
-            selected.push(tag.id);
-          }
+          setPrefilterTagsSelected(prevTags => {
+            if (!prevTags.includes(tag.id)) {
+              return [...prevTags, tag.id];
+            }
+            return prevTags;
+          });
         }
       });
     }
   }, [preFilterTags]);
+
+  const combinedSelects = stopUsingDefaultValue ? selected : [...new Set([...selected, ...prefilterTagsSelected])];
 
   return (
     <div className="form-element">
@@ -91,7 +98,7 @@ const MultiSelectTagFilter = ({
         options={(filterTags || []).map((tag: TagDefinition) => ({
           value: tag.id,
           label: tag.name,
-          checked: selected.includes(tag.id),
+          checked: combinedSelects.includes(tag.id),
         }))}
       />
     </div>
