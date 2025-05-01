@@ -32,7 +32,7 @@ if (dbConfig.mysqlCaCert?.trim?.()) {
 	ssl.ca = [ dbConfig.mysqlCaCert ];
 }
 
-if (dbConfig.requireSsl !== "false" && dbConfig.requireSsl !== false) {
+if (dbConfig.requireSsl === "true" || dbConfig.requireSsl === true) {
 	ssl.rejectUnauthorized = true;
 	ssl.require = true;
 }
