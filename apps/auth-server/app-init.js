@@ -51,7 +51,7 @@ const initializeApp = async () => {
       ssl.rejectUnauthorized = true
     }
     
-    if (process.env.DB_REQUIRE_SSL !== "false") {
+    if (process.env.DB_REQUIRE_SSL !== "false" && process.env.DB_REQUIRE_SSL !== false) {
       ssl.require = true
       ssl.rejectUnauthorized = true
     }
