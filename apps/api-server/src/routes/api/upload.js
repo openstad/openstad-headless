@@ -9,7 +9,7 @@ if (!imageAppUrl.startsWith('http')) {
   imageAppUrl = (process.env.FORCE_HTTP ? 'http://' : 'https://') + imageAppUrl;
 }
 
-const imageProxyMw = createProxyMiddleware({
+let proxySettings = {
   target: imageAppUrl,
   changeOrigin: true,
   pathRewrite: {
@@ -18,18 +18,16 @@ const imageProxyMw = createProxyMiddleware({
   headers: {
     'image-token': process.env.IMAGE_VERIFICATION_TOKEN,
   },
-});
+}
 
 router
     .route('/images|/image|/document|/documents')
     .post((req, res, next) => {
-        // check if req.user is set
-        // if (!req.user || !req.user?.id) {
-        //   console.log ('upload path: no user found', req.user);
-        //   return res.status(401).send('Unauthorized');
-        // }
+        if (req.user && req.user?.role) {
+          proxySettings.headers["x-user-role"] = req.user.role;
+        }
         next();
     })
-    .post(imageProxyMw)
+    .post(createProxyMiddleware(proxySettings))
 
 module.exports = router;
