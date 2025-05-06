@@ -140,21 +140,30 @@ function StemBegroot({
 
   const [activeTagTab, setActiveTagTab] = useState<string>('');
 
-  const tagIdsToLimitResourcesTo = onlyIncludeTagIds
-    .trim()
-    .split(',')
-    .filter((t) => t && !isNaN(+t.trim()))
-    .map((t) => Number.parseInt(t));
+  const stringToArray = (str: string) => {
+    return str
+      .trim()
+      .split(',')
+      .filter((t) => t && !isNaN(+t.trim()))
+      .map((t) => Number.parseInt(t));
+  }
 
-  const statusIdsToLimitResourcesTo = onlyIncludeStatusIds
-    .trim()
-    .split(',')
-    .filter((t) => t && !isNaN(+t.trim()))
-    .map((t) => Number.parseInt(t));
+  const tagIdsToLimitResourcesTo = stringToArray(onlyIncludeTagIds);
+  const statusIdsToLimitResourcesTo = stringToArray(onlyIncludeStatusIds);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTagIds = urlParams.get('tagIds');
+  const urlStatusIds = urlParams.get('statusIds');
+
+  const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : undefined;
+  const urlStatusIdsArray = urlStatusIds ? stringToArray(urlStatusIds) : undefined;
+
+  const initTags = urlTagIdsArray && urlTagIdsArray.length > 0 ? urlTagIdsArray : tagIdsToLimitResourcesTo || [];
+  const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
 
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
-  const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo);
+  const [tags, setTags] = useState<number[]>(initTags);
   const [sort, setSort] = useState<string | undefined>(props.defaultSorting || undefined);
   const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
@@ -533,7 +542,7 @@ function StemBegroot({
           }
         }}
         resourceDetailIndex={resourceDetailIndex}
-        statusIdsToLimitResourcesTo={statusIdsToLimitResourcesTo || []}
+        statusIdsToLimitResourcesTo={initStatuses}
         tagIdsToLimitResourcesTo={tags}
         sort={sort}
         allTags={allTags}
@@ -915,6 +924,7 @@ function StemBegroot({
                         setSort(f.sort);
                         setSearch(f.search.text);
                       }}
+                      preFilterTags={urlTagIdsArray}
                     />
                   ) : null}
 
@@ -968,7 +978,7 @@ function StemBegroot({
                   }
                 }
               }}
-              statusIdsToLimitResourcesTo={statusIdsToLimitResourcesTo || []}
+              statusIdsToLimitResourcesTo={initStatuses}
               tagIdsToLimitResourcesTo={tags}
               sort={sort}
               allTags={allTags}
