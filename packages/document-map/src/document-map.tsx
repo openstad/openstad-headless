@@ -33,7 +33,7 @@ import { MultiSelect } from "@openstad-headless/ui/src";
 import { Spacer } from '@openstad-headless/ui/src';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
-import '@openstad-headless/lib/leaflet-mobile-gesture-handling';
+import './gesture';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {

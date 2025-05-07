@@ -14,7 +14,7 @@ import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import parseLocation from './lib/parse-location';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props'
-import '@openstad-headless/lib/leaflet-mobile-gesture-handling'
+import '@openstad-headless/document-map/src/gesture'
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
 function isRdCoordinates(x: number, y: number) {
