@@ -72,6 +72,7 @@ CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 
 # Prepare production
 FROM builder AS prepare-production
+ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
 RUN npm --prefix=$WORKSPACE run build --if-present && \
     npm --prefix=$WORKSPACE prune --production
@@ -80,6 +81,7 @@ RUN npm --prefix=$WORKSPACE run build --if-present && \
 FROM node:18-slim AS release
 ARG APP
 ARG PORT
+ARG NODE_ENV
 ENV WORKSPACE=apps/${APP}
 ENV NODE_ENV=${NODE_ENV:-production}
 

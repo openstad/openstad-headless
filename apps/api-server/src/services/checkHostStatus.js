@@ -1,9 +1,8 @@
 const dns = require('dns');
 const db = require('../db');
-const k8s = require('@kubernetes/client-node');
-const ip = require('ip');
 
-const getK8sApi = () => {
+const getK8sApi = async () => {
+  const k8s = await import('@kubernetes/client-node');
   const kc = new k8s.KubeConfig();
   kc.loadFromCluster();
   return kc.makeApiClient(k8s.NetworkingV1Api);
@@ -16,16 +15,6 @@ const lookupPromise = async (domain) => {
       resolve(address);
     });
   });
-};
-
-const getDomainIp = async (domain) => {
-  try {
-    return await lookupPromise(domain);
-  } catch(error) {
-    // Todo: log something
-
-    return null;
-  }
 };
 
 const getIngress = async (k8sApi, name, namespace) => {
@@ -121,17 +110,14 @@ const checkHostStatus = async (conditions) => {
   const isOnK8s = !!process.env.KUBERNETES_NAMESPACE;
   const namespace = process.env.KUBERNETES_NAMESPACE;
   const where = conditions ? conditions : {};
-  const serverIp = process.env.PUBLIC_IP ? process.env.PUBLIC_IP : ip.address();
 
   if (isOnK8s) {
-
-    console.log('Server IP should be: ', serverIp, ' IP from env value is: ', process.env.PUBLIC_IP, ' npm thinks it is:', ip.address());
-
-    const projects = await db.Project.findAll({where});
-
+    
+    const projects = await db.Project.findAll({ where });
+    
     const promises = projects.map(async (project) => {
       // Todo: skip the projects with hostStatus.status === true?
-
+      
       if (!project.url) {
         console.error('No url found for project: ', project.id);
         return;
@@ -139,19 +125,15 @@ const checkHostStatus = async (conditions) => {
       
       let hostStatus = project.hostStatus;
       //ensure it's an object so we dont have to worry about checks later
-      hostStatus = hostStatus ? hostStatus : {};          //
-
-      const domainIp = await getDomainIp(project.url);
-
-      hostStatus.dnsRecordIsSetToCorrectIp = domainIp !== null && domainIp === serverIp;
-
-      const k8sApi = getK8sApi();
+      hostStatus     = hostStatus ? hostStatus : {};          //
+      
+      const k8sApi = await getK8sApi();
       
       let ingress = '';
       
       // Create a uniqueId if for some reason it's not set yet
       if (!project.config.uniqueId) {
-        project.config = {...project.config, uniqueId: Math.round(new Date().getTime() / 1000) + project.url.replace(/\W/g, '').slice(0,40)};
+        project.config = { ...project.config, uniqueId: Math.round(new Date().getTime() / 1000) + project.url.replace(/\W/g, '').slice(0, 40) };
         await project.save();
       }
       
@@ -161,7 +143,7 @@ const checkHostStatus = async (conditions) => {
       }
       
       // if ip issset but not ingress try to create one
-      if (hostStatus.dnsRecordIsSetToCorrectIp && !ingress) {
+      if (!ingress) {
         try {
           const response     = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
           hostStatus.ingress = true;
@@ -169,34 +151,21 @@ const checkHostStatus = async (conditions) => {
           // don't set to false, an error might just be that it already exist and the read check failed
           console.error(`Error creating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
         }
-      } else if (hostStatus.dnsRecordIsSetToCorrectIp && ingress) {
+      } else {
         try {
           hostStatus.ingress = true;
-          const response = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace);
+          const response     = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace);
         } catch (error) {
           console.error(`Error updating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`);
         }
-      // else if ip is not set but ingress is set, remove the ingress file
-      } else  if (!hostStatus.dnsRecordIsSetToCorrectIp && ingress) {
-        try {
-    //      await k8sApi.deleteNamespacedIngress(project.name, namespace)
-          hostStatus.ingress = false;
-        } catch(error) {
-          //@todo how to deal with error here?
-          //most likely it doesn't exists anymore if delete doesnt work, but could also be forbidden /
-          console.error('Error deleting ingress for ', project.uniqueId, ' domain: ', project.url, ' :', error);
-        }
       }
-
-      return await project.update({hostStatus});
-    });
-
-    await Promise.all(promises);
-
+      
+      await Promise.all(promises);
+      
+    })
+    // Todo: some output?
+    console.log('all projects checked');
   }
-
-  // Todo: some output?
-  console.log('all projects checked');
 };
 
 module.exports = checkHostStatus;

@@ -22,7 +22,7 @@ const formatTransporter = function ({ host, port, secure, auth }) {
   };
 };
 
-exports.send = function ({subject, toName, toEmail, templateString, template, variables, fromEmail, fromName, replyTo, transporterConfig}) {
+exports.send = async function ({subject, toName, toEmail, templateString, template, variables, fromEmail, fromName, replyTo, transporterConfig}) {
 
   /**
    * Enrich variables with URLS in order to make absolute urls in E-mails
@@ -59,10 +59,10 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
    * Render email template
    */
   let mail = templateString ? templateString : nunjucks.render(template, variables);
-
-  //
-  mail = mjml2html(mail).html;
-
+  
+  // mjml2html is now async
+  mail = (await mjml2html(mail)).html;
+  
   /**
     * Format the to name
     */
