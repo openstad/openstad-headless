@@ -35,4 +35,5 @@
 .form-field-map-container .map-container {
     width: auto !important;
     max-height: 100%;
+    max-width: 100%;
 }

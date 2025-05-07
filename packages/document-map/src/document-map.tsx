@@ -33,6 +33,7 @@ import { MultiSelect } from "@openstad-headless/ui/src";
 import { Spacer } from '@openstad-headless/ui/src';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import './gesture';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -747,7 +748,6 @@ function DocumentMap({
     const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
     const [isTouchDevice, setIsTouchDevice] = useState(false);
-    const [showOverlay, setShowOverlay] = useState(false);
 
     useEffect(() => {
       if ('ontouchstart' in window) {
@@ -755,72 +755,22 @@ function DocumentMap({
       }
     }, []);
 
-    let lastTouchPositionY = 0;
-    let startTouchPositionY = 0;
-
-    const leafletMap = mapRef?.current;
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        leafletMap?.dragging.enable();
-        leafletMap?.touchZoom.enable();
-
-        leafletMap?.getContainer()?.classList?.add('disable-touch-action');
-      } else if ( e.touches.length === 1 ) {
-        lastTouchPositionY = e.touches[0].clientY;
-        startTouchPositionY = e.touches[0].clientY;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        if ( startTouchPositionY === 0 ) return;
-
-        const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
-
-        if (e.touches.length === 1 && dragDifference > 20 && !showOverlay) {
-          leafletMap?.dragging.disable();
-          leafletMap?.touchZoom.disable();
-          setShowOverlay(true);
-        } else if (!!showOverlay) {
-          leafletMap?.dragging.enable();
-          leafletMap?.touchZoom.enable();
-          setShowOverlay(false);
-        }
-
-        lastTouchPositionY = e.touches[0].clientY;
-      } else if (e.touches.length === 2) {
-        startTouchPositionY = 0;
-      }
-    };
-
-    const handleTouchEnd = () => {
-      leafletMap?.getContainer()?.classList?.remove('disable-touch-action');
-      setShowOverlay(false);
-    };
-
     useEffect(() => {
-      if (isTouchDevice) {
-        const mapElement = mapRef.current?.getContainer();
-        if (mapElement) {
-          mapElement.addEventListener('touchstart', handleTouchStart);
-          mapElement.addEventListener('touchend', handleTouchEnd);
-          mapElement.addEventListener('touchmove', handleTouchMove);
-        }
+      const map = mapRef.current;
+      let mapInteractionInstance: any;
 
-        return () => {
-          if (mapElement) {
-            mapElement.removeEventListener('touchstart', handleTouchStart);
-            mapElement.removeEventListener('touchend', handleTouchEnd);
-            mapElement.removeEventListener('touchmove', handleTouchMove);
-          }
-        };
-      } else {
-        leafletMap?.dragging.enable();
-        leafletMap?.touchZoom.enable();
-        leafletMap?.scrollWheelZoom.enable();
-        leafletMap?.doubleClickZoom.enable();
+      if (map && L && L.mapInteraction) {
+        mapInteractionInstance = L.mapInteraction(map, {
+          isTouch: isTouchDevice,
+        });
       }
-    }, [mapRef?.current, isTouchDevice]);
+
+      return () => {
+        if (mapInteractionInstance && mapInteractionInstance.destroy) {
+          mapInteractionInstance.destroy();
+        }
+      };
+    }, [mapRef.current, isTouchDevice]);
 
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
@@ -858,15 +808,6 @@ function DocumentMap({
             </div>
           )}
           <div className='document-container'>
-
-            {isTouchDevice && showOverlay && (
-              <div className="touch-overlay show">
-                <i className="ri-">&#xEF89;</i>
-                Use two fingers to navigate <br />
-                and zoom in or out
-              </div>
-            )}
-
             <MapContainer
                 ref={mapRef}
                 center={[0, 0]}
@@ -876,11 +817,6 @@ function DocumentMap({
                 zoom={zoom}
                 zoomSnap={0}
                 maxBounds={popupPosition ? undefined : bounds as LatLngBoundsLiteral}
-
-                dragging={false}
-                touchZoom={false}
-                scrollWheelZoom={false}
-                doubleClickZoom={false}
             >
               <MapEvents />
               {filteredComments && filteredComments
