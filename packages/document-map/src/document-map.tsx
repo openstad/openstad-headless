@@ -156,7 +156,11 @@ function DocumentMap({
     type: ''
   });
 
-  const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+  const stringToArray = (str: string) => {
+    return str.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+  }
+
+  const tagIdsArray = stringToArray(tagIds);
 
   function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
     let filteredTagIdsArray: Array<number> = [];
@@ -191,8 +195,12 @@ function DocumentMap({
     tags: filteredTagIdsArray
   } = determineTags(includeOrExclude, allTags, tagIdsArray);
 
-  const [selectedTags, setSelectedTags] = useState<Array<number>>([]);
-  const [selectedTagsString, setSelectedTagsString] = useState<string>('');
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTagIds = urlParams.get('tagIds');
+  const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : [];
+
+  const [selectedTags, setSelectedTags] = useState<Array<number>>(urlTagIdsArray);
+  const [selectedTagsString, setSelectedTagsString] = useState<string>( urlTagIdsArray?.join(',') || '' );
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -1103,6 +1111,7 @@ function DocumentMap({
               sorting={[]}
               tagGroups={tagGroups}
               tagsLimitation={filteredTagIdsArray}
+              preFilterTags={urlTagIdsArray}
             />
           ) : null}
 
