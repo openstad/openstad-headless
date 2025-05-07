@@ -1,6 +1,6 @@
 import 'leaflet';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { PropsWithChildren } from 'react';
 import { loadWidget } from '../../lib/load-widget';
 import { LatLng, latLngBounds } from 'leaflet';
@@ -14,6 +14,7 @@ import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import parseLocation from './lib/parse-location';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props'
+import '@openstad-headless/lib/leaflet-mobile-gesture-handling'
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
 function isRdCoordinates(x: number, y: number) {
@@ -400,10 +401,34 @@ const BaseMap = ({
     document.documentElement.style.setProperty('--basemap-map-aspect-ratio', height ? 'unset' : '16 / 9');
   }, [width, height]);
 
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    if ('ontouchstart' in window) {
+      setIsTouchDevice(true);
+    }
+  }, []);
+
+  const mapContainerRef = useRef<any>(null);
+  useEffect(() => {
+    const map = mapContainerRef?.current;
+
+    if (map && L && L.mapInteraction) {
+      const mapInteraction = new L.mapInteraction(map, {
+        isTouch: isTouchDevice,
+      });
+
+      return () => {
+        mapInteraction.destroy();
+      };
+    }
+  }, [mapContainerRef?.current, isTouchDevice]);
+
   return (
     <>
       <div className="map-container osc-map">
         <MapContainer
+          ref={mapContainerRef}
           center={[definedCenterPoint.lat, definedCenterPoint.lng]}
           className="osc-base-map-widget-container"
           id={`osc-base-map-${mapId}`}

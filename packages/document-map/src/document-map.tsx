@@ -33,6 +33,7 @@ import { MultiSelect } from "@openstad-headless/ui/src";
 import { Spacer } from '@openstad-headless/ui/src';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import '@openstad-headless/lib/leaflet-mobile-gesture-handling';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -734,7 +735,6 @@ function DocumentMap({
     const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
     const [isTouchDevice, setIsTouchDevice] = useState(false);
-    const [showOverlay, setShowOverlay] = useState(false);
 
     useEffect(() => {
       if ('ontouchstart' in window) {
@@ -742,57 +742,21 @@ function DocumentMap({
       }
     }, []);
 
-  let lastTouchPositionY = 0;
-  let startTouchPositionY = 0;
-  const handleTouchStart = (e: TouchEvent) => {
-    if ( e.touches.length === 1 ) {
-      lastTouchPositionY = e.touches[0].clientY;
-      startTouchPositionY = e.touches[0].clientY;
-    }
-  };
-  const handleTouchMove = (e: TouchEvent) => {
-    if (e.touches.length === 1) {
-      e.stopPropagation();
-      e.preventDefault();
+    useEffect(() => {
+      const map = mapRef.current;
 
-      if ( startTouchPositionY === 0 ) return;
+      if (map) {
+        if (L && L.mapInteraction) {
+          const mapInteraction = new L.mapInteraction(map, {
+            isTouch: isTouchDevice,
+          });
 
-      const dragDifference = Math.abs(lastTouchPositionY - startTouchPositionY);
-      if (e.touches.length === 1 && dragDifference > 20 && !showOverlay) {
-        setShowOverlay(true);
-      } else if (!!showOverlay) {
-        setShowOverlay(false);
-      }
-      const deltaY = e.touches[0].clientY - lastTouchPositionY;
-      window.scrollBy(0, -deltaY);
-      lastTouchPositionY = e.touches[0].clientY;
-    } else if (e.touches.length === 2) {
-      startTouchPositionY = 0;
-    }
-  };
-  const handleTouchEnd = () => {
-    setShowOverlay(false);
-  };
-  useEffect(() => {
-    if (isTouchDevice) {
-      const mapElement = mapRef.current?.getContainer();
-      if (mapElement) {
-        mapElement.addEventListener('touchstart', handleTouchStart);
-        mapElement.addEventListener('touchend', handleTouchEnd);
-        mapElement.addEventListener('touchmove', handleTouchMove);
-        mapElement.addEventListener('touchmove', handleTouchMove, { passive: false });
-      }
-
-      return () => {
-        if (mapElement) {
-          mapElement.removeEventListener('touchstart', handleTouchStart);
-          mapElement.removeEventListener('touchmove', handleTouchMove);
-          mapElement.removeEventListener('touchmove', handleTouchMove, { passive: false });
-          mapElement.removeEventListener('touchend', handleTouchEnd);
+          return () => {
+            mapInteraction.destroy();
+          };
         }
-      };
-    }
-  }, [mapRef?.current, isTouchDevice]);
+      }
+    }, [mapRef.current, isTouchDevice]);
 
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
@@ -830,15 +794,6 @@ function DocumentMap({
             </div>
           )}
           <div className='document-container'>
-
-            {isTouchDevice && showOverlay && (
-              <div className="touch-overlay show">
-                <i className="ri-">&#xEF89;</i>
-                Use two fingers to navigate <br />
-                and zoom in or out
-              </div>
-            )}
-
             <MapContainer
                 ref={mapRef}
                 center={[0, 0]}
@@ -848,11 +803,6 @@ function DocumentMap({
                 zoom={zoom}
                 zoomSnap={0}
                 maxBounds={popupPosition ? undefined : bounds as LatLngBoundsLiteral}
-
-                dragging={false}
-                touchZoom={false}
-                scrollWheelZoom={false}
-                doubleClickZoom={false}
             >
               <MapEvents />
               {filteredComments && filteredComments
