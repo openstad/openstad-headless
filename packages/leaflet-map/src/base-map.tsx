@@ -411,18 +411,21 @@ const BaseMap = ({
 
   const mapContainerRef = useRef<any>(null);
   useEffect(() => {
-    const map = mapContainerRef?.current;
+    const map = mapContainerRef.current;
+    let mapInteractionInstance: any;
 
     if (map && L && L.mapInteraction) {
-      const mapInteraction = new L.mapInteraction(map, {
+      mapInteractionInstance = L.mapInteraction(map, {
         isTouch: isTouchDevice,
       });
-
-      return () => {
-        mapInteraction.destroy();
-      };
     }
-  }, [mapContainerRef?.current, isTouchDevice]);
+
+    return () => {
+      if (mapInteractionInstance && mapInteractionInstance.destroy) {
+        mapInteractionInstance.destroy();
+      }
+    };
+  }, [mapContainerRef.current, isTouchDevice]);
 
   return (
     <>
