@@ -745,16 +745,14 @@ function DocumentMap({
     useEffect(() => {
       const map = mapRef.current;
 
-      if (map) {
-        if (L && L.mapInteraction) {
-          const mapInteraction = new L.mapInteraction(map, {
-            isTouch: isTouchDevice,
-          });
+      if (map && L && L.mapInteraction) {
+        const mapInteraction = new L.mapInteraction(map, {
+          isTouch: isTouchDevice,
+        });
 
-          return () => {
-            mapInteraction.destroy();
-          };
-        }
+        return () => {
+          mapInteraction.destroy();
+        };
       }
     }, [mapRef.current, isTouchDevice]);
 
