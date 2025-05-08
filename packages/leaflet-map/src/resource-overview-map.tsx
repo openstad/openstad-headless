@@ -23,7 +23,58 @@ type Point = {
   lat: number;
   lng: number;
 };
-;
+
+function generateLineStyleSVG(features: any[]): string {
+  const DEFAULT_STYLE = {
+    stroke: 'rgb(85, 85, 85)',
+    'stroke-width': 2,
+    'stroke-opacity': 1,
+  };
+
+  const styleMap: Record<string, { count: number, width: number, color: string, opacity: number }> = {};
+
+  features.forEach(feature => {
+    if (feature.geometry?.type !== 'LineString') return;
+
+    const props = feature.properties || {};
+    const stroke = props.stroke || DEFAULT_STYLE.stroke;
+    const width = props['stroke-width'] || DEFAULT_STYLE['stroke-width'];
+    const opacity = props['stroke-opacity'] ?? DEFAULT_STYLE['stroke-opacity'];
+
+    const key = `${stroke}-${width}-${opacity}`;
+    if (!styleMap[key]) {
+      styleMap[key] = { count: 0, width, color: stroke, opacity };
+    }
+    styleMap[key].count++;
+  });
+
+  const totalWeight = Object.values(styleMap).reduce((sum, style) => sum + (style.width * style.count), 0);
+
+  let currentX = 0;
+  const height = 13;
+  const width = 13;
+  const svgParts = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`
+  ];
+
+  Object.values(styleMap).forEach(style => {
+    const relativeWidth = (style.width * style.count) / totalWeight * width;
+    svgParts.push(`
+      <rect 
+        x="${currentX}" 
+        y="0" 
+        width="${relativeWidth}" 
+        height="${height}" 
+        fill="${style.color}" 
+        opacity="${style.opacity}" 
+      />
+    `);
+    currentX += relativeWidth;
+  });
+
+  svgParts.push('</svg>');
+  return `data:image/svg+xml;base64,${btoa(svgParts.join(''))}`;
+}
 
 const ResourceOverviewMap = ({
   categorize = undefined,
@@ -294,7 +345,15 @@ const ResourceOverviewMap = ({
                   />
                 )}
                 <div className="legend-info">
-                  {(layer.icon && layer.icon[0] && layer.icon[0].url) && <img src={layer.icon[0].url} alt="Layer icon" className="legend-icon"/>}
+                  {layer.icon && layer.icon[0] && layer.icon[0].url ? (
+                    <img src={layer.icon[0].url} alt="Layer icon" className="legend-icon" />
+                  ) : layer.layer?.features?.some((f: any) => f?.geometry?.type === 'LineString') ? (
+                    <img
+                      src={generateLineStyleSVG(layer.layer.features)}
+                      alt="Layer line preview"
+                      className="legend-icon legend-icon--line"
+                    />
+                  ) : null}
                   <span>{layer.name || 'Naamloze laag'}</span>
                 </div>
               </label>
