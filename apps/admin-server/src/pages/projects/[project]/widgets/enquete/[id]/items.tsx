@@ -901,13 +901,17 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    {form.watch('questionType') === 'imageUpload' && (
+                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' ) && (
                       <FormField
                         control={form.control}
                         name="multiple"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
+                            {form.watch('questionType') === 'imageUpload' ? (
+                              <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
+                            ) : (
+                              <FormLabel>Mogen er meerdere afbeeldingen geselecteerd worden?</FormLabel>
+                            )}
                             <Select
                               onValueChange={(e: string) => field.onChange(e === 'true')}
                               value={field.value ? 'true' : 'false'}>
