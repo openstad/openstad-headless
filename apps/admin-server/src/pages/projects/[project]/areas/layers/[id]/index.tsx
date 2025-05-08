@@ -28,6 +28,7 @@ const formSchema = z.object({
   layer: z.string(),
   icon: z
     .array(z.object({ url: z.string() }))
+    .or(z.object({}))
     .optional()
     .default([]),
   iconUploader: z.string(),
