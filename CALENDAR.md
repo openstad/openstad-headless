@@ -4,7 +4,6 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 
 ## 2025
 ### Mei
-- Donderdag 8-5-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 - Donderdag 22-5-2025 OpenStad Projectenparade+
 ### Juni
 - Donderdag 5-6-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
@@ -60,3 +59,4 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 ## 2025
 ### Februari
 - Donderdag 27-2-2025 OpenStad Projectenparade+
+- Donderdag 8-5-2025 [Community Call](https://docs.google.com/presentation/d/1DTN4swSjA325YtEIChA0oHKwMADVgjsDdy4dD5n_eF8/edit?usp=sharing)
