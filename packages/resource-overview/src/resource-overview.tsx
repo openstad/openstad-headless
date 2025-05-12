@@ -102,6 +102,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     }[];
     multiProjectResources?: any[];
     quickFixTags?: Array<{ id: number; name: string }>;
+    includeOrExcludeTagIds?: string;
+    includeOrExcludeStatusIds?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -381,6 +383,8 @@ function ResourceOverview({
   multiProjectResources = [],
   selectedProjects = [],
   quickFixTags = [],
+  includeOrExcludeTagIds = 'include',
+  includeOrExcludeStatusIds = 'include',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -396,9 +400,51 @@ function ResourceOverview({
       .map((t) => Number.parseInt(t));
   }
 
-  // const recourceTagsInclude = only
-  const tagIdsToLimitResourcesTo = stringToArray(onlyIncludeTagIds);
   const statusIdsToLimitResourcesTo = stringToArray(onlyIncludeStatusIds);
+
+  const {data: allTags} = datastore.useTags({
+    projectId: props.projectId,
+    type: ''
+  });
+
+  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
+    let filteredTagIdsArray: Array<number> = [];
+    try {
+      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0) {
+        const filteredTags = allTags.filter((tag: { id: number }) => !tagIdsArray.includes((tag.id)));
+        const filteredTagIds = filteredTags.map((tag: { id: number }) => tag.id);
+
+        filteredTagIdsArray = filteredTagIds;
+      } else if (includeOrExclude === 'include') {
+        filteredTagIdsArray = tagIdsArray;
+      }
+
+      const filteredTagsIdsString = filteredTagIdsArray.join(',');
+
+      return {
+        tagsString: filteredTagsIdsString || '',
+        tags: filteredTagIdsArray || []
+      };
+
+    } catch (error) {
+      console.error('Error processing tags:', error);
+
+      return {
+        tagsString: '',
+        tags: []
+      };
+    }
+  }
+
+  useEffect(() => {
+    const {
+      tags: filteredTagIdsArray
+    } = determineTags(includeOrExcludeTagIds, allTags, stringToArray(onlyIncludeTagIds));
+
+    setTagIdsToLimitResourcesTo(filteredTagIdsArray);
+  }, [allTags]);
+
+  const [tagIdsToLimitResourcesTo, setTagIdsToLimitResourcesTo] = useState< Array<number> >([]);
 
   const urlParams = new URLSearchParams(window.location.search);
   const urlTagIds = urlParams.get('tagIds');
@@ -408,14 +454,30 @@ function ResourceOverview({
   const urlStatusIdsArray = urlStatusIds ? stringToArray(urlStatusIds) : undefined;
 
   const [open, setOpen] = React.useState(false);
-
-  const initTags = urlTagIdsArray && urlTagIdsArray.length > 0 ? urlTagIdsArray : tagIdsToLimitResourcesTo || [];
   const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
+
+  useEffect(() => {
+    const initTags = Array.from(new Set([...(urlTagIdsArray || []), ...tagIdsToLimitResourcesTo]) )
+
+    const includeTags = includeOrExcludeTagIds === 'include'
+      ? initTags
+      : urlTagIdsArray || [];
+
+    const excludeTags = includeOrExcludeTagIds === 'exclude' ? stringToArray(onlyIncludeTagIds) : [];
+
+    setIncludeTags(includeTags);
+    setTags(includeTags);
+
+    setExcludeTags(excludeTags);
+  }, [tagIdsToLimitResourcesTo.length]);
+
+  const [includeTags, setIncludeTags] = useState<number[]>([]);
+  const [excludeTags, setExcludeTags] = useState<number[]>([]);
 
   // Filters that when changed reupdate the useResources value automatically
   const [search, setSearch] = useState<string>('');
   const [statuses, setStatuses] = useState<number[]>(initStatuses);
-  const [tags, setTags] = useState<number[]>(initTags);
+  const [tags, setTags] = useState<number[]>([]);
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(itemsPerPage || 10);
@@ -430,9 +492,18 @@ function ResourceOverview({
     pageSize: 999999,
     ...props,
     search,
-    tags,
+    tags: [],
     sort,
   });
+
+  useEffect(() => {
+    if ( JSON.stringify(tags) !== JSON.stringify(includeTags) ) {
+      // Tags from setTags are sometimes strings apparently
+      // @ts-ignore
+      const tagsForIncluding = tags.map((tag) => parseInt(tag, 10))
+      setIncludeTags(tagsForIncluding)
+    }
+  }, [tags])
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
@@ -443,11 +514,6 @@ function ResourceOverview({
       setResources(multiProjectResources);
     }
   }, [multiProjectResources, selectedProjects, resourcesWithPagination, pageSize]);
-
-  const {data: allTags} = datastore.useTags({
-    projectId: props.projectId,
-    type: ''
-  });
 
   useEffect(() => {
     // @ts-ignore
@@ -468,19 +534,31 @@ function ResourceOverview({
     });
 
     const filtered = resources && (
-        Object.keys(groupedTags).length === 0
-            ? resources
-            : resources.filter((resource: any) => {
-              return Object.keys(groupedTags).every(tagType => {
-                return groupedTags[tagType].some(tagId =>
-                    resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
-                );
-              });
-            })
+      resources.filter((resource: any) => {
+          const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
+            excludeTags.includes(tag.id)
+          );
+          if (hasExcludedTag) return false;
+
+          if (includeTags.length > 0) {
+            const hasIncludedTag = resource.tags?.some((tag: { id: number }) =>
+              includeTags.includes(tag.id)
+            );
+            return hasIncludedTag;
+          }
+
+          return true;
+        })
     )
-        ?.filter((resource: any) =>
-            (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.some((o: { id: number }) => o.id === statusId))
-        )
+        ?.filter((resource: any) => {
+          if (!statusIdsToLimitResourcesTo?.length) return true;
+
+          const hasMatchingStatus = resource.statuses?.some((o: { id: number }) =>
+            statusIdsToLimitResourcesTo.includes(o.id)
+          );
+
+          return includeOrExcludeStatusIds === 'include' === hasMatchingStatus;
+        })
         ?.sort((a: any, b: any) => {
           if (sort === 'createdAt_desc') {
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -506,7 +584,7 @@ function ResourceOverview({
         });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort, allTags]);
+  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags]);
 
   useEffect(() => {
     if (filteredResources) {
@@ -665,7 +743,7 @@ function ResourceOverview({
               showActiveTags={showActiveTags}
               onUpdateFilter={(f) => {
                 if (f.tags.length === 0) {
-                  setTags(tagIdsToLimitResourcesTo);
+                  setTags(includeOrExcludeTagIds === 'include' ? tagIdsToLimitResourcesTo : []);
                 } else {
                   setTags(f.tags);
                 }
