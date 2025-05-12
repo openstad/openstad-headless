@@ -22,7 +22,8 @@
   "homepage": "https://github.com/openstad/openstad-headless#readme",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "packages/apostrophe-widgets/*"
   ],
   "private": true,
   "devDependencies": {
