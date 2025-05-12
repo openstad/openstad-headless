@@ -21,6 +21,14 @@ const apostropheServer = {};
 let startUpIsBusy = false;
 let startUpQueue = [];
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'UP',
+    message: 'Server is healthy',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/:sitePrefix?/config-reset', async function (req, res, next) {
