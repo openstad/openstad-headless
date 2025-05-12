@@ -27,12 +27,12 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { ObjectListSelect } from '@/components/ui/object-select';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
+import {undefinedToTrueOrProp, YesNoSelect} from '@/lib/form-widget-helpers';
 import { LikeWidgetTabProps } from '.';
 import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
-  title: z.string(),
+  title: z.string().optional(),
   variant: z.enum(['small', 'medium', 'large']),
   yesLabel: z.string(),
   noLabel: z.string(),
@@ -78,13 +78,13 @@ export default function LikesDisplay({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
       resourceId: props?.resourceId,
-      title: props?.title,
+      title: props?.title || '',
       variant: props?.variant || 'medium',
       yesLabel: props?.yesLabel || 'Ja',
       noLabel: props?.noLabel || 'Nee',
       displayDislike: props?.displayDislike || false,
       hideCounters: props?.hideCounters || false,
-      showProgressBar: props?.showProgressBar || true,
+      showProgressBar: undefinedToTrueOrProp(props?.showProgressBar),
       progressBarDescription: props?.progressBarDescription || '',
     },
   });
