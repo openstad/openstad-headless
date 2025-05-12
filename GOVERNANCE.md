@@ -19,7 +19,7 @@ Idealiter heeft geen enkele organisatie een meerderheid aan leden in het Core Te
 De huidige leden zijn:
 
 - Daniël Hoekzema (Gemeente Haarlemmermeer)
-- David Bos (Gemeente Den Haag)
+- Marijn van Dam (Gemeente Zwolle)
 - May-Britt Jansen (Gemeente Amsterdam)
 - Bart Nieuwenweg (Draad)
 

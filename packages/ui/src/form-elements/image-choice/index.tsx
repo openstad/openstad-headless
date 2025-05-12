@@ -1,11 +1,11 @@
-import React, { FC, useState } from "react";
+import React, {FC, useEffect, useState} from "react";
 import {
     Fieldset,
     FieldsetLegend,
     FormField,
     FormLabel,
     RadioButton,
-    Paragraph, FormFieldDescription, AccordionProvider,
+    Paragraph, FormFieldDescription, AccordionProvider, Checkbox
 } from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
 
@@ -25,6 +25,7 @@ export type ImageChoiceFieldProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    multiple?: boolean;
 }
 
 export type ChoiceItem = {
@@ -50,18 +51,28 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    multiple = false,
 }) => {
-    const [selectedValue, setSelectedValue] = useState<string | null>(null);
+    const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
 
-    const handleSelection = (choiceValue: string) => {
-        setSelectedValue(choiceValue);
+    const handleChoiceChange = (choiceValue: string) => {
+        if (!multiple) {
+            setSelectedChoices([choiceValue]);
+        } else if (!selectedChoices.includes(choiceValue)) {
+            setSelectedChoices([...selectedChoices, choiceValue]);
+        } else {
+            setSelectedChoices(selectedChoices.filter((choice) => choice !== choiceValue));
+        }
+    };
+
+    useEffect(() => {
         if (onChange) {
             onChange({
                 name: fieldKey,
-                value: choiceValue
+                value: JSON.stringify(selectedChoices)
             });
         }
-    };
+    } , [selectedChoices]);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -69,6 +80,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
             return <div dangerouslySetInnerHTML={{ __html: html }} />;
         }
     }
+
+    const ChoiceComponent = multiple ? Checkbox : RadioButton;
 
     return (
         <div className="question">
@@ -110,7 +123,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
                 <div className={"image-choice-container"}>
                     {choices?.map((choice, index) => {
-                        const isSelected = selectedValue === choice.value;
+                        const isSelected = choice && choice.label ? selectedChoices.includes(choice.label) : false;
                         return (
                           <FormField type="radio" key={index}>
                               <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
@@ -118,12 +131,12 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                       <figure>
                                           <img src={choice.imageSrc} alt={choice.imageAlt} />
                                           <figcaption>
-                                              <RadioButton
+                                              <ChoiceComponent
                                                 className="radio-field-input"
                                                 id={`${fieldKey}_${index}`}
                                                 name={fieldKey}
                                                 required={fieldRequired}
-                                                onChange={() => handleSelection(choice.value)}
+                                                onChange={() => handleChoiceChange(choice.value)}
                                                 disabled={disabled}
                                               />
                                                   {(choice.label && !choice.hideLabel) && (

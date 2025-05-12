@@ -77,6 +77,10 @@
   display: inline-block;
 }
 
+.map-container--buttons .legend-icon--line {
+  width: 13px;
+}
+
 .map-container--buttons input[type="checkbox"] {
   margin-right: 3px;
 }
