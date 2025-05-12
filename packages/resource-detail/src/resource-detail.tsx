@@ -32,6 +32,7 @@ import { hasRole } from '../../lib';
 type booleanProps = {
   [K in
   | 'displayImage'
+  | 'displayImageDescription'
   | 'displayTitle'
   | 'displayModBreak'
   | 'displaySummary'
@@ -88,6 +89,7 @@ type DocumentType = {
 
 function ResourceDetail({
   displayImage = true,
+  displayImageDescription = true,
   displayTitle = true,
   displayModBreak = true,
   displaySummary = true,
@@ -218,22 +220,35 @@ function ResourceDetail({
 
   const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
-  const renderImage = (src: string, clickableImage: boolean) => {
+  const renderImage = (src: string, clickableImage: boolean, imageDescription?: string) => {
     const imageElement = (
-      <Image
-        src={src}
-        imageFooter={
-          (displayStatusBar && resource.statuses && resource.statuses.length > 0) && (
-            <div>
-              <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
-                {resource.statuses
-                  ?.map((s: { name: string }) => s.name)
-                  ?.join(', ')}
-              </Paragraph>
-            </div>
-          )
-        }
-      />
+      <div
+        className="carousel-image-container"
+      >
+        <Image
+          src={src}
+          imageFooter={
+            (displayStatusBar && resource.statuses && resource.statuses.length > 0) && (
+              <div>
+                <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
+                  {resource.statuses
+                    ?.map((s: { name: string }) => s.name)
+                    ?.join(', ')}
+                </Paragraph>
+              </div>
+            )
+          }
+        />
+
+        {(displayImageDescription && imageDescription) && (
+          <p
+            className="carousel-image-description"
+          >
+            {imageDescription}
+          </p>
+        )}
+
+      </div>
     );
 
     return clickableImage ? (
@@ -288,7 +303,7 @@ function ResourceDetail({
                   items={resourceImages}
                   buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                   itemRenderer={(i) => (
-                    renderImage(i.url, clickableImage)
+                    renderImage(i.url, clickableImage, i.description)
                   )}
                 />
               )}
