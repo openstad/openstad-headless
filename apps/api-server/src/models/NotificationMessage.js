@@ -122,7 +122,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
             instance.subject = nunjucksEnv.renderString(template.subject, { ...templateData });
             let body = nunjucksEnv.renderString(template.body, { ...templateData });
             // mjml2html is now async
-            body = (await mjml2html(body)).html;
+            body = (await mjml2html(body));
             instance.body = body.html;
           } catch (err) {
           }
