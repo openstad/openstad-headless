@@ -222,9 +222,7 @@ function ResourceDetail({
 
   const renderImage = (src: string, clickableImage: boolean, imageDescription?: string) => {
     const imageElement = (
-      <div
-        className="carousel-image-container"
-      >
+      <>
         <Image
           src={src}
           imageFooter={
@@ -247,8 +245,7 @@ function ResourceDetail({
             {imageDescription}
           </p>
         )}
-
-      </div>
+      </>
     );
 
     return clickableImage ? (
