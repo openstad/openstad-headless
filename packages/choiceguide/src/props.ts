@@ -22,6 +22,8 @@ export type ChoiceGuide = {
     introDescription?: string;
     minCharactersWarning?: string;
     maxCharactersWarning?: string;
+    minCharactersError?: string;
+    maxCharactersError?: string;
 };
 
 type ExtraProjectSettings = {

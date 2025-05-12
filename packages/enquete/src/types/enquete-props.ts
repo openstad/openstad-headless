@@ -12,6 +12,8 @@ export type EnqueteProps = {
   confirmation?: Confirmation;
   minCharactersWarning?: string;
   maxCharactersWarning?: string;
+  minCharactersError?: string;
+  maxCharactersError?: string;
 };
 
 export type Item = {

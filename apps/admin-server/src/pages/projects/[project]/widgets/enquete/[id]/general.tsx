@@ -24,6 +24,8 @@ const formSchema = z.object({
   afterSubmitUrl: z.string().optional(),
   minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
   maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
+  minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
+  maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -42,6 +44,8 @@ export default function WidgetEnqueteGeneral(
       afterSubmitUrl: props.afterSubmitUrl || '',
       minCharactersWarning: props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+      minCharactersError: props.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
+      maxCharactersError: props.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
     },
   });
 
@@ -143,6 +147,44 @@ export default function WidgetEnqueteGeneral(
                 </FormLabel>
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="minCharactersError"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Foutmelding voor minimaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters onder de minimum waarde ligt na het versturen van het formulier. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="maxCharactersError"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Foutmelding voor maximaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters boven de maximum waarde ligt na het versturen van het formulier. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
                 <Input
                   {...field}
