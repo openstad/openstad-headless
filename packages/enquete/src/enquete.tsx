@@ -137,6 +137,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';
+                    fieldData['multiple'] = item.multiple || false;
 
                     if ( item.options && item.options.length > 0 ) {
                         fieldData['choices'] = item.options.map((option) => {

@@ -34,7 +34,7 @@ ENV BUILD_ENV=${BUILD_ENV}
 RUN if [ "$BUILD_ENV" = "local" ]; then \
     n=0; \
     until [ "$n" -ge 5 ]; do \
-        npm install -w $WORKSPACE && break; \
+        npm install -w $WORKSPACE --legacy-peer-deps && break; \
         n=$((n+1)); \
         echo "Retrying npm install... attempt $n"; \
         sleep 5; \
@@ -47,7 +47,7 @@ RUN if [ "$BUILD_ENV" = "local" ]; then \
         sleep 5; \
     done; \
 else \
-    npm install -w $WORKSPACE && \
+    npm install -w $WORKSPACE --legacy-peer-deps && \
     npm run build-packages --if-present --prefix=$WORKSPACE; \
 fi
 
