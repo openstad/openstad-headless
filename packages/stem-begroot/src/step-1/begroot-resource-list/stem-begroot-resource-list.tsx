@@ -129,7 +129,7 @@ export const StemBegrootResourceList = ({
       return 0;
     });
 
-    if (JSON.stringify(filtered) !== JSON.stringify(filteredResources)) {
+    if ((JSON.stringify(filtered) !== JSON.stringify(filteredResources)) && setFilteredResources) {
       setFilteredResources(filtered);
     }
 
