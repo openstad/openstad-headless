@@ -61,92 +61,50 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace) => {
 }
 
 const createIngress = async (k8sApi, name, domain, namespace) => {
-
-  console.log( `For namespace: ${namespace}`, JSON.stringify({
-    apiVersion: 'networking.k8s.io/v1',
-    kind: 'Ingress',
-    metadata: {
-      //name must be unique, lowercase, alphanumer, - is allowed
-      name: `${name}`,
-      annotations: {
-        'cert-manager.io/cluster-issuer': 'openstad-letsencrypt-prod',
-        'kubernetes.io/ingress.class': 'nginx',
-        // if www host isset it redirects always to www. if without is isset it redirects to not www
-        'nginx.ingress.kubernetes.io/from-to-www-redirect': "true",
-        'nginx.ingress.kubernetes.io/proxy-body-size': '128m',
-        'nginx.ingress.kubernetes.io/configuration-snippet': `more_set_headers "X-Content-Type-Options: nosniff";
-more_set_headers "X-Frame-Options: SAMEORIGIN";
-more_set_headers "X-Xss-Protection: 1";
-more_set_headers "Referrer-Policy: same-origin";`
-      }
-    },
-    spec: {
-      rules: [{
-        host: domain,
-        http: {
-          paths: [{
-            // todo make this dynamic
-            backend: {
-              service: {
-                name: process.env.KUBERNETES_FRONTEND_SERVICE_NAME || 'openstad-frontend',
-                port: {
-                  number: process.env.KUBERNETES_FRONTEND_SERVICE_PORT ? parseInt(process.env.KUBERNETES_FRONTEND_SERVICE_PORT) : 4444
-                }
-              }
-            },
-            path: '/',
-            pathType: 'Prefix',
-          }]
+  return k8sApi.createNamespacedIngress({
+    namespace,
+    body: {
+      apiVersion: 'networking.k8s.io/v1',
+      kind: 'Ingress',
+      metadata: {
+        //name must be unique, lowercase, alphanumer, - is allowed
+        name: `${name}`,
+        annotations: {
+          'cert-manager.io/cluster-issuer': 'openstad-letsencrypt-prod',
+          'kubernetes.io/ingress.class': 'nginx',
+          // if www host isset it redirects always to www. if without is isset it redirects to not www
+          'nginx.ingress.kubernetes.io/from-to-www-redirect': "true",
+          'nginx.ingress.kubernetes.io/proxy-body-size': '128m',
+          'nginx.ingress.kubernetes.io/configuration-snippet': `more_set_headers "X-Content-Type-Options: nosniff";
+  more_set_headers "X-Frame-Options: SAMEORIGIN";
+  more_set_headers "X-Xss-Protection: 1";
+  more_set_headers "Referrer-Policy: same-origin";`
         }
-      }],
-      tls: [{
-        secretName: name,
-        hosts: [domain]
-      }]
-    }
-  }) );
-
-  return k8sApi.createNamespacedIngress(namespace, {
-    apiVersion: 'networking.k8s.io/v1',
-    kind: 'Ingress',
-    metadata: {
-      //name must be unique, lowercase, alphanumer, - is allowed
-      name: `${name}`,
-      annotations: {
-         'cert-manager.io/cluster-issuer': 'openstad-letsencrypt-prod',
-         'kubernetes.io/ingress.class': 'nginx',
-         // if www host isset it redirects always to www. if without is isset it redirects to not www
-         'nginx.ingress.kubernetes.io/from-to-www-redirect': "true",
-        'nginx.ingress.kubernetes.io/proxy-body-size': '128m',
-        'nginx.ingress.kubernetes.io/configuration-snippet': `more_set_headers "X-Content-Type-Options: nosniff";
-more_set_headers "X-Frame-Options: SAMEORIGIN";
-more_set_headers "X-Xss-Protection: 1";
-more_set_headers "Referrer-Policy: same-origin";`
-      }
-    },
-    spec: {
-      rules: [{
-        host: domain,
-        http: {
-          paths: [{
-            // todo make this dynamic
-            backend: {
-              service: {
-                name: process.env.KUBERNETES_FRONTEND_SERVICE_NAME || 'openstad-frontend',
-                port: {
-                  number: process.env.KUBERNETES_FRONTEND_SERVICE_PORT ? parseInt(process.env.KUBERNETES_FRONTEND_SERVICE_PORT) : 4444
+      },
+      spec: {
+        rules: [{
+          host: domain,
+          http: {
+            paths: [{
+              // todo make this dynamic
+              backend: {
+                service: {
+                  name: process.env.KUBERNETES_FRONTEND_SERVICE_NAME || 'openstad-frontend',
+                  port: {
+                    number: process.env.KUBERNETES_FRONTEND_SERVICE_PORT ? parseInt(process.env.KUBERNETES_FRONTEND_SERVICE_PORT) : 4444
+                  }
                 }
-              }
-            },
-            path: '/',
-            pathType: 'Prefix',
-          }]
-        }
-      }],
-      tls: [{
-        secretName: name,
-        hosts: [domain]
-      }]
+              },
+              path: '/',
+              pathType: 'Prefix',
+            }]
+          }
+        }],
+        tls: [{
+          secretName: name,
+          hosts: [domain]
+        }]
+      }
     }
   })
 };
@@ -189,19 +147,11 @@ const checkHostStatus = async (conditions) => {
       // if ip issset but not ingress try to create one
       if (!ingress) {
         try {
-          console.log('[DEBUG] Calling createIngress with:');
-          console.log(`  name: ${project.config.uniqueId}`);
-          console.log(`  domain: ${project.url}`);
-          console.log(`  namespace: ${namespace}`);
-
           const response = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
-
           hostStatus.ingress = true;
-          console.log(`[SUCCESS] Ingress created for project ${project.config.uniqueId} with domain ${project.url}`);
-
         } catch (error) {
-          console.error(`[ERROR] Failed to create ingress for project ${project.config.uniqueId} with domain ${project.url} in namespace ${namespace}`);
-          console.error(`[ERROR] Details: ${error.message || error}`);
+          // don't set to false, an error might just be that it already exist and the read check failed
+          console.error(`Error creating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`);
         }
       } else {
         try {
