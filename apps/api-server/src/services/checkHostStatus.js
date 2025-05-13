@@ -2,10 +2,27 @@ const dns = require('dns');
 const db = require('../db');
 
 const getK8sApi = async () => {
-  const k8s = await import('@kubernetes/client-node');
-  const kc = new k8s.KubeConfig();
-  kc.loadFromCluster();
-  return kc.makeApiClient(k8s.NetworkingV1Api);
+  try {
+    const k8s = await import('@kubernetes/client-node');
+    console.log('[INFO] @kubernetes/client-node module successfully imported');
+
+    const kc = new k8s.KubeConfig();
+
+    try {
+      kc.loadFromCluster();
+      console.log('[INFO] Kubernetes config loaded from cluster');
+    } catch (err) {
+      console.warn('[WARN] Could not load from cluster');
+    }
+
+    console.log(`[INFO] Current Kubernetes context: ${kc.getCurrentContext()}`);
+    return kc.makeApiClient(k8s.NetworkingV1Api);
+
+  } catch (error) {
+    console.error('[FATAL] Failed to load @kubernetes/client-node or create k8s client');
+    console.error(`[FATAL] Details: ${error.message || error}`);
+    return null; // of throw error als je echt wil stoppen
+  }
 };
 
 const lookupPromise = async (domain) => {
@@ -62,7 +79,7 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace) => {
 
 const createIngress = async (k8sApi, name, domain, namespace) => {
   return k8sApi.createNamespacedIngress(namespace, {
-    apiVersions: 'networking.k8s.io/v1',
+    apiVersion: 'networking.k8s.io/v1',
     kind: 'Ingress',
     metadata: {
       //name must be unique, lowercase, alphanumer, - is allowed
@@ -128,7 +145,11 @@ const checkHostStatus = async (conditions) => {
       hostStatus     = hostStatus ? hostStatus : {};          //
       
       const k8sApi = await getK8sApi();
-      
+      if (!k8sApi) {
+        console.error(`[FATAL] k8sApi is undefined for project ${project.config.uniqueId}`);
+      } else {
+        console.log(`[INFO] k8sApi client initialized for project ${project.config.uniqueId}`);
+      }
       let ingress = '';
       
       // Create a uniqueId if for some reason it's not set yet
@@ -145,11 +166,16 @@ const checkHostStatus = async (conditions) => {
       // if ip issset but not ingress try to create one
       if (!ingress) {
         try {
-          const response     = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
+          console.log(`[INFO] Attempting to create ingress for project ${project.config.uniqueId} with domain ${project.url} in namespace ${namespace}`);
+
+          const response = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
+
           hostStatus.ingress = true;
+          console.log(`[SUCCESS] Ingress created for project ${project.config.uniqueId} with domain ${project.url}`);
+
         } catch (error) {
-          // don't set to false, an error might just be that it already exist and the read check failed
-          console.error(`Error creating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
+          console.error(`[ERROR] Failed to create ingress for project ${project.config.uniqueId} with domain ${project.url} in namespace ${namespace}`);
+          console.error(`[ERROR] Details: ${error.message || error}`);
         }
       } else {
         try {
@@ -159,10 +185,11 @@ const checkHostStatus = async (conditions) => {
           console.error(`Error updating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`);
         }
       }
-      
-      await Promise.all(promises);
-      
+
     })
+
+    await Promise.all(promises);
+
     // Todo: some output?
     console.log('all projects checked');
   }
