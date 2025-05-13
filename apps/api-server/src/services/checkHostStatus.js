@@ -1,28 +1,11 @@
 const dns = require('dns');
 const db = require('../db');
+const k8s = require('@kubernetes/client-node');
 
-const getK8sApi = async () => {
-  try {
-    const k8s = await import('@kubernetes/client-node');
-    console.log('[INFO] @kubernetes/client-node module successfully imported');
-
-    const kc = new k8s.KubeConfig();
-
-    try {
-      kc.loadFromCluster();
-      console.log('[INFO] Kubernetes config loaded from cluster');
-    } catch (err) {
-      console.warn('[WARN] Could not load from cluster');
-    }
-
-    console.log(`[INFO] Current Kubernetes context: ${kc.getCurrentContext()}`);
-    return kc.makeApiClient(k8s.NetworkingV1Api);
-
-  } catch (error) {
-    console.error('[FATAL] Failed to load @kubernetes/client-node or create k8s client');
-    console.error(`[FATAL] Details: ${error.message || error}`);
-    return null; // of throw error als je echt wil stoppen
-  }
+const getK8sApi = () => {
+  const kc = new k8s.KubeConfig();
+  kc.loadFromCluster();
+  return kc.makeApiClient(k8s.NetworkingV1Api);
 };
 
 const lookupPromise = async (domain) => {
@@ -78,6 +61,51 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace) => {
 }
 
 const createIngress = async (k8sApi, name, domain, namespace) => {
+
+  console.log( `For namespace: ${namespace}`, JSON.stringify({
+    apiVersion: 'networking.k8s.io/v1',
+    kind: 'Ingress',
+    metadata: {
+      //name must be unique, lowercase, alphanumer, - is allowed
+      name: `${name}`,
+      annotations: {
+        'cert-manager.io/cluster-issuer': 'openstad-letsencrypt-prod',
+        'kubernetes.io/ingress.class': 'nginx',
+        // if www host isset it redirects always to www. if without is isset it redirects to not www
+        'nginx.ingress.kubernetes.io/from-to-www-redirect': "true",
+        'nginx.ingress.kubernetes.io/proxy-body-size': '128m',
+        'nginx.ingress.kubernetes.io/configuration-snippet': `more_set_headers "X-Content-Type-Options: nosniff";
+more_set_headers "X-Frame-Options: SAMEORIGIN";
+more_set_headers "X-Xss-Protection: 1";
+more_set_headers "Referrer-Policy: same-origin";`
+      }
+    },
+    spec: {
+      rules: [{
+        host: domain,
+        http: {
+          paths: [{
+            // todo make this dynamic
+            backend: {
+              service: {
+                name: process.env.KUBERNETES_FRONTEND_SERVICE_NAME || 'openstad-frontend',
+                port: {
+                  number: process.env.KUBERNETES_FRONTEND_SERVICE_PORT ? parseInt(process.env.KUBERNETES_FRONTEND_SERVICE_PORT) : 4444
+                }
+              }
+            },
+            path: '/',
+            pathType: 'Prefix',
+          }]
+        }
+      }],
+      tls: [{
+        secretName: name,
+        hosts: [domain]
+      }]
+    }
+  }) );
+
   return k8sApi.createNamespacedIngress(namespace, {
     apiVersion: 'networking.k8s.io/v1',
     kind: 'Ingress',
@@ -145,11 +173,6 @@ const checkHostStatus = async (conditions) => {
       hostStatus     = hostStatus ? hostStatus : {};          //
       
       const k8sApi = await getK8sApi();
-      if (!k8sApi) {
-        console.error(`[FATAL] k8sApi is undefined for project ${project.config.uniqueId}`);
-      } else {
-        console.log(`[INFO] k8sApi client initialized for project ${project.config.uniqueId}`);
-      }
       let ingress = '';
       
       // Create a uniqueId if for some reason it's not set yet
@@ -166,7 +189,10 @@ const checkHostStatus = async (conditions) => {
       // if ip issset but not ingress try to create one
       if (!ingress) {
         try {
-          console.log(`[INFO] Attempting to create ingress for project ${project.config.uniqueId} with domain ${project.url} in namespace ${namespace}`);
+          console.log('[DEBUG] Calling createIngress with:');
+          console.log(`  name: ${project.config.uniqueId}`);
+          console.log(`  domain: ${project.url}`);
+          console.log(`  namespace: ${namespace}`);
 
           const response = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
 
