@@ -565,6 +565,8 @@ function StemBegroot({
         voteType={props?.votes?.voteType || 'likes'}
         typeSelector={typeSelector}
         activeTagTab={activeTagTab}
+        currentPage={page}
+        pageSize={itemsPerPage}
       />
 
       <div className="osc">
