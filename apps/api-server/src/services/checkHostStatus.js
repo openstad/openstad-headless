@@ -1,6 +1,5 @@
 const dns = require('dns');
 const db = require('../db');
-const k8s = require('@kubernetes/client-node');
 
 const getK8sApi = async () => {
   const k8s = await import('@kubernetes/client-node');
