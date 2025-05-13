@@ -36,6 +36,8 @@ export const StemBegrootResourceList = ({
   filteredResources = [],
   hideTagsForResources = false,
   hideReadMore = false,
+  currentPage = 0,
+  pageSize = 999,
   header
 }: {
   resourceListColumns?: number;
@@ -64,6 +66,8 @@ export const StemBegrootResourceList = ({
   filteredResources?: Array<any>;
   hideTagsForResources?: boolean;
   hideReadMore?: boolean;
+  currentPage: number;
+  pageSize: number;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -125,17 +129,17 @@ export const StemBegrootResourceList = ({
       return 0;
     });
 
-  if ( (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && setFilteredResources) {
-    if (JSON.stringify(filtered) !== JSON.stringify(filteredResources)) {
+    if ((JSON.stringify(filtered) !== JSON.stringify(filteredResources)) && setFilteredResources) {
       setFilteredResources(filtered);
     }
-  }
 
   return (
     <List
       id='stem-begroot-resource-selections-list'
       columns={resourceListColumns}
-      items={filtered || []}
+      items={
+        (filtered || [])?.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
+      }
       renderHeader={() => header || <></>}
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);

@@ -168,16 +168,16 @@ function StemBegroot({
   const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
   const [itemsPerPage, setPageSize] = useState<number>(
-    props.itemsPerPage || 10
+    props.itemsPerPage || 999
   );
+  const [totalPages, setTotalPages] = useState(0);
 
   const { data: resources, submitVotes } = datastore.useResources({
     projectId: props.projectId,
     tags,
     sort,
     search,
-    page,
-    itemsPerPage,
+    pageSize: 999,
   });
 
   // Replace with type when available from datastore
@@ -488,6 +488,19 @@ function StemBegroot({
     }
   }
 
+  useEffect(() => {
+    if (filteredResources) {
+      const filtered: any = filteredResources || [];
+      const totalPagesCalc = Math.ceil(filtered?.length / itemsPerPage);
+
+      if (totalPagesCalc !== totalPages) {
+        setTotalPages(totalPagesCalc);
+      }
+
+      setPage(0);
+    }
+  }, [filteredResources]);
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -552,6 +565,8 @@ function StemBegroot({
         voteType={props?.votes?.voteType || 'likes'}
         typeSelector={typeSelector}
         activeTagTab={activeTagTab}
+        currentPage={page}
+        pageSize={itemsPerPage}
       />
 
       <div className="osc">
@@ -990,16 +1005,18 @@ function StemBegroot({
               typeSelector={typeSelector}
               hideTagsForResources={hideTagsForResources}
               hideReadMore={hideReadMore}
+              currentPage={page}
+              pageSize={itemsPerPage}
             />
             <Spacer size={3} />
 
             {props.displayPagination && (
               <div className="osc-stem-begroot-paginator">
                 <Paginator
-                  page={resources?.metadata?.page || 0}
-                  totalPages={resources?.metadata?.pageCount || 1}
-                  onPageChange={(page) => {
-                    setPage(page);
+                  page={page || 0}
+                  totalPages={totalPages || 1}
+                  onPageChange={(newPage) => {
+                    setPage(newPage);
                     scrollToTop();
                   }}
                 />
