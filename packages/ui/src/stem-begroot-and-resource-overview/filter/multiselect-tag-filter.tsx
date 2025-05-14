@@ -85,7 +85,7 @@ const MultiSelectTagFilter = ({
 
   const combinedSelects = stopUsingDefaultValue ? selected : Array.from( new Set([...selected, ...prefilterTagsSelected]) );
 
-  return (
+  return filterTags.length > 0 && (
     <div className="form-element">
       <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder || 'Selecteer item'}</FormLabel>
       <MultiSelect
