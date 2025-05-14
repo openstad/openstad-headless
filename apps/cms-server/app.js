@@ -464,8 +464,18 @@ app.use(async function (req, res, next){
       return await serveSite(req, res, projects[completeDomain], req.forceRestart);
     }
 
+  function escapeHtml(input) {
+    return String(input)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/`/g, '&#96;');
+  }
+
     // fallback to generic 404
-    res.status(404).send(`Error: No project found for given URL ${req.openstadDomain}${req.url}`);
+    res.status(404).send(`Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`);
 
 });
 
