@@ -19,7 +19,7 @@ const lookupPromise = async (domain) => {
 
 const getIngress = async (k8sApi, name, namespace) => {
   try {
-    return await k8sApi.readNamespacedIngress(name, namespace);
+    return await k8sApi.readNamespacedIngress({name, namespace});
   } catch(error) {
     //Todo: log something
     console.log(error);
@@ -57,7 +57,7 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace) => {
     }
   }
   
-  return k8sApi.replaceNamespacedIngress(name, namespace, ingress);
+  return k8sApi.replaceNamespacedIngress({name, namespace, ingress});
 }
 
 const createIngress = async (k8sApi, name, domain, namespace) => {
