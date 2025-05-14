@@ -70,8 +70,9 @@ const baseSchema = z.object({
 
     location: z.string().optional(),
     image: z.string().optional(),
+    imageDescription: z.string().optional(),
     images: z
-        .array(z.object({ url: z.string() }))
+        .array(z.object({ url: z.string(), description: z.string().optional() }))
         .optional()
         .default([]),
     document: z.string().optional(),
@@ -388,19 +389,37 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             {imageFields.length > 0 && (
               <>
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
-                <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
+                <section className="grid col-span-full grid-cols-1 gap-y-4">
                   {imageFields.map(({ id, url }, index) => {
                     return (
-                      <div key={id} className="relative">
+                      <div key={id} className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
                         <img src={url} alt={url} />
                         <Button
                           color="red"
                           onClick={() => {
                             removeImage(index);
                           }}
-                          className="absolute right-0 top-0">
+                          className="absolute left-0 top-0">
                           <X size={24} />
                         </Button>
+
+                        <FormField
+                          control={form.control}
+                          name={`images.${index}.description`}
+                          render={({ field }) => (
+                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                              <FormLabel>Beschrijving</FormLabel>
+                              <FormDescription>Op de detailpagina van de inzending is er een optie waarmee je deze beschrijving kunt tonen.</FormDescription>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                       </div>
                     );
                   })}
