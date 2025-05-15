@@ -15,7 +15,7 @@ function getResourceId({
   if (!targetUrl) targetUrl = '?openstadResourceId=[id]';
 
   // Methode 2: Resource ID ophalen via reguliere expressie uit de URL
-  let regex = targetUrl.replace(/([.^$*+?()[\]{\|/])/g, "\\$1");
+  let regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, "\\$1");
   regex = regex.replace(/\\\[id\\\]/, "(\\d+)");
 
   let match = url.match(regex);
@@ -28,7 +28,7 @@ function getResourceId({
   if (!resourceId) {
     const urlPath = new URL(url).pathname + new URL(url).search;
 
-    regex = targetUrl.replace(/([.^$*+?()[\]{\|/])/g, "\\$1");
+    regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, "\\$1");
     regex = regex.replace(/\\\[id\\\]/, "(\\d+)");
 
     match = urlPath.match(regex);

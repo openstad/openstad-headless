@@ -17,7 +17,7 @@ const allowlist = [
 
 function isInAllowlist(key) {
   return allowlist.some(allowKey => {
-    const regex = new RegExp('^' + allowKey.replace('.', '\\.').replace('*', '.*') + '$');
+    const regex = new RegExp('^' + allowKey.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
     return regex.test(key);
   });
 }

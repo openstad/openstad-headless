@@ -333,8 +333,8 @@ app.use(function (req, res, next) {
   const url = req.url;
 
   if (req.url.indexOf('//') > -1 || req.url.indexOf('%5C') > -1) {
-    req.url = req.url.replace('//', '/');
-    req.url = req.url.replace('%5C', '');
+    req.url = req.url.replace(/\/{2,}/g, '/');
+    req.url = req.url.replace(/%5c/gi, '');
 
     // Reinitialize route parameters, so the next middleware will see the correct parameters
     req.app._router.handle(req, res, next);
