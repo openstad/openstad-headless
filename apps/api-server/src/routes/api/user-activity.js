@@ -219,7 +219,7 @@ router.route('/')
 
           return {
              //strip html tags
-            description: instance[config.descriptionKey] ? instance[config.descriptionKey].replace(/<[^>]+>/g, '') : '',
+            description: instance[config.descriptionKey] ? instance[config.descriptionKey].replace(/<\/?[^>]+(>|$)/g, '') : '',
             type: config.type,
             resource: resource,
             project: project ? project : false,
