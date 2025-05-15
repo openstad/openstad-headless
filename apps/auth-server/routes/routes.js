@@ -105,6 +105,30 @@ const addCsrfGlobal = (req, res, next) => {
     next();
 };
 
+const rateLimits = {};
+const AUTH_LIMIT = 5000;
+const AUTH_WINDOW_MS = 60 * 1000;
+
+const authMwCheckRateLimiter = (req, res, next) => {
+    const ip = req.ip;
+    if (!rateLimits[ip]) {
+        rateLimits[ip] = { count: 1, startTime: Date.now() };
+    } else {
+        const currentTime = Date.now();
+        if (currentTime - rateLimits[ip].startTime < AUTH_WINDOW_MS) {
+            rateLimits[ip].count++;
+        } else {
+            rateLimits[ip] = { count: 1, startTime: currentTime };
+        }
+    }
+
+    if (rateLimits[ip].count > AUTH_LIMIT) {
+        return res.status(429).send('Too many requests. Please try again later.');
+    }
+
+    next();
+};
+
 module.exports = function (app) {
 
     app.use(function (req, res, next) {
@@ -251,16 +275,16 @@ module.exports = function (app) {
     /**
      * Show account, add client, but not obligated
      */
-    app.use('/user', [clientMw.withOne, authMw.check]);
-    app.get('/account', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userController.account);
-    app.post('/account', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validateUser, userController.postAccount);
-    app.post('/password', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
+    app.use('/user', [clientMw.withOne, authMwCheckRateLimiter, authMw.check]);
+    app.get('/account', clientMw.withOne, authMwCheckRateLimiter, authMw.check, csrfProtection, addCsrfGlobal, userController.account);
+    app.post('/account', clientMw.withOne, authMwCheckRateLimiter, authMw.check, csrfProtection, addCsrfGlobal, userMw.validateUser, userController.postAccount);
+    app.post('/password', clientMw.withOne, authMwCheckRateLimiter, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
 
-    app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
+    app.use('/auth/required-fields', [authMwCheckRateLimiter, authMw.check, clientMw.withOne]);
     app.get('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.index);
     app.post('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.post);
 
-    app.use('/auth/two-factor', [authMw.check, clientMw.withOne]);
+    app.use('/auth/two-factor', [authMwCheckRateLimiter, authMw.check, clientMw.withOne]);
     app.get('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.index);
     app.post('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.post);
     app.get('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configure);
@@ -268,7 +292,7 @@ module.exports = function (app) {
 
     app.use('/dialog', [bruteForce.global]);
 
-    app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
+    app.get('/dialog/authorize', clientMw.withOne, authMwCheckRateLimiter, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
         return res.redirect('/login?clientId=' + req.query.client_id);
     }), oauth2Controller.authorization);
 

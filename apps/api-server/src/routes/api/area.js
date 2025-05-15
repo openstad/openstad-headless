@@ -8,6 +8,7 @@ const {formatGeoJsonToPolygon} = require('../../util/geo-json-formatter');
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 var createError = require('http-errors');
+const rateLimiter = require("../../util/rateLimiter");
 
 // scopes: for all get requests
 router
@@ -52,7 +53,7 @@ router.route('/')
     if (!req.body.polygon) return next(createError(401, 'Geen polygoon opgegeven'));
     return next();
   })
-  .post(function(req, res, next) {
+  .post( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
     db.Area
       .create(req.body)
       .catch((err) => {
@@ -101,7 +102,7 @@ router.route('/:areaId(\\d+)')
     next();
   })
   .put(auth.useReqUser)
-  .put(function(req, res, next) {
+  .put( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
     const area = req.results;
 
     if (!( area && area.can && area.can('update') )) return next( new Error('You cannot update this area') );

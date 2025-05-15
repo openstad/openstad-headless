@@ -2,6 +2,7 @@ const express = require('express');
 
 let router = express.Router({ mergeParams: true });
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const rateLimiter = require("../../util/rateLimiter");
 
 let imageAppUrl = process.env.IMAGE_APP_URL_INTERNAL || '';
 
@@ -22,7 +23,7 @@ let proxySettings = {
 
 router
     .route('/images|/image|/document|/documents')
-    .post((req, res, next) => {
+    .post( rateLimiter({ limit: 100, windowMs: 60000 }), (req, res, next) => {
         if (req.user && req.user?.role) {
           proxySettings.headers["x-user-role"] = req.user.role;
         }

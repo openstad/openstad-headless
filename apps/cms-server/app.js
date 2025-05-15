@@ -391,9 +391,30 @@ app.use((req, res, next) => {
 });
 
 // Create a middleware function for basic authentication
+const basicAuthLimiter = {};
+const BASIC_AUTH_LIMIT = 10000;
+const BASIC_AUTH_WINDOW_MS = 60 * 1000;
+
 app.use((req, res, next) => {
 
   if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
+
+    const ip = req.ip;
+
+    if (!basicAuthLimiter[ip]) {
+      basicAuthLimiter[ip] = { count: 1, startTime: Date.now() };
+    } else {
+      const currentTime = Date.now();
+      if (currentTime - basicAuthLimiter[ip].startTime < BASIC_AUTH_WINDOW_MS) {
+        basicAuthLimiter[ip].count++;
+      } else {
+        basicAuthLimiter[ip] = { count: 1, startTime: currentTime };
+      }
+    }
+
+    if (basicAuthLimiter[ip].count > BASIC_AUTH_LIMIT) {
+      return res.status(429).send('Too many requests. Please try again later.');
+    }
 
     return basicAuth({
       users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },

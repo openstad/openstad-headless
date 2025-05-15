@@ -11,6 +11,7 @@ const c = require('config');
 
 const { Op } = require('sequelize');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const rateLimiter = require("../../util/rateLimiter");
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -180,7 +181,7 @@ router
     }
     return next();
   })
-  .post(function (req, res, next) {
+  .post( rateLimiter({ limit: 100, windowMs: 60000 }), function (req, res, next) {
     try {
       req.body.location = req.body.location
         ? JSON.parse(req.body.location)
@@ -465,7 +466,7 @@ router
     req.changedToPublished = wasConcept && willNowBePublished;
     next();
   })
-  .put(function (req, res, next) {
+  .put( rateLimiter({ limit: 100, windowMs: 60000 }), function (req, res, next) {
     var resource = req.results;
 
     if (!(resource && resource.can && resource.can('update')))
