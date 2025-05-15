@@ -4,6 +4,7 @@ const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
 const crypto = require('crypto')
+const path = require("path");
 
 const secret = process.env.IMAGE_VERIFICATION_TOKEN
 
@@ -188,13 +189,18 @@ const documentUpload = multer(documentMulterConfig);
 
 app.get('/document/*',
   function (req, res, next) {
-    req.url = req.url.replace('/document', '');
+      const path = require('path');
+      const documentsDir = path.resolve('documents/');
 
-    /**
-     * Pass request en response to the imageserver
-     */
-    // return res.download(`${process.env.APP_URL}/document/${req.url}`);
-    return res.download(`documents/${req.url}`);
+      const requestedPath = req.path.replace(/^\/document\//, '');
+
+      const resolvedPath = path.resolve(documentsDir, requestedPath);
+
+      if (!resolvedPath.startsWith(documentsDir)) {
+          return res.status(403).send('Forbidden');
+      }
+
+      res.download(resolvedPath);
   });
 
 app.use((req, res, next) => {
