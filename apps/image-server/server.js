@@ -67,6 +67,7 @@ const imageSteamConfig = {
         enabled: 'false',
       },
     },
+    hqOriginalMaxPixels: 5120 * 5120
   },
 };
 
@@ -128,19 +129,11 @@ app.get('/health', (req, res) => {
 app.get('/image/*',
   function (req, res, next) {
     req.url = req.url.replace('/image', '');
-    const userRole = req.headers['x-user-role'] || 'member';
-
-    if (userRole === 'admin') {
-      imageSteamConfig.router.hqOriginalMaxPixels = 10240 * 10240;
-    }
-
-    const dynamicImageServer = new imgSteam.http.Connect(imageSteamConfig);
-    const dynamicImageHandler = dynamicImageServer.getHandler();
 
     /**
      * Pass request en response to the imageserver
      */
-    dynamicImageHandler(req, res, next);
+    imageHandler(req, res);
   });
 
 const documentMulterConfig = {

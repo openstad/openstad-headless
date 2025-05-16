@@ -652,7 +652,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               items={loadedTags}
               layout="vertical"
               selectedPredicate={(t) =>
-                form.getValues('tags').findIndex((tg) => tg === t.id) > -1
+                form.getValues('tags')?.findIndex((tg) => tg === t.id) > -1
               }
               onValueChange={(tag, checked) => {
                 const values = form.getValues('tags');
@@ -674,7 +674,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               keyPerItem={(t) => `${t.id}`}
               items={loadedStatuses}
               selectedPredicate={(t) =>
-                form.getValues('statuses').findIndex((tg) => tg === t.id) > -1
+                form.getValues('statuses')?.findIndex((tg) => tg === t.id) > -1
               }
               onValueChange={(status, checked) => {
                 const values = form.getValues('statuses');
