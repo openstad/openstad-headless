@@ -134,6 +134,8 @@ module.exports  = {
 		windowMs: 60000
 	});
 
-    this.app.use(limiter, getUser);
+    // Apply rate limiter specifically to the getUser middleware
+    this.app.use(limiter);
+    this.app.use(getUser);
   },
 };
