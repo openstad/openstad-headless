@@ -41,7 +41,7 @@ module.exports  = {
 		});
 	  });
 
-	  this.app.get( rateLimiter({ limit: 100, windowMs: 60000 }), '/db-health', async (req, res) => {
+	  this.app.get( '/db-health', rateLimiter({ limit: 100, windowMs: 60000 }), async (req, res) => {
 		try {
 			await db.sequelize.authenticate();
 			res.status(200).json({
@@ -129,6 +129,6 @@ module.exports  = {
   _initSessionMiddleware: function() {
     // Middleware to fill `req.user` with a `User` instance.
     const getUser = require('./middleware/user');
-    this.app.use(rateLimiter({ limit: 100, windowMs: 60000 }), getUser);
+    this.app.use( getUser, rateLimiter({ limit: 100, windowMs: 60000 }) );
   },
 };
