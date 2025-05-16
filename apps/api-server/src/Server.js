@@ -134,6 +134,6 @@ module.exports  = {
 		windowMs: 60000
 	});
 
-    this.app.use( limiter, getUser);
+    this.app.use(getUser, limiter);
   },
 };
