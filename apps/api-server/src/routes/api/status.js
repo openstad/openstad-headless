@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
+const rateLimiter = require("../../util/rateLimiter");
 
 let router = express.Router({ mergeParams: true });
 
@@ -53,7 +54,7 @@ router
   // create status
   // ---------------
   .post(auth.can('Status', 'create'))
-  .post(function (req, res, next) {
+  .post( rateLimiter({ limit: 100, windowMs: 60000 }), function (req, res, next) {
     const data = {
       name: req.body.name,
       seqnr: req.body.seqnr,
@@ -102,7 +103,7 @@ router
   // update status
   // ---------------
   .put(auth.useReqUser)
-  .put(function (req, res, next) {
+  .put( rateLimiter({ limit: 100, windowMs: 60000 }), function (req, res, next) {
     const status = req.results;
     if (!(status && status.can && status.can('update')))
       return next(new Error('You cannot update this status'));

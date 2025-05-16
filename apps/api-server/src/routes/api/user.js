@@ -11,6 +11,7 @@ const fetch = require('node-fetch');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const rateLimiter = require("../../util/rateLimiter");
 
 const filterBody = (req, res, next) => {
   const data = {};
@@ -189,7 +190,11 @@ router.route('/')
       .catch(next);
   })
   .post(auth.useReqUser)
-  .post(async function(req, res, next) {
+  /**
+   * Increased rate limit to 1000 to prevent false positives during future user import/export.
+   * Required for CodeQL check
+   */
+  .post( rateLimiter({ limit: 1000, windowMs: 60000 }), async function(req, res, next) {
     const data = {
       ...req.body,
       ...req.oAuthUser,
@@ -440,7 +445,7 @@ router.route('/:userId(\\d+)')
     req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
     return next();
   })
-  .put(async function (req, res, next) {
+  .put( rateLimiter({ limit: 100, windowMs: 60000 }), async function (req, res, next) {
     let user = req.results;
     let userData = merge.recursive(true, req.body);
 

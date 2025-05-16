@@ -3,6 +3,7 @@ const db      = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
+const rateLimiter = require("../../util/rateLimiter");
 
 let router = express.Router({mergeParams: true});
 
@@ -44,7 +45,7 @@ router.route('/')
 // create submission
 // ---------------
   .post(auth.can('Submission', 'create'))
-	.post(function(req, res, next) {
+	.post( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
 		let data = {
 			submittedData: req.body.submittedData,
 			projectId: req.params.projectId,
@@ -158,7 +159,7 @@ router.route('/')
 	// update submission
 	// ---------------
 	.put(auth.useReqUser)
-		.put(function(req, res, next) {
+		.put( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
 		  var submission = req.results;
       if (!( submission && submission.can && submission.can('update') )) return next( new Error('You cannot update this submission') );
 		  submission

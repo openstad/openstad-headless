@@ -3,6 +3,7 @@ const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const router = express.Router({mergeParams: true});
 const createError = require('http-errors');
+const rateLimiter = require("../../util/rateLimiter");
 
 // scopes
 // ------
@@ -43,7 +44,7 @@ router.route('/')
     // validations
 		return next();
 	})
-	.post(function(req, res, next) {
+	.post( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
 		let data = {
       ...req.body,
 			projectId: req.params.projectId,
@@ -96,7 +97,7 @@ router.route('/:templateId(\\d+)')
 // update template
 // ---------------
 	.put(auth.useReqUser)
-	.put(function(req, res, next) {
+	.put( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
 		let template = req.results;
     if (!( template && template.can && template.can('update') )) return next( new Error('You cannot update this notificationTemplate') );
 		template
