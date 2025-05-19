@@ -98,10 +98,17 @@ export default function WidgetEnqueteItems(
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
+    const savedValues = {...values};
+
+    if (savedValues?.options) {
+      savedValues.options = options;
+    }
+
     if (selectedItem) {
       setItems((currentItems) =>
-        currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
+        currentItems.map((item) => {
+            return item.trigger === selectedItem.trigger ? {...item, ...savedValues} : item
+          }
         )
       );
       setItem(null);
@@ -121,7 +128,7 @@ export default function WidgetEnqueteItems(
           minCharacters: values.minCharacters,
           maxCharacters: values.maxCharacters,
           variant: values.variant || 'text input',
-          options: values.options || [],
+          options: savedValues.options || [],
           multiple: values.multiple || false,
           image: values.image || '',
           imageAlt: values.imageAlt || '',
@@ -151,18 +158,25 @@ export default function WidgetEnqueteItems(
   // adds link to options array if no option is selected, otherwise updates the selected option
   function handleAddOption(values: FormData) {
     if (selectedOption) {
-      setOptions((currentOptions) =>
-        currentOptions.map((option) =>
-          option.trigger === selectedOption.trigger
-            ? {
+      setOptions((currentOptions) => {
+        const updatedOptions = currentOptions.map((option) => {
+          if (option.trigger === selectedOption.trigger) {
+            const newTitles =
+              values.options?.find((o) => o.trigger === option.trigger)?.titles || [];
+
+            return {
               ...option,
-              titles:
-                values.options?.find((o) => o.trigger === option.trigger)
-                  ?.titles || [],
-            }
-            : option
-        )
-      );
+              titles: newTitles,
+            };
+          }
+
+          return typeof(option?.trigger) !== "undefined" ? option : false;
+        })
+        .filter((option) => option !== false);
+
+        return updatedOptions;
+      });
+
       setOption(null);
     } else {
       const newOption = {
@@ -339,6 +353,7 @@ export default function WidgetEnqueteItems(
     });
 
     props.updateConfig({ ...updatedProps, items });
+    setOptions([]);
   }
 
 
@@ -426,7 +441,11 @@ export default function WidgetEnqueteItems(
                           </span>
                           <span
                             className="gap-2 py-3 px-2 w-full"
-                            onClick={() => setItem(item)}>
+                            onClick={() => {
+                              setItem(item);
+                              setOptions([]);
+                              setSettingOptions(false);
+                            }}>
                             {`${item.title || 'Geen titel'}`}
                           </span>
                           <span className="gap-2 py-3 px-2">
@@ -616,8 +635,7 @@ export default function WidgetEnqueteItems(
                       type="button"
                       onClick={() => {
                         setSettingOptions(() => !settingOptions),
-                          setOption(null),
-                          setOptions([]);
+                        setOption(null);
                       }}>
                       Annuleer
                     </Button>
@@ -1071,7 +1089,8 @@ export default function WidgetEnqueteItems(
                       type="submit"
                       onClick={(e) => {
                         e.preventDefault();
-                        onSubmit(form.getValues())
+                        onSubmit(form.getValues());
+                        setOptions([]);
                       }}
                       disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none'}
                     >
