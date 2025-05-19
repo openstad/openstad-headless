@@ -98,16 +98,14 @@ export default function WidgetEnqueteItems(
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
-    const savedValues = {...values};
-
-    if (savedValues?.options) {
-      savedValues.options = options;
+    if (values?.options) {
+      values.options = options;
     }
 
     if (selectedItem) {
       setItems((currentItems) =>
         currentItems.map((item) => {
-            return item.trigger === selectedItem.trigger ? {...item, ...savedValues} : item
+            return item.trigger === selectedItem.trigger ? {...item, ...values} : item
           }
         )
       );
@@ -128,7 +126,7 @@ export default function WidgetEnqueteItems(
           minCharacters: values.minCharacters,
           maxCharacters: values.maxCharacters,
           variant: values.variant || 'text input',
-          options: savedValues.options || [],
+          options: values.options || [],
           multiple: values.multiple || false,
           image: values.image || '',
           imageAlt: values.imageAlt || '',
