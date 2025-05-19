@@ -104,9 +104,8 @@ export default function WidgetEnqueteItems(
 
     if (selectedItem) {
       setItems((currentItems) =>
-        currentItems.map((item) => {
-            return item.trigger === selectedItem.trigger ? {...item, ...values} : item
-          }
+        currentItems.map((item) =>
+          item.trigger === selectedItem.trigger ? {...item, ...values} : item
         )
       );
       setItem(null);
