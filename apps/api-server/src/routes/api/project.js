@@ -605,6 +605,7 @@ router.route('/:projectId') //(\\d+)
       let providers = await authSettings.providers({ project });
       const configData = req.body.config?.auth?.provider?.openstad?.config || {};
       const allowedDomains = req.body.config?.allowedDomains || false;
+      const twoFactorRoles = req.body.config?.auth?.provider?.openstad?.twoFactorRoles;
 
       for (let provider of providers) {
         if (
@@ -620,9 +621,12 @@ router.route('/:projectId') //(\\d+)
         if (!!allowedDomains) {
           authConfig.allowedDomains = allowedDomains;
         }
-
+        
         if (adapter.service.updateClient) {
-          let merged = merge.recursive({}, authConfig, {config: configData});
+          let merged = merge.recursive({}, authConfig, {
+            config: configData,
+            twoFactorRoles: twoFactorRoles || authConfig.twoFactorRoles
+          });
           await adapter.service.updateClient({ authConfig: merged, project });
           // delete req.body.config?.auth?.provider?.[authConfig.provider]?.authTypes;
           // delete req.body.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
