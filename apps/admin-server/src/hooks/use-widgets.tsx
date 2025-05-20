@@ -1,12 +1,17 @@
 import { WidgetDefinition } from '@/lib/widget-definitions';
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useWidgetsHook(projectId?: string) {
-  let url = `/api/openstad/api/project/${projectId}/widgets`;
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const widgetsSwr = useSWR(projectId ? url : null);
+  let url = `/api/openstad/api/project/${projectNumber}/widgets`;
+
+  const widgetsSwr = useSWR(projectNumber ? url : null);
 
   async function createWidget(typeId: string, description: string) {
+
+
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -20,7 +25,7 @@ export function useWidgetsHook(projectId?: string) {
   }
 
   async function remove(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectId}/widgets/${id}`;
+    const deleteUrl = `/api/openstad/api/project/${projectNumber}/widgets/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',
@@ -40,7 +45,7 @@ export function useWidgetsHook(projectId?: string) {
   }
 
   async function updateWidget(id: number, body: any) {
-    const updateUrl = `/api/openstad/api/project/${projectId}/widgets/${id}`;
+    const updateUrl = `/api/openstad/api/project/${projectNumber}/widgets/${id}`;
 
     const res = await fetch(updateUrl, {
       method: 'PUT',

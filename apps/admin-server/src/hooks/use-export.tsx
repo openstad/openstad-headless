@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useExport(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/export`;
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const exportSWR = useSWR(projectId ? url : null);
+  const url = `/api/openstad/api/project/${projectNumber}/export`;
+
+  const exportSWR = useSWR(projectNumber ? url : null);
 
   return {...exportSWR}
 }

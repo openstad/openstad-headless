@@ -676,6 +676,13 @@ module.exports = function (db, sequelize, DataTypes) {
       if (instance.projectId && !instance.config) {
         db.Project.findByPk(instance.projectId)
           .then(project => {
+            if (!project) {
+              return reject(new Error(`Project with ID ${instance.projectId} not found`));
+            }
+            if (!project.config) {
+              return reject(new Error(`Project with ID ${instance.projectId} has no config`));
+            }
+
             instance.config = merge.recursive(true, config, project.config);
             return project;
           })

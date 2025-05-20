@@ -20,8 +20,12 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import useStatuses from "@/hooks/use-statuses";
 import React from "react";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import { Spacer } from '@/components/ui/spacer';
 
 const formSchema = z.object({
+  includeOrExcludeTagIds: z.string().optional(),
+  includeOrExcludeStatusIds: z.string().optional(),
   onlyIncludeTagIds: z.string().optional(),
   onlyIncludeStatusIds: z.string().optional()
 });
@@ -51,6 +55,8 @@ export default function WidgetResourceOverviewInclude(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      includeOrExcludeTagIds: props?.includeOrExcludeTagIds || 'include',
+      includeOrExcludeStatusIds: props?.includeOrExcludeStatusIds || 'include',
       onlyIncludeTagIds: props?.onlyIncludeTagIds || '',
       onlyIncludeStatusIds: props?.onlyIncludeStatusIds || '',
     },
@@ -75,10 +81,49 @@ export default function WidgetResourceOverviewInclude(
             </div>
           )}
 
+          <FormField
+            control={form.control}
+            name="includeOrExcludeTagIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon inzendingen gekoppeld aan onderstaande tags
+                </FormLabel>
+                <FormDescription>
+                  Gebruik het selectievakje om te kiezen hoe de geselecteerde tags de weergave van inzendingen
+                  beïnvloeden:
+                  <br/>
+                  Maak je keuze op basis van hoe je de inzendingen wil filteren in relatie tot de geselecteerde tags.
+                  <br/>
+                  <br/>
+                </FormDescription>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'include'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Inclusief" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="include"><strong>Inclusief</strong>: Als je deze optie kiest, worden alleen de
+                      inzendingen getoond die gekoppeld zijn aan de
+                      geselecteerde tags.</SelectItem>
+                    <SelectItem value="exclude"><strong>Exclusief</strong>: Als je deze optie kiest, worden juist de
+                      inzendingen die gekoppeld zijn aan de
+                      geselecteerde tags niet getoond.</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <CheckboxList
             form={form}
             fieldName="onlyIncludeTagIds"
-            fieldLabel="Geef enkel de resources met de volgende tags weer:"
+            fieldLabel=""
             label={(t) => t.name}
             keyForGrouping="type"
             keyPerItem={(t) => `${t.id}`}
@@ -101,10 +146,51 @@ export default function WidgetResourceOverviewInclude(
             }}
           />
 
+          <Spacer />
+
+          <FormField
+            control={form.control}
+            name="includeOrExcludeStatusIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon inzendingen gekoppeld aan onderstaande statussen
+                </FormLabel>
+                <FormDescription>
+                  Gebruik het selectievakje om te kiezen hoe de geselecteerde statussen de weergave van inzendingen
+                  beïnvloeden:
+                  <br/>
+                  Maak je keuze op basis van hoe je de inzendingen wil filteren in relatie tot de geselecteerde statussen.
+                  <br/>
+                  <br/>
+                </FormDescription>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'include'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Inclusief" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="include"><strong>Inclusief</strong>: Als je deze optie kiest, worden alleen de
+                      inzendingen getoond die gekoppeld zijn aan de
+                      geselecteerde statussen.</SelectItem>
+                    <SelectItem value="exclude"><strong>Exclusief</strong>: Als je deze optie kiest, worden juist de
+                      inzendingen die gekoppeld zijn aan de
+                      geselecteerde statussen niet getoond.</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <CheckboxList
             form={form}
             fieldName="onlyIncludeStatusIds"
-            fieldLabel="Geef enkel de inzendingen met de volgende status weer:"
+            fieldLabel=""
             layout="vertical"
             label={(t) => t.name}
             keyPerItem={(t) => `${t.id}`}

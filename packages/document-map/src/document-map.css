@@ -468,3 +468,45 @@ section.comment-item-footer .utrecht-button--disabled:before,
   font-weight: 200;
   font-size: 36px;
 }
+
+.documentMap--container .disable-touch-action {
+  touch-action: none;
+}
+
+.documentMap--container .map-container .lr-map-visually-hidden {
+  word-wrap: normal !important;
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  -webkit-clip-path: inset(50%);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  opacity: 0;
+}
+
+.documentMap--container .lr-map-interaction-overlay {
+  background-color: rgba(0, 0, 0, .75);
+  border-radius: .5rem;
+  color: #fff;
+  font-size: 1rem;
+  left: 50%;
+  max-width: calc(100% - 2rem);
+  padding: 1rem 1.5rem;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity .5s ease;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  width: -moz-max-content;
+  width: max-content;
+  z-index: 1000;
+  opacity: 1;
+}

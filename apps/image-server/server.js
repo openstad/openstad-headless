@@ -66,6 +66,7 @@ const imageSteamConfig = {
         enabled: 'false',
       },
     },
+    hqOriginalMaxPixels: 5120 * 5120
   },
 };
 

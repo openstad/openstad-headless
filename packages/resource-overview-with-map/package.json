@@ -13,8 +13,8 @@
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/ui": "file:../ui",
-    "@utrecht/component-library-css": "^3.0.1-alpha.18",
-    "@utrecht/component-library-react": "^3.0.1-alpha.18",
+    "@utrecht/component-library-css": "^4.2.0",
+    "@utrecht/component-library-react": "^4.2.0",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -26,12 +26,12 @@
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^8.45.0",
     "eslint-config-custom": "*",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5"
+    "vite": "^6.3.3"
   }
 }

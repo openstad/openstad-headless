@@ -164,12 +164,14 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       } catch (error) {}
 
       if (Array.isArray(parsedValue)) {
-        return [...parsedValue].join(', ')
+        return [...parsedValue].join(' | ')
       }
         
       if ( value && typeof value === 'object' ) {
         if (value.skipQuestion) {
           return value?.skipQuestionExplanation || '-';
+        } else if ( value?.lat && value?.lng ) {
+          return `${value?.lat}, ${value?.lng}`;
         } else {
           return value?.value || '-';
         }

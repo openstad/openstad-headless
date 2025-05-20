@@ -332,8 +332,23 @@ service.updateClient = async function({ authConfig, project }) {
         Local: merge({}, client.config?.authTypes?.Local, authConfig.config?.Local),
       }
     };
+
+    if ( Array.isArray(authConfig?.config?.clientStylesheets) && authConfig?.config?.clientStylesheets[0]?.url ) {
+        newClientConfig.clientStylesheets = [{
+            url: authConfig?.config?.clientStylesheets[0]?.url
+        }]
+    } else if ( Array.isArray(client?.config?.clientStylesheets) && client?.config?.clientStylesheets[0]?.url ) {
+        newClientConfig.clientStylesheets = [{
+            url: client?.config?.clientStylesheets[0]?.url
+        }]
+    } else if ( Array.isArray(project.config?.clientStylesheets) && project.config?.clientStylesheets[0]?.url ) {
+        newClientConfig.clientStylesheets = [{
+            url: project.config?.clientStylesheets[0]?.url
+        }]
+    }
+
     // Update these properties (if they exist in the authConfig or client config), else keep the existing value
-    const properties = ['fromEmail', 'fromName', 'contactEmail', 'defaultRoleId', 'requiredFields', 'twoFactor', 'configureTwoFactor'];
+    const properties = ['fromEmail', 'fromName', 'contactEmail', 'defaultRoleId', 'requiredFields', 'twoFactor', 'configureTwoFactor', "clientStylesheets", "clientDisclaimerUrl"];
     properties.forEach(property => {
       if (authConfig?.config && authConfig.config[property]) {
         newClientConfig[property] = authConfig.config[property];

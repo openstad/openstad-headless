@@ -122,9 +122,10 @@ router
     // check redirect first
     let returnTo = req.query.returnTo;
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
+    returnTo = String(returnTo);
     if (!returnTo.match(/\[\[jwt\]\]/) ) returnTo = returnTo + (returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
     let redirectUrl = returnTo;
-    redirectUrl = redirectUrl || (req.query.returnTo ? req.query.returnTo + (req.query.returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]' : false);
+    redirectUrl = redirectUrl || (req.query.returnTo ? String(req.query.returnTo) + (String(req.query.returnTo).includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]' : false);
     redirectUrl = redirectUrl || '/';
 
     const isAllowedRedirectDomain = (url, project) => {
@@ -269,6 +270,36 @@ router
         }
       })
       .catch(next)
+  })
+  .get(function (req, res, next) {
+    if (!req?.userData?.projectId || (req?.userData?.projectId && req?.userData?.projectId !== 1)) return next();
+
+    const privilegedRoles = [
+      'admin',
+      'moderator',
+      'editor'
+    ];
+
+    const userRole = req?.userData?.role || "";
+    const isPrivileged = privilegedRoles.includes(userRole);
+
+    if (!isPrivileged) {
+        let logoutUrl = '/signout';
+
+        try {
+            if (req.redirectUrl) {
+                const url = new URL(req.redirectUrl);
+                logoutUrl = `${url.origin}/signout`;
+            }
+        } catch (e) {}
+
+        return res.status(403).json({
+            error: 'Je hebt geen toegang tot deze omgeving',
+            logoutLink: logoutUrl
+        });
+    }
+
+    return next();
   })
   .get(function (req, res, next) {
     if (!req.redirectUrl.match('[[jwt]]')) return next();

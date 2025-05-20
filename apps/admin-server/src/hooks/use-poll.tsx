@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function usePolls(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/poll`;
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const pollListSwr = useSWR(projectId ? url : null);
+  const url = `/api/openstad/api/project/${projectNumber}/poll`;
+
+  const pollListSwr = useSWR(projectNumber ? url : null);
 
   return {...pollListSwr}
 }

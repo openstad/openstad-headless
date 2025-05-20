@@ -35,6 +35,7 @@ type Props = {
   applyText: string;
   showActiveTags?: boolean;
   quickFixTags?: Array<{ id: number; name: string }>;
+  preFilterTags?: Array<number>;
 };
 
 export function Filters({
@@ -46,6 +47,7 @@ export function Filters({
   onUpdateFilter,
   className = '',
   showActiveTags = false,
+  preFilterTags = undefined,
   ...props
 }: Props) {
   const defaultFilter: Filter = {
@@ -61,11 +63,17 @@ export function Filters({
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
   const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
   const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
+  const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
+  const [tagsReadyForParameter, setTagsReadyForParameter] = useState< Array<string | number> >([]);
 
   const search = useDebounce(setSearch, 300);
 
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
+
+    const tags = newFilter?.tags || [];
+
+    setTagsReadyForParameter(tags);
   }
 
   function setTags(type: string, values: any[]) {
@@ -88,31 +96,57 @@ export function Filters({
     });
   }
 
-  const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel?: string) => {
-    const existingTags = selectedOptions[tagType];
-    const selectedDraft: { type?: string, id: number, label?: string }[] = [...(newActiveTagsDraft || [])];
-    const selected = [...(existingTags || [])];
+  const updateParameter = () => {
+    const url = new URL(window.location.href);
 
-    const tagIndex = selectedDraft.findIndex((tag: { type?: string, id: number, label?: string }) => tag.id === updatedTag);
-
-    if (tagIndex !== -1) {
-      selectedDraft.splice(tagIndex, 1);
+    if (tagsReadyForParameter.length > 0) {
+      const tagString = tagsReadyForParameter.join(',');
+      url.searchParams.set('tagIds', tagString);
     } else {
-      selectedDraft.push({ id: updatedTag, label: updatedLabel, type: tagType });
+      url.searchParams.delete('tagIds');
     }
 
-    if (selected.includes(updatedTag)) {
-      const index = selected.indexOf(updatedTag);
-      selected.splice(index, 1);
-    } else {
-      selected.push(updatedTag);
-    }
+    window.history.replaceState(null, '', url);
+  }
 
-    setSelected({ ...selectedOptions, [tagType]: selected });
-    setTags(tagType, selected);
+  const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel: string, forceSelected?: boolean) => {
+    setSelected((prevSelectedOptions) => {
+      const existingTags = prevSelectedOptions[tagType] || [];
+      const selected = [...(existingTags || [])];
 
-    // @ts-ignore
-    setNewActiveTagsDraft(selectedDraft);
+      if (selected.includes(updatedTag)) {
+        if (!forceSelected) {
+          const index = selected.indexOf(updatedTag);
+          selected.splice(index, 1);
+        }
+      } else {
+        selected.push(updatedTag);
+      }
+
+      setTags(tagType, selected);
+
+      return { ...prevSelectedOptions, [tagType]: selected };
+    });
+
+    setNewActiveTagsDraft((prevSelectedOptions) => {
+      const selectedDraft: { type: string, id: number, label: string }[] = [...(prevSelectedOptions || [])];
+      const tagIndex = selectedDraft.findIndex((tag: { type: string, id: number, label: string }) => tag.id === updatedTag);
+
+      if (tagIndex !== -1) {
+        if (!forceSelected) {
+          selectedDraft.splice(tagIndex, 1);
+        }
+      } else {
+        const label = updatedLabel || '';
+        selectedDraft.push({ id: updatedTag, label: label, type: tagType });
+      }
+
+      if ( forceSelected ) {
+        setActiveTags(selectedDraft)
+      }
+
+      return selectedDraft;
+    });
   };
 
   const updateTagListSingle = (tagType: string, updatedTag: string) => {
@@ -159,6 +193,7 @@ export function Filters({
   }, [tagState]);
 
   const handleSubmit = (e?: any, updatedFilter?: Filter, updatedTags?: any) => {
+    setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
     updateFilter(filterToSubmit);
@@ -169,6 +204,8 @@ export function Filters({
     } else {
       setActiveTags(newActiveTagsDraft);
     }
+
+    updateParameter();
   };
 
   return !(props.displayTagFilters || props.displaySearch || props.displaySorting) ? null : (
@@ -197,11 +234,13 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onlyIncludeIds={tagsLimitation}
-                    onUpdateFilter={(updatedTag, updatedLabel) => {
-                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel);
+                    onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
+                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
                     quickFixTags={props.quickFixTags || []}
+                    preFilterTags={preFilterTags}
+                    parentStopUsingDefaultValue={stopUsingDefaultValue}
                   />
                 );
               } else {
@@ -219,6 +258,8 @@ export function Filters({
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
                     quickFixTags={props.quickFixTags || []}
+                    preFilterTags={preFilterTags}
+                    parentStopUsingDefaultValue={stopUsingDefaultValue}
                   />
                 );
               }
@@ -258,11 +299,14 @@ export function Filters({
               if (inputsInFilter) {
                 inputsInFilter.forEach((i) => (i.value = ''));
               }
+              setStopUsingDefaultValue(true);
               setSelected({});
               setNewActiveTagsDraft([]);
               setActiveTags([]);
-              updateFilter(defaultFilter)
+              updateFilter(defaultFilter);
+              setTagState({});
               onUpdateFilter && onUpdateFilter(defaultFilter);
+              updateParameter();
             }}>
             {props.resetText}
           </Button>

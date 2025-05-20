@@ -35,6 +35,8 @@ export type TextInputProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    minCharactersError?: string;
+    maxCharactersError?: string;
 }
 
 const TextInput: FC<TextInputProps> = ({

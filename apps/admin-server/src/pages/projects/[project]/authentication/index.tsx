@@ -56,6 +56,11 @@ const formSchema = z.object({
   logo: z.string().optional(),
   imageFavicon: z.string().optional(),
   favicon: z.string().optional(),
+  cssUrl: z.string().optional(),
+  clientDisclaimerUrl: z.string().optional(),
+  clientStylesheets: z.array(z.object({
+    url: z.string().optional(),
+  })).optional(),
 });
 
 export default function ProjectAuthentication() {
@@ -76,6 +81,10 @@ export default function ProjectAuthentication() {
       defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
       logo: data?.config?.auth?.provider?.openstad?.config?.styling?.logo,
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
+      clientDisclaimerUrl: data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
+      cssUrl: (Array.isArray(data?.config?.auth?.provider?.openstad?.config?.clientStylesheets) && data?.config?.auth?.provider?.openstad?.config?.clientStylesheets?.length)
+        ? data?.config?.auth?.provider?.openstad?.config?.clientStylesheets[0]?.url
+        : '',
     }),
     [data?.config]
   );
@@ -91,7 +100,27 @@ export default function ProjectAuthentication() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const updatedConfig = {
+      let updatedConfig: {
+        auth: {
+          provider: {
+            openstad: {
+              authTypes: string[];
+              config: {
+                fromEmail?: string;
+                fromName?: string;
+                contactEmail?: string;
+                defaultRoleId?: string;
+                clientDisclaimerUrl?: string;
+                styling: {
+                  logo?: string;
+                  favicon?: string;
+                };
+                clientStylesheets?: { url: string }[];
+              };
+            };
+          };
+        };
+      } = {
         auth: {
           provider: {
             openstad: {
@@ -101,14 +130,21 @@ export default function ProjectAuthentication() {
                 fromName: values.fromName,
                 contactEmail: values.contactEmail,
                 defaultRoleId: values.defaultRoleId,
+                clientDisclaimerUrl: values.clientDisclaimerUrl,
                 styling: {
                   logo: values.logo,
                   favicon: values.favicon,
-                }
+                },
               },
             }
           }
         }
+      }
+
+      if (values.cssUrl) {
+        updatedConfig.auth.provider.openstad.config.clientStylesheets = [{
+          url: values.cssUrl,
+        }];
       }
 
       const project = await updateProject(updatedConfig);
@@ -256,6 +292,34 @@ export default function ProjectAuthentication() {
                   </FormItem>
                 )}
               />
+
+                <FormField
+                  control={form.control}
+                  name="cssUrl"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>CSS url voor de authenticatie omgeving</FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientDisclaimerUrl"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>Privacyverklaring URL voor de authenticatie omgeving</FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="col-span-full grid-cols-2 grid gap-4">
 

@@ -18,6 +18,10 @@ function CommentForm({
   activeMode = '',
   sentiment = '',
   disableSubmit = false,
+  maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
+  minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
+  minCharactersError = 'Tekst moet minimaal {minCharacters} karakters bevatten',
+  maxCharactersError = 'Tekst moet maximaal {maxCharacters} karakters bevatten',
   ...props
 }: CommentFormProps) {
   const commentsContext = useContext(CommentWidgetContext);
@@ -26,6 +30,10 @@ function CommentForm({
     comment,
     descriptionMinLength,
     descriptionMaxLength,
+    maxCharactersWarning,
+    minCharactersWarning,
+    minCharactersError,
+    maxCharactersError,
     ...props,
   } as CommentFormProps;
 
@@ -42,6 +50,10 @@ function CommentForm({
     fieldKey: 'description',
     placeholder: commentsContext?.placeholder,
     defaultValue: !parentId ? args.comment?.description : '',
+    maxCharactersWarning: maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+    minCharactersWarning: minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+    minCharactersError: minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
+    maxCharactersError: maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
   });
 
   formFields.push({
