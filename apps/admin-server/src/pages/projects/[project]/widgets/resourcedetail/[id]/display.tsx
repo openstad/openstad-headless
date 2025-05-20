@@ -19,6 +19,7 @@ import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   displayImage: z.boolean(),
+  displayImageDescription: z.boolean(),
   displayTitle: z.boolean(),
   displayDescription: z.boolean(),
   displaySummary: z.boolean(),
@@ -53,6 +54,7 @@ export default function WidgetResourceDetailDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayImage: undefinedToTrueOrProp(props?.displayImage),
+      displayImageDescription: undefinedToTrueOrProp(props?.displayImageDescription),
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displayDescription: undefinedToTrueOrProp(props?.displayDescription),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
@@ -89,6 +91,17 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Afbeelding weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="displayImageDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Beschrijving van de afbeelding tonen</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

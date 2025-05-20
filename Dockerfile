@@ -34,7 +34,7 @@ ENV BUILD_ENV=${BUILD_ENV}
 RUN if [ "$BUILD_ENV" = "local" ]; then \
     n=0; \
     until [ "$n" -ge 5 ]; do \
-        npm install -w $WORKSPACE && break; \
+        npm install -w $WORKSPACE --legacy-peer-deps && break; \
         n=$((n+1)); \
         echo "Retrying npm install... attempt $n"; \
         sleep 5; \
@@ -47,7 +47,7 @@ RUN if [ "$BUILD_ENV" = "local" ]; then \
         sleep 5; \
     done; \
 else \
-    npm install -w $WORKSPACE && \
+    npm install -w $WORKSPACE --legacy-peer-deps && \
     npm run build-packages --if-present --prefix=$WORKSPACE; \
 fi
 
@@ -72,6 +72,7 @@ CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 
 # Prepare production
 FROM builder AS prepare-production
+ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
 RUN npm --prefix=$WORKSPACE run build --if-present && \
     npm --prefix=$WORKSPACE prune --production
@@ -80,6 +81,7 @@ RUN npm --prefix=$WORKSPACE run build --if-present && \
 FROM node:18-slim AS release
 ARG APP
 ARG PORT
+ARG NODE_ENV
 ENV WORKSPACE=apps/${APP}
 ENV NODE_ENV=${NODE_ENV:-production}
 

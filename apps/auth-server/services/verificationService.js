@@ -39,7 +39,7 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
     emailLogo = clientConfig.emailLogo;
   }
 
-  return emailProvider.send({
+  return await emailProvider.send({
     toName: user.name || false,
     toEmail: user.email,
     fromEmail: clientConfig.fromEmail,
