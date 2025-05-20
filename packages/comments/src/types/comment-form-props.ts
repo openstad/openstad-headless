@@ -13,4 +13,6 @@ export type CommentFormProps = {
   disableSubmit?: boolean;
   minCharactersWarning?: string;
   maxCharactersWarning?: string;
+  minCharactersError?: string;
+  maxCharactersError?: string;
 };
