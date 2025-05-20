@@ -498,9 +498,7 @@ function ResourceOverview({
 
   useEffect(() => {
     if ( JSON.stringify(tags) !== JSON.stringify(includeTags) ) {
-      // Tags from setTags are sometimes strings apparently
-      // @ts-ignore
-      const tagsForIncluding = tags.map((tag) => parseInt(tag, 10))
+      const tagsForIncluding = tags.map((tag) => typeof(tag) === 'string' ? parseInt(tag, 10) : tag)
       setIncludeTags(tagsForIncluding)
     }
   }, [tags])
