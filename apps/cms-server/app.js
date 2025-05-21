@@ -333,8 +333,8 @@ app.use(function (req, res, next) {
   const url = req.url;
 
   if (req.url.indexOf('//') > -1 || req.url.indexOf('%5C') > -1) {
-    req.url = req.url.replace('//', '/');
-    req.url = req.url.replace('%5C', '');
+    req.url = req.url.replace(/\/{2,}/g, '/');
+    req.url = req.url.replace(/%5c/gi, '');
 
     // Reinitialize route parameters, so the next middleware will see the correct parameters
     req.app._router.handle(req, res, next);
@@ -391,9 +391,30 @@ app.use((req, res, next) => {
 });
 
 // Create a middleware function for basic authentication
+const basicAuthLimiter = {};
+const BASIC_AUTH_LIMIT = 10000;
+const BASIC_AUTH_WINDOW_MS = 60 * 1000;
+
 app.use((req, res, next) => {
 
   if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
+
+    const ip = req.ip;
+
+    if (!basicAuthLimiter[ip]) {
+      basicAuthLimiter[ip] = { count: 1, startTime: Date.now() };
+    } else {
+      const currentTime = Date.now();
+      if (currentTime - basicAuthLimiter[ip].startTime < BASIC_AUTH_WINDOW_MS) {
+        basicAuthLimiter[ip].count++;
+      } else {
+        basicAuthLimiter[ip] = { count: 1, startTime: currentTime };
+      }
+    }
+
+    if (basicAuthLimiter[ip].count > BASIC_AUTH_LIMIT) {
+      return res.status(429).send('Too many requests. Please try again later.');
+    }
 
     return basicAuth({
       users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
@@ -464,8 +485,18 @@ app.use(async function (req, res, next){
       return await serveSite(req, res, projects[completeDomain], req.forceRestart);
     }
 
+  function escapeHtml(input) {
+    return String(input)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/`/g, '&#96;');
+  }
+
     // fallback to generic 404
-    res.status(404).send(`Error: No project found for given URL ${req.openstadDomain}${req.url}`);
+    res.status(404).send(`Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`);
 
 });
 
