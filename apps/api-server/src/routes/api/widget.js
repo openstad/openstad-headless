@@ -94,7 +94,15 @@ router
             const updatedWidget = await widget.update({ config, description });
 
             res.json(updatedWidget);
-            console.error(`✅ Widget ${widget?.id} succesvol bijgewerkt`);
+            console.error(`✅ Widget ${widget?.id} succesvol bijgewerkt`,{
+                timestamp: new Date().toISOString(),
+                route: req.originalUrl,
+                method: req.method,
+                projectId: req.params.projectId || widget?.projectId || 'onbekend',
+                widgetId: widget?.id || 'onbekend',
+                user: JSON.stringify(req.user || {}),
+                requestBody: JSON.stringify(req.body),
+            });
 
         } catch (err) {
             console.error(`[API ERROR] Widget update failed`, {
