@@ -19,7 +19,7 @@ module.exports = function( req, res, next ) {
 		
 		// Exception for URLs without project - we allow all origins
 		// see project middleware for list of exceptions
-		if (req.headers && req.headers.origin && (req.path.match('^(/api/repo|/api/template|/api/area|/api/widget|/api/image|/api/document|/api/widget-type|/widget|/$)') || req.path.match('^(/api/lock(/[^/]*)?)$') || (req.path.match('^(/api/user)') && req.method == 'GET'))) {
+		if (req.headers && req.headers.origin && (req.path.match('^(/api/repo|/api/template|/api/log|/api/area|/api/widget|/api/image|/api/document|/api/widget-type|/widget|/$)') || req.path.match('^(/api/lock(/[^/]*)?)$') || (req.path.match('^(/api/user)') && req.method == 'GET'))) {
 				url = req.headers.origin;
 				console.log ('no project, allowing origin', url);
 			}

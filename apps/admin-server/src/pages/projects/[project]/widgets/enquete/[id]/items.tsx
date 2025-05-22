@@ -31,6 +31,7 @@ import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
 import {ProjectSettingProps} from "@openstad-headless/types";
+import {logToServer} from "@/pages/api/log-to-server";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -99,8 +100,24 @@ export default function WidgetEnqueteItems(
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (values?.options) {
+      logToServer('[enquete-form] Options', JSON.stringify({
+        valuesOptions: values.options,
+        stateOptions: options,
+        adminUrl: window.location.href,
+      }));
+
       values.options = options;
     }
+
+    logToServer('[enquete-form] Formulier aangepast', JSON.stringify({
+      actie: selectedItem ? 'update bestaand item' : 'nieuw item toevoegen',
+      selectedItem,
+      values,
+      valuesOptions: values.options,
+      stateOptions: options,
+      adminUrl: window.location.href,
+    }));
+
 
     if (selectedItem) {
       setItems((currentItems) =>
@@ -154,6 +171,16 @@ export default function WidgetEnqueteItems(
 
   // adds link to options array if no option is selected, otherwise updates the selected option
   function handleAddOption(values: FormData) {
+
+    logToServer('[enquete-form] Antwoordoptie aangepast', JSON.stringify({
+      actie: selectedOption ? 'update bestaand antwoordoptie' : 'nieuw antwoordoptie toevoegen',
+      selectedOption,
+      values,
+      valuesOptions: values.options,
+      stateOptions: options,
+      adminUrl: window.location.href,
+    }));
+
     if (selectedOption) {
       setOptions((currentOptions) => {
         const updatedOptions = currentOptions.map((option) => {
@@ -348,6 +375,12 @@ export default function WidgetEnqueteItems(
         delete updatedProps[key];
       }
     });
+
+    logToServer('[enquete-form] Formulier ingestuurd', JSON.stringify({
+      actie: 'items opslaan',
+      items,
+      adminUrl: window.location.href,
+    }));
 
     props.updateConfig({ ...updatedProps, items });
     setOptions([]);

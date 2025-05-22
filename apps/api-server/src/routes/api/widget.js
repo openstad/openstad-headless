@@ -86,11 +86,29 @@ router
 
     if (config) {
       // sanitize rawInput by user
+        try {
+            if (typesToSanitize.includes(widget.dataValues.type)) {
+                widget.dataValues.config.rawInput = sanitize.content(widget.dataValues.config.rawInput);
+            }
 
-      if (typesToSanitize.includes(widget.dataValues.type)) {
-        widget.dataValues.config.rawInput = sanitize.content(widget.dataValues.config.rawInput);
-    }            
-      widget.update({ config, description }).then((result) => res.json(result));
+            const updatedWidget = await widget.update({ config, description });
+
+            res.json(updatedWidget);
+            console.error(`✅ Widget ${widget?.id} succesvol bijgewerkt`);
+
+        } catch (err) {
+            console.error(`[API ERROR] Widget update failed`, {
+                timestamp: new Date().toISOString(),
+                route: req.originalUrl,
+                method: req.method,
+                projectId: req.params.projectId || widget?.projectId || 'onbekend',
+                widgetId: widget?.id || 'onbekend',
+                user: JSON.stringify(req.user || {}),
+                requestBody: JSON.stringify(req.body),
+                error: err?.message || err,
+                stack: err?.stack || 'no stack trace',
+            });
+        }
     }
   })
 

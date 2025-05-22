@@ -40,8 +40,8 @@ export function useWidgetConfig<R>() {
       } else {
         const data = await res.json();
         swr.mutate(data);
+        toast.success('Configuratie aangepast');
       }
-      toast.success('Configuratie aangepast');
     } catch (error) {
       toast.error('De configuratie kon niet worden aangepast');
     }

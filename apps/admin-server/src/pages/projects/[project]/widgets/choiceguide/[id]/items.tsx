@@ -30,6 +30,7 @@ import {ImageUploader} from "@/components/image-uploader";
 import {useWidgetConfig} from "@/hooks/use-widget-config";
 import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/choiceguide/src/props';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
+import {logToServer} from "@/pages/api/log-to-server";
 
 const weightSchema: z.ZodSchema = z.object({
   weightX: z.any().optional(),
@@ -114,6 +115,15 @@ export default function WidgetChoiceGuideItems(
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
+    logToServer('[choiceguide-form] Formulier aangepast', JSON.stringify({
+      actie: selectedItem ? 'update bestaand item' : 'nieuw item toevoegen',
+      selectedItem,
+      values,
+      valuesOptions: values.options,
+      stateOptions: options,
+      adminUrl: window.location.href,
+    }));
+
     if (selectedItem) {
 
       // Ensure weights are defined
@@ -176,6 +186,16 @@ export default function WidgetChoiceGuideItems(
 
   // adds link to options array if no option is selected, otherwise updates the selected option
   function handleAddOption(values: FormData) {
+
+    logToServer('[choiceguide-form] Antwoordoptie aangepast', JSON.stringify({
+      actie: selectedOption ? 'update bestaand antwoordoptie' : 'nieuw antwoordoptie toevoegen',
+      selectedOption,
+      values,
+      valuesOptions: values.options,
+      stateOptions: options,
+      adminUrl: window.location.href,
+    }));
+
     if (selectedOption) {
       setOptions((currentOptions) =>
         currentOptions.map((option) =>
@@ -389,8 +409,13 @@ export default function WidgetChoiceGuideItems(
       }
     });
 
+    logToServer('[choiceguide-form] Formulier ingestuurd', JSON.stringify({
+      actie: 'items opslaan',
+      items,
+      adminUrl: window.location.href,
+    }));
+
     props.updateConfig({ ...updatedProps, items });
-    window.location.reload();
   }
 
   const hasOptions = () => {
