@@ -146,7 +146,7 @@ const MapField: FC<MapProps> = ({
             className="form-field-map-container"
             id={`map`}
           >
-            {((areaId && polygon.length) || !areaId) && (
+            {((areaId && polygon.length) || !Number(areaId)) && (
               <EditorMap
                   {...props}
                   fieldName={fieldKey}
