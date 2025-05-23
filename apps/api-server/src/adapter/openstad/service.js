@@ -277,8 +277,7 @@ service.createClient = async function({ authConfig, project }) {
       throw new Error('OpenStad.service.createClient: create client failed')
     }
 
-    let client = response.json();
-    return client;
+    return await response.json();
 
   } catch(err) {
     throw new Error('Cannot connect to auth server');

@@ -1,11 +1,11 @@
-import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useState, useCallback, useEffect } from 'react';
+import * as z from 'zod';
 import { useProject } from '../../../../hooks/use-project';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -14,13 +14,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import toast from 'react-hot-toast';
 
 
 const twoFactorRoles = [
@@ -30,7 +29,7 @@ const twoFactorRoles = [
   },
   {
     id: 'member',
-    label: 'lid',
+    label: 'Lid',
   },
   {
     id: 'moderator',
