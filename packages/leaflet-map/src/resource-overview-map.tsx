@@ -329,7 +329,7 @@ const ResourceOverviewMap = ({
     }
   }
 
-  return ((polygon && center) || !areaId) ? (
+  return ((polygon && center) || !Number(areaId)) ? (
     <div className='map-container--buttons'>
       <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
       { mapDataLayers.length > 0 && (
