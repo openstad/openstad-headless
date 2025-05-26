@@ -15,7 +15,7 @@ import { exportComments } from '@/lib/export-helpers/comments-export';
 export default function ProjectComments() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, removeComment } = useComments(project as string, '?includeAllComments=1&includeTags', true);
+  const { data, removeComment } = useComments(project as string, '?includeAllComments=1&includeVoteCount=1&includeTags', true);
   const { data: resources } = useResources(project as string);
   const [comments, setComments] = useState<any[]>([]);
 
