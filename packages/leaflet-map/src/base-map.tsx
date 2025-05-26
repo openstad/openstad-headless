@@ -16,7 +16,10 @@ import parseLocation from './lib/parse-location';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props';
 
 import '@openstad-headless/document-map/src/gesture';
-import './lib/leaflet-extensions';
+
+declare module 'leaflet' {
+  function mapInteraction(map: L.Map, options?: any): any;
+}
 
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
