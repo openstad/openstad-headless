@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
-const rateLimiter = require("../../util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 let router = express.Router({ mergeParams: true });
 
@@ -59,7 +59,7 @@ router
   // create tag
   // ---------------
   .post(auth.can('Tag', 'create'))
-  .post( rateLimiter({ limit: 100, windowMs: 60000 }), function (req, res, next) {
+  .post( rateLimiter(), function (req, res, next) {
     const data = {
       name: req.body.name,
       type: req.body.type,
@@ -113,7 +113,7 @@ router
   // update tag
   // ---------------
   .put(auth.useReqUser)
-  .put( rateLimiter({ limit: 100, windowMs: 60000 }), function (req, res, next) {
+  .put( rateLimiter(), function (req, res, next) {
     const tag = req.results;
     if (!(tag && tag.can && tag.can('update')))
       return next(new Error('You cannot update this tag'));

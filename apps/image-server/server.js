@@ -5,6 +5,7 @@ const imgSteam = require('image-steam');
 const multer = require('multer');
 const crypto = require('crypto')
 const path = require("path");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const secret = process.env.IMAGE_VERIFICATION_TOKEN
 
@@ -180,33 +181,8 @@ const documentMulterConfig = {
 documentMulterConfig.dest = process.env.DOCUMENTS_DIR || 'documents/';
 const documentUpload = multer(documentMulterConfig);
 
-const requestCounts = {};
-const RATE_LIMIT = 100;
-const WINDOW_MS = 60 * 1000;
-
-function documentRateLimiter(req, res, next) {
-    const ip = req.ip;
-
-    if (!requestCounts[ip]) {
-        requestCounts[ip] = { count: 1, startTime: Date.now() };
-    } else {
-        const currentTime = Date.now();
-        if (currentTime - requestCounts[ip].startTime < WINDOW_MS) {
-            requestCounts[ip].count++;
-        } else {
-            requestCounts[ip] = { count: 1, startTime: currentTime };
-        }
-    }
-
-    if (requestCounts[ip].count > RATE_LIMIT) {
-        return res.status(429).send('Too many requests. Please try again later.');
-    }
-
-    next();
-}
-
 app.get('/document/*',
-  documentRateLimiter,
+  rateLimiter(),
   function (req, res, next) {
       const path = require('path');
       const documentsDir = path.resolve('documents/');

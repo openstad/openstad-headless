@@ -8,7 +8,7 @@ const bruteForce = require('../../middleware/brute-force');
 const {Op} = require('sequelize');
 const pagination = require('../../middleware/pagination');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
-const rateLimiter = require("../../util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({mergeParams: true});
 
@@ -156,7 +156,7 @@ router.route('/')
 router.route('/*')
 
 // heb je al gestemd
-	.post( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+	.post( rateLimiter(), function(req, res, next) {
 		db.sequelize.transaction()
 			.then(transaction => {
 				res.locals.transaction = transaction

@@ -2,7 +2,7 @@ const express = require('express');
 const db      = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
-const rateLimiter = require("../../util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 let router = express.Router({mergeParams: true});
 
@@ -45,7 +45,7 @@ router.route('/')
     // create Action
     // ---------------
     .post(auth.can('Action', 'create'))
-    .post( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+    .post( rateLimiter(), function(req, res, next) {
         const data = req.body;
 
         data.projectId = req.params.projectId;
@@ -89,7 +89,7 @@ router.route('/:actionId(\\d+)')
     // update action
     // ---------------
     .put(auth.useReqUser)
-    .put( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+    .put( rateLimiter(), function(req, res, next) {
         const action = req.results;
 
         if (!( action && action.can && action.can('update') )) return next( new Error('You cannot update this action') );

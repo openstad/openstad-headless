@@ -1,4 +1,5 @@
 const passport = require('passport');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 //CONTROLERS
 const oauth2Controller = require('../controllers/oauth/oauth2');
@@ -102,30 +103,6 @@ const csrfProtection = async  (req, res, next) => {
 
 const addCsrfGlobal = (req, res, next) => {
     req.nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
-    next();
-};
-
-const rateLimits = {};
-const AUTH_LIMIT = 5000;
-const AUTH_WINDOW_MS = 60 * 1000;
-
-const rateLimiter = (req, res, next) => {
-    const ip = req.ip;
-    if (!rateLimits[ip]) {
-        rateLimits[ip] = { count: 1, startTime: Date.now() };
-    } else {
-        const currentTime = Date.now();
-        if (currentTime - rateLimits[ip].startTime < AUTH_WINDOW_MS) {
-            rateLimits[ip].count++;
-        } else {
-            rateLimits[ip] = { count: 1, startTime: currentTime };
-        }
-    }
-
-    if (rateLimits[ip].count > AUTH_LIMIT) {
-        return res.status(429).send('Too many requests. Please try again later.');
-    }
-
     next();
 };
 

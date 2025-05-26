@@ -6,7 +6,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 var createError = require('http-errors');
-const rateLimiter = require("../../util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 // scopes: for all get requests
 router
@@ -44,7 +44,7 @@ router.route('/')
     if (!req.body.layer) return next(createError(401, 'Geen kaartlaag opgegeven'));
     return next();
   })
-  .post( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+  .post( rateLimiter(), function(req, res, next) {
     db.Datalayer
       .create(req.body)
       .catch((err) => {
@@ -86,7 +86,7 @@ router.route('/:datalayerId(\\d+)')
     res.json(req.results);
   })
   .put(auth.useReqUser)
-  .put( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+  .put( rateLimiter(), function(req, res, next) {
     const datalayer = req.results;
 
     if (!( datalayer && datalayer.can && datalayer.can('update') )) return next( new Error('You cannot update this datalayer') );

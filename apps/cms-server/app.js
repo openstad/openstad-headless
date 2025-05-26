@@ -10,6 +10,7 @@ const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const basicAuth = require('express-basic-auth');
 const path = require('node:path');
@@ -390,36 +391,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Create a middleware function for basic authentication
-const basicAuthLimiter = {};
-const BASIC_AUTH_LIMIT = 10000;
-const BASIC_AUTH_WINDOW_MS = 60 * 1000;
-
 app.use((req, res, next) => {
-
   if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
-
-    const ip = req.ip;
-
-    if (!basicAuthLimiter[ip]) {
-      basicAuthLimiter[ip] = { count: 1, startTime: Date.now() };
-    } else {
-      const currentTime = Date.now();
-      if (currentTime - basicAuthLimiter[ip].startTime < BASIC_AUTH_WINDOW_MS) {
-        basicAuthLimiter[ip].count++;
-      } else {
-        basicAuthLimiter[ip] = { count: 1, startTime: currentTime };
-      }
-    }
-
-    if (basicAuthLimiter[ip].count > BASIC_AUTH_LIMIT) {
-      return res.status(429).send('Too many requests. Please try again later.');
-    }
-
-    return basicAuth({
-      users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
-      challenge: true
-    })(req, res, next);
+    return rateLimiter()(req, res, () => {
+          basicAuth({
+            users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
+            challenge: true
+          })(req, res, next);
+        }
+    );
   }
 
   next();

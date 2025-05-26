@@ -3,7 +3,7 @@ const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const router = express.Router({mergeParams: true});
 const createError = require('http-errors');
-const rateLimiter = require("../../util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 // scopes
 // ------
@@ -44,7 +44,7 @@ router.route('/')
     // validations
 		return next();
 	})
-	.post( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+	.post( rateLimiter(), function(req, res, next) {
 		let data = {
       ...req.body,
 			projectId: req.params.projectId,
@@ -97,7 +97,7 @@ router.route('/:notificationId(\\d+)')
 // update notification
 // -------------------
 	.put(auth.useReqUser)
-	.put( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+	.put( rateLimiter(), function(req, res, next) {
 		let notification = req.results;
     if (!( notification && notification.can && notification.can('update') )) return next( new Error('You cannot update this notification') );
 		notification

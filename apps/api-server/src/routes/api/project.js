@@ -22,7 +22,7 @@ const createError = require('http-errors');
 
 let router = express.Router({mergeParams: true});
 const {Op} = require("sequelize");
-const rateLimiter = require("../../util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 async function getProject(req, res, next, include = []) {
 	const projectId = req.params.projectId;
@@ -233,7 +233,7 @@ async function revertConfigResourceSettings(req, errors) {
 // Endpoint to delete duplicated project and its associated data
 router.route('/delete-duplicated-data')
   .post(auth.can('Project', 'delete'))
-  .post( rateLimiter({ limit: 100, windowMs: 60000 }), async function(req, res, next) {
+  .post( rateLimiter(), async function(req, res, next) {
     const { projectId, tagMap, statusMap, widgetMap, resourceMap, userMap } = req.body;
 
     try {
@@ -394,7 +394,7 @@ router.route('/')
 // -----------
 	.post(auth.can('Project', 'create'))
 	.post(removeProtocolFromUrl)
-	.post( rateLimiter({ limit: 100, windowMs: 60000 }), async function (req, res, next) {
+	.post( rateLimiter(), async function (req, res, next) {
     req.widgets = req.body.widgets || [];
     req.tags = req.body.tags || [];
     req.statuses = req.body.statuses || [];
@@ -598,7 +598,7 @@ router.route('/:projectId') //(\\d+)
 // -----------
 	.put(auth.useReqUser)
 	.put(removeProtocolFromUrl)
-	.put( rateLimiter({ limit: 100, windowMs: 60000 }), async function (req, res, next) {
+	.put( rateLimiter(), async function (req, res, next) {
     // update certain parts of config to the oauth client
 		const project = await db.Project.findOne({ where: { id: req.results.id} });
     if (!hasRole( req.user, 'admin')) return next();
@@ -746,7 +746,7 @@ router.route('/:projectId(\\d+)/export')
 // -------------------
 router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 	.put(auth.can('Project', 'anonymizeAllUsers'))
-	.put( rateLimiter({ limit: 100, windowMs: 60000 }), function(req, res, next) {
+	.put( rateLimiter(), function(req, res, next) {
     // the project
 		let where = { id: parseInt(req.params.projectId) };
 		db.Project

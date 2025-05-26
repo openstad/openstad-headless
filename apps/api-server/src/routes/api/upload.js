@@ -2,7 +2,7 @@ const express = require('express');
 
 let router = express.Router({ mergeParams: true });
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const rateLimiter = require("../../util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 let imageAppUrl = process.env.IMAGE_APP_URL_INTERNAL || '';
 
@@ -23,7 +23,7 @@ const imageProxyMw = createProxyMiddleware({
 
 router
     .route('/images|/image|/document|/documents')
-    .post( rateLimiter({ limit: 100, windowMs: 60000 }), (req, res, next) => {
+    .post( rateLimiter(), (req, res, next) => {
         // check if req.user is set
         // if (!req.user || !req.user?.id) {
         //   console.log ('upload path: no user found', req.user);

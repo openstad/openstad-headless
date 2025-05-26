@@ -1,6 +1,9 @@
 const rateLimiters = {};
 
-function rateLimiter({ limit = 100, windowMs = 60000 } = {}) {
+function rateLimiter({
+    limit = process.env.RATE_LIMIT ? parseInt(process.env.RATE_LIMIT, 10) : 100,
+    windowMs = process.env.RATE_WINDOW_MS ? parseInt(process.env.RATE_WINDOW_MS, 10) : 60000
+} = {}) {
     return (req, res, next) => {
         const ip = req.ip;
         const now = Date.now();

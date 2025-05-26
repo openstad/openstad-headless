@@ -6,6 +6,7 @@
   "license": "MIT",
   "main": "app.js",
   "dependencies": {
+    "@openstad-headless/lib": "file:../../packages/lib",
     "@azure/identity": "^4.6.0",
     "bcrypt": "^5.0.1",
     "bluebird": "^3.5.1",

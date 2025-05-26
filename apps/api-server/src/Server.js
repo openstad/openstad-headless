@@ -6,7 +6,7 @@ var util         = require('./util');
 var log          = require('debug')('app:http');
 const morgan     = require('morgan');
 const db 		 = require('./db');
-const rateLimiter = require("./util/rateLimiter");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 module.exports  = {
 	app: undefined,
@@ -41,7 +41,7 @@ module.exports  = {
 		});
 	  });
 
-	  this.app.get( '/db-health', rateLimiter({ limit: 100, windowMs: 60000 }), async (req, res) => {
+	  this.app.get( '/db-health', rateLimiter(), async (req, res) => {
 		try {
 			await db.sequelize.authenticate();
 			res.status(200).json({
@@ -129,6 +129,6 @@ module.exports  = {
   _initSessionMiddleware: function() {
     // Middleware to fill `req.user` with a `User` instance.
     const getUser = require('./middleware/user');
-    this.app.use( getUser, rateLimiter({ limit: 100, windowMs: 60000 }) );
+    this.app.use( getUser, rateLimiter() );
   },
 };
