@@ -20,60 +20,57 @@ const keyMap: Record<string, string> = {
   'updatedAt'             : 'Laatst bijgewerkt',
 };
 
-const cleanCommentsData = (allComments: any[]) => {
-  return allComments.map(original => {
-    const cleaned: Record<string, any> = {};
+const cleanCommentsData = (original: Record<string, any>) => {
+  const cleaned: Record<string, any> = {};
 
-    Object.entries(keyMap).forEach(([key, label]) => {
-      if (original.hasOwnProperty(key)) {
-        cleaned[label] = original[key];
-      }
-    });
-
-    Object.keys(original).forEach((key) => {
-      if (key.startsWith('tags.')) {
-        const label = key.replace('tags.', 'Tag ');
-
-        const fullTagsString = typeof cleaned[label] === 'undefined'
-          ? original[key]
-          : cleaned[label] + ', ' + original[key];
-
-        cleaned[label] = JSON.parse( `[${fullTagsString}]` )?.filter(Boolean).join(', ');
-      }
-    });
-
-    return cleaned;
+  Object.entries(keyMap).forEach(([key, label]) => {
+    if (original.hasOwnProperty(key)) {
+      cleaned[label] = original[key];
+    }
   });
+
+  Object.keys(original).forEach((key) => {
+    if (key.startsWith('tags.')) {
+      const label = key.replace('tags.', 'Tag ');
+
+      const fullTagsString = typeof cleaned[label] === 'undefined'
+        ? original[key]
+        : cleaned[label] + ', ' + original[key];
+
+      cleaned[label] = JSON.parse( `[${fullTagsString}]` )?.filter(Boolean).join(', ');
+    }
+  });
+
+  return cleaned;
 }
 
 export const exportComments = (data: any[], fileName: string) => {
   const allComments: any[] = [];
 
-  const flattenedData = data.map(item => flattenObject(item));
-
-  flattenedData.forEach((comment) => {
-    allComments.push(comment);
+  data.forEach((comment) => {
+    const flattenedComment = flattenObject(comment);
+    const cleanedComment = cleanCommentsData(flattenedComment);
+    allComments.push(cleanedComment);
 
     let replies = [];
-    if (typeof comment.replies === 'string') {
+    if (typeof flattenedComment.replies === 'string') {
       try {
-        replies = JSON.parse( `[${comment.replies}]` );
+        replies = JSON.parse( `[${flattenedComment.replies}]` );
 
         replies?.forEach((reply: any) => {
-          reply.parentId = comment.id;
+          reply.parentId = flattenedComment.id;
           reply.description = `└ ${reply.description || ''}`;
 
           const flattenedReply = flattenObject(reply);
-          allComments.push(flattenedReply);
+          const cleanedReply = cleanCommentsData(flattenedReply);
+          allComments.push(cleanedReply);
         });
       } catch (e) {}
     }
   });
 
-  const cleanedComments = cleanCommentsData(allComments);
-
   const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(cleanedComments);
+  const worksheet = XLSX.utils.json_to_sheet(allComments);
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Reacties');
   XLSX.writeFile(workbook, fileName);
 };
