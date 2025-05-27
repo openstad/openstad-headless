@@ -1,32 +1,35 @@
 import './resource-detail.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
-import DataStore from '@openstad-headless/data-store/src';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
-import {
-  Carousel,
-  Image,
-  Spacer,
-  Pill,
-  IconButton, Icon,
-} from '@openstad-headless/ui/src';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
-import {
-  Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
-} from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
-import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
   CommentsWidgetProps,
 } from '@openstad-headless/comments/src/comments';
+import DataStore from '@openstad-headless/data-store/src';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import {
+  Carousel,
+  Icon,
+  Image,
+  Pill,
+  Spacer
+} from '@openstad-headless/ui/src';
+import '@utrecht/component-library-css';
+import {
+  ButtonGroup, ButtonLink,
+  Heading,
+  Link,
+  Paragraph
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useState } from 'react';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
-import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { Button } from '@utrecht/component-library-react';
+import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { hasRole } from '../../lib';
 
 type booleanProps = {
@@ -134,7 +137,10 @@ function ResourceDetail({
     return date.split(' ').slice(0, -1).join(' ')
   };
 
-  if (!resource) return null;
+  if (!resource || !resource.id){
+    console.error('Resource does not have an id yet, possible race condition', resource, resourceId, props);
+    return null;
+  }
   const shouldHaveSideColumn =
     displayLikes || displayTags || displayStatus || displaySocials || displayDocuments;
 
