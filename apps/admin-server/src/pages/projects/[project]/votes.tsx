@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import useUsers from "@/hooks/use-users";
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import * as XLSX from 'xlsx';
+import {exportVotes} from "@/lib/export-helpers/votes-export";
 
 export default function ProjectResources() {
   const router = useRouter();
@@ -19,18 +20,11 @@ export default function ProjectResources() {
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
-  const exportData = (data: any[], fileName: string) => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    XLSX.writeFile(workbook, fileName);
-  };
   function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportData(data, `${projectId}_stemmen_${formattedDate}.xlsx`);
+    exportVotes(data, `${projectId}_stemmen_${formattedDate}.xlsx`);
   }
 
   const { data: usersData } = useUsers();
