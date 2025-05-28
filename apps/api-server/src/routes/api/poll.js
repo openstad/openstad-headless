@@ -5,6 +5,7 @@ const pagination  = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 
 const express = require('express');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 const router = express.Router({mergeParams: true});
 
 router
@@ -89,7 +90,7 @@ router.route('/')
     if (!req.resource.auth.canAddPoll(req.user, req.resource)) return next( createError(400, 'Poll toevoegen is niet toegestaan 2') );
 		next();
 	})
-	.post(function(req, res, next) {
+	.post( rateLimiter(), function(req, res, next) {
 
 		let data = {
       ...req.body,
@@ -156,7 +157,7 @@ router.route('/:pollId(\\d+)')
 // update poll
 // ---------------
 	.put(auth.useReqUser)
-	.put(function(req, res, next) {
+	.put( rateLimiter(), function(req, res, next) {
 		var poll = req.results;
     if (!( poll && poll.can && poll.can('update') )) return next( new Error('You cannot update this poll') );
 		poll
