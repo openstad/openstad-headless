@@ -25,7 +25,7 @@
     "express": "^4.17.1",
     "hat": "0.0.3",
     "image-steam": "https://github.com/asilvas/node-image-steam#336cf2fd39463a24965707e6d92c3dce01d3ba40",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.0",
     "yargs": "^17.5.1"
   },
   "author": "Gemeente Amsterdam",
