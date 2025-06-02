@@ -1,15 +1,13 @@
 'use client';
-import React from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { FolderOpen, LogOut, Users, AlertTriangle } from 'lucide-react';
-import { Logo } from './logo';
-import { useContext } from 'react';
+import { AlertTriangle, FolderOpen, LogOut, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useContext, useEffect, useState } from 'react';
 import { SessionContext } from '../../auth';
+import { Logo } from './logo';
 
 export function Sidenav({
   className,
@@ -104,10 +102,9 @@ export function Sidenav({
           'p-4 flex flex-col gap-2',
           narrow ? 'items-center' : null
         )}>
-        <Link href="/projects">
+        <Link href="/signout">
           <Button
             variant="ghost"
-            onClick={() => router.push('/signout')}
             className={cn(
               'w-full flex flex-row justify-start',
               narrow ? 'p-0 h-10 w-10 justify-center' : null
