@@ -368,6 +368,7 @@ router
     let returnTo = req.query.returnTo;
     returnTo = returnTo || (req.cookies && req.cookies['redirectUri']); //
     returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
+    returnTo = returnTo.replace('openstadlogintoken=[[jwt]]', ''); // we don't want double jwt
     let redirectUrl = returnTo
       ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]'
       : false;
