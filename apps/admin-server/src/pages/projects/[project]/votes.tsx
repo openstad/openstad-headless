@@ -8,8 +8,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import useUsers from "@/hooks/use-users";
 import { sortTable, searchTable } from '@/components/ui/sortTable';
-import * as XLSX from 'xlsx';
-import {exportVotes} from "@/lib/export-helpers/votes-export";
+import {exportToXLSX} from "@/lib/export-helpers/xlsx-export";
 
 export default function ProjectResources() {
   const router = useRouter();
@@ -24,7 +23,24 @@ export default function ProjectResources() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportVotes(data, `${projectId}_stemmen_${formattedDate}.xlsx`);
+
+    const keyMap: Record<string, string> = {
+      'id'                    : 'Stem ID',
+      'resourceId'            : 'Inzending ID',
+      'resource.title'        : 'Inzending titel',
+      'opinion'               : 'Stem',
+      'createdAt'             : 'Datum',
+      'ip'                    : 'IP Adres',
+      'userId'                : 'Gebruiker ID',
+      'user.role'             : 'Gebruiker rol',
+      'user.displayName'      : 'Gebruiker weergavenaam',
+      'user.nickName'         : 'Gebruiker bijnaam',
+      'user.name'             : 'Gebruiker naam',
+      'user.email'            : 'Gebruiker e-mailadres',
+      'user.postcode'         : 'Gebruiker postcode',
+    };
+
+    exportToXLSX(data, `${projectId}_stemmen_${formattedDate}.xlsx`, keyMap);
   }
 
   const { data: usersData } = useUsers();

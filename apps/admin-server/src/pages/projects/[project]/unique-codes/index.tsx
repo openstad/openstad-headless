@@ -5,7 +5,6 @@ import { Plus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
-import { CSVLink } from 'react-csv';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +15,7 @@ import { MoreHorizontal } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useUniqueCodes from '@/hooks/use-unique-codes';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
-import * as XLSX from 'xlsx';
-
-const headers = [
-  { label: "ID", key: "id" },
-  { label: "Code", key: "code" }
-]
+import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 
 export default function ProjectCodes() {
   const router = useRouter();
@@ -33,19 +27,19 @@ export default function ProjectCodes() {
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
-  const exportData = (data: any[], fileName: string) => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    XLSX.writeFile(workbook, fileName);
-  };
-
   function transform() {
+    const keyMap: Record<string, string> = {
+      'id': 'Stem ID',
+      'code': 'Code',
+      'userId': 'Gebruikt',
+      'createdAt': 'Aangemaakt op',
+      'updatedAt': 'Bijgewerkt op',
+    };
+
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportData(uniquecodes.data, `${projectId}_stemcodes_${formattedDate}.xlsx`);
+    exportToXLSX(uniquecodes.data, `${projectId}_stemcodes_${formattedDate}.xlsx`, keyMap);
   }
 
   useEffect(() => {
@@ -124,7 +118,7 @@ export default function ProjectCodes() {
                 <li key={code.id} className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <Paragraph className="hidden lg:flex truncate">{code.id || null}</Paragraph>
                   <Paragraph className="hidden lg:flex truncate">{code.code || null}</Paragraph>
-                  <Paragraph className="flex truncate -mr-16">{!!code.userId ? `Gebruikt (userId=${code.userId})` : ''}</Paragraph>
+                  <Paragraph className="flex truncate -mr-16">{!!code.userId ? `Gebruikt` : ''}</Paragraph>
                   {!!code.userId ? (
                     <div
                       className="hidden lg:flex ml-auto"
