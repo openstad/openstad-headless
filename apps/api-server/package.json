@@ -30,7 +30,7 @@
     "@openstad-headless/choiceguide-results": "file:../../packages/choiceguide-results",
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/counter": "file:../../packages/counter",
-    "@openstad-headless/datastore": "file:../../packages/data-store",
+    "@openstad-headless/data-store": "file:../../packages/data-store",
     "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",
     "@openstad-headless/distribution-module": "file:../../packages/distribution-module",
     "@openstad-headless/document-map": "file:../../packages/document-map",
