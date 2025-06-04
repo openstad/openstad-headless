@@ -31,25 +31,8 @@ ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
 
 # Retry logic for npm install and build-packages if BUILD_ENV is local
-RUN if [ "$BUILD_ENV" = "local" ]; then \
-    n=0; \
-    until [ "$n" -ge 5 ]; do \
-        npm install --legacy-peer-deps && break; \
-        n=$((n+1)); \
-        echo "Retrying npm install... attempt $n"; \
-        sleep 5; \
-    done; \
-    n=0; \
-    until [ "$n" -ge 5 ]; do \
-        npm run build-packages --if-present --prefix=$WORKSPACE && break; \
-        n=$((n+1)); \
-        echo "Retrying build-packages... attempt $n"; \
-        sleep 5; \
-    done; \
-else \
-    npm install --legacy-peer-deps && \
-    npm run build-packages --if-present --prefix=$WORKSPACE; \
-fi
+RUN npm install --legacy-peer-deps
+RUN npm run build-packages --if-present -w $WORKSPACE
 
 RUN npm cache clean --force
 
@@ -74,8 +57,8 @@ CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 FROM builder AS prepare-production
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
-RUN npm --prefix=$WORKSPACE run build --if-present && \
-    npm --prefix=$WORKSPACE prune --production
+RUN npm run build --if-present -w $WORKSPACE
+RUN npm prune --production
 
 # Release image
 FROM node:18-slim AS release
