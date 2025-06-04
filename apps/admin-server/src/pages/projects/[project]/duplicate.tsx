@@ -137,6 +137,10 @@ export default function ProjectDuplicate() {
       skipDefaultStatuses: true,
     };
 
+    if ( duplicateData.config && duplicateData.config.uniqueId ) {
+      delete duplicateData.config.uniqueId;
+    }
+
     const widgets = await fetchData(`/api/openstad/api/project/${data.id}/widgets`);
     duplicateData.widgets = widgets;
 
