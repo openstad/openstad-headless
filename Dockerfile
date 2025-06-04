@@ -51,7 +51,7 @@ ENV NODE_ENV=${NODE_ENV:-development}
 # Create app directory
 WORKDIR /opt/openstad-headless
 
-CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
+CMD ["npm", "run", "dev", "-w ${WORKSPACE}"]
 
 # Prepare production
 FROM builder AS prepare-production
@@ -84,7 +84,7 @@ USER node
 
 EXPOSE ${PORT}
 
-CMD ["npm", "run", "start", "--prefix=${WORKSPACE}"]
+CMD ["npm", "run", "start", "-w ${WORKSPACE}"]
 
 # Release image with additional packages if needed
 FROM release AS release-with-packages
@@ -99,4 +99,4 @@ USER node
 EXPOSE ${PORT}
 
 # Run the application
-CMD ["npm", "run", "start", "--prefix=${WORKSPACE}"]
+CMD ["npm", "run", "start", "-w ${WORKSPACE}"]
