@@ -189,7 +189,7 @@ spec:
         image: {{ .Values.auth.deploymentContainer.image }}
         command: ["/bin/bash", "-c"]
         args:
-          - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/auth-server -- --only-if-empty && npm run migrate-database -w apps/auth-server
+          - nc $DB_HOST $DB_PORT -z -w1 && NODE_PATH=../../node_modules npm run init-database -w apps/auth-server -- --only-if-empty && NODE_PATH=../../node_modules npm run migrate-database -w apps/auth-server
         env:
           - name: DB_USER
             valueFrom:
