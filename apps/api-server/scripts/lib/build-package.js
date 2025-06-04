@@ -29,7 +29,6 @@ function buildPackage (package) {
 function buildPackageByDirectory (directory) {
   console.log(`Building package in path: ${directory}`);
   
-  execSync(`npm i --prefix=packages/${directory} --legacy-peer-deps`, {cwd: `../../`});
   execSync(`npm run build --if-present --prefix=packages/${directory}`, {cwd: `../../`});
   
   console.log(`Done building package in path: ${directory}`)
