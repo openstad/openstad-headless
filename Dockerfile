@@ -30,8 +30,7 @@ RUN npm config set fetch-timeout 300000
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
 
-# Retry logic for npm install and build-packages if BUILD_ENV is local
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps -w $WORKSPACE
 RUN npm run build-packages --if-present -w $WORKSPACE
 
 RUN npm cache clean --force
@@ -51,7 +50,7 @@ ENV NODE_ENV=${NODE_ENV:-development}
 # Create app directory
 WORKDIR /opt/openstad-headless
 
-CMD ["npm", "run", "dev", "-w ${WORKSPACE}"]
+CMD ["npm", "run", "dev", "-w", "${WORKSPACE}"]
 
 # Prepare production
 FROM builder AS prepare-production
@@ -85,7 +84,7 @@ USER node
 
 EXPOSE ${PORT}
 
-CMD ["npm", "run", "start", "-w ${WORKSPACE}"]
+CMD ["npm", "run", "start", "-w", "${WORKSPACE}"]
 
 # Release image with additional packages if needed
 FROM release AS release-with-packages
@@ -100,4 +99,4 @@ USER node
 EXPOSE ${PORT}
 
 # Run the application
-CMD ["npm", "run", "start", "-w ${WORKSPACE}"]
+CMD ["npm", "run", "start", "-w", "${WORKSPACE}"]
