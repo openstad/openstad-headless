@@ -79,6 +79,7 @@ RUN apt-get update && \
 # Copy the built app from the prepare-production stage
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/node_modules ./node_modules
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless/package.json ./package.json
 
 USER node
 
