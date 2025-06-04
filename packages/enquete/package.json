@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/data-store": "file:../data-store",
-    "@openstad-headless/lib": "file:../lib",
-    "@openstad-headless/types": "file:../types",
-    "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/data-store": "*",
+    "@openstad-headless/lib": "*",
+    "@openstad-headless/types": "*",
+    "@openstad-headless/ui": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1"
