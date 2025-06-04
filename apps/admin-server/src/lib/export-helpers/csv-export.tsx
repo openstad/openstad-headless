@@ -1,27 +1,4 @@
 export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: any) => {
-
-  if ( selectedWidget && selectedWidget?.config && selectedWidget?.config?.items ) {
-
-    const fieldKeyToTitleMap = selectedWidget?.config?.items.reduce((acc: any, item: any) => {
-      acc[item.fieldKey] = item.title;
-      return acc;
-    }, {});
-
-    data = data.map((row: any) => {
-      const updatedSubmittedData = Object.keys(row?.submittedData).reduce((acc: any, key: any) => {
-        const newKey = fieldKeyToTitleMap[key] || key;
-        acc[newKey] = row?.submittedData[key];
-        return acc;
-      }, {});
-
-      return {
-        ...row,
-        submittedData: updatedSubmittedData
-      };
-    });
-
-  }
-
   function transformString() {
     widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
     widgetName = widgetName.replace(/[^a-z0-9-]/g, '');
@@ -130,8 +107,7 @@ export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: a
       widgetName || ' ',
       row.userId || ' ',
       ...Array.from(fieldKeyToTitleMap.entries()).map(([key, title]) => {
-        const keyToUse = key?.endsWith('_other') ? key : title;
-        const rawValue = row.submittedData?.[keyToUse];
+        const rawValue = row.submittedData?.[key];
         return normalizeData(rawValue);
       }),
     ];
