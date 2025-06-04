@@ -48,6 +48,7 @@
     "@openstad-headless/stem-begroot": "*",
     "@openstad-headless/ui": "*",
     "@radix-ui/react-separator": "^1.1.0",
+    "ajv": "^8.17.1",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.2",
     "co": "^4.6.0",

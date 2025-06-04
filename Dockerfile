@@ -30,7 +30,7 @@ RUN npm config set fetch-timeout 300000
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
 
-RUN npm install --legacy-peer-deps -w $WORKSPACE
+RUN npm install --legacy-peer-deps -ws
 RUN npm run build-packages --if-present -w $WORKSPACE
 
 RUN npm cache clean --force
