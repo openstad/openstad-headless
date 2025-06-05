@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/data-store": "file:../data-store",
-    "@openstad-headless/lib": "file:../lib",
-    "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/data-store": "*",
+    "@openstad-headless/lib": "*",
+    "@openstad-headless/ui": "*",
     "@utrecht/component-library-css": "^4.2.0",
     "@utrecht/component-library-react": "^4.2.0",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",

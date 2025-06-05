@@ -1,7 +1,5 @@
 # Image used for building dependencies
 FROM node:18-slim AS builder
-ARG APP
-ENV WORKSPACE=apps/${APP}
 ENV GITHUB_REPOSITORY=openstad/openstad-headless
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
@@ -21,7 +19,7 @@ RUN npm update -g npm
 COPY --chown=node:node package*.json .
 # Bundle all packages during build, only the installed ones will persist
 COPY --chown=node:node packages/ ./packages
-COPY --chown=node:node apps/$APP ./apps/$APP
+COPY --chown=node:node apps/ ./apps
 
 RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
@@ -30,28 +28,27 @@ RUN npm config set fetch-timeout 300000
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
 
-# Retry logic for npm install and build-packages if BUILD_ENV is local
-RUN if [ "$BUILD_ENV" = "local" ]; then \
-    n=0; \
-    until [ "$n" -ge 5 ]; do \
-        npm install -w $WORKSPACE --legacy-peer-deps && break; \
-        n=$((n+1)); \
-        echo "Retrying npm install... attempt $n"; \
-        sleep 5; \
-    done; \
-    n=0; \
-    until [ "$n" -ge 5 ]; do \
-        npm run build-packages --if-present --prefix=$WORKSPACE && break; \
-        n=$((n+1)); \
-        echo "Retrying build-packages... attempt $n"; \
-        sleep 5; \
-    done; \
-else \
-    npm install -w $WORKSPACE --legacy-peer-deps && \
-    npm run build-packages --if-present --prefix=$WORKSPACE; \
-fi
+RUN npm install --legacy-peer-deps -ws
+
+FROM builder AS base
+
+ARG APP
+ENV WORKSPACE=apps/${APP}
+
+RUN npm run build-packages --if-present -w $WORKSPACE
 
 RUN npm cache clean --force
+
+# Remove all folders from ./apps except the one specified by APP
+RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
+RUN npm prune -ws
+
+
+# Development image
+FROM base AS development
+ENV NODE_ENV=${NODE_ENV:-development}
+# Create app directory
+WORKDIR /opt/openstad-headless
 
 # Generate and store release ID dynamically
 # Alleen uitvoeren voor de cms-server
@@ -62,20 +59,14 @@ RUN if [ "$APP" = "cms-server" ]; then \
       echo "Skipping APOS_RELEASE_ID for $APP"; \
     fi
 
-# Development image
-FROM builder AS development
-ENV NODE_ENV=${NODE_ENV:-development}
-# Create app directory
-WORKDIR /opt/openstad-headless
-
-CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
+CMD ["npm", "run", "dev", "-w", "${WORKSPACE}"]
 
 # Prepare production
-FROM builder AS prepare-production
+FROM base AS prepare-production
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
-RUN npm --prefix=$WORKSPACE run build --if-present && \
-    npm --prefix=$WORKSPACE prune --production
+RUN npm run build --if-present -w $WORKSPACE
+RUN npm prune -ws --production
 
 # Release image
 FROM node:18-slim AS release
@@ -96,12 +87,13 @@ RUN apt-get update && \
 # Copy the built app from the prepare-production stage
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/node_modules ./node_modules
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless/package.json ./package.json
 
 USER node
 
 EXPOSE ${PORT}
 
-CMD ["npm", "run", "start", "--prefix=${WORKSPACE}"]
+CMD ["npm", "run", "start", "-w", "${WORKSPACE}"]
 
 # Release image with additional packages if needed
 FROM release AS release-with-packages
@@ -116,4 +108,4 @@ USER node
 EXPOSE ${PORT}
 
 # Run the application
-CMD ["npm", "run", "start", "--prefix=${WORKSPACE}"]
+CMD ["npm", "run", "start", "-w", "${WORKSPACE}"]

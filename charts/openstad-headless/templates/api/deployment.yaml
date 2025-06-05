@@ -20,10 +20,7 @@ spec:
     spec:
       serviceAccountName: openstad-headless-ingress-sa
       containers:
-        - command: ["/bin/bash", "-c"]
-          args:
-            - cd apps/api-server && node server.js
-          env:
+        - env:
           - name: URL
             value: https://{{ template "openstad.api.url" . }}
 
@@ -211,7 +208,7 @@ spec:
       initContainers:
         - command: ["/bin/bash", "-c"]
           args:
-            - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server init-database -- --only-if-empty && npm run --prefix apps/api-server migrate-database
+            - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server
           env:
             - name: URL
               value: https://{{ template "openstad.api.url" . }}
