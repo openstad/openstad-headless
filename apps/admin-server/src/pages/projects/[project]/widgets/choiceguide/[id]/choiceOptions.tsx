@@ -119,8 +119,13 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   }
 
   const handleAddGroup = () => {
-    append({ id: nextIdRef.current, title: '', description: '' });
-    nextIdRef.current += 1;
+    const choiceOptions = form.getValues('choiceOptions') || [];
+    const newId = choiceOptions.length
+      ? Math.max(...choiceOptions.map((group: ChoiceOptions) => Number(group.id))) + 1
+      : nextIdRef.current;
+
+    append({ id: newId, title: '', description: '' });
+    nextIdRef.current = newId;
   };
 
   // const typeWithoutDimension = ['none', 'map', 'imageUpload', 'documentUpload', 'text'];
