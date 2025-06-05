@@ -208,7 +208,7 @@ spec:
       initContainers:
         - command: ["/bin/bash", "-c"]
           args:
-            - nc $DB_HOST $DB_PORT -z -w1 && NODE_PATH=../../node_modules npm run init-database -w apps/api-server -- --only-if-empty && NODE_PATH=../../node_modules npm run migrate-database -w apps/api-server
+            - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server
           env:
             - name: URL
               value: https://{{ template "openstad.api.url" . }}
