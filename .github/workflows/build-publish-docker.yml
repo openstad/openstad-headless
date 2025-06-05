@@ -30,11 +30,11 @@ jobs:
       - name: Build base stage
         run: |
           docker buildx build \
-            --target=base \
+            --target=builder \
             --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --load \
-            -t base-stage:latest \
+            -t builder-stage:latest \
             .
   # define job to build and publish docker image
   build-and-push-docker-image:

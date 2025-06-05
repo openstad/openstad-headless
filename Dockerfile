@@ -1,7 +1,5 @@
 # Image used for building dependencies
 FROM node:18-slim AS builder
-ARG APP
-ENV WORKSPACE=apps/${APP}
 ENV GITHUB_REPOSITORY=openstad/openstad-headless
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
@@ -31,11 +29,15 @@ ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
 
 RUN npm install --legacy-peer-deps -ws
+
+FROM builder AS base
+
+ARG APP
+ENV WORKSPACE=apps/${APP}
+
 RUN npm run build-packages --if-present -w $WORKSPACE
 
 RUN npm cache clean --force
-
-FROM builder AS base
 
 # Remove all folders from ./apps except the one specified by APP
 RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
