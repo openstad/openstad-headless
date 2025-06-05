@@ -96,6 +96,10 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['rows'] = 5;
                     fieldData['placeholder'] = item.placeholder || '';
                     fieldData['defaultValue'] = item.defaultValue || '';
+                    fieldData['maxCharactersWarning'] = props?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over';
+                    fieldData['minCharactersWarning'] = props?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens';
+                    fieldData['maxCharactersError'] = props?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
+                    fieldData['minCharactersError'] = props?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten';
                     break;
                 case 'multiplechoice':
                 case 'multiple':
@@ -135,6 +139,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';
+                    fieldData['multiple'] = item.multiple || false;
 
                     if ( item.options && item.options.length > 0 ) {
                         fieldData['choices'] = item.options.map((option) => {

@@ -37,14 +37,15 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
 
     if (previewContainer && projectId && config) {
       fetch(`/api/openstad/widget/preview?projectId=${projectId}`, {
+        method: 'POST',
         headers: {
           'cache-control': 'no-cache',
-          'Content-Type': 'application/json',
-          'Widget-Config': JSON.stringify({
-            widgetType: type,
-            ...config,
-          }),
+          'Content-Type': 'application/json'
         },
+        body: JSON.stringify({
+          widgetType: type,
+          ...config,
+        }),
       })
         .then((v) => {
           if (v.ok) {

@@ -10,7 +10,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     switch (field.type) {
         case 'text':
             let min = field.minCharacters || 0;
-            let minWarning = field.minCharactersWarning || 'Tekst moet minimaal {minCharacters} karakters bevatten';
+            let minWarning = field.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten';
 
             if (field.fieldRequired && min == 0) {
                 min = 1;
@@ -20,7 +20,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             }
 
             const max = field.maxCharacters || Infinity;
-            let maxWarning = field.maxCharactersWarning || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
+            let maxWarning = field.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
             maxWarning = maxWarning.replace('{maxCharacters}', max.toString());
 
             if (field.fieldRequired) {
@@ -54,7 +54,6 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
             return mapSchema.optional();
 
-        case 'range':
         case 'radiobox':
         case 'select':
         case 'tickmark-slider':
@@ -66,6 +65,12 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
                 return undefined;
             }
         case 'hidden':
+            return undefined;
+
+        // Default value for range is "50", so it's never empty.
+        // If skipQuestion is true, the value is ignored anyway.
+        // Therefore, we don't need validation here.
+        case 'range':
             return undefined;
 
         default:

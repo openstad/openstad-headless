@@ -43,6 +43,8 @@ export const StemBegrootResourceDetailDialog = ({
   typeSelector = 'tag',
   setFilteredResources,
   filteredResources = [],
+  currentPage = 0,
+  pageSize = 999,
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -69,6 +71,8 @@ export const StemBegrootResourceDetailDialog = ({
   voteType?: string;
   setFilteredResources?: (resources: Array<any>) => void;
   filteredResources?: Array<any>;
+  currentPage: number;
+  pageSize: number;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -102,9 +106,9 @@ export const StemBegrootResourceDetailDialog = ({
     ?.filter((resource: any) => {
       if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
         if (typeSelector === 'tag') {
-          return resource.tags.some((tag: { name: string }) => tag.name === activeTagTab);
+          return resource.tags?.some((tag: { name: string }) => tag.name === activeTagTab);
         } else {
-          return resource.tags.some((tag: { type: string }) => tag.type === activeTagTab);
+          return resource.tags?.some((tag: { type: string }) => tag.type === activeTagTab);
         }
       }
       return true;
@@ -131,10 +135,8 @@ export const StemBegrootResourceDetailDialog = ({
       return 0;
     });
 
-  if ( (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && setFilteredResources) {
-    if (JSON.stringify(filtered) !== JSON.stringify(filteredResources)) {
-      setFilteredResources(filtered);
-    }
+  if ( (JSON.stringify(filtered) !== JSON.stringify(filteredResources)) && setFilteredResources ) {
+    setFilteredResources(filtered);
   }
 
   const handleBeforeIndexChange = () => {
@@ -152,7 +154,9 @@ export const StemBegrootResourceDetailDialog = ({
         <Carousel
           startIndex={resourceDetailIndex}
           buttonText={{next: 'Volgende inzending', previous: 'Vorige inzending'}}
-          items={filtered || []}
+          items={
+            (filtered || [])?.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
+          }
           beforeIndexChange={handleBeforeIndexChange}
           itemRenderer={(resource) => {
             const canUseButton = resourceBtnEnabled(resource);

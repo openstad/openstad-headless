@@ -25,6 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import * as Switch from '@radix-ui/react-switch';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -48,8 +49,10 @@ const formSchema = z.object({
 export default function ProjectSettings() {
 
   const router = useRouter();
-  const { project } = router.query;
+  let { project } = router.query;
   const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
+
+  let projectNumber: number | undefined = validateProjectNumber(project);
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
@@ -162,7 +165,7 @@ export default function ProjectSettings() {
     }
 
     try {
-      const res = await fetch(`/api/openstad/api/project/${project as string}`, {
+      const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +252,7 @@ export default function ProjectSettings() {
           },
           {
             name: 'Instellingen',
-            url: `/projects/${project}/settings`,
+            url: `/projects/${projectNumber}/settings`,
           },
         ]}>
         <div className="container py-6">

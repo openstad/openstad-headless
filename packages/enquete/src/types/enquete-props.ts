@@ -10,6 +10,10 @@ export type EnqueteProps = {
   imageUrl?: string;
   multiple?: boolean;
   confirmation?: Confirmation;
+  minCharactersWarning?: string;
+  maxCharactersWarning?: string;
+  minCharactersError?: string;
+  maxCharactersError?: string;
 };
 
 export type Item = {

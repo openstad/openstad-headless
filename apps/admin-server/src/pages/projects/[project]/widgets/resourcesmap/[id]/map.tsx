@@ -267,7 +267,7 @@ export default function WidgetResourcesMapMap(
             )}
           />
 
-          {form.watch('tilesVariant') !== 'nlmaps' && (
+          {(!!form.watch('tilesVariant') && form.watch('tilesVariant') !== 'nlmaps') && (
             <p
               style={{
                 backgroundColor: '#d69e2e',

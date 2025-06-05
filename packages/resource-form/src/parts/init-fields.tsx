@@ -47,7 +47,11 @@ export const InitializeFormFields = (items, data) => {
                 multiple: item.multiple,
                 options: item.options,
                 rows: 5,
-                placeholder: item.placeholder
+                placeholder: item.placeholder,
+                maxCharactersWarning: data?.general?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+                minCharactersWarning: data?.general?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+                minCharactersError: data?.general?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
+                maxCharactersError: data?.general?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
             };
 
             if ( item.defaultValue ) {

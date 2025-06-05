@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useAreas(projectId?: string) {
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
+
   let url = `/api/openstad/api/area`;
 
-  const areasSwr = useSWR(projectId ? url : null);
+  const areasSwr = useSWR(projectNumber ? url : null);
 
   async function createArea(name: string, geoJSON: string) {
     const res = await fetch(url, {
@@ -17,7 +20,7 @@ export default function useAreas(projectId?: string) {
   }
 
   async function removeArea(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectId}/area/${id}`;
+    const deleteUrl = `/api/openstad/api/project/${projectNumber}/area/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',

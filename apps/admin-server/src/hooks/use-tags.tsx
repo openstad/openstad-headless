@@ -1,13 +1,16 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useTag(projectId?: string, includeGlobalTags?: boolean) {
-  let url = `/api/openstad/api/project/${projectId}/tag`;
+  const projectNumber: number | undefined = validateProjectNumber(projectId, true);
+
+  let url = `/api/openstad/api/project/${projectNumber}/tag`;
 
   if (includeGlobalTags) {
     url += '?includeGlobalTags=true';
   }
 
-  const tagListSwr = useSWR(projectId ? url : null);
+  const tagListSwr = useSWR(projectNumber ? url : null);
 
   async function createTag(name: string, type: string, seqnr: number, addToNewResources: boolean) {
     const res = await fetch(url, {
@@ -15,14 +18,14 @@ export default function useTag(projectId?: string, includeGlobalTags?: boolean) 
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId, name, type, seqnr, addToNewResources }),
+      body: JSON.stringify({ projectId: projectNumber, name, type, seqnr, addToNewResources }),
     });
 
     return await res.json();
   }
 
   async function removeTag(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectId}/tag/${id}`;
+    const deleteUrl = `/api/openstad/api/project/${projectNumber}/tag/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',

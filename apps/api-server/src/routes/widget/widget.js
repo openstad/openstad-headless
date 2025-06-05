@@ -23,16 +23,13 @@ router.use(bruteForce.globalMiddleware);
 // All keys except for `widgetType` will be passed to the widget as config
 router
   .route('/preview')
+  .post(async (req, res, next) => {
+    req.widgetConfig = req.body;
+    return next();
+  })
   .all((req, res, next) => {
-    const config = req.header('Widget-Config');
-    if (!config) {
+    if (!req.widgetConfig) {
       return next(createError(401, 'No widget config provided'));
-    }
-
-    try {
-      req.widgetConfig = JSON.parse(config);
-    } catch (e) {
-      return next(createError(401, 'Invalid widget config provided'));
     }
 
     if (!req.widgetConfig.widgetType) {
@@ -41,7 +38,7 @@ router
 
     return next();
   })
-  .get(async (req, res, next) => {
+  .post(async (req, res, next) => {
     const projectId = req.query.projectId;
     const widgetId = Math.floor(Math.random() * 1000000);
     const randomId = Math.floor(Math.random() * 1000000);

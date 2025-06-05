@@ -28,7 +28,7 @@ function ShareLinks({ title }: Item) {
 
         <LinkSocial
           external
-          href={'https://twitter.com/intent/tweet?text=' + encodeURIComponent(location.href)}
+          href={'https://x.com/intent/post?text=' + encodeURIComponent(location.href)}
           target="_blank"
           title={'X'}
         >

@@ -433,3 +433,80 @@ section.comment-item-footer .utrecht-button--disabled:before,
   line-height: 13px;
   font-weight: 500;
 }
+
+.documentMap--container .touch-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  z-index: 1000;
+  pointer-events: none;
+  visibility: hidden;
+  flex-direction: column;
+  padding: 30px;
+  text-align: center;
+
+  @media only screen and (max-width: 479px) {
+    font-size: 1.15em;
+  }
+}
+
+.documentMap--container .touch-overlay.show {
+  visibility: visible;
+}
+
+.documentMap--container .touch-overlay i {
+  margin-bottom: 10px;
+  font-weight: 200;
+  font-size: 36px;
+}
+
+.documentMap--container .disable-touch-action {
+  touch-action: none;
+}
+
+.documentMap--container .map-container .lr-map-visually-hidden {
+  word-wrap: normal !important;
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  -webkit-clip-path: inset(50%);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  opacity: 0;
+}
+
+.documentMap--container .lr-map-interaction-overlay {
+  background-color: rgba(0, 0, 0, .75);
+  border-radius: .5rem;
+  color: #fff;
+  font-size: 1rem;
+  left: 50%;
+  max-width: calc(100% - 2rem);
+  padding: 1rem 1.5rem;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity .5s ease;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  width: -moz-max-content;
+  width: max-content;
+  z-index: 1000;
+  opacity: 1;
+}

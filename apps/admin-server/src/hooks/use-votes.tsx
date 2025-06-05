@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useVotes(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/vote`;
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const { data, isLoading, error, mutate } = useSWR(projectId ? url : null);
+  const url = `/api/openstad/api/project/${projectNumber}/vote`;
+
+  const { data, isLoading, error, mutate } = useSWR(projectNumber ? url : null);
 
   async function remove(id: string|number) {
     const res = await fetch(`${url}/${id}`, {

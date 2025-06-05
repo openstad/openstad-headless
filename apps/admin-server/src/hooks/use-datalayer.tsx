@@ -1,9 +1,12 @@
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useArea(layerId?: string) {
-    let url = `/api/openstad/api/datalayer/${layerId}`;
+    const layerNumber: number | undefined = validateProjectNumber(layerId);
 
-    const datalayerSwr = useSWR( url );
+    let url = `/api/openstad/api/datalayer/${layerNumber}`;
+
+    const datalayerSwr = useSWR(layerNumber ? url : null);
 
     async function updateDatalayer(name: string, layer: string, icon: any) {
         const res = await fetch(url, {

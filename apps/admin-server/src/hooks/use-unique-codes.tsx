@@ -1,17 +1,19 @@
 import useSWR from "swr";
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useUniqueCodes(projectId: string) {
+export default function useUniqueCodes(projectId?: string) {
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
 
   const params = new URLSearchParams();
   params.set('useAuth', 'openstad');
 
-  const url = `/api/openstad/auth/project/${projectId}/uniquecode?` + params.toString();
+  const url = `/api/openstad/auth/project/${projectNumber}/uniquecode?` + params.toString();
 
-  const uniqueCodesListSwr = useSWR(projectId ? url : null);
+  const uniqueCodesListSwr = useSWR(projectNumber ? url : null);
 
   async function createUniqueCodes(amount?: string) {
     try {
-      const res = await fetch(`/api/openstad/auth/project/${projectId}/uniquecode?` + params.toString(), {
+      const res = await fetch(`/api/openstad/auth/project/${projectNumber}/uniquecode?` + params.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,7 +27,7 @@ export default function useUniqueCodes(projectId: string) {
   }
 
   async function resetUniqueCode(id: number) {
-    const url = `/api/openstad/auth/project/${projectId}/uniquecode/${id}/reset?` + params.toString();
+    const url = `/api/openstad/auth/project/${projectNumber}/uniquecode/${id}/reset?` + params.toString();
     const res = await fetch(url, {
       method: 'POST',
       headers: {

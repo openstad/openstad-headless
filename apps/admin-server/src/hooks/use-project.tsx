@@ -1,16 +1,19 @@
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useProject(scopes?: Array<string>) {
   const router = useRouter();
-  const projectId = router.query.project;
+  let projectId = router.query.project;
+
+  let projectNumber: number | undefined = validateProjectNumber(projectId)
 
   let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig']
   if (scopes) useScopes = useScopes.concat(scopes);
 
   const projectSwr = useSWR(
-    projectId
-      ? `/api/openstad/api/project/${projectId}?${ useScopes.map(s => `${s}=1`).join('&') }`
+    projectNumber
+      ? `/api/openstad/api/project/${projectNumber}?${ useScopes.map(s => `${s}=1`).join('&') }`
       : null
   );
 
@@ -62,7 +65,7 @@ export function useProject(scopes?: Array<string>) {
 
   async function updateProject(config: any, name?: any, url?: any) {
     if (name) {
-      const res = await fetch(`/api/openstad/api/project/${projectId}`, {
+      const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +78,7 @@ export function useProject(scopes?: Array<string>) {
 
       return await data;
     } else {
-      const res = await fetch(`/api/openstad/api/project/${projectId}`, {
+      const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +94,7 @@ export function useProject(scopes?: Array<string>) {
   }
 
   async function updateProjectEmails(emailConfig: any) {
-    const res = await fetch(`/api/openstad/api/project/${projectId}`, {
+    const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -107,7 +110,7 @@ export function useProject(scopes?: Array<string>) {
 
   async function anonymizeUsersOfProject() {
     const res = await fetch(
-      `/api/openstad/api/project/${projectId}/do-anonymize-all-users`,
+      `/api/openstad/api/project/${projectNumber}/do-anonymize-all-users`,
       {
         method: 'PUT',
         headers: {

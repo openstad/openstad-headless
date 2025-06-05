@@ -77,14 +77,19 @@ exports.register = (req, res, next) => {
 }
 
 const handleSending = async (req, res, next) => {
-    let isPriviligedRoute = req.params.priviligedRoute === 'admin';
+    let isPrivilegedRoute = req.params.priviligedRoute === 'admin';
 
-    if ( !isPriviligedRoute ) {
-        isPriviligedRoute = req?.query?.priviligedRoute === 'admin' || false;
+    if ( !isPrivilegedRoute ) {
+        isPrivilegedRoute = req?.query?.priviligedRoute === 'admin' || false;
+    }
+
+    // Mark route as privileged if the client ID is 1 (Admin panel)
+    if ( req?.client?.id && req?.client?.id === 1) {
+        isPrivilegedRoute = true;
     }
 
     try {
-        if (isPriviligedRoute) {
+        if (isPrivilegedRoute) {
             req.user = await authService.validatePrivilegeUser(req.body.email, req.client.id);
         }
 
@@ -99,7 +104,7 @@ const handleSending = async (req, res, next) => {
 
         let redirectUrl = '/auth/url/login?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl;
 
-        if (isPriviligedRoute) {
+        if (isPrivilegedRoute) {
             redirectUrl += '&priviligedRoute=admin';
         }
 

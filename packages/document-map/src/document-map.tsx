@@ -33,6 +33,7 @@ import { MultiSelect } from "@openstad-headless/ui/src";
 import { Spacer } from '@openstad-headless/ui/src';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import './gesture';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -89,6 +90,10 @@ export type DocumentMapProps = BaseProps &
     onlyAllowClickOnImage?: boolean;
     popupNotLoggedInText?: string;
     popupNotLoggedInButton?: string;
+    minCharactersWarning?: string;
+    maxCharactersWarning?: string;
+    minCharactersError?: string;
+    maxCharactersError?: string;
   };
 
 
@@ -154,7 +159,11 @@ function DocumentMap({
     type: ''
   });
 
-  const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+  const stringToArray = (str: string) => {
+    return str.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+  }
+
+  const tagIdsArray = stringToArray(tagIds);
 
   function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
     let filteredTagIdsArray: Array<number> = [];
@@ -189,8 +198,12 @@ function DocumentMap({
     tags: filteredTagIdsArray
   } = determineTags(includeOrExclude, allTags, tagIdsArray);
 
-  const [selectedTags, setSelectedTags] = useState<Array<number>>([]);
-  const [selectedTagsString, setSelectedTagsString] = useState<string>('');
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTagIds = urlParams.get('tagIds');
+  const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : [];
+
+  const [selectedTags, setSelectedTags] = useState<Array<number>>(urlTagIdsArray);
+  const [selectedTagsString, setSelectedTagsString] = useState<string>( urlTagIdsArray?.join(',') || '' );
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -307,14 +320,17 @@ function DocumentMap({
     let helpText = '';
 
     const min = props.comments?.descriptionMinLength || 0;
-    let minWarning = `Nog minimaal ${min - count} karakters`;
+
+    const minWarningText = props?.minCharactersWarning || 'Nog minimaal {minCharacters} karakters';
+    let minWarning = minWarningText.replace('{minCharacters}', (min - count).toString());
 
     const max = props.comments?.descriptionMaxLength || Infinity;
 
     if (count < min) {
       helpText = minWarning;
     } else if (count > max) {
-      helpText = `Je hebt ${count - max} karakters teveel`;
+      const maxWarningText = props?.maxCharactersWarning || 'Je hebt {maxCharacters} karakters teveel';
+      helpText = maxWarningText.replace('{maxCharacters}', (count - max).toString());
     } else {
       helpText = '';
     }
@@ -484,6 +500,14 @@ function DocumentMap({
 
   const [overridePage, setoverridePage] = useState<number | undefined>(undefined);
 
+  const isScrollable = function (ele: HTMLElement) {
+    const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
+    const overflowYStyle = window.getComputedStyle(ele).overflowY;
+    const isOverflowHidden = overflowYStyle.indexOf('hidden') !== -1;
+
+    return hasScrollableContent && !isOverflowHidden;
+  };
+
   const scrollToComment = (index: number) => {
     let attempts = 0;
     const maxAttempts = 10;
@@ -516,14 +540,16 @@ function DocumentMap({
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
           const commentTop = commentRect.top + scrollTop;
 
-          if (window.innerWidth <= 1000) {
-            window.scrollTo({
-              top: commentTop,
+          const canScrollCommentContainer = isScrollable(containerEl);
+
+          if (canScrollCommentContainer) {
+            containerEl.scrollTo({
+              top: commentEl.offsetTop - containerEl.offsetTop,
               behavior: 'smooth'
             });
           } else {
-            containerEl.scrollTo({
-              top: commentEl.offsetTop - containerEl.offsetTop,
+            window.scrollTo({
+              top: commentTop,
               behavior: 'smooth'
             });
           }
@@ -722,6 +748,31 @@ function DocumentMap({
 
     // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
     const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
+
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+    useEffect(() => {
+      if ('ontouchstart' in window) {
+        setIsTouchDevice(true);
+      }
+    }, []);
+
+    useEffect(() => {
+      const map = mapRef.current;
+      let mapInteractionInstance: any;
+
+      if (map && L && L.mapInteraction) {
+        mapInteractionInstance = L.mapInteraction(map, {
+          isTouch: isTouchDevice,
+        });
+      }
+
+      return () => {
+        if (mapInteractionInstance && mapInteractionInstance.destroy) {
+          mapInteractionInstance.destroy();
+        }
+      };
+    }, [mapRef.current, isTouchDevice]);
 
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
@@ -998,6 +1049,7 @@ function DocumentMap({
               sorting={[]}
               tagGroups={tagGroups}
               tagsLimitation={filteredTagIdsArray}
+              preFilterTags={urlTagIdsArray}
             />
           ) : null}
 

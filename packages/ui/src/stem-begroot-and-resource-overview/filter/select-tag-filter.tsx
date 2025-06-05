@@ -1,5 +1,5 @@
 import { Select } from '@openstad-headless/ui/src';
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { FormLabel } from "@utrecht/component-library-react";
 
 
@@ -15,13 +15,22 @@ type Props = {
   onUpdateFilter?: (filter: string) => void;
   title: string;
   tagGroupProjectId?: any;
+  preFilterTags?: Array<number>;
+  parentStopUsingDefaultValue?: boolean;
 };
 
 type TagDefinition = { id: number; name: string; projectId?: any };
 
 const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
-  (
-    { onlyIncludeIds = [], dataStore, tagType, onUpdateFilter, ...props },
+  ({
+     onlyIncludeIds = [],
+     dataStore,
+     tagType,
+     onUpdateFilter,
+     preFilterTags = undefined,
+     parentStopUsingDefaultValue = false,
+     ...props
+   },
     ref
   ) => {
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
@@ -41,6 +50,15 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
 
     const {data:tags} = dataStore.useTags(useTagsConfig);
 
+    const [defaultValue, setDefaultValue] = useState<string | undefined>(undefined);
+    const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState(false);
+
+    useEffect(() => {
+      if (parentStopUsingDefaultValue) {
+        setStopUsingDefaultValue(true);
+      }
+    });
+
     if (!dataStore || !dataStore.useTags) {
       return <p>Cannot render tagfilter, missing data source</p>
     }
@@ -53,6 +71,22 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
       return randomId;
       }
     }
+
+    useEffect(() => {
+      if (!stopUsingDefaultValue && preFilterTags && preFilterTags.length > 0 && tags && tags.length && onUpdateFilter) {
+        preFilterTags.forEach((tagId) => {
+          const tag = tags.find((tag: TagDefinition) => tag.id === tagId);
+          if (tag) {
+            const tagId = tag?.id?.toString();
+
+            if ( defaultValue !== tagId ) {
+              onUpdateFilter(tagId);
+              setDefaultValue(tagId);
+            }
+          }
+        });
+      }
+    }, [preFilterTags]);
 
     return (
       tags.length > 0 && (
@@ -67,8 +101,15 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
             }))}
             title={props.title}
             onValueChange={(value) => {
+              setStopUsingDefaultValue(true);
               onUpdateFilter && onUpdateFilter(value);
-            }}>
+            }}
+            defaultValue={
+              (preFilterTags && preFilterTags.length > 0) ?
+                tags.find((tag: TagDefinition) => preFilterTags.includes(tag.id))?.id?.toString()
+                : undefined
+            }
+          >
           </Select>
         </div>
       )

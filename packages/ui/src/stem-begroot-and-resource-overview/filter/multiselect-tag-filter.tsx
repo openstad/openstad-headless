@@ -1,5 +1,5 @@
 import { MultiSelect } from '@openstad-headless/ui/src';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { FormLabel } from "@utrecht/component-library-react";
 
@@ -12,9 +12,11 @@ type Props = {
   tagType: string;
   placeholder?: string;
   selected?: number[];
-  onUpdateFilter?: (filter: any, label?: string) => void;
+  onUpdateFilter?: (filter: any, label?: string, forceSelected?: boolean) => void;
   onlyIncludeIds?: number[];
   tagGroupProjectId?: any;
+  preFilterTags?: Array<number>;
+  parentStopUsingDefaultValue?: boolean;
 };
 
 type TagDefinition = { id: number; name: string; projectId?: any };
@@ -25,6 +27,8 @@ const MultiSelectTagFilter = ({
   onUpdateFilter,
   selected = [],
   onlyIncludeIds = [],
+  preFilterTags = undefined,
+  parentStopUsingDefaultValue = false,
   ...props
 }: Props) => {
 
@@ -47,6 +51,15 @@ const MultiSelectTagFilter = ({
   
   const {data:tags} = dataStore.useTags(useTagsConfig);
 
+  const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState(false);
+  const [prefilterTagsSelected, setPrefilterTagsSelected] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (parentStopUsingDefaultValue) {
+      setStopUsingDefaultValue(true);
+    }
+  });
+
   const randomId = Math.random().toString(36).substring(7);
 
   function getRandomId(placeholder: string | undefined) {
@@ -57,19 +70,41 @@ const MultiSelectTagFilter = ({
     }
   }
 
-  return (
+  useEffect(() => {
+    if ((!stopUsingDefaultValue && !parentStopUsingDefaultValue) && preFilterTags && preFilterTags.length > 0 && onUpdateFilter) {
+      preFilterTags.forEach((tagId) => {
+        const tag = tags.find((tag: TagDefinition) => tag.id === tagId);
+
+        if (tag) {
+          onUpdateFilter(tag.id, tag.name, true);
+
+          setPrefilterTagsSelected(prevTags => {
+            if (!prevTags.includes(tag.id)) {
+              return [...prevTags, tag.id];
+            }
+            return prevTags;
+          });
+        }
+      });
+    }
+  }, [preFilterTags]);
+
+  const combinedSelects = stopUsingDefaultValue ? selected : Array.from( new Set([...selected, ...prefilterTagsSelected]) );
+
+  return tags.length > 0 && (
     <div className="form-element">
       <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder || 'Selecteer item'}</FormLabel>
       <MultiSelect
         id={getRandomId(props.placeholder)}
         label={props.placeholder || ''}
         onItemSelected={(value, label) => {
+          setStopUsingDefaultValue(true);
           onUpdateFilter && onUpdateFilter(value, label);
         }}
         options={(tags || []).map((tag: TagDefinition) => ({
           value: tag.id,
           label: tag.name,
-          checked: selected.includes(tag.id),
+          checked: combinedSelects.includes(tag.id),
         }))}
       />
     </div>

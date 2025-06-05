@@ -36,6 +36,8 @@ export const StemBegrootResourceList = ({
   filteredResources = [],
   hideTagsForResources = false,
   hideReadMore = false,
+  currentPage = 0,
+  pageSize = 999,
   header
 }: {
   resourceListColumns?: number;
@@ -64,6 +66,8 @@ export const StemBegrootResourceList = ({
   filteredResources?: Array<any>;
   hideTagsForResources?: boolean;
   hideReadMore?: boolean;
+  currentPage: number;
+  pageSize: number;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -87,8 +91,8 @@ export const StemBegrootResourceList = ({
       ? resources
       : resources.filter((resource: any) => {
         return Object.keys(groupedTags).every(tagType => {
-          return groupedTags[tagType].some(tagId =>
-            resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
+          return groupedTags[tagType]?.some(tagId =>
+            resource.tags && Array.isArray(resource.tags) && resource.tags?.some((o: { id: number }) => o.id === tagId)
           );
         });
       })
@@ -96,15 +100,15 @@ export const StemBegrootResourceList = ({
     ?.filter((resource: any) => {
       if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
         if (typeSelector === 'tag') {
-          return resource.tags.some((tag: { name: string }) => tag.name === activeTagTab);
+          return resource?.tags?.some((tag: { name: string }) => tag.name === activeTagTab);
         } else {
-          return resource.tags.some((tag: { type: string }) => tag.type === activeTagTab);
+          return resource?.tags?.some((tag: { type: string }) => tag.type === activeTagTab);
         }
       }
       return true;
     })
     ?.filter((resource: any) =>
-      (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.some((o: { id: number }) => o.id === statusId))
+      (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo?.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses?.some((o: { id: number }) => o.id === statusId))
     )
     ?.sort((a: any, b: any) => {
       if (sort === 'createdAt_desc') {
@@ -125,17 +129,17 @@ export const StemBegrootResourceList = ({
       return 0;
     });
 
-  if ( (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && setFilteredResources) {
-    if (JSON.stringify(filtered) !== JSON.stringify(filteredResources)) {
+    if ((JSON.stringify(filtered) !== JSON.stringify(filteredResources)) && setFilteredResources) {
       setFilteredResources(filtered);
     }
-  }
 
   return (
     <List
       id='stem-begroot-resource-selections-list'
       columns={resourceListColumns}
-      items={filtered || []}
+      items={
+        (filtered || [])?.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
+      }
       renderHeader={() => header || <></>}
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);

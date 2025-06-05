@@ -11,4 +11,8 @@ export type CommentFormProps = {
   sentiment?: string;
   submitComment: (e: any) => void;
   disableSubmit?: boolean;
+  minCharactersWarning?: string;
+  maxCharactersWarning?: string;
+  minCharactersError?: string;
+  maxCharactersError?: string;
 };
