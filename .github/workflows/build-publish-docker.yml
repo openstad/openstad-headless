@@ -9,8 +9,8 @@ on:
     tags:
       - "v*"
 jobs:
-  build-base-stage:
-    name: Build base stage (once) and cache
+  build-builder-stage:
+    name: Build `builder` stage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
             .
   # define job to build and publish docker image
   build-and-push-docker-image:
-    needs: build-base-stage
+    needs: build-builder-stage
     strategy:
       matrix:
         app: [admin-server, api-server, auth-server, image-server, cms-server]
