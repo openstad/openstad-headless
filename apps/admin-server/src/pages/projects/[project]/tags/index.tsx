@@ -16,7 +16,7 @@ export default function ProjectTags({ preset }: { preset?: string }) {
   const { project } = router.query;
   const isGlobal = !!preset && preset === 'global';
 
-  const { data, isLoading, removeTag } = useTags(isGlobal ? "0" : project as string);
+  const { data, isLoading, removeTag } = useTags(isGlobal ? "0" : project as string, true);
 
 
   const [filterData, setFilterData] = useState(data);

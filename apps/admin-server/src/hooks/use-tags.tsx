@@ -10,7 +10,7 @@ export default function useTag(projectId?: string, includeGlobalTags?: boolean) 
     url += '?includeGlobalTags=true';
   }
 
-  const tagListSwr = useSWR(projectNumber ? url : null);
+  const tagListSwr = useSWR((projectNumber || projectNumber === 0 ) ? url : null);
 
   async function createTag(name: string, type: string, seqnr: number, addToNewResources: boolean) {
     const res = await fetch(url, {
