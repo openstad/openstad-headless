@@ -21,7 +21,7 @@ RUN npm update -g npm
 COPY --chown=node:node package*.json .
 # Bundle all packages during build, only the installed ones will persist
 COPY --chown=node:node packages/ ./packages
-COPY --chown=node:node apps/$APP ./apps/$APP
+COPY --chown=node:node apps/ ./apps
 
 RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
@@ -35,6 +35,19 @@ RUN npm run build-packages --if-present -w $WORKSPACE
 
 RUN npm cache clean --force
 
+FROM builder AS base
+
+# Remove all folders from ./apps except the one specified by APP
+RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
+RUN npm prune -ws
+
+
+# Development image
+FROM base AS development
+ENV NODE_ENV=${NODE_ENV:-development}
+# Create app directory
+WORKDIR /opt/openstad-headless
+
 # Generate and store release ID dynamically
 # Alleen uitvoeren voor de cms-server
 RUN if [ "$APP" = "cms-server" ]; then \
@@ -44,20 +57,14 @@ RUN if [ "$APP" = "cms-server" ]; then \
       echo "Skipping APOS_RELEASE_ID for $APP"; \
     fi
 
-# Development image
-FROM builder AS development
-ENV NODE_ENV=${NODE_ENV:-development}
-# Create app directory
-WORKDIR /opt/openstad-headless
-
 CMD ["npm", "run", "dev", "-w", "${WORKSPACE}"]
 
 # Prepare production
-FROM builder AS prepare-production
+FROM base AS prepare-production
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
 RUN npm run build --if-present -w $WORKSPACE
-RUN npm prune --production
+RUN npm prune -ws --production
 
 # Release image
 FROM node:18-slim AS release
