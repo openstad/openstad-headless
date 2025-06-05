@@ -95,6 +95,19 @@ import L from 'leaflet';
 import {Circle, Polyline} from "react-leaflet";
 import type { MarkerProps } from './types/marker-props';
 
+interface MapDataLayerFeature {
+  geometry?: {
+    type?: string;
+    coordinates?: Array<[number, number]> | [number, number];
+  };
+}
+
+interface MapDataLayer {
+  layer?: {
+    features?: Array<MapDataLayerFeature>;
+  };
+}
+
 const BaseMap = ({
   iconCreateFunction = undefined,
   defaultIcon = undefined,
@@ -236,25 +249,23 @@ const BaseMap = ({
       }
 
       if (!area?.length && mapDataLayers?.length) {
-        const coords = mapDataLayers.reduce((acc: Array<{ lat: number, lng: number }>, layer) => {
+        const coords = mapDataLayers.reduce((acc: Array<{ lat: number, lng: number }>, layer: MapDataLayer) => {
           const features = layer?.layer?.features ?? [];
-          features.forEach((feature) => {
+          features.forEach((feature: MapDataLayerFeature) => {
             if (feature?.geometry?.type === 'LineString' && Array.isArray(feature.geometry.coordinates)) {
-              feature.geometry.coordinates.forEach(([lng, lat]: [number, number]) => {
-                if (Array.isArray([lng, lat]) && [lng, lat].length === 2) {
-                  acc.push({ lat, lng });
-                }
+              (feature.geometry.coordinates as Array<[number, number]>).forEach((coord) => {
+                acc.push({ lat: coord[1], lng: coord[0] });
               });
             } else if (feature?.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)) {
-              const [lng, lat] = feature.geometry.coordinates as [number, number];
-              acc.push({ lat, lng });
+              const coord = feature.geometry.coordinates as [number, number];
+              acc.push({ lat: coord[1], lng: coord[0] });
             }
           });
           return acc;
         }, []);
 
         if (coords.length > 0) {
-          const bounds = latLngBounds(coords.map(c => [c.lat, c.lng] as [number, number]));
+          const bounds = latLngBounds(coords.map((c: any) => [c.lat, c.lng] as [number, number]));
           mapRef.fitBounds(bounds);
         }
         return;
@@ -291,7 +302,7 @@ const BaseMap = ({
 
           // Process records
           if (records?.length) {
-            records.forEach((record) => {
+            records.forEach((record: any) => {
               const {lat, lon, titel, inhoud} = record;
               const long = lon || record.long;
 
