@@ -24,7 +24,7 @@ module.exports = function( req, res, next ) {
           break;
         default:
           column = column.replace(/[^a-z0-9_]+/ig, '');
-          let match = column.match(/(.*?)_(asc|desc)$/i);
+          let match = column.match(/^([a-z0-9_]+)_(asc|desc)$/i);
           if (match) return [ match[1], match[2] ];
           return column
       }
