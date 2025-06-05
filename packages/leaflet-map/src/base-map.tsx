@@ -330,7 +330,7 @@ const BaseMap = ({
 
           // Process GeoJSON features
           if (geoJsonFeatures?.length) {
-            geoJsonFeatures.forEach((feature) => {
+            geoJsonFeatures.forEach((feature: any) => {
               if (!feature.geometry) return;
               const geometryType = feature.geometry?.type;
 
