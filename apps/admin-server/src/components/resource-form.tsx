@@ -145,7 +145,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     max: projectData?.config?.resources?.descriptionMaxLength || 5000,
   };
 
-  const { data: tags, error: tagError } = useTags(project as string, true);
+  const { data: tags, error: tagError } = useTags(project as string);
   const { data: statuses, error: statusError } = useStatuses(project as string);
 
   let loadedTags = (tags || []) as {

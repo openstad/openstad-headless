@@ -80,7 +80,7 @@ export default function WidgetResourceFormItems(
     const router = useRouter();
     const { project } = router.query;
 
-    const { data: allTags } = useTags(project as string, true);
+    const { data: allTags } = useTags(project as string);
     const firstTagType = allTags?.[0]?.type ?? '';
 
     // adds item to items array if no item is selected, otherwise updates the selected item
