@@ -8,7 +8,9 @@
     "setup": "node ./scripts/setup-all.js",
     "start": "node ./scripts/start-all.js",
     "init-databases": "node ./scripts/init-databases.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cy:open": "cypress open",
+    "test:e2e": "cypress run"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
   "private": true,
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "cypress": "^14.4.1",
     "mysql2": "^3.11.3",
     "prettier": "3.0.3"
   },
