@@ -117,8 +117,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Add release version to .testing.env
+        run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
+
       - name: Start services with docker compose
-        run: docker compose --env-file .testing.env up -d -e RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}
+        run: docker compose --env-file .testing.env up -d
 
       - name: Wait for services to be ready
         run: |
