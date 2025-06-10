@@ -123,10 +123,10 @@ jobs:
       - name: Start services with docker compose
         run: docker compose --env-file .testing.env up -d
 
-      - name: Wait for services to be ready
-        run: |
-          export $(grep -v '^#' .testing.env | xargs)
-          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
+#      - name: Wait for services to be ready
+#        run: |
+#          export $(grep -v '^#' .testing.env | xargs)
+#          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
 
       - name: Run extra commands
         run: |
@@ -141,7 +141,7 @@ jobs:
 
       - name: Stop docker compose
         if: always()
-        run: docker compose down
+        run: docker compose --env-file .testing.env down
 
   set-images-in-yaml-and-commit:
     name: Set images in yaml and commit
