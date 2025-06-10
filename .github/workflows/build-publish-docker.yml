@@ -117,8 +117,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Start services with docker-compose
-        run: docker-compose --env-file .testing.env up -d -e RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}
+      - name: Start services with docker compose
+        run: docker compose --env-file .testing.env up -d -e RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}
 
       - name: Wait for services to be ready
         run: |
@@ -136,9 +136,9 @@ jobs:
       - name: Run Cypress tests
         run: npx cypress run
 
-      - name: Stop docker-compose
+      - name: Stop docker compose
         if: always()
-        run: docker-compose down
+        run: docker compose down
 
   set-images-in-yaml-and-commit:
     name: Set images in yaml and commit
