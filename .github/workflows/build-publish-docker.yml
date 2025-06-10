@@ -111,6 +111,9 @@ jobs:
     needs: build-and-push-docker-image
 
     steps:
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
       - name: Checkout code
         uses: actions/checkout@v3
 
