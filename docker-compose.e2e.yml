@@ -47,14 +47,6 @@ services:
       - 8025:8025 # web ui
 
   openstad-api-server:
-    build:
-      target: ${BUILD_TARGET:-development}
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - APP=api-server
-        - PORT=${API_PORT}
-        - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/api-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -123,14 +115,6 @@ services:
       - /opt/openstad-headless/packages/ui/node_modules
 
   openstad-auth-server:
-    build:
-      target: ${BUILD_TARGET:-development}
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - APP=auth-server
-        - PORT=${AUTH_PORT}
-        - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/auth-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -180,14 +164,6 @@ services:
       - openstad-auth-server-init:/opt/openstad-headless/apps/auth-server/init
 
   openstad-image-server:
-    build:
-      target: ${BUILD_TARGET:-development}
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - APP=image-server
-        - PORT=${IMAGE_PORT_API}
-        - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/image-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -218,14 +194,6 @@ services:
       - openstad-image-server-init:/opt/openstad-headless/apps/image-server/init
 
   openstad-admin-server:
-    build:
-      target: ${BUILD_TARGET:-development}
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - APP=admin-server
-        - PORT=${ADMIN_PORT}
-        - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/admin-server}:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
     restart: unless-stopped
@@ -249,14 +217,6 @@ services:
       - ./packages:/opt/openstad-headless/packages
 
   openstad-cms-server:
-    build:
-      target: ${BUILD_TARGET:-release-with-packages}
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - APP=cms-server
-        - PORT=${CMS_PORT}
-        - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/cms-server}:${RELEASE_VERSION:-latest}
     command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
     depends_on:
