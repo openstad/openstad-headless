@@ -137,8 +137,6 @@ const ResourceOverviewMap = ({
       if ( Array.isArray(selectedProjects) && selectedProjects.length > 0 ) {
         const markerHrefUrl = selectedProjects.find((project) => project.id === resource.projectId)?.detailPageLink;
 
-        console.log( 'resource', resource, markerHrefUrl );
-
         if (markerHrefUrl) {
           markerHref = markerHrefUrl;
         }

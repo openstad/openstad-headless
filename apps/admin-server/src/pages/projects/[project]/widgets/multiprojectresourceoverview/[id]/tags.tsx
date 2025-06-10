@@ -145,8 +145,6 @@ export default function WidgetMultiProjectTags(
                                       (tag: {type: string}) => tag.type === groupName
                                     )?.projectId;
 
-                                    console.log( 'ID!', projectId, tags );
-
                                     const updatedFields =
                                       handleTagCheckboxGroupChange(
                                         groupName,

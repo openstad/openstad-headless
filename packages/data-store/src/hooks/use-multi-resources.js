@@ -12,9 +12,6 @@ export default function useMultiResources(
 ) {
   let self = this;
 
-  console.log( 'useMultiResources' );
-  console.log( 'projectIds', projectIds );
-
   if (!projectIds || projectIds.length === 0) {
     const data = {
       metadata: {
@@ -34,8 +31,6 @@ export default function useMultiResources(
     'multiResources.fetch',
     options
   );
-
-  console.log( 'data', data );
 
   // add functionality
   let resources = data || [];

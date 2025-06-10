@@ -34,10 +34,6 @@ export default {
       projectIds.forEach((projectId) => params.append('projectIds', projectId));
     }
 
-    console.log( 'params', params.toString() );
-    console.log( 'projectIds', JSON.stringify(projectIds) );
-    console.log( 'allowMultipleProjects', JSON.stringify(allowMultipleProjects) );
-
     let url = `/api/project/${projectId}/resource?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1&includeCommentsCount=1&${params.toString()}`;
     return this.fetch(url, options);
   },

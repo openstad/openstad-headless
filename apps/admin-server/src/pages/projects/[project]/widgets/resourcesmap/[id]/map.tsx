@@ -104,8 +104,6 @@ export default function WidgetResourcesMapMap(
     { value: 'custom', label: 'Aangepaste Kaart' },
   ];
 
-  console.log( 'props', props );
-
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
