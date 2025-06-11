@@ -7,6 +7,7 @@ dotenv.config({ path: ".testing.env" });
 
 
 export default defineConfig({
+  projectId: "vqxz36",
   e2e: {
     setupNodeEvents(on, config) {
       // implement node event listeners here

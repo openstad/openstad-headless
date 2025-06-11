@@ -115,7 +115,7 @@ jobs:
         uses: docker/setup-compose-action@v1
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -141,7 +141,7 @@ jobs:
         run: npm ci
 
       - name: Run Cypress tests
-        run: npx cypress run
+        run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }} --ci-build-id ${{ github.run_id }}
 
       - name: Stop docker compose
         if: always()

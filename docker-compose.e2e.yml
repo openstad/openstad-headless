@@ -218,7 +218,6 @@ services:
 
   openstad-cms-server:
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/cms-server}:${RELEASE_VERSION:-latest}
-    command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
     depends_on:
       openstad-redis:
         condition: service_healthy
