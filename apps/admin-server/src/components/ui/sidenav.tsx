@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils';
 import { AlertTriangle, FolderOpen, LogOut, Users, UnplugIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { SessionContext } from '../../auth';
 import { Logo } from './logo';
+import { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
 
 export function Sidenav({
   className,
