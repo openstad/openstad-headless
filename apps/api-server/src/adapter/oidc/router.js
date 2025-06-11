@@ -411,6 +411,8 @@ router
       return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
 
+    console.log ('redirectUrl', redirectUrl, 'allowedDomains', allowedDomains, 'contains [[jwt]]', redirectUrl.match('[[jwt]]'));
+    
     //check if redirect domain is allowed
     if (redirectUrl.match('[[jwt]]')) {
       jwt.sign(
@@ -427,6 +429,8 @@ router
         }
       );
     }
+    
+    console.log ('redirectUrl after jwt', redirectUrl, 'allowedDomains', allowedDomains, 'is safe?', isSafeRedirectUrl(redirectUrl, allowedDomains));
     
     // Revalidate redirectUrl after modification
     if (isSafeRedirectUrl(redirectUrl, allowedDomains)) {
