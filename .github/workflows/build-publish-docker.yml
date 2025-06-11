@@ -137,8 +137,11 @@ jobs:
           docker exec openstad-api-server bash -c "npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server"
           docker exec openstad-auth-server bash -c "npm run init-database -w apps/auth-server -- --only-if-empty && npm run migrate-database -w apps/auth-server"
 
+      - name: Clean up node_modules
+        run: rm -rf node_modules **/node_modules
+
       - name: Install dependencies
-        run: npm ci
+        run: npm i
 
       - name: Run Cypress tests
         run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }} --ci-build-id ${{ github.run_id }}
