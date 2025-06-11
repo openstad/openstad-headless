@@ -483,6 +483,8 @@ router
       }
       return res.redirect(url);
     }*/
+    
+    console.log ('logout, req.query.redirectUri', req.query.redirectUri, req.project.id, await isRedirectAllowed(req.project.id, req.query.redirectUri));
 
     // Check if redirect domain is allowed
     if (
