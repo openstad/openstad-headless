@@ -365,27 +365,10 @@ router
       .catch(next);
   })
   .get(function (req, res, next) {
-    let returnTo = req.query.returnTo;
-    returnTo = returnTo || (req.cookies && req.cookies['redirectUri']); //
-    returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
-    returnTo = returnTo.replace('openstadlogintoken=[[jwt]]', ''); // we don't want double jwt
-    let redirectUrl = returnTo
-      ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]'
-      : false;
-    redirectUrl =
-      redirectUrl ||
-      (req.query.returnTo
-        ? req.query.returnTo +
-          (req.query.returnTo.includes('?') ? '&' : '?') +
-          'jwt=[[jwt]]'
-        : false);
-    redirectUrl = redirectUrl || '/';
-
     // todo: deze afvanging moet veel eerder!!!
-    const isAllowedRedirectDomain = (url, allowedDomains) => {
+    const isSafeRedirectUrl = (url, allowedDomains) => {
       allowedDomains = prefillAllowedDomains(allowedDomains || []);
 
-      let redirectUrlHost = '';
       try {
         const parsedUrl = new URL(url);
 
