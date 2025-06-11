@@ -105,11 +105,56 @@ jobs:
         id: image_output
         run: echo "image_tag=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
 
-  set-images-in-yaml-and-commit:
-    name: Set images in yaml and commit
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+  e2e-test:
+    name: Run E2E tests
     runs-on: ubuntu-latest
     needs: build-and-push-docker-image
+
+    steps:
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Add release version to .testing.env
+        run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
+
+      - name: Start services with docker compose
+        run: docker compose --env-file .testing.env up -d
+
+#      - name: Wait for services to be ready
+#        run: |
+#          export $(grep -v '^#' .testing.env | xargs)
+#          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
+
+      - name: Run extra commands
+        run: |
+          docker exec openstad-api-server bash -c "npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server"
+          docker exec openstad-auth-server bash -c "npm run init-database -w apps/auth-server -- --only-if-empty && npm run migrate-database -w apps/auth-server"
+
+      - name: Clean up node_modules
+        run: rm -rf node_modules **/node_modules
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Run Cypress tests
+        run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }} --ci-build-id ${{ github.run_id }}
+
+      - name: Stop docker compose
+        if: always()
+        run: docker compose --env-file .testing.env down
+
+  set-images-in-yaml-and-commit:
+    name: Set images in yaml and commit
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' && (needs.e2e-test.result == 'success' || needs.e2e-test.result == 'skipped')
+    runs-on: ubuntu-latest
+    needs: [e2e-test, build-and-push-docker-image]
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
