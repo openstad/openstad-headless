@@ -125,7 +125,8 @@ export default function ProjectAuthentication() {
               };
             };
           };
-        };
+        },
+        authProviderId: string | null
       } = {
         auth: {
           provider: {
