@@ -411,10 +411,10 @@ router
       return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
 
-    console.log ('redirectUrl', redirectUrl, 'allowedDomains', allowedDomains, 'contains [[jwt]]', redirectUrl.match('[[jwt]]'));
+    console.log ('redirectUrl', redirectUrl, 'allowedDomains', allowedDomains, 'contains [[jwt]]', redirectUrl.match('\[\[jwt\]\]'));
     
     //check if redirect domain is allowed
-    if (redirectUrl.match('[[jwt]]')) {
+    if (redirectUrl.match('\[\[jwt\]\]')) {
       jwt.sign(
         { userId: req.userData.id, authProvider: req.authConfig.provider },
         req.authConfig.jwtSecret,
