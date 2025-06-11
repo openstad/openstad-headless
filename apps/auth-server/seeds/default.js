@@ -50,7 +50,6 @@ module.exports = async function seed(db) {
   console.log('  creating initial clients');
   console.log('    - admin site');
   console.log('      clientId:', adminClientId);
-  console.log('      clientSecret:', adminClientSecret);
 
   try {
     await db.Client.create({
@@ -68,7 +67,6 @@ module.exports = async function seed(db) {
 
     console.log("    - default site");
     console.log("      clientId:", clientId);
-    console.log("      clientSecret:", clientSecret);
     await db.Client.create({
       id: 2,
       redirectUrl: "", // deprecated

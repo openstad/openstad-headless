@@ -35,6 +35,7 @@
     "@openstad-headless/distribution-module": "file:../../packages/distribution-module",
     "@openstad-headless/document-map": "file:../../packages/document-map",
     "@openstad-headless/enquete": "file:../../packages/enquete",
+    "@openstad-headless/lib": "file:../../packages/lib",
     "@openstad-headless/leaflet-map": "file:../../packages/leaflet-map",
     "@openstad-headless/likes": "file:../../packages/likes",
     "@openstad-headless/multi-project-resource-overview": "file:../../packages/multi-project-resource-overview",

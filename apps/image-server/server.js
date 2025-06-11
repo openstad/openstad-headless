@@ -4,6 +4,8 @@ const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
 const crypto = require('crypto')
+const path = require("path");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const secret = process.env.IMAGE_VERIFICATION_TOKEN
 
@@ -23,8 +25,8 @@ const imageMulterConfig = {
 }
 
 const sanitizeFileName = (fileName) => {
-  let sanitizedFileName = fileName.replace(/[^a-z0-9_\-]/gi, '_');
-  return sanitizedFileName.replace(/_+/g, '_');
+  let sanitizedFileName = fileName?.replace(/[^a-z0-9_\-]/gi, '_');
+  return sanitizedFileName?.replace(/_+/g, '_');
 }
 
 const createFilename = (originalFileName) => {
@@ -180,14 +182,20 @@ documentMulterConfig.dest = process.env.DOCUMENTS_DIR || 'documents/';
 const documentUpload = multer(documentMulterConfig);
 
 app.get('/document/*',
+  rateLimiter(),
   function (req, res, next) {
-    req.url = req.url.replace('/document', '');
+      const path = require('path');
+      const documentsDir = path.resolve('documents/');
 
-    /**
-     * Pass request en response to the imageserver
-     */
-    // return res.download(`${process.env.APP_URL}/document/${req.url}`);
-    return res.download(`documents/${req.url}`);
+      const requestedPath = req.path.replace(/^\/document\//, '');
+
+      const resolvedPath = path.resolve(documentsDir, requestedPath);
+
+      if (!resolvedPath.startsWith(documentsDir)) {
+          return res.status(403).send('Forbidden');
+      }
+
+      res.download(resolvedPath);
   });
 
 app.use((req, res, next) => {
@@ -213,7 +221,7 @@ app.use((req, res, next) => {
 app.post('/image',
   imageUpload.single('image'), (req, res, next) => {
     const fileName = req.file.filename || req.file.key;
-    let url = `${process.env.APP_URL}/image/${fileName}`;
+    let url = `${process.env.APP_URL}/image/${sanitizeFileName(fileName)}`;
 
     let protocol = '';
 
@@ -222,7 +230,7 @@ app.post('/image',
     }
 
     res.send(JSON.stringify({
-      name: req.file.name,
+      name: sanitizeFileName(req.file.name),
       url: protocol + url
     }));
   });
@@ -230,7 +238,7 @@ app.post('/image',
 app.post('/images',
   imageUpload.array('image', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-        let url = `${process.env.APP_URL}/image/${file.filename}`;
+        let url = `${process.env.APP_URL}/image/${sanitizeFileName(file.filename)}`;
 
         let protocol = '';
 
@@ -239,7 +247,7 @@ app.post('/images',
         }
 
         return {
-            name: file.originalname,
+            name: sanitizeFileName(file.originalname),
             url: protocol + url
         }
     })));
@@ -266,7 +274,7 @@ app.post('/document',
     }
 
     res.send(JSON.stringify({
-      name: req.file.originalname,
+      name: sanitizeFileName(req.file.originalname),
       url: protocol + url
     }));
   });
@@ -283,7 +291,7 @@ app.post('/documents',
       }
 
       return {
-        name: file.originalname,
+        name: sanitizeFileName(file.originalname),
         url: protocol + url
       }
     })));
