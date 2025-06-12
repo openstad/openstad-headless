@@ -39,14 +39,28 @@ export const calculateScoreForItem = (
                 }
             });
 
+            const tempScores: Record<'x' | 'y' | 'z', number> = { x: 0, y: 0, z: 0 };
+
             Object.keys(optionWeights).forEach((optionId) => {
                 const secondOptionWeights = optionWeights[optionId];
 
+                const isRadioBox = answerKey.startsWith('radiobox');
+
                 ['x', 'y', 'z'].forEach((secondDimension) => {
-                    if (typeof secondOptionWeights[secondDimension] === 'number' && secondOptionWeights[secondDimension] !== 0) {
-                        countScores[secondDimension] += Number(secondOptionWeights[secondDimension]);
+                    const optionValue = secondOptionWeights[secondDimension];
+
+                    if (typeof optionValue === 'number' && optionValue !== 0) {
+                        if (isRadioBox) {
+                            tempScores[secondDimension] = Math.max(tempScores[secondDimension], optionValue);
+                        } else {
+                            tempScores[secondDimension] += optionValue;
+                        }
                     }
                 });
+            });
+
+            ['x', 'y', 'z'].forEach((sixthDimension) => {
+                countScores[sixthDimension] += tempScores[sixthDimension];
             });
         });
 
