@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
 import React from "react";
 import {ImageUploader} from "@/components/image-uploader";
+import { Spacer } from '@openstad-headless/ui/src';
 
 const formSchema = z.object({
   selectedProjects: z.array(
@@ -85,7 +86,7 @@ export default function WidgetMultiProjectSettings(
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Moeten projecten in het overzicht worden opgenomen?
+                Toon projecten zelf als tegels in het overzicht
               </FormLabel>
               {YesNoSelect(field, props)}
               <FormMessage />
@@ -133,7 +134,7 @@ export default function WidgetMultiProjectSettings(
                               <FormLabel
                                 style={{opacity: `${isChecked ? 1 : 0.3}`, pointerEvents: `${isChecked ? 'auto' : 'none'}`, cursor: `${isChecked ? 'auto' : 'not-allowed'}`}}
                               >
-                                Detailpagina link
+                                Link naar detailpagina van inzending
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -171,14 +172,14 @@ export default function WidgetMultiProjectSettings(
 
                     { (form.watch("includeProjectsInOverview") === true && isChecked ) && (
                       <>
-                        <div className="lg:w-full flex flex-row items-center gap-x-2 gap-y-2" style={{gridArea: 'content', display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
+                        <div className="lg:w-full flex flex-row items-center gap-x-2 gap-y-4" style={{gridArea: 'content', display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
                           <FormField
                             control={form.control}
                             name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewTitle`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
-                                  Overzichtstitel
+                                  Titel van de project tegel
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -196,7 +197,7 @@ export default function WidgetMultiProjectSettings(
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
-                                  Overzichtsamenvatting
+                                  Korte samenvatting van het project
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -215,7 +216,7 @@ export default function WidgetMultiProjectSettings(
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
-                                  Overzichtsbeschrijving
+                                  Beschrijving van het project
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -230,11 +231,11 @@ export default function WidgetMultiProjectSettings(
 
                           <FormField
                             control={form.control}
-                            name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewImage`}
+                            name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewUrl`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
-                                  Overzichtsafbeelding URL
+                                  Link waar de project tegel naartoe leidt
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -249,15 +250,12 @@ export default function WidgetMultiProjectSettings(
 
                           <ImageUploader
                             form={form}
-                            project={project as string}
-                            fieldName="imageOptionUpload"
-                            imageLabel="Afbeelding"
+                            project={props?.projectId}
+                            fieldName="imageProjectUpload"
+                            imageLabel="Upload een afbeelding voor de project tegel"
                             allowedTypes={["image/*"]}
                             onImageUploaded={(imageResult) => {
                               const image = imageResult ? imageResult.url : '';
-
-                              console.log( "Project", field.value?.findIndex(p => p.id === project.id) ?? 0 );
-                              console.log( "image", image, imageResult );
 
                               form.setValue(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewImage`, image);
                               form.resetField('imageProjectUpload');
@@ -271,6 +269,8 @@ export default function WidgetMultiProjectSettings(
                           )}
 
                         </div>
+
+                        <Spacer />
                       </>
                     )}
 

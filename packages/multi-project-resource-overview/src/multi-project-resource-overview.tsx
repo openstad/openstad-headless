@@ -103,18 +103,10 @@ function MultiProjectResourceOverview({
   return (
     <ResourceOverview
       {...props}
-      // multiProjectResources={resources || []}
       selectedProjects={props.selectedProjects}
-      // quickFixTags={tags || []}
+      includeProjectsInOverview={props.includeProjectsInOverview}
     />
   );
-
-  // return (
-  //   <>
-  //   <h1>Loading...</h1>
-  //   <p>{resourcesWithPagination?.records?.length || 0}</p>
-  //   </>
-  // );
 }
 
 MultiProjectResourceOverview.loadWidget = loadWidget;

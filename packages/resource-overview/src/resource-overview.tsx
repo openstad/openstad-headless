@@ -100,10 +100,16 @@ export type ResourceOverviewWidgetProps = BaseProps &
       name: string;
       detailPageLink?: string;
       label?: string;
+      overviewTitle?: string;
+      overviewSummary?: string;
+      overviewDescription?: string;
+      overviewImage?: string;
+      overviewUrl?: string;
     }[];
     multiProjectResources?: any[];
     includeOrExcludeTagIds?: string;
     includeOrExcludeStatusIds?: string;
+    includeProjectsInOverview?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -184,8 +190,10 @@ const defaultItemRenderer = (
     if ( !!props.selectedProjects && props.selectedProjects.length > 0 ) {
       const project = props.selectedProjects.find(project => project.id === resource.projectId);
 
-      if (project) {
+      if (resource?.id && project) {
         urlToUse = project.detailPageLink;
+      } else if ( !resource?.id && project?.overviewUrl) {
+        urlToUse = project.overviewUrl;
       }
     }
 
@@ -385,6 +393,7 @@ function ResourceOverview({
   selectedProjects = [],
   includeOrExcludeTagIds = 'include',
   includeOrExcludeStatusIds = 'include',
+  includeProjectsInOverview = false,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -583,6 +592,25 @@ function ResourceOverview({
           return 0;
         });
 
+    if ( includeProjectsInOverview && selectedProjects && selectedProjects.length > 0 ) {
+      selectedProjects.forEach((project) => {
+        const projectObject = {
+          title: project?.overviewTitle || '',
+          summary: project?.overviewSummary || '',
+          description: project?.overviewDescription || '',
+          images: [
+              {
+                "url": project?.overviewImage || ''
+              }
+            ],
+          overviewUrl: project?.overviewUrl || '',
+          projectId: project.id,
+        }
+
+        filtered.unshift(projectObject);
+      });
+    }
+
     setFilteredResources(filtered);
   }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags]);
 
@@ -613,8 +641,10 @@ function ResourceOverview({
         if ( selectedProjects.length > 0 ) {
           const project = selectedProjects.find(project => project.id === resource.projectId);
 
-          if (project) {
+          if ( resource?.id && project) {
             urlToUse = project.detailPageLink;
+          } else if ( !resource?.id && project?.overviewUrl) {
+            urlToUse = project.overviewUrl;
           }
         }
 
