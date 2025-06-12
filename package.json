@@ -8,7 +8,13 @@
     "setup": "node ./scripts/setup-all.js",
     "start": "node ./scripts/start-all.js",
     "init-databases": "node ./scripts/init-databases.js",
-    "test": "vitest"
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:admin": "vitest run apps/admin-server",
+    "test:unit:api": "vitest run apps/api-server",
+    "test:unit:auth": "vitest run apps/auth-server",
+    "test:unit:cms": "vitest run apps/cms-server",
+    "test:unit:image": "vitest run apps/image-server"
   },
   "repository": {
     "type": "git",
