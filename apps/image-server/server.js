@@ -3,9 +3,7 @@ const express = require('express');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
-const crypto = require('crypto')
-
-const secret = process.env.IMAGE_VERIFICATION_TOKEN
+const { createFilename } = require('./utils')
 
 const imageMulterConfig = {
   onError: function (err, next) {
@@ -20,21 +18,6 @@ const imageMulterConfig = {
 
     cb(null, true);
   }
-}
-
-const sanitizeFileName = (fileName) => {
-  let sanitizedFileName = fileName.replace(/[^a-z0-9_\-]/gi, '_');
-  return sanitizedFileName.replace(/_+/g, '_');
-}
-
-const createFilename = (originalFileName) => {
-  const fileExtension = originalFileName.split('.').pop();
-  const fileNameWithoutExtension = originalFileName.substring(0, originalFileName.lastIndexOf('.')) || originalFileName
-  const sanitizedFileName = sanitizeFileName(fileNameWithoutExtension);
-
-  const randomUUID = crypto.randomUUID();
-
-  return `${sanitizedFileName}-${randomUUID}.${fileExtension}`;
 }
 
 const imageSteamConfig = {
