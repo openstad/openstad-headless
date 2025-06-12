@@ -23,7 +23,11 @@ export const calculateScoreForItem = (
     let totalScores = { x: 0, y: 0, z: 0 };
     let countScores = { x: 0, y: 0, z: 0 };
 
-    const choiceOptionsArray = Array.isArray(choiceOption) ? choiceOption : [choiceOption];
+    let choiceOptionsArray = Array.isArray(choiceOption) ? choiceOption : [choiceOption];
+
+    if (choicesType === 'plane') {
+        choiceOptionsArray = [{id: 'plane'}];
+    }
 
     choiceOptionsArray.forEach((option) => {
         Object.keys(weights[option.id] || {}).forEach((answerKey) => {
@@ -70,7 +74,7 @@ export const calculateScoreForItem = (
 
                             if (isNaN(number)) return;
 
-                            const singleScore = choicesType === 'default'
+                            const singleScore = (choicesType === 'default' || choicesType === 'plane')
                               ? number
                               : 100 - Math.abs(number - 50);
 
@@ -102,18 +106,21 @@ export const calculateScoreForItem = (
                                 fieldValue = Number(userAnswer);
                             }
 
-                            const reverseValue = optionWeights.hasOwnProperty('ab') && optionWeights.ab === 'A';
+                            const optionsHasAB = fifthDimension === 'x' && optionWeights.hasOwnProperty('ab') && optionWeights.ab === 'A';
+                            const optionsHasABY = fifthDimension === 'y' && optionWeights.hasOwnProperty('aby') && optionWeights.aby === 'A';
+
+                            const reverseValue = optionsHasAB || optionsHasABY;
                             const valueBasedOnAB = reverseValue ? (100 - fieldValue) : fieldValue;
 
                             const rangeCalc = isNaN(valueBasedOnAB) ? '' : (valueBasedOnAB / 100) * number;
 
                             const finalNumber = rangeCalc === '' ? number : rangeCalc;
 
-                            const singleScore = choicesType === 'default'
+                            const singleScore = (choicesType === 'default' || choicesType === 'plane')
                               ? finalNumber
                               : 100 - Math.abs(finalNumber - 50);
 
-                            totalScores[fifthDimension] += singleScore;
+                            totalScores[fifthDimension] = totalScores[fifthDimension] + singleScore;
                         });
                     }
                 }

@@ -64,7 +64,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions);
+        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions, choicesType);
         setWeights(initialWeights);
     }, [items, choiceOption]);
 
