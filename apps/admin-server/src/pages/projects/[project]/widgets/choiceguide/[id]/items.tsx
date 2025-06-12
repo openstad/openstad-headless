@@ -1473,7 +1473,7 @@ export default function WidgetChoiceGuideItems(
                         fontSize: '14px',
                         marginTop: '10px'
                       }}>
-                        In dit scherm vind je de keuze opties die je in het tabblad 'Keuze opties' kunt aanmaken. Per vraag stel je hier in welke weging je meegeeft aan de antwoorden. Zo werkt dat:
+                        In dit scherm vind je de keuze opties die je in het tabblad &apos;Keuze opties&apos; kunt aanmaken. Per vraag stel je hier in welke weging je meegeeft aan de antwoorden. Zo werkt dat:
                         <ul style={{
                           listStyleType: 'disc',
                           paddingLeft: '20px',
@@ -1483,7 +1483,7 @@ export default function WidgetChoiceGuideItems(
                           <li key="li-0">Kies of een A/B slider helemaal naar links (A) of naar rechts (B) moet worden gesleept voor de maximale weging;</li>
                           <li key="li-1">Geef een getal mee voor hoeveel de vraag meetelt in de totale weging. 0 = geen weging, 100 = maximale weging. Als je een keuze optie niet wilt beïnvloeden met een vraag, vul dan 0 in.</li>
                         </ul>
-                        Heb je de weergave van de voorkeuren ingesteld als ‘In een vlak’? Dan kun je ook een verticale weging meegeven. De opties ‘Y’ bepalen die verticale weging.
+                        Heb je de weergave van de voorkeuren ingesteld als &apos;In een vlak&apos;? Dan kun je ook een verticale weging meegeven. De opties &apos;Y&apos; bepalen die verticale weging.
                       </p>
                     )}
 
