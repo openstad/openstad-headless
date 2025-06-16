@@ -3,12 +3,14 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { ResourceOverviewWidgetProps, ResourceOverview } from '@openstad-headless/resource-overview/src/resource-overview';
 import '../../resource-overview/src/resource-overview.css';
 import DataStore from "@openstad-headless/data-store/src";
+import useProjectList from "@openstad-headless/admin-server/src/hooks/use-project-list";
 
 export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
   widgetName?: string;
   selectedProjects?: {
     id: string;
     name: string;
+    tags?: string;
     detailPageLink?: string;
     label?: string;
     overviewTitle?: string;
@@ -28,6 +30,7 @@ function MultiProjectResourceOverview({
 
   const resourceCache = useRef(new Map());
   const tagsCache = useRef(new Map());
+  const [selectedProjectsState, setSelectedProjectsState] = useState(props.selectedProjects || []);
 
   const fetchResource = async (url: string) => {
     const response = await fetch(url);
@@ -43,6 +46,8 @@ function MultiProjectResourceOverview({
 
         const projectResources = await Promise.all(
           newProjects.map(async (project) => {
+            if (!project.id) return [];
+
             const url = `${props?.api?.url}/api/project/${project.id}/resource?includeConfig=1&includeUserVote=1&includeVoteCount=1`;
             const data = await fetchResource(url);
 
@@ -67,6 +72,30 @@ function MultiProjectResourceOverview({
     };
 
     fetchResources();
+
+    if (props.selectedProjects && props.selectedProjects.length > 0) {
+      const updateSelectedProjects = async (selectedProjects: any= []) => {
+        const url = `${props?.api?.url}/api/project?includeConfig=1&getBasicInformation=1`;
+        const data = await fetchResource(url);
+
+        const updatedProjects = selectedProjects?.map((selectedProject: any) => {
+          const project = Array.isArray(data) && data.find((p: any) => p.id === selectedProject.id);
+          if (project) {
+            return {
+              ...selectedProject,
+              tags: project?.tags || '',
+              createdAt: project?.createdAt,
+            }
+          }
+          return selectedProject;
+        });
+
+        setSelectedProjectsState( updatedProjects );
+      }
+
+      updateSelectedProjects(props.selectedProjects);
+    }
+
   }, [props.selectedProjects]);
 
   useEffect(() => {
@@ -100,10 +129,12 @@ function MultiProjectResourceOverview({
     fetchTags();
   }, [props.tagGroups]);
 
-  return (
+  const initFinished = selectedProjectsState.some(project => typeof project?.createdAt === 'string')
+
+  return !initFinished ? null : (
     <ResourceOverview
       {...props}
-      selectedProjects={props.selectedProjects}
+      selectedProjects={selectedProjectsState}
       includeProjectsInOverview={props.includeProjectsInOverview}
     />
   );

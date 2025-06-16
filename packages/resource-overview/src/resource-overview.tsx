@@ -100,6 +100,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
       name: string;
       detailPageLink?: string;
       label?: string;
+      tags?: string;
+      createdAt?: string;
       overviewTitle?: string;
       overviewSummary?: string;
       overviewDescription?: string;
@@ -226,11 +228,13 @@ const defaultItemRenderer = (
                                               ? props.selectedProjects.find(project => project.id === resource.projectId)?.label
                                               : '';
 
+  const isProjectCard = !resource?.id ? 'project-card' : '';
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className={`resource-card--link ${hasImages}`} data-projectid={ resource.projectId || '' } >
+          className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' } >
 
           <Carousel
             items={resourceImages}
@@ -300,7 +304,7 @@ const defaultItemRenderer = (
         </div>
 
       ) : (
-        <div className={`resource-card--link ${hasImages}`} data-projectid={ resource.projectId || '' }>
+        <div className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' }>
           <Carousel
             items={resourceImages}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
@@ -542,8 +546,59 @@ function ResourceOverview({
       }
     });
 
-    const filtered = resources && (
-      resources.filter((resource: any) => {
+    const allResources: any = [];
+
+    if ( includeProjectsInOverview && selectedProjects && selectedProjects.length > 0 ) {
+      selectedProjects.forEach((project) => {
+        const tagsArray = project?.tags ? project.tags.split(',').map(tag => tag.trim()) : [];
+        const tags = tagsArray.map(tag => {
+          const foundTag = allTags.find((t: {id: number}) => t.id === parseInt(tag));
+          return foundTag ? foundTag : null;
+        })
+        .filter(tag => tag !== null);
+
+        const projectObject = {
+          title: project?.overviewTitle || '',
+          summary: project?.overviewSummary || '',
+          description: project?.overviewDescription || '',
+          images: [
+            {
+              "url": project?.overviewImage || ''
+            }
+          ],
+          overviewUrl: project?.overviewUrl || '',
+          projectId: project.id,
+          createdAt: project?.createdAt || '',
+          tags: tags,
+          uniqueId: `project-${project.id}`,
+        }
+
+        if (search) {
+          const searchLower = search.toLowerCase();
+          if (
+            !projectObject.title.toLowerCase().includes(searchLower) &&
+            !projectObject.summary.toLowerCase().includes(searchLower) &&
+            !projectObject.description.toLowerCase().includes(searchLower)
+          ) {
+            return;
+          }
+        }
+
+        allResources.push(projectObject);
+      });
+    }
+
+    const uniqueResources = allResources?.filter((resource: any, index: number, self: any) => {
+      if (resource.uniqueId) {
+        return index === self.findIndex((t: any) => t.uniqueId === resource.uniqueId);
+      }
+      return true;
+    });
+
+    const combinedResources = [...uniqueResources, ...resources];
+
+    const filtered = combinedResources && (
+      combinedResources.filter((resource: any) => {
           const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
             excludeTags.includes(tag.id)
           );
@@ -591,25 +646,6 @@ function ResourceOverview({
           }
           return 0;
         });
-
-    if ( includeProjectsInOverview && selectedProjects && selectedProjects.length > 0 ) {
-      selectedProjects.forEach((project) => {
-        const projectObject = {
-          title: project?.overviewTitle || '',
-          summary: project?.overviewSummary || '',
-          description: project?.overviewDescription || '',
-          images: [
-              {
-                "url": project?.overviewImage || ''
-              }
-            ],
-          overviewUrl: project?.overviewUrl || '',
-          projectId: project.id,
-        }
-
-        filtered.unshift(projectObject);
-      });
-    }
 
     setFilteredResources(filtered);
   }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags]);
@@ -792,7 +828,7 @@ function ResourceOverview({
                 ?.slice(page * pageSize, (page + 1) * pageSize)
                 ?.map((resource: any, index: number) => {
                   return (
-                    <React.Fragment key={`resource-item-${resource.id}`}>
+                    <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
                       {renderItem(resource, { ...props, displayType, selectedProjects }, () => {
                         onResourceClick(resource, index);
                       })}

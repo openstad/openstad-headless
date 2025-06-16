@@ -29,8 +29,8 @@ import { extractConfig } from '@/lib/sub-widget-helper';
 import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
 import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
 import WidgetMultiProjectSettings from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/settings";
-import WidgetMultiProjectInclude from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/include";
-import WidgetMultiProjectTags from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/tags";
+import WidgetResourceOverviewTags from "@/pages/projects/[project]/widgets/resourceoverview/[id]/tags";
+import WidgetResourceOverviewInclude from "@/pages/projects/[project]/widgets/resourceoverview/[id]/include";
 
 export const getServerSideProps = withApiUrl;
 
@@ -167,10 +167,10 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                   <WidgetResourceOverviewSearch {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="tags" className="p-0">
-                  <WidgetMultiProjectTags {...totalPropPackage} />
+                  <WidgetResourceOverviewTags {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="include" className="p-0">
-                  <WidgetMultiProjectInclude {...totalPropPackage} />
+                  <WidgetResourceOverviewInclude {...totalPropPackage} isMultiProjectResourceOverview={true} />
                 </TabsContent>
                 <TabsContent value="likes" className="p-0">
                   {previewConfig && (

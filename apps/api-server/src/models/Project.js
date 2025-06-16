@@ -245,6 +245,10 @@ module.exports = function (db, sequelize, DataTypes) {
       includeEmailConfig: {
         attributes: {include: ['emailConfig']},
       },
+
+      getBasicInformation: {
+        attributes: {include: ['safeConfig']},
+      },
       
       includeInstallationUrls: {
         attributes: {include: ['installationUrls']},

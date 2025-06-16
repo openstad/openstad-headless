@@ -141,12 +141,17 @@ export default function WidgetResourceOverviewTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
+                                    const projectId = tags.find(
+                                      (tag: {type: string}) => tag.type === groupName
+                                    )?.projectId;
+
                                     const updatedFields =
                                       handleTagCheckboxGroupChange(
                                         groupName,
                                         checked,
                                         field.value,
-                                        'type'
+                                        'type',
+                                        projectId
                                       );
 
                                     field.onChange(updatedFields);
