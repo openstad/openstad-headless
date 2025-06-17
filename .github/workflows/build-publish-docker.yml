@@ -119,22 +119,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Start services with docker compose
-        run: docker compose --env-file .testing.env up -d
-
-      - name: Clean up node_modules
-        run: rm -rf node_modules **/node_modules
+      
+      - name: Debug permissions
+        run: |
+          ls -la /home/runner/work/openstad-headless/openstad-headless/apps/admin-server
+          ls -la /home/runner/work/openstad-headless/openstad-headless
+          whoami
 
       - name: Install dependencies
         run: npm i
 
       - name: Run Vitest tests
         run: npm run test:unit
-
-      - name: Stop docker compose
-        if: always()
-        run: docker compose --env-file .testing.env down
   
   set-images-in-yaml-and-commit:
     name: Set images in yaml and commit
