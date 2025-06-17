@@ -121,7 +121,7 @@ jobs:
           node-version: 18
 
       - name: Start services with docker compose
-        run: docker compose up -d
+        run: docker compose --env-file .testing.env up -d
 
       - name: Clean up node_modules
         run: rm -rf node_modules **/node_modules
@@ -134,7 +134,7 @@ jobs:
 
       - name: Stop docker compose
         if: always()
-        run: docker compose down
+        run: docker compose --env-file .testing.env down
   
   set-images-in-yaml-and-commit:
     name: Set images in yaml and commit
