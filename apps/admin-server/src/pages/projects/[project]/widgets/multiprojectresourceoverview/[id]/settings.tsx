@@ -21,6 +21,8 @@ import {YesNoSelect} from "@/lib/form-widget-helpers";
 import React from "react";
 import {ImageUploader} from "@/components/image-uploader";
 import { Spacer } from '@openstad-headless/ui/src';
+import AccordionUI from '@/components/ui/accordion';
+import {X} from "lucide-react";
 
 const formSchema = z.object({
   selectedProjects: z.array(
@@ -106,41 +108,43 @@ export default function WidgetMultiProjectSettings(
                 const isChecked = field.value?.some((p) => p.id === project.id);
                 return (
                   <FormItem
-                    className={'lg:w-full grid flex-row items-center gap-x-2 gap-y-2'}
-                    style={{ gridTemplateColumns: "1fr 12fr 36fr", gridTemplateAreas: `"check text div div div" "content content content content content"`}}
+                    className={'lg:w-full grid flex-row items-center gap-x-2 gap-y-0'}
+                    style={{ gridTemplateColumns: "1fr 3fr", gridTemplateAreas: `"check div" ". content"`, border: "1px solid hsl(214.3 31.8% 91.4%)", padding: "12px 20px" }}
                   >
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        id={project.id}
-                        checked={isChecked}
-                        onChange={(e) => {
-                          const updatedProjects = isChecked
-                            ? field.value?.filter((p) => p.id !== project.id) || []
-                            : [...(field.value || []), { id: project.id, name: project.name, detailPageLink: '', label: '' }];
-                          field.onChange(updatedProjects);
-                        }}
-                        style={{ gridArea: 'check' }}
-                      />
-                    </FormControl>
-                    <FormLabel style={{marginTop: '0', whiteSpace: "nowrap", gridArea: "text" }} htmlFor={project.id}>{project.name}</FormLabel>
+                    <div style={{gridArea: "check", display: "grid"}}>
+                      <FormLabel style={{marginTop: '0', whiteSpace: "nowrap", marginBottom: "12px" }} htmlFor={project.id}>{project.name}</FormLabel>
+                      <FormControl>
+                        {YesNoSelect(
+                          {
+                            ...field,
+                            value: isChecked,
+                            onChange: (checked: boolean) => {
+                              const updatedProjects = checked
+                                ? [...(field.value || []), { id: project.id, name: project.name, detailPageLink: '', label: '' }]
+                                : field.value?.filter((p) => p.id !== project.id) || [];
+                              field.onChange(updatedProjects);
+                            }
+                          },
+                          props
+                        )}
+                      </FormControl>
+                    </div>
                     <FormMessage />
-                      <div className="lg:w-full flex flex-row items-center gap-x-2" style={{display: 'grid', gridArea: "div", gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
+
+                    {isChecked && (
+                      <div className="lg:w-full flex flex-row items-center" style={{display: 'grid', gridArea: "div", gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
                         <FormField
                           control={form.control}
                           name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.detailPageLink`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel
-                                style={{opacity: `${isChecked ? 1 : 0.3}`, pointerEvents: `${isChecked ? 'auto' : 'none'}`, cursor: `${isChecked ? 'auto' : 'not-allowed'}`}}
-                              >
+                              <FormLabel>
                                 Link naar detailpagina van inzending
                               </FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   type="text"
-                                  style={{opacity: `${isChecked ? 1 : 0.3}`, pointerEvents: `${isChecked ? 'auto' : 'none'}`, cursor: `${isChecked ? 'auto' : 'not-allowed'}`}}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -152,16 +156,13 @@ export default function WidgetMultiProjectSettings(
                           name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.label`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel
-                                style={{opacity: `${isChecked ? 1 : 0.3}`, pointerEvents: `${isChecked ? 'auto' : 'none'}`, cursor: `${isChecked ? 'auto' : 'not-allowed'}`}}
-                              >
+                              <FormLabel>
                                 Label in overzicht
                               </FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   type="text"
-                                  style={{opacity: `${isChecked ? 1 : 0.3}`, pointerEvents: `${isChecked ? 'auto' : 'none'}`, cursor: `${isChecked ? 'auto' : 'not-allowed'}`}}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -169,10 +170,11 @@ export default function WidgetMultiProjectSettings(
                           )}
                         />
                       </div>
+                    )}
 
                     { (form.watch("includeProjectsInOverview") === true && isChecked ) && (
                       <>
-                        <div className="lg:w-full flex flex-row items-center gap-x-2 gap-y-4" style={{gridArea: 'content', display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
+                        <div className="lg:w-full flex flex-row items-center" style={{gridArea: 'content', display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px', rowGap: '20px', marginTop: "20px"}}>
                           <FormField
                             control={form.control}
                             name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewTitle`}
@@ -263,8 +265,20 @@ export default function WidgetMultiProjectSettings(
                           />
 
                           {!!form.getValues(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewImage`) && (
-                            <div style={{ position: 'relative' }}>
-                              <img src={form.getValues(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewImage`)} />
+                            <div style={{ position: 'relative', height: '140px' }}>
+                              <img
+                                src={form.getValues(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewImage`)}
+                                style={{position: "relative", width: "auto", height: "auto", maxHeight: "100%"}}
+                              />
+                              <Button
+                                color="red"
+                                onClick={() => {
+                                  form.setValue(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewImage`, '');
+                                  form.resetField('imageProjectUpload');
+                                }}
+                                className="absolute left-0 top-0 p-1">
+                                <X size={24} />
+                              </Button>
                             </div>
                           )}
 
