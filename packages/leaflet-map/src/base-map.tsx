@@ -1,5 +1,4 @@
 import 'leaflet';
-import React from 'react';
 import type { LeafletMouseEvent } from 'leaflet';
 import { LatLng, latLngBounds } from 'leaflet';
 import type { PropsWithChildren } from 'react';
