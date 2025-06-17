@@ -6,4 +6,6 @@ test('sanitize file names', () => {
     expect(sanitizeFileName("hello/world\\test")).toBe("hello_world_test")
     expect(sanitizeFileName("123-abc_DEF")).toBe("123-abc_DEF")
     expect(sanitizeFileName("$$$weird__name###")).toBe("_weird_name_")
+    // temporarely add a failing test for testing purposes
+    expect(sanitizeFileName("$$$weird__name###")).toBe("failing-test")
 })
