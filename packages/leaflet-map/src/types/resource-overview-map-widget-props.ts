@@ -2,6 +2,7 @@ import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import type { MapPropsType } from '../types/index';
 import { MarkerIconType } from './marker-icon';
 import { MarkerProps } from './marker-props';
+import {PostcodeAutoFillLocation} from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 
 export type ResourceOverviewMapWidgetProps = BaseProps &
   ProjectSettingProps &
@@ -22,6 +23,7 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
     resourceOverviewMapWidget?: dataLayerArray;
     selectedProjects?: Array<any>;
     widgetName?: string;
+    locationProx?: PostcodeAutoFillLocation
   };
 
 export type dataLayerArray = {

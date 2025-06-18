@@ -81,6 +81,7 @@ const ResourceOverviewMap = ({
   markerHref = undefined,
   countButton = undefined,
   ctaButton = undefined,
+  locationProx = undefined,
   givenResources,
   selectedProjects = [],
   ...props
@@ -380,7 +381,9 @@ const ResourceOverviewMap = ({
         autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
         center={center}
-        markers={currentMarkers}>
+        markers={currentMarkers}
+        locationProx={locationProx}
+      >
       </BaseMap>
       <div className='map-buttons'>
         {ctaButtonElement}

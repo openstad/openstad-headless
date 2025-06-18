@@ -2,8 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { ResourceOverviewWidgetProps, ResourceOverview } from '@openstad-headless/resource-overview/src/resource-overview';
 import '../../resource-overview/src/resource-overview.css';
-import DataStore from "@openstad-headless/data-store/src";
-import useProjectList from "@openstad-headless/admin-server/src/hooks/use-project-list";
 
 export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
   widgetName?: string;

@@ -9,13 +9,21 @@ import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Button, FormLabel } from "@utrecht/component-library-react";
 import { IconButton } from '@openstad-headless/ui/src';
+import PostcodeAutoFill from "../../location";
 type Filter = {
   tags: Array<number>;
   search: { text: string };
   sort: string;
   page: number;
   pageSize: number;
+  location: PostcodeAutoFillLocation;
 };
+
+export type PostcodeAutoFillLocation = {
+  lat: string;
+  lng: string;
+  proximity?: number;
+} | undefined;
 
 type Props = {
   className?: string;
@@ -35,6 +43,7 @@ type Props = {
   applyText: string;
   showActiveTags?: boolean;
   preFilterTags?: Array<number>;
+  displayLocationFilter?: boolean;
 };
 
 export function Filters({
@@ -55,6 +64,7 @@ export function Filters({
     sort: props.defaultSorting || 'createdAt_desc',
     page: 0,
     pageSize: props.itemsPerPage || 20,
+    location: undefined,
   };
 
   const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>();
@@ -92,6 +102,13 @@ export function Filters({
     updateFilter({
       ...filter,
       sort: value,
+    });
+  }
+
+  function setLocation(location: PostcodeAutoFillLocation) {
+    updateFilter({
+      ...filter,
+      location: location,
     });
   }
 
@@ -207,7 +224,7 @@ export function Filters({
     updateParameter();
   };
 
-  return !(props.displayTagFilters || props.displaySearch || props.displaySorting) ? null : (
+  return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
     <section id="stem-begroot-filter">
       <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>
         {props.displaySearch ? (
@@ -277,6 +294,12 @@ export function Filters({
           </div>
         ) : null}
 
+        {props.displayLocationFilter ? (
+          <PostcodeAutoFill
+            onValueChange={setLocation}
+            locationDefault={filter.location}
+          />
+        ) : null}
 
         <div className='button-group'>
           <Button
@@ -304,6 +327,7 @@ export function Filters({
               setTagState({});
               onUpdateFilter && onUpdateFilter(defaultFilter);
               updateParameter();
+              setLocation(undefined);
             }}>
             {props.resetText}
           </Button>
