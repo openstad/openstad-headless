@@ -1,6 +1,9 @@
-'use strict';
-process.env.SESSION_SECRET = '123secret';
-const config    = require('../../../config');
+import { expect, test, describe, vi } from "vitest";
+
+const testSessionSecret = '123secret';
+vi.stubEnv('SESSION_SECRET', testSessionSecret)
+
+const config = require('./index');
 
 describe('config', () => {
   test('should calculate expiration date correctly', () => {
@@ -30,6 +33,6 @@ describe('config', () => {
   });
 
   test('should have session secret as a string', () => {
-    expect(config.session.secret).toEqual('123secret');
+    expect(config.session.secret).toEqual(testSessionSecret);
   });
 });
