@@ -837,6 +837,7 @@ function ResourceOverview({
 
           {filterNeccesary && datastore ? (
             <Filters
+              {...props}
               className="osc-flex-columned"
               tagsLimitation={tagIdsToLimitResourcesTo}
               dataStore={datastore}
@@ -866,7 +867,6 @@ function ResourceOverview({
                 setLocation(f.location)
               }}
               preFilterTags={urlTagIdsArray}
-              {...props}
             />
           ) : null}
 
