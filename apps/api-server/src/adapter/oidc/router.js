@@ -423,8 +423,12 @@ router
         req.authConfig.jwtSecret,
         { expiresIn: 182 * 24 * 60 * 60 },
         (err, token) => {
-          if (err) return next(err);
+          if (err) {
+            console.log ('error in jwt creation');
+            return next(err);
+          }
           redirectUrl = redirectUrl.replace('[[jwt]]', token);
+          console.log ('[!!!! jwt cb] redirectUrl after jwt', redirectUrl, 'token', token, 'err', err);
           // Revalidate redirectUrl after adding the token
           if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
             return res.status(500).json({ status: 'Redirect domain not allowed' });
