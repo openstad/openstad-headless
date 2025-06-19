@@ -429,22 +429,24 @@ router
           }
           redirectUrl = redirectUrl.replace('[[jwt]]', token);
           console.log ('[!!!! jwt cb] redirectUrl after jwt', redirectUrl, 'token', token, 'err', err);
+          
           // Revalidate redirectUrl after adding the token
           if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
             return res.status(500).json({ status: 'Redirect domain not allowed' });
           }
+          
+          return res.redirect(redirectUrl);
         }
       );
-    }
-    
-    console.log ('[!!!! 2]redirectUrl after jwt', redirectUrl, 'allowedDomains', allowedDomains, 'is safe?', isSafeRedirectUrl(redirectUrl, allowedDomains));
-    
-    // Revalidate redirectUrl after modification
-    if (isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+    } else {
+      console.log ('[!!!! no jwt cb] redirectUrl without jwt', redirectUrl);
+      // Revalidate redirectUrl before redirecting
+      if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+        return res.status(500).json({ status: 'Redirect domain not allowed' });
+      }
+      
       return res.redirect(redirectUrl);
     }
-    
-    return res.status(500).json({ status: 'Redirect domain not allowed' });
     
   })
 
