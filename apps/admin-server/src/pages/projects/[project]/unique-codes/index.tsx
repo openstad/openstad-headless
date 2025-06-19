@@ -36,10 +36,17 @@ export default function ProjectCodes() {
       'updatedAt': 'Bijgewerkt op',
     };
 
+    const uniqueCodesData = uniquecodes.data?.map((code: any) => {
+      return {
+        ...code,
+        userId: code.userId ? 'Ja' : 'Nee',
+      }
+    });
+
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportToXLSX(uniquecodes.data, `${projectId}_stemcodes_${formattedDate}.xlsx`, keyMap);
+    exportToXLSX(uniqueCodesData, `${projectId}_stemcodes_${formattedDate}.xlsx`, keyMap);
   }
 
   useEffect(() => {
