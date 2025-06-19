@@ -16,6 +16,8 @@ const proximityOptions = [
 type Props = {
   onValueChange: (location: PostcodeAutoFillLocation) => void;
   locationDefault: PostcodeAutoFillLocation;
+  zipCodeAutofillApiUrl?: string;
+  zipCodeApiUrl?: string;
 };
 
 type Suggestion = {
@@ -32,7 +34,7 @@ type FullSuggestion = Suggestion & {
   longitude: string;
 };
 
-export default function PostcodeAutoFill({ onValueChange, locationDefault }: Props) {
+export default function PostcodeAutoFill({ onValueChange, locationDefault, ...props }: Props) {
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,7 +60,7 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault }: Pro
     const timeout = setTimeout(() => {
       setLoading(true);
 
-      fetch(`https://openstad-cdn.nl/api/autofill.php?query=${input}`, {
+      fetch(`${props?.zipCodeAutofillApiUrl || ''}${input}`, {
         signal: controller.signal,
       })
         .then((res) => res.json())
@@ -83,7 +85,7 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault }: Pro
   const handleSelect = async (s: Suggestion) => {
     setShowDropdown(false);
     try {
-      const res = await fetch(`https://openstad-cdn.nl/api/postcode.php?postcode=${s.postcode}`);
+      const res = await fetch(`${props?.zipCodeApiUrl || ''}${s.postcode}`);
       const data = await res.json();
       const full = data.results?.[0];
       if (full) {

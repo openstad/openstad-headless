@@ -866,6 +866,7 @@ function ResourceOverview({
                 setLocation(f.location)
               }}
               preFilterTags={urlTagIdsArray}
+              {...props}
             />
           ) : null}
 

@@ -298,6 +298,7 @@ export function Filters({
           <PostcodeAutoFill
             onValueChange={setLocation}
             locationDefault={filter.location}
+            {...props}
           />
         ) : null}
 
