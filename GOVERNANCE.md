@@ -17,11 +17,16 @@ Elke actieve bijdrager in de community OpenStad kan verzoeken om lid te worden v
 Idealiter heeft geen enkele organisatie een meerderheid aan leden in het Core Team.
 
 De huidige leden zijn:
-
 - Daniël Hoekzema (Gemeente Haarlemmermeer)
 - Marijn van Dam (Gemeente Zwolle)
 - May-Britt Jansen (Gemeente Amsterdam)
-- Bart Nieuwenweg (Draad)
+
+Core Team geeft opdracht aan deze maintainers voor beheer en onderhoud van code:
+- [Rudi van Hierden (Draad)](https://github.com/rudivanhierden)
+- [Ian Rieken (Gemeente Amsterdam)](https://github.com/IanR01)
+
+Core Team werkt samen met deze marktpartij voor ontwikkeling van code:
+- [Bart Nieuwenweg (Draad)](https://github.com/bartnieuwenweg) 
 
 ### Verantwoordelijkheden
 
