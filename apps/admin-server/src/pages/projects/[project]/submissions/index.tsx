@@ -9,7 +9,7 @@ import { sortTable, searchTable } from '@/components/ui/sortTable';
 import useSubmissions from "@/hooks/use-submission";
 import useUsers from "@/hooks/use-users";
 import {useWidgetsHook} from "@/hooks/use-widgets";
-import {exportDataToCSV} from "@/lib/export-helpers/csv-export";
+import {exportSubmissionsToCSV} from "@/lib/export-helpers/submissions-export";
 import {Select, SelectTrigger, SelectContent, SelectValue, SelectItem} from "@/components/ui/select";
 
 export default function ProjectSubmissions() {
@@ -109,7 +109,7 @@ export default function ProjectSubmissions() {
             <Button
               className="text-xs p-2"
               type="submit"
-              onClick={() => exportDataToCSV(filterData, activeWidget, selectedWidget)}
+              onClick={() => exportSubmissionsToCSV(filterData, activeWidget, selectedWidget)}
               disabled={activeWidget === "0"}
             >
               Exporteer inzendingen .csv

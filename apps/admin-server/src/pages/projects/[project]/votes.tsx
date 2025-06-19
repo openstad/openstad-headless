@@ -33,10 +33,12 @@ export default function ProjectResources() {
       'ip'                    : 'IP Adres',
       'userId'                : 'Gebruiker ID',
       'user.role'             : 'Gebruiker rol',
-      'user.displayName'      : 'Gebruiker weergavenaam',
-      'user.nickName'         : 'Gebruiker bijnaam',
       'user.name'             : 'Gebruiker naam',
+      'user.displayName'      : 'Gebruiker weergavenaam',
       'user.email'            : 'Gebruiker e-mailadres',
+      'user.phonenumber'      : 'Gebruiker telefoonnummer',
+      'user.address'          : 'Gebruiker adres',
+      'user.city'             : 'Gebruiker woonplaats',
       'user.postcode'         : 'Gebruiker postcode',
     };
 

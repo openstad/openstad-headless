@@ -18,7 +18,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
     const fetchBatch = async (page: number, retries: number = 0) => {
       try {
-        const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}`;
+        const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}&includeUser=1`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -196,7 +196,15 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         'Aangemaakt op': row.createdAt,
         'Project ID': row.projectId,
         'Widget': widgetName,
-        'Gebruikers ID': row.userId,
+        'Gebruikers ID': row.userId || ' ',
+        'Gebruikers rol': row.user?.role || ' ',
+        'Gebruikers naam': row.user?.name || ' ',
+        'Gebruikers weergavenaam': row.user?.displayName || ' ',
+        'Gebruikers e-mailadres': row.user?.email || ' ',
+        'Gebruikers telefoonnummer': row.user?.phonenumber || ' ',
+        'Gebruikers adres': row.user?.address || ' ',
+        'Gebruikers woonplaats': row.user?.city || ' ',
+        'Gebruikers postcode': row.user?.postcode || ' ',
       };
 
       const keyCount: Record<string, number> = {};
