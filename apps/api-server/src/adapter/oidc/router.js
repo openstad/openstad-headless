@@ -404,17 +404,20 @@ router
     res.clearCookie('useAuth', { path: '/' });
     res.clearCookie('projectId', { path: '/' });
     
-    let redirectUrl = returnTo + (returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
+    let redirectUrl = returnTo;
+    if (redirectUrl && !redirectUrl.includes('openstadlogintoken=[[jwt]]')) {
+      redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
+    }
     redirectUrl = redirectUrl || '/';
 
     if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
       return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
 
-    console.log ('redirectUrl', redirectUrl, 'allowedDomains', allowedDomains, 'contains [[jwt]]', redirectUrl.match('\[\[jwt\]\]'));
+    console.log ('[!!!!!] redirectUrl', redirectUrl, 'allowedDomains', allowedDomains, 'contains [[jwt]]', redirectUrl.indexOf('[[jwt]]') > -1);
     
     //check if redirect domain is allowed
-    if (redirectUrl.match('\[\[jwt\]\]')) {
+    if (redirectUrl.indexOf('[[jwt]]') > -1) {
       jwt.sign(
         { userId: req.userData.id, authProvider: req.authConfig.provider },
         req.authConfig.jwtSecret,
@@ -430,7 +433,7 @@ router
       );
     }
     
-    console.log ('redirectUrl after jwt', redirectUrl, 'allowedDomains', allowedDomains, 'is safe?', isSafeRedirectUrl(redirectUrl, allowedDomains));
+    console.log ('[!!!! 2]redirectUrl after jwt', redirectUrl, 'allowedDomains', allowedDomains, 'is safe?', isSafeRedirectUrl(redirectUrl, allowedDomains));
     
     // Revalidate redirectUrl after modification
     if (isSafeRedirectUrl(redirectUrl, allowedDomains)) {
