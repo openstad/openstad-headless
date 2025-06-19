@@ -537,6 +537,8 @@ secrets:
   cdn:
     reactUrl: https://unpkg.com/react@18.3.1/umd/react.production.min.js
     reactDomUrl: https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
+    zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
+    zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
 
   ### Mail server secretes
   mail:

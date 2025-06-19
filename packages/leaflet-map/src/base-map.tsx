@@ -94,7 +94,7 @@ import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
 import React from 'react';
 import L from 'leaflet';
-import {Polyline} from "react-leaflet";
+import {Circle, Polyline} from "react-leaflet";
 
 const BaseMap = ({
   iconCreateFunction = undefined,
@@ -134,6 +134,7 @@ const BaseMap = ({
   height = undefined,
   customPolygon = [],
   mapDataLayers = [],
+  locationProx = undefined,
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
   const definedCenterPoint =
@@ -560,6 +561,20 @@ const BaseMap = ({
             }
             onMarkerClick={onMarkerClick}
           />
+
+          {locationProx && locationProx.lat && locationProx.lng && (
+            <Circle
+              center={[parseFloat(locationProx.lat), parseFloat(locationProx.lng)]}
+              radius={(locationProx.proximity  || 1) * 1000}
+              pathOptions={{
+                color: '#0077ff',
+                fillColor: '#0077ff',
+                fillOpacity: 0.1,
+                weight: 2,
+                dashArray: '4 4',
+              }}
+            />
+          )}
 
         </MapContainer>
       </div>

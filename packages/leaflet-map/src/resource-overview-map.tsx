@@ -81,7 +81,9 @@ const ResourceOverviewMap = ({
   markerHref = undefined,
   countButton = undefined,
   ctaButton = undefined,
+  locationProx = undefined,
   givenResources,
+  selectedProjects = [],
   ...props
 }: PropsWithChildren<ResourceOverviewMapWidgetProps>) => {
   const datastore = new DataStore({
@@ -105,9 +107,11 @@ const ResourceOverviewMap = ({
   let categorizeByField = categorize?.categorizeByField;
   let categories: CategoriesType = {};
 
+  const projectId = Array.isArray(selectedProjects) && selectedProjects.length > 0 ? "0" : props.projectId;
+
   if (categorizeByField) {
     const { data: tags } = datastore.useTags({
-      projectId: props.projectId,
+      projectId: projectId,
       type: categorizeByField,
     });
     if (Array.isArray(tags) && tags.length) {
@@ -130,6 +134,14 @@ const ResourceOverviewMap = ({
       const markerLatLng: any = parseLocation(marker); // unify location format
       marker.lat = markerLatLng.lat;
       marker.lng = markerLatLng.lng;
+
+      if ( Array.isArray(selectedProjects) && selectedProjects.length > 0 ) {
+        const markerHrefUrl = selectedProjects.find((project) => project.id === resource.projectId)?.detailPageLink;
+
+        if (markerHrefUrl) {
+          markerHref = markerHrefUrl;
+        }
+      }
 
       if (marker.lat && marker.lng && markerHref) {
         marker.href = markerHref.replace(/\[id\]/, resource.id);
@@ -369,7 +381,9 @@ const ResourceOverviewMap = ({
         autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
         center={center}
-        markers={currentMarkers}>
+        markers={currentMarkers}
+        locationProx={locationProx}
+      >
       </BaseMap>
       <div className='map-buttons'>
         {ctaButtonElement}

@@ -319,6 +319,10 @@ router
       req.scope.push('includeEmailConfig');
     }
 
+    if (req.query.getBasicInformation) {
+      req.scope.push('getBasicInformation');
+    }
+
     if (req.query.includeAreas) {
       req.scope.push('includeAreas');
     }
@@ -335,7 +339,15 @@ router.route('/')
 
 // list projects
 // ----------
-	.get(auth.can('Project', 'list'))
+    .get(function(req, res, next) {
+      console.log( "req.scope",req.scope );
+      console.log( "req.scope.getBasicInformation",req.scope.getBasicInformation );
+      if (req.scope.includes("getBasicInformation")) {
+        return next();
+      }
+
+      return auth.can('Project', 'list')(req, res, next);
+    })
 	.get(pagination.init)
 	.get(function(req, res, next) {
     if (req.query.includeAuthConfig) return next('includeAuthConfig is not implemented for projects list')
@@ -345,7 +357,7 @@ router.route('/')
 
     try {
       let where = {};
-      if (!hasRole( req.user, 'superuser' )) {
+      if (!hasRole( req.user, 'superuser' ) && !req.scope.includes("getBasicInformation") ) {
         // first find all corresponding users for the current user, only where she is admin
         let users = await db.User.findAll({
           where: {
@@ -362,6 +374,18 @@ router.route('/')
 
       // now find the corresponding projects
       let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+
+      if ( req.scope.includes("getBasicInformation") ) {
+        result.rows = result.rows.map(project => {
+          const p = project.toJSON();
+          return {
+            id: p.id,
+            createdAt: p.createdAt,
+            tags: p?.config?.project?.tags || ''
+          };
+        });
+      }
+
       req.results = result.rows;
       req.dbQuery.count = result.count;
       return next();
@@ -379,7 +403,7 @@ router.route('/')
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
       // todo: waarom is dit? dat zou door het auth systeem moeten worden afgevangen
-      let project = record.toJSON()
+          let project = typeof record.toJSON === 'function' ? record.toJSON() : record;
 			if (!( req.user && hasRole( req.user, 'admin') )) {
         project.config = undefined;
         project.safeConfig = undefined;

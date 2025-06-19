@@ -13,6 +13,7 @@ type ExtractConfigParams<ParentWidgetProps extends {}, ChildWidgetProps extends 
   updateConfig: (config: ParentWidgetProps) => void;
   updatePreview: (config: ParentWidgetProps) => void;
   extraChildConfig?: Partial<ChildWidgetProps>;
+  widgetName?: string;
 };
 
 export function extractConfig<ParentWidgetProps extends {}, ChildWidgetProps extends {}>(

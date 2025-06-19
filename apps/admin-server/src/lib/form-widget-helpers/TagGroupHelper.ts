@@ -10,7 +10,7 @@ export function handleTagCheckboxGroupChange(
   checked: boolean,
   groups: Array<Group>,
   fieldToChange: keyof Pick<Group, 'type' | 'multiple'>,
-  projectId?: string
+  projectId?: number
 ) {
   const indexToChange = groups.findIndex((g) => g.type === tagGroupName);
 
@@ -22,7 +22,7 @@ export function handleTagCheckboxGroupChange(
       type: tagGroupName,
       multiple: false,
       label: '',
-      projectId: projectId || '',
+      projectId: projectId?.toString(),
     });
   }
 

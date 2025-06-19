@@ -114,11 +114,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
   Tag.scopes = function scopes() {
     return {
-      forProjectId: function (projectId) {
+      forProjectId: function (projectId, includeGlobalTags) {
         return {
           where: {
-            projectId: projectId,
-          },
+            [db.Sequelize.Op.or]: [
+              { projectId: projectId },
+              ...(includeGlobalTags ? [{ projectId: 0 }] : [])
+            ]
+          }
         };
       },
 
@@ -161,8 +164,6 @@ module.exports = function (db, sequelize, DataTypes) {
       otherKey: 'commentId',
       constraints: false,
     });
-
-    this.belongsTo(models.Project, { onDelete: 'CASCADE' });
   };
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu

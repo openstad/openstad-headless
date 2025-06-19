@@ -7,7 +7,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
+import {Filters, PostcodeAutoFillLocation} from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import {elipsizeHTML} from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
@@ -23,7 +23,30 @@ import {
 } from '@utrecht/component-library-react';
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
-import {useRaf} from "rooks";
+
+// This function takes in latitude and longitude of two locations
+// and returns the distance between them as the crow flies (in kilometers)
+function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLocation)
+{
+  if (!coords1 || !coords2) {
+    return 0;
+  }
+
+  const coords1Lat = parseFloat(coords1.lat), coords1Lng = parseFloat(coords1.lng), coords2Lat = parseFloat(coords2.lat), coords2Lng = parseFloat(coords2.lng);
+  const toRad = (Value: number) => { return Value * Math.PI / 180; };
+
+  var R = 6371;
+  var dLat = toRad(coords2Lat-coords1Lat);
+  var dLon = toRad(coords2Lng-coords1Lng);
+  var lat1 = toRad(coords1Lat);
+  var lat2 = toRad(coords2Lat);
+
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var d = R * c;
+  return d;
+}
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -38,7 +61,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
       resources?: any,
       title?: string,
       displayHeader?: boolean,
-      displayMap?: boolean
+      displayMap?: boolean,
+      selectedProjects?: any[],
+      location?: PostcodeAutoFillLocation
     ) => React.JSX.Element; renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
@@ -90,6 +115,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     resetText?: string;
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
+    onLocationChange?: (location: PostcodeAutoFillLocation) => void;
     displayLikeButton?: boolean;
     clickableImage?: boolean;
     displayBudget?: boolean;
@@ -99,11 +125,19 @@ export type ResourceOverviewWidgetProps = BaseProps &
       name: string;
       detailPageLink?: string;
       label?: string;
+      tags?: string;
+      createdAt?: string;
+      overviewTitle?: string;
+      overviewSummary?: string;
+      overviewDescription?: string;
+      overviewImage?: string;
+      overviewUrl?: string;
     }[];
     multiProjectResources?: any[];
-    quickFixTags?: Array<{ id: number; name: string }>;
     includeOrExcludeTagIds?: string;
     includeOrExcludeStatusIds?: string;
+    includeProjectsInOverview?: boolean;
+    displayLocationFilter?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -113,7 +147,9 @@ const defaultHeaderRenderer = (
   resources?: any,
   title?: string,
   displayHeader?: boolean,
-  displayMap?: boolean
+  displayMap?: boolean,
+  selectedProjects?: any[],
+  location?: PostcodeAutoFillLocation
 ) => {
   return (
     <>
@@ -122,6 +158,8 @@ const defaultHeaderRenderer = (
           {...widgetProps}
           {...widgetProps.resourceOverviewMapWidget}
           givenResources={resources}
+          selectedProjects={selectedProjects}
+          locationProx={location}
         />
       }
       {displayHeader &&
@@ -182,8 +220,10 @@ const defaultItemRenderer = (
     if ( !!props.selectedProjects && props.selectedProjects.length > 0 ) {
       const project = props.selectedProjects.find(project => project.id === resource.projectId);
 
-      if (project) {
+      if (resource?.id && project) {
         urlToUse = project.detailPageLink;
+      } else if ( !resource?.id && project?.overviewUrl) {
+        urlToUse = project.overviewUrl;
       }
     }
 
@@ -216,11 +256,13 @@ const defaultItemRenderer = (
                                               ? props.selectedProjects.find(project => project.id === resource.projectId)?.label
                                               : '';
 
+  const isProjectCard = !resource?.id ? 'project-card' : '';
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className={`resource-card--link ${hasImages}`} data-projectid={ resource.projectId || '' } >
+          className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' } >
 
           <Carousel
             items={resourceImages}
@@ -290,7 +332,7 @@ const defaultItemRenderer = (
         </div>
 
       ) : (
-        <div className={`resource-card--link ${hasImages}`} data-projectid={ resource.projectId || '' }>
+        <div className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' }>
           <Carousel
             items={resourceImages}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
@@ -380,11 +422,11 @@ function ResourceOverview({
   documentsDesc = '',
   displayVariant = '',
   onFilteredResourcesChange,
-  multiProjectResources = [],
+  onLocationChange,
   selectedProjects = [],
-  quickFixTags = [],
   includeOrExcludeTagIds = 'include',
   includeOrExcludeStatusIds = 'include',
+  includeProjectsInOverview = false,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -484,9 +526,12 @@ function ResourceOverview({
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
+  const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
 
   const [resources, setResources] = useState< Array<any> >([]);
   const [filteredResources, setFilteredResources] = useState< Array<any> >([]);
+
+  const projectIds = selectedProjects?.map(project => project.id) || [];
 
   const { data: resourcesWithPagination } = datastore.useResources({
     pageSize: 999999,
@@ -494,6 +539,8 @@ function ResourceOverview({
     search,
     tags: [],
     sort,
+    projectIds: projectIds || [],
+    allowMultipleProjects: selectedProjects && selectedProjects.length > 1
   });
 
   useEffect(() => {
@@ -506,12 +553,10 @@ function ResourceOverview({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (selectedProjects.length === 0 && resourcesWithPagination) {
+    if (resourcesWithPagination) {
       setResources(resourcesWithPagination.records || []);
-    } else {
-      setResources(multiProjectResources);
     }
-  }, [multiProjectResources, selectedProjects, resourcesWithPagination, pageSize]);
+  }, [resourcesWithPagination, pageSize]);
 
   useEffect(() => {
     // @ts-ignore
@@ -531,8 +576,59 @@ function ResourceOverview({
       }
     });
 
-    const filtered = resources && (
-      resources.filter((resource: any) => {
+    const allResources: any = [];
+
+    if ( includeProjectsInOverview && selectedProjects && selectedProjects.length > 0 ) {
+      selectedProjects.forEach((project) => {
+        const tagsArray = project?.tags ? project.tags.split(',').map(tag => tag.trim()) : [];
+        const tags = tagsArray.map(tag => {
+          const foundTag = allTags.find((t: {id: number}) => t.id === parseInt(tag));
+          return foundTag ? foundTag : null;
+        })
+        .filter(tag => tag !== null);
+
+        const projectObject = {
+          title: project?.overviewTitle || '',
+          summary: project?.overviewSummary || '',
+          description: project?.overviewDescription || '',
+          images: [
+            {
+              "url": project?.overviewImage || ''
+            }
+          ],
+          overviewUrl: project?.overviewUrl || '',
+          projectId: project.id,
+          createdAt: project?.createdAt || '',
+          tags: tags,
+          uniqueId: `project-${project.id}`,
+        }
+
+        if (search) {
+          const searchLower = search.toLowerCase();
+          if (
+            !projectObject.title.toLowerCase().includes(searchLower) &&
+            !projectObject.summary.toLowerCase().includes(searchLower) &&
+            !projectObject.description.toLowerCase().includes(searchLower)
+          ) {
+            return;
+          }
+        }
+
+        allResources.push(projectObject);
+      });
+    }
+
+    const uniqueResources = allResources?.filter((resource: any, index: number, self: any) => {
+      if (resource.uniqueId) {
+        return index === self.findIndex((t: any) => t.uniqueId === resource.uniqueId);
+      }
+      return true;
+    });
+
+    const combinedResources = [...uniqueResources, ...resources];
+
+    const filtered = combinedResources && (
+      combinedResources.filter((resource: any) => {
           const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
             excludeTags.includes(tag.id)
           );
@@ -548,6 +644,17 @@ function ResourceOverview({
           return true;
         })
     )
+      ?.filter((resource: any) => {
+        if (!location) return true;
+        if (!resource?.location?.lat || !resource?.location?.lng) return false;
+
+        const resourceLocation: PostcodeAutoFillLocation = {
+          lat: resource.location.lat.toString(),
+          lng: resource.location.lng.toString(),
+        };
+        const distance = calcCrow(location, resourceLocation);
+        return distance <= (location?.proximity || 999);
+      })
         ?.filter((resource: any) => {
           if (!statusIdsToLimitResourcesTo?.length) return true;
 
@@ -564,7 +671,7 @@ function ResourceOverview({
           if (sort === 'createdAt_asc') {
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           }
-          if ( multiProjectResources.length > 0 ) {
+          if ( projectIds.length > 0 ) {
             if (sort === 'title') {
               return a.title.localeCompare(b.title);
             }
@@ -582,7 +689,7 @@ function ResourceOverview({
         });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags]);
+  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location]);
 
   useEffect(() => {
     if (filteredResources) {
@@ -598,6 +705,10 @@ function ResourceOverview({
       if (onFilteredResourcesChange) {
         onFilteredResourcesChange(filtered);
       }
+
+      if (onLocationChange) {
+        onLocationChange(location);
+      }
     }
   }, [filteredResources]);
 
@@ -611,8 +722,10 @@ function ResourceOverview({
         if ( selectedProjects.length > 0 ) {
           const project = selectedProjects.find(project => project.id === resource.projectId);
 
-          if (project) {
+          if ( resource?.id && project) {
             urlToUse = project.detailPageLink;
+          } else if ( !resource?.id && project?.overviewUrl) {
+            urlToUse = project.overviewUrl;
           }
         }
 
@@ -642,7 +755,7 @@ function ResourceOverview({
 
   const filterNeccesary =
     allowFiltering &&
-    (props.displaySearch || props.displaySorting || props.displayTagFilters);
+    (props.displaySearch || props.displaySorting || props.displayTagFilters || props.displayLocationFilter);
 
   const getDisplayVariant = (variant: string) => {
     if (!variant) {
@@ -705,7 +818,7 @@ function ResourceOverview({
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
 
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap, selectedProjects, location) : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -724,6 +837,7 @@ function ResourceOverview({
 
           {filterNeccesary && datastore ? (
             <Filters
+              {...props}
               className="osc-flex-columned"
               tagsLimitation={tagIdsToLimitResourcesTo}
               dataStore={datastore}
@@ -732,6 +846,7 @@ function ResourceOverview({
               defaultSorting={props.defaultSorting || ''}
               displayTagFilters={props.displayTagFilters || false}
               displaySearch={props.displaySearch || false}
+              displayLocationFilter={props.displayLocationFilter || false}
               searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
               resetText={props.resetText || 'Reset'}
               applyText={props.applyText || 'Toepassen'}
@@ -749,8 +864,8 @@ function ResourceOverview({
                   setSort(f.sort);
                 }
                 setSearch(f.search.text);
+                setLocation(f.location)
               }}
-              quickFixTags={quickFixTags || []}
               preFilterTags={urlTagIdsArray}
             />
           ) : null}
@@ -761,7 +876,7 @@ function ResourceOverview({
                 ?.slice(page * pageSize, (page + 1) * pageSize)
                 ?.map((resource: any, index: number) => {
                   return (
-                    <React.Fragment key={`resource-item-${resource.id}`}>
+                    <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
                       {renderItem(resource, { ...props, displayType, selectedProjects }, () => {
                         onResourceClick(resource, index);
                       })}

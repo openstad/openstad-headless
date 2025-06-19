@@ -53,10 +53,6 @@ export default function WidgetResourceOverviewGeneral(
     },
   });
 
-  if ( props.widgetName ) {
-    console.log( 'props.widgetName', props.widgetName );
-  }
-
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>

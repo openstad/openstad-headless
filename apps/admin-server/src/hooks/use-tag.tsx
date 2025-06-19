@@ -9,7 +9,7 @@ export default function useTags(projectId?: string, id?: string) {
 
   const url = `/api/openstad/api/project/${projectNumber}/tag/${useId}`;
 
-  const tagSwr = useSWR(projectNumber && useId ? url : null);
+  const tagSwr = useSWR((projectNumber || projectNumber === 0) && useId ? url : null);
 
   async function updateTag(
     name: string | undefined,

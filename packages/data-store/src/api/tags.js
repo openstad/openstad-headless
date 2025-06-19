@@ -4,7 +4,8 @@ export default {
     if (onlyIncludeIds.length > 0) {
       onlyIncludeIds.forEach((tagId) => params.append('tags', tagId));
     }
-    let url = `/api/project/${projectId}/tag?type=${type}&${params.toString()}`;
+
+    let url = `/api/project/${projectId}/tag?type=${type}&${params.toString()}&includeGlobalTags=true`;
     return this.fetch(url);
   },
 
