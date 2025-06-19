@@ -44,7 +44,7 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tag = await createTag(values.name, values.type, values.seqnr, false);
+    const tag = await createTag(values.name, values.type, values.seqnr, values.addToNewResources || false);
     if (tag?.id) {
       toast.success('Tag aangemaakt!');
       router.push(isGlobal ? "/settings" : `/projects/${project}/tags`);
@@ -146,21 +146,19 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
                   </FormItem>
                 )}
               />
-              { !isGlobal && (
-                <FormField
-                  control={form.control}
-                  name="addToNewResources"
-                  render={({field}) => (
-                    <FormItem>
-                      <FormLabel>
-                        Voeg deze status automatisch toe aan nieuwe resources
-                      </FormLabel>
-                      {YesNoSelect(field, {})}
-                      <FormMessage/>
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="addToNewResources"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>
+                      Voeg deze status automatisch toe aan nieuwe resources
+                    </FormLabel>
+                    {YesNoSelect(field, {})}
+                    <FormMessage/>
+                  </FormItem>
+                )}
+              />
               <Button
                 className="w-fit col-span-full"
                 disabled={disabled}

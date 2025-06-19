@@ -224,21 +224,19 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                         </FormItem>
                       )}
                     />
-                    { !isGlobal && (
-                      <FormField
-                        control={form.control}
-                        name="addToNewResources"
-                        render={({field}) => (
-                          <FormItem>
-                            <FormLabel>
-                              Voeg deze tag automatisch toe aan nieuwe resources
-                            </FormLabel>
-                            {YesNoSelect(field, {})}
-                            <FormMessage/>
-                          </FormItem>
-                        )}
-                      />
-                    )}
+                    <FormField
+                      control={form.control}
+                      name="addToNewResources"
+                      render={({field}) => (
+                        <FormItem>
+                          <FormLabel>
+                            Voeg deze tag automatisch toe aan nieuwe resources
+                          </FormLabel>
+                          {YesNoSelect(field, {})}
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                    />
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
                     </Button>
