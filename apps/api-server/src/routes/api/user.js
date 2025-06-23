@@ -14,7 +14,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const filterBody = (req, res, next) => {
   const data = {};
-  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole', 'firstname', 'lastname'];
+  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole', 'firstname', 'lastname', 'twoFactorToken', 'twoFactorConfigured'];
 
   keys.forEach((key) => {
     if (typeof req.body[key] != 'undefined') {
@@ -225,6 +225,35 @@ router.route('/')
     return res.json(req.results);
   })
 
+// get user's two-factor status
+// --------------
+router.get('/:userId/two-factor-status', async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const apiUser = await db.User.findOne({ where: { id: userId } });
+    if (!apiUser) {
+      return res.status(404).json({ error: 'API user not found' });
+    }
+
+    // auth server settings
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+
+    // fetch auth user
+    const authUser = await req.adapter.service.fetchUserData({
+      authConfig: req.authConfig,
+      userId: apiUser.idpUser.identifier,
+    });
+
+    // return true if twoFactorConfigured equals 1
+    const isTwoFactorConfigured = authUser?.twoFactorConfigured === 1;
+    res.json({ twoFactorEnabled: isTwoFactorConfigured });
+  } catch (err) {
+    next(err);
+  }
+});
+  
 // anonymize user
 // --------------
 router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
