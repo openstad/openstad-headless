@@ -340,8 +340,6 @@ router.route('/')
 // list projects
 // ----------
     .get(function(req, res, next) {
-      console.log( "req.scope",req.scope );
-      console.log( "req.scope.getBasicInformation",req.scope.getBasicInformation );
       if (req.scope.includes("getBasicInformation")) {
         return next();
       }
