@@ -27,13 +27,15 @@ const formSchema = z.object({
   name: z.string(),
   type: z.string(),
   seqnr: z.coerce.number(),
-  addToNewResources: z.boolean(),
+  addToNewResources: z.boolean().optional(),
 });
 
-export default function ProjectTagCreate() {
+export default function ProjectTagCreate({ preset }: { preset?: string }) {
+  const isGlobal = !!preset && preset === 'global';
+
   const router = useRouter();
   const project = router.query.project;
-  const { createTag } = useTag(project as string);
+  const { createTag } = useTag(isGlobal ? "0" : project as string);
   const [disabled, setDisabled]  = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,10 +44,10 @@ export default function ProjectTagCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tag = await createTag(values.name, values.type, values.seqnr, values.addToNewResources);
+    const tag = await createTag(values.name, values.type, values.seqnr, values.addToNewResources || false);
     if (tag?.id) {
       toast.success('Tag aangemaakt!');
-      router.push(`/projects/${project}/tags`);
+      router.push(isGlobal ? "/settings" : `/projects/${project}/tags`);
     } else {
       toast.error('Er is helaas iets mis gegaan.')
     }
@@ -69,8 +71,19 @@ export default function ProjectTagCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
-        breadcrumbs={[
+        pageHeader={isGlobal ? "Instellingen" : "Projecten"}
+        breadcrumbs={isGlobal ? [
+          {
+            name: 'Instellingen',
+            url: '/settings',
+          },
+          {
+            name: 'Tag toevoegen',
+            url: `/settings/globaltags/create`,
+          },
+        ]
+        :
+        [
           {
             name: 'Projecten',
             url: '/projects',
@@ -136,13 +149,13 @@ export default function ProjectTagCreate() {
               <FormField
                 control={form.control}
                 name="addToNewResources"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>
                       Voeg deze status automatisch toe aan nieuwe resources
                     </FormLabel>
                     {YesNoSelect(field, {})}
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />

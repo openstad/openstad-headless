@@ -27,7 +27,7 @@ function ChoiceGuideResults(props: ChoiceGuideResultsProps) {
     useEffect(() => {
         if (!items || items.length === 0 || !choiceOption) return;
 
-        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions);
+        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions, choiceGuide?.choicesType || 'default');
         setWeights(initialWeights);
     }, [items, choiceOption]);
 
