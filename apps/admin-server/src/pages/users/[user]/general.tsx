@@ -15,6 +15,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { ResetResourceDialog } from '@/components/dialog-resource-reset';
 import useUser from '@/hooks/use-user';
 import { toast } from 'react-hot-toast';
 
@@ -75,6 +76,20 @@ export default function CreateUserGeneral() {
       toast.success('User is bijgewerkt')
     } catch(err:any) {
       toast.error(err.message || 'User kon niet worden bijgewerkt')
+    }
+  }
+
+  async function handleResetTwoFactor() {
+    try {
+      await updateUser({
+        ...user, // Include all existing user data
+        twoFactorToken: null, 
+        twoFactorConfigured: null, 
+      });
+
+      toast.success('Two-factor authentication reset succesvol');
+    } catch (error) {
+      toast.error('Two-factor authenticatie kon niet worden gereset');
     }
   }
 
@@ -221,6 +236,18 @@ export default function CreateUserGeneral() {
           </Button>
         </form>
       </Form>
+
+      <Separator className="my-4" />
+
+      <div>
+        {/* <Heading size="lg">Two-Factor Authenticatie</Heading> */}
+        <ResetResourceDialog
+          header="Two-Factor Authenticatie Reset"
+          message="Weet je zeker dat je de two-factor authentication wilt resetten voor deze gebruiker?"
+          resetButtonText='Reset Two-Factor Authenticatie'
+          onResetAccepted={handleResetTwoFactor}
+        />
+      </div>
     </div>
   );
 }
