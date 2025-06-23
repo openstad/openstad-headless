@@ -112,7 +112,7 @@ export default function ProjectSubmissions() {
               onClick={() => exportSubmissionsToCSV(filterData, activeWidget, selectedWidget)}
               disabled={activeWidget === "0"}
             >
-              Exporteer inzendingen .csv
+              Exporteer inzendingen
             </Button>
           </div>
         }>

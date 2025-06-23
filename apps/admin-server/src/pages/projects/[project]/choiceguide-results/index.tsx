@@ -165,7 +165,7 @@ export default function ProjectChoiceGuideResults() {
                 onClick={() => exportChoiceGuideToCSV(activeWidget, selectedWidget, project as string, (totalCount + 1))}
                 disabled={activeWidget === "0"}
               >
-                Exporteer inzendingen .xlsx
+                Exporteer inzendingen
               </Button>
             </div>
           }>
