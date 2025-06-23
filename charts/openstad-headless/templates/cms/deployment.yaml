@@ -58,16 +58,6 @@ spec:
               secretKeyRef:
                 key: reactDomUrl
                 name: {{ template "openstad.cdn.secret.fullname" . }}
-          - name: ZIPCODE_AUTOFILL_API_URL
-            valueFrom:
-              secretKeyRef:
-                key: zipCodeAutofillApiUrl
-                name: {{ template "openstad.cdn.secret.fullname" . }}
-          - name: ZIPCODE_API_URL
-            valueFrom:
-              secretKeyRef:
-                key: zipCodeApiUrl
-                name: {{ template "openstad.cdn.secret.fullname" . }}
           - name: CMS_DEFAULTS
             value: "{}"
           - name: NODE_ENV
