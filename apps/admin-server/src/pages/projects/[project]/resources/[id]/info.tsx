@@ -9,7 +9,10 @@ export default function ProjectResourceCreate() {
   const router = useRouter();
   const { project } = router.query;
   const { id } = router.query;
-  const { update } = useResources(project as string);
+  const { update } = useResources(
+    project as string,
+    true
+  );
 
   return id ? (
     <div>

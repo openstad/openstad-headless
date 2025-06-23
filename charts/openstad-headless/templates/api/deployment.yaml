@@ -20,10 +20,7 @@ spec:
     spec:
       serviceAccountName: openstad-headless-ingress-sa
       containers:
-        - command: ["/bin/bash", "-c"]
-          args:
-            - cd apps/api-server && node server.js
-          env:
+        - env:
           - name: URL
             value: https://{{ template "openstad.api.url" . }}
 
@@ -159,6 +156,18 @@ spec:
                 key: reactDomUrl
                 name: {{ template "openstad.cdn.secret.fullname" . }}
 
+          - name: ZIPCODE_AUTOFILL_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeAutofillApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
+          - name: ZIPCODE_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
 
@@ -211,7 +220,7 @@ spec:
       initContainers:
         - command: ["/bin/bash", "-c"]
           args:
-            - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server init-database -- --only-if-empty && npm run --prefix apps/api-server migrate-database
+            - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server
           env:
             - name: URL
               value: https://{{ template "openstad.api.url" . }}
@@ -332,6 +341,18 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: reactDomUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: ZIPCODE_AUTOFILL_API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: zipCodeAutofillApiUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: ZIPCODE_API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: zipCodeApiUrl
                   name: {{ template "openstad.cdn.secret.fullname" . }}
 
             - name: BASE_DOMAIN

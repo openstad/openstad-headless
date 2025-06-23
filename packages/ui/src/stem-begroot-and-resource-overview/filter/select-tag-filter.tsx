@@ -14,7 +14,6 @@ type Props = {
   onlyIncludeIds?: number[];
   onUpdateFilter?: (filter: string) => void;
   title: string;
-  quickFixTags?: TagDefinition[];
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
   parentStopUsingDefaultValue?: boolean;
@@ -28,7 +27,6 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
      dataStore,
      tagType,
      onUpdateFilter,
-     quickFixTags = [],
      preFilterTags = undefined,
      parentStopUsingDefaultValue = false,
      ...props
@@ -37,10 +35,20 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
   ) => {
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
 
-    const { data: tags } = dataStore.useTags({
+    const useTagsConfig: {
+      type: string;
+      onlyIncludeIds: number[];
+      projectId?: string;
+    } = {
       type: tagType,
       onlyIncludeIds,
-    });
+    }
+
+    if ( typeof props?.tagGroupProjectId === 'string' && props?.tagGroupProjectId === "0" ) {
+      useTagsConfig.projectId = props.tagGroupProjectId;
+    }
+
+    const {data:tags} = dataStore.useTags(useTagsConfig);
 
     const [defaultValue, setDefaultValue] = useState<string | undefined>(undefined);
     const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState(false);
@@ -64,12 +72,10 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
       }
     }
 
-    const filterTags = quickFixTags.length > 0 ? (quickFixTags.filter(tag => tag.projectId === parseInt(props.tagGroupProjectId))) : tags;
-
     useEffect(() => {
       if (!stopUsingDefaultValue && preFilterTags && preFilterTags.length > 0 && tags && tags.length && onUpdateFilter) {
         preFilterTags.forEach((tagId) => {
-          const tag = filterTags.find((tag: TagDefinition) => tag.id === tagId);
+          const tag = tags.find((tag: TagDefinition) => tag.id === tagId);
           if (tag) {
             const tagId = tag?.id?.toString();
 
@@ -83,13 +89,13 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     }, [preFilterTags]);
 
     return (
-      filterTags.length > 0 && (
+      tags.length > 0 && (
         <div className="form-element">
           <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
           <Select
             id={getRandomId(props.placeholder)}
             ref={ref}
-            options={(filterTags || []).map((tag: TagDefinition) => ({
+            options={(tags || []).map((tag: TagDefinition) => ({
               value: tag.id,
               label: tag.name,
             }))}
@@ -100,7 +106,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
             }}
             defaultValue={
               (preFilterTags && preFilterTags.length > 0) ?
-                filterTags.find((tag: TagDefinition) => preFilterTags.includes(tag.id))?.id?.toString()
+                tags.find((tag: TagDefinition) => preFilterTags.includes(tag.id))?.id?.toString()
                 : undefined
             }
           >
