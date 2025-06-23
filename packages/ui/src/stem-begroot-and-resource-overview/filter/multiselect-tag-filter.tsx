@@ -14,7 +14,6 @@ type Props = {
   selected?: number[];
   onUpdateFilter?: (filter: any, label?: string, forceSelected?: boolean) => void;
   onlyIncludeIds?: number[];
-  quickFixTags?: TagDefinition[];
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
   parentStopUsingDefaultValue?: boolean;
@@ -28,7 +27,6 @@ const MultiSelectTagFilter = ({
   onUpdateFilter,
   selected = [],
   onlyIncludeIds = [],
-  quickFixTags = [],
   preFilterTags = undefined,
   parentStopUsingDefaultValue = false,
   ...props
@@ -37,11 +35,21 @@ const MultiSelectTagFilter = ({
   if(!dataStore || !dataStore.useTags) {
     return <p>Cannot render tagfilter, missing data source</p>
   }
-  
-  const {data:tags} = dataStore.useTags({
+
+  const useTagsConfig: {
+    type: string;
+    onlyIncludeIds: number[];
+    projectId?: string;
+  } = {
     type: tagType,
     onlyIncludeIds,
-  });
+  }
+
+  if ( typeof props?.tagGroupProjectId === 'string' && props?.tagGroupProjectId === "0"  ) {
+    useTagsConfig.projectId = props.tagGroupProjectId;
+  }
+  
+  const {data:tags} = dataStore.useTags(useTagsConfig);
 
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState(false);
   const [prefilterTagsSelected, setPrefilterTagsSelected] = useState<number[]>([]);
@@ -62,12 +70,10 @@ const MultiSelectTagFilter = ({
     }
   }
 
-  const filterTags = quickFixTags.length > 0 ? (quickFixTags.filter(tag => tag.projectId === parseInt(props.tagGroupProjectId))) : tags;
-
   useEffect(() => {
     if ((!stopUsingDefaultValue && !parentStopUsingDefaultValue) && preFilterTags && preFilterTags.length > 0 && onUpdateFilter) {
       preFilterTags.forEach((tagId) => {
-        const tag = filterTags.find((tag: TagDefinition) => tag.id === tagId);
+        const tag = tags.find((tag: TagDefinition) => tag.id === tagId);
 
         if (tag) {
           onUpdateFilter(tag.id, tag.name, true);
@@ -85,7 +91,7 @@ const MultiSelectTagFilter = ({
 
   const combinedSelects = stopUsingDefaultValue ? selected : Array.from( new Set([...selected, ...prefilterTagsSelected]) );
 
-  return filterTags.length > 0 && (
+  return tags.length > 0 && (
     <div className="form-element">
       <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder || 'Selecteer item'}</FormLabel>
       <MultiSelect
@@ -95,7 +101,7 @@ const MultiSelectTagFilter = ({
           setStopUsingDefaultValue(true);
           onUpdateFilter && onUpdateFilter(value, label);
         }}
-        options={(filterTags || []).map((tag: TagDefinition) => ({
+        options={(tags || []).map((tag: TagDefinition) => ({
           value: tag.id,
           label: tag.name,
           checked: combinedSelects.includes(tag.id),
