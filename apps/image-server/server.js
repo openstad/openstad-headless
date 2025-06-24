@@ -49,7 +49,7 @@ const imageSteamConfig = {
         enabled: 'false',
       },
     },
-    hqOriginalMaxPixels: 5120 * 5120
+    hqOriginalMaxPixels: process.env.HQ_ORIGINAL_MAX_PIXELS || 160000,  // default value of image-steam is 400 * 400 = 160000 px
   },
 };
 
