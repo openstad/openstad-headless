@@ -66,7 +66,7 @@ FROM base AS prepare-production
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
 RUN npm run build --if-present -w $WORKSPACE
-RUN npm prune -ws --omit=dev
+RUN npm prune -ws --production
 
 # Release image
 FROM node:18-slim AS release
