@@ -257,9 +257,9 @@ function ResourceDetail({
     );
   };
 
-  const { data: currentUser } = datastore.useCurrentUser({ ...props });
+  const { data: currentUser, isLoading: userIsLoading } = datastore.useCurrentUser({ ...props });
   const resourceUserId = resource?.userId || null;
-  const canDelete = hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
+  const canDelete = !userIsLoading && hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
 
   const onRemoveClick = async (resource: any) => {
     try {

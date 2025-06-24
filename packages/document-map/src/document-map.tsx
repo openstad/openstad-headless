@@ -92,6 +92,8 @@ export type DocumentMapProps = BaseProps &
     popupNotLoggedInButton?: string;
     minCharactersWarning?: string;
     maxCharactersWarning?: string;
+    minCharactersError?: string;
+    maxCharactersError?: string;
   };
 
 

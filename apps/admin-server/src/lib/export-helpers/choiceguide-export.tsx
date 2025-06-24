@@ -69,7 +69,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
       let weights: any = {};
       try {
-        weights = InitializeWeights(items, choiceOptions);
+        weights = InitializeWeights(items, choiceOptions, choiceType);
       } catch (error) {
         weights = {};
       }

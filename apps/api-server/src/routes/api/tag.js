@@ -9,7 +9,9 @@ let router = express.Router({ mergeParams: true });
 router.all('*', function (req, res, next) {
   req.scope = [];
   req.scope.push('defaultScope');
-  req.scope.push({ method: ['forProjectId', req.project.id] });
+
+  const includeGlobalTags = req?.query?.includeGlobalTags === 'true';
+  req.scope.push({ method: ['forProjectId', req.params.projectId, includeGlobalTags] });
 
   if (req.query.includeProject) {
     req.scope.push('includeProject');
@@ -39,7 +41,8 @@ router
   .get(function (req, res, next) {
     let { dbQuery } = req;
 
-    req.scope.push({ method: ['forProjectId', req.params.projectId] });
+    const includeGlobalTags = req?.query?.includeGlobalTags === 'true';
+    req.scope.push({ method: ['forProjectId', req.params.projectId, includeGlobalTags] });
 
     db.Tag.scope(...req.scope)
       .findAndCountAll(dbQuery)

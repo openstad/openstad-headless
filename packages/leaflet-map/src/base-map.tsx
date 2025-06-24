@@ -13,8 +13,14 @@ import { Area, isPointInArea } from './area';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import parseLocation from './lib/parse-location';
-import type { BaseMapWidgetProps } from './types/basemap-widget-props'
-import '@openstad-headless/document-map/src/gesture'
+import type { BaseMapWidgetProps } from './types/basemap-widget-props';
+
+import '@openstad-headless/document-map/src/gesture';
+
+declare module 'leaflet' {
+  function mapInteraction(map: L.Map, options?: any): any;
+}
+
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
 function isRdCoordinates(x: number, y: number) {
@@ -88,7 +94,7 @@ import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
 import React from 'react';
 import L from 'leaflet';
-import {Polyline} from "react-leaflet";
+import {Circle, Polyline} from "react-leaflet";
 
 const BaseMap = ({
   iconCreateFunction = undefined,
@@ -128,6 +134,7 @@ const BaseMap = ({
   height = undefined,
   customPolygon = [],
   mapDataLayers = [],
+  locationProx = undefined,
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
   const definedCenterPoint =
@@ -221,9 +228,36 @@ const BaseMap = ({
 
     if (!mapRef) return;
     if (autoZoomAndCenter) {
-    if (autoZoomAndCenter === 'area' && area) {
-        const updatedArea = Array.isArray(area[0]) ? area : [area];
+      if (autoZoomAndCenter === 'area') {
+        if (area && area.length) {
+          const updatedArea = Array.isArray(area[0]) ? area : [area];
           return setBoundsAndCenter(updatedArea as any);
+        }
+
+        if ((!area || area.length === 0) && Array.isArray(mapDataLayers) && mapDataLayers.length > 0) {
+          let coords: Array<{ lat: number, lng: number }> = [];
+          mapDataLayers.forEach((layer) => {
+            const features = layer?.layer?.features ?? [];
+            features.forEach((feature: any) => {
+              if (feature?.geometry?.type === 'LineString' && Array.isArray(feature.geometry.coordinates)) {
+                (feature.geometry.coordinates as [number, number][]).forEach((coord) => {
+                  if (Array.isArray(coord) && coord.length === 2) {
+                    const [lng, lat] = coord;
+                    coords.push({ lat, lng });
+                  }
+                });
+              } else if (feature?.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)) {
+                const [lng, lat] = feature.geometry.coordinates as [number, number];
+                coords.push({ lat, lng });
+              }
+            });
+          });
+          if (coords.length > 0) {
+            const bounds = latLngBounds(coords.map(c => [c.lat, c.lng] as [number, number]));
+            mapRef.fitBounds(bounds);
+          }
+          return;
+        }
       }
       if (currentMarkers?.length) {
         return setBoundsAndCenter(currentMarkers as any);
@@ -527,6 +561,20 @@ const BaseMap = ({
             }
             onMarkerClick={onMarkerClick}
           />
+
+          {locationProx && locationProx.lat && locationProx.lng && (
+            <Circle
+              center={[parseFloat(locationProx.lat), parseFloat(locationProx.lng)]}
+              radius={(locationProx.proximity  || 1) * 1000}
+              pathOptions={{
+                color: '#0077ff',
+                fillColor: '#0077ff',
+                fillOpacity: 0.1,
+                weight: 2,
+                dashArray: '4 4',
+              }}
+            />
+          )}
 
         </MapContainer>
       </div>

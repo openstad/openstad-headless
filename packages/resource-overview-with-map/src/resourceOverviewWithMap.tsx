@@ -1,7 +1,7 @@
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './resourceOverviewWithMap.css';
 import {
   ResourceOverview,
@@ -10,12 +10,14 @@ import {
 
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map.js';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import {PostcodeAutoFillLocation} from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 
 
 export type ResourceOverviewWithMapWidgetProps = ResourceOverviewWidgetProps & ResourceOverviewMapWidgetProps;
 
 const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
     const [filteredResources, setFilteredResources] = useState<any[]>([]);
+    const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
 
     return (
         <div className="map-wrapper">
@@ -23,13 +25,15 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
                 <div className="detail-container">
                     <ResourceOverview
                         {...props}
-                        onFilteredResourcesChange={setFilteredResources} // Pass the callback function
+                        onFilteredResourcesChange={setFilteredResources}
+                        onLocationChange={setLocation}
                     />
                 </div>
                 <ResourceOverviewMap
                     {...props}
                     {...props.resourceOverviewMapWidget}
                     givenResources={filteredResources.length > 0 ? filteredResources : undefined}
+                    locationProx={location}
                 />
         </div>
         </div>
