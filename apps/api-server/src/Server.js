@@ -1,18 +1,12 @@
 var config       = require('config')
   , express      = require('express');
-const rateLimit  = require('express-rate-limit');
 
 // Misc
 var util         = require('./util');
 var log          = require('debug')('app:http');
 const morgan     = require('morgan');
 const db 		 = require('./db');
-
-// CodeQL only accepts express-rate-limit limiter for this file
-const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
-	max: 100,
-});
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 module.exports  = {
 	app: undefined,
@@ -29,7 +23,7 @@ module.exports  = {
       this.app.set('trust proxy', true);
       this.app.set('view engine', 'njk');
       this.app.set('env', process.env.NODE_APP_INSTANCE || 'development');
-	  this.app.use(limiter);
+	  this.app.use(rateLimiter());
 
       if (process.env.REQUEST_LOGGING === 'ON') {
         this.app.use(morgan('dev'));

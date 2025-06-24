@@ -44,8 +44,9 @@ router.route('/')
 
     // create Action
     // ---------------
+    .post(rateLimiter())
     .post(auth.can('Action', 'create'))
-    .post( rateLimiter(), function(req, res, next) {
+    .post(function(req, res, next) {
         const data = req.body;
 
         data.projectId = req.params.projectId;
@@ -88,8 +89,9 @@ router.route('/:actionId(\\d+)')
 
     // update action
     // ---------------
+    .put(rateLimiter())
     .put(auth.useReqUser)
-    .put( rateLimiter(), function(req, res, next) {
+    .put(function(req, res, next) {
         const action = req.results;
 
         if (!( action && action.can && action.can('update') )) return next( new Error('You cannot update this action') );
