@@ -37,6 +37,10 @@ router.use( '/project/:projectId(\\d+)/user', require('./user') );
 router.use( '/project/:projectId(\\d+)/user/:userId(\\d+)/activity', require('./user-activity') );
 router.use( '/user', require('./user') );
 
+router.use('/test-error', (req, res, next) => {
+  throw new Error('This is a test error for telemetry - user tried to access /users/test-error');
+});
+
 // submissions
 router.use( '/project/:projectId(\\d+)/submission', require('./submission') );
 
