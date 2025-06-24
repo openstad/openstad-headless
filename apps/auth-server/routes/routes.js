@@ -252,10 +252,10 @@ module.exports = function (app) {
     /**
      * Show account, add client, but not obligated
      */
-    app.use('/user', [clientMw.withOne, rateLimiter, authMw.check]);
-    app.get('/account', clientMw.withOne, rateLimiter, authMw.check, csrfProtection, addCsrfGlobal, userController.account);
-    app.post('/account', clientMw.withOne, rateLimiter, authMw.check, csrfProtection, addCsrfGlobal, userMw.validateUser, userController.postAccount);
-    app.post('/password', clientMw.withOne, rateLimiter, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
+    app.use('/user', [rateLimiter, clientMw.withOne, authMw.check]);
+    app.get('/account', rateLimiter, clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userController.account);
+    app.post('/account', rateLimiter, clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validateUser, userController.postAccount);
+    app.post('/password', rateLimiter, clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
 
     app.use('/auth/required-fields', [rateLimiter, authMw.check, clientMw.withOne]);
     app.get('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.index);
@@ -269,7 +269,7 @@ module.exports = function (app) {
 
     app.use('/dialog', [bruteForce.global]);
 
-    app.get('/dialog/authorize', clientMw.withOne, rateLimiter, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
+    app.get('/dialog/authorize', rateLimiter, clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
         return res.redirect('/login?clientId=' + req.query.client_id);
     }), oauth2Controller.authorization);
 

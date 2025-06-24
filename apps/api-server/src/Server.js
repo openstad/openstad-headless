@@ -129,6 +129,6 @@ module.exports  = {
   _initSessionMiddleware: function() {
     // Middleware to fill `req.user` with a `User` instance.
     const getUser = require('./middleware/user');
-    this.app.use( getUser, rateLimiter() );
+    this.app.use( rateLimiter(), getUser );
   },
 };
