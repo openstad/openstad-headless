@@ -14,7 +14,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm update -g npm
-RUN npm install -g npm@8
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
@@ -29,7 +28,7 @@ RUN npm config set fetch-timeout 300000
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
 
-# RUN npm install --legacy-peer-deps -ws
+RUN npm install --legacy-peer-deps -ws
 
 FROM builder AS base
 
