@@ -320,6 +320,10 @@ router
       req.scope.push('includeEmailConfig');
     }
 
+    if (req.query.getBasicInformation) {
+      req.scope.push('getBasicInformation');
+    }
+
     if (req.query.includeAreas) {
       req.scope.push('includeAreas');
     }
@@ -336,7 +340,13 @@ router.route('/')
 
 // list projects
 // ----------
-	.get(auth.can('Project', 'list'))
+    .get(function(req, res, next) {
+      if (req.scope.includes("getBasicInformation")) {
+        return next();
+      }
+
+      return auth.can('Project', 'list')(req, res, next);
+    })
 	.get(pagination.init)
 	.get(function(req, res, next) {
     if (req.query.includeAuthConfig) return next('includeAuthConfig is not implemented for projects list')
@@ -346,7 +356,7 @@ router.route('/')
 
     try {
       let where = {};
-      if (!hasRole( req.user, 'superuser' )) {
+      if (!hasRole( req.user, 'superuser' ) && !req.scope.includes("getBasicInformation") ) {
         // first find all corresponding users for the current user, only where she is admin
         let users = await db.User.findAll({
           where: {
@@ -363,6 +373,18 @@ router.route('/')
 
       // now find the corresponding projects
       let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+
+      if ( req.scope.includes("getBasicInformation") ) {
+        result.rows = result.rows.map(project => {
+          const p = project.toJSON();
+          return {
+            id: p.id,
+            createdAt: p.createdAt,
+            tags: p?.config?.project?.tags || ''
+          };
+        });
+      }
+
       req.results = result.rows;
       req.dbQuery.count = result.count;
       return next();
@@ -380,7 +402,7 @@ router.route('/')
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
       // todo: waarom is dit? dat zou door het auth systeem moeten worden afgevangen
-      let project = record.toJSON()
+          let project = typeof record.toJSON === 'function' ? record.toJSON() : record;
 			if (!( req.user && hasRole( req.user, 'admin') )) {
         project.config = undefined;
         project.safeConfig = undefined;
@@ -606,6 +628,7 @@ router.route('/:projectId') //(\\d+)
       let providers = await authSettings.providers({ project });
       const configData = req.body.config?.auth?.provider?.openstad?.config || {};
       const allowedDomains = req.body.config?.allowedDomains || false;
+      const twoFactorRoles = req.body.config?.auth?.provider?.openstad?.twoFactorRoles;
 
       for (let provider of providers) {
         if (
@@ -621,9 +644,12 @@ router.route('/:projectId') //(\\d+)
         if (!!allowedDomains) {
           authConfig.allowedDomains = allowedDomains;
         }
-
+        
         if (adapter.service.updateClient) {
-          let merged = merge.recursive({}, authConfig, {config: configData});
+          let merged = merge.recursive({}, authConfig, {
+            config: configData,
+            twoFactorRoles: twoFactorRoles || authConfig.twoFactorRoles
+          });
           await adapter.service.updateClient({ authConfig: merged, project });
           // delete req.body.config?.auth?.provider?.[authConfig.provider]?.authTypes;
           // delete req.body.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;

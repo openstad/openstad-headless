@@ -190,6 +190,8 @@ function getDefaultConfig(project, widgetType) {
   const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
 
   let url = process.env.IMAGE_APP_URL;
+  let zipCodeAutofillApiUrl = process.env.ZIPCODE_AUTOFILL_API_URL;
+  let zipCodeApiUrl = process.env.ZIPCODE_API_URL;
 
   let protocol = '';
 
@@ -212,6 +214,8 @@ function getDefaultConfig(project, widgetType) {
     },
     projectId: project.id,
     imageUrl: config.url + `/api/project/${project.id}/upload`,
+    zipCodeApiUrl: zipCodeApiUrl || '',
+    zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
   };
 
   if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {

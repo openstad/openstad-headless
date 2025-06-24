@@ -20,8 +20,12 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import useStatuses from "@/hooks/use-statuses";
 import React from "react";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import { Spacer } from '@/components/ui/spacer';
 
 const formSchema = z.object({
+  includeOrExcludeTagIds: z.string().optional(),
+  includeOrExcludeStatusIds: z.string().optional(),
   onlyIncludeTagIds: z.string().optional(),
   onlyIncludeStatusIds: z.string().optional()
 });
@@ -29,6 +33,9 @@ const formSchema = z.object({
 export default function WidgetResourceOverviewInclude(
   props: MultiProjectResourceOverviewProps &
     EditFieldProps<MultiProjectResourceOverviewProps>
+    & ({
+      isMultiProjectResourceOverview?: boolean;
+    })
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
@@ -51,6 +58,8 @@ export default function WidgetResourceOverviewInclude(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      includeOrExcludeTagIds: props?.includeOrExcludeTagIds || 'include',
+      includeOrExcludeStatusIds: props?.includeOrExcludeStatusIds || 'include',
       onlyIncludeTagIds: props?.onlyIncludeTagIds || '',
       onlyIncludeStatusIds: props?.onlyIncludeStatusIds || '',
     },
@@ -65,20 +74,49 @@ export default function WidgetResourceOverviewInclude(
           onSubmit={form.handleSubmit(onSubmit)}
           className="grid gap-4">
 
-          {!!props.widgetName && props.widgetName === 'multiprojectresourceoverview' && (
-            <div style={{backgroundColor: 'red', padding: '15px 20px', margin: '10px 0 20px'}}>
-              <FormDescription
-                style={{color: 'white', textAlign: 'center'}}
-              >
-                Opties op deze pagina zijn nog niet beschikbaar voor de multi project widget.
-              </FormDescription>
-            </div>
-          )}
+          <FormField
+            control={form.control}
+            name="includeOrExcludeTagIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon inzendingen gekoppeld aan onderstaande tags
+                </FormLabel>
+                <FormDescription>
+                  Gebruik het selectievakje om te kiezen hoe de geselecteerde tags de weergave van inzendingen
+                  beïnvloeden:
+                  <br/>
+                  Maak je keuze op basis van hoe je de inzendingen wil filteren in relatie tot de geselecteerde tags.
+                  <br/>
+                  <br/>
+                </FormDescription>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'include'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Inclusief" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="include"><strong>Inclusief</strong>: Als je deze optie kiest, worden alleen de
+                      inzendingen getoond die gekoppeld zijn aan de
+                      geselecteerde tags.</SelectItem>
+                    <SelectItem value="exclude"><strong>Exclusief</strong>: Als je deze optie kiest, worden juist de
+                      inzendingen die gekoppeld zijn aan de
+                      geselecteerde tags niet getoond.</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <CheckboxList
             form={form}
             fieldName="onlyIncludeTagIds"
-            fieldLabel="Geef enkel de resources met de volgende tags weer:"
+            fieldLabel=""
             label={(t) => t.name}
             keyForGrouping="type"
             keyPerItem={(t) => `${t.id}`}
@@ -101,32 +139,81 @@ export default function WidgetResourceOverviewInclude(
             }}
           />
 
-          <CheckboxList
-            form={form}
-            fieldName="onlyIncludeStatusIds"
-            fieldLabel="Geef enkel de inzendingen met de volgende status weer:"
-            layout="vertical"
-            label={(t) => t.name}
-            keyPerItem={(t) => `${t.id}`}
-            items={statuses}
-            selectedPredicate={(t) =>
-              // @ts-ignore
-              form
-                ?.getValues('onlyIncludeStatusIds')
-                ?.split(',')
-                ?.findIndex((tg) => tg === `${t.id}`) > -1
-            }
-            onValueChange={(status, checked) => {
-              const values = form.getValues('onlyIncludeStatusIds')?.split(',') ?? [];
 
-              const idsToSave = (checked
-                ? [...values, status.id]
-                : values.filter((id) => id !== `${status.id}`)).join(',');
+          { !props.isMultiProjectResourceOverview && (
+            <>
+              <Spacer/>
 
-              form.setValue('onlyIncludeStatusIds', idsToSave);
-              props.onFieldChanged("onlyIncludeStatusIds", idsToSave);
-            }}
-          />
+              <FormField
+                control={form.control}
+                name="includeOrExcludeStatusIds"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>
+                      Toon inzendingen gekoppeld aan onderstaande statussen
+                    </FormLabel>
+                    <FormDescription>
+                      Gebruik het selectievakje om te kiezen hoe de geselecteerde statussen de weergave van inzendingen
+                      beïnvloeden:
+                      <br/>
+                      Maak je keuze op basis van hoe je de inzendingen wil filteren in relatie tot de geselecteerde
+                      statussen.
+                      <br/>
+                      <br/>
+                    </FormDescription>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || 'include'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Inclusief"/>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="include"><strong>Inclusief</strong>: Als je deze optie kiest, worden alleen
+                          de
+                          inzendingen getoond die gekoppeld zijn aan de
+                          geselecteerde statussen.</SelectItem>
+                        <SelectItem value="exclude"><strong>Exclusief</strong>: Als je deze optie kiest, worden juist de
+                          inzendingen die gekoppeld zijn aan de
+                          geselecteerde statussen niet getoond.</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage/>
+                  </FormItem>
+                )}
+              />
+
+
+              <CheckboxList
+                form={form}
+                fieldName="onlyIncludeStatusIds"
+                fieldLabel=""
+                layout="vertical"
+                label={(t) => t.name}
+                keyPerItem={(t) => `${t.id}`}
+                items={statuses}
+                selectedPredicate={(t) =>
+                  // @ts-ignore
+                  form
+                    ?.getValues('onlyIncludeStatusIds')
+                    ?.split(',')
+                    ?.findIndex((tg) => tg === `${t.id}`) > -1
+                }
+                onValueChange={(status, checked) => {
+                  const values = form.getValues('onlyIncludeStatusIds')?.split(',') ?? [];
+
+                  const idsToSave = (checked
+                    ? [...values, status.id]
+                    : values.filter((id) => id !== `${status.id}`)).join(',');
+
+                  form.setValue('onlyIncludeStatusIds', idsToSave);
+                  props.onFieldChanged("onlyIncludeStatusIds", idsToSave);
+                }}
+              />
+            </>
+          )}
           
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

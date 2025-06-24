@@ -11,6 +11,10 @@ const roles = {
 
 function hasRole(user:any, minRoles:any, ownerId?:any) {
 
+  if (!user || !user.id || !user.role) {
+    return false;
+  }
+
   minRoles = minRoles || 'admin'; // admin can do anything
   if (!Array.isArray(minRoles)) minRoles = [minRoles];
 

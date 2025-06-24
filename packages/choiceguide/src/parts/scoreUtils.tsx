@@ -23,7 +23,11 @@ export const calculateScoreForItem = (
     let totalScores = { x: 0, y: 0, z: 0 };
     let countScores = { x: 0, y: 0, z: 0 };
 
-    const choiceOptionsArray = Array.isArray(choiceOption) ? choiceOption : [choiceOption];
+    let choiceOptionsArray = Array.isArray(choiceOption) ? choiceOption : [choiceOption];
+
+    if (choicesType === 'plane') {
+        choiceOptionsArray = [{id: 'plane'}];
+    }
 
     choiceOptionsArray.forEach((option) => {
         Object.keys(weights[option.id] || {}).forEach((answerKey) => {
@@ -35,14 +39,28 @@ export const calculateScoreForItem = (
                 }
             });
 
+            const tempScores: Record<'x' | 'y' | 'z', number> = { x: 0, y: 0, z: 0 };
+
             Object.keys(optionWeights).forEach((optionId) => {
                 const secondOptionWeights = optionWeights[optionId];
 
+                const isRadioBox = answerKey.startsWith('radiobox');
+
                 ['x', 'y', 'z'].forEach((secondDimension) => {
-                    if (typeof secondOptionWeights[secondDimension] === 'number' && secondOptionWeights[secondDimension] !== 0) {
-                        countScores[secondDimension] += Number(secondOptionWeights[secondDimension]);
+                    const optionValue = secondOptionWeights[secondDimension];
+
+                    if (typeof optionValue === 'number' && optionValue !== 0) {
+                        if (isRadioBox) {
+                            tempScores[secondDimension] = Math.max(tempScores[secondDimension], optionValue);
+                        } else {
+                            tempScores[secondDimension] += optionValue;
+                        }
                     }
                 });
+            });
+
+            ['x', 'y', 'z'].forEach((sixthDimension) => {
+                countScores[sixthDimension] += tempScores[sixthDimension];
             });
         });
 
@@ -70,7 +88,7 @@ export const calculateScoreForItem = (
 
                             if (isNaN(number)) return;
 
-                            const singleScore = choicesType === 'default'
+                            const singleScore = (choicesType === 'default' || choicesType === 'plane')
                               ? number
                               : 100 - Math.abs(number - 50);
 
@@ -102,18 +120,21 @@ export const calculateScoreForItem = (
                                 fieldValue = Number(userAnswer);
                             }
 
-                            const reverseValue = optionWeights.hasOwnProperty('ab') && optionWeights.ab === 'A';
+                            const optionsHasAB = fifthDimension === 'x' && optionWeights.hasOwnProperty('ab') && optionWeights.ab === 'A';
+                            const optionsHasABY = fifthDimension === 'y' && optionWeights.hasOwnProperty('aby') && optionWeights.aby === 'A';
+
+                            const reverseValue = optionsHasAB || optionsHasABY;
                             const valueBasedOnAB = reverseValue ? (100 - fieldValue) : fieldValue;
 
                             const rangeCalc = isNaN(valueBasedOnAB) ? '' : (valueBasedOnAB / 100) * number;
 
                             const finalNumber = rangeCalc === '' ? number : rangeCalc;
 
-                            const singleScore = choicesType === 'default'
+                            const singleScore = (choicesType === 'default' || choicesType === 'plane')
                               ? finalNumber
                               : 100 - Math.abs(finalNumber - 50);
 
-                            totalScores[fifthDimension] += singleScore;
+                            totalScores[fifthDimension] = totalScores[fifthDimension] + singleScore;
                         });
                     }
                 }

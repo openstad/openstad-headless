@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/data-store": "file:../data-store",
-    "@openstad-headless/types": "file:../types",
-    "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/data-store": "*",
+    "@openstad-headless/types": "*",
+    "@openstad-headless/ui": "*",
     "@utrecht/component-library-css": "^2.0.0",
     "filepond-plugin-file-validate-type": "^1.2.9",
     "filepond-plugin-image-exif-orientation": "^1.0.11",

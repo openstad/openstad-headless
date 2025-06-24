@@ -11,8 +11,6 @@ import WidgetResourceOverviewDisplay from '../../resourceoverview/[id]/display';
 import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
 import WidgetResourceOverviewPagination from '../../resourceoverview/[id]/pagination';
 import WidgetResourceOverviewSearch from '../../resourceoverview/[id]/search';
-import WidgetResourceOverviewTags from '../../resourceoverview/[id]/tags';
-import WidgetResourceOverviewInclude from '../../resourceoverview/[id]/include';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -31,6 +29,8 @@ import { extractConfig } from '@/lib/sub-widget-helper';
 import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
 import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
 import WidgetMultiProjectSettings from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/settings";
+import WidgetResourceOverviewTags from "@/pages/projects/[project]/widgets/resourceoverview/[id]/tags";
+import WidgetResourceOverviewInclude from "@/pages/projects/[project]/widgets/resourceoverview/[id]/include";
 
 export const getServerSideProps = withApiUrl;
 
@@ -124,6 +124,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                           subWidgetKey: 'resourceOverviewMapWidget',
                           updateConfig,
                           updatePreview,
+                          widgetName: 'multiprojectresourceoverview',
                         })}
                       />
                     </TabsContent>
@@ -169,7 +170,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                   <WidgetResourceOverviewTags {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="include" className="p-0">
-                  <WidgetResourceOverviewInclude {...totalPropPackage} />
+                  <WidgetResourceOverviewInclude {...totalPropPackage} isMultiProjectResourceOverview={true} />
                 </TabsContent>
                 <TabsContent value="likes" className="p-0">
                   {previewConfig && (
