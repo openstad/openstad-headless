@@ -14,6 +14,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm update -g npm
+RUN npm install -g npm@8
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
