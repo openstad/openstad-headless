@@ -108,6 +108,7 @@ const addCsrfGlobal = (req, res, next) => {
 
 module.exports = function (app) {
 
+    app.use(rateLimiter());
     app.use(function (req, res, next) {
         // load env sheets that have been set for complete Environment, not specific for just one client
         if (process.env.STYLESHEETS) {
@@ -252,16 +253,16 @@ module.exports = function (app) {
     /**
      * Show account, add client, but not obligated
      */
-    app.use('/user', [rateLimiter, clientMw.withOne, authMw.check]);
-    app.get('/account', rateLimiter, clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userController.account);
-    app.post('/account', rateLimiter, clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validateUser, userController.postAccount);
-    app.post('/password', rateLimiter, clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
+    app.use('/user', [clientMw.withOne, authMw.check]);
+    app.get('/account', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userController.account);
+    app.post('/account', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validateUser, userController.postAccount);
+    app.post('/password', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
 
-    app.use('/auth/required-fields', [rateLimiter, authMw.check, clientMw.withOne]);
+    app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
     app.get('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.index);
     app.post('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.post);
 
-    app.use('/auth/two-factor', [rateLimiter, authMw.check, clientMw.withOne]);
+    app.use('/auth/two-factor', [authMw.check, clientMw.withOne]);
     app.get('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.index);
     app.post('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.post);
     app.get('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configure);
@@ -269,7 +270,7 @@ module.exports = function (app) {
 
     app.use('/dialog', [bruteForce.global]);
 
-    app.get('/dialog/authorize', rateLimiter, clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
+    app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
         return res.redirect('/login?clientId=' + req.query.client_id);
     }), oauth2Controller.authorization);
 

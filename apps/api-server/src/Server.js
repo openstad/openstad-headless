@@ -23,6 +23,7 @@ module.exports  = {
       this.app.set('trust proxy', true);
       this.app.set('view engine', 'njk');
       this.app.set('env', process.env.NODE_APP_INSTANCE || 'development');
+	  this.app.use(rateLimiter());
 
       if (process.env.REQUEST_LOGGING === 'ON') {
         this.app.use(morgan('dev'));
@@ -129,6 +130,6 @@ module.exports  = {
   _initSessionMiddleware: function() {
     // Middleware to fill `req.user` with a `User` instance.
     const getUser = require('./middleware/user');
-    this.app.use( rateLimiter(), getUser );
+    this.app.use( getUser );
   },
 };
