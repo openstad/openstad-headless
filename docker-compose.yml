@@ -46,6 +46,19 @@ services:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
 
+  openstad-jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: openstad-jaeger
+    restart: unless-stopped
+    ports:
+      - 16686:16686
+      - 4317:4317
+      - 4318:4318
+      - 14268:14268
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+
   openstad-api-server:
     build:
       target: ${BUILD_TARGET:-development}

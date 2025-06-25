@@ -12,7 +12,7 @@ class TelemetryManager {
       serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-api-server',
       serviceVersion: process.env.OTEL_SERVICE_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'development',
-      otlpEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://jaeger:4318/v1/traces',
+      otlpEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://openstad-jaeger:4318/v1/traces',
       ...config,
     };
     this.sdk = null;
