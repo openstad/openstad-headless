@@ -88,8 +88,3 @@
   user: {{ .Values.secrets.mail.auth.user | default "mail@example.com" | b64enc }}
   password: {{ .Values.secrets.mail.auth.password | default ( randAlphaNum 12 | quote ) | b64enc }}
 {{- end}}
-
-{{- define "rateLimitSecret" -}}
-    rateWindowMs: {{ .Values.rateLimit.windowMs | default "60000" | toString | b64enc }}
-    rateLimit: {{ .Values.rateLimit.limit | default "100" | toString | b64enc }}
-{{- end}}
