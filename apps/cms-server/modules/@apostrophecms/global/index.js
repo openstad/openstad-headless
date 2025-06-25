@@ -195,29 +195,29 @@ module.exports = {
         label: 'Favicon',
         fileGroup: 'icons',
       },
-      // cssExtras: {
-      //   type: 'string',
-      //   textarea: true,
-      //   def: '#logo-image {\n  max-height: 50px;\n}',
-      //   label: 'Extra CSS',
-      // },
-      // customCssLink: {
-      //   type: 'string',
-      //   label: 'URL voor CSS imports (optioneel)',
-      // },
-      // customCssLink: {
-      //   type: 'array',
-      //   label: 'URL voor CSS imports (optioneel)',
-      //   inline: true,
-      //   fields: {
-      //     add: {
-      //       item: {
-      //         type: 'string',
-      //         label: 'URL voor CSS imports (optioneel)',
-      //       },
-      //     },
-      //   },
-      // },
+      cssExtras: {
+        type: 'string',
+        textarea: true,
+        def: '#logo-image {\n  max-height: 50px;\n}',
+        label: 'Extra CSS',
+      },
+      customCssLink: {
+        type: 'string',
+        label: 'URL voor CSS imports (optioneel)',
+      },
+      customCssLink: {
+        type: 'array',
+        label: 'URL voor CSS imports (optioneel)',
+        inline: true,
+        fields: {
+          add: {
+            item: {
+              type: 'string',
+              label: 'URL voor CSS imports (optioneel)',
+            },
+          },
+        },
+      },
       compactMenu: {
         type: 'boolean',
         label: 'Compacte weergave van het hoofdmenu.',
@@ -345,7 +345,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: ['favicon', 'compactMenu'],
+        fields: ['favicon', 'compactMenu', 'cssExtras', 'customCssLink'],
       },
       login: {
         label: 'Menu instellingen',
