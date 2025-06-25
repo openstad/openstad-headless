@@ -153,6 +153,9 @@ spec:
           - name: COOKIE_SECURE_OFF
             value: "{{ .Values.auth.cookie.secureOff | default "no" }}"
 
+          - name: PHONE_HASH_SALT
+            value: "{{ .Values.auth.phoneHashSalt | default ( randAlphaNum 12 | quote ) }}"
+
           - name: API_URL
             value: https://{{ template "openstad.api.url" . }}
 

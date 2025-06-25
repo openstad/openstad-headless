@@ -248,6 +248,9 @@ auth:
   fromName:
   fromEmail:
 
+  # Salt settings
+  phoneHashSalt:
+
   # Cookie settings
   cookie:
     secureOff:
