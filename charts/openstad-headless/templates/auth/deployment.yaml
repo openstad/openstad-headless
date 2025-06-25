@@ -171,6 +171,18 @@ spec:
           - name: NODE_ENV
             value: production
 
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: openstad-ratelimit-secret
+
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: openstad-ratelimit-secret
+
           {{- if .Values.auth.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}

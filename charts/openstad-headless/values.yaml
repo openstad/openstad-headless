@@ -71,6 +71,10 @@ public:
   name: openstad
   environmentName:
 
+rateLimit:
+  windowMs: 60000
+  limit: 100
+
 # Settings
 
 ##

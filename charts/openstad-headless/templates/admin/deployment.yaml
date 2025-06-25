@@ -58,6 +58,16 @@ spec:
               secretKeyRef:
                 key: apiKey
                 name: {{ template "openstad.admin.secret.fullname" . }}
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: openstad-ratelimit-secret
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: openstad-ratelimit-secret
           # Inject extra environment variables
           {{- if .Values.admin.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.admin.extraEnvVars "context" $) | nindent 10 }}

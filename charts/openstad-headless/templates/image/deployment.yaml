@@ -48,6 +48,16 @@ spec:
               secretKeyRef:
                 key: verificationToken
                 name: {{ template "openstad.image.secret.fullname" . }}
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: openstad-ratelimit-secret
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: openstad-ratelimit-secret
           # Inject extra environment variables
           {{- if .Values.image.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}
