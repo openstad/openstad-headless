@@ -39,6 +39,7 @@
     "vitest": "^3.2.3"
   },
   "dependencies": {
+    "@apostrophecms/sitemap": "^1.1.0",
     "react-leaflet": "^4.2.1",
     "uuid": "^10.0.0"
   }
