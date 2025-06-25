@@ -52,12 +52,12 @@ spec:
             valueFrom:
               secretKeyRef:
                 key: rateLimit
-                name: openstad-ratelimit-secret
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
           - name: RATE_WINDOW_MS
             valueFrom:
               secretKeyRef:
                 key: rateWindowMs
-                name: openstad-ratelimit-secret
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
           # Inject extra environment variables
           {{- if .Values.image.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}
