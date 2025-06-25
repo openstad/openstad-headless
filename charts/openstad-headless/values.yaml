@@ -114,6 +114,12 @@ persistence:
   #configure the cloud-specific storageClassName, will use the clouds default if not specified
   storageClassName:
   annotations: {}
+  image:
+    size: 1Gi
+  docs:
+    size: 1Gi
+  cms:
+    size: 1Gi
 
 admin:
   # Configure how many replicas exists of this service
