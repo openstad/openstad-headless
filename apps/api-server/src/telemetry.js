@@ -2,8 +2,8 @@ const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 const { Resource } = require('@opentelemetry/resources');
-const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION, SEMRESATTRS_DEPLOYMENT_ENVIRONMENT } = require('@opentelemetry/semantic-conventions');
-const { BatchSpanProcessor, SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION, ATTR_DEPLOYMENT_ENVIRONMENT } = require('@opentelemetry/semantic-conventions');
+const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 
 class TelemetryManager {
   constructor(config = {}) {
@@ -29,7 +29,7 @@ class TelemetryManager {
       const resource = new Resource({
         [ATTR_SERVICE_NAME]: this.config.serviceName,
         [ATTR_SERVICE_VERSION]: this.config.serviceVersion,
-        [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: this.config.environment,
+        [ATTR_DEPLOYMENT_ENVIRONMENT]: this.config.environment,
       });
 
       // Create the OTLP exporter
