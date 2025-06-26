@@ -3,10 +3,6 @@
 Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team. [Deel een opmerking of vraag via een issue](https://github.com/openstad/openstad-headless/blob/main/CONTRIBUTING.md).
 
 ## 2025
-### Mei
-- Donderdag 22-5-2025 OpenStad Projectenparade+
-### Juni
-- Donderdag 5-6-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Juli
 - Donderdag 3-7-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Augustus
@@ -17,8 +13,7 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 ### Oktober
 - Donderdag 2-10-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### November
-- Donderdag 6-11-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
-- Donderdag 27-11-2025 OpenStad Projectenparade+
+- Donderdag 13-11-2025 OpenStad Live
 ### December
 - Donderdag 4-12-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 
@@ -57,6 +52,10 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 
 # Historie
 ## 2025
+### Juni
+- Donderdag 5-6-2025 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+### Mei
+- Donderdag 22-5-2025 OpenStad Projectenparade+
+- Donderdag 8-5-2025 [Community Call](https://docs.google.com/presentation/d/1DTN4swSjA325YtEIChA0oHKwMADVgjsDdy4dD5n_eF8/edit?usp=sharing)
 ### Februari
 - Donderdag 27-2-2025 OpenStad Projectenparade+
-- Donderdag 8-5-2025 [Community Call](https://docs.google.com/presentation/d/1DTN4swSjA325YtEIChA0oHKwMADVgjsDdy4dD5n_eF8/edit?usp=sharing)

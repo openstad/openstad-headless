@@ -48,6 +48,7 @@ const formSchema = z.object({
   clickableImage: z.boolean(),
   displayBudget: z.boolean(),
   displayTags: z.boolean(),
+  displayLocationFilter: z.boolean(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -91,6 +92,7 @@ export default function WidgetResourceOverviewDisplay(
       clickableImage: props?.clickableImage || false,
       displayBudget: props?.displayBudget !== false,
       displayTags: props?.displayTags !== false,
+      displayLocationFilter: props?.displayLocationFilter === true,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -364,6 +366,20 @@ export default function WidgetResourceOverviewDisplay(
               <FormItem>
                 <FormLabel>
                   Tags in dialog weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayLocationFilter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Locatie filter weergeven
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />

@@ -156,6 +156,18 @@ spec:
                 key: reactDomUrl
                 name: {{ template "openstad.cdn.secret.fullname" . }}
 
+          - name: ZIPCODE_AUTOFILL_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeAutofillApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
+          - name: ZIPCODE_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
 
@@ -329,6 +341,18 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: reactDomUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: ZIPCODE_AUTOFILL_API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: zipCodeAutofillApiUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: ZIPCODE_API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: zipCodeApiUrl
                   name: {{ template "openstad.cdn.secret.fullname" . }}
 
             - name: BASE_DOMAIN

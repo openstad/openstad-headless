@@ -35,6 +35,7 @@ const weightSchema: z.ZodSchema = z.object({
   weightX: z.any().optional(),
   weightY: z.any().optional(),
   weightAB: z.any().optional(),
+  weightABY: z.any().optional(),
   choice: z.record(z.lazy(() => weightSchema)).optional(),
 });
 
@@ -425,6 +426,169 @@ export default function WidgetChoiceGuideItems(
     form.setValue('options', options);
     setSettingOptions(false);
   }
+
+  // Create component for heading dimensions
+  const DimensionHeading = (version: number = 1) => (
+    <div
+      className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-y-${version === 1 ? '2' : '0'} gap-x-${version === 1 ? '2' : '4'}`}
+    >
+      { version === 1 && (<Heading size="lg">Vraaggroep titel</Heading>)}
+      {dimensions.length > 0 && dimensions.map((XY, i) => (
+        <React.Fragment
+          key={i}
+        >
+          <Heading size="lg"
+            style={{
+              fontSize: version === 1 ? '18px' : '14px'
+            }}
+          >
+            Weging {XY}
+          </Heading>
+
+          {form.watch('type') === 'a-b-slider' && (
+            <Heading size="lg"
+              style={{
+                fontSize: version === 1 ? '18px' : '14px'
+              }}
+            >Weging A/B {XY}</Heading>
+          )}
+        </React.Fragment>
+      ))}
+
+    </div>
+  );
+
+  const weightFields = (group: {title?: string, id?: string | number}, index: number) => (
+    <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-x-${form.watch('type') === 'a-b-slider' ? 4 : 2} gap-y-${form.watch('type') === 'a-b-slider' ? 0 : 2} items-center`} key={index}>
+      <p
+        style={{
+          margin: form.watch('type') === 'a-b-slider' ? "20px 0 10px 0" : '0',
+        }}
+      >
+        {group.title}
+      </p>
+
+      { form.watch('type') === 'a-b-slider' && (
+        DimensionHeading( form.watch('type') === 'a-b-slider' ? 2 : 1 )
+      )}
+
+      {dimensions.length > 0 && dimensions.map((XY, i) => {
+        const weightFieldAppend = XY === 'Y' ? 'Y' : '';
+
+        return (
+          <>
+            <FormField
+              control={form.control}
+              name={`weights.${group.id}.weight${XY}`}
+              key={`2-${i}`}
+              render={({field}) => {
+                const value = field.value ?? 0;
+                const watchValue = form.watch(`weights.${group.id}.weight${XY}`);
+
+                if (value !== watchValue) {
+                  form.setValue(`weights.${group.id}.weight${XY}`, field.value ?? 0);
+                }
+
+                return (
+                  <FormItem>
+                    <FormControl>
+                      <div className={`weight-${XY.toLowerCase()}-container`}>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          {...field}
+                          value={field.value ?? 0}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage/>
+                  </FormItem>
+                )
+              }}
+            />
+            <FormField
+              control={form.control}
+              name={`weights.${group.id}.weightAB${weightFieldAppend}`}
+              key={`3-${i}`}
+              render={({field}) => {
+                const value = field.value || 'A';
+                const watchValue = form.watch(`weights.${group.id}.weightAB${weightFieldAppend}`);
+
+                if (value !== watchValue) {
+                  form.setValue(`weights.${group.id}.weightAB${weightFieldAppend}`, field.value || 'A');
+                }
+
+                return (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        onValueChange={(e: string) => field.onChange(e)}
+                        value={field.value || 'A'}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Kies een optie"/>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="A">A</SelectItem>
+                          <SelectItem value="B">B</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage/>
+                  </FormItem>
+                )
+              }}
+            />
+          </>
+        )
+      })}
+    </div>
+    );
+
+  const weightOptionsFields = (group: {title?: string, id?: string | number}, index: number) => (
+    <div key={`0-${index}`} className="w-full col-span-full grid-cols-1 grid">
+      <Heading size="lg" className="mt-3">
+        {group.title}
+      </Heading>
+      <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-2 gap-y-2 items-center`} key={index}>
+
+        {options.length > 0 && options.map((option, j) => (
+          <React.Fragment key={`1-${j}`}>
+            <p>
+              {option.titles[0].key}
+            </p>
+
+            {dimensions.length > 0 && dimensions.map((XY, i) => (
+              <FormField
+                control={form.control}
+                name={`weights.${group.id}.choice.${option.titles[0].key}.weight${XY}`}
+                key={`0-${i}-${j}`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className={`weight-${XY.toLowerCase()}-container`}>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          {...field}
+                          value={ field.value ?? 0 }
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <div>
@@ -1303,144 +1467,55 @@ export default function WidgetChoiceGuideItems(
                 <div className="p-0" style={{display: (activeTab === '2') ? 'block' : 'none'}} >
                   <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                     <Heading size="xl">Bepaal de weging per vraaggroep</Heading>
+
+                    { form.watch('type') === 'a-b-slider' && (
+                      <p style={{
+                        fontSize: '14px',
+                        marginTop: '10px'
+                      }}>
+                        In dit scherm vind je de keuze opties die je in het tabblad &apos;Keuze opties&apos; kunt aanmaken. Per vraag stel je hier in welke weging je meegeeft aan de antwoorden. Zo werkt dat:
+                        <ul style={{
+                          listStyleType: 'disc',
+                          paddingLeft: '20px',
+                          marginTop: '10px',
+                          marginBottom: '10px'
+                        }}>
+                          <li key="li-0">Kies of een A/B slider helemaal naar links (A) of naar rechts (B) moet worden gesleept voor de maximale weging;</li>
+                          <li key="li-1">Geef een getal mee voor hoeveel de vraag meetelt in de totale weging. 0 = geen weging, 100 = maximale weging. Als je een keuze optie niet wilt beïnvloeden met een vraag, vul dan 0 in.</li>
+                        </ul>
+                        Heb je de weergave van de voorkeuren ingesteld als &apos;In een vlak&apos;? Dan kun je ook een verticale weging meegeven. De opties &apos;Y&apos; bepalen die verticale weging.
+                      </p>
+                    )}
+
                     <Separator className="my-4" />
-                    <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? 2 : 1)} grid gap-2 gap-y-2`} >
-                      <Heading size="lg">Vraaggroep titel</Heading>
-                      {dimensions.length > 0 && dimensions.map((XY, i) => (
-                        <Heading key={i} size="lg">Weging {XY}</Heading>
-                      ))}
 
-                      {form.watch('type') === 'a-b-slider' && (
-                        <Heading size="lg">Weging A of B</Heading>
-                      )}
+                    { form.watch("type") !== 'a-b-slider' && (
+                      DimensionHeading()
+                    )}
 
-                    </div>
                     <div className="w-full mt-4 flex flex-col gap-y-4">
-                      {['checkbox', 'radiobox', 'select'].includes(form.watch('type') || "") ? (
-                        <>
-                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) => (
+                      {(() => {
+                        const isPlaneType = widget?.config?.choiceGuide?.choicesType === "plane";
+                        const isCheckboxType = ['checkbox', 'radiobox', 'select'].includes(form.watch('type') || "");
 
-                            <div key={index} className="w-full col-span-full grid-cols-1 grid">
-                              <Heading size="lg" className="mt-3">
-                                {singleGroup.title}
-                              </Heading>
-                              <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? 2 : 1)} grid gap-2 gap-y-2 items-center`} key={index}>
+                        if (isCheckboxType && isPlaneType) {
+                          return weightOptionsFields({ id: "plane" }, 999);
+                        }
 
-                                {options.length > 0 && options.map((option, j) => (
-                                  <React.Fragment key={j}>
-                                    <p>
-                                      {option.titles[0].text}
-                                    </p>
+                        if (isCheckboxType) {
+                          return widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) =>
+                            weightOptionsFields(singleGroup, index)
+                          );
+                        }
 
-                                  {dimensions.length > 0 && dimensions.map((XY, i) => (
-                                    <FormField
-                                      control={form.control}
-                                      name={`weights.${singleGroup.id}.choice.${option.titles[0].text}.weight${XY}`}
-                                      key={i}
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormControl>
-                                            <div className={`weight-${XY.toLowerCase()}-container`}>
-                                              <Input
-                                                type="number"
-                                                min={0}
-                                                max={100}
-                                                {...field}
-                                                value={ field.value ?? 0 }
-                                                />
-                                              </div>
-                                              </FormControl>
-                                              <FormMessage />
-                                            </FormItem>
-                                          )}
-                                        />
-                                      ))}
-                                  </React.Fragment>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) => (
-                            <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? 2 : 1)} grid gap-2 gap-y-2 items-center`} key={index}>
-                              <p>
-                                {singleGroup.title}
-                              </p>
-                              {dimensions.length > 0 && dimensions.map((XY, i) => (
-                                  <>
-                                    <FormField
-                                      control={form.control}
-                                      name={`weights.${singleGroup.id}.weight${XY}`}
-                                      key={i}
-                                      render={({ field }) => {
-                                        const value = field.value ?? 0;
-                                        const watchValue = form.watch(`weights.${singleGroup.id}.weight${XY}`);
+                        if (isPlaneType) {
+                          return weightFields({ id: "plane" }, 999);
+                        }
 
-                                        if ( value !== watchValue ) {
-                                          form.setValue(`weights.${singleGroup.id}.weight${XY}`, field.value ?? 0);
-                                        }
-
-                                        return (
-                                            <FormItem>
-                                              <FormControl>
-                                                <div className={`weight-${XY.toLowerCase()}-container`}>
-                                                  <Input
-                                                      type="number"
-                                                      min={0}
-                                                      max={100}
-                                                      {...field}
-                                                      value={field.value ?? 0}
-                                                  />
-                                                </div>
-                                              </FormControl>
-                                              <FormMessage/>
-                                            </FormItem>
-                                        )
-                                      }}
-                                    />
-                                    <FormField
-                                      control={form.control}
-                                      name={`weights.${singleGroup.id}.weightAB`}
-                                      key={i}
-                                      render={({ field }) => {
-                                        const value = field.value || 'A';
-                                        const watchValue = form.watch(`weights.${singleGroup.id}.weightAB`);
-
-                                        if ( value !== watchValue ) {
-                                          form.setValue(`weights.${singleGroup.id}.weightAB`, field.value || 'A');
-                                        }
-
-                                        return (
-                                            <FormItem>
-                                              <FormControl>
-                                                <Select
-                                                    onValueChange={(e: string) => field.onChange(e)}
-                                                    value={field.value || 'A'}
-                                                >
-                                                  <FormControl>
-                                                    <SelectTrigger>
-                                                      <SelectValue placeholder="Kies een optie"/>
-                                                    </SelectTrigger>
-                                                  </FormControl>
-                                                  <SelectContent>
-                                                    <SelectItem value="A">A</SelectItem>
-                                                    <SelectItem value="B">B</SelectItem>
-                                                  </SelectContent>
-                                                </Select>
-                                              </FormControl>
-                                              <FormMessage/>
-                                            </FormItem>
-                                        )
-                                      }}
-                                      />
-                                  </>
-                              ))}
-                            </div>
-                          ))}
-                        </>
-                      )}
+                        return widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) =>
+                          weightFields(singleGroup, index)
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
