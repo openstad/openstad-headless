@@ -145,8 +145,6 @@ jobs:
         with:
           node-version: 18
 
-      - run: npm i -ws --legacy-peer-deps
-
       - name: Add release version to .testing.env
         run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
 
@@ -164,7 +162,12 @@ jobs:
           docker exec openstad-auth-server bash -c "npm run init-database -w apps/auth-server -- --only-if-empty && npm run migrate-database -w apps/auth-server"
 
       - name: Run Cypress tests
-        run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }} --ci-build-id ${{ github.run_id }}
+        uses: cypress-io/github-action@v6
+        with:
+          record: true
+        env:
+            CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Stop docker compose
         if: always()
