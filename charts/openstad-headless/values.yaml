@@ -71,6 +71,10 @@ public:
   name: openstad
   environmentName:
 
+rateLimit:
+  windowMs: 60000
+  limit: 100
+
 # Settings
 
 ##
@@ -253,6 +257,9 @@ auth:
   # Default email settings
   fromName:
   fromEmail:
+
+  # Salt settings
+  phoneHashSalt:
 
   # Cookie settings
   cookie:

@@ -153,6 +153,9 @@ spec:
           - name: COOKIE_SECURE_OFF
             value: "{{ .Values.auth.cookie.secureOff | default "no" }}"
 
+          - name: PHONE_HASH_SALT
+            value: {{ .Values.auth.phoneHashSalt | default ( randAlphaNum 12 | quote ) }}
+
           - name: API_URL
             value: https://{{ template "openstad.api.url" . }}
 
@@ -167,6 +170,18 @@ spec:
 
           - name: NODE_ENV
             value: production
+
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
 
           {{- if .Values.auth.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}

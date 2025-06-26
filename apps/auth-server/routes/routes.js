@@ -1,4 +1,5 @@
 const passport = require('passport');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 //CONTROLERS
 const oauth2Controller = require('../controllers/oauth/oauth2');
@@ -107,6 +108,7 @@ const addCsrfGlobal = (req, res, next) => {
 
 module.exports = function (app) {
 
+    app.use(rateLimiter());
     app.use(function (req, res, next) {
         // load env sheets that have been set for complete Environment, not specific for just one client
         if (process.env.STYLESHEETS) {
