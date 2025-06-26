@@ -46,6 +46,17 @@ services:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
 
+  openstad-jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: openstad-jaeger
+    restart: unless-stopped
+    ports:
+      - 16686:16686 # Jaeger UI
+      - 4317:4317   # OTLP gRPC receiver
+      - 4318:4318   # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
   openstad-api-server:
     build:
       target: ${BUILD_TARGET:-development}
