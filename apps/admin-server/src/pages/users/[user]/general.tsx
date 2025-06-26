@@ -98,10 +98,8 @@ export default function CreateUserGeneral() {
 
   async function handleResetTwoFactor() {
     try {
-      await updateUser({
-        ...user, // Include all existing user data
-        twoFactorToken: null, 
-        twoFactorConfigured: null, 
+      await fetch(`/api/openstad/api/project/${user.projectId}/user/${user.id}/reset-two-factor`, {
+        method: 'PUT',
       });
 
       setIsTwoFactorEnabled(false);

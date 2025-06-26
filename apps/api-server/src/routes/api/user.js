@@ -253,7 +253,38 @@ router.get('/:userId/two-factor-status', async (req, res, next) => {
     next(err);
   }
 });
-  
+
+router.put('/:userId/reset-two-factor', async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const user = await db.User.findOne({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // auth server settings
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+
+    // Reset two-factor authentication in the auth database
+    if (user.idpUser?.identifier && req.adapter.service.updateUser) {
+      await req.adapter.service.updateUser({
+        authConfig: req.authConfig,
+        userData: {
+          id: user.idpUser.identifier,
+          twoFactorToken: null,
+          twoFactorConfigured: null,
+        },
+      });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // anonymize user
 // --------------
 router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
