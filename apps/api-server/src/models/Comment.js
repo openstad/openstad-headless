@@ -183,7 +183,19 @@ module.exports = function( db, sequelize, DataTypes ) {
 			defaultScope: {
 				include: [{
 					model      : db.User,
-					attributes : ['id', 'role', 'displayName', 'nickName', 'name', 'email']
+					attributes : [
+						'id',
+						'role',
+						'displayName',
+						'nickName',
+						'name',
+						'email',
+						'extraData',
+						'phonenumber',
+						'address',
+						'city',
+						'postcode'
+					]
 				}]
 			},
 
@@ -225,7 +237,19 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return {
 					include: [{
 						model: db.User,
-						attributes: ['id', 'role', 'displayName', 'nickName', 'name', 'email']
+						attributes: [
+							'id',
+							'role',
+							'displayName',
+							'nickName',
+							'name',
+							'email',
+							'extraData',
+							'phonenumber',
+							'address',
+							'city',
+							'postcode'
+						]
 					}],
 					order: [
 						['createdAt', 'ASC']

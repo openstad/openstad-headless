@@ -57,6 +57,10 @@ router.route('*')
 			{ method: ['forProjectId', req.project.id]}
     ];
 
+	if (req.query.includeResource !== undefined) {
+		req.scope.push('includeResource');
+	}
+
     return next();
 
   })
@@ -144,6 +148,10 @@ router.route('/')
 				vote.user = entry.user;
 				if (vote.user.auth) vote.user.auth.user = req.user;
 				vote.userId = entry.userId;
+			}
+
+			if (entry.resource) {
+				vote.resource = entry.resource;
 			}
       records[i] = vote
 		});

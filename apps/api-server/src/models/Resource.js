@@ -752,6 +752,10 @@ module.exports = function (db, sequelize, DataTypes) {
               'name',
               'email',
               'extraData',
+              'phonenumber',
+              'address',
+              'city',
+              'postcode'
             ],
           },
         ],

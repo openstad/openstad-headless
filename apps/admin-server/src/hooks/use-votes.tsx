@@ -4,7 +4,7 @@ import {validateProjectNumber} from "@/lib/validateProjectNumber";
 export default function useVotes(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const url = `/api/openstad/api/project/${projectNumber}/vote`;
+  const url = `/api/openstad/api/project/${projectNumber}/vote?includeResource`;
 
   const { data, isLoading, error, mutate } = useSWR(projectNumber ? url : null);
 

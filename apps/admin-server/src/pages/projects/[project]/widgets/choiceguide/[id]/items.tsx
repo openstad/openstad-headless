@@ -565,7 +565,7 @@ export default function WidgetChoiceGuideItems(
               <FormField
                 control={form.control}
                 name={`weights.${group.id}.choice.${option.titles[0].key}.weight${XY}`}
-                key={`0-${i}-${j}`}
+                key={`0-${group.id}-${option.titles[0].key}`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -575,7 +575,6 @@ export default function WidgetChoiceGuideItems(
                           min={0}
                           max={100}
                           {...field}
-                          value={ field.value ?? 0 }
                         />
                       </div>
                     </FormControl>
@@ -630,7 +629,9 @@ export default function WidgetChoiceGuideItems(
                                                     </span>
                           <span
                             className="gap-2 py-3 px-2 w-full"
-                            onClick={() => setItem(item)}>
+                            onClick={() => {
+                              setItem(item)
+                            }}>
                                                         {`${item.title || 'Geen titel'}`}
                                                     </span>
                           <span className="gap-2 py-3 px-2">
