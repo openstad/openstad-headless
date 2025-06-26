@@ -48,6 +48,10 @@ export type CommentsWidgetProps = BaseProps &
     overridePage?: number;
     displayPagination?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
+    extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    defaultTags?: string;
+    includeOrExclude?: string;
+    onlyIncludeOrExcludeTagIds?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -67,12 +71,61 @@ function CommentsInner({
   displayPagination = false,
   overridePage = 0,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
+  defaultTags,
+  includeOrExclude = 'include',
+  onlyIncludeOrExcludeTagIds = '',
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(displayPagination ? itemsPerPage || 9999 : 9999 );
+
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    api: props.api,
+  });
+
+  const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
+
+  const { data: allTags } = datastore.useTags({
+    projectId: props.projectId,
+    type: ''
+  });
+
+  const stringToArray = (str: string) => {
+    return str.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+  }
+
+  const tagIdsArray = stringToArray(tagIds);
+
+  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
+    let filteredTagIdsArray: Array<number> = [];
+    try {
+      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0) {
+        const filteredTags = allTags.filter((tag: { id: number }) => !tagIdsArray.includes((tag.id)));
+        const filteredTagIds = filteredTags.map((tag: { id: number }) => tag.id);
+        filteredTagIdsArray = filteredTagIds;
+      } else if (includeOrExclude === 'include') {
+        filteredTagIdsArray = tagIdsArray;
+      }
+
+      const filteredTagsIdsString = filteredTagIdsArray.join(',');
+
+      return {
+        tagsString: filteredTagsIdsString || ''
+      };
+
+    } catch (error) {
+      return {
+        tagsString: ''
+      };
+    }
+  }
+
+  const {
+    tagsString: filteredTagsIdsString
+  } = determineTags(includeOrExclude, allTags, tagIdsArray);
 
   const goToLastPage = () => {
     if (totalPages > 0 && displayPagination) {
@@ -126,16 +179,11 @@ function CommentsInner({
     ...props,
   } as CommentsWidgetProps;
 
-  const datastore = new DataStore({
-    projectId: props.projectId,
-    api: props.api,
-  });
-
   const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: args.sentiment,
-    onlyIncludeTagIds: props.onlyIncludeTags || undefined,
+    onlyIncludeTagIds: props.onlyIncludeTags || filteredTagsIdsString || undefined,
     refreshKey
   };
 
@@ -177,6 +225,25 @@ function CommentsInner({
     const formDataCopy = { ...formData };
 
     formDataCopy.resourceId = `${resourceId}`;
+
+    const defaultTagsArray = defaultTags
+      ? defaultTags.split(',').map(tag => parseInt(tag.trim(), 10)).filter(tag => !isNaN(tag))
+      : [];
+
+    const formTags: string[] = [];
+    Object.keys(formDataCopy)
+      .filter(key => key.startsWith('tags-'))
+      .forEach(key => {
+        const tagsValue = formDataCopy[key];
+        if (Array.isArray(tagsValue)) {
+          formTags.push(...tagsValue);
+        } else if (typeof tagsValue === 'string') {
+          formTags.push(...tagsValue.split(',').map(tag => tag));
+        }
+      });
+
+    const allTags = Array.from(new Set([...defaultTagsArray, ...formTags]) );
+    formDataCopy.tags = allTags;
 
     try {
       if (formDataCopy.id) {

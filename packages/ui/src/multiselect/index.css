@@ -69,3 +69,11 @@
     overflow: auto;
     box-shadow: 0 0 6px hsl(0deg 0% 0% / 16.08%);
 }
+
+.osc .multi-select .multiselect-container .utrecht-form-field__label--checkbox{
+    display: flex;
+}
+
+.osc .multi-select .multiselect-container .utrecht-checkbox.utrecht-checkbox--html-input.utrecht-checkbox--custom {
+    order: 0;
+}

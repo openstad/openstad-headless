@@ -26,6 +26,8 @@ import ArgumentsForm from '../../comments/[id]/form';
 import { LikeWidgetTabProps } from '../../likes/[id]';
 import { extractConfig } from '@/lib/sub-widget-helper';
 import WidgetResourceDetailDocumentMap from "@/pages/projects/[project]/widgets/resourcedetail/[id]/document-map";
+import ArgumentsExtraFields from "@/pages/projects/[project]/widgets/comments/[id]/extraFields";
+import ArgumentsInclude from "@/pages/projects/[project]/widgets/comments/[id]/include";
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -112,6 +114,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     <TabsTrigger value="general">Algemeen</TabsTrigger>
                     <TabsTrigger value="list">Lijst</TabsTrigger>
                     <TabsTrigger value="form">Formulier</TabsTrigger>
+                    <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
+                    <TabsTrigger value="include">Inclusief / exclusief</TabsTrigger>
                   </TabsList>
                   <TabsContent value="general" className="p-0">
                     <ArgumentsGeneral
@@ -192,8 +196,38 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         })}
                       />
                     </div>
-
                   </TabsContent>
+
+                  <TabsContent value="extraFields" className="p-0">
+                    <ArgumentsExtraFields
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ArgumentWidgetTabProps
+                      >({
+                        subWidgetKey: 'commentsWidget',
+                        previewConfig: previewConfig,
+                        updateConfig,
+                        updatePreview,
+                      })}
+                      projectId={ projectId as string }
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="include" className="p-0">
+                    <ArgumentsInclude
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ArgumentWidgetTabProps
+                      >({
+                        subWidgetKey: 'commentsWidget',
+                        previewConfig: previewConfig,
+                        updateConfig,
+                        updatePreview,
+                      })}
+                      projectId={ projectId as string }
+                    />
+                  </TabsContent>
+
                 </Tabs>
               )}
             </TabsContent>

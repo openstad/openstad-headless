@@ -1,6 +1,6 @@
-import {Comment} from '@openstad-headless/types';
+import {BaseProps, Comment} from '@openstad-headless/types';
 
-export type CommentFormProps = {
+export type CommentFormProps = BaseProps & {
   activeMode?: 'edit' | 'reply' | '';
   comment?: Comment;
   descriptionMinLength?: number;
@@ -15,4 +15,5 @@ export type CommentFormProps = {
   maxCharactersWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
+  extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
 };
