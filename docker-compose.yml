@@ -51,13 +51,11 @@ services:
     container_name: openstad-jaeger
     restart: unless-stopped
     ports:
-      - 16686:16686
-      - 4317:4317
-      - 4318:4318
-      - 14268:14268
+      - 16686:16686 # Jaeger UI
+      - 4317:4317   # OTLP gRPC receiver
+      - 4318:4318   # OTLP HTTP receiver
     environment:
       - COLLECTOR_OTLP_ENABLED=true
-      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
 
   openstad-api-server:
     build:
