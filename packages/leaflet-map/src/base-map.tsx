@@ -1,18 +1,18 @@
 import 'leaflet';
-
-import { useState, useEffect, useCallback, useRef } from 'react';
-import type { PropsWithChildren } from 'react';
-import { loadWidget } from '../../lib/load-widget';
-import { LatLng, latLngBounds } from 'leaflet';
+import React from 'react';
 import type { LeafletMouseEvent } from 'leaflet';
+import { LatLng, latLngBounds } from 'leaflet';
+import type { PropsWithChildren } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapContainer } from 'react-leaflet/MapContainer';
 import { useMapEvents } from 'react-leaflet/hooks';
-import { MapConsumer, useMapRef } from './map-consumer';
-import TileLayer from './tile-layer';
+import { loadWidget } from '../../lib/load-widget';
 import { Area, isPointInArea } from './area';
+import parseLocation from './lib/parse-location';
+import { MapConsumer, useMapRef } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
-import parseLocation from './lib/parse-location';
+import TileLayer from './tile-layer';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props';
 
 import '@openstad-headless/document-map/src/gesture';
@@ -90,17 +90,29 @@ const rdToWgs84 = (x: number, y: number) => {
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.css';
-import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
-import React from 'react';
 import L from 'leaflet';
 import {Circle, Polyline} from "react-leaflet";
+import type { MarkerProps } from './types/marker-props';
+
+interface MapDataLayerFeature {
+  geometry?: {
+    type?: string;
+    coordinates?: Array<[number, number]> | [number, number];
+  };
+}
+
+interface MapDataLayer {
+  layer?: {
+    features?: Array<MapDataLayerFeature>;
+  };
+}
 
 const BaseMap = ({
   iconCreateFunction = undefined,
   defaultIcon = undefined,
 
-  area = [],
+  area = undefined,
   areaPolygonStyle = undefined,
 
   markers = [],
@@ -137,6 +149,8 @@ const BaseMap = ({
   locationProx = undefined,
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
+
+
   const definedCenterPoint =
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
@@ -219,245 +233,217 @@ const BaseMap = ({
 
   // map is ready
   useEffect(() => {
-    let event = new CustomEvent('osc-map-is-ready', { detail: { id: mapId } });
+    const event = new CustomEvent('osc-map-is-ready', { detail: { id: mapId } });
     window.dispatchEvent(event);
   }, [mapId]);
 
   // auto zoom and center on init
   useEffect(() => {
+    if (!mapRef || !autoZoomAndCenter) return;
 
-    if (!mapRef) return;
-    if (autoZoomAndCenter) {
-      if (autoZoomAndCenter === 'area') {
-        if (area && area.length) {
-          const updatedArea = Array.isArray(area[0]) ? area : [area];
-          return setBoundsAndCenter(updatedArea as any);
-        }
+    if (autoZoomAndCenter === 'area') {
+      if (area?.length) {
+        const updatedArea = Array.isArray(area[0]) ? area : [area];
+        setBoundsAndCenter(updatedArea as any);
+        return;
+      }
 
-        if ((!area || area.length === 0) && Array.isArray(mapDataLayers) && mapDataLayers.length > 0) {
-          let coords: Array<{ lat: number, lng: number }> = [];
-          mapDataLayers.forEach((layer) => {
-            const features = layer?.layer?.features ?? [];
-            features.forEach((feature: any) => {
-              if (feature?.geometry?.type === 'LineString' && Array.isArray(feature.geometry.coordinates)) {
-                (feature.geometry.coordinates as [number, number][]).forEach((coord) => {
-                  if (Array.isArray(coord) && coord.length === 2) {
-                    const [lng, lat] = coord;
-                    coords.push({ lat, lng });
-                  }
-                });
-              } else if (feature?.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)) {
-                const [lng, lat] = feature.geometry.coordinates as [number, number];
-                coords.push({ lat, lng });
-              }
-            });
+      if (!area?.length && mapDataLayers?.length) {
+        const coords = mapDataLayers.reduce((acc: Array<{ lat: number, lng: number }>, layer: MapDataLayer) => {
+          const features = layer?.layer?.features ?? [];
+          features.forEach((feature: MapDataLayerFeature) => {
+            if (feature?.geometry?.type === 'LineString' && Array.isArray(feature.geometry.coordinates)) {
+              (feature.geometry.coordinates as Array<[number, number]>).forEach((coord) => {
+                acc.push({ lat: coord[1], lng: coord[0] });
+              });
+            } else if (feature?.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)) {
+              const coord = feature.geometry.coordinates as [number, number];
+              acc.push({ lat: coord[1], lng: coord[0] });
+            }
           });
-          if (coords.length > 0) {
-            const bounds = latLngBounds(coords.map(c => [c.lat, c.lng] as [number, number]));
-            mapRef.fitBounds(bounds);
-          }
-          return;
+          return acc;
+        }, []);
+
+        if (coords.length > 0) {
+          const bounds = latLngBounds(coords.map((c: any) => [c.lat, c.lng] as [number, number]));
+          mapRef.fitBounds(bounds);
         }
-      }
-      if (currentMarkers?.length) {
-        return setBoundsAndCenter(currentMarkers as any);
-      }
-      if (center) {
-        setBoundsAndCenter([center] as any);
+        return;
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef, area, center]);
+
+    if (currentMarkers?.length) {
+      setBoundsAndCenter(currentMarkers as any);
+    } else if (center) {
+      setBoundsAndCenter([center] as any);
+    }
+  }, [mapRef, area, center, autoZoomAndCenter, mapDataLayers, currentMarkers, setBoundsAndCenter]);
 
   // markers
   useEffect(() => {
     if ((markers.length === 0 && currentMarkers.length === 0) && mapDataLayers.length === 0) return;
 
-    let result = [...markers];
-    let polyLines: {
-      positions: [number, number][],
-      style: {
-        color: string,
-        weight: number,
-        opacity: number,
-      }
-    }[] = [];
-
-    if (mapDataLayers.length > 0) {
-      mapDataLayers?.forEach((dataLayer: any) => {
-        const records = dataLayer?.layer?.result?.records;
-        const geoJsonFeatures = dataLayer?.layer?.features;
-
-        if (records && Array.isArray(records)) {
-          records.forEach((record) => {
-            const {lat, lon, titel, inhoud} = record;
-            const long = lon || record.long
-
-            if (lat && long) {
-              let icon = dataLayer?.icon;
-              icon = (!!icon && icon.length > 0) ? icon[0].url : undefined;
-
-              if (icon) {
-                let markerData: MarkerProps = {
-                  lat,
-                  lng: long,
-                  title: titel,
-                  description: inhoud,
-                  markerId: `${parseInt((Math.random() * 1e8).toString())}`,
-                  isVisible: true,
-                  isClustered: false,
-                };
-
-                markerData.icon = L.icon({
-                  iconUrl: icon,
-                  iconSize: [30, 40],
-                  iconAnchor: [15, 40],
-                  className: 'custom-image-icon',
-                });
-
-                result.push(markerData);
-              }
-            }
-          });
+    const processMarkers = () => {
+      const result = [...markers];
+      const polyLines: {
+        positions: [number, number][],
+        style: {
+          color: string,
+          weight: number,
+          opacity: number,
         }
+      }[] = [];
 
-        if (geoJsonFeatures && Array.isArray(geoJsonFeatures)) {
-          geoJsonFeatures.forEach((feature) => {
-            if (!feature.geometry) return;
-            const geometryType = feature.geometry?.type;
+      // Process map data layers
+      if (mapDataLayers.length > 0) {
+        mapDataLayers.forEach((dataLayer: any) => {
+          const records = dataLayer?.layer?.result?.records;
+          const geoJsonFeatures = dataLayer?.layer?.features;
 
-            if (geometryType === 'LineString') {
-              const coordinates = feature.geometry?.coordinates || [];
-              const latlngs = coordinates.map(([lng, lat]: [number, number]) => {
-                if (isRdCoordinates(lng, lat)) {
-                  const converted = rdToWgs84(lng, lat);
-                  return [converted.lat, converted.lon];
-                }
-                return [lat, lng];
-              });
-
-              polyLines.push({
-                positions: latlngs,
-                style: {
-                  color: feature?.properties?.stroke || 'rgb(85, 85, 85)',
-                  weight: feature?.properties?.['stroke-width'] || 2,
-                  opacity: feature?.properties?.['stroke-opacity'] ?? 1,
-                },
-              });
-            } else {
-              const coordinates = feature.geometry?.coordinates;
-              let lat = coordinates && coordinates[1];
-              let long = coordinates && coordinates[0];
-              const {Objectnaam, Locatieaanduiding} = feature.properties;
-
-              if (isRdCoordinates(long, lat)) {
-                const converted = rdToWgs84(long, lat);
-                lat = converted.lat;
-                long = converted.lon;
-              }
+          // Process records
+          if (records?.length) {
+            records.forEach((record: any) => {
+              const {lat, lon, titel, inhoud} = record;
+              const long = lon || record.long;
 
               if (lat && long) {
-                let icon = dataLayer?.icon;
-                icon = (!!icon && icon.length > 0) ? icon[0].url : undefined;
-
+                const icon = dataLayer?.icon?.[0]?.url;
                 if (icon) {
-                  let markerData: MarkerProps = {
+                  result.push({
                     lat,
                     lng: long,
-                    title: Objectnaam,
-                    description: Locatieaanduiding,
-                    markerId: `${parseInt((Math.random() * 1e8).toString())}`,
+                    title: titel,
+                    description: inhoud,
+                    markerId: `record-${lat}-${long}-${titel || 'marker'}`,
                     isVisible: true,
                     isClustered: false,
-                  };
-
-                  markerData.icon = L.icon({
-                    iconUrl: icon,
-                    iconSize: [30, 40],
-                    iconAnchor: [15, 40],
-                    className: 'custom-image-icon',
+                    icon: L.icon({
+                      iconUrl: icon,
+                      iconSize: [30, 40],
+                      iconAnchor: [15, 40],
+                      className: 'custom-image-icon',
+                    })
                   });
-
-                  result.push(markerData);
                 }
               }
-            }
-          });
-        }
-      });
-    }
+            });
+          }
 
-    setPolyLines(polyLines);
+          // Process GeoJSON features
+          if (geoJsonFeatures?.length) {
+            geoJsonFeatures.forEach((feature: any) => {
+              if (!feature.geometry) return;
+              const geometryType = feature.geometry?.type;
 
-    result.map((marker, i) => {
-      // unify location format
-      parseLocation(marker);
+              if (geometryType === 'LineString') {
+                const coordinates = feature.geometry?.coordinates || [];
+                const latlngs = coordinates.map(([lng, lat]: [number, number]) => {
+                  if (isRdCoordinates(lng, lat)) {
+                    const converted = rdToWgs84(lng, lat);
+                    return [converted.lat, converted.lon];
+                  }
+                  return [lat, lng];
+                });
 
-      // add
-      let markerData: MarkerProps = { ...marker };
-      markerData.markerId = `${parseInt((Math.random() * 1e8).toString())}`;
+                polyLines.push({
+                  positions: latlngs,
+                  style: {
+                    color: feature?.properties?.stroke || 'rgb(85, 85, 85)',
+                    weight: feature?.properties?.['stroke-width'] || 2,
+                    opacity: feature?.properties?.['stroke-opacity'] ?? 1,
+                  },
+                });
+              } else if (geometryType === 'Point') {
+                const coordinates = feature.geometry?.coordinates;
+                let lat = coordinates?.[1];
+                let long = coordinates?.[0];
+                const {Objectnaam, Locatieaanduiding} = feature.properties;
 
-      // iconCreateFunction
-      markerData.iconCreateFunction =
-        markerData.iconCreateFunction || iconCreateFunction;
+                if (isRdCoordinates(long, lat)) {
+                  const converted = rdToWgs84(long, lat);
+                  lat = converted.lat;
+                  long = converted.lon;
+                }
 
-      // categorize
-      if (
-        categorize?.categorizeByField &&
-        markerData.data?.[categorize.categorizeByField]
-      ) {
-        let type = markerData.data?.[categorize.categorizeByField];
-        let category = categorize.categories?.[type];
-        if (category) {
-          if (!markerData.icon) {
-            let icon = category.icon;
-            if (!icon && category.color) {
-              icon = { ...defaultIcon, color: category.color };
-            }
-            if (icon) {
-              markerData.icon = icon;
-            }
+                if (lat && long) {
+                  const icon = dataLayer?.icon?.[0]?.url;
+                  if (icon) {
+                    result.push({
+                      lat,
+                      lng: long,
+                      title: Objectnaam,
+                      description: Locatieaanduiding,
+                      markerId: `feature-${lat}-${long}-${Objectnaam || 'marker'}`,
+                      isVisible: true,
+                      isClustered: false,
+                      icon: L.icon({
+                        iconUrl: icon,
+                        iconSize: [30, 40],
+                        iconAnchor: [15, 40],
+                        className: 'custom-image-icon',
+                      })
+                    });
+                  }
+                }
+              }
+            });
+          }
+        });
+      }
+
+      // Process markers
+      const processedMarkers = result.map(marker => {
+        parseLocation(marker);
+
+        const markerData: MarkerProps = {
+          ...marker,
+          markerId: marker.markerId || `marker-${marker.lat}-${marker.lng}`,
+          iconCreateFunction: marker.iconCreateFunction || iconCreateFunction,
+          onClick: marker.onClick ? [...marker.onClick, onMarkerClick] : [onMarkerClick],
+          isVisible: true,
+          isClustered: clustering?.isActive && !marker.doNotCluster ? false : undefined
+        };
+
+        // Handle categorization
+        if (categorize?.categorizeByField && markerData.data?.[categorize.categorizeByField]) {
+          const type = markerData.data[categorize.categorizeByField];
+          const category = categorize.categories?.[type];
+          if (category && !markerData.icon) {
+            const icon = category.icon || (category.color ? { ...defaultIcon, color: category.color } : undefined);
+            if (icon) markerData.icon = icon;
           }
         }
-      }
 
-      // fallback on defaultIcon
-      if (!markerData.icon && defaultIcon) {
-        if (markerData.color) {
-          markerData.icon = { ...defaultIcon, color: markerData.color };
-        } else {
-          markerData.icon = defaultIcon;
+        // Handle default icon
+        if (!markerData.icon && defaultIcon) {
+          markerData.icon = markerData.color
+            ? { ...defaultIcon, color: markerData.color }
+            : defaultIcon;
         }
-      }
 
-      markerData.onClick = markerData.onClick
-        ? [...markerData.onClick, onMarkerClick]
-        : [onMarkerClick];
+        return markerData;
+      });
 
-      // ToDo
-      markerData.isVisible = true;
+      return { markers: processedMarkers, polyLines };
+    };
 
-      if (clustering && clustering.isActive && !markerData.doNotCluster) {
-        markerData.isClustered = false;
-      }
+    const { markers: newMarkers, polyLines: newPolyLines } = processMarkers();
 
-      result[i] = markerData;
-    });
-
-    if (result.length !== currentMarkers.length) {
-      setCurrentMarkers(result);
-    } else {
-      const isDifferent = result.some(
-        (marker, index) =>
-          marker.lat !== currentMarkers[index]?.lat ||
-          marker.lng !== currentMarkers[index]?.lng
+    // Only update state if there are actual changes
+    const markersChanged = newMarkers.length !== currentMarkers.length ||
+      newMarkers.some((marker, index) =>
+        marker.lat !== currentMarkers[index]?.lat ||
+        marker.lng !== currentMarkers[index]?.lng
       );
 
-      if (isDifferent) {
-        setCurrentMarkers(result);
-      }
+    if (markersChanged) {
+      setCurrentMarkers(newMarkers);
     }
-  }, [markers, mapDataLayers]);
+
+    if (newPolyLines.length > 0) {
+      setPolyLines(newPolyLines);
+    }
+  }, [markers, mapDataLayers, iconCreateFunction, defaultIcon, categorize, clustering, onMarkerClick]);
 
   let clusterMarkers: MarkerProps[] = [];
 
@@ -473,7 +459,14 @@ const BaseMap = ({
 
   useEffect(() => {
     document.documentElement.style.setProperty('--basemap-map-width', width);
-    document.documentElement.style.setProperty('--basemap-map-height', height ? `${height}px` : 'auto');
+
+    const heightValue = height
+      ? (height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
+          ? height
+          : `${height}px`)
+      : 'auto';
+
+    document.documentElement.style.setProperty('--basemap-map-height', heightValue);
     document.documentElement.style.setProperty('--basemap-map-aspect-ratio', height ? 'unset' : '16 / 9');
   }, [width, height]);
 
