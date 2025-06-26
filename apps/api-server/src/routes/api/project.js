@@ -353,7 +353,7 @@ router.route('/')
               identifier: req.user?.idpUser?.identifier || 'no identifier found',
               provider: req.user?.idpUser?.provider || 'no provider found',
             },
-            role: 'admin',
+            [Op.or]: [{role: 'admin'}, {role: 'editor'}]
           }
         })
         let projectIds = users.map(u => u.projectId);
