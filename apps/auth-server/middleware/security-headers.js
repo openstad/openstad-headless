@@ -5,10 +5,16 @@ module.exports = function( req, res, next ) {
 
 	let origin = req.headers && req.headers.origin;
 
+	let domain = ''
+	try {
+		domain = new URL(origin).hostname;
+	} catch (err) {
+	}
+
 	let allowedDomains = (req.client && req.client.allowedDomains) || process.env.ALLOWED_ADMIN_DOMAINS;
 	let whitelist = Array.isArray(allowedDomains) ? allowedDomains : (allowedDomains || '').split(',');
 
-	if (whitelist.includes(origin)) {
+	if (whitelist.includes(domain)) {
 		res.header('Access-Control-Allow-Origin', origin);
 	} else if (config.dev && config.dev['Header-Access-Control-Allow-Origin'] && process.env.NODE_ENV == 'development') {
 		res.header('Access-Control-Allow-Origin', config.dev['Header-Access-Control-Allow-Origin']);

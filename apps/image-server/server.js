@@ -3,12 +3,9 @@ const express = require('express');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
-const crypto = require('crypto')
-const path = require("path");
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
-const secret = process.env.IMAGE_VERIFICATION_TOKEN
-const { createFilename } = require('./utils')
+const { createFilename, sanitizeFileName } = require('./utils')
 
 const imageMulterConfig = {
   onError: function (err, next) {
