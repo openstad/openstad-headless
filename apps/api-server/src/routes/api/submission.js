@@ -25,6 +25,10 @@ router.route('/')
 			req.scope.push({method: ['forProjectId', req.params.projectId]});
 		}
 
+		if (req.query && req.query.includeUser) {
+			req.scope.push('includeUser');
+		}
+
 		db.Submission
 			.scope(...req.scope)
 			.findAndCountAll({where, offset: req.dbQuery.offset, limit: req.dbQuery.limit, order: req.dbQuery.order})

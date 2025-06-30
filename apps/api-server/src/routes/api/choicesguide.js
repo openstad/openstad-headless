@@ -75,7 +75,11 @@ router.route('/')
 	.get(auth.useReqUser)
 	.get(async function(req, res, next) {
 		let where = {};
-		req.scope = ['defaultScope'];
+		req.scope = ['defaultScope']
+
+		if (req.query && req.query.includeUser) {
+			req.scope.push('includeUser');
+		}
 
 		if (req.params && req.params.projectId) {
 			req.scope.push({method: ['forProjectId', req.params.projectId]});
@@ -103,7 +107,8 @@ router.route('/')
 				});
 				return {
 					...entry.toJSON(),
-					widgetConfig: widget ? widget.config : null
+					widgetConfig: widget ? widget.config : null,
+					user: entry.user || null,
 				};
 			}));
 
