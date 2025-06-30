@@ -89,6 +89,7 @@ AUTH_FIRST_CLIENT_ID = default-client
 AUTH_FIRST_CLIENT_SECRET = generateRandomToken({ length: 64 })
 AUTH_ADMIN_CLIENT_ID = admin-client
 AUTH_ADMIN_CLIENT_SECRET = generateRandomToken({ length: 64 })
+AUTH_PHONE_HASH_SALT = generateRandomToken({ length: 32 })
 
 AUTH_SESSION_SECRET = generateRandomToken({ length: 32 })
 AUTH_COOKIE_SECURE_OFF = typeof process.env.AUTH_COOKIE_SECURE_OFF != 'undefined' ? process.env.AUTH_COOKIE_SECURE_OFF : 'yes'
@@ -110,3 +111,10 @@ IMAGE_THROTTLE_CC_PREFETCHER = 20
 IMAGE_THROTTLE_CC_REQUESTS = 100
 
 ```
+
+## Phone hash salt (`AUTH_PHONE_HASH_SALT`) (2025-06-30)
+Due to switching from `md5` to `sha256` for hashing phone numbers, the `AUTH_PHONE_HASH_SALT` environment variable is now used.
+Preferably this should be a string of at least 32 characters. You can generate it using the `generateRandomToken` function or any other secure random string generator.
+The salt should be kept secret and not shared with anyone, to ensure the security of the phone number hashing process.
+
+This `AUTH_PHONE_HASH_SALT` variable is generated automatically during the setup process, but you can also set it manually in your `.env` file if needed.
