@@ -15,6 +15,7 @@ module.exports = {
     '@apostrophecms/redirect': {},
     // '@apostrophecms/scheduled-publishing': {},
     '@apostrophecms/anchors': {},
+    '@apostrophecms/sitemap': { },
     'openstad-login': { },
     'openstad-section-widget': { },
     'openstad-assets': { },
