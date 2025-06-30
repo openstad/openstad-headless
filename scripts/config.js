@@ -43,6 +43,7 @@ async function setupEnvVars() {
   let AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET || generateRandomToken({ length: 64 });
   let AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID || generateRandomToken({ length: 64 });
   let AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET || generateRandomToken({ length: 64 });
+  let AUTH_PHONE_HASH_SALT = process.env.AUTH_PHONE_HASH_SALT = process.env.AUTH_PHONE_HASH_SALT || generateRandomToken({ length: 32 });
 
   let IMAGE_PORT_API = process.env.IMAGE_PORT_API = process.env.IMAGE_PORT_API || BASE_PORT + 50;
   let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + IMAGE_PORT_API : 'image.' + process.env.BASE_DOMAIN );
@@ -127,6 +128,7 @@ async function setupEnvVars() {
   process.env.AUTH_FIRST_CLIENT_ID = AUTH_FIRST_CLIENT_ID;
   process.env.AUTH_FIRST_CLIENT_SECRET = AUTH_FIRST_CLIENT_SECRET;
   process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || generateRandomToken({ length: 32 });
+  process.env.AUTH_PHONE_HASH_SALT = AUTH_PHONE_HASH_SALT
 
   process.env.KPN_CLIENT_ID=process.env.KPN_CLIENT_ID || '';
   process.env.KPN_CLIENT_SECRET=process.env.KPN_CLIENT_SECRET || '';
@@ -259,6 +261,7 @@ AUTH_ADMIN_CLIENT_SECRET=${process.env.AUTH_ADMIN_CLIENT_SECRET}
 AUTH_FIRST_CLIENT_ID=${process.env.AUTH_FIRST_CLIENT_ID}
 AUTH_FIRST_CLIENT_SECRET=${process.env.AUTH_FIRST_CLIENT_SECRET}
 AUTH_FIRST_LOGIN_CODE=${process.env.AUTH_FIRST_LOGIN_CODE}
+AUTH_PHONE_HASH_SALT=${process.env.AUTH_PHONE_HASH_SALT}
 
 #KPN_CLIENT_ID=${process.env.KPN_CLIENT_ID}
 #KPN_CLIENT_SECRET=${process.env.KPN_CLIENT_SECRET}
