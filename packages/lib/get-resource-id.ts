@@ -69,13 +69,15 @@ function getFirstParamNameWithIdValue(targetUrl: string): string|null {
 
   const params = new URLSearchParams(queryString);
 
-  for (const [key, value] of params.entries()) {
-    if (value === '[id]') {
-      return key;
-    }
-  }
+  let paramName: string | null = null;
 
-  return null;
+  params.forEach((value, key) => {
+    if (paramName === null && value === '[id]') {
+      paramName = key;
+    }
+  });
+
+  return paramName;
 }
 
 export {
