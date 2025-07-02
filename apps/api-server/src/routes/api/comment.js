@@ -214,7 +214,16 @@ router.route('/:commentId(\\d+)')
     comment
       .authorizeData(req.body, 'update')
       .update(req.body)
-      .then(result => {
+      .then(async result => {
+        if ( !comment.location && !comment.parentId ) {
+            let tags = req.body.tags || [];
+            if (!Array.isArray(tags)) tags = [tags];
+            tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
+            tags = tags.map(tag => parseInt(tag));
+            tags = tags.filter((value, index) => tags.indexOf(value) === index);
+            await result.setTags(tags);
+        }
+
         res.json(result);
       })
       .catch(next);
