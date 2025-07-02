@@ -110,9 +110,10 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
           }
         }
 
+
+
         // Get all variables fom the string
-        const regex = /\{\{([^}]*)\}\}/g
-        const varsInString = Array.from(rendered.matchAll(regex));
+        const varsInString = extractVars(rendered);
 
         if (varsInString && varsInString.length) {
           for (const match of varsInString) {
@@ -163,4 +164,23 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
   })();
 
   return render;
+}
+
+function extractVars(input: string) {
+  const vars = [];
+  let pos = 0;
+
+  while (pos < input.length) {
+    const start = input.indexOf('{{', pos);
+    if (start === -1) break;
+
+    const end = input.indexOf('}}', start);
+    if (end === -1) break;
+
+    const inside = input.slice(start + 2, end).trim();
+    vars.push(inside);
+    pos = end + 2;
+  }
+
+  return vars;
 }
