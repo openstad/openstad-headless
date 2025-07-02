@@ -22,6 +22,7 @@ const createError = require('http-errors');
 
 let router = express.Router({mergeParams: true});
 const {Op} = require("sequelize");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 async function getProject(req, res, next, include = []) {
 	const projectId = req.params.projectId;
@@ -232,7 +233,7 @@ async function revertConfigResourceSettings(req, errors) {
 // Endpoint to delete duplicated project and its associated data
 router.route('/delete-duplicated-data')
   .post(auth.can('Project', 'delete'))
-  .post(async function(req, res, next) {
+  .post( rateLimiter(), async function(req, res, next) {
     const { projectId, tagMap, statusMap, widgetMap, resourceMap, userMap } = req.body;
 
     try {
@@ -319,6 +320,10 @@ router
       req.scope.push('includeEmailConfig');
     }
 
+    if (req.query.getBasicInformation) {
+      req.scope.push('getBasicInformation');
+    }
+
     if (req.query.includeAreas) {
       req.scope.push('includeAreas');
     }
@@ -335,7 +340,13 @@ router.route('/')
 
 // list projects
 // ----------
-	.get(auth.can('Project', 'list'))
+    .get(function(req, res, next) {
+      if (req.scope.includes("getBasicInformation")) {
+        return next();
+      }
+
+      return auth.can('Project', 'list')(req, res, next);
+    })
 	.get(pagination.init)
 	.get(function(req, res, next) {
     if (req.query.includeAuthConfig) return next('includeAuthConfig is not implemented for projects list')
@@ -345,7 +356,7 @@ router.route('/')
 
     try {
       let where = {};
-      if (!hasRole( req.user, 'superuser' )) {
+      if (!hasRole( req.user, 'superuser' ) && !req.scope.includes("getBasicInformation") ) {
         // first find all corresponding users for the current user, only where she is admin
         let users = await db.User.findAll({
           where: {
@@ -362,6 +373,18 @@ router.route('/')
 
       // now find the corresponding projects
       let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+
+      if ( req.scope.includes("getBasicInformation") ) {
+        result.rows = result.rows.map(project => {
+          const p = project.toJSON();
+          return {
+            id: p.id,
+            createdAt: p.createdAt,
+            tags: p?.config?.project?.tags || ''
+          };
+        });
+      }
+
       req.results = result.rows;
       req.dbQuery.count = result.count;
       return next();
@@ -379,7 +402,7 @@ router.route('/')
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
       // todo: waarom is dit? dat zou door het auth systeem moeten worden afgevangen
-      let project = record.toJSON()
+          let project = typeof record.toJSON === 'function' ? record.toJSON() : record;
 			if (!( req.user && hasRole( req.user, 'admin') )) {
         project.config = undefined;
         project.safeConfig = undefined;
@@ -393,7 +416,7 @@ router.route('/')
 // -----------
 	.post(auth.can('Project', 'create'))
 	.post(removeProtocolFromUrl)
-	.post(async function (req, res, next) {
+	.post( rateLimiter(), async function (req, res, next) {
     req.widgets = req.body.widgets || [];
     req.tags = req.body.tags || [];
     req.statuses = req.body.statuses || [];
@@ -597,7 +620,7 @@ router.route('/:projectId') //(\\d+)
 // -----------
 	.put(auth.useReqUser)
 	.put(removeProtocolFromUrl)
-	.put(async function (req, res, next) {
+	.put( rateLimiter(), async function (req, res, next) {
     // update certain parts of config to the oauth client
 		const project = await db.Project.findOne({ where: { id: req.results.id} });
     if (!hasRole( req.user, 'admin')) return next();
@@ -749,7 +772,7 @@ router.route('/:projectId(\\d+)/export')
 // -------------------
 router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 	.put(auth.can('Project', 'anonymizeAllUsers'))
-	.put(function(req, res, next) {
+	.put( rateLimiter(), function(req, res, next) {
     // the project
 		let where = { id: parseInt(req.params.projectId) };
 		db.Project

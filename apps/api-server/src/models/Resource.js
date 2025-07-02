@@ -752,6 +752,10 @@ module.exports = function (db, sequelize, DataTypes) {
               'name',
               'email',
               'extraData',
+              'phonenumber',
+              'address',
+              'city',
+              'postcode'
             ],
           },
         ],
@@ -815,6 +819,23 @@ module.exports = function (db, sequelize, DataTypes) {
           ],
           exclude: ['modBreak'],
         },
+      },
+
+      selectProjectIds: function (projectIds) {
+        if (!projectIds || projectIds.length == 0) {
+          return {};
+        }
+        return {
+          where: {
+            [db.Sequelize.Op.or]: [
+                ...projectIds.map((projectId) => {
+                return {
+                  projectId: projectId,
+                };
+              })
+            ]
+          }
+        };
       },
 
     };

@@ -156,6 +156,18 @@ spec:
                 key: reactDomUrl
                 name: {{ template "openstad.cdn.secret.fullname" . }}
 
+          - name: ZIPCODE_AUTOFILL_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeAutofillApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
+          - name: ZIPCODE_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
 
@@ -179,6 +191,18 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: metadata.namespace
+
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
 
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
@@ -329,6 +353,18 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: reactDomUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: ZIPCODE_AUTOFILL_API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: zipCodeAutofillApiUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: ZIPCODE_API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: zipCodeApiUrl
                   name: {{ template "openstad.cdn.secret.fullname" . }}
 
             - name: BASE_DOMAIN

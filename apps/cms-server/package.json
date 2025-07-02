@@ -42,6 +42,7 @@
   },
   "homepage": "https://github.com/Amsterdam/openstad-frontend#readme",
   "dependencies": {
+    "@openstad-headless/lib": "*",
     "@apostrophecms/anchors": "^1.0.1",
     "@apostrophecms/blog": "^1.0.4",
     "@apostrophecms/import-export": "^3.0.0",

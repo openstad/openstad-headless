@@ -14,6 +14,8 @@ const createError = require('http-errors')
 const router = express.Router({mergeParams: true});
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+
 /**
  * After SQL query only the missing
  *
@@ -87,7 +89,7 @@ router.route('/')
 
     // Check if user is allowed to see the statistics
     // -----------
-    .get((req, res, next) => {
+    .get(rateLimiter(), (req, res, next) => {
 
         const isViewable = (req.user && hasRole( req.user, 'moderator'))
 

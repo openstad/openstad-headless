@@ -71,6 +71,10 @@ public:
   name: openstad
   environmentName:
 
+rateLimit:
+  windowMs: 60000
+  limit: 100
+
 # Settings
 
 ##
@@ -114,6 +118,12 @@ persistence:
   #configure the cloud-specific storageClassName, will use the clouds default if not specified
   storageClassName:
   annotations: {}
+  image:
+    size: 1Gi
+  docs:
+    size: 1Gi
+  cms:
+    size: 1Gi
 
 admin:
   # Configure how many replicas exists of this service
@@ -248,6 +258,9 @@ auth:
   fromName:
   fromEmail:
 
+  # Salt settings
+  phoneHashSalt:
+
   # Cookie settings
   cookie:
     secureOff:
@@ -364,6 +377,8 @@ image:
     ccPrefetcher: 20
     # Number of concurrent http requests. Anything to exceed this value will result in a 503 (too busy), to avoid an indefinite pileup
     ccRequests: 100
+  
+  hqOriginalMaxPixels: 160000
 
   # Inject extra environment variables
   extraEnvVars: []
@@ -537,6 +552,8 @@ secrets:
   cdn:
     reactUrl: https://unpkg.com/react@18.3.1/umd/react.production.min.js
     reactDomUrl: https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
+    zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
+    zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
 
   ### Mail server secretes
   mail:

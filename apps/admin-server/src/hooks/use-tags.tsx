@@ -2,12 +2,11 @@ import useSWR from 'swr';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useTag(projectId?: string) {
-  // Global tags have projectId = 0, therefore this check is different from the others
   const projectNumber: number | undefined = validateProjectNumber(projectId, true);
 
-  const url = `/api/openstad/api/project/${projectNumber}/tag`;
+  let url = `/api/openstad/api/project/${projectNumber}/tag?includeGlobalTags=true`;
 
-  const tagListSwr = useSWR(projectNumber ? url : null);
+  const tagListSwr = useSWR((projectNumber || projectNumber === 0 ) ? url : null);
 
   async function createTag(name: string, type: string, seqnr: number, addToNewResources: boolean) {
     const res = await fetch(url, {

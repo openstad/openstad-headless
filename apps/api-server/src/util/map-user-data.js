@@ -33,7 +33,7 @@ module.exports = function mapUserData({ map = {}, user = {} }) {
   }
 
   // do mapping
-  let keys = [ 'email', 'nickName', 'name', 'phoneNumber', 'address', 'postcode', 'city' ];
+  let keys = [ 'email', 'nickName', 'name', 'phoneNumber', 'address', 'postcode', 'city', 'twoFactorConfigured' ];
   for (let key of keys) {
     result[ key ] = mapKey( key );
   }

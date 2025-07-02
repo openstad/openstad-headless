@@ -43,11 +43,23 @@ spec:
             value: "{{ .Values.image.throttle.ccPrefetcher | default 20 }}"
           - name: THROTTLE_CC_REQUESTS
             value: "{{ .Values.image.throttle.ccRequests | default 100 }}"
+          - name: HQ_ORIGINAL_MAX_PIXELS
+            value: "{{ .Values.image.hqOriginalMaxPixels | default 160000 }}"
           - name: IMAGE_VERIFICATION_TOKEN
             valueFrom:
               secretKeyRef:
                 key: verificationToken
                 name: {{ template "openstad.image.secret.fullname" . }}
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
           # Inject extra environment variables
           {{- if .Values.image.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}

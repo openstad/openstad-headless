@@ -2,6 +2,7 @@ const express = require('express');
 const db      = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 let router = express.Router({mergeParams: true});
 
@@ -43,6 +44,7 @@ router.route('/')
 
     // create Action
     // ---------------
+    .post(rateLimiter())
     .post(auth.can('Action', 'create'))
     .post(function(req, res, next) {
         const data = req.body;
@@ -87,6 +89,7 @@ router.route('/:actionId(\\d+)')
 
     // update action
     // ---------------
+    .put(rateLimiter())
     .put(auth.useReqUser)
     .put(function(req, res, next) {
         const action = req.results;

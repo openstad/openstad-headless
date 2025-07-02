@@ -11,10 +11,11 @@ const fetch = require('node-fetch');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const filterBody = (req, res, next) => {
   const data = {};
-  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole', 'firstname', 'lastname'];
+  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole', 'firstname', 'lastname', 'twoFactorToken', 'twoFactorConfigured'];
 
   keys.forEach((key) => {
     if (typeof req.body[key] != 'undefined') {
@@ -189,7 +190,11 @@ router.route('/')
       .catch(next);
   })
   .post(auth.useReqUser)
-  .post(async function(req, res, next) {
+  /**
+   * Increased rate limit to 1000 to prevent false positives during future user import/export.
+   * Required for CodeQL check
+   */
+  .post( rateLimiter(), async function(req, res, next) {
     const data = {
       ...req.body,
       ...req.oAuthUser,
@@ -224,6 +229,66 @@ router.route('/')
   .post(function (req, res, next) {
     return res.json(req.results);
   })
+
+// get user's two-factor status
+// --------------
+router.get('/:userId/two-factor-status', async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const apiUser = await db.User.findOne({ where: { id: userId } });
+    if (!apiUser) {
+      return res.status(404).json({ error: 'API user not found' });
+    }
+
+    // auth server settings
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+
+    // fetch auth user
+    const authUser = await req.adapter.service.fetchUserData({
+      authConfig: req.authConfig,
+      userId: apiUser.idpUser.identifier,
+    });
+
+    // return true if twoFactorConfigured equals 1
+    const isTwoFactorConfigured = authUser?.twoFactorConfigured === 1;
+    res.json({ twoFactorEnabled: isTwoFactorConfigured });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/:userId/reset-two-factor', async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const user = await db.User.findOne({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // auth server settings
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+
+    // Reset two-factor authentication in the auth database
+    if (user.idpUser?.identifier && req.adapter.service.updateUser) {
+      await req.adapter.service.updateUser({
+        authConfig: req.authConfig,
+        userData: {
+          id: user.idpUser.identifier,
+          twoFactorToken: null,
+          twoFactorConfigured: null,
+        },
+      });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // anonymize user
 // --------------
@@ -440,7 +505,7 @@ router.route('/:userId(\\d+)')
     req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
     return next();
   })
-  .put(async function (req, res, next) {
+  .put( rateLimiter(), async function (req, res, next) {
     let user = req.results;
     let userData = merge.recursive(true, req.body);
 

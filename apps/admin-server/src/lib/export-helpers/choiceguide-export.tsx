@@ -1,6 +1,7 @@
 import {calculateScoreForItem} from "../../../../../packages/choiceguide/src/parts/scoreUtils";
 import {InitializeWeights} from "../../../../../packages/choiceguide/src/parts/init-weights";
 import {useEffect, useState} from "react";
+import * as XLSX from "xlsx";
 
 export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string, limit: number) => {
   const fetchResults = async () => {
@@ -17,7 +18,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
     const fetchBatch = async (page: number, retries: number = 0) => {
       try {
-        const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}`;
+        const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}&includeUser=1`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -154,7 +155,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       return `export-${widgetName}-${currentDate}`;
     }
 
-    const fileName = transformString();
+    const fileName = transformString() + '.xlsx';
 
     const normalizeData = (value: any) => {
       let parsedValue;
@@ -181,41 +182,47 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         let escapedValue = value.replace(/(\r\n|\r\r|\n\n|\n|\r)+/g, '\n');
         escapedValue = escapedValue.replace(/"/g, "'");
 
-        return `"${escapedValue}"`;
+        return `${escapedValue}`;
       }
 
       return value;
     };
 
-    const headerRow = [
-      'ID',
-      'Aangemaakt op',
-      'Project ID',
-      'Widget',
-      'Gebruikers ID',
-      ...Object.values(data[0].result).map((item: any) => item.value)
-    ].join(';');
+    const rows: any[] = [];
 
-    const dataRows = data.map((row: any) => {
-      return [
-        row.id,
-        row.createdAt,
-        row.projectId,
-        widgetName,
-        row.userId,
-        ...Object.values(row.result).map((item: any) => normalizeData(item.result))
-      ].join(';');
+    data.forEach((row: any) => {
+      const rowObj: Record<string, any> = {
+        'ID': row.id,
+        'Aangemaakt op': row.createdAt,
+        'Project ID': row.projectId,
+        'Widget': widgetName,
+        'Gebruikers ID': row.userId || ' ',
+        'Gebruikers rol': row.user?.role || ' ',
+        'Gebruikers naam': row.user?.name || ' ',
+        'Gebruikers weergavenaam': row.user?.displayName || ' ',
+        'Gebruikers e-mailadres': row.user?.email || ' ',
+        'Gebruikers telefoonnummer': row.user?.phonenumber || ' ',
+        'Gebruikers adres': row.user?.address || ' ',
+        'Gebruikers woonplaats': row.user?.city || ' ',
+        'Gebruikers postcode': row.user?.postcode || ' ',
+      };
+
+      const keyCount: Record<string, number> = {};
+      Object.values(row.result || {}).forEach((item: any) => {
+        const baseKey = item.value;
+        const key = keyCount[baseKey]
+          ? `${baseKey} (${keyCount[baseKey]++})`
+          : (keyCount[baseKey] = 1, baseKey);
+        rowObj[key] = normalizeData(item.result);
+      });
+
+      rows.push(rowObj);
     });
 
-    const csv = [headerRow, ...dataRows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Keuzewijzer');
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName + '.csv';
-    a.click();
-
-    window.URL.revokeObjectURL(url);
+    XLSX.writeFile(workbook, fileName);
   });
 };

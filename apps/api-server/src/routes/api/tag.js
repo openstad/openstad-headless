@@ -2,13 +2,16 @@ const express = require('express');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 let router = express.Router({ mergeParams: true });
 
 router.all('*', function (req, res, next) {
   req.scope = [];
   req.scope.push('defaultScope');
-  req.scope.push({ method: ['forProjectId', req.project.id] });
+
+  const includeGlobalTags = req?.query?.includeGlobalTags === 'true';
+  req.scope.push({ method: ['forProjectId', req.params.projectId, includeGlobalTags] });
 
   if (req.query.includeProject) {
     req.scope.push('includeProject');
@@ -38,7 +41,8 @@ router
   .get(function (req, res, next) {
     let { dbQuery } = req;
 
-    req.scope.push({ method: ['forProjectId', req.params.projectId] });
+    const includeGlobalTags = req?.query?.includeGlobalTags === 'true';
+    req.scope.push({ method: ['forProjectId', req.params.projectId, includeGlobalTags] });
 
     db.Tag.scope(...req.scope)
       .findAndCountAll(dbQuery)
@@ -58,7 +62,7 @@ router
   // create tag
   // ---------------
   .post(auth.can('Tag', 'create'))
-  .post(function (req, res, next) {
+  .post( rateLimiter(), function (req, res, next) {
     const data = {
       name: req.body.name,
       type: req.body.type,
@@ -112,7 +116,7 @@ router
   // update tag
   // ---------------
   .put(auth.useReqUser)
-  .put(function (req, res, next) {
+  .put( rateLimiter(), function (req, res, next) {
     const tag = req.results;
     if (!(tag && tag.can && tag.can('update')))
       return next(new Error('You cannot update this tag'));

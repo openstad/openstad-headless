@@ -496,9 +496,14 @@ function ResourceDetail({
             closedText={props.commentsWidget?.closedText}
             itemsPerPage={props.commentsWidget?.itemsPerPage}
             displayPagination={props.commentsWidget?.displayPagination}
+            extraFieldsTagGroups={ props.commentsWidget?.extraFieldsTagGroups }
+            defaultTags={ props.commentsWidget?.defaultTags }
+            includeOrExclude={ props.commentsWidget?.includeOrExclude }
+            onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
             sentiment={useSentiments[0]}
           />
-
+          includeOrExclude
+          onlyIncludeOrExcludeTagIds
           {useSentiments?.length > 1 && (
             <Comments
               {...props}
@@ -513,6 +518,10 @@ function ResourceDetail({
               closedText={props.commentsWidget_multiple?.closedText}
               itemsPerPage={props.commentsWidget?.itemsPerPage}
               displayPagination={props.commentsWidget?.displayPagination}
+              extraFieldsTagGroups={ props.commentsWidget?.extraFieldsTagGroups }
+              defaultTags={ props.commentsWidget?.defaultTags }
+              includeOrExclude={ props.commentsWidget?.includeOrExclude }
+              onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
               sentiment={useSentiments[1]}
             />
           )}

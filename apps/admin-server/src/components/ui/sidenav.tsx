@@ -2,12 +2,12 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, FolderOpen, LogOut, Users } from 'lucide-react';
+import {FolderOpen, LogOut, Users, AlertTriangle, Settings} from 'lucide-react';
+import { Logo } from './logo';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { SessionContext } from '../../auth';
-import { Logo } from './logo';
 
 export function Sidenav({
   className,
@@ -94,6 +94,24 @@ export function Sidenav({
             {narrow ? '' : 'Problemen'}
           </Button>
         </Link>
+        ) : null }
+        {sessionData?.role == 'superuser' ? (
+          <Link href="/settings">
+            <Button
+              variant={location.startsWith('/settings') ? 'secondary' : 'ghost'}
+              className={cn(
+                'w-full flex flex-row justify-start',
+                narrow ? 'p-0 h-10 w-10 justify-center' : null
+              )}>
+              <Settings
+                size="20"
+                className={
+                  location.startsWith('/settings') ? 'text-brand' : 'text-foreground'
+                }
+              />
+              {narrow ? '' : 'Instellingen'}
+            </Button>
+          </Link>
         ) : null }
       </div>
       <div className="flex-grow"></div>
