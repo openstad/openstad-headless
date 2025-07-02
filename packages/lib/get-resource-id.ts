@@ -81,4 +81,5 @@ function getFirstParamNameWithIdValue(targetUrl: string): string|null {
 export {
   getResourceId as default,
   getResourceId,
+  getFirstParamNameWithIdValue
 }
