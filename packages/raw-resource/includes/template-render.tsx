@@ -111,7 +111,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
         }
 
         // Get all variables fom the string
-        const regex = /\{\{\s*([\s\S]*?)\s*\}\}/g;
+        const regex = /\{\{\s*([^{}]+?)\s*\}\}/g;
         const varsInString = Array.from(rendered.matchAll(regex));
 
         if (varsInString && varsInString.length) {
