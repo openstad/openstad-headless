@@ -100,7 +100,7 @@ router.route('/')
   .get(function (req, res, next) {
     res.json(req.results);
   })
-
+  
 // create user
 // -----------
   .post(auth.can('User', 'create'))
