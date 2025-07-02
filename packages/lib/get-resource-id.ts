@@ -46,14 +46,15 @@ function getResourceId({
 
       // Methode 5: Extra controle op [id] patroon in targetUrl en query parameter
       if (!resourceId && targetUrl.includes('[id]')) {
-        const paramNameMatch = targetUrl.match(/[?&]([^=]+)=\[id\]/);
+        const paramName = getFirstParamNameWithIdValue(targetUrl);
 
-        if (paramNameMatch && paramNameMatch[1]) {
-          const paramName = paramNameMatch[1];
-          const paramValue = urlParams.get(paramName);
+        let paramValue = undefined;
 
-          resourceId = paramValue ? parseInt(paramValue, 10) : undefined;
+        if (paramName && urlParams.has(paramName)) {
+          paramValue = urlParams.get(paramName);
         }
+
+        resourceId = paramValue ? parseInt(paramValue, 10) : undefined;
       }
     }
   }
@@ -61,9 +62,23 @@ function getResourceId({
   return resourceId ? resourceId : undefined;
 }
 
+// Get the first parameter name that has a value of [id] in the targetUrl
+function getFirstParamNameWithIdValue(targetUrl: string): string|null {
+  const queryString = targetUrl.split('?')[1];
+  if (!queryString) return null;
+
+  const params = new URLSearchParams(queryString);
+
+  for (const [key, value] of params.entries()) {
+    if (value === '[id]') {
+      return key;
+    }
+  }
+
+  return null;
+}
+
 export {
   getResourceId as default,
   getResourceId,
 }
-
-
