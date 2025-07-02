@@ -213,7 +213,7 @@ app.post('/image',
     }
 
     res.send(JSON.stringify({
-      name: sanitizeFileName(req.file.name),
+      name: sanitizeFileName(req.file.originalname),
       url: protocol + url
     }));
   });
