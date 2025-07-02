@@ -258,9 +258,6 @@ auth:
   fromName:
   fromEmail:
 
-  # Salt settings
-  phoneHashSalt:
-
   # Cookie settings
   cookie:
     secureOff:
@@ -377,7 +374,7 @@ image:
     ccPrefetcher: 20
     # Number of concurrent http requests. Anything to exceed this value will result in a 503 (too busy), to avoid an indefinite pileup
     ccRequests: 100
-  
+
   hqOriginalMaxPixels: 160000
 
   # Inject extra environment variables
@@ -491,6 +488,7 @@ secrets:
 
   auth:
     sessionSecret:
+    phoneHashSalt:
 
   cms:
     apiKey:
