@@ -3,6 +3,7 @@ const dbConfig  = config.get('database');
 const mysql = require('mysql2');
 const express = require('express');
 const createError = require('http-errors')
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const pool = mysql.createPool({
   host: dbConfig.host,
@@ -26,7 +27,7 @@ router.route('/total')
 
 // count comments
 // ---------------
-	.get(function(req, res, next) {
+	.get(rateLimiter(), function(req, res, next) {
 
     let resourceId = req.query.resourceId;
     let sentiment = req.query.sentiment;

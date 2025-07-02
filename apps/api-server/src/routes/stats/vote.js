@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const express = require('express');
 const createError = require('http-errors')
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const pool = mysql.createPool({
     host: dbConfig.host,
@@ -29,7 +30,7 @@ router.route('/total')
 
     // count votes
     // -----------
-    .get(function(req, res, next) {
+    .get( rateLimiter(), function(req, res, next) {
 
         let isViewable = req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable;
         isViewable = isViewable || hasRole( req.user, 'moderator')
@@ -62,7 +63,7 @@ router.route('/no-of-users')
 
     // count votes
     // -----------
-    .get(function(req, res, next) {
+    .get( rateLimiter(), function(req, res, next) {
 
         let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE resources.projectId=? AND votes.deletedAt  IS NULL AND  (votes.checked IS NULL OR votes.checked = 1)  AND resources.deletedAt IS NULL GROUP BY votes.userId";
         let bindvars = [req.params.projectId]

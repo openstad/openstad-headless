@@ -46,6 +46,17 @@ services:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
 
+  openstad-jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: openstad-jaeger
+    restart: unless-stopped
+    ports:
+      - 16686:16686 # Jaeger UI
+      - 4317:4317   # OTLP gRPC receiver
+      - 4318:4318   # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
   openstad-api-server:
     build:
       target: ${BUILD_TARGET:-development}
@@ -166,6 +177,7 @@ services:
       - AUTH_FIRST_CLIENT_ID=${AUTH_FIRST_CLIENT_ID}
       - AUTH_FIRST_CLIENT_SECRET=${AUTH_FIRST_CLIENT_SECRET}
       - AUTH_FIRST_LOGIN_CODE=${AUTH_FIRST_LOGIN_CODE}
+      - PHONE_HASH_SALT=${AUTH_PHONE_HASH_SALT}
       - SESSION_SECRET=${AUTH_SESSION_SECRET}
       - COOKIE_SECURE_OFF=${AUTH_COOKIE_SECURE_OFF}
       - API_URL=${API_URL}
@@ -207,6 +219,7 @@ services:
       - THROTTLE_CC_PROCESSORS=${IMAGE_THROTTLE_CC_PROCESSORS}
       - THROTTLE_CC_PREFETCHER=${IMAGE_THROTTLE_CC_PREFETCHER}
       - THROTTLE_CC_REQUESTS=${IMAGE_THROTTLE_CC_REQUESTS}
+      - HQ_ORIGINAL_MAX_PIXELS=${IMAGE_HQ_ORIGINAL_MAX_PIXELS}
       - NODE_ENV=development
       - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
       - FORCE_HTTP=${FORCE_HTTP}

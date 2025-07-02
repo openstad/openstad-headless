@@ -71,6 +71,10 @@ public:
   name: openstad
   environmentName:
 
+rateLimit:
+  windowMs: 60000
+  limit: 100
+
 # Settings
 
 ##
@@ -114,6 +118,12 @@ persistence:
   #configure the cloud-specific storageClassName, will use the clouds default if not specified
   storageClassName:
   annotations: {}
+  image:
+    size: 1Gi
+  docs:
+    size: 1Gi
+  cms:
+    size: 1Gi
 
 admin:
   # Configure how many replicas exists of this service
@@ -365,6 +375,8 @@ image:
     # Number of concurrent http requests. Anything to exceed this value will result in a 503 (too busy), to avoid an indefinite pileup
     ccRequests: 100
 
+  hqOriginalMaxPixels: 160000
+
   # Inject extra environment variables
   extraEnvVars: []
 
@@ -476,6 +488,7 @@ secrets:
 
   auth:
     sessionSecret:
+    phoneHashSalt:
 
   cms:
     apiKey:
