@@ -108,7 +108,6 @@ export const StemBegrootBudgetList = ({
 
               const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
               const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
-
               return (
                 <Image
                   imageHeader={
@@ -120,7 +119,7 @@ export const StemBegrootBudgetList = ({
                         className="primary-action-button"
                         icon="ri-close-line"
                         iconOnly={true}
-                        text='Item verwijderen'
+                        text={`${resource.title} verwijderen uit selectie`}
                       />
                     </div>
                   }
