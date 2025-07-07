@@ -7,8 +7,6 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         url: z.string()
     });
 
-    console.log(field)
-
     switch (field.type) {
         case 'text':
             let min = field.minCharacters || 0;
