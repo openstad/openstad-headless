@@ -32,13 +32,13 @@ module.exports = function( req, res, next ) {
           // For incorrect sort columns, return by rank
           let match = column.match(/^([a-z0-9_]+)_(asc|desc)$/i);
           if (!match) {
-            return [ 'yes', 'DESC' ];
+            return [ 'createdAt', 'DESC' ];
             break;
           }
           
           // If the column is not allowed, return by rank
           if (!allowedSortColumns.includes(match[1])) {
-            return [ 'yes', 'DESC' ];
+            return [ 'createdAt', 'DESC' ];
             break;
           }
           
