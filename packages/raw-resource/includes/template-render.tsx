@@ -151,7 +151,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
               }
             }
 
-            rendered = rendered.replaceAll(match[0], newValue);
+            rendered = rendered.replaceAll(match, newValue);
 
           }
         }
