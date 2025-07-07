@@ -201,3 +201,7 @@ Create the name of the service account to use
 {{- define "openstad.api.secret.fullname" -}}
 {{- printf "%s-api-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{- define "openstad.ratelimit.secret.fullname" -}}
+{{- printf "%s-ratelimit-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

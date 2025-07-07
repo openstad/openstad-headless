@@ -11,29 +11,89 @@ import { toast } from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import * as XLSX from 'xlsx';
 import flattenObject from "@/lib/export-helpers/flattenObject";
+import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
+
+const keyMap: Record<string, string> = {
+  id: 'Inzending ID',
+  projectId: 'Project ID',
+  widgetId: 'Widget ID',
+  title: 'Titel',
+  summary: 'Samenvatting',
+  description: 'Beschrijving',
+  budget: 'Budget',
+  'location.lat': 'Locatie (lat)',
+  'location.lng': 'Locatie (lng)',
+  createDateHumanized: 'Datum aangemaakt (leesbaar)',
+  updatedAt: 'Laatst bijgewerkt',
+  deletedAt: 'Verwijderd op',
+  yes: 'Aantal likes',
+  no: 'Aantal dislikes',
+  progress: 'Voortgang',
+  statuses: 'Statussen',
+  modBreak: 'Moderatie bericht',
+  modBreakDate: 'Moderatie bericht datum',
+  images: 'Afbeeldingen',
+  tags: 'Tags',
+  documents: 'Documenten',
+  'user.id': 'Gebruiker ID',
+  'user.role': 'Gebruiker rol',
+  'user.name': 'Gebruiker naam',
+  'user.email': 'Gebruiker e-mailadres',
+  'user.phonenumber': 'Gebruiker telefoonnummer',
+  'user.address': 'Gebruiker adres',
+  'user.city': 'Gebruiker woonplaats',
+  'user.postcode': 'Gebruiker postcode',
+};
+
+const prepareDataForExport = (data: any[]) => {
+  const allResources: any[] = [];
+
+  data.forEach((resource) => {
+    for (const [key, values] of Object.entries(resource)) {
+      if ( (key.startsWith('tags') || key.startsWith('statuses')) && Array.isArray(values)) {
+        try {
+          const createString = values.map((value: any) => {
+            return key.startsWith('tags')
+            ? `${value.name} (type: ${value.type})`
+            : value.name
+          }).filter(Boolean).join(' | ');
+
+          resource[key] = createString || '';
+        } catch (e) {}
+      }
+
+      if ( (key.startsWith('images') || key.startsWith('documents') ) && Array.isArray(values)) {
+        try {
+          const createString = values.map((value: any) => {
+            return key.startsWith('images')
+              ? `${value.url}${ value.description ? ` (${value.description})` : '' }`
+              : `${value.url}${ value.name ? ` (${value.name})` : '' }`;
+          }).filter(Boolean).join(' | ');
+
+          resource[key] = createString || '';
+        } catch (e) {}
+      }
+    };
+
+    allResources.push(resource);
+  });
+
+  return allResources;
+}
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove } = useResources(project as string);
 
-  const exportData = (data: any[], fileName: string) => {
-
-    const flattenedData = data.map(item => flattenObject(item));
-
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    XLSX.writeFile(workbook, fileName);
-  };
-
   function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
 
-    exportData(data, `${projectId}_resources_${formattedDate}.xlsx`);
+    const preparedData = prepareDataForExport(data);
+
+    exportToXLSX(preparedData, `${projectId}_resources_${formattedDate}.xlsx`, keyMap);
   }
 
   const [filterData, setFilterData] = useState(data);

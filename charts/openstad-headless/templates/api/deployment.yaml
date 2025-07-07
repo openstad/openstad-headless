@@ -192,6 +192,18 @@ spec:
                 apiVersion: v1
                 fieldPath: metadata.namespace
 
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}

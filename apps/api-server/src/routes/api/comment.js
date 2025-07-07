@@ -6,6 +6,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const express = require('express');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 const router = express.Router({ mergeParams: true });
 
 // scopes: for all get requests
@@ -149,7 +150,7 @@ router.route('/')
         return next();
       });
   })
-  .post(function(req, res, next) {
+  .post( rateLimiter(), function(req, res, next) {
 
     let userId = req.user.id;
     if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
@@ -207,13 +208,22 @@ router.route('/:commentId(\\d+)')
   // update comment
   // ---------------
   .put(auth.useReqUser)
-  .put(function(req, res, next) {
+  .put( rateLimiter(), function(req, res, next) {
     var comment = req.results;
     if (!(comment && comment.can && comment.can('update'))) return next(new Error('You cannot update this comment'));
     comment
       .authorizeData(req.body, 'update')
       .update(req.body)
-      .then(result => {
+      .then(async result => {
+        if ( !comment.location && !comment.parentId ) {
+            let tags = req.body.tags || [];
+            if (!Array.isArray(tags)) tags = [tags];
+            tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
+            tags = tags.map(tag => parseInt(tag));
+            tags = tags.filter((value, index) => tags.indexOf(value) === index);
+            await result.setTags(tags);
+        }
+
         res.json(result);
       })
       .catch(next);

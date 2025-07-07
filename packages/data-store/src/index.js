@@ -55,8 +55,7 @@ function DataStore(props = {}) {
 
   // swr
   self.createKey = function (props, fetcherAsString) {
-    let type = fetcherAsString;
-    type = type.replace(/^([^.]*).*$/, '$1');
+    let type = fetcherAsString.split('.')[0];
     return { type, ...props };
   };
 

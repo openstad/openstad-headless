@@ -1,5 +1,9 @@
 const db = require('../db');
 
+const allowedSortColumns = Object.entries(db.Resource.getAttributes())
+  .filter(([key, val]) => !(val.type instanceof db.Sequelize.DataTypes.VIRTUAL))
+  .map(([key]) => key);
+
 module.exports = function( req, res, next ) {
   let sort = req.query.sort;
   if (sort) {
@@ -24,9 +28,23 @@ module.exports = function( req, res, next ) {
           break;
         default:
           column = column.replace(/[^a-z0-9_]+/ig, '');
-          let match = column.match(/(.*?)_(asc|desc)$/i);
-          if (match) return [ match[1], match[2] ];
-          return column
+          
+          // For incorrect sort columns, return by rank
+          let match = column.match(/^([a-z0-9_]+)_(asc|desc)$/i);
+          if (!match) {
+            return [ 'yes', 'DESC' ];
+            break;
+          }
+          
+          // If the column is not allowed, return by rank
+          if (!allowedSortColumns.includes(match[0])) {
+            return [ 'yes', 'DESC' ];
+            break;
+          }
+          
+          const sortOrder = column.endsWith('_asc') ? 'ASC' : 'DESC';
+          
+          return [ match[0], sortOrder ];
       }
     });
     req.dbQuery.order = sort;

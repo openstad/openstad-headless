@@ -8,6 +8,7 @@ const bruteForce = require('../../middleware/brute-force');
 const {Op} = require('sequelize');
 const pagination = require('../../middleware/pagination');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({mergeParams: true});
 
@@ -56,6 +57,10 @@ router.route('*')
 		req.scope = [
 			{ method: ['forProjectId', req.project.id]}
     ];
+
+	if (req.query.includeResource !== undefined) {
+		req.scope.push('includeResource');
+	}
 
     return next();
 
@@ -145,6 +150,10 @@ router.route('/')
 				if (vote.user.auth) vote.user.auth.user = req.user;
 				vote.userId = entry.userId;
 			}
+
+			if (entry.resource) {
+				vote.resource = entry.resource;
+			}
       records[i] = vote
 		});
 		res.json(req.results);
@@ -155,7 +164,7 @@ router.route('/')
 router.route('/*')
 
 // heb je al gestemd
-	.post(function(req, res, next) {
+	.post( rateLimiter(), function(req, res, next) {
 		db.sequelize.transaction()
 			.then(transaction => {
 				res.locals.transaction = transaction
