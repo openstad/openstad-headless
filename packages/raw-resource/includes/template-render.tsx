@@ -151,7 +151,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
               }
             }
 
-            rendered = rendered.replaceAll(match, newValue);
+            rendered = rendered.replaceAll(`{{${match}}}`, newValue);
 
           }
         }
@@ -177,7 +177,7 @@ function extractVars(input: string) {
     const end = input.indexOf('}}', start);
     if (end === -1) break;
 
-    const inside = input.slice(start + 2, end).trim();
+    const inside = input.slice(start + 2, end);
     vars.push(inside);
     pos = end + 2;
   }
