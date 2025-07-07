@@ -44,11 +44,10 @@ module.exports = function( req, res, next ) {
           
           const sortOrder = column.endsWith('_asc') ? 'ASC' : 'DESC';
           
-          return [ match[0], sortOrder ];
+          return [ match[1], sortOrder ];
       }
     });
     req.dbQuery.order = sort;
   }
   return next();
 }
-1
