@@ -283,8 +283,6 @@ services:
       - APOS_RELEASE_ID=${APOS_RELEASE_ID}
       - REACT_CDN=${REACT_CDN}
       - REACT_DOM_CDN=${REACT_DOM_CDN}
-      - APOS_DEV=1
-      - NODE_ENV=production
     ports:
       - '${CMS_PORT}:${CMS_PORT}'
     volumes:
