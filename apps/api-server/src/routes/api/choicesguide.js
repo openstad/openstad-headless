@@ -67,6 +67,43 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/res
 			.catch(next);
 	});
 
+router.route('/widgets')
+	.get(auth.can('ChoicesGuide', 'list'))
+	.get(function (req, res, next){
+		db.Widget
+			.findAll({
+				attributes: ['id', 'description'],
+				where: {
+					projectId: req.params.projectId,
+					type: 'choiceguide',
+				}
+			})
+			.then((found) => {
+				res.json(found);
+			}).catch(next);
+	});
+
+router.route('/widgets/:widgetId(\\d+)/count')
+	.get(auth.can('ChoicesGuide', 'list'))
+	.get(function (req, res, next) {
+		const widgetId = parseInt(req.params.widgetId);
+		if (!widgetId) return next(createError(404, 'Widget not found'));
+
+		db.ChoicesGuideResult
+			.count({
+				where: {
+					widgetId,
+					projectId: req.params.projectId
+				}
+			})
+			.then((count) => {
+				res.json({ count });
+			})
+			.catch(next);
+	});
+
+
+
 router.route('/')
 	// list choicesguide result
 	// --------------
