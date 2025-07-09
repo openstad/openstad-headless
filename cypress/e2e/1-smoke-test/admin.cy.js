@@ -7,8 +7,7 @@ describe('Can log into admin server', () => {
     
     cy.origin(Cypress.env('AUTH_APP_URL'), () => {
       cy.location('href').should('include', '/login');
-      cy.contains('Hoe wil je inloggen?').should('exist');
-      cy.contains('stemcode').click();
+      cy.contains('Controleer stemcode').should('exist');
       
       cy.get('input[name="unique_code"]').type('does-not-exist');
       cy.get('input[type="submit"]').click();
