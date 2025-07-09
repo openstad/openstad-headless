@@ -15,8 +15,8 @@ export default function useChoiceGuideResultCount({
     );
 
     if (error) {
-      let error = new Error(error);
-      let event = new window.CustomEvent('osc-error', { detail: error });
+      let newError = new Error(error);
+      let event = new window.CustomEvent('osc-error', { detail: newError });
       document.dispatchEvent(event);
     }
     
