@@ -5,7 +5,7 @@ export default function useChoiceGuideResultCount({
   let self = this;
 
   if (!widgetId) {
-    return { data: [], error: 'No widgetId given', isLoading: false };
+    return { data: 0, error: 'No widgetId given', isLoading: false };
   }
 
   try {
@@ -20,7 +20,7 @@ export default function useChoiceGuideResultCount({
       document.dispatchEvent(event);
     }
     
-    return { data: data?.count || [], error, isLoading };
+    return { data: data?.count || 0, error, isLoading };
   } catch (e) {
     return {
       data: [],
