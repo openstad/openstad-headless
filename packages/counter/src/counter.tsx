@@ -20,7 +20,6 @@ export type CounterProps = {
   | 'votedUsers'
   | 'static'
   | 'argument'
-  | 'submission'
   | 'choiceguideresults';
   label?: string;
   url?: string;
