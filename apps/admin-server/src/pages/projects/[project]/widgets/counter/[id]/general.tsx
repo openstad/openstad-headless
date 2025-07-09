@@ -41,7 +41,6 @@ const formSchema = z.object({
     'votedUsers',
     'static',
     'argument',
-    'submission',
     'choiceguideresults',
   ]),
   opinion: z.string().optional(),
