@@ -22,6 +22,10 @@ const apostropheServer = {};
 let startUpIsBusy = false;
 let startUpQueue = [];
 
+app.set('trust proxy', true);
+
+app.use(rateLimiter());
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -393,13 +397,10 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
-    return rateLimiter()(req, res, () => {
-          basicAuth({
-            users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
-            challenge: true
-          })(req, res, next);
-        }
-    );
+    return basicAuth({
+        users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
+        challenge: true
+    });
   }
 
   next();
