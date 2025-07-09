@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import useUsers from "@/hooks/use-users";
 import { sortTable, searchTable } from '@/components/ui/sortTable';
-import * as XLSX from 'xlsx';
+import {exportToXLSX} from "@/lib/export-helpers/xlsx-export";
 
 export default function ProjectResources() {
   const router = useRouter();
@@ -19,18 +19,30 @@ export default function ProjectResources() {
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
-  const exportData = (data: any[], fileName: string) => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    XLSX.writeFile(workbook, fileName);
-  };
   function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportData(data, `${projectId}_stemmen_${formattedDate}.xlsx`);
+
+    const keyMap: Record<string, string> = {
+      'id'                    : 'Stem ID',
+      'resourceId'            : 'Inzending ID',
+      'resource.title'        : 'Inzending titel',
+      'opinion'               : 'Stem',
+      'createdAt'             : 'Datum',
+      'ip'                    : 'IP Adres',
+      'userId'                : 'Gebruiker ID',
+      'user.role'             : 'Gebruiker rol',
+      'user.name'             : 'Gebruiker naam',
+      'user.displayName'      : 'Gebruiker weergavenaam',
+      'user.email'            : 'Gebruiker e-mailadres',
+      'user.phonenumber'      : 'Gebruiker telefoonnummer',
+      'user.address'          : 'Gebruiker adres',
+      'user.city'             : 'Gebruiker woonplaats',
+      'user.postcode'         : 'Gebruiker postcode',
+    };
+
+    exportToXLSX(data, `${projectId}_stemmen_${formattedDate}.xlsx`, keyMap);
   }
 
   const { data: usersData } = useUsers();

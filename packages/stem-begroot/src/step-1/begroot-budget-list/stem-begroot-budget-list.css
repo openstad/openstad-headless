@@ -47,6 +47,12 @@
   font-size: var(--nlds--budget-aside-amount-font-size, inherit);
 }
 
+.stem-begroot-helptext-and-budget-section-budget ul{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .info-budget-label {
   display: flex;
   justify-content: space-between;

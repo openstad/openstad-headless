@@ -6,6 +6,7 @@
   "license": "MIT",
   "main": "app.js",
   "dependencies": {
+    "@openstad-headless/lib": "*",
     "@azure/identity": "^4.6.0",
     "@draadnl/passport-url": "^1.0.4",
     "ajv": "^8.17.1",

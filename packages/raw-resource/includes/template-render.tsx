@@ -110,15 +110,16 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
           }
         }
 
+
+
         // Get all variables fom the string
-        const regex = /\{\{([^}]*)\}\}/g
-        const varsInString = Array.from(rendered.matchAll(regex));
+        const varsInString = extractVars(rendered);
 
         if (varsInString && varsInString.length) {
           for (const match of varsInString) {
 
             let newValue = '';
-            const cleanMatches = match[1].trim().split('|');
+            const cleanMatches = match.trim().split('|');
             const varName = cleanMatches[0].trim();
             const filters = cleanMatches.slice(1).map((filter) => filter.trim());
 
@@ -150,7 +151,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
               }
             }
 
-            rendered = rendered.replaceAll(match[0], newValue);
+            rendered = rendered.replaceAll(`{{${match}}}`, newValue);
 
           }
         }
@@ -163,4 +164,23 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
   })();
 
   return render;
+}
+
+function extractVars(input: string) {
+  const vars = [];
+  let pos = 0;
+
+  while (pos < input.length) {
+    const start = input.indexOf('{{', pos);
+    if (start === -1) break;
+
+    const end = input.indexOf('}}', start);
+    if (end === -1) break;
+
+    const inside = input.slice(start + 2, end);
+    vars.push(inside);
+    pos = end + 2;
+  }
+
+  return vars;
 }

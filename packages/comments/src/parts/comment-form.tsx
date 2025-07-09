@@ -7,6 +7,7 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { CommentWidgetContext } from '../comments';
 import { CommentFormProps } from '../types/comment-form-props';
+import DataStore from "@openstad-headless/data-store/src";
 
 function CommentForm({
   comment,
@@ -22,6 +23,7 @@ function CommentForm({
   minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
   minCharactersError = 'Tekst moet minimaal {minCharacters} karakters bevatten',
   maxCharactersError = 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+  extraFieldsTagGroups = [],
   ...props
 }: CommentFormProps) {
   const commentsContext = useContext(CommentWidgetContext);
@@ -56,10 +58,55 @@ function CommentForm({
     maxCharactersError: maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
   });
 
+  if (
+    !parentId
+    && !(args?.comment?.parentId)
+    && extraFieldsTagGroups
+    && Array.isArray(extraFieldsTagGroups)
+    && extraFieldsTagGroups.length > 0
+  ) {
+    const datastore = new DataStore({
+      projectId: props.projectId,
+      api: props.api,
+    });
+
+    const {data: allTags} = datastore.useTags({
+      projectId: props.projectId,
+      type: ''
+    });
+
+    extraFieldsTagGroups.map((tagGroup) => {
+      const options = !!allTags ?
+        allTags
+          .filter((tag: any) => tag.type === tagGroup.type)
+          .map((tag: any) => ({
+            label: tag.name, value: tag.id
+          }))
+        : [];
+
+      const defaultValue = args.comment?.tags?.map((tag: any) => {
+        if (tag.type === tagGroup.type) {
+          return tag.id;
+        }})
+        ?.filter((id: any) => !!id)
+          || [];
+
+      formFields.push({
+        type: 'select',
+        title: tagGroup.label || 'Tags',
+        fieldKey: `tags-${tagGroup.type}`,
+        fieldRequired: false,
+        multiple: !!tagGroup.multiple,
+        choices: options,
+        defaultValue: defaultValue.length ? defaultValue : []
+      })
+    })
+  }
+
   formFields.push({
     type: 'hidden',
     fieldKey: 'sentiment',
-    defaultValue: sentiment,
+    defaultValue: sentiment === 'none' ? 'no sentiment' : sentiment,
   });
 
   if (

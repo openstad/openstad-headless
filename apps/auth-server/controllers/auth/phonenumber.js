@@ -5,7 +5,7 @@
 'use strict';
 
 const passport          = require('passport');
-const md5               = require('md5');
+const crypto            = require('crypto');
 const login             = require('connect-ensure-login');
 const db                = require('../../db');
 const authService       = require('../../services/authService');
@@ -57,20 +57,27 @@ exports.login = (req, res) => {
  * Authenticate normal login = find or create user and send sms
  */
 
+const getSalt = () => process.env.PHONE_HASH_SALT || '';
+
+const hashPhoneNumber = (phoneNumber) => {
+  const salt = getSalt();
+  return crypto.createHash('sha256').update(phoneNumber + salt).digest('hex');
+};
+
 //Todo: move these methods to the user service
 const createUser = async (phoneNumber) => {
-  let hashedPhoneNumber = md5(phoneNumber)
+  let hashedPhoneNumber = hashPhoneNumber(phoneNumber);
   return db.User.create({ hashedPhoneNumber: hashedPhoneNumber });
 }
 
 const updateUser = async (user, phoneNumber) => {
-  let hashedPhoneNumber = md5(phoneNumber)
+  let hashedPhoneNumber = hashPhoneNumber(phoneNumber);
   return user
     .update({ hashedPhoneNumber: hashedPhoneNumber })
 }
 
 const getUser = async (phoneNumber) => {
-  let hashedPhoneNumber = md5(phoneNumber)
+  let hashedPhoneNumber = hashPhoneNumber(phoneNumber);
   return db.User.findOne({ where: { hashedPhoneNumber } });
 }
 
