@@ -23,7 +23,7 @@ export default function useChoiceGuideResultCount({
     return { data: data?.count || 0, error, isLoading };
   } catch (e) {
     return {
-      data: [],
+      data: 0,
       error:
         'Er ging iets mis bij het ophalen van de resultaten, waarschijnlijk ontbreken er een aantal rechten',
       isLoading: false,
