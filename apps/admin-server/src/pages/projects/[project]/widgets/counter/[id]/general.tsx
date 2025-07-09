@@ -25,7 +25,7 @@ import { CounterWidgetProps } from '@openstad-headless/counter/src/counter';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useRouter } from 'next/router';
-import useChoiceGuides from '@/hooks/use-choiceguides';
+import useChoiceGuideWidgets from '@/hooks/use-choice-guide-widgets';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useTags from "@/hooks/use-tags";
@@ -62,7 +62,7 @@ export default function CounterDisplay(
   const router = useRouter();
 
   const projectId = router.query.project as string;
-  const { data: choiceGuides } = useChoiceGuides(projectId as string);
+  const { data: choiceGuides } = useChoiceGuideWidgets(projectId as string);
   const { data: resourceList } = useResources(projectId as string);
   const resources = resourceList as { id: string; title: string }[];
 

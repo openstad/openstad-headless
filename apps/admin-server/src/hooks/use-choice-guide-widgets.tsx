@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useChoiceGuides(projectId?: string) {
+export default function useChoiceGuideWidgets(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
   const url = `/api/openstad/api/project/${projectNumber}/choicesguide/widgets`;
