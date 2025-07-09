@@ -159,10 +159,12 @@ jobs:
 #          export $(grep -v '^#' .testing.env | xargs)
 #          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
 
-      - name: Run extra commands
-        run: |
-          docker exec openstad-api-server bash -c "NODE_ENV=development npm run init-database -w apps/api-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/api-server"
-          docker exec openstad-auth-server bash -c "NODE_ENV=development npm run init-database -w apps/auth-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/auth-server"
+      - name: Initialize Api database
+        run: docker exec openstad-api-server bash -c "NODE_ENV=development npm run init-database -w apps/api-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/api-server"
+
+      - name: Initialize Auth database
+        run: docker exec openstad-auth-server bash -c "NODE_ENV=development npm run init-database -w apps/auth-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/auth-server"
+
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
