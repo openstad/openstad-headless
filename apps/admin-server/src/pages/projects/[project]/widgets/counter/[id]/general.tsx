@@ -41,7 +41,7 @@ const formSchema = z.object({
     'votedUsers',
     'static',
     'argument',
-    'choiceguideresults',
+    'choiceGuideResults',
   ]),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
@@ -165,7 +165,7 @@ export default function CounterDisplay(
                   </SelectItem>
                   <SelectItem value="static">Vaste waarde</SelectItem>
                   <SelectItem value="argument">Aantal reacties</SelectItem>
-                  <SelectItem value="choiceguideresults">
+                  <SelectItem value="choiceGuideResults">
                     Aantal inzendingen keuzewijzer
                   </SelectItem>
                 </SelectContent>
@@ -239,7 +239,7 @@ export default function CounterDisplay(
           />
         ) : null}
 
-        {props.counterType === 'choiceguideresults' ? (
+        {props.counterType === 'choiceGuideResults' ? (
           <FormObjectSelectField
             form={form}
             fieldName="widgetId"

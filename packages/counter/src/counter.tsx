@@ -20,7 +20,7 @@ export type CounterProps = {
   | 'votedUsers'
   | 'static'
   | 'argument'
-  | 'choiceguideresults';
+  | 'choiceGuideResults';
   label?: string;
   url?: string;
   opinion?: string;
@@ -120,7 +120,7 @@ function Counter({
   } = datastore.useChoiceGuideResultCount({
     projectId: props.projectId,
     widgetId:
-      counterType === 'choiceguideresults' ? props.widgetId : undefined,
+      counterType === 'choiceGuideResults' ? props.widgetId : undefined,
   });
 
   if (counterType === 'resource') {
@@ -149,7 +149,7 @@ function Counter({
     amountDisplayed = comments?.length || 0;
   }
 
-  if (counterType === 'choiceguideresults') {
+  if (counterType === 'choiceGuideResults') {
     amountDisplayed = results || 0;
   }
 
