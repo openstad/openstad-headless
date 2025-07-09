@@ -42,11 +42,12 @@ const formSchema = z.object({
     'static',
     'argument',
     'submission',
+    'choiceguideresults',
   ]),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
   id: z.string().optional(),
-  choiceGuideId: z.string().optional(),
+  widgetId: z.string().optional(),
   resourceId: z.string().optional(),
   includeOrExclude: z.string().optional(),
   onlyIncludeOrExcludeTagIds: z.string().optional()
@@ -83,7 +84,7 @@ export default function CounterDisplay(
       label: props?.label || 'Hoeveelheid',
       url: props?.url || '',
       opinion: props?.opinion || '',
-      choiceGuideId: props?.choiceGuideId,
+      widgetId: props?.widgetId,
       resourceId: props?.resourceId,
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
@@ -165,7 +166,7 @@ export default function CounterDisplay(
                   </SelectItem>
                   <SelectItem value="static">Vaste waarde</SelectItem>
                   <SelectItem value="argument">Aantal reacties</SelectItem>
-                  <SelectItem value="submission">
+                  <SelectItem value="choiceguideresults">
                     Aantal inzendingen keuzewijzer
                   </SelectItem>
                 </SelectContent>
@@ -239,14 +240,14 @@ export default function CounterDisplay(
           />
         ) : null}
 
-        {props.counterType === 'submission' ? (
+        {props.counterType === 'choiceguideresults' ? (
           <FormObjectSelectField
             form={form}
-            fieldName="choiceGuideId"
+            fieldName="widgetId"
             fieldLabel="Gewenste keuzewijzer"
             items={choiceGuides}
             keyForValue="id"
-            label={(ch) => `${ch.id}`}
+            label={(ch) => `${ch.description} (Widget ID ${ch.id})`}
             onFieldChanged={props.onFieldChanged}
             noSelection="Selecteer uw gewenste keuzewijzer"
           />
