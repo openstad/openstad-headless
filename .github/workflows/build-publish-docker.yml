@@ -142,8 +142,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm i
+      - name: Install Cypress
+        run: npm install cypress
 
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v1
