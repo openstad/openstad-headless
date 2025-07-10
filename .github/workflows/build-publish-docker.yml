@@ -186,6 +186,14 @@ jobs:
       - name: Start all services with docker compose
         run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up -d
 
+      # Wait for 30 seconds to allow services to start
+      - name: Wait 30 seconds for services to start
+        run: sleep 30
+
+      # Get logs from Docker-compose
+      - name: Show logs from Docker-compose
+        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env logs
+
       #      - name: Wait for services to be ready
       #        run: |
       #          export $(grep -v '^#' .testing.env | xargs)
