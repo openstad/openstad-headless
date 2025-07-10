@@ -144,14 +144,6 @@ jobs:
           set +a
           printenv > $GITHUB_ENV
 
-      - name: Check env vars
-        run: |
-          echo "ADMIN_URL: ${{env.ADMIN_URL}}"
-          echo "API_URL: ${{env.API_URL}}"
-          echo "CMS_URL: ${{env.CMS_URL}}"
-          echo "AUTH_URL: ${{env.AUTH_APP_URL}}"
-          echo "IMAGE_URL: ${{env.IMAGE_APP_URL}}"
-
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -204,7 +196,7 @@ jobs:
         with:
           record: true
           install: false
-          wait-on: '${{env.ADMIN_URL}},${{env.API_URL}},${{env.CMS_URL}},${{env.AUTH_URL}},${{env.IMAGE_URL}}'
+          wait-on: '${{env.ADMIN_URL}}/health,${{env.API_URL}}/health,${{env.CMS_URL}}/health,${{env.AUTH_APP_URL}}/health,${{env.IMAGE_APP_URL}}/health'
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

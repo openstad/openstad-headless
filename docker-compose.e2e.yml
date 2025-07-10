@@ -19,7 +19,6 @@ services:
     volumes:
       # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
       - ./scripts/init-sql.sh:/docker-entrypoint-initdb.d/00-init-sql.sh
-      #- ./scripts/init-auth-database-e2e.sh:/docker-entrypoint-initdb.d/01-init-auth-database-e2e.sh
       - openstad-mysql-data:/var/lib/mysql
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
