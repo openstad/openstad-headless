@@ -1,5 +1,6 @@
 services:
   openstad-mysql:
+    platform: linux/amd64
     image: mysql:8.4
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -25,6 +26,7 @@ services:
       retries: 10
 
   openstad-redis:
+    platform: linux/amd64
     image: redis:latest
     restart: always
     ports:
@@ -35,18 +37,21 @@ services:
       retries: 10
 
   openstad-mongo:
+    platform: linux/amd64
     image: mongo
     restart: always
     volumes:
       - openstad-mongo-data:/var/lib/mongo
 
   openstad-mailpit:
+    platform: linux/amd64
     image: axllent/mailpit:v1.15
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
 
   openstad-api-server:
+    platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/api-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -115,6 +120,7 @@ services:
       - /opt/openstad-headless/packages/ui/node_modules
 
   openstad-auth-server:
+    platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/auth-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -164,6 +170,7 @@ services:
       - openstad-auth-server-init:/opt/openstad-headless/apps/auth-server/init
 
   openstad-image-server:
+    platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/image-server}:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
@@ -194,6 +201,7 @@ services:
       - openstad-image-server-init:/opt/openstad-headless/apps/image-server/init
 
   openstad-admin-server:
+    platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/admin-server}:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
     restart: unless-stopped
@@ -217,6 +225,7 @@ services:
       - ./packages:/opt/openstad-headless/packages
 
   openstad-cms-server:
+    platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/cms-server}:${RELEASE_VERSION:-latest}
     depends_on:
       openstad-redis:
