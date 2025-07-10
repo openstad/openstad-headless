@@ -97,10 +97,8 @@ services:
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
-      - ./apps/api-server:/opt/openstad-headless/apps/api-server
       - openstad-api-server-node_modules:/opt/openstad-headless/apps/api-server/node_modules
       - openstad-api-server-init:/opt/openstad-headless/apps/api-server/init
-      - ./packages:/opt/openstad-headless/packages
       - /opt/openstad-headless/packages/agenda/node_modules
       - /opt/openstad-headless/packages/comments/node_modules
       - /opt/openstad-headless/packages/choiceguide/node_modules
@@ -164,10 +162,10 @@ services:
     ports:
       - '${AUTH_PORT}:${AUTH_PORT}'
     volumes:
-      - ./apps/auth-server:/opt/openstad-headless/apps/auth-server
       - openstad-auth-server-node_modules:/opt/openstad-headless/apps/auth-server/node_modules
       - openstad-auth-server-certs:/opt/openstad-headless/apps/auth-server/certs
       - openstad-auth-server-init:/opt/openstad-headless/apps/auth-server/init
+      - ./apps/auth-server/certs:/opt/openstad-headless/apps/auth-server/certs
 
   openstad-image-server:
     platform: linux/amd64
@@ -194,7 +192,6 @@ services:
     ports:
       - '${IMAGE_PORT_API}:${IMAGE_PORT_API}'
     volumes:
-      - ./apps/image-server:/opt/openstad-headless/apps/image-server
       - openstad-image-server-node_modules:/opt/openstad-headless/apps/image-server/node_modules
       - openstad-image-server-images:/opt/openstad-headless/apps/image-server/images
       - openstad-image-server-documents:/opt/openstad-headless/apps/image-server/documents
@@ -220,9 +217,7 @@ services:
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:
-      - ./apps/admin-server:/opt/openstad-headless/apps/admin-server
       - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
-      - ./packages:/opt/openstad-headless/packages
 
   openstad-cms-server:
     platform: linux/amd64
@@ -252,7 +247,6 @@ services:
     ports:
       - '${CMS_PORT}:${CMS_PORT}'
     volumes:
-      - ./apps/cms-server:/opt/openstad-headless/apps/cms-server
       - openstad-cms-server-node_modules:/opt/openstad-headless/apps/cms-server/node_modules
       - openstad-cms-server-init:/opt/openstad-headless/apps/cms-server/init
 
