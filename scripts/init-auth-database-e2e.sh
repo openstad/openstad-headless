@@ -3,6 +3,18 @@
 mysql -u root -p$MYSQL_ROOT_PASSWORD -D $AUTH_DB_NAME --execute \
 "SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS \`access_tokens\`;
+DROP TABLE IF EXISTS \`action_log\`;
+DROP TABLE IF EXISTS \`clients\`;
+DROP TABLE IF EXISTS \`external_csrf_tokens\`;
+DROP TABLE IF EXISTS \`login_tokens\`;
+DROP TABLE IF EXISTS \`migrations\`;
+DROP TABLE IF EXISTS \`password_reset_tokens\`;
+DROP TABLE IF EXISTS \`roles\`;
+DROP TABLE IF EXISTS \`users\`;
+DROP TABLE IF EXISTS \`unique_codes\`;
+DROP TABLE IF EXISTS \`user_roles\`;
+
 CREATE TABLE \`access_tokens\` (
   \`id\` int NOT NULL AUTO_INCREMENT,
   \`tokenId\` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
