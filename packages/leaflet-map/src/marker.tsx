@@ -1,7 +1,9 @@
 import type { LeafletMouseEvent } from 'leaflet';
 import { Marker as LeafletMarker } from 'react-leaflet'
+// @ts-ignore
 import { useMap } from 'react-leaflet/hooks';
 import type { MarkerProps } from './types/marker-props';
+// @ts-ignore
 import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
 import MarkerIcon from './marker-icon';
 import React from 'react';
@@ -85,6 +87,5 @@ for (let eventname of ['click', 'mouseDown', 'mouseUp', 'dragStart', 'dragEnd'])
             position={[lat, lng]}
         />
     ) : null;
-  
-}
 
+}

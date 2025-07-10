@@ -4,7 +4,9 @@ import type { LeafletMouseEvent } from 'leaflet';
 import { LatLng, latLngBounds } from 'leaflet';
 import type { PropsWithChildren } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+// @ts-ignore
 import { MapContainer } from 'react-leaflet/MapContainer';
+// @ts-ignore
 import { useMapEvents } from 'react-leaflet/hooks';
 import { loadWidget } from '../../lib/load-widget';
 import { Area, isPointInArea } from './area';
@@ -158,7 +160,7 @@ const BaseMap = ({
 
   tilesVariant = props?.map?.tilesVariant || tilesVariant ||'nlmaps';
   const customUrlSetting = tilesVariant === 'custom' ? props?.map?.customUrl : undefined;
-      
+
 
   // clustering geeft errors; ik begrijp niet waarom: het gebeurd alleen in de gebuilde widgets, niet in de dev componenten
   // het lijkt een timing issue, waarbij niet alles in de juiste volgporde wordt geladen
@@ -182,7 +184,7 @@ const BaseMap = ({
   const setBoundsAndCenter = useCallback(
     (polygons: Array<Array<LocationType>>) => {
       let allPolygons: LocationType[][] = [];
-  
+
       if (polygons && Array.isArray(polygons)) {
         polygons.forEach((points: Array<LocationType>) => {
           let poly: LocationType[] = [];
@@ -199,19 +201,19 @@ const BaseMap = ({
           }
         });
       }
-  
+
       if (allPolygons.length == 0) {
         mapRef.panTo(
           new LatLng(definedCenterPoint.lat, definedCenterPoint.lng)
         );
         return;
       }
-  
+
       if (allPolygons.length == 1 && allPolygons[0].length == 1 && allPolygons[0][0].lat && allPolygons[0][0].lng) {
         mapRef.panTo(new LatLng(allPolygons[0][0].lat, allPolygons[0][0].lng));
         return;
       }
-  
+
       let combinedBounds = latLngBounds([]);
       allPolygons.forEach((poly) => {
         let bounds = latLngBounds(
@@ -225,7 +227,7 @@ const BaseMap = ({
         );
         combinedBounds.extend(bounds);
       });
-  
+
       mapRef.fitBounds(combinedBounds);
     },
     [center, mapRef]

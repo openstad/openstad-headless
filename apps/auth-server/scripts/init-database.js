@@ -24,7 +24,8 @@ const { Umzug, SequelizeStorage } = require('umzug');
       
       console.log('Create database...');
       await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true })
-      await db.sequelize.sync({ force: true });
+      console.log ('Syncing models')
+      await db.sequelize.sync();
     
       console.log('Marking migrations as done...');
       let pendingMigrations = await umzug.pending();
