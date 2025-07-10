@@ -156,7 +156,7 @@ jobs:
         run: mkdir -p certs && NODE_ENV=development node generate-cert.js
 
       - name: Start API & Auth in init mode with docker compose
-        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up -d
 
 #      - name: Start Auth service with docker compose
 #        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up openstad-auth-server -d
