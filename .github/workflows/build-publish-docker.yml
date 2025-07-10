@@ -160,7 +160,7 @@ jobs:
 
       - name: Generate Auth certs
         working-directory: ./apps/auth-server
-        run: mkdir -p certs && NODE_ENV=development node generate-cert.js && chmod -R 644 certs && chown -R 1000:1000 certs
+        run: mkdir -p certs && NODE_ENV=development node generate-cert.js
 
       - name: Start API & Auth in init mode with docker compose
         run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up -d
