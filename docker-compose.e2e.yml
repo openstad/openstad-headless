@@ -18,8 +18,8 @@ services:
       - 3306:3306
     volumes:
       # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
-      - ./scripts/init-sql.sh:/docker-entrypoint-initdb.d/init-sql.sh
-      - ./scripts/init-auth-database-e2e.sh:/docker-entrypoint-initdb.d/init-auth-database-e2e.sh
+      - ./scripts/init-sql.sh:/docker-entrypoint-initdb.d/00-init-sql.sh
+      - ./scripts/init-auth-database-e2e.sh:/docker-entrypoint-initdb.d/01-init-auth-database-e2e.sh
       - openstad-mysql-data:/var/lib/mysql
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
@@ -125,7 +125,6 @@ services:
     depends_on:
       openstad-mysql:
         condition: service_healthy
-    container_name: openstad-auth-server
     restart: unless-stopped
     environment:
       - APP_URL=${AUTH_APP_URL}
@@ -175,7 +174,6 @@ services:
     depends_on:
       openstad-mysql:
         condition: service_healthy
-    container_name: openstad-image-server
     restart: unless-stopped
     environment:
       - APP_URL=${IMAGE_APP_URL}
@@ -201,7 +199,6 @@ services:
   openstad-admin-server:
     platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/admin-server}:${RELEASE_VERSION:-latest}
-    container_name: openstad-admin-server
     restart: unless-stopped
     environment:
       - URL=${ADMIN_URL}
@@ -229,7 +226,6 @@ services:
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     #   openstad-mongo:
     #     condition: service_healthy
-    container_name: openstad-cms-server
     restart: unless-stopped
     environment:
       - PORT=${CMS_PORT}
