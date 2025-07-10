@@ -137,6 +137,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Load .testing.env into environment
+        run: |
+          set -a
+          source .testing.env
+          set +a
+          printenv > $GITHUB_ENV
+
+      - name: Check env vars
+        run: |
+          echo "ADMIN_URL: ${{env.ADMIN_URL}}"
+          echo "API_URL: ${{env.API_URL}}"
+          echo "CMS_URL: ${{env.CMS_URL}}"
+          echo "AUTH_URL: ${{env.AUTH_APP_URL}}"
+          echo "IMAGE_URL: ${{env.IMAGE_APP_URL}}"
+
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -184,27 +199,12 @@ jobs:
       #          export $(grep -v '^#' .testing.env | xargs)
       #          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
 
-      - name: Load .testing.env into environment
-        run: |
-          set -a
-          source .testing.env
-          set +a
-          printenv > $GITHUB_ENV
-
-      - name: Check env vars
-        run: |
-          echo "ADMIN_URL: $ADMIN_URL"
-          echo "API_URL: $API_URL"
-          echo "CMS_URL: $CMS_URL"
-          echo "AUTH_URL: $AUTH_URL"
-          echo "IMAGE_URL: $IMAGE_URL"
-
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
           record: true
           install: false
-          wait-on: '$ADMIN_URL,$API_URL,$CMS_URL,$AUTH_URL,$IMAGE_URL'
+          wait-on: '${{env.ADMIN_URL}},${{env.API_URL}},${{env.CMS_URL}},${{env.AUTH_URL}},${{env.IMAGE_URL}}'
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
