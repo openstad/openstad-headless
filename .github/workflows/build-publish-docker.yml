@@ -155,23 +155,28 @@ jobs:
         working-directory: ./apps/auth-server
         run: mkdir -p certs && NODE_ENV=development node generate-cert.js
 
-      - name: Start Auth service with docker compose
-        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up openstad-auth-server -d
+      - name: Start API & Auth in init mode with docker compose
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up
 
+#      - name: Start Auth service with docker compose
+#        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up openstad-auth-server -d
+#
       - name: Initialize Auth database
-        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env exec openstad-auth-server bash -c "NODE_ENV=development npm run init-database -w apps/auth-server -- --force && NODE_ENV=development npm run migrate-database -w apps/auth-server"
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env exec openstad-auth-server bash -c "NODE_ENV=development npm run init-database -w apps/auth-server -- --force && NODE_ENV=development npm run migrate-database -w apps/auth-server"
 
       - name: Migrate Auth database
-        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env exec openstad-auth-server bash -c "NODE_ENV=development npm run migrate-database -w apps/auth-server"
-
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env exec openstad-auth-server bash -c "NODE_ENV=development npm run migrate-database -w apps/auth-server"
 
       - name: Start API service with docker compose
-        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up openstad-api-server -d
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up openstad-api-server -d
 
       - name: Initialize Api database
-        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env exec openstad-api-server bash -c "NODE_ENV=development npm run init-database -w apps/api-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/api-server"
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env exec openstad-api-server bash -c "NODE_ENV=development npm run init-database -w apps/api-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/api-server"
 
-      - name: Start the rest of the services with docker compose
+      - name: Shut down initialization services
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env down
+
+      - name: Start all services with docker compose
         run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up -d
 
       #      - name: Wait for services to be ready

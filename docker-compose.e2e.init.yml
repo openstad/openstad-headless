@@ -26,39 +26,13 @@ services:
       timeout: 20s
       retries: 10
 
-  openstad-redis:
-    platform: linux/amd64
-    image: redis:latest
-    restart: always
-    ports:
-      - '6379:6379'
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      timeout: 20s
-      retries: 10
-
-  openstad-mongo:
-    platform: linux/amd64
-    image: mongo
-    restart: always
-    volumes:
-      - openstad-mongo-data:/var/lib/mongo
-
-  openstad-mailpit:
-    platform: linux/amd64
-    image: axllent/mailpit:v1.15
-    ports:
-      - 1025:1025 # smtp server
-      - 8025:8025 # web ui
-
   openstad-api-server:
     platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/api-server}:${RELEASE_VERSION:-latest}
+    command: tail -f /dev/null
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
-        condition: service_healthy
-      openstad-redis:
         condition: service_healthy
     restart: unless-stopped
     environment:
@@ -120,6 +94,7 @@ services:
   openstad-auth-server:
     platform: linux/amd64
     image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/auth-server}:${RELEASE_VERSION:-latest}
+    command: tail -f /dev/null
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -166,98 +141,10 @@ services:
       - openstad-auth-server-init:/opt/openstad-headless/apps/auth-server/init
       - ./apps/auth-server/certs:/opt/openstad-headless/apps/auth-server/certs
 
-  openstad-image-server:
-    platform: linux/amd64
-    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/image-server}:${RELEASE_VERSION:-latest}
-    # TODO: dit moet conditional: alleen als we deze db gebruiken
-    depends_on:
-      openstad-mysql:
-        condition: service_healthy
-    restart: unless-stopped
-    environment:
-      - APP_URL=${IMAGE_APP_URL}
-      - PORT_API=${IMAGE_PORT_API}
-      - PORT_IMAGE_SERVER=${IMAGE_PORT_IMAGE_SERVER}
-      - IMAGES_DIR=${IMAGE_IMAGES_DIR}
-      - DOCUMENTS_DIR=${DOCUMENTS_DIR}
-      - THROTTLE=${IMAGE_THROTTLE}
-      - THROTTLE_CC_PROCESSORS=${IMAGE_THROTTLE_CC_PROCESSORS}
-      - THROTTLE_CC_PREFETCHER=${IMAGE_THROTTLE_CC_PREFETCHER}
-      - THROTTLE_CC_REQUESTS=${IMAGE_THROTTLE_CC_REQUESTS}
-      - NODE_ENV=development
-      - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
-      - FORCE_HTTP=${FORCE_HTTP}
-    ports:
-      - '${IMAGE_PORT_API}:${IMAGE_PORT_API}'
-    volumes:
-      - openstad-image-server-node_modules:/opt/openstad-headless/apps/image-server/node_modules
-      - openstad-image-server-images:/opt/openstad-headless/apps/image-server/images
-      - openstad-image-server-documents:/opt/openstad-headless/apps/image-server/documents
-      - openstad-image-server-init:/opt/openstad-headless/apps/image-server/init
-
-  openstad-admin-server:
-    platform: linux/amd64
-    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/admin-server}:${RELEASE_VERSION:-latest}
-    restart: unless-stopped
-    environment:
-      - URL=${ADMIN_URL}
-      - COOKIE_SECRET=${ADMIN_COOKIE_SECRET}
-      - CLIENT_ID=${AUTH_ADMIN_CLIENT_ID}
-      - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
-      - OAUTH_URL=${AUTH_APP_URL}
-      - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
-      - API_URL=${API_URL}
-      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
-      - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
-      - PORT=${ADMIN_PORT}
-      - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
-    ports:
-      - '${ADMIN_PORT}:${ADMIN_PORT}'
-    volumes:
-      - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
-
-  openstad-cms-server:
-    platform: linux/amd64
-    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/cms-server}:${RELEASE_VERSION:-latest}
-    depends_on:
-      openstad-redis:
-        condition: service_healthy
-    # TODO: dit moet conditional: alleen als we deze db gebruiken
-    #   openstad-mongo:
-    #     condition: service_healthy
-    restart: unless-stopped
-    environment:
-      - PORT=${CMS_PORT}
-      - OVERWRITE_URL=${CMS_OVERWRITE_URL}
-      - MONGODB_URI=${CMS_MONGODB_URI}
-      - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
-      - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
-      - CMS_DEFAULTS=${CMS_DEFAULTS}
-      - API_URL=${API_URL}
-      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
-      - API_KEY=${API_FIXED_AUTH_KEY}
-      - FORCE_HTTP=${FORCE_HTTP}
-      - APOS_RELEASE_ID=${APOS_RELEASE_ID}
-      - REACT_CDN=${REACT_CDN}
-      - REACT_DOM_CDN=${REACT_DOM_CDN}
-    ports:
-      - '${CMS_PORT}:${CMS_PORT}'
-    volumes:
-      - openstad-cms-server-node_modules:/opt/openstad-headless/apps/cms-server/node_modules
-      - openstad-cms-server-init:/opt/openstad-headless/apps/cms-server/init
-
 volumes:
   openstad-mysql-data: {}
-  openstad-mongo-data: {}
   openstad-api-server-node_modules: {}
   openstad-api-server-init: {}
   openstad-auth-server-node_modules: {}
   openstad-auth-server-certs: {}
   openstad-auth-server-init: {}
-  openstad-image-server-node_modules: {}
-  openstad-image-server-images: {}
-  openstad-image-server-documents: {}
-  openstad-image-server-init: {}
-  openstad-admin-server-node_modules: {}
-  openstad-cms-server-node_modules: {}
-  openstad-cms-server-init: {}
