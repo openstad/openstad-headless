@@ -15,6 +15,10 @@ describe('Can log into admin server', () => {
       
       cy.get('input[name="unique_code"]').type(Cypress.env('AUTH_FIRST_LOGIN_CODE'));
       cy.get('input[type="submit"]').click();
+      
+      cy.contains('Aanvullende gegevens').should('exist');
+      cy.get('input[name="name"]').type('Cypress');
+      cy.get('button.btn').click();
     });
     
     cy.contains('Uitloggen').should('exist');
