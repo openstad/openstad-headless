@@ -151,6 +151,10 @@ jobs:
       - name: Add release version to .testing.env
         run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
 
+      - name: Generate Auth certs
+        working-directory: ./apps/auth-server
+        run: mkdir -p certs && NODE_ENV=development node generate-cert.js
+
       - name: Start Auth service with docker compose
         run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up openstad-auth-server -d
 
