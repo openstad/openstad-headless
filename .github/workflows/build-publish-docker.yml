@@ -184,12 +184,24 @@ jobs:
       #          export $(grep -v '^#' .testing.env | xargs)
       #          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
 
+      - name: Export environment variables
+        run: |
+          export $(grep -v '^#' .testing.env | xargs)
+
+      - name: Check env vars
+        run: |
+          echo "ADMIN_URL: $ADMIN_URL"
+          echo "API_URL: $API_URL"
+          echo "CMS_URL: $CMS_URL"
+          echo "AUTH_URL: $AUTH_URL"
+          echo "IMAGE_URL: $IMAGE_URL"
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
           record: true
           install: false
+          wait-on: '$ADMIN_URL,$API_URL,$CMS_URL,$AUTH_URL,$IMAGE_URL'
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
