@@ -144,6 +144,20 @@ jobs:
           set +a
           printenv > $GITHUB_ENV
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Cypress
+        run: npm install cypress
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Add release version to .testing.env
+        #run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
+        run: echo "RELEASE_VERSION=feat-e2e-test-7a764a6" >> .testing.env
+
       - name: Generate Auth certs
         working-directory: ./apps/auth-server
         run: |
@@ -159,21 +173,6 @@ jobs:
           chmod 644 ./certs/certificate.pem
       
           ls -l ./certs
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install Cypress
-        run: npm install cypress
-
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-
-      - name: Add release version to .testing.env
-        #run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
-        run: echo "RELEASE_VERSION=feat-e2e-test-7a764a6" >> .testing.env
-
 
       - name: Start API & Auth in init mode with docker compose
         run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up -d
@@ -199,13 +198,8 @@ jobs:
       - name: Start all services with docker compose
         run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up -d
 
-      # Wait for 30 seconds to allow services to start
-      - name: Wait 30 seconds for services to start
-        run: sleep 30
-
-      # Get logs from Docker-compose
-      - name: Show logs from Docker-compose
-        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env logs
+#      - name: Show logs from Docker-compose
+#        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env logs
 
       #      - name: Wait for services to be ready
       #        run: |
