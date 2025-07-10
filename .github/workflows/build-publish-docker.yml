@@ -184,9 +184,12 @@ jobs:
       #          export $(grep -v '^#' .testing.env | xargs)
       #          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
 
-      - name: Export environment variables
+      - name: Load .testing.env into environment
         run: |
-          export $(grep -v '^#' .testing.env | xargs)
+          set -a
+          source .testing.env
+          set +a
+          printenv > $GITHUB_ENV
 
       - name: Check env vars
         run: |
