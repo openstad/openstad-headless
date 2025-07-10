@@ -149,22 +149,15 @@ jobs:
         run: |
           mkdir -p ./certs
       
-          # Genereer private key en pas permissies aan
           openssl genrsa -out ./certs/privatekey.pem 2048
           chmod 644 ./certs/privatekey.pem
-          chown 1000:1000 ./certs/privatekey.pem
       
-          # Genereer certificate signing request
           openssl req -new -key ./certs/privatekey.pem -out ./certs/certrequest.csr -subj "/C=NL/ST=All/L=Amsterdam/O=openstad/CN=www.openstad.org"
           chmod 644 ./certs/certrequest.csr
-          chown 1000:1000 ./certs/certrequest.csr
       
-          # Genereer self-signed certificate
           openssl x509 -req -in ./certs/certrequest.csr -signkey ./certs/privatekey.pem -days 3650 -out ./certs/certificate.pem
           chmod 644 ./certs/certificate.pem
-          chown 1000:1000 ./certs/certificate.pem
       
-          # Controleer of alles goed is
           ls -l ./certs
 
       - uses: actions/setup-node@v4
