@@ -151,19 +151,25 @@ jobs:
       - name: Add release version to .testing.env
         run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
 
-      - name: Start services with docker compose
-        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up -d
+      - name: Start Auth service with docker compose
+        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up openstad-auth-server -d
 
-#      - name: Wait for services to be ready
-#        run: |
-#          export $(grep -v '^#' .testing.env | xargs)
-#          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
+      - name: Initialize Auth database
+        run: docker exec openstad-auth-server bash -c "NODE_ENV=development npm run init-database -w apps/auth-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/auth-server"
+
+      - name: Start API service with docker compose
+        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up openstad-api-server -d
 
       - name: Initialize Api database
         run: docker exec openstad-api-server bash -c "NODE_ENV=development npm run init-database -w apps/api-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/api-server"
 
-      - name: Initialize Auth database
-        run: docker exec openstad-auth-server bash -c "NODE_ENV=development npm run init-database -w apps/auth-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/auth-server"
+      - name: Start the rest of the services with docker compose
+        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up -d
+
+      #      - name: Wait for services to be ready
+      #        run: |
+      #          export $(grep -v '^#' .testing.env | xargs)
+      #          npx wait-on $ADMIN_URL $API_URL $CMS_URL $AUTH_URL $IMAGE_URL --timeout=60000 --interval=5000
 
 
       - name: Run Cypress tests
