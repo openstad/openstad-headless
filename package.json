@@ -17,6 +17,7 @@
     "test:unit:cms": "vitest run apps/cms-server",
     "test:unit:image": "vitest run apps/image-server",
     "test:e2e": "cypress run",
+    "test:component": "node ./scripts/run-component-tests.js",
     "cy:open": "cypress open"
   },
   "repository": {

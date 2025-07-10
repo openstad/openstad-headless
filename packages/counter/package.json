@@ -7,9 +7,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cy:open": "cypress open",
+    "test:component": "cypress run --component",
+    "test:component:record": "cypress run --component --record"
   },
   "dependencies": {
+    "@cypress/react": "^9.0.1",
+    "@cypress/vite-dev-server": "^6.0.3",
     "@openstad-headless/data-store": "*",
     "@openstad-headless/lib": "*",
     "@openstad-headless/types": "*",
@@ -18,6 +23,7 @@
     "@utrecht/component-library-react": "^4.2.0",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
     "copy": "^0.3.2",
+    "cypress": "^14.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "swr": "^2.2.4"
