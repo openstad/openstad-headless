@@ -159,6 +159,7 @@ jobs:
     name: Run E2E tests
     runs-on: ubuntu-latest
     needs: [build-and-push-docker-image]
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
     steps:
       - name: Checkout code
