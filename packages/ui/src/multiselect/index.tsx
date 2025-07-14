@@ -44,6 +44,7 @@ export function MultiSelect({
         onClick={() => {
           setOpen(!isOpen);
         }}
+        test-id="multi-select-button"
       >
         {label}
         <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
