@@ -159,7 +159,7 @@ jobs:
     name: Run E2E tests
     runs-on: ubuntu-latest
     needs: [build-and-push-docker-image]
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    #if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
     steps:
       - name: Checkout code
@@ -227,6 +227,7 @@ jobs:
           install: false
           wait-on: '${{env.ADMIN_URL}}/health,${{env.API_URL}}/health,${{env.CMS_URL}}/health,${{env.AUTH_APP_URL}}/health,${{env.IMAGE_APP_URL}}/health'
           wait-on-timeout: 160
+          group: "E2E"
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
