@@ -1,16 +1,16 @@
 export default function useChoiceGuideResultCount({
   projectId,
-  widgetId,
+  widgetToFetchId,
 }) {
   let self = this;
 
-  if (!widgetId) {
+  if (!widgetToFetchId) {
     return { data: 0, error: 'No widgetId given', isLoading: false };
   }
 
   try {
     const { data, error, isLoading } = self.useSWR(
-      { projectId, widgetId },
+      { projectId, widgetToFetchId },
       'choiceGuideResultCount.fetch'
     );
 

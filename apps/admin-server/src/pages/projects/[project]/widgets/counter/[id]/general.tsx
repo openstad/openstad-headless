@@ -46,7 +46,7 @@ const formSchema = z.object({
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
   id: z.string().optional(),
-  widgetId: z.string().optional(),
+  widgetToFetchId: z.string().optional(),
   resourceId: z.string().optional(),
   includeOrExclude: z.string().optional(),
   onlyIncludeOrExcludeTagIds: z.string().optional()
@@ -83,7 +83,7 @@ export default function CounterDisplay(
       label: props?.label || 'Hoeveelheid',
       url: props?.url || '',
       opinion: props?.opinion || '',
-      widgetId: props?.widgetId,
+      widgetToFetchId: props?.widgetToFetchId,
       resourceId: props?.resourceId,
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
@@ -242,7 +242,7 @@ export default function CounterDisplay(
         {props.counterType === 'choiceGuideResults' ? (
           <FormObjectSelectField
             form={form}
-            fieldName="widgetId"
+            fieldName="widgetToFetchId"
             fieldLabel="Gewenste keuzewijzer"
             items={choiceGuides}
             keyForValue="id"
