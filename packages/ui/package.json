@@ -8,7 +8,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test:component": "cypress run --component",
-    "test:component:record": "cypress run --component --record"
+    "test:component:record": "cypress run --component --record --group UI"
   },
   "author": "",
   "license": "ISC",

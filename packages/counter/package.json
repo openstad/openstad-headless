@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "cy:open": "cypress open",
     "test:component": "cypress run --component",
-    "test:component:record": "cypress run --component --record"
+    "test:component:record": "cypress run --component --record --group Counter"
   },
   "dependencies": {
     "@cypress/react": "^9.0.1",

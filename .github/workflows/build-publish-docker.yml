@@ -30,6 +30,7 @@ jobs:
         run: npm run test:unit
 
   prepare-uuid:
+    name: Prepare unique ID for Cypress recording
     runs-on: ubuntu-latest
     outputs:
       uuid: ${{ steps.uuid.outputs.value }}
