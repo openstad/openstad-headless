@@ -6,6 +6,10 @@ const allowedSortColumns = Object.entries(db.Resource.getAttributes())
 
 module.exports = function( req, res, next ) {
   let sort = req.query.sort;
+  
+  const MAX_INT_UNSIGNED = 4294967295
+  const getRandomSeed = () => Math.floor(Math.random() * MAX_INT_UNSIGNED)
+  
   if (sort) {
     if (!Array.isArray(sort)) sort = [ sort ];
     sort = sort.map( column => {
@@ -17,14 +21,8 @@ module.exports = function( req, res, next ) {
         case 'votes_asc':
           return [ 'yes', 'ASC' ];
           break;
-        // case 'comments_desc':
-        //   return [ 'commentCount', 'DESC' ];
-        //   break;
-        // case 'comments_asc':
-        //   return [ 'commentCount', 'ASC' ];
-        //   break;
         case 'random':
-          return db.sequelize.random();
+          return db.sequelize.literal(`RAND(${req.query?.pseudoRandomSortSeed ?? getRandomSeed()})`)
           break;
         default:
           column = column.replace(/[^a-z0-9_]+/ig, '');
@@ -51,4 +49,3 @@ module.exports = function( req, res, next ) {
   }
   return next();
 }
-1
