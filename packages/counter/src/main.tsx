@@ -3,10 +3,15 @@ import ReactDOM from 'react-dom/client';
 import { CounterWidgetProps, Counter } from './counter.js';
 
 const config: CounterWidgetProps = {
-  counterType: 'resource',
+  counterType: 'choiceGuideResults',
+  widgetId: '6',
   label: 'Hoeveelheid',
   url: 'https://www.google.com',
   opinion: '',
+  api: {
+    url: 'http://localhost:31410',
+  },
+  projectId: '2'
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
