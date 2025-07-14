@@ -4,7 +4,7 @@ import { CounterWidgetProps, Counter } from './counter.js';
 
 const config: CounterWidgetProps = {
   counterType: 'choiceGuideResults',
-  widgetId: '6',
+  widgetToFetchId: '6',
   label: 'Hoeveelheid',
   url: 'https://www.google.com',
   opinion: '',

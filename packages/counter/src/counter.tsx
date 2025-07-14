@@ -25,7 +25,7 @@ export type CounterProps = {
   url?: string;
   opinion?: string;
   amount?: number;
-  widgetId?: string;
+  widgetToFetchId?: string;
   includeOrExclude?: string;
   onlyIncludeOrExcludeTagIds?: string;
 };
@@ -113,14 +113,16 @@ function Counter({
     sentiment: opinion,
   });
 
+  console.log ({props});
+
   const {
     data: results,
     error,
     isLoading,
   } = datastore.useChoiceGuideResultCount({
     projectId: props.projectId,
-    widgetId:
-      counterType === 'choiceGuideResults' ? props.widgetId : undefined,
+    widgetToFetchId:
+      counterType === 'choiceGuideResults' ? props.widgetToFetchId : undefined,
   });
 
   if (counterType === 'resource') {
