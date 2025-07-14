@@ -24,6 +24,8 @@ for (const folder of packageFolders) {
       execSync(`npm run ${command}`, { stdio: 'inherit', cwd: packagePath });
     } catch (err) {
       console.error(`\nFailed running component test in ${folder}`);
+      // Exit with a non-zero code to indicate failure
+      process.exit(1);
     }
   }
 }

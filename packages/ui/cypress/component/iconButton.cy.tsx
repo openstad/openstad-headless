@@ -1,5 +1,5 @@
 import React from 'react'
-import { IconButton } from '../../src/iconButton'
+import { IconButton } from '../../src/iconbutton'
 
 describe('<IconButton />', () => {
   it('renders', () => {
