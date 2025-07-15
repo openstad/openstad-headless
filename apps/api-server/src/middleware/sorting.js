@@ -18,7 +18,12 @@ module.exports = function( req, res, next ) {
           return [ 'yes', 'ASC' ];
           break;
         case 'random':
-          return db.sequelize.literal(`RAND(${req.query?.pseudoRandomSortSeed ?? ""})`)
+          const pseudoRandomSortSeed = parseInt(req.query?.pseudoRandomSortSeed)
+          if (Number.isInteger(pseudoRandomSortSeed)) {
+            return db.sequelize.literal(`RAND(${pseudoRandomSortSeed})`)
+          } else {
+            return db.sequelize.random()
+          }
           break;
         default:
           column = column.replace(/[^a-z0-9_]+/ig, '');
