@@ -246,7 +246,7 @@ jobs:
           wait-on: '${{env.ADMIN_URL}}/health,${{env.API_URL}}/health,${{env.CMS_URL}}/health,${{env.AUTH_APP_URL}}/health,${{env.IMAGE_APP_URL}}/health'
           wait-on-timeout: 160
           group: "E2E"
-          ci-build-id: {{ needs.generate-ci-build-id.outputs.build_id }}
+          ci-build-id: ${{ needs.generate-ci-build-id.outputs.build_id }}
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
