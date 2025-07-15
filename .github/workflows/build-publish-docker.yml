@@ -72,7 +72,7 @@ jobs:
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            CI_BUILD_ID: ${{ needs.generate-ci-build-id.outputs.build_id }}
+            BUILD_ID: ${{ needs.generate-ci-build-id.outputs.build_id }}
 
   build-builder-stage:
     name: Build `builder` stage
