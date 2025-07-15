@@ -13,3 +13,4 @@ image:
 cms:
   deploymentContainer:
     image: ghcr.io/openstad/cms-server:main-f80dc58
+

@@ -25,7 +25,7 @@ import { CounterWidgetProps } from '@openstad-headless/counter/src/counter';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useRouter } from 'next/router';
-import useChoiceGuides from '@/hooks/use-choiceguides';
+import useChoiceGuideWidgets from '@/hooks/use-choice-guide-widgets';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useTags from "@/hooks/use-tags";
@@ -41,12 +41,12 @@ const formSchema = z.object({
     'votedUsers',
     'static',
     'argument',
-    'submission',
+    'choiceGuideResults',
   ]),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
   id: z.string().optional(),
-  choiceGuideId: z.string().optional(),
+  widgetToFetchId: z.string().optional(),
   resourceId: z.string().optional(),
   includeOrExclude: z.string().optional(),
   onlyIncludeOrExcludeTagIds: z.string().optional()
@@ -61,7 +61,7 @@ export default function CounterDisplay(
   const router = useRouter();
 
   const projectId = router.query.project as string;
-  const { data: choiceGuides } = useChoiceGuides(projectId as string);
+  const { data: choiceGuides } = useChoiceGuideWidgets(projectId as string);
   const { data: resourceList } = useResources(projectId as string);
   const resources = resourceList as { id: string; title: string }[];
 
@@ -83,7 +83,7 @@ export default function CounterDisplay(
       label: props?.label || 'Hoeveelheid',
       url: props?.url || '',
       opinion: props?.opinion || '',
-      choiceGuideId: props?.choiceGuideId,
+      widgetToFetchId: props?.widgetToFetchId,
       resourceId: props?.resourceId,
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
@@ -165,7 +165,7 @@ export default function CounterDisplay(
                   </SelectItem>
                   <SelectItem value="static">Vaste waarde</SelectItem>
                   <SelectItem value="argument">Aantal reacties</SelectItem>
-                  <SelectItem value="submission">
+                  <SelectItem value="choiceGuideResults">
                     Aantal inzendingen keuzewijzer
                   </SelectItem>
                 </SelectContent>
@@ -239,14 +239,14 @@ export default function CounterDisplay(
           />
         ) : null}
 
-        {props.counterType === 'submission' ? (
+        {props.counterType === 'choiceGuideResults' ? (
           <FormObjectSelectField
             form={form}
-            fieldName="choiceGuideId"
+            fieldName="widgetToFetchId"
             fieldLabel="Gewenste keuzewijzer"
             items={choiceGuides}
             keyForValue="id"
-            label={(ch) => `${ch.id}`}
+            label={(ch) => `${ch.description} (Widget ID ${ch.id})`}
             onFieldChanged={props.onFieldChanged}
             noSelection="Selecteer uw gewenste keuzewijzer"
           />
