@@ -400,7 +400,7 @@ app.use((req, res, next) => {
     return basicAuth({
         users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
         challenge: true
-    });
+    })(req, res, next);
   }
 
   next();
