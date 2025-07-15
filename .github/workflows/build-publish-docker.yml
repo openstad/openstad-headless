@@ -29,9 +29,26 @@ jobs:
       - name: Run Vitest tests
         run: npm run test:unit
 
+  generate-ci-build-id:
+    name: Generate CI build ID
+    runs-on: ubuntu-latest
+    outputs:
+      build_id: ${{ steps.set_build_id.outputs.build_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set build ID
+        id: set_build_id
+        # This step generates a unique build ID based on the current timestamp with the github sha.
+        run: |
+          BUILD_ID=${{ github.sha }}-$(date +%s)
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+
   component-test:
     name: Run Component tests
     runs-on: ubuntu-latest
+    needs: generate-ci-build-id
 
     steps:
       - name: Checkout code
@@ -54,6 +71,7 @@ jobs:
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            CI_BUILD_ID: ${{ needs.generate-ci-build-id.outputs.build_id }}
 
   build-builder-stage:
     name: Build `builder` stage
@@ -158,7 +176,7 @@ jobs:
   e2e-test:
     name: Run E2E tests
     runs-on: ubuntu-latest
-    needs: [build-and-push-docker-image]
+    needs: [generate-ci-build-id, build-and-push-docker-image]
     #if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
     steps:
@@ -228,6 +246,7 @@ jobs:
           wait-on: '${{env.ADMIN_URL}}/health,${{env.API_URL}}/health,${{env.CMS_URL}}/health,${{env.AUTH_APP_URL}}/health,${{env.IMAGE_APP_URL}}/health'
           wait-on-timeout: 160
           group: "E2E"
+          ci-build-id: {{ needs.generate-ci-build-id.outputs.build_id }}
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
