@@ -9,8 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "preview": "vite preview",
     "cy:open": "cypress open",
-    "test:component": "cypress run --component",
-    "test:component:record": "cypress run --component --record --group Counter"
+    "test:component": "cypress run --component"
   },
   "dependencies": {
     "@cypress/react": "^9.0.1",
