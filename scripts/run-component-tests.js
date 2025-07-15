@@ -7,7 +7,6 @@ const packageFolders = fs.readdirSync(packagesDir);
 
 const ciBuildId = process.env?.CI_BUILD_ID;
 console.log(`CI Build ID: ${ciBuildId}`);
-process.exit(0);
 
 for (const folder of packageFolders) {
   const packagePath = path.join(packagesDir, folder);
