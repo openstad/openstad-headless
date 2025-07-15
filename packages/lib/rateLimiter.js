@@ -7,6 +7,7 @@ function rateLimiter() {
         max: process.env.RATE_LIMIT ? parseInt(process.env.RATE_LIMIT, 10) : 100,
         standardHeaders: true,
         legacyHeaders: false,
+        skipSuccessfulRequests: true,
         skip: (req, res) => {
             console.log ('rate limit skip > IP:', req.ip, req.url);
             // Skip rate limiting for private IPs and localhost
