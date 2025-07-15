@@ -248,6 +248,7 @@ jobs:
           wait-on-timeout: 160
           group: "E2E"
           ci-build-id: ${{ needs.generate-ci-build-id.outputs.build_id }}
+          tag: "e2e"
         env:
             CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -23,7 +23,7 @@ for (const folder of packageFolders) {
   
   
   if (process.env?.CYPRESS_RECORD_KEY) {
-    command = `cypress run --component --record --group ${group}`;
+    command = `cypress run --component --record --group ${group} --tag component`;
     
     if (ciBuildId) {
       command += ` --ci-build-id=${ciBuildId}`;
