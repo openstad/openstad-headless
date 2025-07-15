@@ -35,7 +35,6 @@ module.exports = function( req, res, next ) {
             break;
           }
           
-          // If the column is not allowed, return by rank
           if (!allowedSortColumns.includes(match[1])) {
             return [ 'createdAt', 'DESC' ];
             break;
