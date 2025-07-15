@@ -108,6 +108,7 @@ const SelectField: FC<SelectFieldProps> = ({
               { multiple ? (
                   <MultiSelect
                     label={defaultOption}
+                    id={fieldKey}
                     options={choices.map(choice => ({
                       value: choice.value,
                       label: choice.label,
@@ -133,6 +134,7 @@ const SelectField: FC<SelectFieldProps> = ({
                 <Select
                   className="form-item"
                   name={fieldKey}
+                  id={fieldKey}
                   required={fieldRequired}
                   onChange={(e) => {
                     setSelected(e.target.value);
