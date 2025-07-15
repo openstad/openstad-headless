@@ -6,9 +6,6 @@ const allowedSortColumns = Object.entries(db.Resource.getAttributes())
 
 module.exports = function( req, res, next ) {
   let sort = req.query.sort;
-  
-  const DEFAULT_PSEUDO_RANDOM_SORT_SEED = "123456789"
-  
   if (sort) {
     if (!Array.isArray(sort)) sort = [ sort ];
     sort = sort.map( column => {
@@ -21,6 +18,7 @@ module.exports = function( req, res, next ) {
           return [ 'yes', 'ASC' ];
           break;
         case 'random':
+          const DEFAULT_PSEUDO_RANDOM_SORT_SEED = "123456789"
           return db.sequelize.literal(`RAND(${req.query?.pseudoRandomSortSeed ?? DEFAULT_PSEUDO_RANDOM_SORT_SEED})`)
           break;
         default:
