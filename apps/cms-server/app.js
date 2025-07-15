@@ -363,7 +363,7 @@ app.use('/:sitePrefix', function (req, res, next) {
 
     const site = projects[domainAndPath] ? projects[domainAndPath] : false;
 
-
+    console.log (`Checking for site with prefix ${req.params.sitePrefix} on domain ${req.openstadDomain}`, site);
 
     if (site) {
       site.sitePrefix = req.params.sitePrefix;
@@ -462,6 +462,9 @@ app.get('/auth/logout', (req, res, next) => {
 
 app.use(async function (req, res, next){
   const completeDomain = req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
+  
+  console.log (`Request for ${completeDomain}${req.url} with forceRestart: ${req.forceRestart}`, projects[completeDomain]);
+  
     if (projects[completeDomain]) {
       return await serveSite(req, res, projects[completeDomain], req.forceRestart);
     }
@@ -477,7 +480,7 @@ app.use(async function (req, res, next){
   }
 
     // fallback to generic 404
-    res.status(404).send(`Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`);
+    return res.status(404).send(`Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`);
 
 });
 
