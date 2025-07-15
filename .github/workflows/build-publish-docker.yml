@@ -42,7 +42,7 @@ jobs:
         id: set_build_id
         # This step generates a unique build ID based on the current timestamp with the github sha.
         run: |
-          BUILD_ID=${{ github.sha }}-$(date +%s)
+          BUILD_ID=${GITHUB_SHA}-$(date +%s)
           echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
 
   component-test:
