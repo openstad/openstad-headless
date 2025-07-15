@@ -29,7 +29,6 @@ module.exports = function( req, res, next ) {
         default:
           column = column.replace(/[^a-z0-9_]+/ig, '');
           
-          // For incorrect sort columns, return by rank
           let match = column.match(/^([a-z0-9_]+)_(asc|desc)$/i);
           if (!match) {
             return [ 'createdAt', 'DESC' ];
