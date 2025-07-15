@@ -8,6 +8,7 @@ function rateLimiter() {
         standardHeaders: true,
         legacyHeaders: false,
         skip: (req, res) => {
+            console.log ('rate limit skip > IP:', req.ip, req.url);
             // Skip rate limiting for private IPs and localhost
             return ip.isPrivate(req.ip) || req.ip === '::1';
         }
