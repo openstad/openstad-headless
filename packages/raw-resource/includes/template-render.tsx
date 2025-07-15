@@ -119,7 +119,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
           for (const match of varsInString) {
 
             let newValue = '';
-            const cleanMatches = match[1].trim().split('|');
+            const cleanMatches = match.trim().split('|');
             const varName = cleanMatches[0].trim();
             const filters = cleanMatches.slice(1).map((filter) => filter.trim());
 
@@ -151,7 +151,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
               }
             }
 
-            rendered = rendered.replaceAll(match[0], newValue);
+            rendered = rendered.replaceAll(`{{${match}}}`, newValue);
 
           }
         }
@@ -177,7 +177,7 @@ function extractVars(input: string) {
     const end = input.indexOf('}}', start);
     if (end === -1) break;
 
-    const inside = input.slice(start + 2, end).trim();
+    const inside = input.slice(start + 2, end);
     vars.push(inside);
     pos = end + 2;
   }

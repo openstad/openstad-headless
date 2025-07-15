@@ -20,12 +20,12 @@ export type CounterProps = {
   | 'votedUsers'
   | 'static'
   | 'argument'
-  | 'submission';
+  | 'choiceGuideResults';
   label?: string;
   url?: string;
   opinion?: string;
   amount?: number;
-  choiceGuideId?: string;
+  widgetToFetchId?: string;
   includeOrExclude?: string;
   onlyIncludeOrExcludeTagIds?: string;
 };
@@ -113,14 +113,16 @@ function Counter({
     sentiment: opinion,
   });
 
+  console.log ({props});
+
   const {
     data: results,
     error,
     isLoading,
-  } = datastore.useChoiceGuideResults({
+  } = datastore.useChoiceGuideResultCount({
     projectId: props.projectId,
-    choiceGuideId:
-      counterType === 'submission' ? props.choiceGuideId : undefined,
+    widgetToFetchId:
+      counterType === 'choiceGuideResults' ? props.widgetToFetchId : undefined,
   });
 
   if (counterType === 'resource') {
@@ -149,8 +151,8 @@ function Counter({
     amountDisplayed = comments?.length || 0;
   }
 
-  if (counterType === 'submission') {
-    amountDisplayed = results?.length || 0;
+  if (counterType === 'choiceGuideResults') {
+    amountDisplayed = results || 0;
   }
 
   const content = () => {

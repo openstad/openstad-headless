@@ -502,8 +502,6 @@ function ResourceDetail({
             onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
             sentiment={useSentiments[0]}
           />
-          includeOrExclude
-          onlyIncludeOrExcludeTagIds
           {useSentiments?.length > 1 && (
             <Comments
               {...props}
