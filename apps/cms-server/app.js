@@ -10,7 +10,6 @@ const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
-const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const basicAuth = require('express-basic-auth');
 const path = require('node:path');
@@ -24,7 +23,10 @@ let startUpQueue = [];
 
 app.set('trust proxy', true);
 
-app.use(rateLimiter());
+if (!process.env?.DISABLE_RATE_LIMITER || process.env?.DISABLE_RATE_LIMITER !== 'true') {
+  const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+  app.use(rateLimiter());
+}
 
 app.get('/health', (req, res) => {
   res.status(200).json({
