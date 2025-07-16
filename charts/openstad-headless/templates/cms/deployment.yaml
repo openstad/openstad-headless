@@ -60,8 +60,13 @@ spec:
                 name: {{ template "openstad.cdn.secret.fullname" . }}
           - name: CMS_DEFAULTS
             value: "{}"
+
           - name: NODE_ENV
             value: production
+
+          - name: DISABLE_RATE_LIMITER
+            value: {{ .Values.cms.disableRateLimiter | default "false" | quote }}
+
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
