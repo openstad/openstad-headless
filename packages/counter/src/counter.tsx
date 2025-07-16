@@ -84,10 +84,10 @@ function Counter({
   const { tags: filteredTagIdsArray } = determineTags(includeOrExclude, allTags, tagIdsArray);
 
   const { data: resources } = datastore.useResources({
-    projectId: counterType === 'resource' ? props.projectId : undefined,
+    projectId: props.projectId,
     pageSize: 999999,
     includeTags: '',
-  });
+  });  
 
   const filteredResources = resources && resources?.records && filteredTagIdsArray && Array.isArray(filteredTagIdsArray) && filteredTagIdsArray.length > 0
       ? resources?.records?.filter((resource: any) => {
