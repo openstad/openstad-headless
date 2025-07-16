@@ -65,7 +65,7 @@ spec:
             value: production
 
           - name: DISABLE_RATE_LIMITER
-            value: {{ .Values.cms.disableRateLimiter | default "false" }}
+            value: {{ .Values.cms.disableRateLimiter | default "false" | quote }}
 
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
