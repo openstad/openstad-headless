@@ -469,6 +469,8 @@ cms:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
 
+  disableRateLimiter: "false" # Whether to disable the rate limiter for this service
+
 # Overwrite Secrets
 
 ##
