@@ -31,7 +31,7 @@ spec:
   ingressClassName: {{ .Values.admin.ingress.ingressClassName }}
   rules:
 {{- range $host := .Values.admin.ingress.hosts }}
-    - host: {{ 1 }}
+    - host: {{ $host }}
       http:
         paths:
           - path: /
