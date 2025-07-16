@@ -329,10 +329,12 @@ export function Filters({
               onUpdateFilter && onUpdateFilter(defaultFilter);
               updateParameter();
               setLocation(undefined);
-            }}>
+            }}
+            test-id={"filter-reset-button"}
+          >
             {props.resetText}
           </Button>
-          <Button type='submit' appearance='primary-action-button'>{props.applyText}</Button>
+          <Button type='submit' appearance='primary-action-button' test-id={"filter-apply-button"}>{props.applyText}</Button>
         </div>
       </form>
 

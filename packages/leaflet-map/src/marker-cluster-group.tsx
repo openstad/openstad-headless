@@ -3,7 +3,7 @@ import LeafletMarkerClusterGroup from 'react-leaflet-cluster'
 import type { MarkerCluster } from 'leaflet';
 import type { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
 
-import Marker from './marker.jsx';
+import Marker from './marker';
 import amapsCreateClusterIcon from './lib/amaps-cluster-icon.js';
 
 export default function MarkerClusterGroup({
@@ -43,13 +43,13 @@ export default function MarkerClusterGroup({
   );
 
   return (
+    // @ts-ignore
     <LeafletMarkerClusterGroup {...props} iconCreateFunction={useIconCreateFunction} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover}>
       {markers?.map((data) => {
+        // @ts-ignore
         return <Marker {...data} key={`marker-${data.markerId}`}/>
         })}
     </LeafletMarkerClusterGroup>
   );
 
 }
-
-
