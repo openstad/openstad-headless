@@ -136,10 +136,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "openstad.admin.url" -}}
+{{- if .Values.admin.customDomain -}}
+{{ .Values.admin.customDomain }}
+{{- else -}}
 {{- if .Values.admin.subdomain -}}
 {{- if .Values.host.usewww -}}www.{{- end -}}{{ .Values.admin.subdomain }}.{{ .Values.host.base }}
 {{- else -}}
 {{- if .Values.host.usewww -}}www.{{- end -}}{{ .Values.host.base }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
