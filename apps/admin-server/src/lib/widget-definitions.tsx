@@ -64,6 +64,11 @@ export const WidgetDefinitions = {
     description: 'Likemodule',
     image: '/widget_preview/likes-preview.png',
   },
+  swipe: {
+    name: 'Swipe',
+    description: 'Swipe module',
+    image: '/widget_preview/swipe_preview.png',
+  },
   rawresource: {
     name: 'Inzending maatwerk',
     description: 'Module for raw resources',

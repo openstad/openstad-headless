@@ -22,6 +22,17 @@ let moduleDefinitions = {
       resourceId: null,
     },
   },
+  swipe: {
+    packageName: '@openstad-headless/swipe',
+    directory: 'swipe',
+    js: ['dist/swipe.iife.js'],
+    css: ['dist/swipe.css'],
+    functionName: 'OpenstadHeadlessSwipe',
+    componentName: 'Swipe',
+    defaultConfig: {
+      resourceId: null,
+    },
+  },
   comments: {
     packageName: '@openstad-headless/comments',
     directory: 'comments',
