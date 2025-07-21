@@ -150,12 +150,13 @@ function VideoSlider({
   const [muted, setMuted] = useState(true);
 
   const handleSwiperClick = (swiper: any, event: Event) => {
-    const target = event.target as HTMLElement;
-    // Don't toggle mute if clicking on checkboxes, labels, or their children
-    if (target.closest('input') || target.closest('label')) {
-      return;
+    if (muted) {
+      const target = event.target as HTMLElement;
+      if (target.closest('input') || target.closest('label')) {
+        return;
+      }
+      setMuted(false);
     }
-    setMuted(!muted);
   };
 
   return (
