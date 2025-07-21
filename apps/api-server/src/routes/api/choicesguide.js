@@ -5,6 +5,7 @@ const auth= require('../../middleware/sequelize-authorization-middleware');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const pagination = require("../../middleware/pagination");
 const searchInResults = require("../../middleware/search-in-results");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({ mergeParams: true });
 
@@ -66,6 +67,43 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/res
 			.catch(next);
 	});
 
+router.route('/widgets')
+	.get(auth.can('ChoicesGuide', 'list'))
+	.get(function (req, res, next){
+		db.Widget
+			.findAll({
+				attributes: ['id', 'description'],
+				where: {
+					projectId: req.params.projectId,
+					type: 'choiceguide',
+				}
+			})
+			.then((found) => {
+				res.json(found);
+			}).catch(next);
+	});
+
+router.route('/widgets/:widgetId(\\d+)/count')
+	.get(auth.can('ChoicesGuide', 'list'))
+	.get(function (req, res, next) {
+		const widgetId = parseInt(req.params.widgetId);
+		if (!widgetId) return next(createError(404, 'Widget not found'));
+
+		db.ChoicesGuideResult
+			.count({
+				where: {
+					widgetId,
+					projectId: req.params.projectId
+				}
+			})
+			.then((count) => {
+				res.json({ count });
+			})
+			.catch(next);
+	});
+
+
+
 router.route('/')
 	// list choicesguide result
 	// --------------
@@ -74,7 +112,11 @@ router.route('/')
 	.get(auth.useReqUser)
 	.get(async function(req, res, next) {
 		let where = {};
-		req.scope = ['defaultScope'];
+		req.scope = ['defaultScope']
+
+		if (req.query && req.query.includeUser) {
+			req.scope.push('includeUser');
+		}
 
 		if (req.params && req.params.projectId) {
 			req.scope.push({method: ['forProjectId', req.params.projectId]});
@@ -102,7 +144,8 @@ router.route('/')
 				});
 				return {
 					...entry.toJSON(),
-					widgetConfig: widget ? widget.config : null
+					widgetConfig: widget ? widget.config : null,
+					user: entry.user || null,
 				};
 			}));
 
@@ -130,7 +173,7 @@ router.route('/')
 		if (!req.project) return next(createError(401, 'Project niet gevonden'));
 		return next();
 	})
-  .post(function( req, res, next ) {
+  .post( rateLimiter(), function( req, res, next ) {
     let data = {
       userId: req.user && req.user.id,
       result: req.body.submittedData,

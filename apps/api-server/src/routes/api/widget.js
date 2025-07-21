@@ -3,6 +3,7 @@ const router = express.Router({ mergeParams: true });
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const db = require('../../db');
 const sanitize = require('../../util/sanitize');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 router.all('*', function (req, res, next) {
   req.scope = [];
@@ -37,7 +38,7 @@ router
 
   // Create widget
   .post(auth.useReqUser)
-  .post(async function (req, res, next) {
+  .post( rateLimiter(), async function (req, res, next) {
     const widget = req.body;
     const projectId = req.params.projectId;
 
@@ -78,7 +79,7 @@ router
 
   // Update widget
   .put(auth.useReqUser)
-  .put(async function (req, res, next) {
+  .put( rateLimiter(), async function (req, res, next) {
     const widget = req.widget;
     const config = { ...widget.config, ...(req.body?.config || {}) };
     const description = req.body?.description ?? widget.description;

@@ -14,6 +14,7 @@ import submissions from './submissions';
 import commentsByProject from './commentsByProject';
 import choiceGuideResults from './choiceGuideResults';
 import userActivity from './user-activity';
+import choiceGuideResultCount from './choiceGuideResultCount';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -46,6 +47,10 @@ function API(props = {}) {
 
   self.choiceGuideResults = {
     fetch: choiceGuideResults.fetch.bind(self)
+  }
+  
+  self.choiceGuideResultCount = {
+    fetch: choiceGuideResultCount.fetch.bind(self)
   }
 
   self.comments = {

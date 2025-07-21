@@ -11,6 +11,7 @@ const c = require('config');
 
 const { Op } = require('sequelize');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -105,6 +106,13 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeUser');
   }
 
+  if (req?.query?.projectIds && typeof req?.query?.projectIds === "object") {
+    let projectIds = req.query.projectIds;
+
+    if (!Array.isArray(projectIds)) projectIds = [projectIds];
+    req.scope.push({ method: ['selectProjectIds', projectIds] });
+  }
+
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
   // todo? volgens mij wordt dit niet meer gebruikt
   // if (req.query.highlighted) {
@@ -125,11 +133,16 @@ router
     let { dbQuery } = req;
 
     dbQuery.where = {
-      projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
       deletedAt: null,
     };
+
+    let projectIds = req?.query?.projectIds || [];
+
+    if (!Array.isArray(projectIds) || ( Array.isArray(projectIds) && projectIds.length === 0 ) ) {
+        dbQuery.where.projectId = req.params.projectId;
+    }
 
     if (dbQuery.hasOwnProperty('order')) {
       /**
@@ -180,7 +193,7 @@ router
     }
     return next();
   })
-  .post(function (req, res, next) {
+  .post( rateLimiter(), function (req, res, next) {
     try {
       req.body.location = req.body.location
         ? JSON.parse(req.body.location)
@@ -465,7 +478,7 @@ router
     req.changedToPublished = wasConcept && willNowBePublished;
     next();
   })
-  .put(function (req, res, next) {
+  .put( rateLimiter(), function (req, res, next) {
     var resource = req.results;
 
     if (!(resource && resource.can && resource.can('update')))
@@ -520,7 +533,8 @@ router
     }
 
     const projectId = req.params.projectId;
-    const tagEntities = await getValidTags(projectId, tags, req.user);
+    const canBeGlobal = req?.query?.includeGlobalTags === 'true';
+    const tagEntities = await getValidTags(projectId, tags, canBeGlobal);
     
     const resourceInstance = req.results;
     resourceInstance.setTags(tagEntities).then((result) => {
@@ -629,11 +643,16 @@ router
   });
 
 // Get all valid tags of the project based on given ids
-async function getValidTags(projectId, tags) {
+async function getValidTags(projectId, tags, canBeGlobal) {
   const uniqueIds = Array.from(new Set(tags));
 
+  const whereClause = {
+    id: { [Op.in]: uniqueIds },
+    projectId: canBeGlobal ? { [Op.or]: [projectId, 0] } : projectId,
+  };
+
   const tagsOfProject = await db.Tag.findAll({
-    where: { projectId, id: { [Op.in]: uniqueIds } },
+    where: whereClause,
   });
 
   return tagsOfProject;

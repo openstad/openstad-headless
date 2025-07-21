@@ -29,7 +29,7 @@ const contentWidgets = {
 };
 
 module.exports = {
-  extend: '@apostrophecms/widget-type',
+  extend: 'base-widget',
   options: {
     label: 'Accordion',
   },

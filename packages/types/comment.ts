@@ -19,6 +19,12 @@ export type Comment = {
   user?: { displayName: string, role: string};
   submitLike: () => void;
 
+  tags?: Array<{
+    id: string;
+    name: string;
+    type: string;
+  }>;
+
   can?: {
     reply: boolean;
     delete: boolean;

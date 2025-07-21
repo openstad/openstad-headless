@@ -136,10 +136,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "openstad.admin.url" -}}
+{{- if .Values.admin.customDomain -}}
+{{ .Values.admin.customDomain }}
+{{- else -}}
 {{- if .Values.admin.subdomain -}}
 {{- if .Values.host.usewww -}}www.{{- end -}}{{ .Values.admin.subdomain }}.{{ .Values.host.base }}
 {{- else -}}
 {{- if .Values.host.usewww -}}www.{{- end -}}{{ .Values.host.base }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -200,4 +204,8 @@ Create the name of the service account to use
 
 {{- define "openstad.api.secret.fullname" -}}
 {{- printf "%s-api-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "openstad.ratelimit.secret.fullname" -}}
+{{- printf "%s-ratelimit-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

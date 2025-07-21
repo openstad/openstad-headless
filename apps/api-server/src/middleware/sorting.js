@@ -1,5 +1,9 @@
 const db = require('../db');
 
+const allowedSortColumns = Object.entries(db.Resource.getAttributes())
+  .filter(([key, val]) => !(val.type instanceof db.Sequelize.DataTypes.VIRTUAL))
+  .map(([key]) => key);
+
 module.exports = function( req, res, next ) {
   let sort = req.query.sort;
   if (sort) {
@@ -13,24 +17,34 @@ module.exports = function( req, res, next ) {
         case 'votes_asc':
           return [ 'yes', 'ASC' ];
           break;
-        // case 'comments_desc':
-        //   return [ 'commentCount', 'DESC' ];
-        //   break;
-        // case 'comments_asc':
-        //   return [ 'commentCount', 'ASC' ];
-        //   break;
         case 'random':
-          return db.sequelize.random();
+          const pseudoRandomSortSeed = parseInt(req.query?.pseudoRandomSortSeed)
+          if (Number.isInteger(pseudoRandomSortSeed)) {
+            return db.sequelize.literal(`RAND(${pseudoRandomSortSeed})`)
+          } else {
+            return db.sequelize.random()
+          }
           break;
         default:
           column = column.replace(/[^a-z0-9_]+/ig, '');
-          let match = column.match(/(.*?)_(asc|desc)$/i);
-          if (match) return [ match[1], match[2] ];
-          return column
+          
+          let match = column.match(/^([a-z0-9_]+)_(asc|desc)$/i);
+          if (!match) {
+            return [ 'createdAt', 'DESC' ];
+            break;
+          }
+          
+          if (!allowedSortColumns.includes(match[1])) {
+            return [ 'createdAt', 'DESC' ];
+            break;
+          }
+          
+          const sortOrder = column.endsWith('_asc') ? 'ASC' : 'DESC';
+          
+          return [ match[1], sortOrder ];
       }
     });
     req.dbQuery.order = sort;
   }
   return next();
 }
-1

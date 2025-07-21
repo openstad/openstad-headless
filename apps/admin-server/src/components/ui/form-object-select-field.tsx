@@ -19,7 +19,7 @@ type Props<T> = {
   items: Array<T>;
   keyForValue: keyof T;
   onFieldChanged?: (key: string, value: keyof T) => void;
-  label?: (item: T) => string;
+  label?: (item: T & Record<string, any>) => string;
   noSelection?: string;
 };
 
@@ -34,7 +34,7 @@ export const FormObjectSelectField = <T extends { [key: string]: any }>({
       render={({ field }) => (
         <FormItem>
           <FormLabel>
-            {props.fieldLabel} 
+            {props.fieldLabel}
             {props.fieldInfo && <InfoDialog content={props.fieldInfo} />}
           </FormLabel>
           {ObjectListSelect<T>({

@@ -10,6 +10,7 @@ import type { MarkerProps } from './types/marker-props';
 import type {ResourceDetailMapWidgetProps} from './types/resource-detail-map-widget-props';
 import { BaseMap } from './base-map';
 import React from 'react';
+import { getFirstParamNameWithIdValue } from '../../lib/get-resource-id';
 
 const ResourceDetailMap = ({
   resourceId = undefined,
@@ -34,9 +35,8 @@ const ResourceDetailMap = ({
   resourceId = resourceId || urlParams.get(resourceIdRelativePath);
 
   if (!resourceId && resourceIdRelativePath.includes('[id]')) {
-    const paramNameMatch = resourceIdRelativePath.match(/[?&]([^=]+)=\[id]/);
-    if (paramNameMatch && paramNameMatch[1]) {
-      const paramName = paramNameMatch[1];
+    const paramName = getFirstParamNameWithIdValue(resourceIdRelativePath);
+    if (paramName && urlParams.has(paramName)) {
       resourceId = urlParams.get(paramName);
     }
   }
@@ -63,7 +63,7 @@ const ResourceDetailMap = ({
   const { data: areas } = datastore.useArea({
     projectId: props.projectId
   });
-  
+
 
   let areaId = props?.map?.areaId || false;
   const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];

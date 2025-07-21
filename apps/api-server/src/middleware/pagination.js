@@ -40,12 +40,12 @@ module.exports = {
     }
 
     let url = req.originalUrl;
-    let match = url.match(/(?:\?|&)page=.*?(?:&|$)/);
+    let match = url.match(/(?:\?|&)page=[^&]*(?:&|$)/);
     if (!match) {
       url += url.match(/\?/) ? '&' : '?';
       url += `page=${currentPage}`
     }
-    url = url.replace(/(\?|&)pageSize=.*?(&|$)/, `$1pageSize=${pageSize}$2`);
+    url = url.replace(/(\?|&)pageSize=[^&]*(&|$)/, `$1pageSize=${pageSize}$2`);
 
     let metadata = {
       page: currentPage,
@@ -53,16 +53,16 @@ module.exports = {
       pageCount,
       totalCount: listLength,
       links: {
-        self: url.replace(/(\?|&)page=.*?(&|$)/, `$1page=${currentPage}$2`),
-        first: url.replace(/(\?|&)page=.*?(&|$)/, `$1page=0$2`),
-        last: url.replace(/(\?|&)page=.*?(&|$)/, `$1page=${pageCount - 1}$2`),
+        self: url.replace(/(\?|&)page=[^&]*(&|$)/, `$1page=${currentPage}$2`),
+        first: url.replace(/(\?|&)page=[^&]*(&|$)/, `$1page=0$2`),
+        last: url.replace(/(\?|&)page=[^&]*(&|$)/, `$1page=${pageCount - 1}$2`),
       },
     }
     if (currentPage > 0) {
-      metadata.links.previous = url.replace(/(\?|&)page=.*?(&|$)/, `$1page=${currentPage - 1}$2`);
+      metadata.links.previous = url.replace(/(\?|&)page=[^&]*(&|$)/, `$1page=${currentPage - 1}$2`);
     }
     if (currentPage < pageCount - 1) {
-      metadata.links.next = url.replace(/(\?|&)page=.*?(&|$)/, `$1page=${currentPage + 1}$2`);
+      metadata.links.next = url.replace(/(\?|&)page=[^&]*(&|$)/, `$1page=${currentPage + 1}$2`);
     }
 
     req.results = {

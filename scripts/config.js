@@ -43,6 +43,7 @@ async function setupEnvVars() {
   let AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET || generateRandomToken({ length: 64 });
   let AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID || generateRandomToken({ length: 64 });
   let AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET || generateRandomToken({ length: 64 });
+  let AUTH_PHONE_HASH_SALT = process.env.AUTH_PHONE_HASH_SALT = process.env.AUTH_PHONE_HASH_SALT || generateRandomToken({ length: 32 });
 
   let IMAGE_PORT_API = process.env.IMAGE_PORT_API = process.env.IMAGE_PORT_API || BASE_PORT + 50;
   let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + IMAGE_PORT_API : 'image.' + process.env.BASE_DOMAIN );
@@ -127,6 +128,7 @@ async function setupEnvVars() {
   process.env.AUTH_FIRST_CLIENT_ID = AUTH_FIRST_CLIENT_ID;
   process.env.AUTH_FIRST_CLIENT_SECRET = AUTH_FIRST_CLIENT_SECRET;
   process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || generateRandomToken({ length: 32 });
+  process.env.AUTH_PHONE_HASH_SALT = AUTH_PHONE_HASH_SALT
 
   process.env.KPN_CLIENT_ID=process.env.KPN_CLIENT_ID || '';
   process.env.KPN_CLIENT_SECRET=process.env.KPN_CLIENT_SECRET || '';
@@ -145,6 +147,8 @@ async function setupEnvVars() {
   process.env.IMAGE_THROTTLE_CC_PROCESSORS = process.env.IMAGE_THROTTLE_CC_PROCESSORS || 4;
   process.env.IMAGE_THROTTLE_CC_PREFETCHER = process.env.IMAGE_THROTTLE_CC_PREFETCHER || 20;
   process.env.IMAGE_THROTTLE_CC_REQUESTS = process.env.IMAGE_THROTTLE_CC_REQUESTS || 100;
+
+  process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS = process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS || 160000;
 
   // admin server
   process.env.ADMIN_URL = ADMIN_URL;
@@ -259,6 +263,7 @@ AUTH_ADMIN_CLIENT_SECRET=${process.env.AUTH_ADMIN_CLIENT_SECRET}
 AUTH_FIRST_CLIENT_ID=${process.env.AUTH_FIRST_CLIENT_ID}
 AUTH_FIRST_CLIENT_SECRET=${process.env.AUTH_FIRST_CLIENT_SECRET}
 AUTH_FIRST_LOGIN_CODE=${process.env.AUTH_FIRST_LOGIN_CODE}
+AUTH_PHONE_HASH_SALT=${process.env.AUTH_PHONE_HASH_SALT}
 
 #KPN_CLIENT_ID=${process.env.KPN_CLIENT_ID}
 #KPN_CLIENT_SECRET=${process.env.KPN_CLIENT_SECRET}
@@ -277,6 +282,8 @@ IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}
 IMAGE_THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 IMAGE_THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
 IMAGE_THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
+
+IMAGE_HQ_ORIGINAL_MAX_PIXELS=${process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS}
 
 #admin server
 ADMIN_URL=${process.env.ADMIN_URL}

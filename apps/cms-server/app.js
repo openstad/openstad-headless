@@ -21,6 +21,13 @@ const apostropheServer = {};
 let startUpIsBusy = false;
 let startUpQueue = [];
 
+app.set('trust proxy', true);
+
+if (!process.env?.DISABLE_RATE_LIMITER || process.env?.DISABLE_RATE_LIMITER !== 'true') {
+  const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+  app.use(rateLimiter());
+}
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -333,8 +340,8 @@ app.use(function (req, res, next) {
   const url = req.url;
 
   if (req.url.indexOf('//') > -1 || req.url.indexOf('%5C') > -1) {
-    req.url = req.url.replace('//', '/');
-    req.url = req.url.replace('%5C', '');
+    req.url = req.url.replace(/\/{2,}/g, '/');
+    req.url = req.url.replace(/%5c/gi, '');
 
     // Reinitialize route parameters, so the next middleware will see the correct parameters
     req.app._router.handle(req, res, next);
@@ -390,14 +397,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Create a middleware function for basic authentication
 app.use((req, res, next) => {
-
   if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
-
     return basicAuth({
-      users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
-      challenge: true
+        users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
+        challenge: true
     })(req, res, next);
   }
 
@@ -464,8 +468,18 @@ app.use(async function (req, res, next){
       return await serveSite(req, res, projects[completeDomain], req.forceRestart);
     }
 
+  function escapeHtml(input) {
+    return String(input)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/`/g, '&#96;');
+  }
+
     // fallback to generic 404
-    res.status(404).send(`Error: No project found for given URL ${req.openstadDomain}${req.url}`);
+    res.status(404).send(`Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`);
 
 });
 

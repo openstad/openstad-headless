@@ -71,6 +71,10 @@ public:
   name: openstad
   environmentName:
 
+rateLimit:
+  windowMs: 60000
+  limit: 100
+
 # Settings
 
 ##
@@ -114,6 +118,12 @@ persistence:
   #configure the cloud-specific storageClassName, will use the clouds default if not specified
   storageClassName:
   annotations: {}
+  image:
+    size: 1Gi
+  docs:
+    size: 1Gi
+  cms:
+    size: 1Gi
 
 admin:
   # Configure how many replicas exists of this service
@@ -148,6 +158,9 @@ admin:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: admin
+
+  # Custom domain for the service, this overrides the subdomain
+  customDomain:
 
   # Ingress settings:
   # Configure how the service is accessed
@@ -365,6 +378,8 @@ image:
     # Number of concurrent http requests. Anything to exceed this value will result in a 503 (too busy), to avoid an indefinite pileup
     ccRequests: 100
 
+  hqOriginalMaxPixels: 160000
+
   # Inject extra environment variables
   extraEnvVars: []
 
@@ -429,6 +444,8 @@ cms:
       secretName: openstad-tls-cms
       hosts: []
 
+  disableWidgetPreview: "false"
+
   # Inject extra environment variables
   extraEnvVars: []
 
@@ -457,6 +474,8 @@ cms:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
 
+  disableRateLimiter: "false" # Whether to disable the rate limiter for this service
+
 # Overwrite Secrets
 
 ##
@@ -476,6 +495,7 @@ secrets:
 
   auth:
     sessionSecret:
+    phoneHashSalt:
 
   cms:
     apiKey:
@@ -537,6 +557,8 @@ secrets:
   cdn:
     reactUrl: https://unpkg.com/react@18.3.1/umd/react.production.min.js
     reactDomUrl: https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
+    zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
+    zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
 
   ### Mail server secretes
   mail:
