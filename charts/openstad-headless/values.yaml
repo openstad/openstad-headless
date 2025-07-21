@@ -444,6 +444,8 @@ cms:
       secretName: openstad-tls-cms
       hosts: []
 
+  disableWidgetPreview: "false"
+
   # Inject extra environment variables
   extraEnvVars: []
 
