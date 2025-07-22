@@ -5,6 +5,7 @@ import { Accordion } from './accordion.tsx'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Accordion 
+      headingLevel={3}
       label='test label' 
       content='
       <h3>Utrecht heading 3</h3>
