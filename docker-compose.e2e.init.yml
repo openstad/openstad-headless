@@ -1,3 +1,4 @@
+name: openstad-headless-e2e
 services:
   openstad-mysql:
     platform: linux/amd64
