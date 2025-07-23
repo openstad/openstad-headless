@@ -23,6 +23,7 @@ import {
 } from '@utrecht/component-library-react';
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
+import {TabsContent, TabsList, TabsTrigger, Tabs} from "@openstad-headless/admin-server/src/components/ui/tabs";
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
@@ -63,7 +64,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
       displayHeader?: boolean,
       displayMap?: boolean,
       selectedProjects?: any[],
-      location?: PostcodeAutoFillLocation
+      location?: PostcodeAutoFillLocation,
+      displayAsTabs?: boolean,
     ) => React.JSX.Element; renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
@@ -101,6 +103,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
+    displayAsTabs?: boolean;
+    listTabTitle?: string;
+    mapTabTitle?: string;
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
@@ -132,12 +137,16 @@ export type ResourceOverviewWidgetProps = BaseProps &
       overviewDescription?: string;
       overviewImage?: string;
       overviewUrl?: string;
+      overviewMarkerIcon?: string;
+      projectLat?: string;
+      projectLng?: string;
     }[];
     multiProjectResources?: any[];
     includeOrExcludeTagIds?: string;
     includeOrExcludeStatusIds?: string;
     includeProjectsInOverview?: boolean;
     displayLocationFilter?: boolean;
+    excludeResourcesInOverview?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -400,7 +409,7 @@ const defaultItemRenderer = (
   );
 };
 
-function ResourceOverview({
+function ResourceOverviewInner({
   renderItem = defaultItemRenderer,
   allowFiltering = true,
   displayType = 'cardrow',
@@ -427,6 +436,10 @@ function ResourceOverview({
   includeOrExcludeTagIds = 'include',
   includeOrExcludeStatusIds = 'include',
   includeProjectsInOverview = false,
+  displayAsTabs = false,
+  listTabTitle = 'Lijst',
+  mapTabTitle = 'Kaart',
+  excludeResourcesInOverview = false,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -553,6 +566,8 @@ function ResourceOverview({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
+    if (includeProjectsInOverview && excludeResourcesInOverview) return;
+
     if (resourcesWithPagination) {
       setResources(resourcesWithPagination.records || []);
     }
@@ -777,6 +792,24 @@ function ResourceOverview({
     }, 200);
   }
 
+  const overviewSection = (
+    <section className="osc-resource-overview-resource-collection" id={randomId}>
+      {filteredResources &&
+        filteredResources
+          ?.slice(page * pageSize, (page + 1) * pageSize)
+          ?.map((resource: any, index: number) => {
+            return (
+              <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
+                {renderItem(resource, { ...props, displayType, selectedProjects }, () => {
+                  onResourceClick(resource, index);
+                })}
+              </React.Fragment>
+            );
+          })
+      }
+    </section>
+  );
+
   return (
     <>
       <Dialog
@@ -818,7 +851,7 @@ function ResourceOverview({
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
 
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap, selectedProjects, location) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location) : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -870,21 +903,23 @@ function ResourceOverview({
             />
           ) : null}
 
-          <section className="osc-resource-overview-resource-collection" id={randomId}>
-            {filteredResources &&
-              filteredResources
-                ?.slice(page * pageSize, (page + 1) * pageSize)
-                ?.map((resource: any, index: number) => {
-                  return (
-                    <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
-                      {renderItem(resource, { ...props, displayType, selectedProjects }, () => {
-                        onResourceClick(resource, index);
-                      })}
-                    </React.Fragment>
-                  );
-                })
-            }
-          </section>
+          { displayAsTabs ? (
+            <div className="osc-resource-overview-tabs-container">
+              <TabsList>
+                <TabsTrigger value="list"><Icon icon="ri-list-unordered" />{listTabTitle}</TabsTrigger>
+                <TabsTrigger value="map"><Icon icon="ri-map-pin-line" />{mapTabTitle}</TabsTrigger>
+              </TabsList>
+              <TabsContent value="list">
+                {overviewSection}
+              </TabsContent>
+              <TabsContent value="map">
+                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location)}
+              </TabsContent>
+            </div>
+          ) : (
+            overviewSection
+          )}
+
         </section>
         {props.displayPagination && (
           <>
@@ -903,6 +938,18 @@ function ResourceOverview({
         )}
       </div>
     </>
+  );
+}
+
+function ResourceOverview(props: ResourceOverviewWidgetProps) {
+  const { displayAsTabs } = props;
+
+  return displayAsTabs ? (
+    <Tabs defaultValue="list">
+      <ResourceOverviewInner {...props} />
+    </Tabs>
+    ) : (
+    <ResourceOverviewInner {...props} />
   );
 }
 
