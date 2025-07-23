@@ -23,8 +23,7 @@ import {
 } from '@utrecht/component-library-react';
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
-import { Tabs } from '@/components/ui/tabs';
-import {TabsContent, TabsList, TabsTrigger} from "@openstad-headless/admin-server/src/components/ui/tabs";
+import {TabsContent, TabsList, TabsTrigger, Tabs} from "@openstad-headless/admin-server/src/components/ui/tabs";
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
