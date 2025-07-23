@@ -41,6 +41,7 @@ export const Dialog = ({
                   className="subtle-button"
                   icon="ri-close-line"
                   aria-label="Sluiten"
+                  test-id="dialog-close-button"
                 />
               </RadixDialog.Close>
             </div>

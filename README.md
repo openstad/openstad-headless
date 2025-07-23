@@ -12,11 +12,10 @@ __All__
 - [Setup](doc/setup.md)
 - [About databases](doc/databases.md)
 - [Deployment](doc/deployment.md)
+- [Testing](doc/testing.md)
 
 __API__
 - [API configuration](apps/api-server/doc/config.md)
 - [Authentication and authorization](apps/api-server/doc/auth.md)
 - [Tags: thema's, areas and more](apps/api-server/doc/tags.and.statuses.md)
 - [Pagination and search](apps/api-server/doc/pagination-and-search.md)
-
-

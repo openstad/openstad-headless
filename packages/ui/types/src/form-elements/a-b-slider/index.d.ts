@@ -1,0 +1,42 @@
+import { FC } from 'react';
+import './a-b-slider.css';
+export type RangeSliderProps = {
+    title: string;
+    description?: string;
+    labelA: string;
+    labelB: string;
+    titleA: string;
+    titleB: string;
+    imageA: string;
+    imageB: string;
+    descriptionA?: string;
+    descriptionB?: string;
+    fieldRequired?: boolean;
+    fieldKey: string;
+    showLabels?: boolean;
+    minCharacters?: number;
+    maxCharacters?: number;
+    disabled?: boolean;
+    type?: string;
+    onChange?: (e: {
+        name: string;
+        value: string | Record<number, never> | valueObject | [];
+    }) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
+    skipQuestion?: boolean;
+    skipQuestionAllowExplanation?: boolean;
+    skipQuestionExplanation?: string;
+    skipQuestionLabel?: string;
+};
+type valueObject = {
+    value: string;
+    skipQuestion: boolean;
+    skipQuestionExplanation: string | undefined;
+};
+declare const RangeSlider: FC<RangeSliderProps>;
+export default RangeSlider;

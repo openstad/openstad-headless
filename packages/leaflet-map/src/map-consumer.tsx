@@ -1,3 +1,4 @@
+// @ts-ignore
 import { useMap } from 'react-leaflet/hooks';
 
 declare global {
@@ -15,7 +16,7 @@ export function useMapRef(mapId: string) {
     if (val.map) return;
     window.oscMap[mapId].map = ref
   }
-  
+
   return [ val.map, setMapRef ];
 
 }
@@ -39,4 +40,3 @@ export function MapConsumer({
 }
 
 export default MapConsumer;
-

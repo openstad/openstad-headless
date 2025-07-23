@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
- 
+
     "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     "typeRoots": ["node_modules/@types"],   /* Specify multiple folders that act like `./node_modules/@types`. */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */
@@ -17,6 +17,10 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "emitDeclarationOnly": true,
-    "lib": ["ES2023", "DOM"]
-  }
+    "lib": ["ES2023", "DOM"],
+  },
+  "exclude": [
+    "cypress",
+    "types"
+  ]
 }
