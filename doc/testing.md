@@ -45,8 +45,10 @@ E2E tests are written using Cypress, and require some setup, as the tests will n
 You can start the local instance of OpenStad with the following command:
 
 ```bash
-docker-compose --env-file .testing.env up -d
+docker-compose --env-file .testing.env up -d -p openstad-e2e
 ```
+
+**The `-p openstad-e2e` flag will ensure that Docker starts the services under a new project name, which allows us to retain any data we already have for our normal docker-compose project.**
 
 Then you will need to run the init-database and migration commands to fill the database with initial data:
 
