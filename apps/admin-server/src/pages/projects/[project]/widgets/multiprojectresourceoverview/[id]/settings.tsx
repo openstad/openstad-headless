@@ -42,6 +42,7 @@ const formSchema = z.object({
     })
   ).optional(),
   includeProjectsInOverview: z.boolean().optional(),
+  excludeResourcesInOverview: z.boolean().optional(),
   imageProjectUpload: z.string().optional(),
   markerIconProjectUpload: z.string().optional(),
 });
@@ -55,7 +56,8 @@ export default function WidgetMultiProjectSettings(
   const { data: projects } = useProjectList();
   const defaultValues = {
     selectedProjects: props.selectedProjects || [],
-    includeProjectsInOverview: props.includeProjectsInOverview || false
+    includeProjectsInOverview: props.includeProjectsInOverview || false,
+    excludeResourcesInOverview: props?.excludeResourcesInOverview || false
   }
 
   const form = useForm<FormData>({
@@ -99,6 +101,28 @@ export default function WidgetMultiProjectSettings(
             </FormItem>
           )}
         />
+
+        {form.watch("includeProjectsInOverview") === true && (
+          <>
+            <Spacer />
+            <FormField
+              control={form.control}
+              name="excludeResourcesInOverview"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Toon geen inzendingen in het overzicht
+                  </FormLabel>
+                  <FormDescription>
+                    Als je deze optie aanzet, worden alleen de projecten zelf getoond als tegels in het overzicht, zonder de inzendingen.
+                  </FormDescription>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}

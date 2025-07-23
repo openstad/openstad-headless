@@ -146,6 +146,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     includeOrExcludeStatusIds?: string;
     includeProjectsInOverview?: boolean;
     displayLocationFilter?: boolean;
+    excludeResourcesInOverview?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -438,6 +439,7 @@ function ResourceOverviewInner({
   displayAsTabs = false,
   listTabTitle = 'Lijst',
   mapTabTitle = 'Kaart',
+  excludeResourcesInOverview = false,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -564,6 +566,8 @@ function ResourceOverviewInner({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
+    if (includeProjectsInOverview && excludeResourcesInOverview) return;
+
     if (resourcesWithPagination) {
       setResources(resourcesWithPagination.records || []);
     }
