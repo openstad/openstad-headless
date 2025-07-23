@@ -53,10 +53,10 @@ docker-compose --env-file .testing.env up -d -p openstad-e2e
 Then you will need to run the init-database and migration commands to fill the database with initial data:
 
 ```bash
-docker-compose --env-file .testing.env exec auth-server npm run init-database
-docker-compose --env-file .testing.env exec auth-server npm run migrate-database
-docker-compose --env-file .testing.env exec api-server npm run init-database
-docker-compose --env-file .testing.env exec api-server npm run migrate-database
+docker-compose --env-file .testing.env exec openstad-auth-server npm run init-database
+docker-compose --env-file .testing.env exec openstad-auth-server npm run migrate-database
+docker-compose --env-file .testing.env exec openstad-api-server npm run init-database
+docker-compose --env-file .testing.env exec openstad-api-server npm run migrate-database
 ```
 
 
