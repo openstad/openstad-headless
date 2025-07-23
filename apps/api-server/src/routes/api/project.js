@@ -373,6 +373,9 @@ router.route('/')
 
       // now find the corresponding projects
       let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+      if (req.user?.role === 'editor') {
+        result.rows = result.rows.filter(project => project.id !== 1);
+      }
 
       if ( req.scope.includes("getBasicInformation") ) {
         result.rows = result.rows.map(project => {
