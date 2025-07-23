@@ -148,6 +148,9 @@ jobs:
             type=ref,event=branch,suffix=-{{sha}}
             # tag event
             type=ref,event=tag
+            # latest tag
+            type=raw,value=latest,enable={{is_default_branch}}
+
 
       - name: Set up Docker Buildx
         id: buildx
