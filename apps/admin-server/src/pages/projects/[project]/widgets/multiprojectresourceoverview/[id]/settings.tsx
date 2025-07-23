@@ -35,11 +35,15 @@ const formSchema = z.object({
       overviewSummary: z.string().optional(),
       overviewDescription: z.string().optional(),
       overviewImage: z.string().optional(),
+      overviewMarkerIcon: z.string().optional(),
       overviewUrl: z.string().optional(),
+      projectLat: z.string().optional(),
+      projectLng: z.string().optional(),
     })
   ).optional(),
   includeProjectsInOverview: z.boolean().optional(),
   imageProjectUpload: z.string().optional(),
+  markerIconProjectUpload: z.string().optional(),
 });
 
 export default function WidgetMultiProjectSettings(
@@ -250,11 +254,69 @@ export default function WidgetMultiProjectSettings(
                             )}
                           />
 
+                          <FormField
+                            control={form.control}
+                            name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.projectLat`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Latitude voor project marker
+                                </FormLabel>
+                                <FormDescription>
+                                  Dit veld is optioneel en wordt gebruikt voor een marker op de kaart. Voor hulp bij het vinden van de juiste coördinaten kun je bijvoorbeeld <a href="https://www.latlong.net/" target="_blank" rel="noopener noreferrer" style={{textDecoration: "underline"}}>deze website</a> gebruiken.
+                                </FormDescription>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="text"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.projectLng`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Longitude voor project marker
+                                </FormLabel>
+                                <FormDescription>
+                                  Dit veld is optioneel en wordt gebruikt voor een marker op de kaart. Voor hulp bij het vinden van de juiste coördinaten kun je bijvoorbeeld <a href="https://www.latlong.net/" target="_blank" rel="noopener noreferrer" style={{textDecoration: "underline"}}>deze website</a> gebruiken.
+                                </FormDescription>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="text"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <ImageUploader
+                            form={form}
+                            project={props?.projectId}
+                            fieldName="markerIconProjectUpload"
+                            imageLabel="Upload een marker icoon voor het project"
+                            allowedTypes={["image/*"]}
+                            onImageUploaded={(imageResult) => {
+                              const image = imageResult ? imageResult.url : '';
+
+                              form.setValue(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewMarkerIcon`, image);
+                              form.resetField('markerIconProjectUpload');
+                            }}
+                          />
+
                           <ImageUploader
                             form={form}
                             project={props?.projectId}
                             fieldName="imageProjectUpload"
-                            imageLabel="Upload een afbeelding voor de project tegel"
+                            imageLabel="Upload een afbeelding voor de project tegel in het overzicht"
                             allowedTypes={["image/*"]}
                             onImageUploaded={(imageResult) => {
                               const image = imageResult ? imageResult.url : '';
@@ -263,6 +325,26 @@ export default function WidgetMultiProjectSettings(
                               form.resetField('imageProjectUpload');
                             }}
                           />
+
+                          {!!form.getValues(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewMarkerIcon`) ? (
+                            <div style={{ position: 'relative', height: '140px' }}>
+                              <img
+                                src={form.getValues(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewMarkerIcon`)}
+                                style={{position: "relative", width: "auto", height: "auto", maxHeight: "100%"}}
+                              />
+                              <Button
+                                color="red"
+                                onClick={() => {
+                                  form.setValue(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewMarkerIcon`, '');
+                                  form.resetField('markerIconProjectUpload');
+                                }}
+                                className="absolute left-0 top-0 p-1">
+                                <X size={24} />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div></div>
+                          )}
 
                           {!!form.getValues(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewImage`) && (
                             <div style={{ position: 'relative', height: '140px' }}>

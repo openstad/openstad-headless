@@ -137,6 +137,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
       overviewDescription?: string;
       overviewImage?: string;
       overviewUrl?: string;
+      overviewMarkerIcon?: string;
+      projectLat?: string;
+      projectLng?: string;
     }[];
     multiProjectResources?: any[];
     includeOrExcludeTagIds?: string;
