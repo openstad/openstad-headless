@@ -15,7 +15,7 @@ const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
-  return hasRole( user, 'moderator')
+  return hasRole( user, 'editor')
 };
 
 // scopes: for all get requests

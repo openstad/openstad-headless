@@ -97,7 +97,8 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         if (!result.id) throw 'no user'
         if ( !( req.nextUrl.pathname.match(/^\/(?:projects)?\/?$/) && hasRole(result, 'member') ) // project overview is available for members; anything else requires
              && result.role != 'superuser'
-             && result.role != 'admin' ) {
+             && result.role != 'admin'
+             && result.role != 'editor' ) {
           forceNewLogin = true;
           throw 'no user';
         }
