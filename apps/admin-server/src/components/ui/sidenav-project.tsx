@@ -22,8 +22,6 @@ export function SidenavProject({ className }: { className?: string }) {
   const sessionData = useContext(SessionContext);
   const hasAccess = sessionData?.role === 'admin' || sessionData?.role === 'superuser';
 
-  // {hasAccess && ()}
-
   return (
     <nav
       className={cn(
