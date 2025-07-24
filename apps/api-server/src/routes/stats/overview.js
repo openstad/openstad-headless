@@ -91,7 +91,7 @@ router.route('/')
     // -----------
     .get(rateLimiter(), (req, res, next) => {
 
-        const isViewable = (req.user && hasRole( req.user, 'moderator'))
+        const isViewable = (req.user && hasRole( req.user, 'editor'))
 
         if (isViewable) {
             return next();
