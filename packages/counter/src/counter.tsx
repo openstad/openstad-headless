@@ -25,6 +25,7 @@ export type CounterProps = {
   url?: string;
   opinion?: string;
   amount?: number;
+  rigCounter?: string;
   widgetToFetchId?: string;
   includeOrExclude?: string;
   onlyIncludeOrExcludeTagIds?: string;
@@ -36,6 +37,7 @@ function Counter({
   url = '',
   opinion = '',
   amount = 0,
+  rigCounter = '0',
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
   ...props
@@ -153,6 +155,13 @@ function Counter({
 
   if (counterType === 'choiceGuideResults') {
     amountDisplayed = results || 0;
+  }
+
+  if (counterType !== 'static' && rigCounter !== '0') {
+    const currAmount = isNaN(Number(amountDisplayed)) ? 0 : Number(amountDisplayed);
+    const rigCounterNumber = isNaN(Number(rigCounter)) ? 0 : Number(rigCounter);
+
+    amountDisplayed = currAmount + rigCounterNumber;
   }
 
   const content = () => {
