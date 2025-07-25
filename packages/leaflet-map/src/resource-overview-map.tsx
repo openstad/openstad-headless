@@ -99,6 +99,7 @@ const ResourceOverviewMap = ({
   const { data: resources } = datastore.useResources(
     {
       projectId: props.projectId,
+      pageSize: 99999,
     },
     { suspense: !!givenResources }
   );
