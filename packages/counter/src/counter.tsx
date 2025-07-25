@@ -54,36 +54,7 @@ function Counter({
 
   const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
 
-  const {data: allTags} = datastore.useTags({
-    projectId: props.projectId,
-    type: ''
-  });
-
   const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
-
-  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
-    let filteredTagIdsArray: Array<number> = [];
-    try {
-      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0 ) {
-        filteredTagIdsArray = allTags.filter((tag: {id: number}) => !tagIdsArray.includes((tag.id))).map((tag: {id: number}) => tag.id);
-      } else if (includeOrExclude === 'include') {
-        filteredTagIdsArray = tagIdsArray;
-      }
-
-      return {
-        tags: filteredTagIdsArray || []
-      };
-
-    } catch (error) {
-      console.error('Error processing tags:', error);
-
-      return {
-        tags: []
-      };
-    }
-  }
-
-  const { tags: filteredTagIdsArray } = determineTags(includeOrExclude, allTags, tagIdsArray);
 
   const { data: resources } = datastore.useResources({
     projectId: props.projectId,
@@ -91,15 +62,16 @@ function Counter({
     includeTags: '',
   });  
 
-  const filteredResources = resources && resources?.records && filteredTagIdsArray && Array.isArray(filteredTagIdsArray) && filteredTagIdsArray.length > 0
+  const filteredResources = resources && resources?.records && tagIdsArray && Array.isArray(tagIdsArray) && tagIdsArray.length > 0
       ? resources?.records?.filter((resource: any) => {
         if (includeOrExclude === 'exclude') {
-          if (!resource.tags || !Array.isArray(resource.tags) || resource.tags.length === 0) {
-            return true;
-          }
-          return !filteredTagIdsArray.some((tag) => resource.tags.find((o: { id: number }) => o.id === tag));
+          const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
+            tagIdsArray.includes(tag.id)
+          );
+
+          return !hasExcludedTag;
         } else {
-          return filteredTagIdsArray.some((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === tag));
+          return tagIdsArray.some((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === tag));
         }
       })
       : resources?.records;
@@ -114,8 +86,6 @@ function Counter({
     resourceId: counterType === 'argument' ? resourceId : undefined,
     sentiment: opinion,
   });
-
-  console.log ({props});
 
   const {
     data: results,
