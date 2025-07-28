@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { SwipeProps, Swipe } from './swipe.js';
+import { SwipeProps, SwipeField } from './swipe.js';
 
 const config: SwipeProps = {
   api: {
@@ -19,7 +19,7 @@ const config: SwipeProps = {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <div className="openstad">
-    <Swipe {...config} />
+    <SwipeField {...config} />
     </div>
   </React.StrictMode>
 );

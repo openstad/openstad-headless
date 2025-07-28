@@ -39,6 +39,7 @@ export type Item = {
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
+  cards?: Array<Card>;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -52,6 +53,13 @@ export type Item = {
 export type Option = {
   trigger: string;
   titles: Array<Title>;
+};
+
+export type Card = {
+    id: string,
+    title: string,
+    description: string,
+    image: string
 };
 
 export type Title = {

@@ -1,5 +1,5 @@
 import './swipe.css';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, FC } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
 
@@ -8,8 +8,7 @@ export type SwipeCard = {
   title: string;
   description: string;
   image?: string;
-  age?: number;
-  location?: string;
+
 };
 
 export type SwipeWidgetProps = BaseProps &
@@ -17,13 +16,15 @@ export type SwipeWidgetProps = BaseProps &
     resourceId?: string;
     resourceIdRelativePath?: string;
   };
-
-export type SwipeProps = {
-  cards?: SwipeCard[];
-  onSwipeLeft?: (card: SwipeCard) => void;
-  onSwipeRight?: (card: SwipeCard) => void;
-  showButtons?: boolean;
-  enableKeyboard?: boolean;
+  
+  export type SwipeProps = {
+    cards?: SwipeCard[];
+    onSwipeRight?: (card: SwipeCard) => void;
+    onSwipeLeft?: (card: SwipeCard) => void;
+    showButtons?: boolean;
+    enableKeyboard?: boolean;
+    fieldKey?: string;
+    type?: string;
 };
 
 // Default demo cards - moved outside component to prevent recreation
@@ -60,14 +61,13 @@ const defaultCards: SwipeCard[] = [
   },
 ];
 
-function Swipe({
-  cards = [],
+const SwipeField: FC<SwipeWidgetProps> = ({
+  cards = defaultCards,
   onSwipeLeft = () => { console.log('Swiped LEFT'); },
   onSwipeRight = () => { console.log('Swiped RIGHT'); },
   showButtons = true,
   enableKeyboard = true,
-  ...props
-}: SwipeWidgetProps) {
+}) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [remainingCards, setRemainingCards] = useState<SwipeCard[]>([]);
@@ -243,7 +243,7 @@ function Swipe({
         <div className="swipe-finished-content">
           <h2>Klaar!</h2>
           <p>Je hebt alle beschikbare kaarten gezien.</p>
-          <button onClick={resetCards} className="swipe-reset-btn">
+          <button onClick={(e) => { resetCards(); e.preventDefault(); }} className="swipe-reset-btn">
             Begin opnieuw
           </button>
         </div>
@@ -255,10 +255,10 @@ function Swipe({
     <div className="swipe-widget">
       <div className="swipe-intro">
         <div className="swipe-progress">
-          <progress id="file" value={100 - (remainingCards.length / defaultCards.length) * 100} max="100"> {100 - (remainingCards.length / defaultCards.length) * 100} </progress>
+          <progress id="file" value={100 - (remainingCards.length / cards.length) * 100} max="100"> {100 - (remainingCards.length / cards.length) * 100} </progress>
         </div>
         <div className="swipe-counter">
-          Stelling {defaultCards.length - remainingCards.length + 1} van de {defaultCards.length}
+          Stelling {cards.length - remainingCards.length + 1} van de {cards.length}
         </div>
 
       </div>
@@ -324,7 +324,10 @@ function Swipe({
         <div className="swipe-actions">
           <button
             className="swipe-btn swipe-btn-pass"
-            onClick={handleSwipeLeft}
+            onClick={(e) => {
+              handleSwipeLeft();
+              e.preventDefault();
+            }}
             disabled={remainingCards.length === 0}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -333,7 +336,10 @@ function Swipe({
           </button>
           <button
             className="swipe-btn swipe-btn-like"
-            onClick={handleSwipeRight}
+            onClick={(e) => {
+              handleSwipeRight();
+              e.preventDefault();
+            }}
             disabled={remainingCards.length === 0}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -345,7 +351,5 @@ function Swipe({
     </div>
   );
 }
-
-Swipe.loadWidget = loadWidget;
-
-export { Swipe };
+export { SwipeField };
+export default SwipeField;
