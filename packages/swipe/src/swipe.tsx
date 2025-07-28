@@ -83,7 +83,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaY: 0,
   });
 
-  // Use useMemo to stabilize the swipeCards reference
   const swipeCards = useMemo(() => {
     return cards.length > 0 ? cards : defaultCards;
   }, [cards]);
@@ -115,7 +114,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     if (remainingCards.length > 0 && !isAnimating) {
       setIsAnimating(true);
       setSwipeDirection('left');
-      const currentCard = remainingCards[0]; // Always take the top card
+      const currentCard = remainingCards[0];
       onSwipeLeft?.(currentCard);
 
       setTimeout(() => {
@@ -130,7 +129,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     if (remainingCards.length > 0 && !isAnimating) {
       setIsAnimating(true);
       setSwipeDirection('right');
-      const currentCard = remainingCards[0]; // Always take the top card
+      const currentCard = remainingCards[0];
       onSwipeRight?.(currentCard);
 
       setTimeout(() => {
@@ -143,7 +142,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   const removeCurrentCard = () => {
     setRemainingCards(prev => {
-      const newCards = prev.slice(1); // Remove the first card
+      const newCards = prev.slice(1);
       if (newCards.length === 0) {
         setIsFinished(true);
       }
@@ -201,7 +200,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     const swipeThreshold = 100;
     const velocityThreshold = 0.5;
 
-    // Calculate velocity (rough approximation)
     const velocity = Math.abs(dragState.deltaX) / 100;
 
     // Determine if swipe should trigger action
@@ -268,10 +266,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             const isTop = index === 0;
             const zIndex = remainingCards.length - index;
 
-            // Calculate transform for dragging
             let transform = '';
             if (isTop && dragState.isDragging) {
-              const rotation = dragState.deltaX * 0.1; // Rotation based on horizontal movement
+              const rotation = dragState.deltaX * 0.1;
               transform = `translate(${dragState.deltaX}px, ${dragState.deltaY * 0.5}px) rotate(${rotation}deg)`;
             } else if (isTop && swipeDirection && isAnimating) {
               const direction = swipeDirection === 'right' ? 1 : -1;
@@ -300,7 +297,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   <p className="swipe-card-description">{card.description}</p>
                 </div>
 
-                {/* Swipe direction indicators */}
                 {isTop && swipeDirection && (
                   <div className={`swipe-indicator swipe-indicator--${swipeDirection}`}>
                     {swipeDirection === 'left' ? (
