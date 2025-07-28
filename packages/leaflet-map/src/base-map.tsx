@@ -281,7 +281,14 @@ const BaseMap = ({
 
   // markers
   useEffect(() => {
-    if ((markers.length === 0 && currentMarkers.length === 0) && mapDataLayers.length === 0) return;
+    if (mapDataLayers.length === 0 ) {
+      if (currentPolyLines.length > 0) {
+        setPolyLines([]);
+      }
+      if (markers.length === 0 && currentMarkers.length === 0) {
+        return;
+      };
+    }
 
     const processMarkers = () => {
       const result = [...markers];
