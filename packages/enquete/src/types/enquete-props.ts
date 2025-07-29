@@ -1,3 +1,5 @@
+import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
+
 export type EnqueteProps = {
   widgetId?: number;
   afterSubmitUrl?: string;
@@ -14,6 +16,8 @@ export type EnqueteProps = {
   maxCharactersWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
+  datalayer?: DataLayer[];
+  enableOnOffSwitching?: boolean;
 };
 
 export type Item = {

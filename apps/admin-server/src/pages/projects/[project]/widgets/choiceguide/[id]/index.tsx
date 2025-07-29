@@ -16,6 +16,9 @@ import WidgetPreview from '@/components/widget-preview';
 import WidgetChoiceGuideItems from "@/pages/projects/[project]/widgets/choiceguide/[id]/items";
 import WidgetChoiceGuideChoiceOptions from "@/pages/projects/[project]/widgets/choiceguide/[id]/choiceOptions";
 import WidgetChoiceGuideGeneralSettings from "@/pages/projects/[project]/widgets/choiceguide/[id]/settings";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
+import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
+import {ChoiceGuideProps} from "../../../../../../../../../packages/choiceguide/src/props";
 
 export const getServerSideProps = withApiUrl;
 
@@ -24,10 +27,10 @@ export default function WidgetChoiceGuide({
 }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
-  const { previewConfig, updatePreview } = useWidgetPreview({
+  const { data: widget, updateConfig } = useWidgetConfig<ChoiceGuideProps>();
+  const { previewConfig, updatePreview } = useWidgetPreview<ChoiceGuideProps>({
     projectId,
   });
   return (
@@ -55,6 +58,7 @@ export default function WidgetChoiceGuide({
               <TabsTrigger value="items">Velden</TabsTrigger>
               <TabsTrigger value="choiceOptions">Keuze opties</TabsTrigger>
               <TabsTrigger value="generalSettings">Algemene instellingen</TabsTrigger>
+              <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
@@ -85,6 +89,32 @@ export default function WidgetChoiceGuide({
             </TabsContent>
             <TabsContent value="generalSettings" className="p-0">
               <WidgetChoiceGuideGeneralSettings />
+            </TabsContent>
+            <TabsContent value="datalayers" className="p-0">
+              {previewConfig && (
+                <>
+                  <Alert variant="info" className="mb-4">
+                    <AlertTitle>Let op!</AlertTitle>
+                    <AlertDescription>
+                      De kaartopties zijn alleen van toepassing als je een veld hebt die een kaart bevat.
+                    </AlertDescription>
+                  </Alert>
+                  <WidgetResourcesMapDatalayers
+                    {...previewConfig}
+                    updateConfig={(config) =>
+                      updateConfig({ ...widget.config, ...config })
+                    }
+                    onFieldChanged={(key, value) => {
+                      if (previewConfig) {
+                        updatePreview({
+                          ...previewConfig,
+                          [key]: value,
+                        });
+                      }
+                    }}
+                  />
+                </>
+              )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

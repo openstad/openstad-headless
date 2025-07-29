@@ -107,7 +107,15 @@ export const InitializeFormFields = (items, data) => {
                 case 'budget':
                     fieldData['format'] = true;
                     break;
-                
+                case 'map':
+                case 'location':
+                    if ( !!data?.datalayer ) {
+                        fieldData['datalayer'] = data?.datalayer;
+                    }
+
+                    if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
+                        fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
+                    }
             }
 
             formFields.push(fieldData);
