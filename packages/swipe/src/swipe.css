@@ -1,13 +1,12 @@
-/* TEMP  */
-body {
-  margin: 0;
-}
-* {
-  box-sizing: border-box;
-}
-
-/* Swipe Widget Styles */
 .swipe-widget {
+  --swipe-active-background: var(--setSwipeActiveBackground,var(--utrecht-button-primary-action-background-color, #238641));
+  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground,var(--utrecht-button-primary-action-background-color, #238641));
+  --swipe-progress-bar-color: var(--setSwipeProgressBarColor, var(--utrecht-button-disabled-color, #d5e7d4));
+  
+  --swipe-like-color: var(--setSwipeLikeColor, #ff4458);
+  --swipe-dislike-color: var(--setSwipeDislikeColor, #42c767);
+
+
   max-width: 500px;
   max-height: 850px;
   width: 100%;
@@ -120,15 +119,15 @@ body {
 }
 
 .swipe-indicator--left {
-  background: rgba(255, 68, 88, 0.9);
+  background: var(--swipe-like-color);
   color: white;
-  border: 3px solid #ff4458;
+  opacity: 0.8;
 }
 
 .swipe-indicator--right {
-  background: rgba(66, 199, 103, 0.9);
+  background: var(--swipe-dislike-color);
   color: white;
-  border: 3px solid #42c767;
+  opacity: 0.8;
 }
 
 .swipe-indicator svg {
@@ -171,7 +170,7 @@ body {
 
 .swipe-card-content {
   padding: 20px;
-  background: #238641;
+  background: var(--swipe-active-background);
   position: absolute;
   bottom: 0;
   left: 0;
@@ -262,15 +261,14 @@ body {
 }
 
 .swipe-btn-pass {
-  border-color: #ff4458;
-  color: #ff4458;
+  border-color: var(--swipe-like-color);
+  color: var(--swipe-like-color);
 }
 
 .swipe-btn-pass:hover {
-  background: #ff4458;
+  background: var(--swipe-like-color);
   color: white;
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(255, 68, 88, 0.3);
 }
 
 .swipe-btn-pass:hover svg {
@@ -278,15 +276,14 @@ body {
 }
 
 .swipe-btn-like {
-  border-color: #42c767;
-  color: #42c767;
+  border-color: var(--swipe-dislike-color);
+  color: var(--swipe-dislike-color);
 }
 
 .swipe-btn-like:hover {
-  background: #42c767;
+  background: var(--swipe-dislike-color);
   color: white;
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(66, 199, 103, 0.3);
 }
 
 .swipe-btn-like:hover svg {
@@ -298,8 +295,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #238641 0%, #37b05b 100%);
-  color: white;
+  border-radius: 10px;
+  border: solid 1px rgba(0, 0, 0, 0.1);
+  color: #000;
   text-align: center;
 }
 
@@ -307,12 +305,14 @@ body {
   font-size: 28px;
   margin: 0 0 16px 0;
   font-weight: 700;
+  text-align: center;
 }
 
 .swipe-finished-content p {
   font-size: 16px;
   margin: 0 0 24px 0;
   opacity: 0.9;
+  text-align: center;
 }
 
 .swipe-reset-btn {
@@ -378,17 +378,21 @@ body {
 
 /* For Webkit browsers */
 .swipe-progress progress::-webkit-progress-bar {
-  background-color: #d5e7d4;
+  background-color: var(--swipe-progress-bar-color);
 }
 
 /* For Firefox */
 .swipe-progress progress::-moz-progress-bar {
-  background-color: #d5e7d4;
+  background-color: var(--swipe-progress-bar-color);
   transition: width 0.5s;
 }
 
 /* For IE/Edge */
 .swipe-progress progress::-ms-fill {
-  background-color: #d5e7d4;
+  background-color: var(--swipe-progress-bar-color);
   transition: width 0.5s;
+}
+
+.swipe-progress progress::-webkit-progress-value {
+  background: var(--swipe-progress-bar-background);
 }

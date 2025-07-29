@@ -241,7 +241,10 @@ function Enquete(props: EnqueteWidgetProps) {
                 {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
                 <div className="osc-enquete-item-description">
                     {props.displayDescription && props.description && (
-                        <Paragraph>{props.description}</Paragraph>
+                        <>
+                            <Paragraph>{props.description}</Paragraph>
+                            <Spacer size={2} />
+                        </>
                     )}
                 </div>
                 <Form
