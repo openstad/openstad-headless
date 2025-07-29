@@ -22,6 +22,7 @@ export type Item = {
   key: string;
   description?: string;
   questionType?: string;
+  videoUrl?: string;
   fieldKey?: string;
   minCharacters?: string;
   maxCharacters?: string;

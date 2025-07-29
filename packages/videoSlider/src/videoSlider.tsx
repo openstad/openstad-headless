@@ -151,18 +151,21 @@ function Swipe({ slide, active, muted }: { slide: any, active: boolean, muted: b
               );
             })()}
           </div>
-          <video
-            src={slide.src || 'https://www.w3schools.com/html/mov_bbb.mp4'}
-            autoPlay={isActive}
-            muted={muted}
-            loop={true}
-          />
+          {slide.videoUrl && (
+            <video
+              src={slide.videoUrl}
+              autoPlay={isActive}
+              muted={muted}
+              loop={true}
+            />
+          )}
         </div>
       )}
-      {!isActive && (
+
+      {!isActive && slide.videoUrl && (
         <div className="swiper-video-content">
           <video
-            src={slide.src || 'https://www.w3schools.com/html/mov_bbb.mp4'}
+            src={slide.videoUrl}
             autoPlay={false}
             muted={true}
             loop={true}

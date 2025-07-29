@@ -37,16 +37,19 @@
 
 .video-slider .swiper-video-content {
   height: 100%;
+  background: linear-gradient(153deg,rgb(238, 238, 238) 0%, rgba(232, 232, 232, 1)100%);
+
 }
 
 .video-slider .swiper-video-container .swiper-video-question {
   position: absolute;
   inset: 0;
   display: flex;
+  gap: 30px;
   flex-direction: column;
   justify-content: space-between;
   z-index: 1;
-  padding: 3rem 4rem;
+  padding: 3rem 3rem;
 }
 
 .video-slider .swiper-video-container .swiper-video-question .--intro {
