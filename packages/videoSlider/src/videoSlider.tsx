@@ -71,7 +71,7 @@ const defaultSlides = [
   }
 ]
 
-function Swipe({ slide, active, muted }: { slide: any, active: boolean, muted: boolean }) {
+function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean, muted: boolean, autoPlay: boolean }) {
   const [isActive, setActive] = useState(active);
 
 
@@ -152,24 +152,28 @@ function Swipe({ slide, active, muted }: { slide: any, active: boolean, muted: b
             })()}
           </div>
           {slide.videoUrl && (
-            <video
-              src={slide.videoUrl}
-              autoPlay={isActive}
-              muted={muted}
-              loop={true}
-            />
+            <div className="vid-container">
+              <video
+                src={slide.videoUrl}
+                autoPlay={isActive && autoPlay}
+                muted={muted}
+                loop={true}
+              />
+            </div>
           )}
         </div>
       )}
 
       {!isActive && slide.videoUrl && (
         <div className="swiper-video-content">
-          <video
-            src={slide.videoUrl}
-            autoPlay={false}
-            muted={true}
-            loop={true}
-          />
+          <div className="vid-container">
+            <video
+              src={slide.videoUrl}
+              autoPlay={false}
+              muted={true}
+              loop={true}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -184,6 +188,8 @@ function VideoSlider({
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(true);
+
   const slides = props?.items || baseSlides;
 
   // Handle fullscreen changes
@@ -193,7 +199,7 @@ function VideoSlider({
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    
+
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
@@ -229,7 +235,7 @@ function VideoSlider({
         >
           {slides.map((slide, index) => (
             <SwiperSlide key={index}>
-              <Swipe slide={slide} active={index === current} muted={muted} />
+              <Swipe slide={slide} active={index === current} muted={muted} autoPlay={autoPlay} />
             </SwiperSlide>
           ))}
           <SwiperSlide key={99999}>
@@ -242,6 +248,25 @@ function VideoSlider({
         </Swiper>
 
         <div className="video-slider-controls">
+          <button
+            onClick={() => {
+              // Toggle play/pause for all videos
+              const videos = document.querySelectorAll('.vid-container video') as NodeListOf<HTMLVideoElement>;
+              videos.forEach(video => {
+                setAutoPlay(!autoPlay);
+                if (video.paused) {
+                  console.log('Playing video');
+                  video.play();
+                } else {
+                  console.log('Pausing video');
+                  video.pause();
+                }
+              });
+            }}
+            className={`video-slider-play-button ${autoPlay ? '--autoplay' : ''}`}
+          >
+            <span>Speel/Pauzeer alle Videos</span>
+          </button>
           <button onClick={() => setMuted(!muted)} className={`video-slider-mute-button ${muted ? '--muted' : ''}`}>
             <span>{muted ? 'Unmute' : 'Mute'}</span>
           </button>

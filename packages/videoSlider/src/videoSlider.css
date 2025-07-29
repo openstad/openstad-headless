@@ -37,8 +37,11 @@
 
 .video-slider .swiper-video-content {
   height: 100%;
-  background: linear-gradient(153deg,rgb(238, 238, 238) 0%, rgba(232, 232, 232, 1)100%);
-
+  background: linear-gradient(
+    153deg,
+    rgb(238, 238, 238) 0%,
+    rgb(220, 220, 220) 100%
+  );
 }
 
 .video-slider .swiper-video-container .swiper-video-question {
@@ -50,6 +53,8 @@
   justify-content: space-between;
   z-index: 1;
   padding: 3rem 3rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .video-slider .swiper-video-container .swiper-video-question .--intro {
@@ -60,6 +65,7 @@
   line-height: 150%;
   animation: FadeIn 0.5s ease-in-out;
   margin: 0 auto;
+  max-width: 90%;
 }
 
 @keyframes FadeIn {
@@ -88,7 +94,7 @@
   content: '';
   background: #f8d62d;
   position: absolute;
-  inset: 0;
+  inset: 0 -30px;
   z-index: -1;
   transform: skew(-10deg);
 }
@@ -201,7 +207,13 @@
   flex-shrink: 0;
 }
 
-.video-slider .swiper-video-container video {
+.video-slider .swiper-video-container .vid-container {
+  max-width: 900px;
+  overflow: hidden;
+  position: absolute;
+  inset: 0;
+}
+.video-slider .swiper-video-container .vid-container video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -248,10 +260,21 @@
   background-size: 25px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--%3E%3Cpath fill='%23ffffff' d='M128 96C110.3 96 96 110.3 96 128L96 224C96 241.7 110.3 256 128 256C145.7 256 160 241.7 160 224L160 160L224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L128 96zM160 416C160 398.3 145.7 384 128 384C110.3 384 96 398.3 96 416L96 512C96 529.7 110.3 544 128 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480L160 416zM416 96C398.3 96 384 110.3 384 128C384 145.7 398.3 160 416 160L480 160L480 224C480 241.7 494.3 256 512 256C529.7 256 544 241.7 544 224L544 128C544 110.3 529.7 96 512 96L416 96zM544 416C544 398.3 529.7 384 512 384C494.3 384 480 398.3 480 416L480 480L416 480C398.3 480 384 494.3 384 512C384 529.7 398.3 544 416 544L512 544C529.7 544 544 529.7 544 512L544 416z'/%3E%3C/svg%3E");
 }
-.video-slider .video-slider-controls .video-slider-fullscreen-button.--fullscreen {
+.video-slider
+  .video-slider-controls
+  .video-slider-fullscreen-button.--fullscreen {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--%3E%3Cpath fill='%23ffffff' d='M256 128C256 110.3 241.7 96 224 96C206.3 96 192 110.3 192 128L192 192L128 192C110.3 192 96 206.3 96 224C96 241.7 110.3 256 128 256L224 256C241.7 256 256 241.7 256 224L256 128zM128 384C110.3 384 96 398.3 96 416C96 433.7 110.3 448 128 448L192 448L192 512C192 529.7 206.3 544 224 544C241.7 544 256 529.7 256 512L256 416C256 398.3 241.7 384 224 384L128 384zM448 128C448 110.3 433.7 96 416 96C398.3 96 384 110.3 384 128L384 224C384 241.7 398.3 256 416 256L512 256C529.7 256 544 241.7 544 224C544 206.3 529.7 192 512 192L448 192L448 128zM416 384C398.3 384 384 398.3 384 416L384 512C384 529.7 398.3 544 416 544C433.7 544 448 529.7 448 512L448 448L512 448C529.7 448 544 433.7 544 416C544 398.3 529.7 384 512 384L416 384z'/%3E%3C/svg%3E");
 }
 
+.video-slider .video-slider-controls .video-slider-play-button {
+  background-size: 25px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--%3E%3Cpath fill='%23ffffff' d='M147.6 101.6C135.5 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6zM176 490.5L176 149.5L487.3 320L176 490.5z'/%3E%3C/svg%3E");
+}
+.video-slider
+.video-slider-controls
+.video-slider-play-button.--autoplay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--%3E%3Cpath fill='%23ffffff' d='M176 144L176 496L240 496L240 144L176 144zM128 144C128 117.5 149.5 96 176 96L240 96C266.5 96 288 117.5 288 144L288 496C288 522.5 266.5 544 240 544L176 544C149.5 544 128 522.5 128 496L128 144zM400 144L400 496L464 496L464 144L400 144zM352 144C352 117.5 373.5 96 400 96L464 96C490.5 96 512 117.5 512 144L512 496C512 522.5 490.5 544 464 544L400 544C373.5 544 352 522.5 352 496L352 144z'/%3E%3C/svg%3E");
+}
 
 .video-slider .video-slider-controls button span {
   display: none;
@@ -280,5 +303,22 @@
   z-index: 1000;
   max-width: unset;
   max-height: unset;
-  padding: .5rem;
+  padding: 0.5rem;
+  background: linear-gradient(
+    153deg,
+    rgb(238, 238, 238) 0%,
+    rgb(220, 220, 220) 100%
+  );
+}
+
+.video-slider:has(.video-slider-fullscreen-button.--fullscreen) .swiper-video-content {
+  background: unset;
+}
+
+.video-slider:has(.video-slider-fullscreen-button.--fullscreen)
+  .swiper-video-container
+  .vid-container {
+  margin: 1rem auto;
+  padding: 20px 0;
+  border-radius: 10px;
 }
