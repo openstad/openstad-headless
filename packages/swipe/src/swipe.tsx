@@ -276,7 +276,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
               const direction = swipeDirection === 'right' ? 1 : -1;
               transform = `translateX(${direction * 150}px) rotate(${direction * 30}deg)`;
             }
-
             return (
               <div
                 key={card.id}
