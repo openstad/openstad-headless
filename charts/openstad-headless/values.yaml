@@ -159,6 +159,9 @@ admin:
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: admin
 
+  # Custom domain for the service, this overrides the subdomain
+  customDomain:
+
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -440,6 +443,8 @@ cms:
     tls:
       secretName: openstad-tls-cms
       hosts: []
+
+  disableWidgetPreview: "false"
 
   # Inject extra environment variables
   extraEnvVars: []

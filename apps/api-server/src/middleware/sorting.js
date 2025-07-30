@@ -17,14 +17,13 @@ module.exports = function( req, res, next ) {
         case 'votes_asc':
           return [ 'yes', 'ASC' ];
           break;
-        // case 'comments_desc':
-        //   return [ 'commentCount', 'DESC' ];
-        //   break;
-        // case 'comments_asc':
-        //   return [ 'commentCount', 'ASC' ];
-        //   break;
         case 'random':
-          return db.sequelize.random();
+          const pseudoRandomSortSeed = parseInt(req.query?.pseudoRandomSortSeed)
+          if (Number.isInteger(pseudoRandomSortSeed)) {
+            return db.sequelize.literal(`RAND(${pseudoRandomSortSeed})`)
+          } else {
+            return db.sequelize.random()
+          }
           break;
         default:
           column = column.replace(/[^a-z0-9_]+/ig, '');

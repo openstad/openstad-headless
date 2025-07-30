@@ -141,6 +141,30 @@ const ResourceOverviewMap = ({
       return marker;
     }) || [];
 
+  const projectMarkers = selectedProjects.map((project) => {
+    const marker: MarkerProps = {
+      lat: project.projectLat ? parseFloat(project.projectLat) : undefined,
+      lng: project.projectLng ? parseFloat(project.projectLng) : undefined,
+      href: project.overviewUrl || '',
+      title: project.overviewTitle || project.name || '',
+      icon: project.overviewMarkerIcon
+        ? L.icon({
+          iconUrl: project.overviewMarkerIcon,
+          iconSize: [30, 40],
+          iconAnchor: [15, 40],
+          className: 'custom-image-icon',
+        })
+        : undefined,
+    };
+
+    if (marker.lat && marker.lng) {
+      return marker;
+    }
+    return null;
+  }).filter(marker => marker !== null);
+
+  currentMarkers = currentMarkers.concat(projectMarkers);
+
   if (givenResources) {
     resources.metadata.totalCount = givenResources.length;
   }
