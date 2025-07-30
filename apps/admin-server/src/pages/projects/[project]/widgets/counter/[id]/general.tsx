@@ -45,6 +45,7 @@ const formSchema = z.object({
   ]),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
+  rigCounter: z.any().optional(),
   id: z.string().optional(),
   widgetToFetchId: z.string().optional(),
   resourceId: z.string().optional(),
@@ -87,6 +88,7 @@ export default function CounterDisplay(
       resourceId: props?.resourceId,
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
+      rigCounter: props?.rigCounter || '0',
     },
   });
 
@@ -173,6 +175,31 @@ export default function CounterDisplay(
             </FormItem>
           )}
         />
+
+        { form.watch("counterType") !== "static" && (
+          <FormField
+            control={form.control}
+            name="rigCounter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pas de teller aan</FormLabel>
+                <FormDescription>
+                  Door hier een waarde in te vullen, wordt de teller verhoogd of verlaagd met de opgegeven waarde.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    type="number"
+                    value={field.value || '0'}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        ) }
 
         {props?.counterType === 'vote' || props.counterType === 'argument' ? (
           <>

@@ -1,3 +1,4 @@
+import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type ChoiceGuideProps = ChoiceGuide &
@@ -24,6 +25,8 @@ export type ChoiceGuide = {
     maxCharactersWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
+    datalayer?: DataLayer[];
+    enableOnOffSwitching?: boolean;
 };
 
 type ExtraProjectSettings = {

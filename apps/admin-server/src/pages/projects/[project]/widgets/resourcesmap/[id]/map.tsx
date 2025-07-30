@@ -104,6 +104,8 @@ export default function WidgetResourcesMapMap(
     { value: 'custom', label: 'Aangepaste Kaart' },
   ];
 
+  const hideOverviewFields = props?.hideOverviewFields || false;
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -113,39 +115,41 @@ export default function WidgetResourcesMapMap(
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
 
-          <FormField
-            control={form.control}
-            name="markerHref"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Link naar de specifieke inzending
-                </FormLabel>
-                <FormControl>
-                  {!!props?.widgetName && props?.widgetName === 'multiprojectresourceoverview' ? (
-                    <div style={{backgroundColor: 'goldenrod', padding: '15px 20px', margin: '10px 0 20px'}}>
-                      <FormDescription
-                        style={{color: 'black', textAlign: 'center'}}
-                      >
-                        Deze optie is instelbaar per project bij het tabblad &apos;Instellingen multi project&apos;.
-                      </FormDescription>
-                    </div>
-                  ) : (
-                    <Input
-                      placeholder="Bijv: /resource?openstadResourceId=[id]"
-                      type="text"
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
-                  )}
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!hideOverviewFields && (
+            <FormField
+              control={form.control}
+              name="markerHref"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>
+                    Link naar de specifieke inzending
+                  </FormLabel>
+                  <FormControl>
+                    {!!props?.widgetName && props?.widgetName === 'multiprojectresourceoverview' ? (
+                      <div style={{backgroundColor: 'goldenrod', padding: '15px 20px', margin: '10px 0 20px'}}>
+                        <FormDescription
+                          style={{color: 'black', textAlign: 'center'}}
+                        >
+                          Deze optie is instelbaar per project bij het tabblad &apos;Instellingen multi project&apos;.
+                        </FormDescription>
+                      </div>
+                    ) : (
+                      <Input
+                        placeholder="Bijv: /resource?openstadResourceId=[id]"
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    )}
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
@@ -201,36 +205,38 @@ export default function WidgetResourcesMapMap(
           />
           */}
 
-          <FormField
-            control={form.control}
-            name="categorize.categorizeByField"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Gebruik tags van dit type (gebruik de iconen en kleuren van de tag) om de inzending te tonen.
-                </FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    props.onFieldChanged(field.name, value);
-                    field.onChange(value);
-                  }}
-                  value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecteer een optie" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
-                    {tagGroupNames.map(type => (
-                      <SelectItem value={type} key={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!hideOverviewFields && (
+            <FormField
+              control={form.control}
+              name="categorize.categorizeByField"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>
+                    Gebruik tags van dit type (gebruik de iconen en kleuren van de tag) om de inzending te tonen.
+                  </FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      props.onFieldChanged(field.name, value);
+                      field.onChange(value);
+                    }}
+                    value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecteer een optie"/>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
+                      {tagGroupNames.map(type => (
+                        <SelectItem value={type} key={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}

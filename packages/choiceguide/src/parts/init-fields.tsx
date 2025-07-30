@@ -101,6 +101,14 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                         skipQuestionExplanation: ''
                     }
                     break;
+                case 'map':
+                    if ( !!data?.datalayer ) {
+                        fieldData['datalayer'] = data?.datalayer;
+                    }
+
+                    if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
+                        fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
+                    }
             }
 
             formFields.push(fieldData);

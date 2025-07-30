@@ -31,6 +31,7 @@ import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
 import { extractConfig } from '@/lib/sub-widget-helper';
 import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
 import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
+import WidgetResourcesMapDatalayers from '../../resourcesmap/[id]/datalayers';
 
 export const getServerSideProps = withApiUrl;
 
@@ -110,6 +111,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                       <TabsTrigger value="general">Kaart</TabsTrigger>
                       <TabsTrigger value="polygons">Polygonen</TabsTrigger>
+                      <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
                       <TabsTrigger value="buttons">Knoppen</TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
@@ -127,6 +129,19 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     </TabsContent>
                     <TabsContent value="buttons" className="p-0">
                       <WidgetResourcesMapButton
+                        {...extractConfig<
+                          MultiProjectResourceOverviewProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig: previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="datalayers" className="p-0">
+                      <WidgetResourcesMapDatalayers
                         {...extractConfig<
                           MultiProjectResourceOverviewProps,
                           ResourceOverviewMapWidgetTabProps

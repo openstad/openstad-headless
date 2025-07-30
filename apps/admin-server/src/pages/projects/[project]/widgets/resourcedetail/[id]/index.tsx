@@ -28,6 +28,12 @@ import { extractConfig } from '@/lib/sub-widget-helper';
 import WidgetResourceDetailDocumentMap from "@/pages/projects/[project]/widgets/resourcedetail/[id]/document-map";
 import ArgumentsExtraFields from "@/pages/projects/[project]/widgets/comments/[id]/extraFields";
 import ArgumentsInclude from "@/pages/projects/[project]/widgets/comments/[id]/include";
+import WidgetResourcesMapMap from "@/pages/projects/[project]/widgets/resourcesmap/[id]/map";
+import {ResourceOverviewMapWidgetTabProps} from "@/pages/projects/[project]/widgets/resourcesmap/[id]";
+import WidgetResourcesMapButtons from "@/pages/projects/[project]/widgets/resourcesmap/[id]/buttons";
+import WidgetResourcesMapPolygons from "@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons";
+import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
+import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -65,6 +71,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
+              <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="comments">Reacties widget</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="document-map">Interactieve afbeelding</TabsTrigger>
@@ -104,6 +111,73 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     }
                   }}
                 />
+              )}
+            </TabsContent>
+
+            <TabsContent value="map" className="p-0">
+              {previewConfig && (
+                <Tabs defaultValue="map">
+                  <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+                    <TabsTrigger value="map">Kaart</TabsTrigger>
+                    <TabsTrigger value="polygons">Polygonen</TabsTrigger>
+                    <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
+                    <TabsTrigger value="button">Knoppen</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="map" className="p-0">
+                    <WidgetResourcesMapMap
+                      hideOverviewFields={true}
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="button" className="p-0">
+                    <WidgetResourcesMapButtons
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="polygons" className="p-0">
+                    <WidgetResourcesMapPolygons
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="datalayers" className="p-0">
+                    <WidgetResourcesMapDatalayers
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                </Tabs>
               )}
             </TabsContent>
 
