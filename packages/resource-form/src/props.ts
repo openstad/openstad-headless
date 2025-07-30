@@ -1,3 +1,4 @@
+import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type ResourceFormWidgetProps = BaseProps &
@@ -16,6 +17,8 @@ export type ResourceFormWidget = {
     confirmation?: Confirmation;
     redirectUrl?: string,
     placeholder?: string,
+    datalayer?: DataLayer[],
+    enableOnOffSwitching?: boolean;
 };
 
 export type General = {
