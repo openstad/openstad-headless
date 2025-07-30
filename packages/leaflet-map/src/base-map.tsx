@@ -149,7 +149,7 @@ const BaseMap = ({
   locationProx = undefined,
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
-
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const definedCenterPoint =
     center.lat && center.lng
@@ -277,7 +277,14 @@ const BaseMap = ({
     } else if (center) {
       setBoundsAndCenter([center] as any);
     }
-  }, [mapRef, area, center, autoZoomAndCenter, mapDataLayers, currentMarkers, setBoundsAndCenter]);
+  }, [isMapReady, mapRef, area, center, autoZoomAndCenter, mapDataLayers, currentMarkers, setBoundsAndCenter]);
+
+  // Quick fix for map not being ready on first render. This will set the center and zoom settings correctly.
+  useEffect(() => {
+    window.setTimeout(() => {
+        setIsMapReady(true);
+    }, 500);
+  }, []);
 
   // markers
   useEffect(() => {
