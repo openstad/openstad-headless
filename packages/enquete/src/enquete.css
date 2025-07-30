@@ -47,7 +47,8 @@
   color: black;
 }
 
-.question input[type="range"] {
+.question input[type="range"],
+.video-slider input[type="range"] {
   -webkit-appearance: none;
   appearance: none; 
   width: 100%;
@@ -61,7 +62,8 @@
 }
 
 /* Thumb: webkit */
-.question input[type="range"]::-webkit-slider-thumb {
+.question input[type="range"]::-webkit-slider-thumb,
+.video-slider input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none; 
   height: 30px;
@@ -72,7 +74,8 @@
 }
 
 /* Thumb: Firefox */
-.question input[type="range"]::-moz-range-thumb {
+.question input[type="range"]::-moz-range-thumb,
+.video-slider input[type="range"]::-moz-range-thumb {
   height: 30px;
   width: 30px;
   margin-top: -5px;
@@ -80,7 +83,9 @@
   background-size: cover;
 }
 
-.question input[type="range"]:focus::-webkit-slider-thumb {
+.question input[type="range"]:focus::-webkit-slider-thumb,
+.video-slider input[type="range"]:focus::-webkit-slider-thumb {
+
   --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
   box-shadow: var(--_utrecht-focus-ring-box-shadow);
   outline-color: var(--utrecht-focus-outline-color, revert);
@@ -89,7 +94,8 @@
   outline-width: var(--utrecht-focus-outline-width, revert);
   border-radius: 50%;
 }
-.question input[type="range"]:focus::-moz-range-thumb {
+.question input[type="range"]:focus::-moz-range-thumb,
+.video-slider input[type="range"]:focus::-moz-range-thumb {
   --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
   box-shadow: var(--_utrecht-focus-ring-box-shadow);
   outline-color: var(--utrecht-focus-outline-color, revert);

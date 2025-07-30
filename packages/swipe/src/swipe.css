@@ -299,6 +299,7 @@
   border: solid 1px rgba(0, 0, 0, 0.1);
   color: #000;
   text-align: center;
+  height: 100%;
 }
 
 .swipe-finished-content h2 {

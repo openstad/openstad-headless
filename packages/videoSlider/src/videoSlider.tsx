@@ -4,6 +4,7 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
 import { Pagination, A11y } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import type { Swiper as SwiperType } from 'swiper';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -11,6 +12,9 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import SwipeField from '@openstad-headless/swipe/src/swipe';
+import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-slider";
+import { Icon } from '@openstad-headless/ui/src';
+
 
 export type VideoSliderWidgetProps = BaseProps &
   VideoSliderProps & {
@@ -86,17 +90,12 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
       {isActive && (
         <div className="swiper-video-content">
           <div className="swiper-video-question">
-            {slide.questionType === 'none' && (
-              <div className="--intro">
-                {slide.description}
-              </div>
-            )}
+            <div className="--intro">
+              {slide.title && (<h2>{slide.title}</h2>)}
+              {slide.description && (<p>{slide.description}</p>)}
+            </div>
             {slide.questionType === 'multiple' && (
               <>
-                <div className="--intro">
-                  <h2>{slide.title}</h2>
-                  <p>{slide.description}</p>
-                </div>
                 <ul className="swiper-video-question-list">
                   {slide.options?.map((q, key) => (
                     <li key={q.id}>
@@ -111,10 +110,6 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
             )}
             {slide.questionType === 'multiplechoice' && (
               <>
-                <div className="--intro">
-                  <h2>{slide.title}</h2>
-                  <p>{slide.description}</p>
-                </div>
                 <ul className="swiper-video-question-list --radiofield">
                   {slide.options?.map((q, key) => (
                     <li key={q.id}>
@@ -136,10 +131,6 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
               }));
               return (
                 <>
-                  <div className="--intro">
-                    <h2>{slide.title}</h2>
-                    <p>{slide.description}</p>
-                  </div>
                   <ul className="swiper-video-question-list">
                     <li>
                       <SwipeField
@@ -147,6 +138,34 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
                       />
                     </li>
                   </ul>
+                </>
+              );
+            })()}
+
+            {slide.questionType === 'scale' && (() => {
+              const labelOptions = [
+                <><div key="1">😡</div><span className="value">Slecht</span></>,
+                <div key="2">🙁</div>,
+                <div key="3">😐</div>,
+                <div key="4">😀</div>,
+                <><div key="5">😍</div><span className="value">Goed</span></>,
+              ]
+              return (
+                <>
+                  <div className="swiper-video-question-list">
+                      <TickmarkSlider
+                        showSmileys={slide.showSmileys}
+                        onChange={(value) => console.log('Slider value:', value)} index={0} title={''}
+                        fieldOptions={labelOptions.map((label, index) => {
+                          const currentValue = (index + 1).toString();
+                          return {
+                            value: currentValue,
+                            label: slide.showSmileys ? label as any : currentValue,
+                          }
+                        })}
+                        fieldRequired={false}
+                        fieldKey={''} />
+                  </div>
                 </>
               );
             })()}
@@ -189,8 +208,32 @@ function VideoSlider({
   const [muted, setMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
+  const swiperRef = useRef<SwiperType | null>(null);
 
   const slides = props?.items || baseSlides;
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!swiperRef.current) return;
+
+      const swiper = swiperRef.current;
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        swiper.slideNext();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        swiper.slidePrev();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Handle fullscreen changes
   useEffect(() => {
@@ -229,7 +272,9 @@ function VideoSlider({
           modules={[A11y]}
           direction='vertical'
           pagination={{ clickable: false }}
-          onSwiper={(swiper) => console.log(swiper)}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
           onSlideChange={(e) => setCurrent(e.activeIndex)}
           onClick={handleSwiperClick}
         >
@@ -238,7 +283,7 @@ function VideoSlider({
               <Swipe slide={slide} active={index === current} muted={muted} autoPlay={autoPlay} />
             </SwiperSlide>
           ))}
-          <SwiperSlide key={99999}>
+          <SwiperSlide key={'final-slide'}>
             <div className="final-slide">
               <h2>Dat waren alle vragen!</h2>
               <p>Bedankt voor het beantwoorden van de vragen.</p>
@@ -255,10 +300,8 @@ function VideoSlider({
               videos.forEach(video => {
                 setAutoPlay(!autoPlay);
                 if (video.paused) {
-                  console.log('Playing video');
                   video.play();
                 } else {
-                  console.log('Pausing video');
                   video.pause();
                 }
               });
