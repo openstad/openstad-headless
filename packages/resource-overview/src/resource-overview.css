@@ -262,10 +262,28 @@ p.osc-searchtext {
 
 .osc-resource-overview-tabs-container > div[role="tablist"] {
   margin-bottom: 20px;
+  align-items: center;
+  border-bottom: 2px solid rgb(226, 232, 240);
+  color: rgb(100, 116, 139);
+  display: flex;
+  justify-content: flex-start;
+  padding: 4px;
 }
 
-.osc-resource-overview-tabs-container > div[role="tablist"] > button[type="button"]{
+.osc-resource-overview-tabs-container > div[role="tablist"] > button[type="button"] {
   gap: 2px;
+  align-items: center;
+  background-color: rgb(255, 255, 255);
+  color: rgb(2, 8, 23);
+  display: flex;
+  justify-content: center;
+  padding: 6px 12px;
+  row-gap: 2px;
+  border: none;
+}
+
+.osc-resource-overview-tabs-container > div[role="tablist"] > button[type="button"][data-state="inactive"] {
+  color: rgb(100, 116, 139);
 }
 
 /* Text Colors */
