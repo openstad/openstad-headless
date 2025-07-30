@@ -173,6 +173,8 @@
                         flex-direction: column;
                         text-align: center;
                         padding: 0 20px 20px 20px;
+                        height: 100%;
+                        justify-content: space-between;
 
                         span {
                             margin-top: -20px;
@@ -325,7 +327,7 @@
                 inset: 0;
             }
 
-            span.value{
+            span.value {
                 display: block;
                 top: 40px;
 

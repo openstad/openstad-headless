@@ -13,7 +13,6 @@ import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import SwipeField from '@openstad-headless/swipe/src/swipe';
 import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-slider";
-import { Icon } from '@openstad-headless/ui/src';
 
 
 export type VideoSliderWidgetProps = BaseProps &
@@ -99,8 +98,13 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
                 <ul className="swiper-video-question-list">
                   {slide.options?.map((q, key) => (
                     <li key={q.id}>
-                      <input type="checkbox" id={q.titles[0].key} />
-                      <label htmlFor={q.titles[0].key}>
+                      <input 
+                        type="checkbox" 
+                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`} 
+                        name={`${slide.id || slide.trigger}_multiple`} 
+                        value={q.titles[0].key} 
+                      />
+                      <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
                         <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
                       </label>
                     </li>
@@ -108,13 +112,19 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
                 </ul>
               </>
             )}
+
             {slide.questionType === 'multiplechoice' && (
               <>
                 <ul className="swiper-video-question-list --radiofield">
                   {slide.options?.map((q, key) => (
                     <li key={q.id}>
-                      <input type="radio" id={q.titles[0].key} name={'radio'} />
-                      <label htmlFor={q.titles[0].key}>
+                      <input
+                        type="radio"
+                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                        name={`${slide.id || slide.trigger}_multiplechoice`}
+                        value={q.titles[0].key}
+                      />
+                      <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
                         <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
                       </label>
                     </li>
@@ -145,30 +155,31 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
             {slide.questionType === 'scale' && (() => {
               const labelOptions = [
                 <><div key="1">😡</div><span className="value">Slecht</span></>,
-                <div key="2">🙁</div>,
-                <div key="3">😐</div>,
-                <div key="4">😀</div>,
+                <><div key="2">🙁</div></>,
+                <><div key="3">😐</div></>,
+                <><div key="4">😀</div></>,
                 <><div key="5">😍</div><span className="value">Goed</span></>,
               ]
               return (
                 <>
                   <div className="swiper-video-question-list">
-                      <TickmarkSlider
-                        showSmileys={slide.showSmileys}
-                        onChange={(value) => console.log('Slider value:', value)} index={0} title={''}
-                        fieldOptions={labelOptions.map((label, index) => {
-                          const currentValue = (index + 1).toString();
-                          return {
-                            value: currentValue,
-                            label: slide.showSmileys ? label as any : currentValue,
-                          }
-                        })}
-                        fieldRequired={false}
-                        fieldKey={''} />
+                    <TickmarkSlider
+                      showSmileys={slide.showSmileys}
+                      onChange={(value) => console.log('Slider value:', value)} index={0} title={''}
+                      fieldOptions={labelOptions.map((label, index) => {
+                        const currentValue = (index + 1).toString();
+                        return {
+                          value: currentValue,
+                          label: slide.showSmileys ? label as any : currentValue,
+                        }
+                      })}
+                      fieldRequired={false}
+                      fieldKey={''} />
                   </div>
                 </>
               );
             })()}
+
           </div>
           {slide.videoUrl && (
             <div className="vid-container">
@@ -258,15 +269,25 @@ function VideoSlider({
     }
   };
 
-  console.log('sliderprops:', props)
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const formEntries = Object.fromEntries(formData.entries());
+    console.log('Form entries:', formEntries);
+
+    // Combine all form data
+    const allData = {
+      formInputs: formEntries,
+    };
+    console.log('All form data:', allData);
+  };
 
 
   return (
     <div className="video-slider">
       <form className="video-slider-form" onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        console.log(Object.fromEntries(formData.entries()))
+        handleSubmit(e);
       }}>
         <Swiper
           modules={[A11y]}
@@ -295,7 +316,6 @@ function VideoSlider({
         <div className="video-slider-controls">
           <button
             onClick={() => {
-              // Toggle play/pause for all videos
               const videos = document.querySelectorAll('.vid-container video') as NodeListOf<HTMLVideoElement>;
               videos.forEach(video => {
                 setAutoPlay(!autoPlay);
