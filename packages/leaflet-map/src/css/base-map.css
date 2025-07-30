@@ -96,12 +96,6 @@
   opacity: 1;
 }
 
-.osc-map-outer-container {
-  position: relative;
-  height: var(--basemap-map-height);
-  aspect-ratio: var(--basemap-map-aspect-ratio);
-}
-
 .osc-map-legend.legend {
   list-style: none;
   padding: 8px;

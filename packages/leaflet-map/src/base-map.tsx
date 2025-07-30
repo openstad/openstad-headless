@@ -616,7 +616,7 @@ const BaseMap = ({
   }, [mapContainerRef.current, isTouchDevice]);
 
   return (
-    <div className="osc-map-outer-container">
+    <>
       { mapDataLayers.length > 0 && (
         <ul className="legend osc-map-legend">
           {mapDataLayers.map(layer => (
@@ -719,7 +719,7 @@ const BaseMap = ({
 
         </MapContainer>
       </div>
-    </div>
+    </>
   );
 };
 
