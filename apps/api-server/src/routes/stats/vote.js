@@ -33,7 +33,7 @@ router.route('/total')
     .get( rateLimiter(), function(req, res, next) {
 
         let isViewable = req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable;
-        isViewable = isViewable || hasRole( req.user, 'moderator')
+        isViewable = isViewable || hasRole( req.user, 'editor')
         if (!isViewable) return next(createError(401, 'Je kunt deze stats niet bekijken'));
 
         let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND  (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?";
