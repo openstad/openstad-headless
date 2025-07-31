@@ -140,6 +140,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
       overviewMarkerIcon?: string;
       projectLat?: string;
       projectLng?: string;
+      includeProjectsInOverview?: boolean;
+      excludeResourcesInOverview?: boolean;
     }[];
     multiProjectResources?: any[];
     includeOrExcludeTagIds?: string;
@@ -436,10 +438,10 @@ function ResourceOverviewInner({
   includeOrExcludeTagIds = 'include',
   includeOrExcludeStatusIds = 'include',
   includeProjectsInOverview = false,
+  excludeResourcesInOverview = false,
   displayAsTabs = false,
   listTabTitle = 'Lijst',
   mapTabTitle = 'Kaart',
-  excludeResourcesInOverview = false,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -544,7 +546,9 @@ function ResourceOverviewInner({
   const [resources, setResources] = useState< Array<any> >([]);
   const [filteredResources, setFilteredResources] = useState< Array<any> >([]);
 
-  const projectIds = selectedProjects?.map(project => project.id) || [];
+  const projectIds = selectedProjects
+    ?.filter(project => !project?.excludeResourcesInOverview)
+    .map(project => project.id) || [];
 
   const { data: resourcesWithPagination } = datastore.useResources({
     pageSize: 999999,
@@ -566,9 +570,7 @@ function ResourceOverviewInner({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (includeProjectsInOverview && excludeResourcesInOverview) return;
-
-    if (resourcesWithPagination) {
+    if (resourcesWithPagination && !( selectedProjects.length > 0 && projectIds.length === 0 )) {
       setResources(resourcesWithPagination.records || []);
     }
   }, [resourcesWithPagination, pageSize]);
@@ -593,8 +595,10 @@ function ResourceOverviewInner({
 
     const allResources: any = [];
 
-    if ( includeProjectsInOverview && selectedProjects && selectedProjects.length > 0 ) {
+    if ( selectedProjects && selectedProjects.length > 0 ) {
       selectedProjects.forEach((project) => {
+        if ( project.includeProjectsInOverview === false ) return;
+
         const tagsArray = project?.tags ? project.tags.split(',').map(tag => tag.trim()) : [];
         const tags = tagsArray.map(tag => {
           const foundTag = allTags.find((t: {id: number}) => t.id === parseInt(tag));
@@ -686,7 +690,7 @@ function ResourceOverviewInner({
           if (sort === 'createdAt_asc') {
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           }
-          if ( projectIds.length > 0 ) {
+          if ( selectedProjects.length > 0 ) {
             if (sort === 'title') {
               return a.title.localeCompare(b.title);
             }
