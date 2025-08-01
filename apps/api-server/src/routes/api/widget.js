@@ -4,7 +4,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const db = require('../../db');
 const sanitize = require('../../util/sanitize');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
-
+const getWidgetSettings = require('../widget/widget-settings');
 router.all('*', function (req, res, next) {
   req.scope = [];
   return next();
@@ -41,12 +41,28 @@ router
   .post( rateLimiter(), async function (req, res, next) {
     const widget = req.body;
     const projectId = req.params.projectId;
+    // Get the project to generate default config
+    const project = await db.Project.scope('includeAreas').findOne({
+      where: { id: projectId }
+    });
+
+    if (!project) {
+      return next(new Error('Project not found'));
+    }
+
+    // Get widget settings and generate default config
+    const widgetSettings = getWidgetSettings();
+    const widgetDefinition = widgetSettings[widget.type];
+
+    if (!widgetDefinition) {
+      return next(new Error('Invalid widget type'));
+    }
 
     const createdWidget = await db.Widget.create({
       projectId,
       description: widget.description,
       type: widget.type,
-      config: {},
+      config: widgetDefinition.defaultConfig || {},
     });
 
     return res.json(createdWidget);
