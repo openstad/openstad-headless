@@ -39,10 +39,10 @@ const formSchema = z.object({
       overviewUrl: z.string().optional(),
       projectLat: z.string().optional(),
       projectLng: z.string().optional(),
+      includeProjectsInOverview: z.boolean().optional(),
+      excludeResourcesInOverview: z.boolean().optional(),
     })
   ).optional(),
-  includeProjectsInOverview: z.boolean().optional(),
-  excludeResourcesInOverview: z.boolean().optional(),
   imageProjectUpload: z.string().optional(),
   markerIconProjectUpload: z.string().optional(),
 });
@@ -55,9 +55,13 @@ export default function WidgetMultiProjectSettings(
 
   const { data: projects } = useProjectList();
   const defaultValues = {
-    selectedProjects: props.selectedProjects || [],
-    includeProjectsInOverview: props.includeProjectsInOverview || false,
-    excludeResourcesInOverview: props?.excludeResourcesInOverview || false
+    selectedProjects: (props.selectedProjects || []).map(project => ({
+      ...project,
+
+      // Get value from props for backwards compatibility
+      includeProjectsInOverview: props.includeProjectsInOverview === true ? true : project.includeProjectsInOverview,
+      excludeResourcesInOverview: props.excludeResourcesInOverview === true ? true : project.excludeResourcesInOverview,
+    })),
   }
 
   const form = useForm<FormData>({
@@ -72,6 +76,10 @@ export default function WidgetMultiProjectSettings(
         ...project,
         id: project.id || 0,
       })) || [],
+
+      // Turn off for backwards compatibility. If the value was set, it has been set in selectedProjects
+      includeProjectsInOverview: false,
+      excludeResourcesInOverview: false,
     };
     props.updateConfig({ ...props, ...updatedValues });
   }
@@ -88,42 +96,6 @@ export default function WidgetMultiProjectSettings(
           Voor de detailpagina kun je linken naar de juiste inzending door [id] te gebruiken, bijvoorbeeld /resources/[id]
         </FormDescription>
         <Separator className="my-4" />
-        <FormField
-          control={form.control}
-          name="includeProjectsInOverview"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Toon projecten zelf als tegels in het overzicht
-              </FormLabel>
-              {YesNoSelect(field, props)}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {form.watch("includeProjectsInOverview") === true && (
-          <>
-            <Spacer />
-            <FormField
-              control={form.control}
-              name="excludeResourcesInOverview"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Toon geen inzendingen in het overzicht
-                  </FormLabel>
-                  <FormDescription>
-                    Als je deze optie aanzet, worden alleen de projecten zelf getoond als tegels in het overzicht, zonder de inzendingen.
-                  </FormDescription>
-                  {YesNoSelect(field, props)}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
-        <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
@@ -137,9 +109,9 @@ export default function WidgetMultiProjectSettings(
                 return (
                   <FormItem
                     className={'lg:w-full grid flex-row items-center gap-x-2 gap-y-0'}
-                    style={{ gridTemplateColumns: "1fr 3fr", gridTemplateAreas: `"check div" ". content"`, border: "1px solid hsl(214.3 31.8% 91.4%)", padding: "12px 20px" }}
+                    style={{ gridTemplateColumns: "1fr 3fr", border: "1px solid hsl(214.3 31.8% 91.4%)", padding: "20px", alignItems: "start" }}
                   >
-                    <div style={{gridArea: "check", display: "grid"}}>
+                    <div style={{display: "grid"}}>
                       <FormLabel style={{marginTop: '0', whiteSpace: "nowrap", marginBottom: "12px" }} htmlFor={project.id}>{project.name}</FormLabel>
                       <FormControl>
                         {YesNoSelect(
@@ -156,11 +128,54 @@ export default function WidgetMultiProjectSettings(
                           props
                         )}
                       </FormControl>
+
+
+                      {isChecked && (
+                        <>
+                        <Spacer size={2} />
+                          <FormField
+                            control={form.control}
+                            name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.includeProjectsInOverview`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Toon dit project zelf als tegel in het overzicht
+                                </FormLabel>
+                                {YesNoSelect(field, props)}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+
+                      {form.watch(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.includeProjectsInOverview`) === true && (
+                        <>
+                          <Spacer size={2} />
+                          <FormField
+                            control={form.control}
+                            name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.excludeResourcesInOverview`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Toon geen inzendingen in het overzicht
+                                </FormLabel>
+                                <FormDescription>
+                                  Als je deze optie aanzet, wordt alleen het project zelf getoond als tegel in het overzicht, zonder de inzendingen.
+                                </FormDescription>
+                                {YesNoSelect(field, props)}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
                     </div>
                     <FormMessage />
 
+                    <div style={{display: "grid"}}>
                     {isChecked && (
-                      <div className="lg:w-full flex flex-row items-center" style={{display: 'grid', gridArea: "div", gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
+                      <div className="lg:w-full flex flex-row items-center" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px'}}>
                         <FormField
                           control={form.control}
                           name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.detailPageLink`}
@@ -200,9 +215,9 @@ export default function WidgetMultiProjectSettings(
                       </div>
                     )}
 
-                    { (form.watch("includeProjectsInOverview") === true && isChecked ) && (
+                    { (form.watch(`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.includeProjectsInOverview`) === true && isChecked ) && (
                       <>
-                        <div className="lg:w-full flex flex-row items-center" style={{gridArea: 'content', display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px', rowGap: '20px', marginTop: "20px"}}>
+                        <div className="lg:w-full flex flex-row items-center" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '30px', rowGap: '20px', marginTop: "20px"}}>
                           <FormField
                             control={form.control}
                             name={`selectedProjects.${field.value?.findIndex(p => p.id === project.id) ?? 0}.overviewTitle`}
@@ -390,9 +405,9 @@ export default function WidgetMultiProjectSettings(
 
                         </div>
 
-                        <Spacer />
                       </>
                     )}
+                    </div>
 
                   </FormItem>
                 );
