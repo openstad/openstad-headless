@@ -822,12 +822,12 @@ function StemBegroot({
                         return;
                       }
 
-                      const isAtLeastOneTagSelected = tagCounter.some(tagObj => {
+                      const notOneTagSelected = tagCounter.every(tagObj => {
                         const key = Object.keys(tagObj)[0];
-                        return tagObj[key].current !== 0;
+                        return tagObj[key].current === 0;
                       });
 
-                      if (!isAtLeastOneTagSelected) {
+                      if (notOneTagSelected) {
                         notifyVoteMessage('Maak een keuze om verder te kunnen gaan.', true);
                         return;
                       }
