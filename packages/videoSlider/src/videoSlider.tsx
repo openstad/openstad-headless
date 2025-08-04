@@ -13,6 +13,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import SwipeField from '@openstad-headless/swipe/src/swipe';
 import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-slider";
+import ImageChoiceField from '@openstad-headless/ui/src/form-elements/image-choice';
 
 
 export type VideoSliderWidgetProps = BaseProps &
@@ -98,11 +99,11 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
                 <ul className="swiper-video-question-list">
                   {slide.options?.map((q, key) => (
                     <li key={q.id}>
-                      <input 
-                        type="checkbox" 
-                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`} 
-                        name={`${slide.id || slide.trigger}_multiple`} 
-                        value={q.titles[0].key} 
+                      <input
+                        type="checkbox"
+                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                        name={`${slide.id || slide.trigger}_multiple`}
+                        value={q.titles[0].key}
                       />
                       <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
                         <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
@@ -175,6 +176,34 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
                       })}
                       fieldRequired={false}
                       fieldKey={''} />
+                  </div>
+                </>
+              );
+            })()}
+
+            {(slide.questionType === 'images' && slide.multiple === false) && (() => {
+              console.log(slide)
+              const choices = slide.options?.map((option: any) => ({
+                imageSrc: option.titles[0].image,
+                imageAlt: option.titles[0].text || '',
+                label: option.titles[0].key,
+                value: option.titles[0].key,
+              }));
+              return (
+                <>
+                  <div className="swiper-video-question-list">
+                    <div className="question-type-imageChoice ">
+                      <ImageChoiceField
+                        title={''}
+                        description={''}
+                        choices={choices}
+                        fieldKey={slide.fieldKey}
+                        fieldRequired={slide.fieldRequired}
+                        multiple={slide.multiple}
+                        view={slide.view}
+                        randomId={Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
+                      />
+                    </div>
                   </div>
                 </>
               );

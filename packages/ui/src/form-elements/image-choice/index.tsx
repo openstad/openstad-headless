@@ -9,6 +9,8 @@ import {
 } from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
 
+import './image-choice.css';
+
 export type ImageChoiceFieldProps = {
     title: string;
     description?: string;
@@ -26,6 +28,7 @@ export type ImageChoiceFieldProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     multiple?: boolean;
+    view: string;
 }
 
 export type ChoiceItem = {
@@ -52,6 +55,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     randomId = '',
     fieldInvalid = false,
     multiple = false,
+    view = 'default',
 }) => {
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
 
@@ -83,8 +87,10 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
     const ChoiceComponent = multiple ? Checkbox : RadioButton;
 
+    console.log(choices)
+
     return (
-        <div className="question">
+        <div className={`question --${view}`}>
             <Fieldset
                 aria-invalid={fieldInvalid}
                 aria-describedby={`${randomId}_error`}

@@ -58,6 +58,7 @@ const formSchema = z.object({
     )
     .optional(),
   multiple: z.boolean().optional(),
+  view: z.string().optional(),
   image: z.string().optional(),
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
@@ -127,6 +128,7 @@ export default function WidgetEnqueteItems(
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
+          view: values.view || '',
           image: values.image || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
@@ -201,6 +203,7 @@ export default function WidgetEnqueteItems(
     variant: 'text input',
     options: [],
     multiple: false,
+    view: '',
     image: '',
     imageAlt: '',
     imageDescription: '',
@@ -250,6 +253,7 @@ export default function WidgetEnqueteItems(
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
+        view: selectedItem.view || '',
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
@@ -945,6 +949,32 @@ export default function WidgetEnqueteItems(
                               <SelectContent>
                                 <SelectItem value="true">Ja</SelectItem>
                                 <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {(form.watch('questionType') === 'images') && (
+                      <FormField
+                        control={form.control}
+                        name="view"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Weergave</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="default">Standaard weergave</SelectItem>
+                                <SelectItem value="Jongeren">Jongerenwidget</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
