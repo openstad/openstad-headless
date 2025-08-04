@@ -182,7 +182,6 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
             })()}
 
             {(slide.questionType === 'images' && slide.multiple === false) && (() => {
-              console.log(slide)
               const choices = slide.options?.map((option: any) => ({
                 imageSrc: option.titles[0].image,
                 imageAlt: option.titles[0].text || '',
@@ -251,6 +250,38 @@ function VideoSlider({
   const swiperRef = useRef<SwiperType | null>(null);
 
   const slides = props?.items || baseSlides;
+
+  // Group slides by their group property
+  const groupedSlides = useMemo(() => {
+    const groups: { [key: string]: any[] } = {};
+    const ungroupedSlides: any[] = [];
+
+    slides.forEach((slide) => {
+      if (slide.group) {
+        if (!groups[slide.group]) {
+          groups[slide.group] = [];
+        }
+        groups[slide.group].push(slide);
+      } else {
+        ungroupedSlides.push(slide);
+      }
+    });
+
+    // Convert groups to array format and combine with ungrouped slides
+    const result: any[] = [];
+
+    // Add ungrouped slides first (maintaining original order)
+    ungroupedSlides.forEach(slide => {
+      result.push({ type: 'single', slide });
+    });
+
+    // Add grouped slides
+    Object.entries(groups).forEach(([groupName, groupSlides]) => {
+      result.push({ type: 'group', group: groupName, slides: groupSlides });
+    });
+
+    return result;
+  }, [slides]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -328,9 +359,42 @@ function VideoSlider({
           onSlideChange={(e) => setCurrent(e.activeIndex)}
           onClick={handleSwiperClick}
         >
-          {slides.map((slide, index) => (
+          {groupedSlides.map((item, index) => (
             <SwiperSlide key={index}>
-              <Swipe slide={slide} active={index === current} muted={muted} autoPlay={autoPlay} />
+              {item.type === 'single' ? (
+                <Swipe slide={item.slide} active={index === current} muted={muted} autoPlay={autoPlay} />
+              ) : (
+                <Swiper
+                  direction='horizontal'
+                  pagination={{ clickable: true }}
+                >
+                  {item.slides.map((slide: any, slideIndex: number) => (
+                    <SwiperSlide>
+                      <Swipe
+                        key={slideIndex}
+                        slide={slide}
+                        active={index === current}
+                        muted={muted}
+                        autoPlay={autoPlay}
+                      />
+                      {slideIndex < item.slides.length - 1 && (
+                        <button
+                          className="video-slide--next"
+                          type="button"
+                          onClick={() => {
+                            const swiperEl = document.querySelector('.swiper-horizontal') as any;
+                            if (swiperEl && swiperEl.swiper) {
+                              swiperEl.swiper.slideNext();
+                            }
+                          }}
+                        >
+                          Volgende
+                        </button>
+                      )}
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
             </SwiperSlide>
           ))}
           <SwiperSlide key={'final-slide'}>

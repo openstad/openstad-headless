@@ -60,6 +60,7 @@ const formSchema = z.object({
     .optional(),
   multiple: z.boolean().optional(),
   view: z.string().optional(),
+  group: z.string().optional(),
   image: z.string().optional(),
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
@@ -130,6 +131,7 @@ export default function WidgetEnqueteItems(
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
+          group: values.group || '',
           view: values.view || 'default',
           image: values.image || '',
           imageAlt: values.imageAlt || '',
@@ -207,6 +209,7 @@ export default function WidgetEnqueteItems(
     options: [],
     multiple: false,
     view: 'default',
+    group: '',
     image: '',
     imageAlt: '',
     imageDescription: '',
@@ -258,6 +261,7 @@ export default function WidgetEnqueteItems(
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
         view: selectedItem.view || 'default',
+        group: selectedItem.group || '',
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
@@ -971,31 +975,51 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
-
                     {(form.watch('questionType') === 'images') && (
-                      <FormField
-                        control={form.control}
-                        name="view"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Weergave</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="default">Standaard weergave</SelectItem>
-                                <SelectItem value="Jongeren">Jongerenwidget</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="view"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Weergave</FormLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="default">Standaard weergave</SelectItem>
+                                  <SelectItem value="Jongeren">Jongerenwidget</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch('view') === 'Jongeren' && (
+                          <>
+                            <FormField
+                              control={form.control}
+                              name="group"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Groeperen</FormLabel>
+                                  <FormDescription>
+                                    Groepeer meerdere 'Antwoordopties met afbeeldingen' onder één item. Dit voegt een slider toe aan de widget, voor elke aparte groep.
+                                    Elke groep moet een unieke naam hebben.
+                                  </FormDescription>
+                                  <Input {...field} />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </>
                         )}
-                      />
+                      </>
                     )}
 
                     <FormField

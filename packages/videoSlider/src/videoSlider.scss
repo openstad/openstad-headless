@@ -348,6 +348,24 @@
             }
         }
     }
+
+    .swiper-slide-active:has(.video-slide--next) .swiper-video-question{
+        padding-bottom: calc(3rem + 80px);
+    }
+
+    .video-slide--next {
+        border-radius: 11px;
+        padding: 16px 20px;
+        border: none;
+        background: #f8d62d;
+        color: #000;
+        font-weight: 700;
+        position: absolute;
+        bottom: 69px;
+        z-index: 1;
+        left: 48px;
+        right: 48px;
+    }
 }
 
 .final-slide {

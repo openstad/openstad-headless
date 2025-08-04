@@ -31,6 +31,7 @@ export type Item = {
   imageUpload?: string;
   multiple?: boolean;
   view?: string;
+  group?: string;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
