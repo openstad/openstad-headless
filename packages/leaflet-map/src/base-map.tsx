@@ -569,7 +569,16 @@ const BaseMap = ({
       setCurrentMarkers(newMarkers);
     }
 
-    if (newPolyLines.length > 0) {
+    // Only update polyLines if there are actual changes
+    const polyLinesChanged = newPolyLines.length !== currentPolyLines.length ||
+      newPolyLines.some((polyLine, index) =>
+        polyLine.positions.length !== currentPolyLines[index]?.positions.length ||
+        polyLine.style.color !== currentPolyLines[index]?.style.color ||
+        polyLine.style.weight !== currentPolyLines[index]?.style.weight ||
+        polyLine.style.opacity !== currentPolyLines[index]?.style.opacity
+      );
+
+    if (polyLinesChanged) {
       setPolyLines(newPolyLines);
     }
   }, [markers, visibleMapDataLayers, iconCreateFunction, defaultIcon, categorize, clustering, onMarkerClick]);
