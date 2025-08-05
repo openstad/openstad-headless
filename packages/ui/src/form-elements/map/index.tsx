@@ -14,6 +14,7 @@ import type {AreaProps} from '@openstad-headless/leaflet-map/src/types/area-prop
 import {ProjectSettingProps} from "@openstad-headless/types/project-setting-props.js";
 import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
 import {Spacer} from "../../spacer";
+import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
 
 export type MapProps = BaseProps &
     AreaProps &
@@ -30,6 +31,8 @@ export type MapProps = BaseProps &
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    datalayer?: DataLayer[];
+    enableOnOffSwitching?: boolean;
 }
 
 type Point = {
@@ -48,6 +51,8 @@ const MapField: FC<MapProps> = ({
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
     infoImage = '',
+    datalayer = [],
+    enableOnOffSwitching = false,
     ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -107,8 +112,12 @@ const MapField: FC<MapProps> = ({
     const zoom = {
         minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
         maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
-    }; 
+    };
 
+    const dataLayerSettings = {
+        datalayer: datalayer,
+        enableOnOffSwitching: enableOnOffSwitching,
+    }
 
     return (
       <FormField type="text">
@@ -158,6 +167,7 @@ const MapField: FC<MapProps> = ({
                   autoZoomAndCenter='area'
                   area={polygon}
                   {...zoom}
+                  dataLayerSettings={dataLayerSettings}
               />
             )}
           </div>

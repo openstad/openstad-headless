@@ -438,10 +438,15 @@ function StemBegroot({
         &&
         ( !Array.isArray(tagCounter) || (Array.isArray(tagCounter) && tagCounter.length === 0) )
       ) {
+        const numberOrDefault = (value: any, defaultValue: number) => {
+          const parsedValue = Number(value);
+          return !isNaN(parsedValue) ? parsedValue : defaultValue;
+        };
+
         const tagCounterNew: Array<TagType> = tagsToDisplay.map((tag: string) => {
           return {
             [tag]: {
-              min: 1,
+              min: props?.votes?.voteType === "countPerTag" ? numberOrDefault(props.votes.minResources, 1) : numberOrDefault(props.votes.minBudget, 1),
               max: props?.votes?.voteType === "countPerTag" ? props.votes.maxResources || 1 : props.votes.maxBudget || 1,
               current: 0,
               selectedResources: []
@@ -814,6 +819,16 @@ function StemBegroot({
                       if (nextUnmetTag) {
                         const tagName = Object.keys(nextUnmetTag)[0];
                         setActiveTagTab(tagName);
+                        return;
+                      }
+
+                      const notOneTagSelected = tagCounter.every(tagObj => {
+                        const key = Object.keys(tagObj)[0];
+                        return tagObj[key].current === 0;
+                      });
+
+                      if (notOneTagSelected) {
+                        notifyVoteMessage('Maak een keuze om verder te kunnen gaan.', true);
                         return;
                       }
                     }
