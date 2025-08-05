@@ -185,12 +185,12 @@ function Swipe({
                   onSwipeLeft={(card) => {
                     console.log(card)
                     const fieldKey = `${slide.id || slide.trigger}_swipe`;
-                    updateSwipeAnswer(fieldKey, { action: 'left', card: card });
+                    // updateSwipeAnswer(fieldKey, { action: 'left', card: card });
                   }}
                   onSwipeRight={(card) => {
                     console.log(card)
                     const fieldKey = `${slide.id || slide.trigger}_swipe`;
-                    updateSwipeAnswer(fieldKey, { action: 'right', card: card });
+                    // updateSwipeAnswer(fieldKey, { action: 'right', card: card });
                   }}
                 />
               </li>
