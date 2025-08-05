@@ -82,7 +82,8 @@ function Swipe({
   autoPlay, 
   formAnswers, 
   updateAnswer, 
-  updateMultipleAnswer 
+  updateMultipleAnswer,
+  updateSwipeAnswer
 }: { 
   slide: any, 
   active: boolean, 
@@ -90,180 +91,174 @@ function Swipe({
   autoPlay: boolean,
   formAnswers: { [key: string]: any },
   updateAnswer: (fieldKey: string, value: any) => void,
-  updateMultipleAnswer: (fieldKey: string, value: string, checked: boolean) => void
+  updateMultipleAnswer: (fieldKey: string, value: string, checked: boolean) => void,
+  updateSwipeAnswer: (fieldKey: string, swipeData: any) => void
 }) {
   const [isActive, setActive] = useState(active);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setActive(active);
-  }, [active]);
+    
+    if (videoRef.current) {
+      if (active) {
+        // Reset video to beginning when slide becomes active
+        videoRef.current.currentTime = 0;
+        if (autoPlay) {
+          videoRef.current.play().catch(console.error);
+        }
+      } else {
+        // Pause video when slide becomes inactive
+        videoRef.current.pause();
+      }
+    }
+  }, [active, autoPlay]);
 
   return (
     <div className="swiper-video-container">
-      {isActive && (
-        <div className="swiper-video-content">
-          <div className="swiper-video-question">
-            <div className="--intro">
-              {slide.title && (<h2>{slide.title}</h2>)}
-              {slide.description && (<p>{slide.description}</p>)}
-            </div>
-            {slide.questionType === 'multiple' && (
-              <ul className="swiper-video-question-list">
-                {slide.options?.map((q, key) => {
-                  const fieldKey = `${slide.id || slide.trigger}_multiple`;
-                  const isChecked = (formAnswers[fieldKey] || []).includes(q.titles[0].key);
-                  
-                  return (
-                    <li key={q.id}>
-                      <input
-                        type="checkbox"
-                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
-                        name={fieldKey}
-                        value={q.titles[0].key}
-                        checked={isChecked}
-                        onChange={(e) => updateMultipleAnswer(fieldKey, q.titles[0].key, e.target.checked)}
-                      />
-                      <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
-                        <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-
-            {slide.questionType === 'multiplechoice' && (
-              <ul className="swiper-video-question-list --radiofield">
-                {slide.options?.map((q, key) => {
-                  const fieldKey = `${slide.id || slide.trigger}_multiplechoice`;
-                  const isChecked = formAnswers[fieldKey] === q.titles[0].key;
-                  
-                  return (
-                    <li key={q.id}>
-                      <input
-                        type="radio"
-                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
-                        name={fieldKey}
-                        value={q.titles[0].key}
-                        checked={isChecked}
-                        onChange={(e) => updateAnswer(fieldKey, e.target.value)}
-                      />
-                      <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
-                        <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-
-            {slide.questionType === 'swipe' && (
-              <ul className="swiper-video-question-list">
-                <li>
-                  <SwipeField
-                    key={`${slide.id || slide.trigger}_swipe`} // Use a stable key
-                    cards={slide?.options?.map((card: any) => ({
-                      id: card.trigger,
-                      description: card.titles[0].key,
-                      image: card.titles[0].image || '',
-                    }))}
-                    onSwipeLeft={(card) => {
-                      const fieldKey = `${slide.id || slide.trigger}_swipe`;
-                      const currentAnswers = formAnswers[fieldKey] || { left: [], right: [] };
-                      
-                      // Check if this card was already swiped to avoid duplicates
-                      const alreadySwipedLeft = currentAnswers.left.some((c: any) => c.id === card.id);
-                      const alreadySwipedRight = currentAnswers.right.some((c: any) => c.id === card.id);
-                      
-                      if (!alreadySwipedLeft && !alreadySwipedRight) {
-                        updateAnswer(fieldKey, {
-                          ...currentAnswers,
-                          left: [...currentAnswers.left, card]
-                        });
-                      }
-                    }}
-                    onSwipeRight={(card) => {
-                      const fieldKey = `${slide.id || slide.trigger}_swipe`;
-                      const currentAnswers = formAnswers[fieldKey] || { left: [], right: [] };
-                      
-                      // Check if this card was already swiped to avoid duplicates
-                      const alreadySwipedLeft = currentAnswers.left.some((c: any) => c.id === card.id);
-                      const alreadySwipedRight = currentAnswers.right.some((c: any) => c.id === card.id);
-                      
-                      if (!alreadySwipedLeft && !alreadySwipedRight) {
-                        updateAnswer(fieldKey, {
-                          ...currentAnswers,
-                          right: [...currentAnswers.right, card]
-                        });
-                      }
-                    }}
-                  />
-                </li>
-              </ul>
-            )}
-
-            {slide.questionType === 'scale' && (
-              <div className="swiper-video-question-list">
-                <TickmarkSlider
-                  showSmileys={slide.showSmileys}
-                  onChange={(value) => {
-                    const fieldKey = `${slide.id || slide.trigger}_scale`;
-                    updateAnswer(fieldKey, value);
-                  }}
-                  index={0}
-                  title=""
-                  fieldOptions={[
-                    { value: '1', label: slide.showSmileys ? <><div>😡</div><span className="value">Slecht</span></> as any : '1' },
-                    { value: '2', label: slide.showSmileys ? <div>🙁</div> as any : '2' },
-                    { value: '3', label: slide.showSmileys ? <div>😐</div> as any : '3' },
-                    { value: '4', label: slide.showSmileys ? <div>😀</div> as any : '4' },
-                    { value: '5', label: slide.showSmileys ? <><div>😍</div><span className="value">Goed</span></> as any : '5' },
-                  ]}
-                  fieldRequired={false}
-                  fieldKey=""
-                />
-              </div>
-            )}
-
-            {slide.questionType === 'images' && !slide.multiple && (
-              <div className="swiper-video-question-list">
-                <div className="question-type-imageChoice">
-                  <ImageChoiceField
-                    title=""
-                    description=""
-                    choices={slide.options?.map((option: any) => ({
-                      imageSrc: option.titles[0].image,
-                      imageAlt: option.titles[0].text || '',
-                      label: option.titles[0].key,
-                      value: option.titles[0].key,
-                    }))}
-                    fieldKey={slide.fieldKey}
-                    fieldRequired={slide.fieldRequired}
-                    multiple={slide.multiple}
-                    view={slide.view}
-                    randomId={`img-choice-${Math.random().toString(36).substring(2, 15)}`}
-                    onChange={(e) => {
-                      const fieldKey = `${slide.id || slide.trigger}_images`;
-                      updateAnswer(fieldKey, e.value);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
+      <div className="swiper-video-content" style={{ display: isActive ? 'block' : 'none' }}>
+        <div className="swiper-video-question">
+          <div className="--intro">
+            {slide.title && (<h2>{slide.title}</h2>)}
+            {slide.description && (<p>{slide.description}</p>)}
           </div>
-          {slide.videoUrl && (
-            <div className="vid-container">
-              <video
-                src={slide.videoUrl}
-                autoPlay={isActive && autoPlay}
-                muted={muted}
-                loop={true}
+          {slide.questionType === 'multiple' && (
+            <ul className="swiper-video-question-list">
+              {slide.options?.map((q, key) => {
+                const fieldKey = `${slide.id || slide.trigger}_multiple`;
+                const isChecked = (formAnswers[fieldKey] || []).includes(q.titles[0].key);
+                
+                return (
+                  <li key={q.id}>
+                    <input
+                      type="checkbox"
+                      id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                      name={fieldKey}
+                      value={q.titles[0].key}
+                      checked={isChecked}
+                      onChange={(e) => updateMultipleAnswer(fieldKey, q.titles[0].key, e.target.checked)}
+                    />
+                    <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {slide.questionType === 'multiplechoice' && (
+            <ul className="swiper-video-question-list --radiofield">
+              {slide.options?.map((q, key) => {
+                const fieldKey = `${slide.id || slide.trigger}_multiplechoice`;
+                const isChecked = formAnswers[fieldKey] === q.titles[0].key;
+                
+                return (
+                  <li key={q.id}>
+                    <input
+                      type="radio"
+                      id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                      name={fieldKey}
+                      value={q.titles[0].key}
+                      checked={isChecked}
+                      onChange={(e) => updateAnswer(fieldKey, e.target.value)}
+                    />
+                    <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {slide.questionType === 'swipe' && (
+            <ul className="swiper-video-question-list">
+              <li>
+                <SwipeField
+                  key={`${slide.id || slide.trigger}_swipe`} // Use a stable key
+                  cards={slide?.options?.map((card: any) => ({
+                    id: card.trigger,
+                    description: card.titles[0].key,
+                    image: card.titles[0].image || '',
+                  }))}
+                  onSwipeLeft={(card) => {
+                    console.log(card)
+                    const fieldKey = `${slide.id || slide.trigger}_swipe`;
+                    updateSwipeAnswer(fieldKey, { action: 'left', card: card });
+                  }}
+                  onSwipeRight={(card) => {
+                    console.log(card)
+                    const fieldKey = `${slide.id || slide.trigger}_swipe`;
+                    updateSwipeAnswer(fieldKey, { action: 'right', card: card });
+                  }}
+                />
+              </li>
+            </ul>
+          )}
+
+          {slide.questionType === 'scale' && (
+            <div className="swiper-video-question-list">
+              <TickmarkSlider
+                showSmileys={slide.showSmileys}
+                onChange={(value) => {
+                  const fieldKey = `${slide.id || slide.trigger}_scale`;
+                  updateAnswer(fieldKey, value);
+                }}
+                index={0}
+                title=""
+                fieldOptions={[
+                  { value: '1', label: slide.showSmileys ? <><div>😡</div><span className="value">Slecht</span></> as any : '1' },
+                  { value: '2', label: slide.showSmileys ? <div>🙁</div> as any : '2' },
+                  { value: '3', label: slide.showSmileys ? <div>😐</div> as any : '3' },
+                  { value: '4', label: slide.showSmileys ? <div>😀</div> as any : '4' },
+                  { value: '5', label: slide.showSmileys ? <><div>😍</div><span className="value">Goed</span></> as any : '5' },
+                ]}
+                fieldRequired={false}
+                fieldKey=""
               />
             </div>
           )}
+
+          {slide.questionType === 'images' && !slide.multiple && (
+            <div className="swiper-video-question-list">
+              <div className="question-type-imageChoice">
+                <ImageChoiceField
+                  title=""
+                  description=""
+                  choices={slide.options?.map((option: any) => ({
+                    imageSrc: option.titles[0].image,
+                    imageAlt: option.titles[0].text || '',
+                    label: option.titles[0].key,
+                    value: option.titles[0].key,
+                  }))}
+                  fieldKey={slide.fieldKey}
+                  fieldRequired={slide.fieldRequired}
+                  multiple={slide.multiple}
+                  view={slide.view}
+                  randomId={`img-choice-${Math.random().toString(36).substring(2, 15)}`}
+                  onChange={(e) => {
+                    const fieldKey = `${slide.id || slide.trigger}_images`;
+                    updateAnswer(fieldKey, e.value);
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
         </div>
-      )}
+        {slide.videoUrl && (
+          <div className="vid-container">
+            <video
+              ref={videoRef}
+              src={slide.videoUrl}
+              autoPlay={isActive && autoPlay}
+              muted={muted}
+              loop={true}
+            />
+          </div>
+        )}
+      </div>
 
       {!isActive && slide.videoUrl && (
         <div className="swiper-video-content">
@@ -317,6 +312,31 @@ function VideoSlider({
         return {
           ...prev,
           [fieldKey]: currentAnswers.filter((item: string) => item !== value)
+        };
+      }
+    });
+  };
+
+  // Helper function to handle swipe answers (accumulating all swipes)
+  const updateSwipeAnswer = (fieldKey: string, swipeData: any) => {
+    setFormAnswers(prev => {
+      const currentAnswers = prev[fieldKey] || [];
+      // Check if an entry with the same card ID already exists
+      const existingIndex = currentAnswers.findIndex((item: any) => item.card.id === swipeData.card.id);
+      
+      if (existingIndex !== -1) {
+        // Overwrite the existing entry
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[existingIndex] = swipeData;
+        return {
+          ...prev,
+          [fieldKey]: updatedAnswers
+        };
+      } else {
+        // Add new entry
+        return {
+          ...prev,
+          [fieldKey]: [...currentAnswers, swipeData]
         };
       }
     });
@@ -422,6 +442,7 @@ function VideoSlider({
                   formAnswers={formAnswers}
                   updateAnswer={updateAnswer}
                   updateMultipleAnswer={updateMultipleAnswer}
+                  updateSwipeAnswer={updateSwipeAnswer}
                 />
               ) : (
                 <Swiper
@@ -445,6 +466,7 @@ function VideoSlider({
                         formAnswers={formAnswers}
                         updateAnswer={updateAnswer}
                         updateMultipleAnswer={updateMultipleAnswer}
+                        updateSwipeAnswer={updateSwipeAnswer}
                       />
                       {slideIndex < item.slides.length - 1 && (
                         <button
