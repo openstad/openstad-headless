@@ -176,7 +176,7 @@ function Swipe({
             <ul className="swiper-video-question-list">
               <li>
                 <SwipeField
-                  key={`${slide.id || slide.trigger}_swipe`} // Use a stable key
+                  key={`${slide.id || slide.trigger}_swipe`}
                   cards={slide?.options?.map((card: any) => ({
                     id: card.trigger,
                     description: card.titles[0].key,
@@ -185,11 +185,13 @@ function Swipe({
                   onSwipeLeft={(card) => {
                     console.log(card)
                     const fieldKey = `${slide.id || slide.trigger}_swipe`;
+                    //Still bugged..
                     // updateSwipeAnswer(fieldKey, { action: 'left', card: card });
                   }}
                   onSwipeRight={(card) => {
                     console.log(card)
                     const fieldKey = `${slide.id || slide.trigger}_swipe`;
+                    //Still bugged..
                     // updateSwipeAnswer(fieldKey, { action: 'right', card: card });
                   }}
                 />
@@ -321,11 +323,9 @@ function VideoSlider({
   const updateSwipeAnswer = (fieldKey: string, swipeData: any) => {
     setFormAnswers(prev => {
       const currentAnswers = prev[fieldKey] || [];
-      // Check if an entry with the same card ID already exists
       const existingIndex = currentAnswers.findIndex((item: any) => item.card.id === swipeData.card.id);
       
       if (existingIndex !== -1) {
-        // Overwrite the existing entry
         const updatedAnswers = [...currentAnswers];
         updatedAnswers[existingIndex] = swipeData;
         return {
@@ -333,7 +333,6 @@ function VideoSlider({
           [fieldKey]: updatedAnswers
         };
       } else {
-        // Add new entry
         return {
           ...prev,
           [fieldKey]: [...currentAnswers, swipeData]
