@@ -23,6 +23,8 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   afterSubmitUrl: z.string().optional(),
+  finalSlideTitle: z.string().optional(),
+  finalSlideDescription: z.string().optional(),
   minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
   maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
   minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
@@ -43,6 +45,8 @@ export default function WidgetEnqueteGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
+      finalSlideTitle: props.finalSlideTitle || '',
+      finalSlideDescription: props.finalSlideDescription || '',
       minCharactersWarning: props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError: props.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
@@ -94,6 +98,42 @@ export default function WidgetEnqueteGeneral(
                     }}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="finalSlideTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bevestiging -- titel</FormLabel>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="finalSlideDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bevestiging -- beschrijving</FormLabel>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
                 <FormMessage />
               </FormItem>
             )}

@@ -21,6 +21,8 @@ export type VideoSliderWidgetProps = BaseProps &
     resourceId?: string;
     resourceIdRelativePath?: string;
     items?: any;
+    finalSlideTitle?: string;
+    finalSlideDescription?: string;
   };
 
 export type VideoSliderProps = {
@@ -293,6 +295,7 @@ function VideoSlider({
 
   const slides = props?.items || baseSlides;
 
+
   // Helper function to update answers in state
   const updateAnswer = (fieldKey: string, value: any) => {
     setFormAnswers(prev => ({
@@ -489,8 +492,8 @@ function VideoSlider({
           ))}
           <SwiperSlide key={'final-slide'}>
             <div className="final-slide">
-              <h2>Dat waren alle vragen!</h2>
-              <p>Bedankt voor het beantwoorden van de vragen.</p>
+              <h2>{props?.finalSlideTitle}</h2>
+              <p>{props?.finalSlideDescription}</p>
               <button type="submit">Versturen</button>
             </div>
           </SwiperSlide>

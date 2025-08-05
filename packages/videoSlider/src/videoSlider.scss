@@ -1,18 +1,27 @@
 .video-slider {
-    --titleBackgroundColor: var(--setTitleBackgroundColor, #f8d62d);
+    --videoSliderPrimaryColor: var(--setVideoSliderPrimaryColor, #f8d62d);
+    --videoSliderSecondaryColor: var(--setVideoSliderSecondaryColor, #258641);
+
+    --titleBackgroundColor: var(--setTitleBackgroundColor, var(--videoSliderPrimaryColor));
     --titleFontSize: var(--setTitleFontSize, 2rem);
     --descriptionFontSize: var(--setDescriptionFontSize, 12px);
     --swipeBackgroundColor: var(--setSwipeBackgroundColor, linear-gradient(153deg, rgb(238, 238, 238) 0%, rgb(220, 220, 220) 100%));
 
-    --checkedBackgroundColor: var(--setCheckedBackgroundColor, #f8d62d);
+    --checkedBackgroundColor: var(--setCheckedBackgroundColor, var(--videoSliderPrimaryColor));
     --checkedColor: var(--setCheckedColor, #000);
 
     --inputBackgroundColor: var(--setInputBackgroundColor, rgba(0, 0, 0, 0.4));
     --inputColor: var(--setInputColor, #fff);
-    --inputNumberColor: var(--setInputNumberColor, #258641);
+    --inputNumberColor: var(--setInputNumberColor, var(--videoSliderSecondaryColor));
 
     --animationSpeed: var(--setAnimationSpeed, 0.5s);
     --animationDelay: var(--setAnimationDelay, 0.3s);
+
+    --nextButtonBackgroundColor: var(--setNextButtonBackgroundColor, var(--videoSliderPrimaryColor));
+    --nextButtonColor: var(--setNextButtonColor, #000);
+
+    --submitButtonBackgroundColor: var(--setSubmitButtonBackgroundColor, var(--videoSliderPrimaryColor));
+    --submitButtonColor: var(--setSubmitButtonColor, #000);
 
     height: 100dvh;
     max-width: 650px;
@@ -358,8 +367,8 @@
         border-radius: 11px;
         padding: 16px 20px;
         border: none;
-        background: #f8d62d;
-        color: #000;
+        background: var(--nextButtonBackgroundColor);
+        color: var(--nextButtonColor);
         font-weight: 700;
         position: absolute;
         bottom: 69px;
@@ -382,9 +391,16 @@
     width: 100%;
     flex-direction: column;
     background: var(--swipeBackgroundColor);
+    padding: 0 15%;
 
     button {
         margin-top: 2rem;
+        border-radius: 11px;
+        padding: 16px 20px;
+        border: none;
+        background: var(--submitButtonBackgroundColor);
+        color: var(--submitButtonColor);
+        font-weight: 700;
     }
 }
 
