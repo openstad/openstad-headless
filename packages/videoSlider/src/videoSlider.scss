@@ -92,7 +92,7 @@
             flex-direction: column;
             justify-content: space-between;
             z-index: 1;
-            padding: 3rem 3rem;
+            padding: 3rem 4rem 3rem 2rem;
             max-width: 600px;
             margin: 0 auto;
             text-align: left;
@@ -259,6 +259,7 @@
             background-repeat: no-repeat;
             background-position: center;
             pointer-events: all;
+            background-color: rgba(0, 0, 0, 0.2);
 
             span {
                 display: none;
@@ -349,7 +350,7 @@
         }
     }
 
-    .swiper-slide-active:has(.video-slide--next) .swiper-video-question{
+    .swiper-slide-active:has(.video-slide--next) .swiper-video-question {
         padding-bottom: calc(3rem + 80px);
     }
 
@@ -363,8 +364,10 @@
         position: absolute;
         bottom: 69px;
         z-index: 1;
-        left: 48px;
-        right: 48px;
+        left: 2rem;
+        right: 4rem;
+        max-width: 500px;
+        margin: 0 auto;
     }
 }
 

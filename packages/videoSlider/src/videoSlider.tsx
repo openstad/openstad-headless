@@ -253,32 +253,33 @@ function VideoSlider({
 
   // Group slides by their group property
   const groupedSlides = useMemo(() => {
-    const groups: { [key: string]: any[] } = {};
-    const ungroupedSlides: any[] = [];
+    const groups: { [key: string]: { slides: any[], firstIndex: number } } = {};
+    const result: any[] = [];
+    const processedGroups = new Set<string>();
 
-    slides.forEach((slide) => {
+    slides.forEach((slide, index) => {
       if (slide.group) {
         if (!groups[slide.group]) {
-          groups[slide.group] = [];
+          groups[slide.group] = { slides: [], firstIndex: index };
         }
-        groups[slide.group].push(slide);
+        groups[slide.group].slides.push(slide);
       } else {
-        ungroupedSlides.push(slide);
+        result.push({ type: 'single', slide, originalIndex: index });
       }
     });
 
-    // Convert groups to array format and combine with ungrouped slides
-    const result: any[] = [];
-
-    // Add ungrouped slides first (maintaining original order)
-    ungroupedSlides.forEach(slide => {
-      result.push({ type: 'single', slide });
+    // Insert grouped slides at the position of their first occurrence
+    Object.entries(groups).forEach(([groupName, { slides: groupSlides, firstIndex }]) => {
+      result.splice(firstIndex, 0, { 
+        type: 'group', 
+        group: groupName, 
+        slides: groupSlides,
+        originalIndex: firstIndex
+      });
     });
 
-    // Add grouped slides
-    Object.entries(groups).forEach(([groupName, groupSlides]) => {
-      result.push({ type: 'group', group: groupName, slides: groupSlides });
-    });
+    // Sort by original index to maintain order
+    result.sort((a, b) => a.originalIndex - b.originalIndex);
 
     return result;
   }, [slides]);
