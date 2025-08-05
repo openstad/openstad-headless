@@ -78,9 +78,6 @@ const defaultSlides = [
 function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean, muted: boolean, autoPlay: boolean }) {
   const [isActive, setActive] = useState(active);
 
-
-  console.log('slide:', slide);
-
   useEffect(() => {
     setActive(active);
   }, [active]);
@@ -95,118 +92,96 @@ function Swipe({ slide, active, muted, autoPlay }: { slide: any, active: boolean
               {slide.description && (<p>{slide.description}</p>)}
             </div>
             {slide.questionType === 'multiple' && (
-              <>
-                <ul className="swiper-video-question-list">
-                  {slide.options?.map((q, key) => (
-                    <li key={q.id}>
-                      <input
-                        type="checkbox"
-                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
-                        name={`${slide.id || slide.trigger}_multiple`}
-                        value={q.titles[0].key}
-                      />
-                      <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
-                        <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <ul className="swiper-video-question-list">
+                {slide.options?.map((q, key) => (
+                  <li key={q.id}>
+                    <input
+                      type="checkbox"
+                      id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                      name={`${slide.id || slide.trigger}_multiple`}
+                      value={q.titles[0].key}
+                    />
+                    <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
+                    </label>
+                  </li>
+                ))}
+              </ul>
             )}
 
             {slide.questionType === 'multiplechoice' && (
-              <>
-                <ul className="swiper-video-question-list --radiofield">
-                  {slide.options?.map((q, key) => (
-                    <li key={q.id}>
-                      <input
-                        type="radio"
-                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
-                        name={`${slide.id || slide.trigger}_multiplechoice`}
-                        value={q.titles[0].key}
-                      />
-                      <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
-                        <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <ul className="swiper-video-question-list --radiofield">
+                {slide.options?.map((q, key) => (
+                  <li key={q.id}>
+                    <input
+                      type="radio"
+                      id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                      name={`${slide.id || slide.trigger}_multiplechoice`}
+                      value={q.titles[0].key}
+                    />
+                    <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
+                    </label>
+                  </li>
+                ))}
+              </ul>
             )}
 
-            {slide.questionType === 'swipe' && (() => {
-              const swipeSlides = slide?.options?.map((card: any) => ({
-                id: card.trigger,
-                description: card.titles[0].key,
-                image: card.titles[0].image || '',
-              }));
-              return (
-                <>
-                  <ul className="swiper-video-question-list">
-                    <li>
-                      <SwipeField
-                        cards={swipeSlides}
-                      />
-                    </li>
-                  </ul>
-                </>
-              );
-            })()}
+            {slide.questionType === 'swipe' && (
+              <ul className="swiper-video-question-list">
+                <li>
+                  <SwipeField
+                    cards={slide?.options?.map((card: any) => ({
+                      id: card.trigger,
+                      description: card.titles[0].key,
+                      image: card.titles[0].image || '',
+                    }))}
+                  />
+                </li>
+              </ul>
+            )}
 
-            {slide.questionType === 'scale' && (() => {
-              const labelOptions = [
-                <><div key="1">😡</div><span className="value">Slecht</span></>,
-                <><div key="2">🙁</div></>,
-                <><div key="3">😐</div></>,
-                <><div key="4">😀</div></>,
-                <><div key="5">😍</div><span className="value">Goed</span></>,
-              ]
-              return (
-                <>
-                  <div className="swiper-video-question-list">
-                    <TickmarkSlider
-                      showSmileys={slide.showSmileys}
-                      onChange={(value) => console.log('Slider value:', value)} index={0} title={''}
-                      fieldOptions={labelOptions.map((label, index) => {
-                        const currentValue = (index + 1).toString();
-                        return {
-                          value: currentValue,
-                          label: slide.showSmileys ? label as any : currentValue,
-                        }
-                      })}
-                      fieldRequired={false}
-                      fieldKey={''} />
-                  </div>
-                </>
-              );
-            })()}
+            {slide.questionType === 'scale' && (
+              <div className="swiper-video-question-list">
+                <TickmarkSlider
+                  showSmileys={slide.showSmileys}
+                  onChange={(value) => {/* Handle slider change */}}
+                  index={0}
+                  title=""
+                  fieldOptions={[
+                    { value: '1', label: slide.showSmileys ? <><div>😡</div><span className="value">Slecht</span></> as any : '1' },
+                    { value: '2', label: slide.showSmileys ? <div>🙁</div> as any : '2' },
+                    { value: '3', label: slide.showSmileys ? <div>😐</div> as any : '3' },
+                    { value: '4', label: slide.showSmileys ? <div>😀</div> as any : '4' },
+                    { value: '5', label: slide.showSmileys ? <><div>😍</div><span className="value">Goed</span></> as any : '5' },
+                  ]}
+                  fieldRequired={false}
+                  fieldKey=""
+                />
+              </div>
+            )}
 
-            {(slide.questionType === 'images' && slide.multiple === false) && (() => {
-              const choices = slide.options?.map((option: any) => ({
-                imageSrc: option.titles[0].image,
-                imageAlt: option.titles[0].text || '',
-                label: option.titles[0].key,
-                value: option.titles[0].key,
-              }));
-              return (
-                <>
-                  <div className="swiper-video-question-list">
-                    <div className="question-type-imageChoice ">
-                      <ImageChoiceField
-                        title={''}
-                        description={''}
-                        choices={choices}
-                        fieldKey={slide.fieldKey}
-                        fieldRequired={slide.fieldRequired}
-                        multiple={slide.multiple}
-                        view={slide.view}
-                        randomId={Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
-                      />
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
+            {slide.questionType === 'images' && !slide.multiple && (
+              <div className="swiper-video-question-list">
+                <div className="question-type-imageChoice">
+                  <ImageChoiceField
+                    title=""
+                    description=""
+                    choices={slide.options?.map((option: any) => ({
+                      imageSrc: option.titles[0].image,
+                      imageAlt: option.titles[0].text || '',
+                      label: option.titles[0].key,
+                      value: option.titles[0].key,
+                    }))}
+                    fieldKey={slide.fieldKey}
+                    fieldRequired={slide.fieldRequired}
+                    multiple={slide.multiple}
+                    view={slide.view}
+                    randomId={`img-choice-${Math.random().toString(36).substring(2, 15)}`}
+                  />
+                </div>
+              </div>
+            )}
 
           </div>
           {slide.videoUrl && (
@@ -247,6 +222,7 @@ function VideoSlider({
   const [muted, setMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
+  const [horizontalSlideIndex, setHorizontalSlideIndex] = useState<{ [key: number]: number }>({});
   const swiperRef = useRef<SwiperType | null>(null);
 
   const slides = props?.items || baseSlides;
@@ -255,7 +231,6 @@ function VideoSlider({
   const groupedSlides = useMemo(() => {
     const groups: { [key: string]: { slides: any[], firstIndex: number } } = {};
     const result: any[] = [];
-    const processedGroups = new Set<string>();
 
     slides.forEach((slide, index) => {
       if (slide.group) {
@@ -268,7 +243,7 @@ function VideoSlider({
       }
     });
 
-    // Insert grouped slides at the position of their first occurrence
+    // Insert grouped slides at their first occurrence position
     Object.entries(groups).forEach(([groupName, { slides: groupSlides, firstIndex }]) => {
       result.splice(firstIndex, 0, { 
         type: 'group', 
@@ -278,10 +253,7 @@ function VideoSlider({
       });
     });
 
-    // Sort by original index to maintain order
-    result.sort((a, b) => a.originalIndex - b.originalIndex);
-
-    return result;
+    return result.sort((a, b) => a.originalIndex - b.originalIndex);
   }, [slides]);
 
   // Handle keyboard navigation
@@ -320,36 +292,21 @@ function VideoSlider({
     };
   }, []);
 
-  const handleSwiperClick = (swiper: any, event: Event) => {
-    if (muted) {
-      const target = event.target as HTMLElement;
-      if (target.closest('input') || target.closest('label')) {
-        return;
-      }
-      setMuted(false);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-
     const formEntries = Object.fromEntries(formData.entries());
-    console.log('Form entries:', formEntries);
-
-    // Combine all form data
+    
+    // Process form submission here
     const allData = {
       formInputs: formEntries,
     };
-    console.log('All form data:', allData);
+    // TODO: Handle form submission
   };
-
 
   return (
     <div className="video-slider">
-      <form className="video-slider-form" onSubmit={(e) => {
-        handleSubmit(e);
-      }}>
+      <form className="video-slider-form" onSubmit={handleSubmit}>
         <Swiper
           modules={[A11y]}
           direction='vertical'
@@ -358,7 +315,6 @@ function VideoSlider({
             swiperRef.current = swiper;
           }}
           onSlideChange={(e) => setCurrent(e.activeIndex)}
-          onClick={handleSwiperClick}
         >
           {groupedSlides.map((item, index) => (
             <SwiperSlide key={index}>
@@ -368,13 +324,19 @@ function VideoSlider({
                 <Swiper
                   direction='horizontal'
                   pagination={{ clickable: true }}
+                  onSlideChange={(swiper) => {
+                    // Update the horizontal slide index for this group
+                    setHorizontalSlideIndex(prev => ({
+                      ...prev,
+                      [index]: swiper.activeIndex
+                    }));
+                  }}
                 >
                   {item.slides.map((slide: any, slideIndex: number) => (
-                    <SwiperSlide>
+                    <SwiperSlide key={slideIndex}>
                       <Swipe
-                        key={slideIndex}
                         slide={slide}
-                        active={index === current}
+                        active={index === current && (horizontalSlideIndex[index] ?? 0) === slideIndex}
                         muted={muted}
                         autoPlay={autoPlay}
                       />
