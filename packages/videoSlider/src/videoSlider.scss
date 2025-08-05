@@ -1,6 +1,7 @@
 .video-slider {
     --videoSliderPrimaryColor: var(--setVideoSliderPrimaryColor, #f8d62d);
     --videoSliderSecondaryColor: var(--setVideoSliderSecondaryColor, #258641);
+    --videoSliderBorderRadius: var(--setVideoSliderBorderRadius, 10px);
 
     --titleBackgroundColor: var(--setTitleBackgroundColor, var(--videoSliderPrimaryColor));
     --titleFontSize: var(--setTitleFontSize, 2rem);
@@ -58,14 +59,14 @@
         .swiper-video-container .vid-container {
             margin: 1rem auto;
             padding: 20px 0;
-            border-radius: 10px;
+            border-radius: var(--videoSliderBorderRadius);
         }
     }
 
     .video-slider-form {
         height: 100%;
         width: 100%;
-        border-radius: 10px;
+        border-radius: var(--videoSliderBorderRadius);
         overflow: hidden;
     }
 
@@ -308,7 +309,7 @@
         background: #fff;
         padding: 2rem;
         margin-right: 1rem;
-        border-radius: 10px;
+        border-radius: var(--videoSliderBorderRadius);
         box-shadow: 0 0 20px 0px rgba(0, 0, 0, 0.075);
         display: flex;
         flex-direction: column-reverse;
@@ -364,7 +365,7 @@
     }
 
     .video-slide--next {
-        border-radius: 11px;
+        border-radius: var(--videoSliderBorderRadius);
         padding: 16px 20px;
         border: none;
         background: var(--nextButtonBackgroundColor);
@@ -395,7 +396,7 @@
 
     button {
         margin-top: 2rem;
-        border-radius: 11px;
+        border-radius: var(--videoSliderBorderRadius);
         padding: 16px 20px;
         border: none;
         background: var(--submitButtonBackgroundColor);
