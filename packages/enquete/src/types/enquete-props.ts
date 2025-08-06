@@ -43,6 +43,8 @@ export type Item = {
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
+  matrix?: Matrix;
+  matrixMultiple?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -73,3 +75,13 @@ export type Confirmation = {
   overwriteEmailAddress?: string;
   userEmailAddress?: string;
 };
+
+export type Matrix = {
+  columns: Array<MatrixOption>;
+  rows: Array<MatrixOption>;
+}
+
+export type MatrixOption = {
+  trigger: string;
+  text?: string;
+}
