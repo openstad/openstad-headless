@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,12 +18,13 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 
 import * as Switch from '@radix-ui/react-switch';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
@@ -39,6 +40,7 @@ const formSchema = z.object({
       message: 'You have to select at least one item.',
     }),
   displayTagGroupName: z.boolean(),
+  filterBehavior: z.string().optional(),
 });
 
 type Tag = {
@@ -73,6 +75,7 @@ export default function WidgetStemBegrootOverviewTags(
       displayTagFilters: props?.displayTagFilters || false,
       tagGroups: props.tagGroups || [],
       displayTagGroupName: props?.displayTagGroupName || false,
+      filterBehavior: props?.filterBehavior || 'or',
     },
   });
 
@@ -95,6 +98,38 @@ export default function WidgetStemBegrootOverviewTags(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="filterBehavior"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Kies de manier waarop je de filters wilt combineren
+                </FormLabel>
+                <FormDescription>
+                  <strong>Of</strong>: Als er meerdere filters actief zijn, wordt alleen één van de filters toegepast. Bijvoorbeeld, als je zoekt op meerdere eigenschappen, wordt er een resultaat getoond als één van die eigenschappen overeenkomt.<br />
+                  <strong>En</strong>: Als er meerdere filters actief zijn, moeten alle filters tegelijkertijd van toepassing zijn. Alleen resultaten die aan alle geselecteerde criteria voldoen, worden getoond.
+                </FormDescription>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'or'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Of" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="or">Of</SelectItem>
+                    <SelectItem value="and">En</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Separator className="my-4" />
 
           <FormField

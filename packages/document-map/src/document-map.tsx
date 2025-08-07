@@ -94,6 +94,7 @@ export type DocumentMapProps = BaseProps &
     maxCharactersWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
+    filterBehavior?: string;
   };
 
 
@@ -133,6 +134,7 @@ function DocumentMap({
   onlyAllowClickOnImage = false,
   popupNotLoggedInText = 'Om een reactie te plaatsen, moet je ingelogd zijn.',
   popupNotLoggedInButton = 'Inloggen',
+  filterBehavior = 'or',
   ...props
 }: DocumentMapProps) {
 
@@ -249,7 +251,15 @@ function DocumentMap({
           return false;
         }
 
-        return comment?.tags.some((tag: any) => finalAllTagsToFilter.includes(tag.id));
+        if (filterBehavior === 'and') {
+          return finalAllTagsToFilter.every(tagId =>
+            comment.tags?.some((tag: { id: number }) => tag.id === tagId)
+          );
+        } else {
+          return comment.tags?.some((tag: { id: number }) =>
+            finalAllTagsToFilter.includes(tag.id)
+          );
+        }
       });
 
     const tagsNewString = !!finalAllTagsToFilter ? finalAllTagsToFilter.join(',') : '';
