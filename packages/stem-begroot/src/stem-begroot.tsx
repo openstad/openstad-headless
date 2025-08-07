@@ -95,6 +95,7 @@ export type StemBegrootWidgetProps = BaseProps &
     step1Delete?: string;
     step1Add?: string;
     step1MaxText?: string;
+    filterBehavior?: string;
   };
 
 function StemBegroot({
@@ -115,6 +116,7 @@ function StemBegroot({
   step1Delete = 'Verwijder',
   step1Add = 'Voeg toe',
   step1MaxText = '',
+  filterBehavior = 'or',
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -1022,6 +1024,7 @@ function StemBegroot({
               hideReadMore={hideReadMore}
               currentPage={page}
               pageSize={itemsPerPage}
+              filterBehavior={filterBehavior}
             />
             <Spacer size={3} />
 
