@@ -14,8 +14,13 @@ router
     let userNickName = '';
 
     try {
+      const whereCondition = { id: req.user.id };
+      if (req.params.projectId && req.params.projectId !== 1) {
+        whereCondition.projectId = req.params.projectId;
+      }
+
       const user = await db.User.findOne({
-        where: { id: req.user.id, projectId: req.params.projectId }
+        where: whereCondition
       });
 
       userNickName = user?.nickName || '';
