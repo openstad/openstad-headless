@@ -127,7 +127,7 @@ function Counter({
     amountDisplayed = results || 0;
   }
 
-  if (counterType !== 'static' && rigCounter !== '0') {
+  if (counterType !== 'static' && rigCounter !== '0' && amountDisplayed !== 0) {
     const currAmount = isNaN(Number(amountDisplayed)) ? 0 : Number(amountDisplayed);
     const rigCounterNumber = isNaN(Number(rigCounter)) ? 0 : Number(rigCounter);
 
