@@ -135,3 +135,8 @@ label.utrecht-form-label{
 .question-type-text input[type="text"]{
   max-width: none;
 }
+
+.button-group.--flex{
+  display: flex;
+  flex-direction: row;
+}
