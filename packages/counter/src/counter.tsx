@@ -20,6 +20,7 @@ export type CounterProps = {
   | 'votedUsers'
   | 'static'
   | 'argument'
+  | 'enqueteResults'
   | 'choiceGuideResults';
   label?: string;
   url?: string;
@@ -97,6 +98,14 @@ function Counter({
       counterType === 'choiceGuideResults' ? props.widgetToFetchId : undefined,
   });
 
+  const {
+    data: enqueteResults
+  } = datastore.useEnqueteResultCount({
+    projectId: props.projectId,
+    widgetToFetchId:
+      counterType === 'enqueteResults' ? props.widgetToFetchId : undefined,
+  });
+
   if (counterType === 'resource') {
     amountDisplayed = (filteredResources || []).length;
   }
@@ -125,6 +134,10 @@ function Counter({
 
   if (counterType === 'choiceGuideResults') {
     amountDisplayed = results || 0;
+  }
+
+  if (counterType === 'enqueteResults') {
+    amountDisplayed = enqueteResults || 0;
   }
 
   if (counterType !== 'static' && rigCounter !== '0' && amountDisplayed !== 0) {

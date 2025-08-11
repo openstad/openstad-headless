@@ -4,8 +4,45 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const createError = require("http-errors");
 
 let router = express.Router({mergeParams: true});
+
+router.route('/widgets')
+	.get(auth.can('Submission', 'list'))
+	.get(function (req, res, next){
+		db.Widget
+			.findAll({
+				attributes: ['id', 'description'],
+				where: {
+					projectId: req.params.projectId,
+					type: 'enquete',
+				}
+			})
+			.then((found) => {
+				res.json(found);
+			}).catch(next);
+	});
+
+router.route('/widgets/:widgetId(\\d+)/count')
+	.get(auth.can('Submission', 'list'))
+	.get(function (req, res, next) {
+		const widgetId = parseInt(req.params.widgetId);
+		if (!widgetId) return next(createError(404, 'Widget not found'));
+
+		db.Submission
+			.scope('defaultScope', {method: ['forProjectId', req.params.projectId]})
+			.count({
+				where: {
+					widgetId,
+					projectId: req.params.projectId
+				}
+			})
+			.then((count) => {
+				res.json({ count });
+			})
+			.catch(next);
+	});
 
 router.route('/')
 
