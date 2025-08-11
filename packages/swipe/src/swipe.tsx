@@ -238,36 +238,34 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   if (isFinished) {
     return (
-      <div className="swipe-widget swipe-finished">
+      <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
         <div className="swipe-finished-content">
           <h2>Klaar!</h2>
           <p>Je hebt alle stellingen gehad.</p>
-          {/* <button onClick={(e) => { resetCards(); e.preventDefault(); }} className="swipe-reset-btn">
+          <button onClick={(e) => { resetCards(); e.preventDefault(); }} className="swipe-reset-btn" aria-label="Begin opnieuw">
             Begin opnieuw
-          </button> */}
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="swipe-widget">
-
-      <div className="swipe-intro">
+    <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0}>
+      <div className="swipe-intro" role="group" aria-label="Voortgang">
         <div className="swipe-progress">
-          <progress id="file" value={100 - (remainingCards.length / cards.length) * 100} max="100"> {100 - (remainingCards.length / cards.length) * 100} </progress>
+          <label htmlFor="swipe-progress-bar" className="sr-only">Voortgang</label>
+          <progress id="swipe-progress-bar" value={100 - (remainingCards.length / cards.length) * 100} max="100" aria-valuenow={100 - (remainingCards.length / cards.length) * 100} aria-valuemax={100} aria-label="Voortgang"></progress>
         </div>
-        <div className="swipe-counter">
+        <div className="swipe-counter" aria-live="polite" tabIndex={0}>
           Stelling {cards.length - remainingCards.length + 1} van de {cards.length}
         </div>
-
       </div>
-      <div className="swipe-container">
+      <div className="swipe-container" role="list" aria-label="Stellingen">
         <div className="swipe-stack">
           {remainingCards.slice(0, 3).map((card, index) => {
             const isTop = index === 0;
             const zIndex = remainingCards.length - index;
-
             let transform = '';
             if (isTop && dragState.isDragging) {
               const rotation = dragState.deltaX * 0.1;
@@ -279,33 +277,32 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             return (
               <div
                 key={card.id}
-                className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''
-                  } ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
-                style={{
-                  zIndex,
-                  transform,
-                }}
+                className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
+                style={{ zIndex, transform }}
                 onPointerDown={isTop ? handlePointerDown : undefined}
                 onPointerMove={isTop ? handlePointerMove : undefined}
                 onPointerUp={isTop ? handlePointerUp : undefined}
+                role="listitem"
+                aria-label={card.title}
+                tabIndex={isTop ? 0 : -1}
+                aria-describedby={`swipe-card-desc-${card.id}`}
               >
                 {card.image && (
                   <div className="swipe-card-image">
-                    <img src={card.image} alt={card.title} />
+                    <img src={card.image} alt={card.title || `afbeelding voor: ${card.description}`} />
                   </div>
                 )}
                 <div className="swipe-card-content">
-                  <p className="swipe-card-description">{card.description}</p>
+                  <p className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.description}</p>
                 </div>
-
                 {isTop && swipeDirection && (
-                  <div className={`swipe-indicator swipe-indicator--${swipeDirection}`}>
+                  <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
                     {swipeDirection === 'left' ? (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" role="img" aria-label="Afwijzen icoon" focusable="false">
                         <path d="M18 6L6 18M6 6l12 12" />
                       </svg>
                     ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" role="img" aria-label="Goedkeuren icoon" focusable="false">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                       </svg>
                     )}
@@ -316,38 +313,33 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           })}
         </div>
       </div>
-
-      {
-    showButtons && (
-      <div className="swipe-actions">
-        <button
-          className="swipe-btn swipe-btn-pass"
-          onClick={(e) => {
-            handleSwipeLeft();
-            e.preventDefault();
-          }}
-          disabled={remainingCards.length === 0}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
-        <button
-          className="swipe-btn swipe-btn-like"
-          onClick={(e) => {
-            handleSwipeRight();
-            e.preventDefault();
-          }}
-          disabled={remainingCards.length === 0}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </button>
-      </div>
-    )
-  }
-    </div >
+      {showButtons && (
+        <div className="swipe-actions" role="group" aria-label="Acties">
+          <button
+            className="swipe-btn swipe-btn-pass"
+            onClick={(e) => { handleSwipeLeft(); e.preventDefault(); }}
+            disabled={remainingCards.length === 0}
+            aria-label="Afwijzen"
+            tabIndex={0}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="Afwijzen icoon" focusable="false">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <button
+            className="swipe-btn swipe-btn-like"
+            onClick={(e) => { handleSwipeRight(); e.preventDefault(); }}
+            disabled={remainingCards.length === 0}
+            aria-label="Goedkeuren"
+            tabIndex={0}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="Goedkeuren icoon" focusable="false">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 export { SwipeField };

@@ -422,19 +422,19 @@ function VideoSlider({
   };
 
   return (
-    <div className="video-slider">
-      <form className="video-slider-form" onSubmit={handleSubmit}>
+    <div className="video-slider" role="region" aria-label="Video slider widget">
+      <form className="video-slider-form" onSubmit={handleSubmit} aria-label="Video slider formulier">
         <Swiper
           modules={[A11y]}
           direction='vertical'
           pagination={{ clickable: false }}
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
-          }}
+          onSwiper={(swiper) => { swiperRef.current = swiper; }}
           onSlideChange={(e) => setCurrent(e.activeIndex)}
+          role="list"
+          aria-label="Slides"
         >
           {groupedSlides.map((item, index) => (
-            <SwiperSlide key={index}>
+            <SwiperSlide key={index} role="listitem" aria-label={item.type === 'single' ? (item.slide?.title || `Slide ${index + 1}`) : `Groep ${item.group}` }>
               {item.type === 'single' ? (
                 <Swipe 
                   slide={item.slide} 
@@ -451,15 +451,13 @@ function VideoSlider({
                   direction='horizontal'
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
-                    // Update the horizontal slide index for this group
-                    setHorizontalSlideIndex(prev => ({
-                      ...prev,
-                      [index]: swiper.activeIndex
-                    }));
+                    setHorizontalSlideIndex(prev => ({ ...prev, [index]: swiper.activeIndex }));
                   }}
+                  role="list"
+                  aria-label={`Slides groep ${item.group}`}
                 >
                   {item.slides.map((slide: any, slideIndex: number) => (
-                    <SwiperSlide key={slideIndex}>
+                    <SwiperSlide key={slideIndex} role="listitem" aria-label={slide?.title || `Slide ${slideIndex + 1}` }>
                       <Swipe
                         slide={slide}
                         active={index === current && (horizontalSlideIndex[index] ?? 0) === slideIndex}
@@ -474,6 +472,7 @@ function VideoSlider({
                         <button
                           className="video-slide--next"
                           type="button"
+                          aria-label={`Ga naar volgende slide (${slideIndex + 2})`}
                           onClick={() => {
                             const swiperEl = document.querySelector('.swiper-horizontal') as any;
                             if (swiperEl && swiperEl.swiper) {
@@ -490,16 +489,16 @@ function VideoSlider({
               )}
             </SwiperSlide>
           ))}
-          <SwiperSlide key={'final-slide'}>
-            <div className="final-slide">
+          <SwiperSlide key={'final-slide'} role="listitem" aria-label="Laatste slide">
+            <div className="final-slide" role="region" aria-label="Laatste slide">
               <h2>{props?.finalSlideTitle}</h2>
               <p>{props?.finalSlideDescription}</p>
-              <button type="submit">Versturen</button>
+              <button type="submit" aria-label="Versturen antwoorden">Versturen</button>
             </div>
           </SwiperSlide>
         </Swiper>
 
-        <div className="video-slider-controls">
+        <div className="video-slider-controls" role="group" aria-label="Video bediening">
           <button
             onClick={() => {
               const videos = document.querySelectorAll('.vid-container video') as NodeListOf<HTMLVideoElement>;
@@ -513,11 +512,18 @@ function VideoSlider({
               });
             }}
             className={`video-slider-play-button ${autoPlay ? '--autoplay' : ''}`}
+            aria-label={autoPlay ? 'Pauzeer alle videos' : 'Speel alle videos'}
+            type="button"
           >
-            <span>Speel/Pauzeer alle Videos</span>
+            <span>{autoPlay ? 'Pauzeer alle Videos' : 'Speel alle Videos'}</span>
           </button>
-          <button onClick={() => setMuted(!muted)} className={`video-slider-mute-button ${muted ? '--muted' : ''}`}>
-            <span>{muted ? 'Unmute' : 'Mute'}</span>
+          <button 
+            onClick={() => setMuted(!muted)} 
+            className={`video-slider-mute-button ${muted ? '--muted' : ''}`}
+            aria-label={muted ? 'Geluid aanzetten' : 'Geluid uitzetten'}
+            type="button"
+          >
+            <span>{muted ? 'Geluid aanzetten' : 'Geluid uitzetten'}</span>
           </button>
           <button
             onClick={async () => {
@@ -534,8 +540,10 @@ function VideoSlider({
               }
             }}
             className={`video-slider-fullscreen-button${isFullscreen ? ' --fullscreen' : ''}`}
+            aria-label={isFullscreen ? 'Venster verlaten' : 'Volledig scherm'}
+            type="button"
           >
-            <span>{isFullscreen ? 'venster verlaten' : 'volledig scherm'}</span>
+            <span>{isFullscreen ? 'Venster verlaten' : 'Volledig scherm'}</span>
           </button>
         </div>
 
