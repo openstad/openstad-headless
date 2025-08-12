@@ -155,7 +155,6 @@ function Form({
                     {fields.map((field: ComponentFieldProps, index: number) => {
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
-                        console.log(field)
 
                         if (field.type !== 'pagination') {
                             return (

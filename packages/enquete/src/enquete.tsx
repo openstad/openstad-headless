@@ -218,7 +218,6 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['type'] = 'pagination';
                     fieldData['prevPageTekst'] = item?.prevPageTekst || '1';
                     fieldData['nextPageTekst'] = item?.nextPageTekst || '2';
-                    console.log('Pagination field detected');
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
@@ -261,9 +260,6 @@ function Enquete(props: EnqueteWidgetProps) {
         const updatedAnswers = { ...answers, ...currentAnswers };
         setAnswers(updatedAnswers);
     }, [currentAnswers]);
-
-    console.log(currentPage, formFields.filter(field => field.type === 'pagination'), formFields.filter(field => field.type === 'pagination')[currentPage]);
-
 
     // @ts-ignore
     const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageTekst || 'Vorige';
