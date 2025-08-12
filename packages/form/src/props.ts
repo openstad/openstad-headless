@@ -14,6 +14,7 @@ import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/num
 
 export type FormProps = {
     title?: string;
+    fieldKey?: any;
     fields: Array<CombinedFieldProps>;
     submitText?: string;
     submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;
@@ -26,7 +27,15 @@ export type FormProps = {
     currentPage?: any;
     setCurrentPage?: (page: number) => void;
     prevPage?: any;
+    prevPageText?: string;
 }
+
+type PaginationFieldProps = {
+    type: 'pagination';
+    fieldKey?: string;
+    prevPageTekst?: any;
+    nextPageTekst?: any;
+};
 
 type CombinedFieldPropsWithType =
     | ({ type?: 'text' } & TextInputProps)
@@ -41,6 +50,7 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'hidden' } & HiddenInputProps)
     | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
     | ({ type?: 'map' } & MapProps)
+    | ({ type?: 'pagination' } & PaginationFieldProps)
     | ({ type?: 'none' } & InfoFieldProps);
 
 type ComponentFieldProps = (
@@ -51,6 +61,7 @@ type ComponentFieldProps = (
 )
 
 type CombinedFieldProps = (
+    PaginationFieldProps|
     TextInputProps |
     TickmarkSliderProps |
     RangeSliderProps |

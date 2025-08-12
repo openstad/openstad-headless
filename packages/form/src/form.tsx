@@ -35,6 +35,7 @@ function Form({
     currentPage,
     setCurrentPage,
     prevPage,
+    prevPageText,
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -196,7 +197,7 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                Vorige
+                                {prevPageText}
                             </Button>
                         )}
                         <Button

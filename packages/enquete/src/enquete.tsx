@@ -216,6 +216,8 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'pagination':
                     fieldData['type'] = 'pagination';
+                    fieldData['prevPageTekst'] = item?.prevPageTekst || '1';
+                    fieldData['nextPageTekst'] = item?.nextPageTekst || '2';
                     console.log('Pagination field detected');
                     break;
                 case 'none':
@@ -231,10 +233,12 @@ function Enquete(props: EnqueteWidgetProps) {
     }
 
     const defaultAnswers = formFields.reduce((acc, item) => {
+        // @ts-ignore
         acc[item.fieldKey] = item?.defaultValue;
         return acc;
     }, {});
 
+    // @ts-ignore   
     const [answers, setAnswers] = useState<{ [key: string]: FormValue }>(defaultAnswers);
     const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -257,6 +261,14 @@ function Enquete(props: EnqueteWidgetProps) {
         const updatedAnswers = { ...answers, ...currentAnswers };
         setAnswers(updatedAnswers);
     }, [currentAnswers]);
+
+    console.log(currentPage, formFields.filter(field => field.type === 'pagination'), formFields.filter(field => field.type === 'pagination')[currentPage]);
+
+
+    // @ts-ignore
+    const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageTekst || 'Vorige';
+    // @ts-ignore
+    const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageTekst || 'Volgende';
 
     return (
         <div className="osc">
@@ -289,11 +301,12 @@ function Enquete(props: EnqueteWidgetProps) {
                     fields={currentFields}
                     submitHandler={onSubmit}
                     title=""
-                    submitText={currentPage < totalPages - 1 ? ("Volgende") : ("Versturen")}
+                    submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
                     submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     prevPage={currentPage > 0 ? currentPage - 1 : null}
+                    prevPageText={getPrevPageTitle}
                     {...props}
                 />
             </div>
