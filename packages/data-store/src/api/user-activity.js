@@ -6,6 +6,6 @@ export default {
       'Content-Type': 'application/json'
     };
 
-    return this.fetch(url, { headers });
+    return userId ? this.fetch(url, { headers }) : [];
   },
 }
