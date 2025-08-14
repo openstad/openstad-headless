@@ -58,6 +58,12 @@ export default function CreateProject() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const project = await createProject(values.projectName);
+
+    if (project && project?.status === 500) {
+      toast.error('Je hebt geen toegang tot deze actie.');
+      return;
+    }
+
     if (project) {
       toast.success('Project aangemaakt!');
       const projectId = project?.id || project;

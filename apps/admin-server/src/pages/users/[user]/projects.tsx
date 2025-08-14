@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import UserRoleDropdownList from '@/components/user-role-dropdown-list';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
+import {Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const formSchema = z.object({
 });
@@ -22,10 +23,10 @@ type ProjectRole = {
 
 export default function CreateUserProjects() {
 
-  let projectRoles: Array<ProjectRole> = [];
   const { data:projects } = projectListSwr();
   const { data:users, updateUser } = useUser();
   const { createUser } = useUsers();
+  const [projectRoles, setProjectRoles] = useState<Array<ProjectRole>>([]);
 
   useEffect(() => {
   }, [projects, users]);
@@ -36,20 +37,21 @@ export default function CreateUserProjects() {
   });
 
   const addProject = (projectId: string, roleId: string) => {
-    if (projectRoles.find((e) => e.projectId === projectId)) {
-      if (roleId === '') {
-        projectRoles = projectRoles.filter(function (project) {
-          return project.projectId !== projectId;
-        });
-      } else {
-        let role = projectRoles.findIndex((obj) => obj.projectId == projectId);
-        projectRoles[role].roleId = roleId;
+    setProjectRoles(prev => {
+      let updated = [...prev];
+      const index = updated.findIndex(e => e.projectId === projectId);
+
+      if (index !== -1) {
+        if (roleId === '') {
+          updated.splice(index, 1);
+        } else {
+          updated[index].roleId = roleId;
+        }
+      } else if (roleId !== '') {
+        updated.push({ projectId, roleId });
       }
-    } else {
-      if (roleId !== '') {
-        projectRoles.push({ projectId: projectId, roleId: roleId });
-      }
-    }
+      return updated;
+    });
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -96,11 +98,32 @@ export default function CreateUserProjects() {
 
   if (!projects || !users) return null;
 
+  const mergedRoles = Array.isArray(users)
+    ? users.map((user: any) => {
+      const override = projectRoles.find(pr => pr.projectId == user.projectId);
+      return override ? { ...user, role: override.roleId } : user;
+    })
+    : [users];
+
+  projectRoles.forEach(pr => {
+    if (!mergedRoles.find((u: any) => u.projectId == pr.projectId)) {
+      mergedRoles.push({ projectId: pr.projectId, role: pr.roleId });
+    }
+  });
+
+  const hasEditorRole = mergedRoles.some((item: any) => item.role === 'editor');
+  const adminProject = mergedRoles.find((item: any) => item.projectId == 1);
+  const isAdminOrEditorInAdminProject =
+    adminProject && (adminProject.role === 'admin' || adminProject.role === 'editor');
+  const isEditorInAdminProject =
+    adminProject && adminProject.role === 'editor';
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Projectsrechten</Heading>
         <Separator className="my-4" />
+
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="ml-1">
             <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 items-center lg:py-2 lg:border-b border-border gap-4">
@@ -138,6 +161,26 @@ export default function CreateUserProjects() {
               })}
             </ul>
           </div>
+
+          {hasEditorRole && !isAdminOrEditorInAdminProject && (
+            <Alert variant="warning" className="mb-4">
+              <AlertTitle>Let op!</AlertTitle>
+              <AlertDescription>
+                Een gebruiker met de rol <b>editor</b> heeft geen toegang tot projecten als deze geen <b>admin</b> of <b>editor</b> is van het admin-project.<br />
+                Voeg de gebruiker toe als <b>admin</b> of <b>editor</b> aan het admin-project om toegang te geven tot de admin.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {isEditorInAdminProject && (
+            <Alert variant="info" className="mb-4">
+              <AlertTitle>Let op!</AlertTitle>
+              <AlertDescription>
+                Een <b>editor</b> van het admin-project kan het admin-project zelf niet bewerken. Deze rol geeft alleen toegang tot de admin-omgeving.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Button className="col-span-full w-fit mt-4" type="submit">
             Opslaan
           </Button>

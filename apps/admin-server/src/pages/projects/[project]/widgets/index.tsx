@@ -7,11 +7,12 @@ import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import toast from 'react-hot-toast';
 
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import { Button } from '@/components/ui/button';
+import { HasAccess } from '@/lib/hasAccess';
 
 export default function ProjectWidgets() {
   const router = useRouter();
@@ -135,24 +136,26 @@ export default function ProjectWidgets() {
                           />
                         </div>
 
-                        <div
-                          className="hidden lg:flex ml-auto"
-                          onClick={(e) => e.preventDefault()}>
-                          <RemoveResourceDialog
-                            header="Widget verwijderen"
-                            message="Weet je zeker dat je deze widget wilt verwijderen?"
-                            onDeleteAccepted={() =>
-                              remove(widget.id)
-                                .then(() =>
-                                  toast.success('Widget successvol verwijderd')
-                                )
-                                .catch((e) =>
-                                  toast.error('Widget kon niet worden verwijderd')
-                                )
-                            }
-                          />
+                        {HasAccess() && (
+                          <div
+                            className="hidden lg:flex ml-auto"
+                            onClick={(e) => e.preventDefault()}>
+                            <RemoveResourceDialog
+                              header="Widget verwijderen"
+                              message="Weet je zeker dat je deze widget wilt verwijderen?"
+                              onDeleteAccepted={() =>
+                                remove(widget.id)
+                                  .then(() =>
+                                    toast.success('Widget successvol verwijderd')
+                                  )
+                                  .catch((e) =>
+                                    toast.error('Widget kon niet worden verwijderd')
+                                  )
+                              }
+                            />
+                          </div>
+                        )}
 
-                        </div>
                       </div>
                       <Paragraph className="flex">
                         <ChevronRight
