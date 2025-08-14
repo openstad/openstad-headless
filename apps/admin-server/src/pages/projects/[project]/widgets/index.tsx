@@ -34,6 +34,8 @@ export default function ProjectWidgets() {
     }
   }, [widgets]);
 
+  const sessionData = useContext(SessionContext);
+
   return (
     <div>
       <PageLayout
@@ -137,7 +139,7 @@ export default function ProjectWidgets() {
                           />
                         </div>
 
-                        {HasAccess(useContext(SessionContext)) && (
+                        {HasAccess(sessionData) && (
                           <div
                             className="hidden lg:flex ml-auto"
                             onClick={(e) => e.preventDefault()}>

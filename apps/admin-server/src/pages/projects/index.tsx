@@ -23,6 +23,8 @@ export default function Projects() {
     setFilterData(data);
   }, [data])
 
+  const sessionData = useContext(SessionContext);
+
   if (!data) return (
     <div>
       <PageLayout
@@ -34,7 +36,7 @@ export default function Projects() {
           },
         ]}
         action={
-          HasAccess(useContext(SessionContext)) && (
+          HasAccess(sessionData) && (
             <Link href="/projects/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />
@@ -59,7 +61,7 @@ export default function Projects() {
           },
         ]}
         action={
-          HasAccess(useContext(SessionContext)) && (
+          HasAccess(sessionData) && (
             <Link href="/projects/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />
