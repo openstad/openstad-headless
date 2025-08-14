@@ -11,8 +11,9 @@ function isRole(role: any): role is Role {
   return validRoles.includes(role);
 }
 
-export function hasAccess(userParr?: { role: string }) {
-  let user = userParr || useContext(SessionContext);
+export function HasAccess(userParr?: { role: string }) {
+  const context = useContext(SessionContext);
+  let user = userParr || context;
 
   if (user?.role && isRole(user.role)) {
     return hasRole({ ...user, role: user.role }, "admin");

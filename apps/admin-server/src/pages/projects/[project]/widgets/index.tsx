@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import { Button } from '@/components/ui/button';
-import { hasAccess } from '@/lib/hasAccess';
+import { HasAccess } from '@/lib/hasAccess';
 
 export default function ProjectWidgets() {
   const router = useRouter();
@@ -136,7 +136,7 @@ export default function ProjectWidgets() {
                           />
                         </div>
 
-                        {hasAccess() && (
+                        {HasAccess() && (
                           <div
                             className="hidden lg:flex ml-auto"
                             onClick={(e) => e.preventDefault()}>

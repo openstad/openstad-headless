@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { authMiddleware, getSession } from './auth';
-import { hasAccess } from './lib/hasAccess';
+import { HasAccess } from './lib/hasAccess';
 
 const restrictedPaths = [
   '/areas',
@@ -51,9 +51,9 @@ export default async function middleware(req: NextRequest) {
     const subPath = match[2] || '/';
     const projectId = match[1];
 
-    if (!hasAccess(session?.user) && restrictedPaths.includes(subPath)) {
+    if (!HasAccess(session?.user) && restrictedPaths.includes(subPath)) {
       return NextResponse.redirect(`${process.env.URL}/projects/${projectId}/widgets`);
-    } else if (!hasAccess(session?.user) && subPath === '/settings') {
+    } else if (!HasAccess(session?.user) && subPath === '/settings') {
       return NextResponse.redirect(`${process.env.URL}/projects/${projectId}/settings/voting`);
     }
   }

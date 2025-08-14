@@ -8,7 +8,7 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { useRouter } from 'next/router';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import projectListSwr from '../../hooks/use-project-list';
-import { hasAccess } from '@/lib/hasAccess';
+import { HasAccess } from '@/lib/hasAccess';
 
 export default function Projects() {
   const { data, isLoading, error } = projectListSwr();
@@ -33,7 +33,7 @@ export default function Projects() {
           },
         ]}
         action={
-          hasAccess() && (
+          HasAccess() && (
             <Link href="/projects/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />
@@ -58,7 +58,7 @@ export default function Projects() {
           },
         ]}
         action={
-          hasAccess() && (
+          HasAccess() && (
             <Link href="/projects/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />
