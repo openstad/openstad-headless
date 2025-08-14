@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { useRouter } from 'next/router';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import projectListSwr from '../../hooks/use-project-list';
+import { HasAccess } from '@/lib/hasAccess';
 
 export default function Projects() {
   const { data, isLoading, error } = projectListSwr();
@@ -32,12 +33,14 @@ export default function Projects() {
           },
         ]}
         action={
-          <Link href="/projects/create">
-            <Button variant="default" className="flex w-fit">
-              <Plus size="20" className="hidden lg:flex" />
-              Project toevoegen
-            </Button>
-          </Link>
+          HasAccess() && (
+            <Link href="/projects/create">
+              <Button variant="default" className="flex w-fit">
+                <Plus size="20" className="hidden lg:flex" />
+                Project toevoegen
+              </Button>
+            </Link>
+          )
         }>
       </PageLayout>
     </div>
@@ -55,12 +58,14 @@ export default function Projects() {
           },
         ]}
         action={
-          <Link href="/projects/create">
-            <Button variant="default" className="flex w-fit">
-              <Plus size="20" className="hidden lg:flex" />
-              Project toevoegen
-            </Button>
-          </Link>
+          HasAccess() && (
+            <Link href="/projects/create">
+              <Button variant="default" className="flex w-fit">
+                <Plus size="20" className="hidden lg:flex" />
+                Project toevoegen
+              </Button>
+            </Link>
+          )
         }>
 
         <div className="container py-6">

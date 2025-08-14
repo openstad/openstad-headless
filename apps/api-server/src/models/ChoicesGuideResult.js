@@ -106,7 +106,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     viewableBy: 'all',
     createableBy: 'all',
     updateableBy: ['editor', 'owner'],
-    deleteableBy: 'admin',
+    deleteableBy: 'editor',
   }
 
   return ChoicesGuideResult;
