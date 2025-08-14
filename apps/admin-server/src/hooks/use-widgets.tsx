@@ -24,14 +24,17 @@ export function useWidgetsHook(projectId?: string) {
     return data;
   }
 
-  async function remove(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectNumber}/widgets/${id}`;
+  async function remove(id: number, multiple?: boolean, ids?: number[]) {
+    const deleteUrl = multiple
+      ? `/api/openstad/api/project/${projectNumber}/widgets/delete`
+      : `/api/openstad/api/project/${projectNumber}/widgets/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: multiple ? JSON.stringify({ ids }) : undefined,
     });
 
     if (res.ok) {
@@ -71,8 +74,29 @@ export function useWidgetsHook(projectId?: string) {
 
   }
 
+  async function duplicate(ids: number[]) {
+    const duplicateUrl = `/api/openstad/api/project/${projectNumber}/widgets/duplicate`;
 
-  return { ...widgetsSwr, createWidget, updateWidget, remove };
+    const res = await fetch(duplicateUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+
+      widgetsSwr.mutate([...widgetsSwr.data, ...data]);
+      return data;
+    } else {
+      throw new Error('Could not duplicate the widgets');
+    }
+  }
+
+
+  return { ...widgetsSwr, createWidget, updateWidget, remove, duplicate };
 }
 
 export type Widget = {

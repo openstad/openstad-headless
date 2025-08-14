@@ -52,6 +52,89 @@ router
     return res.json(createdWidget);
   });
 
+// Multiple widget routes
+// -------------------------
+
+// Delete multiple widgets
+router
+    .route ('/delete')
+    .delete(auth.useReqUser)
+    .delete( rateLimiter(), async function (req, res, next)  {
+        const ids = req.body.ids;
+
+        if (!ids || !Array.isArray(ids)) {
+            return next(new Error('Invalid request: ids must be an array'));
+        }
+
+        try {
+            const widgets = await db.Widget.scope(...req.scope).findAll({
+                where: { id: ids }
+            });
+
+            if (widgets.length === 0) {
+                return res.status(404).json({ error: 'No widgets found for the provided IDs' });
+            }
+
+            for (const widget of widgets) {
+                if (!widget.can || !widget.can('delete')) {
+                    return next(new Error(`You cannot delete widget with ID ${widget.id}`));
+                }
+            }
+
+            await db.Widget.destroy({
+                where: { id: ids }
+            });
+
+            res.json({ message: 'Widgets deleted successfully' });
+        } catch (error) {
+            next(error);
+        }
+    })
+
+// Duplicate multiple widgets
+router
+    .route('/duplicate')
+    .post(auth.useReqUser)
+    .post(rateLimiter(), async function (req, res, next) {
+        const ids = req.body.ids;
+        const projectId = req.params.projectId;
+
+        if (!ids || !Array.isArray(ids)) {
+            return next(new Error('Invalid request: ids must be an array'));
+        }
+
+        try {
+            const widgets = await db.Widget.scope(...req.scope).findAll({
+                where: { id: ids }
+            });
+
+            if (widgets.length === 0) {
+                return res.status(404).json({ error: 'No widgets found for the provided IDs' });
+            }
+
+            for (const widget of widgets) {
+                if (!widget.can || !widget.can('create')) {
+                    return next(new Error(`You cannot duplicate widget with ID ${widget.id}`));
+                }
+            }
+
+            const duplicatedWidgets = await Promise.all(
+                widgets.map((widget) => {
+                    return db.Widget.create({
+                        projectId,
+                        description: widget?.description || '',
+                        type: widget.type,
+                        config: widget?.config || '{}',
+                    });
+                })
+            );
+
+            res.json(duplicatedWidgets);
+        } catch (error) {
+            next(error);
+        }
+    });
+
 // one widget routes: get widget
 // -------------------------
 router
