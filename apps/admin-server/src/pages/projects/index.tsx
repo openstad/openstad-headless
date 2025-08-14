@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import projectListSwr from '../../hooks/use-project-list';
 import { HasAccess } from '@/lib/hasAccess';
+import {SessionContext} from "@/auth";
 
 export default function Projects() {
   const { data, isLoading, error } = projectListSwr();
@@ -33,7 +34,7 @@ export default function Projects() {
           },
         ]}
         action={
-          HasAccess() && (
+          HasAccess(useContext(SessionContext)) && (
             <Link href="/projects/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />
@@ -58,7 +59,7 @@ export default function Projects() {
           },
         ]}
         action={
-          HasAccess() && (
+          HasAccess(useContext(SessionContext)) && (
             <Link href="/projects/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />
