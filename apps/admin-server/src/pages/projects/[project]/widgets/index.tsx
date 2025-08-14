@@ -7,12 +7,12 @@ import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import {useContext, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import toast from 'react-hot-toast';
 
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import { Button } from '@/components/ui/button';
-import {SessionContext} from "@/auth";
+import { hasAccess } from '@/lib/hasAccess';
 
 export default function ProjectWidgets() {
   const router = useRouter();
@@ -32,9 +32,6 @@ export default function ProjectWidgets() {
       setData(widgets);
     }
   }, [widgets]);
-
-  const sessionData = useContext(SessionContext);
-  const hasAccess = sessionData?.role === 'admin' || sessionData?.role === 'superuser';
 
   return (
     <div>
@@ -139,7 +136,7 @@ export default function ProjectWidgets() {
                           />
                         </div>
 
-                        {hasAccess && (
+                        {hasAccess() && (
                           <div
                             className="hidden lg:flex ml-auto"
                             onClick={(e) => e.preventDefault()}>

@@ -1,5 +1,4 @@
 'use client';
-import {useContext} from 'react';
 import React from 'react';
 
 import { Button } from './button';
@@ -8,7 +7,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
-import { SessionContext } from '../../auth';
+import {hasAccess} from "@/lib/hasAccess";
 
 export function SidenavProject({ className }: { className?: string }) {
   const router = useRouter();
@@ -18,9 +17,6 @@ export function SidenavProject({ className }: { className?: string }) {
   useEffect(() => {
     setLocation(router.pathname);
   }, [router]);
-
-  const sessionData = useContext(SessionContext);
-  const hasAccess = sessionData?.role === 'admin' || sessionData?.role === 'superuser';
 
   return (
     <nav
@@ -57,7 +53,7 @@ export function SidenavProject({ className }: { className?: string }) {
         </Link>
         {location.includes('/settings') ? (
           <>
-            {hasAccess && (
+            {hasAccess() && (
               <Link href={`/projects/${project}/settings`}>
                 <Button
                   variant={location.endsWith('/settings') ? 'secondary' : 'ghost'}
@@ -87,7 +83,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Reacties</span>
               </Button>
             </Link>
-            {hasAccess && (
+            {hasAccess() && (
               <Link href={`/projects/${project}/settings/anonymization`}>
                 <Button
                   variant={
@@ -101,7 +97,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 </Button>
               </Link>
             )}
-            {hasAccess && (
+            {hasAccess() && (
               <Link href={`/projects/${project}/settings/notifications`}>
                 <Button
                   variant={
@@ -139,7 +135,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Kaart instellingen</span>
               </Button>
             </Link>
-            {hasAccess && (
+            {hasAccess() && (
               <Link href={`/projects/${project}/settings/alloweddomains`}>
                 <Button
                   variant={
@@ -153,7 +149,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 </Button>
               </Link>
             )}
-            {hasAccess && (
+            {hasAccess() && (
               <Link href={`/projects/${project}/settings/design`}>
                 <Button
                   variant={
@@ -206,7 +202,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Algemeen</span>
               </Button>
             </Link>
-            {hasAccess && (
+            {hasAccess() && (
               <Link href={`/projects/${project}/authentication/2fa`}>
                 <Button
                   variant={
@@ -329,7 +325,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Notificaties en e-mails</span>
           </Button>
         </Link>
-        {hasAccess && (
+        {hasAccess() && (
           <Link href={`/projects/${project}/duplicate`}>
             <Button
               variant={location.includes("/duplicate") ? "secondary" : "ghost"}
@@ -340,7 +336,7 @@ export function SidenavProject({ className }: { className?: string }) {
             </Button>
           </Link>
         )}
-        {hasAccess && (
+        {hasAccess() && (
           <Link href={`/projects/${project}/export`}>
             <Button
               variant={location.includes("/export") ? "secondary" : "ghost"}

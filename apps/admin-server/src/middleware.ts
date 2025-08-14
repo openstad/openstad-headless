@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { authMiddleware, getSession } from './auth';
+import { hasAccess } from './lib/hasAccess';
 
 const restrictedPaths = [
   '/areas',
@@ -44,18 +45,15 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(`${process.env.API_URL}/auth/project/1/logout?useAuth=default&redirectUri=${process.env.URL}/`, { headers: res.headers });
   }
 
-  const userRole = session?.user?.role || '';
-  const hasAccess = userRole && (userRole === 'admin' || userRole === 'superuser');
-
   const match = req.nextUrl.pathname.match(/^\/projects\/(\d+)(\/.*)?$/);
 
   if (match) {
     const subPath = match[2] || '/';
     const projectId = match[1];
 
-    if (!hasAccess && restrictedPaths.includes(subPath)) {
+    if (!hasAccess(session?.user) && restrictedPaths.includes(subPath)) {
       return NextResponse.redirect(`${process.env.URL}/projects/${projectId}/widgets`);
-    } else if (!hasAccess && subPath === '/settings') {
+    } else if (!hasAccess(session?.user) && subPath === '/settings') {
       return NextResponse.redirect(`${process.env.URL}/projects/${projectId}/settings/voting`);
     }
   }
