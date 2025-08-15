@@ -196,7 +196,7 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                {prevPageText}
+                                {prevPageText || 'vorige'}
                             </Button>
                         )}
                         <Button
