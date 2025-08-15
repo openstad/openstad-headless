@@ -29,6 +29,8 @@ export type Item = {
   fieldKey?: string;
   minCharacters?: string;
   maxCharacters?: string;
+  nextPageTekst?: string;
+  prevPageTekst?: string;
   variant?: string;
   options?: Array<Option>;
   imageUpload?: string;
