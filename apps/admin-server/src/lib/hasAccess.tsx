@@ -2,7 +2,7 @@ import hasRole from "./hasRole";
 import { Role } from "@/lib/roles";
 
 const validRoles: Role[] = [
-  "superuser", "admin", "editor", "member", "anonymous", "all"
+  "superuser", "admin", "editor", "moderator", "member", "anonymous", "all"
 ];
 
 function isRole(role: any): role is Role {
