@@ -358,7 +358,8 @@ export default function WidgetEnqueteItems(
   const handleAction = (
     actionType: 'moveUp' | 'moveDown' | 'delete',
     clickedTrigger: string,
-    isItemAction: boolean // Determines if the action is for items or options
+    isItemAction: boolean, // Determines if the action is for items or options
+    isMatrixAction: boolean = false
   ) => {
     if (isItemAction) {
       setItems((currentItems) => {
@@ -367,6 +368,25 @@ export default function WidgetEnqueteItems(
           actionType,
           clickedTrigger
         ) as Item[];
+      });
+    } else if (isMatrixAction) {
+      setMatrixOptions((currentMatrix) => {
+        const updatedRows = handleMovementOrDeletion(
+          currentMatrix.rows,
+          actionType,
+          clickedTrigger
+        ) as MatrixOption[];
+        const updatedColumns = handleMovementOrDeletion(
+          currentMatrix.columns,
+          actionType,
+          clickedTrigger
+        ) as MatrixOption[];
+
+        return {
+          ...currentMatrix,
+          rows: updatedRows,
+          columns: updatedColumns,
+        };
       });
     } else {
       setOptions((currentLinks) => {
@@ -542,11 +562,72 @@ export default function WidgetEnqueteItems(
                   <>
                     <div className="flex flex-col justify-between">
                       <div className="flex flex-col gap-y-2">
-                        <Heading size="xl">Antwoordopties</Heading>
+                        <Heading size="xl">Lijst van onderwerpen</Heading>
                         <FormDescription>
-                          Dit zijn de antwoordopties die gekozen kunnen worden per onderwerp. Deze komen in de eerste kolom van de matrix.
+                          Dit zijn de onderwerpen die in de matrix worden weergegeven. Deze komen in de eerste kolom (verticaal) van de matrix.
                         </FormDescription>
                         <Separator className="mt-2" />
+
+                        <div className="flex flex-col gap-1">
+                          {options.length > 0
+                            ? options
+                              .sort(
+                                (a, b) =>
+                                  parseInt(a.trigger) - parseInt(b.trigger)
+                              )
+                              .map((option, index) => (
+                                <div
+                                  key={index}
+                                  className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
+                                  'bg-secondary'
+                                  }`}>
+                                <span className="flex gap-2 py-3 px-2">
+                                  <ArrowUp
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveUp',
+                                        option.trigger,
+                                        false,
+                                        true
+                                      )
+                                    }
+                                  />
+                                  <ArrowDown
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveDown',
+                                        option.trigger,
+                                        false,
+                                        true
+                                      )
+                                    }
+                                  />
+                                </span>
+                                  <span
+                                    className="py-3 px-2 w-full"
+                                    onClick={() => setOption(option)}>
+                                  {option?.titles?.[0].key}
+                                </span>
+                                  <span className="py-3 px-2">
+                                  <X
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'delete',
+                                        option.trigger,
+                                        false,
+                                        true
+                                      )
+                                    }
+                                  />
+                                </span>
+                                </div>
+                              ))
+                            : ''}
+                        </div>
+
                         {hasList() && (
                           (() => {
                             const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
@@ -595,64 +676,42 @@ export default function WidgetEnqueteItems(
                         </Button>
                       </div>
                     </div>
-                    <div>
-                      <Heading size="xl">Lijst van antwoordopties</Heading>
-                      <Separator className="my-4" />
-                      <div className="flex flex-col gap-1">
-                        {options.length > 0
-                          ? options
-                            .sort(
-                              (a, b) =>
-                                parseInt(a.trigger) - parseInt(b.trigger)
+                    <div className="flex flex-col justify-between">
+                      <div className="flex flex-col gap-y-2">
+                        <Heading size="xl">Lijst van antwoordopties</Heading>
+                        <FormDescription>
+                          Dit zijn de antwoordopties die gekozen kunnen worden per onderwerp. Deze komen in de eerste kolom (horizontaal) van de matrix.
+                        </FormDescription>
+                        <Separator className="mt-2" />
+                        {hasList() && (
+                          (() => {
+                            const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                            const activeOption = currentOption !== -1 ? currentOption : options.length;
+
+                            return (
+                              <FormField
+                                control={form.control}
+                                name={`options.${activeOption}.titles.0.key`}
+                                render={({field}) => (
+                                  <FormItem>
+                                    <FormLabel>Optie tekst</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage/>
+                                  </FormItem>
+                                )}
+                              />
                             )
-                            .map((option, index) => (
-                              <div
-                                key={index}
-                                className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
-                                'bg-secondary'
-                                }`}>
-                                <span className="flex gap-2 py-3 px-2">
-                                  <ArrowUp
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveUp',
-                                        option.trigger,
-                                        false
-                                      )
-                                    }
-                                  />
-                                  <ArrowDown
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveDown',
-                                        option.trigger,
-                                        false
-                                      )
-                                    }
-                                  />
-                                </span>
-                                <span
-                                  className="py-3 px-2 w-full"
-                                  onClick={() => setOption(option)}>
-                                  {option?.titles?.[0].key}
-                                </span>
-                                <span className="py-3 px-2">
-                                  <X
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'delete',
-                                        option.trigger,
-                                        false
-                                      )
-                                    }
-                                  />
-                                </span>
-                              </div>
-                            ))
-                          : 'Geen options'}
+                          })()
+                        )}
+
+                        <Button
+                          className="w-full bg-secondary text-black hover:text-white mt-4"
+                          type="button"
+                          onClick={() => handleAddOption(form.getValues())}>
+                          {selectedOption
+                            ? 'Sla wijzigingen op'
+                            : 'Voeg optie toe aan lijst'}
+                        </Button>
                       </div>
                     </div>
                   </>
