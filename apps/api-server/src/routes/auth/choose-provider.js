@@ -80,6 +80,15 @@ router
       isPriviligedRoute: isPriviligedRoute,
       project: req.project,
     });
+    
+    // Send the renderedResponse as HTML
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    
     return res.send(renderedResponse);
   });
 
