@@ -115,7 +115,7 @@ router.route('/')
   })
   .post(async function (req, res, next) {
     // auth server settings
-    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default', req });
     req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
     return next();
   })
@@ -375,7 +375,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
 
     // no api users left for this oauth user, so remove the oauth user
     try {
-      let authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+      let authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default', req });
       let adapter = await authSettings.adapter({ authConfig: req.authConfig });
       if (adapter.service.deleteUser) {
         adapter.service.deleteUser({ authConfig, userData: { id: req.externalUserId } })
@@ -436,7 +436,7 @@ router.route('/:userId(\\d+)')
   })
   .put(async function (req, res, next) {
     // auth server settings
-    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default', req });
     req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
     return next();
   })
@@ -537,7 +537,7 @@ router.route('/:userId(\\d+)')
      */
     const userForAllProjects = await db.User.findAll({where: {idpUser: { identifier: user.idpUser && user.idpUser.identifier }}});
     if (userForAllProjects.length <= 1) {
-      let authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+      let authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default', req });
       let adapter = await authSettings.adapter({ authConfig: req.authConfig });
       if (adapter.service.deleteUser) {
         adapter.service.deleteUser({ authConfig, userData: { id: user.idpUser.identifier, provider: user.idpUser.provider } })

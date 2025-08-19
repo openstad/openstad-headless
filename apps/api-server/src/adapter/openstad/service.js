@@ -225,7 +225,7 @@ service.fetchClient = async function({ authConfig, project }) {
   }
 }
 
-service.createClient = async function({ authConfig, project }) {
+service.createClient = async function({ authConfig, project, req }) {
 
   // sync only configuration that is used by the OpenStad auth server - compare updateConfig below
   let newConfig = {

@@ -13,12 +13,29 @@ router.post( '*', bruteForce.postMiddleware );
 // routes
 router.use( '/', require('./me') );
 
+router.use('/project/:projectId/choose-provider', require('./choose-provider') );
+
 // dynamically use the required adapter
 router
+  .use(async function (req, res, next) {
+    let useAuthProvider = req.cookies['useAuthProvider'];
+    
+    console.log ('adapter middleware for auth', req.project?.config?.authProviders, useAuthProvider);
+    
+    if (req.project && req.project.config && req.project.config.authProviders && Array.isArray(req.project.config.authProviders) && req.project.config.authProviders.length > 1) {
+      if (!useAuthProvider) {
+          // allow the user to choose an auth provider
+          console.log ('/auth route useAuthProvider not set, redirecting to /auth/providers');
+          const currentUrl = req.originalUrl;
+          return res.redirect('/auth/project/' + req.project.id + '/choose-provider?returnTo=' + encodeURIComponent(currentUrl));
+        }
+    }
+    return next();
+  })
   .use(async function (req, res, next) { // auth config
     let useAuth = req.query.useAuth || req.user.provider || ( req.user.idpUser && req.user.idpUser.provider );
     console.log ('/auth/me route useAuth', useAuth);
-    req.authConfig = await authSettings.config({ project: req.project, useAuth: useAuth })
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: useAuth, req })
     console.log ('/auth/me route authConfig', req.authConfig, req.project);
     return next();
   })

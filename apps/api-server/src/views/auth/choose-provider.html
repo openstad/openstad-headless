@@ -1,0 +1,36 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+  <div class="upper-box card-body">
+    <h1>Kies een dienst</h1>
+    <p>
+    <p>
+      Voor dit project kan er via verschillende diensten worden ingelogd.<br />
+      Kies hieronder de gewenste inlogmethode.
+    </p>
+
+    {% include 'elements/error-flash.html' %}
+
+    <hr />
+
+
+    {% if allowOpenStad %}
+    <a href="{{currentUrl}}authProvider=openstad{% if isPriviligedRoute %}&priviligedRoute=admin{% endif %}"
+       class="btn btn-primary">
+      Inloggen via OpenStad
+    </a>
+
+    <hr />
+
+    {% endif %}
+
+    {% for provider in authProviders %}
+    <a href="{{currentUrl}}authProvider={{ provider.id}}{% if isPriviligedRoute %}&priviligedRoute=admin{% endif %}"
+       class="btn btn-primary">Inloggen via {{ provider.name }}</a>
+    <hr />
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

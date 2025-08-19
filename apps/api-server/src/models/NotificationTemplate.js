@@ -79,7 +79,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
       const authSettings = require('../util/auth-settings');
       let providers = await authSettings.providers({ project });
       for (let provider of providers) {
-        let authConfig = await authSettings.config({ project, useAuth: provider });
+        let authConfig = await authSettings.config({ project, useAuth: provider, req });
         let newConfig = {
           config: {
             Url: {
@@ -99,4 +99,3 @@ module.exports = ( db, sequelize, DataTypes ) => {
   }
 
 };
-

@@ -4,7 +4,7 @@
   <title>{{ client.name }}</title>
   <!-- Needed for mobile sites to work -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="{{ AUTH_URL }}/css/main.css?v=1.1">
+  <link rel="stylesheet" type="text/css" href="{{ authUrl }}/css/main.css?v=1.1">
 
   {% if envStyleSheets %}
   {% for sheet in envStyleSheets %}
@@ -27,10 +27,10 @@
   {% endif %}
 
 
-  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
-  <script type="text/javascript" src="/javascripts/jquery.validate.min.js"></script>
-  <script type="text/javascript" src="/javascripts/jquery.validate.nl.js"></script>
-  <script type="text/javascript" src="/javascripts/main.js?v=1.1"></script>
+  <script type="text/javascript" src="{{ authUrl }}/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="{{ authUrl }}/javascripts/jquery.validate.min.js"></script>
+  <script type="text/javascript" src="{{ authUrl }}/javascripts/jquery.validate.nl.js"></script>
+  <script type="text/javascript" src="{{ authUrl }}/javascripts/main.js?v=1.1"></script>
 </head>
 <body>
   {% include 'elements/header.html' %}
@@ -43,11 +43,6 @@
           {% include 'elements/flash.html' %}
 
           {% block body %}{% endblock %}
-        </div>
-        <div class="col-xs-12 col-sm-3 pull-right">
-          {% if displaySidebar %}
-          {% include 'elements/sidebar.html' %}
-          {% endif %}
         </div>
       </div>
     </div>

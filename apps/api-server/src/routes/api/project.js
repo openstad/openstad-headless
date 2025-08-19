@@ -36,7 +36,7 @@ async function getProject(req, res, next, include = []) {
       let providers = await authSettings.providers({ project });
       for (let provider of providers) {
         if ( provider == 'default' ) continue;
-        let authConfig = await authSettings.config({ project, useAuth: provider });
+        let authConfig = await authSettings.config({ project, useAuth: provider, req });
         let adapter = await authSettings.adapter({ authConfig });
         if (adapter.service.fetchClient) {
           let client = await adapter.service.fetchClient({authConfig, project})
@@ -416,11 +416,11 @@ router.route('/')
       let providers = await authSettings.providers({ project, useOnlyDefinedOnProject: true });
       let providersDone = [];
       for (let provider of providers) {
-        let authConfig = await authSettings.config({ project, useAuth: provider });
+        let authConfig = await authSettings.config({ project, useAuth: provider, req });
         if ( !providersDone[authConfig.provider] ) { // filter for duplicates like 'default'
           let adapter = await authSettings.adapter({ authConfig });
           if (adapter.service.createClient) {
-            let client = await adapter.service.createClient({ authConfig, project });
+            let client = await adapter.service.createClient({ authConfig, project, req });
             project.config.auth.provider[authConfig.provider] = project.config.auth.provider[authConfig.provider] || {};
             project.config.auth.provider[authConfig.provider].clientId = client.clientId;
             project.config.auth.provider[authConfig.provider].clientSecret = client.clientSecret;
@@ -615,7 +615,7 @@ router.route('/:projectId') //(\\d+)
           continue;
         }
 
-        let authConfig = await authSettings.config({ project, useAuth: provider });
+        let authConfig = await authSettings.config({ project, useAuth: provider , req});
         let adapter = await authSettings.adapter({ authConfig });
 
         if (!!allowedDomains) {
@@ -662,7 +662,7 @@ router.route('/:projectId') //(\\d+)
       updateBody.config.allowedDomains = [host];
 
       // Update client (auth-db)
-      let adminAuthConfig = await authSettings.config({ project: project });
+      let adminAuthConfig = await authSettings.config({ project: project, req });
       service.updateClient({
         authConfig: adminAuthConfig,
         project: updateBody

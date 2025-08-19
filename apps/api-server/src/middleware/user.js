@@ -41,7 +41,7 @@ module.exports = async function getUser( req, res, next ) {
       }
     }
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['authorization']);
-    let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider })
+    let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider, req })
     
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);
@@ -160,7 +160,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
   if (dbUser.projectId != projectId && dbUser.projectId == config.admin.projectId ) {
     // admin op config.admin.projectId = superuser; use the correct authConfig
     let adminProject = await db.Project.findOne({ where: { id: config.admin.projectId } });
-    authConfig = await authSettings.config({ project: adminProject, useAuth: 'default' });
+    authConfig = await authSettings.config({ project: adminProject, useAuth: 'default', req });
   }
 
   let adapter = authConfig.adapter || 'openstad';
