@@ -1009,7 +1009,7 @@ export default function WidgetEnqueteItems(
                                 <FormItem>
                                   <FormLabel>Groeperen</FormLabel>
                                   <FormDescription>
-                                    Groepeer meerdere 'Antwoordopties met afbeeldingen' onder één item. Dit voegt een slider toe aan de widget, voor elke aparte groep.
+                                    Groepeer meerdere &apos;Antwoordopties met afbeeldingen&apos; onder één item. Dit voegt een slider toe aan de widget, voor elke aparte groep.
                                     Elke groep moet een unieke naam hebben.
                                   </FormDescription>
                                   <Input {...field} />
