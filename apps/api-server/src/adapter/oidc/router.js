@@ -175,7 +175,7 @@ router
       }
 
       // Set cookies for digest login
-      res.cookie('useAuth', req.authConfig.provider, {
+      res.cookie('useAuth', 'oidc', {
         path: '/',
         httpOnly: true,
         secure: true,
