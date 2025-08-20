@@ -117,10 +117,10 @@ module.exports = function( db, sequelize, DataTypes ) {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
-    updateableBy: ['moderator', 'owner'],
-    deleteableBy: ['moderator', 'owner'],
+    updateableBy: ['editor', 'owner'],
+    deleteableBy: ['editor', 'owner'],
     canToggle: function(user, self) {
-      return userHasRole(user, 'moderator', self.userId);
+      return userHasRole(user, 'editor', self.userId);
     }
   }
 

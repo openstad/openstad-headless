@@ -28,6 +28,8 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { Button } from '@utrecht/component-library-react';
 import { hasRole } from '../../lib';
+import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 type booleanProps = {
   [K in
@@ -63,7 +65,7 @@ export type ResourceDetailWidgetProps = {
     backUrlIdRelativePath?: string;
     pageTitle?: boolean;
     backUrlText?: string;
-  } & booleanProps & {
+  } & MapPropsType & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -74,6 +76,10 @@ export type ResourceDetailWidgetProps = {
     >;
     commentsWidget_multiple?: Omit<
       CommentsWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
+    resourceOverviewMapWidget?: Omit<
+      ResourceOverviewMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     resourceDetailMap?: Omit<
@@ -110,6 +116,7 @@ function ResourceDetail({
   documentsDesc = '',
   backUrlText = 'Terug naar het document',
   backUrlIdRelativePath = '',
+  resourceOverviewMapWidget = {},
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
@@ -284,6 +291,11 @@ function ResourceDetail({
     }
   }, [resource]);
 
+  const dataLayerSettings = !!resourceOverviewMapWidget?.datalayer ? {
+    datalayer: resourceOverviewMapWidget?.datalayer || [],
+    enableOnOffSwitching: resourceOverviewMapWidget?.enableOnOffSwitching || false,
+  } : {};
+
   return (
     <section>
       <div
@@ -364,7 +376,9 @@ function ResourceDetail({
                   <ResourceDetailMap
                     resourceId={resource.id || resourceId || '0'}
                     resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
+                    {...resourceOverviewMapWidget}
                     {...props}
+                    dataLayerSettings={dataLayerSettings}
                     center={resource.location}
                     area={props.resourceDetailMap?.area}
                   />

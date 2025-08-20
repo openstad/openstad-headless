@@ -116,11 +116,13 @@
             {% set menuData = data.home._children | json | replace("'", "&#39;") %}
             <div id="navbar"
               class="--compact"
-              data-home='
-              [{
-                "_url": "{{ data.home._url }}",
-                "title": "{{ data.home.title }}"
-              }]'
+                 {% if not data.home.orphan %}
+                 data-home='
+                    [{
+                      "_url": "{{ data.home._url }}",
+                      "title": "{{ data.home.title }}"
+                    }]'
+                 {% endif %}
               data-content='{{ menuData }}'
              data-prefix='{{ data.prefix }}'
             ></div>

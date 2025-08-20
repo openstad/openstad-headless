@@ -13,3 +13,6 @@ secrets.yaml
 *.agekey
 
 docker-compose.override.yml
+
+# Package lock files per app should not be committed, we use a monorepo approach with a package-lock.json at the root
+apps/*/package-lock.json

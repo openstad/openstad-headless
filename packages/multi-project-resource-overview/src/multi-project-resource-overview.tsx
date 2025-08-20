@@ -16,8 +16,14 @@ export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
     overviewDescription?: string;
     overviewImage?: string;
     overviewUrl?: string;
+    overviewMarkerIcon?: string;
+    projectLat?: string;
+    projectLng?: string;
+    includeProjectsInOverview?: boolean;
+    excludeResourcesInOverview?: boolean;
   }[];
   includeProjectsInOverview?: boolean;
+  excludeResourcesInOverview?: boolean;
 };
 
 function MultiProjectResourceOverview({
@@ -62,6 +68,7 @@ function MultiProjectResourceOverview({
       {...props}
       selectedProjects={selectedProjectsState}
       includeProjectsInOverview={props.includeProjectsInOverview}
+      excludeResourcesInOverview={props.excludeResourcesInOverview}
     />
   );
 }

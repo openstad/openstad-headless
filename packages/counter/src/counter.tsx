@@ -20,12 +20,14 @@ export type CounterProps = {
   | 'votedUsers'
   | 'static'
   | 'argument'
-  | 'submission';
+  | 'enqueteResults'
+  | 'choiceGuideResults';
   label?: string;
   url?: string;
   opinion?: string;
   amount?: number;
-  choiceGuideId?: string;
+  rigCounter?: string;
+  widgetToFetchId?: string;
   includeOrExclude?: string;
   onlyIncludeOrExcludeTagIds?: string;
 };
@@ -36,6 +38,7 @@ function Counter({
   url = '',
   opinion = '',
   amount = 0,
+  rigCounter = '0',
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
   ...props
@@ -52,52 +55,24 @@ function Counter({
 
   const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
 
-  const {data: allTags} = datastore.useTags({
-    projectId: props.projectId,
-    type: ''
-  });
-
   const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
 
-  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
-    let filteredTagIdsArray: Array<number> = [];
-    try {
-      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0 ) {
-        filteredTagIdsArray = allTags.filter((tag: {id: number}) => !tagIdsArray.includes((tag.id))).map((tag: {id: number}) => tag.id);
-      } else if (includeOrExclude === 'include') {
-        filteredTagIdsArray = tagIdsArray;
-      }
-
-      return {
-        tags: filteredTagIdsArray || []
-      };
-
-    } catch (error) {
-      console.error('Error processing tags:', error);
-
-      return {
-        tags: []
-      };
-    }
-  }
-
-  const { tags: filteredTagIdsArray } = determineTags(includeOrExclude, allTags, tagIdsArray);
-
   const { data: resources } = datastore.useResources({
-    projectId: counterType === 'resource' ? props.projectId : undefined,
+    projectId: props.projectId,
     pageSize: 999999,
     includeTags: '',
-  });
+  });  
 
-  const filteredResources = resources && resources?.records && filteredTagIdsArray && Array.isArray(filteredTagIdsArray) && filteredTagIdsArray.length > 0
+  const filteredResources = resources && resources?.records && tagIdsArray && Array.isArray(tagIdsArray) && tagIdsArray.length > 0
       ? resources?.records?.filter((resource: any) => {
         if (includeOrExclude === 'exclude') {
-          if (!resource.tags || !Array.isArray(resource.tags) || resource.tags.length === 0) {
-            return true;
-          }
-          return !filteredTagIdsArray.some((tag) => resource.tags.find((o: { id: number }) => o.id === tag));
+          const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
+            tagIdsArray.includes(tag.id)
+          );
+
+          return !hasExcludedTag;
         } else {
-          return filteredTagIdsArray.some((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === tag));
+          return tagIdsArray.some((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === tag));
         }
       })
       : resources?.records;
@@ -117,10 +92,18 @@ function Counter({
     data: results,
     error,
     isLoading,
-  } = datastore.useChoiceGuideResults({
+  } = datastore.useChoiceGuideResultCount({
     projectId: props.projectId,
-    choiceGuideId:
-      counterType === 'submission' ? props.choiceGuideId : undefined,
+    widgetToFetchId:
+      counterType === 'choiceGuideResults' ? props.widgetToFetchId : undefined,
+  });
+
+  const {
+    data: enqueteResults
+  } = datastore.useEnqueteResultCount({
+    projectId: props.projectId,
+    widgetToFetchId:
+      counterType === 'enqueteResults' ? props.widgetToFetchId : undefined,
   });
 
   if (counterType === 'resource') {
@@ -149,8 +132,19 @@ function Counter({
     amountDisplayed = comments?.length || 0;
   }
 
-  if (counterType === 'submission') {
-    amountDisplayed = results?.length || 0;
+  if (counterType === 'choiceGuideResults') {
+    amountDisplayed = results || 0;
+  }
+
+  if (counterType === 'enqueteResults') {
+    amountDisplayed = enqueteResults || 0;
+  }
+
+  if (counterType !== 'static' && rigCounter !== '0' && amountDisplayed !== 0) {
+    const currAmount = isNaN(Number(amountDisplayed)) ? 0 : Number(amountDisplayed);
+    const rigCounterNumber = isNaN(Number(rigCounter)) ? 0 : Number(rigCounter);
+
+    amountDisplayed = currAmount + rigCounterNumber;
   }
 
   const content = () => {

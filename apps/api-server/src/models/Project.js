@@ -91,7 +91,7 @@ module.exports = function (db, sequelize, DataTypes) {
       allowNull: false,
       defaultValue: {},
       auth: {
-        viewableBy: 'admin',
+        viewableBy: 'editor',
       },
     },
 
@@ -112,7 +112,7 @@ module.exports = function (db, sequelize, DataTypes) {
         throw new Error('installationUrls is a virtual field and cannot be set');
       },
       auth: {
-        viewableBy: 'admin',
+        viewableBy: 'editor',
       },
     }
 

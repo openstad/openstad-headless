@@ -15,7 +15,7 @@ const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
-  return hasRole( user, 'moderator')
+  return hasRole( user, 'editor')
 };
 
 // scopes: for all get requests
@@ -106,11 +106,12 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeUser');
   }
 
-  if (req?.query?.projectIds && typeof req?.query?.projectIds === "object") {
+  if (req?.query?.projectIds && (typeof req?.query?.projectIds === "object" || typeof req?.query?.projectIds === "string")) {
     let projectIds = req.query.projectIds;
 
     if (!Array.isArray(projectIds)) projectIds = [projectIds];
     req.scope.push({ method: ['selectProjectIds', projectIds] });
+    req.query.projectIds = projectIds;
   }
 
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');

@@ -159,6 +159,9 @@ admin:
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: admin
 
+  # Custom domain for the service, this overrides the subdomain
+  customDomain:
+
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -441,6 +444,8 @@ cms:
       secretName: openstad-tls-cms
       hosts: []
 
+  disableWidgetPreview: "false"
+
   # Inject extra environment variables
   extraEnvVars: []
 
@@ -468,6 +473,8 @@ cms:
     data:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
+
+  disableRateLimiter: "false" # Whether to disable the rate limiter for this service
 
 # Overwrite Secrets
 

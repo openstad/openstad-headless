@@ -1,7 +1,7 @@
 // const styleSchema = require('../../../config/styleSchema.js').default;
 
 module.exports = {
-  extend: '@apostrophecms/widget-type',
+  extend: 'base-widget',
   options: {
     label: 'Afbeelding',
   },

@@ -389,8 +389,8 @@ module.exports = function( db, sequelize, DataTypes ) {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
-    updateableBy: ['moderator','owner'],
-    deleteableBy: ['moderator','owner'],
+    updateableBy: ['editor','owner'],
+    deleteableBy: ['editor','owner'],
     canVote: function(user, self) {
       // TODO: ik denk dat je alleen moet kunnen voten bij resource.isOpen, maar dat doet hij nu ook niet. Sterker: hij checkt nu alleen maar op parentId.
       if (userHasRole(user, 'member') && self.id) {

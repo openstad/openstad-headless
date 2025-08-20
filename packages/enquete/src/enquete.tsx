@@ -195,6 +195,15 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'map':
                     fieldData['type'] = 'map';
+
+                    if ( !!props?.datalayer ) {
+                        fieldData['datalayer'] = props?.datalayer;
+                    }
+
+                    if ( typeof(props?.enableOnOffSwitching) === 'boolean' ) {
+                        fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
+                    }
+
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
