@@ -49,7 +49,7 @@ module.exports = async function getUser( req, res, next ) {
 
     let projectId = req.project && req.project.id;
 
-    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) || {};
+    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId, req }) || {};
 
     console.log ('user entity', userEntity);
     
@@ -111,7 +111,7 @@ function parseJwt(authorizationHeader) {
  * @param projectConfig
  * @returns {Promise<{}|*>}
  */
-async function getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) {
+async function getUserInstance({ authConfig, authProvider, userId, isFixed, projectId, req }) {
 
   let dbUser;
   
