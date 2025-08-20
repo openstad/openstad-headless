@@ -49,6 +49,8 @@ module.exports = async function getUser( req, res, next ) {
 
     let projectId = req.project && req.project.id;
 
+    console.log ('get user instance');
+    
     const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId, req }) || {};
 
     console.log ('user entity', userEntity);
