@@ -60,10 +60,15 @@ router
     .route ('/delete')
     .delete(auth.useReqUser)
     .delete( rateLimiter(), async function (req, res, next)  {
-        const ids = req.body.ids;
+        let ids = req.body.ids;
 
         if (!ids || !Array.isArray(ids)) {
             return next(new Error('Invalid request: ids must be an array'));
+        }
+
+        ids = ids.filter((id) => Number.isInteger(id));
+        if (ids.length === 0) {
+            return next(new Error('Invalid request: no valid ids provided'));
         }
 
         try {
@@ -96,11 +101,16 @@ router
     .route('/duplicate')
     .post(auth.useReqUser)
     .post(rateLimiter(), async function (req, res, next) {
-        const ids = req.body.ids;
+        let ids = req.body.ids;
         const projectId = req.params.projectId;
 
         if (!ids || !Array.isArray(ids)) {
             return next(new Error('Invalid request: ids must be an array'));
+        }
+
+        ids = ids.filter((id) => Number.isInteger(id));
+        if (ids.length === 0) {
+            return next(new Error('Invalid request: no valid ids provided'));
         }
 
         try {
