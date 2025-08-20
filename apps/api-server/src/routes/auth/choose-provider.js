@@ -50,16 +50,11 @@ router
   })
   .use(async function (req, res, next) {
     // get auth providers from project config
-    console.log ('ch2ooose, req.project', req.project);
     const authProviderIds = req.project.config.authProviders.filter(provider => provider != "openstad").map(provider => parseInt(provider, 10));
     const allowOpenStad = req.project.config.authProviders.filter(provider => provider == "openstad").length > 0;
     let isPriviligedRoute = !!req.params.priviligedRoute || false;
     
-    console.log ('choose', authProviderIds);
-    
     const authProviders = await db.AuthProvider.findAll({ where: { id: { [Op.in]: authProviderIds}} });
-    
-    console.log ('choo2ss2e2', authProviders, allowOpenStad);
     
     nunjucks.configure(resolve(__dirname,'../../views'), {
     autoescape: true,});

@@ -30,12 +30,9 @@ let createProjectConfig = function({ project, useOnlyDefinedOnProject = false })
 }
 
 let getConfig = async function({  project, useAuth = 'default', req }) {
-
   
   const db = require('../db');
   let projectConfig = createProjectConfig({ project })
-  
-  console.log ('authsettings getConfig projectConfig2', projectConfig);
   
   if (useAuth == 'default' && projectConfig.default) useAuth = projectConfig.default;
 
@@ -44,16 +41,14 @@ let getConfig = async function({  project, useAuth = 'default', req }) {
     jwtSecret: projectConfig.jwtSecret
   }
   
-  console.log ('authsettings getConfig', project.config.authProviders);
   let useAuthProvider = req && req.cookies && req.cookies['useAuthProvider'] || "openstad";
   
-  console.log ('>>>>use auth provider', useAuthProvider, typeof useAuthProvider, project.config.authProviders, Array.isArray(project.config.authProviders), project && project.config && project.config.authProviders && Array.isArray(project.config.authProviders) && project.config.authProviders.includes(parseInt(useAuthProvider, 10)));
+  console.log ('>>>>use auth provider', useAuthProvider, req.cookies);
   
   // Check if we have an authProviderId in the project config
   if (useAuthProvider !== "openstad" && project && project.config && project.config.authProviders && Array.isArray(project.config.authProviders) && project.config.authProviders.includes(parseInt(useAuthProvider, 10))) {
     // log trace
     let authProvider = await db.AuthProvider.findOne({ where: { id: useAuthProvider } });
-    console.log ('>>> using auth provider from project config', useAuthProvider, 'found in db', authProvider);
     if (authProvider) {
       let providerConfig = authProvider.config || {};
       let adapterConfig  = projectConfig.adapter[authProvider.type] || {}
