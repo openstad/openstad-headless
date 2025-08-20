@@ -47,6 +47,9 @@ module.exports = function (dataTypeJSON,  projectConfigKey) {
             // send null to delete fields
             delete val[key];
           } else if (typeof val[key] == 'undefined') {
+            // Prevent prototype pollution
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+
             // not defined in put data; use old val
             val[key] = old[key];
           }
