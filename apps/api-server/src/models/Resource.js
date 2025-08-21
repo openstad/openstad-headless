@@ -96,6 +96,7 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.ENUM(
           'superuser',
           'admin',
+          'moderator',
           'editor',
           'member',
           'anonymous',
