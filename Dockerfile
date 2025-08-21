@@ -1,5 +1,5 @@
 # Image used for building dependencies
-FROM node:18-slim AS builder
+FROM node:24-slim AS builder
 ENV GITHUB_REPOSITORY=openstad/openstad-headless
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
@@ -69,7 +69,7 @@ RUN npm run build --if-present -w $WORKSPACE
 RUN npm prune -ws --production
 
 # Release image
-FROM node:18-slim AS release
+FROM node:24-slim AS release
 ARG APP
 ARG PORT
 ARG NODE_ENV
