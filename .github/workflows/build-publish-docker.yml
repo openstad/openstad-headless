@@ -29,13 +29,58 @@ jobs:
       - name: Run Vitest tests
         run: npm run test:unit
 
+  generate-ci-build-id:
+    name: Generate CI build ID
+    runs-on: ubuntu-latest
+    outputs:
+      build_id: ${{ steps.set_build_id.outputs.build_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set build ID
+        id: set_build_id
+        # This step generates a unique build ID based on the current timestamp with the github sha.
+        run: |
+          BUILD_ID=${GITHUB_SHA}-$(date +%s)
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+
+  component-test:
+    name: Run Component tests
+    runs-on: ubuntu-latest
+    needs: generate-ci-build-id
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Cypress
+        run: npm install cypress
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          record: true
+          install: false
+          component: true
+          command: npm run test:component
+          ci-build-id: ${{ needs.generate-ci-build-id.outputs.build_id }}
+        env:
+            CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            BUILD_ID: ${{ needs.generate-ci-build-id.outputs.build_id }}
+
   build-builder-stage:
     name: Build `builder` stage
     runs-on: ubuntu-latest
-    needs: unit-test
+    needs: [unit-test, component-test]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -79,7 +124,7 @@ jobs:
       BUILD_TARGET: release
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Restore base build cache
         uses: actions/cache@v3
@@ -103,6 +148,9 @@ jobs:
             type=ref,event=branch,suffix=-{{sha}}
             # tag event
             type=ref,event=tag
+            # latest tag
+            type=raw,value=latest,enable={{is_default_branch}}
+
 
       - name: Set up Docker Buildx
         id: buildx
@@ -129,20 +177,102 @@ jobs:
         id: image_output
         run: echo "image_tag=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
 
+  e2e-test:
+    name: Run E2E tests
+    runs-on: ubuntu-latest
+    needs: [generate-ci-build-id, build-and-push-docker-image]
+    #if: github.event_name == 'pull_request' && github.base_ref == 'main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Load .testing.env into environment
+        run: |
+          set -a
+          source .testing.env
+          set +a
+          printenv > $GITHUB_ENV
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Cypress
+        run: npm install cypress
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Add release version to .testing.env
+        run: echo "RELEASE_VERSION=${{ needs.build-and-push-docker-image.outputs.image_tag }}" >> .testing.env
+
+      - name: Generate Auth certs
+        working-directory: ./apps/auth-server
+        run: |
+          mkdir -p ./certs
+      
+          openssl genrsa -out ./certs/privatekey.pem 2048
+          chmod 644 ./certs/privatekey.pem
+      
+          openssl req -new -key ./certs/privatekey.pem -out ./certs/certrequest.csr -subj "/C=NL/ST=All/L=Amsterdam/O=openstad/CN=www.openstad.org"
+          chmod 644 ./certs/certrequest.csr
+      
+          openssl x509 -req -in ./certs/certrequest.csr -signkey ./certs/privatekey.pem -days 3650 -out ./certs/certificate.pem
+          chmod 644 ./certs/certificate.pem
+
+      - name: Start API & Auth in init mode with docker compose
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up -d
+
+      - name: Initialize Auth database
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env exec openstad-auth-server bash -c "NODE_ENV=development npm run init-database -w apps/auth-server -- --force && NODE_ENV=development npm run migrate-database -w apps/auth-server"
+
+      - name: Migrate Auth database
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env exec openstad-auth-server bash -c "NODE_ENV=development npm run migrate-database -w apps/auth-server"
+
+      - name: Start API service with docker compose
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env up openstad-api-server -d
+
+      - name: Initialize Api database
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env exec openstad-api-server bash -c "NODE_ENV=development npm run init-database -w apps/api-server -- --only-if-empty && NODE_ENV=development npm run migrate-database -w apps/api-server"
+
+      - name: Shut down initialization services
+        run: docker compose -f docker-compose.e2e.init.yml --env-file .testing.env down
+
+      - name: Start all services with docker compose
+        run: docker compose -f docker-compose.e2e.yml --env-file .testing.env up -d
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          record: true
+          install: false
+          wait-on: '${{env.ADMIN_URL}}/health,${{env.API_URL}}/health,${{env.CMS_URL}}/health,${{env.AUTH_APP_URL}}/health,${{env.IMAGE_APP_URL}}/health'
+          wait-on-timeout: 160
+          group: "E2E"
+          ci-build-id: ${{ needs.generate-ci-build-id.outputs.build_id }}
+          tag: "e2e"
+        env:
+            CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Stop docker compose
+        if: always()
+        run: docker compose --env-file .testing.env down
+
   set-images-in-yaml-and-commit:
     name: Set images in yaml and commit
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && (needs.e2e-test.result == 'success' || needs.e2e-test.result == 'skipped')
     runs-on: ubuntu-latest
-    needs: build-and-push-docker-image
+    needs: [e2e-test, build-and-push-docker-image]
 
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
@@ -182,7 +312,7 @@ jobs:
       - name: Display images in Github Action
         run: |
           echo "**New images 🐳**
-          
+
           | App | Image |
           |---|---|
           | admin-server | \`ghcr.io/${{ github.repository_owner}}/admin-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
