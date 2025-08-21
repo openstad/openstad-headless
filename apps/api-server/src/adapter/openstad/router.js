@@ -1,7 +1,6 @@
 const config = require('config');
 const express = require('express');
 const createError = require('http-errors');
-const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
 const db = require('../../db');
