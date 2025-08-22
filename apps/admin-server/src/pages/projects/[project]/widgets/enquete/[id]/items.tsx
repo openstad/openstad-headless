@@ -247,17 +247,6 @@ export default function WidgetEnqueteItems(
 
       setMatrixOption(null);
     } else {
-      const createNewIndex = (updatedMatrixOption: 'rows' | 'columns', offset: number, currMatrixOptions: Matrix): string => {
-        let newTrigger = updatedMatrixOption === 'rows' ? matrixOptions.rows.length : matrixOptions.columns.length;
-        newTrigger = newTrigger + offset;
-
-        if (!!currMatrixOptions && currMatrixOptions[updatedMatrixOption].findIndex((option: {trigger?: string}) => parseInt(option?.trigger || '-1') === newTrigger) !== -1) {
-          return createNewIndex( updatedMatrixOption, offset + 1, currMatrixOptions);
-        }
-
-        return `${newTrigger}`;
-      }
-
       const newTrigger = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
         ? values?.matrix?.[updatedMatrixOption].reduce((max, option) => {
             return (parseInt(option?.trigger || '0') > max ? parseInt(option?.trigger || '0') : max);
@@ -389,32 +378,10 @@ export default function WidgetEnqueteItems(
   }, [selectedOption, form, options]);
 
   useEffect(() => {
-    if (matrixOption) {
-      const updatedRows = [...matrixOptions.rows];
-      const updatedColumns = [...matrixOptions.columns];
-
-      const rowIndex = matrixOptions.rows.findIndex(
-        (row) => row.trigger === matrixOption.trigger
-      );
-      const columnIndex = matrixOptions.columns.findIndex(
-        (column) => column.trigger === matrixOption.trigger
-      );
-
-      if (rowIndex !== -1) {
-        updatedRows[rowIndex] = { ...matrixOption };
-      }
-      if (columnIndex !== -1) {
-        updatedColumns[columnIndex] = { ...matrixOption };
-      }
-
-      form.reset({
-        ...form.getValues(),
-        matrix: {
-          rows: updatedRows,
-          columns: updatedColumns,
-        },
-      });
-    }
+    form.reset({
+      ...form.getValues(),
+      matrix: matrixOptions
+    });
   }, [matrixOption, form, matrixOptions]);
 
   const handleAction = (

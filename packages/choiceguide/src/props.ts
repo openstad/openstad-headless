@@ -1,3 +1,4 @@
+import { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
 import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
@@ -112,6 +113,8 @@ export type Item = {
     skipQuestionAllowExplanation?: boolean;
     skipQuestionExplanation?: string;
     skipQuestionLabel?: string;
+    matrix?: Matrix;
+    matrixMultiple?: boolean;
 };
 
 export type Option = {

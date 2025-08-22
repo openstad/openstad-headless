@@ -109,6 +109,13 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                     if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
                         fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
                     }
+                    break;
+                case 'matrix':
+                    fieldData['type'] = 'matrix';
+                    fieldData['matrix'] = item?.matrix || undefined;
+                    fieldData['matrixMultiple'] = item?.matrixMultiple || false;
+                    fieldData['defaultValue'] = [];
+                    break;
             }
 
             formFields.push(fieldData);

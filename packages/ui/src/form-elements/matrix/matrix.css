@@ -7,6 +7,10 @@ fieldset.utrecht-form-fieldset__fieldset {
  overflow: auto;
 }
 
+fieldset.utrecht-form-fieldset__fieldset table.utrecht-table .utrecht-table__body > .utrecht-table__row:nth-child(odd) {
+ background-color: rgb(241 241 241);
+}
+
 fieldset.utrecht-form-fieldset__fieldset table.utrecht-table[data-columns="1"] {
  min-width: 400px;
 }

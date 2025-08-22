@@ -216,6 +216,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['matrix'] = item?.matrix || undefined;
                     fieldData['matrixMultiple'] = item?.matrixMultiple || false;
                     fieldData['defaultValue'] = [];
+                    break;
             }
 
             formFields.push(fieldData);

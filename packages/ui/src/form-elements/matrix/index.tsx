@@ -140,7 +140,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
             <Table role="presentation" data-columns={matrix?.columns?.length || 0} data-rows={matrix?.rows?.length || 0}>
               <TableHeader role="presentation">
                 <TableRow>
-                  <TableCell></TableCell>
+                  <TableHeaderCell key={`column--1`}></TableHeaderCell>
 
                   {matrix?.columns?.map((column, index) =>
                     <TableHeaderCell key={`column-${index}`}>
