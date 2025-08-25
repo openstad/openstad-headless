@@ -7,7 +7,6 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const {Op} = require('sequelize');
 const searchInResults = require('../../middleware/search-in-results');
-const fetch = require('node-fetch');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');

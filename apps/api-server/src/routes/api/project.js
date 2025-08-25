@@ -1,6 +1,5 @@
 const express 				= require('express');
 const config 					= require('config');
-const fetch           = require('node-fetch');
 const merge           = require('merge');
 const Sequelize       = require('sequelize');
 const db      				= require('../../db');

@@ -3,7 +3,6 @@
  * and if valid fetches the user data
  */
 
-const fetch = require('node-fetch');
 const Url = require('url');
 const expressSession = require('express-session');
 
