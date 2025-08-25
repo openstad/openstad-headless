@@ -310,7 +310,6 @@ router
     });
   })
   .get(function (req, res, next) {
-    res.clearCookie('useAuthProvider', { path: '/' });
     res.clearCookie('useAuth', { path: '/' });
     return next();
   })

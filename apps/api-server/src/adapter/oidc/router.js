@@ -403,7 +403,6 @@ router
     res.clearCookie('redirectUri', { path: '/' });
     res.clearCookie('useAuth', { path: '/' });
     res.clearCookie('projectId', { path: '/' });
-    res.clearCookie('useAuthProvider', { path: '/' });
     
     let redirectUrl = returnTo;
     if (redirectUrl && !redirectUrl.includes('openstadlogintoken=[[jwt]]')) {

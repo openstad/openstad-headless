@@ -57,6 +57,8 @@ module.exports = async function getUser( req, res, next ) {
     
     req.user = userEntity
     
+    res.clearCookie('useAuthProvider', {path: '/'});
+    
     return next();
     
   } catch(error) {
@@ -165,6 +167,8 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     authConfig = await authSettings.config({ project: adminProject, useAuth: 'default', req });
   }
 
+  console.log ('get user instance, authConfig', authConfig, req.cookies['useAuthProvider']);
+  
   let adapter = authConfig.adapter || 'openstad';
   try {
     if (!adapters[adapter]) {
