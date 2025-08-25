@@ -1,0 +1,263 @@
+name: openstad-headless-e2e
+services:
+  openstad-mysql:
+    platform: linux/amd64
+    image: mysql:8.4
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-openstad-no-db}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - AUTH_DB_NAME=${AUTH_DB_NAME}
+      - API_DB_NAME=${API_DB_NAME}
+    command:
+      - mysqld
+      - --mysql_native_password=ON
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+    volumes:
+      # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
+      - ./scripts/init-sql.sh:/docker-entrypoint-initdb.d/00-init-sql.sh
+      - openstad-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      timeout: 20s
+      retries: 10
+
+  openstad-redis:
+    platform: linux/amd64
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      timeout: 20s
+      retries: 10
+
+  openstad-mongo:
+    platform: linux/amd64
+    image: mongo
+    restart: always
+    volumes:
+      - openstad-mongo-data:/var/lib/mongo
+
+  openstad-mailpit:
+    platform: linux/amd64
+    image: axllent/mailpit:v1.15
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+
+  openstad-api-server:
+    platform: linux/amd64
+    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/api-server}:${RELEASE_VERSION:-latest}
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    depends_on:
+      openstad-mysql:
+        condition: service_healthy
+      openstad-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - URL=${API_URL}
+      - HOSTNAME=${API_HOSTNAME}
+      - DB_USERNAME=${API_DATABASE_USER}
+      - DB_PASSWORD=${API_DATABASE_PASSWORD}
+      - DB_NAME=${API_DATABASE_DATABASE}
+      - DB_HOST=${API_DATABASE_HOST}
+      - DB_DIALECT=${API_DB_DIALECT}
+      - DB_REQUIRE_SSL=${API_DB_REQUIRE_SSL}
+      - DB_AUTH_METHOD=${API_DB_AUTH_METHOD}
+      - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
+      - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
+      - EMAILADDRESS=${API_EMAILADDRESS}
+      - PORT=${API_PORT}
+      - MAIL_FROM=${API_MAIL_FROM}
+      - MAIL_TRANSPORT_SMTP_PORT=${API_SMTP_PORT}
+      - MAIL_TRANSPORT_SMTP_HOST=${API_SMTP_HOST}
+      - MAIL_TRANSPORT_SMTP_REQUIRESSL=${API_SMTP_REQUIRESSL}
+      - MAIL_TRANSPORT_SMTP_AUTH_USER=${API_SMTP_USERNAME}
+      - MAIL_TRANSPORT_SMTP_AUTH_PASS=${API_SMTP_PASSWORD}
+      - NOTIFICATIONS_ADMIN_EMAILADDRESS=${API_NOTIFICATIONS_ADMIN_EMAILADDRESS}
+      - AUTH_JWTSECRET=${API_AUTH_JWTSECRET}
+      - AUTH_FIXEDAUTHTOKENS=${API_AUTH_FIXEDAUTHTOKENS}
+      - AUTH_ADAPTER_OPENSTAD_SERVERURL=${AUTH_APP_URL}
+      - AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
+      - IMAGE_APP_URL=${IMAGE_APP_URL}
+      - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
+      - NODE_ENV=development
+      - CMS_URL=${CMS_URL}
+      - BASE_DOMAIN=${BASE_DOMAIN}
+      - ADMIN_DOMAIN=${ADMIN_DOMAIN}
+      - FORCE_HTTP=${FORCE_HTTP}
+      - IMAGE_APP_URL_INTERNAL=http://openstad-image-server:${IMAGE_PORT_API}
+    ports:
+      - '${API_PORT}:${API_PORT}'
+    volumes:
+      - openstad-api-server-node_modules:/opt/openstad-headless/apps/api-server/node_modules
+      - openstad-api-server-init:/opt/openstad-headless/apps/api-server/init
+      - /opt/openstad-headless/packages/agenda/node_modules
+      - /opt/openstad-headless/packages/comments/node_modules
+      - /opt/openstad-headless/packages/choiceguide/node_modules
+      - /opt/openstad-headless/packages/configs/node_modules
+      - /opt/openstad-headless/packages/data-store/node_modules
+      - /opt/openstad-headless/packages/date-countdown-bar/node_modules
+      - /opt/openstad-headless/packages/eslint-config-custom/node_modules
+      - /opt/openstad-headless/packages/lib/node_modules
+      - /opt/openstad-headless/packages/likes/node_modules
+      - /opt/openstad-headless/packages/message-streaming/node_modules
+      - /opt/openstad-headless/packages/raw-resource/node_modules
+      - /opt/openstad-headless/packages/resource-detail/node_modules
+      - /opt/openstad-headless/packages/resource-overview/node_modules
+      - /opt/openstad-headless/packages/resource-form/node_modules
+      - /opt/openstad-headless/packages/resource-with-detail-map/node_modules
+      - /opt/openstad-headless/packages/types/node_modules
+      - /opt/openstad-headless/packages/ui/node_modules
+
+  openstad-auth-server:
+    platform: linux/amd64
+    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/auth-server}:${RELEASE_VERSION:-latest}
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    depends_on:
+      openstad-mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - APP_URL=${AUTH_APP_URL}
+      - PORT=${AUTH_PORT}
+      - CMS_URL=${CMS_URL}
+      - BASE_DOMAIN=${BASE_DOMAIN}
+      # - ADMIN_REDIRECT_URL=${AUTH_ADMIN_REDIRECT_URL}
+      - DB_HOST=${AUTH_DB_HOST}
+      - DB_USER=${AUTH_DB_USER}
+      - DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - DB_NAME=${AUTH_DB_NAME}
+      - DB_DIALECT=${AUTH_DB_DIALECT}
+      - DB_REQUIRE_SSL=${AUTH_DB_REQUIRE_SSL}
+      - DB_AUTH_METHOD=${AUTH_DB_AUTH_METHOD}
+      - MAIL_SERVER_URL=${AUTH_MAIL_SERVER_URL}
+      - MAIL_SERVER_PORT=${AUTH_MAIL_SERVER_PORT}
+      - MAIL_SERVER_SECURE=${AUTH_MAIL_SERVER_SECURE}
+      - MAIL_SERVER_PASSWORD=${AUTH_MAIL_SERVER_PASSWORD}
+      - MAIL_SERVER_USER_NAME=${AUTH_MAIL_SERVER_USER_NAME}
+      - EMAIL_ASSETS_URL=${AUTH_EMAIL_ASSETS_URL}
+      - FROM_NAME=${AUTH_FROM_NAME}
+      - FROM_EMAIL=${AUTH_FROM_EMAIL}
+      - AUTH_ADMIN_CLIENT_ID=${AUTH_ADMIN_CLIENT_ID}
+      - AUTH_ADMIN_CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
+      - AUTH_FIRST_CLIENT_ID=${AUTH_FIRST_CLIENT_ID}
+      - AUTH_FIRST_CLIENT_SECRET=${AUTH_FIRST_CLIENT_SECRET}
+      - AUTH_FIRST_LOGIN_CODE=${AUTH_FIRST_LOGIN_CODE}
+      - SESSION_SECRET=${AUTH_SESSION_SECRET}
+      - COOKIE_SECURE_OFF=${AUTH_COOKIE_SECURE_OFF}
+      - API_URL=${API_URL}
+      - ADMIN_URL=${ADMIN_URL}
+      - ALLOWED_ADMIN_DOMAINS=["${ADMIN_DOMAIN}"]
+      - ENVIRONMENT_NAME=${ENVIRONMENT_NAME}
+      - NODE_ENV=development
+    ports:
+      - '${AUTH_PORT}:${AUTH_PORT}'
+    volumes:
+      - openstad-auth-server-node_modules:/opt/openstad-headless/apps/auth-server/node_modules
+      - openstad-auth-server-certs:/opt/openstad-headless/apps/auth-server/certs
+      - openstad-auth-server-init:/opt/openstad-headless/apps/auth-server/init
+      - ./apps/auth-server/certs:/opt/openstad-headless/apps/auth-server/certs
+
+  openstad-image-server:
+    platform: linux/amd64
+    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/image-server}:${RELEASE_VERSION:-latest}
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    depends_on:
+      openstad-mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - APP_URL=${IMAGE_APP_URL}
+      - PORT_API=${IMAGE_PORT_API}
+      - PORT_IMAGE_SERVER=${IMAGE_PORT_IMAGE_SERVER}
+      - IMAGES_DIR=${IMAGE_IMAGES_DIR}
+      - DOCUMENTS_DIR=${DOCUMENTS_DIR}
+      - THROTTLE=${IMAGE_THROTTLE}
+      - THROTTLE_CC_PROCESSORS=${IMAGE_THROTTLE_CC_PROCESSORS}
+      - THROTTLE_CC_PREFETCHER=${IMAGE_THROTTLE_CC_PREFETCHER}
+      - THROTTLE_CC_REQUESTS=${IMAGE_THROTTLE_CC_REQUESTS}
+      - NODE_ENV=development
+      - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
+      - FORCE_HTTP=${FORCE_HTTP}
+    ports:
+      - '${IMAGE_PORT_API}:${IMAGE_PORT_API}'
+    volumes:
+      - openstad-image-server-node_modules:/opt/openstad-headless/apps/image-server/node_modules
+      - openstad-image-server-images:/opt/openstad-headless/apps/image-server/images
+      - openstad-image-server-documents:/opt/openstad-headless/apps/image-server/documents
+      - openstad-image-server-init:/opt/openstad-headless/apps/image-server/init
+
+  openstad-admin-server:
+    platform: linux/amd64
+    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/admin-server}:${RELEASE_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      - URL=${ADMIN_URL}
+      - COOKIE_SECRET=${ADMIN_COOKIE_SECRET}
+      - CLIENT_ID=${AUTH_ADMIN_CLIENT_ID}
+      - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
+      - OAUTH_URL=${AUTH_APP_URL}
+      - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
+      - API_URL=${API_URL}
+      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
+      - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
+      - PORT=${ADMIN_PORT}
+      - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
+    ports:
+      - '${ADMIN_PORT}:${ADMIN_PORT}'
+    volumes:
+      - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
+
+  openstad-cms-server:
+    platform: linux/amd64
+    image: ${REGISTRY:-ghcr.io}/${REPOSITORY:-openstad/cms-server}:${RELEASE_VERSION:-latest}
+    depends_on:
+      openstad-redis:
+        condition: service_healthy
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    #   openstad-mongo:
+    #     condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - PORT=${CMS_PORT}
+      - OVERWRITE_URL=${CMS_OVERWRITE_URL}
+      - MONGODB_URI=${CMS_MONGODB_URI}
+      - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
+      - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
+      - CMS_DEFAULTS=${CMS_DEFAULTS}
+      - API_URL=${API_URL}
+      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
+      - API_KEY=${API_FIXED_AUTH_KEY}
+      - FORCE_HTTP=${FORCE_HTTP}
+      - APOS_RELEASE_ID=${APOS_RELEASE_ID}
+      - REACT_CDN=${REACT_CDN}
+      - REACT_DOM_CDN=${REACT_DOM_CDN}
+    ports:
+      - '${CMS_PORT}:${CMS_PORT}'
+    volumes:
+      - openstad-cms-server-node_modules:/opt/openstad-headless/apps/cms-server/node_modules
+      - openstad-cms-server-init:/opt/openstad-headless/apps/cms-server/init
+
+volumes:
+  openstad-mysql-data: {}
+  openstad-mongo-data: {}
+  openstad-api-server-node_modules: {}
+  openstad-api-server-init: {}
+  openstad-auth-server-node_modules: {}
+  openstad-auth-server-certs: {}
+  openstad-auth-server-init: {}
+  openstad-image-server-node_modules: {}
+  openstad-image-server-images: {}
+  openstad-image-server-documents: {}
+  openstad-image-server-init: {}
+  openstad-admin-server-node_modules: {}
+  openstad-cms-server-node_modules: {}
+  openstad-cms-server-init: {}

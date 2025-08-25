@@ -671,7 +671,7 @@ module.exports = function (db, sequelize, DataTypes) {
           where: {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
-                (SELECT resourceId FROM resource_tags 
+                (SELECT resourceId FROM resource_tags
                 WHERE tagId IN (${tags.map(tag => `'${tag}'`).join(', ')}))
               `),
             },
