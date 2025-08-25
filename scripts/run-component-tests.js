@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const packagesDir = path.resolve(__dirname, '../packages');
 const packageFolders = fs.readdirSync(packagesDir);
@@ -15,18 +15,18 @@ for (const folder of packageFolders) {
   const cypressComponentPath = path.join(cypressPath, 'component');
 
   if (!fs.existsSync(pkgJsonPath)) continue;
-
-  let command = `cypress run --component`
+  
+  let args = ['run', '--component'];
   
   // get current folder name
   const group = folder.trim().replace(/\ /g, '-').toLowerCase();
   
   
   if (process.env?.CYPRESS_RECORD_KEY) {
-    command = `cypress run --component --record --group ${group} --tag component`;
+    args.push('--record', `--group=${group}`, '--tag=component');
     
     if (ciBuildId) {
-      command += ` --ci-build-id=${ciBuildId}`;
+      args.push(` --ci-build-id=${ciBuildId}`);
     }
   }
   
@@ -37,7 +37,7 @@ for (const folder of packageFolders) {
   }
   console.log(`\nRunning component tests in ${folder}...`);
   try {
-    execSync(command, { stdio: 'inherit', cwd: packagePath });
+    execFileSync('cypress', args, { stdio: 'inherit', cwd: packagePath });
   } catch (err) {
     console.error(`\nFailed running component test in ${folder}`);
     // Exit with a non-zero code to indicate failure
