@@ -1,19 +1,26 @@
-export const fetchMatrixData = (key: string, allItems: any, results: any) => {
+export const fetchMatrixData = (key: string, allItems: any, results: any, fieldkeyHasTrigger = true) => {
   const parts = key.split('_');
   if (parts.length !== 2) {
     return null;
   }
 
   const resultKey = parts[0];
-  const itemParts = resultKey.split('-');
-  if (itemParts.length !== 2) {
-    return null;
+  let item = null;
+
+  if (fieldkeyHasTrigger) {
+    const itemParts = resultKey.split('-');
+    if (itemParts.length !== 2) {
+      return null;
+    }
+
+    const itemTrigger = itemParts[1];
+
+    item = allItems.find((i: any) => i.type === 'matrix' && i.trigger === itemTrigger);
+  } else {
+    item = allItems.find((i: any) => i.questionType === 'matrix' && i.fieldKey === resultKey);
   }
 
-  const itemTrigger = itemParts[1];
   const rowTrigger = parts[1];
-
-  const item = allItems.find((i: any) => i.type === 'matrix' && i.trigger === itemTrigger);
 
   const answers = item?.matrix?.columns || [];
 
