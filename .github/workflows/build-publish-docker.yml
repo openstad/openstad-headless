@@ -32,6 +32,8 @@ jobs:
   generate-ci-build-id:
     name: Generate CI build ID
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       build_id: ${{ steps.set_build_id.outputs.build_id }}
     steps:
