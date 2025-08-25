@@ -123,7 +123,7 @@ jobs:
     outputs:
       image_tag: ${{ steps.image_output.outputs.image_tag }}
     env:
-      IMAGE: '${{ github.repository_owner }}/${{ matrix.app }}'
+      IMAGE: 'ghcr.io/${{ github.repository_owner }}/${{ matrix.app }}'
       APP: ${{ matrix.app }}
       BUILD_TARGET: release
     steps:
