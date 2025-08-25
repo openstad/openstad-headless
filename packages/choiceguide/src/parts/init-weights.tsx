@@ -12,6 +12,8 @@ export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[], 
 
   choiceOptions.forEach((choiceOption) => {
     const id = choiceOption.id;
+    // Prevent prototype pollution. Needed for security warning #216.
+    if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
 
     items.forEach((item) => {
       const itemType = item.type || '';

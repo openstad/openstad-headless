@@ -442,6 +442,10 @@ router.route('/')
       let providersDone = [];
       for (let provider of providers) {
         let authConfig = await authSettings.config({ project, useAuth: provider });
+
+        // Prevent prototype pollution
+        if (authConfig?.provider === '__proto__' || authConfig?.provider === 'constructor' || authConfig?.provider === 'prototype') continue;
+
         if ( !providersDone[authConfig.provider] ) { // filter for duplicates like 'default'
           let adapter = await authSettings.adapter({ authConfig });
           if (adapter.service.createClient) {
