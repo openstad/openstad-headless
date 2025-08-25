@@ -35,6 +35,7 @@ function Form({
     currentPage,
     setCurrentPage,
     prevPage,
+    prevPageText,
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -155,21 +156,24 @@ function Form({
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
-                        return (
-                            <div className={`question question-type-${field.type}`} key={index}>
-                                {renderField(field, index, randomId, fieldInvalid)}
-                                <FormFieldErrorMessage className="error-message">
-                                    {field.fieldKey && formErrors[field.fieldKey] &&
-                                      <span
-                                        id={`${randomId}_error`}
-                                        aria-live="assertive"
-                                      >
-                                          {formErrors[field.fieldKey]}
-                                      </span>
-                                    }
-                                </FormFieldErrorMessage>
-                            </div>
-                        );
+                        if (field.type !== 'pagination') {
+                            return (
+                                <div className={`question question-type-${field.type}`} key={index}>
+                                    {renderField(field, index, randomId, fieldInvalid)}
+                                    <FormFieldErrorMessage className="error-message">
+                                        {field.fieldKey && formErrors[field.fieldKey] &&
+                                          <span
+                                            id={`${randomId}_error`}
+                                            aria-live="assertive"
+                                          >
+                                              {formErrors[field.fieldKey]}
+                                          </span>
+                                        }
+                                    </FormFieldErrorMessage>
+                                </div>
+                            );
+                        }
+                        return null;
                       }
                     )}
                     {secondaryLabel && (
@@ -181,7 +185,7 @@ function Form({
                             {secondaryLabel}
                         </Button>
                     )}
-                    <div className="button-group">
+                    <div className="button-group --flex">
                         {currentPage > 0 && (
                             <Button
                                 appearance='secondary-action-button'
@@ -192,7 +196,7 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                Vorige
+                                {prevPageText || 'vorige'}
                             </Button>
                         )}
                         <Button

@@ -37,6 +37,8 @@ export type TextInputProps = {
     fieldInvalid?: boolean;
     minCharactersError?: string;
     maxCharactersError?: string;
+    nextPageTekst?: string;
+    prevPageTekst?: string;
 }
 
 const TextInput: FC<TextInputProps> = ({
