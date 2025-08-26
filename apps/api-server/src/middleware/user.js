@@ -57,7 +57,7 @@ module.exports = async function getUser( req, res, next ) {
     
     req.user = userEntity
     
-    res.clearCookie('useAuthProvider', {path: '/'});
+    //res.clearCookie('useAuthProvider', {path: '/'});
     
     return next();
     
