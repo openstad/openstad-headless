@@ -344,6 +344,11 @@ router
     return next();
   })
   .get(async function (req, res, next) {
+    
+    res.clearCookie('useAuthProvider', { path: '/' });
+    res.clearCookie('useAuth', { path: '/' });
+    res.clearCookie('pkce_uuid', { path: '/' });
+    
     const projectId = req.params.projectId;
     if(req.query.redirectUri && projectId && await isRedirectAllowed(projectId, req.query.redirectUri)){
       return res.redirect(req.query.redirectUri);

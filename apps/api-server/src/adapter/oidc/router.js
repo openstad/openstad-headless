@@ -482,6 +482,10 @@ router
     
     console.log ('logout, req.query.redirectUri', req.query.redirectUri, req.project.id, await isRedirectAllowed(req.project.id, req.query.redirectUri));
 
+    res.clearCookie('useAuthProvider', { path: '/' });
+    res.clearCookie('useAuth', { path: '/' });
+    res.clearCookie('pkce_uuid', { path: '/' });
+    
     // Check if redirect domain is allowed
     if (
       req.query.redirectUri &&
