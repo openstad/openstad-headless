@@ -15,7 +15,7 @@ import React from 'react';
 
 const EditorMap = ({
   fieldName = 'location',
-  centerOnEditorMarker = true,
+  centerOnEditorMarker = false,
   editorMarker = undefined,
   markerIcon = undefined,
   center = undefined,
@@ -78,6 +78,7 @@ const EditorMap = ({
         markers={[currentEditorMarker]}
         onClick={updateLocation}
         onMarkerClick={removeMarker}
+        zoomAfterInit={false}
       />
 
       <input

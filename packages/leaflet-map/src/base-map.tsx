@@ -206,6 +206,7 @@ const BaseMap = ({
     datalayer: [],
     enableOnOffSwitching: false,
   },
+  zoomAfterInit = true,
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
 
@@ -357,6 +358,7 @@ const BaseMap = ({
   // auto zoom and center on init
   useEffect(() => {
     if (!mapRef || !autoZoomAndCenter) return;
+    if ( !zoomAfterInit && isMapReady ) return;
 
     if (autoZoomAndCenter === 'area') {
       if (area?.length) {
