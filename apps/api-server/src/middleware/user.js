@@ -167,7 +167,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     authConfig = await authSettings.config({ project: adminProject, useAuth: 'default', req });
   }
 
-  console.log ('get user instance, authConfig', authConfig, req.cookies['useAuthProvider']);
+  console.log ('get user instance, authConfig', authConfig, req.cookies['useAuthProvider'], req.cookies);
   
   let adapter = authConfig.adapter || 'openstad';
   try {
