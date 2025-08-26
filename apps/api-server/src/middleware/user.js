@@ -41,6 +41,9 @@ module.exports = async function getUser( req, res, next ) {
       }
     }
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['authorization']);
+    // Set authProvider in cookies
+    console.log ('set auth provider in cookie', authProvider);
+    req.cookies['useAuthProvider'] = authProvider || 'default';
     let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider, req })
     
     if(userId === null || typeof userId === 'undefined') {
