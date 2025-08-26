@@ -589,12 +589,12 @@ const BaseMap = ({
 
   // ToDo: waarom kan ik die niet gewoon als props meesturen
   const tileLayerProps = {
+    ...props,
     tilesVariant,
-    customUrlSetting,
+    "customUrl": customUrlSetting,
     tiles,
     minZoom,
     maxZoom,
-    ...props,
   };
 
   useEffect(() => {
