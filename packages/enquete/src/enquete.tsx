@@ -232,12 +232,12 @@ function Enquete(props: EnqueteWidgetProps) {
     }
 
     const defaultAnswers = formFields.reduce((acc, item) => {
-        // @ts-ignore
-        acc[item.fieldKey] = item?.defaultValue;
+        if (typeof item.fieldKey !== 'undefined') {
+            acc[item.fieldKey] = typeof item.defaultValue !== 'undefined' ? item.defaultValue : '';
+        }
         return acc;
-    }, {});
+    }, {} as { [key: string]: FormValue });
 
-    // @ts-ignore   
     const [answers, setAnswers] = useState<{ [key: string]: FormValue }>(defaultAnswers);
     const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -261,9 +261,7 @@ function Enquete(props: EnqueteWidgetProps) {
         setAnswers(updatedAnswers);
     }, [currentAnswers]);
 
-    // @ts-ignore
     const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageTekst || 'Vorige';
-    // @ts-ignore
     const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageTekst || 'Volgende';
 
     return (

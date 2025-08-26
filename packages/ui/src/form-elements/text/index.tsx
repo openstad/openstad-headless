@@ -10,6 +10,7 @@ import {
 } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type TextInputProps = {
     title: string;
@@ -27,7 +28,7 @@ export type TextInputProps = {
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined | number;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }) => void;
     reset?: (resetFn: () => void) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -39,6 +40,7 @@ export type TextInputProps = {
     maxCharactersError?: string;
     nextPageTekst?: string;
     prevPageTekst?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const TextInput: FC<TextInputProps> = ({

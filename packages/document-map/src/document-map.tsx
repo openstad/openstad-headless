@@ -34,6 +34,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 import './gesture';
+import { FormValue } from '@openstad-headless/form/src/form';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -924,7 +925,7 @@ function DocumentMap({
                                     label: tag.name
                                   })))}
                                   fieldKey={`tag[${group.type}]`}
-                                  onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
+                                  onChange={(e: { name: string; value: FormValue; }) => {
                                     let selectedTag = e.value as string;
 
                                     updateTagListMultiple(parseInt(selectedTag, 10));

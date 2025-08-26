@@ -17,7 +17,7 @@ import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | Record<number, never> | [];
+export type FormValue = string | string[] | Record<number, never> | [] | number | boolean;
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -41,12 +41,10 @@ function Form({
     const initialFormValues: { [key: string]: FormValue } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
-            //@ts-expect-error
             initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
             initialFormValues[field.fieldKey] = field.type === 'map' ? {} : initialFormValues[field.fieldKey];
 
             if (field.type === 'tickmark-slider') {
-                //@ts-expect-error
                 initialFormValues[field.fieldKey] = Math.ceil((field?.fieldOptions?.length || 2) / 2).toString();
             }
         }
