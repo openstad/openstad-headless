@@ -40,6 +40,10 @@ module.exports = {
         type: 'int',
         default: 860,
       },
+      anonymizeUserName: {
+        type: 'string',
+        default: 'Gebruiker is geanonimiseerd',
+      }
     },
   },
 

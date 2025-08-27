@@ -800,9 +800,7 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 
 		req.project.doAnonymizeAllUsers(
 			[...result.users],
-			[...result.externalUserIds],
 			req.query.useAuth
-
 		);
       }
       next();
