@@ -79,6 +79,7 @@ const EditorMap = ({
         onClick={updateLocation}
         onMarkerClick={removeMarker}
         zoomAfterInit={false}
+        autoZoomAndCenter="area"
       />
 
       <input
