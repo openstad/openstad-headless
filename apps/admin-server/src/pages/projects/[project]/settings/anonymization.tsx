@@ -28,6 +28,7 @@ const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
   warnUsersAfterXDaysOfInactivity: z.coerce.number(),
   anonymizeUsersAfterXDaysOfInactivity: z.coerce.number(),
+  anonymizeUserName: z.string().optional()
 });
 
 const emailFormSchema = z.object({
@@ -55,6 +56,8 @@ export default function ProjectSettingsAnonymization() {
         data?.config?.[category]?.warnUsersAfterXDaysOfInactivity || null,
       anonymizeUsersAfterXDaysOfInactivity:
         data?.config?.[category]?.anonymizeUsersAfterXDaysOfInactivity || null,
+      anonymizeUserName:
+        data?.config?.[category]?.anonymizeUserName || 'Gebruiker is geanonimiseerd'
     }),
     [data?.config]
   );
@@ -116,8 +119,9 @@ export default function ProjectSettingsAnonymization() {
   async function anonymizeAllUsers() {
     try {
       await anonymizeUsersOfProject();
+      toast.success('Alle gebruikers zijn geanonimiseerd!');
     } catch (error) {
-      console.error('Could not anonymize the users', error);
+      toast.error("Het project moet eerst zijn beëindigd voordat gebruikers geanonimiseerd kunnen worden.")
     }
   }
 
@@ -162,7 +166,7 @@ export default function ProjectSettingsAnonymization() {
                         <FormItem>
                           <FormLabel>
                             Na hoeveel dagen na het einde van het project worden gebruikers geanonimiseerd?
-                            <InfoDialog content={'Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "gebruiker verwijderd".'} />
+                            <InfoDialog content={`Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "${ form.watch("anonymizeUserName") || "Gebruiker is geanonimiseerd" }".`} />
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="60" {...field} />
@@ -198,6 +202,22 @@ export default function ProjectSettingsAnonymization() {
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="200" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="anonymizeUserName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Hoe worden gebruikers genoemd na anonimisering?
+                            <InfoDialog content={'Standaard wordt de naam van de gebruiker aangepast naar "Gebruiker is geanonimiseerd". Je kunt dit hier aanpassen naar een andere tekst.'} />
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="text" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
