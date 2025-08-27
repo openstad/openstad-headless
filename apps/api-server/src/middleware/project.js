@@ -15,6 +15,7 @@ module.exports = function( req, res, next ) {
   // deze paden mogen dit overslaan
   if (req.path.match('^(/api/repo|/api/template|/api/area|/api/datalayer|/api/widget|/api/image|/api/document|/api/widget-type|/api/project/delete-duplicated-data|/api/project/0/tag|/auth/project/0/me|/widget|/$)')) return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
+  if (req.path.match('^(/api/project)$') && req.method == 'GET') return next();
   if ((req.path.match('^(/api/user)') && ( req.method == 'GET' ))) return next();
 
   let projectId = getProjectId(req.path);
