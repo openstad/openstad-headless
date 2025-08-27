@@ -3,6 +3,8 @@
   "description": "Next.js app that showcases openstad-headless widgets",
   "version": "0.1.0",
   "private": true,
+  "author": "OpenStad",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -11,8 +11,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "OpenStad",
+  "license": "MIT",
   "dependencies": {
     "autoprefixer": "^10.4.20",
     "dompurify": "^3.2.6",
