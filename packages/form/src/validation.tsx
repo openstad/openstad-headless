@@ -67,6 +67,23 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         case 'hidden':
             return undefined;
 
+        case 'matrix':
+            if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+                const warning: string = ('customWarning' in field) ? field.customWarning as string : `Het veld '${field.title}' is verplicht`;
+                const triggers = field?.matrix?.rows?.map(row => row?.trigger).filter(Boolean) || [];
+                const uniqueTriggers = Array.from(new Set(triggers));
+
+                return z.array(z.string()).refine(
+                  (answers) => uniqueTriggers.every(trigger => {
+                      return answers.some(answer => answer.startsWith(trigger))
+                    }
+                  ),
+                  { message: warning }
+                );
+            } else {
+                return undefined;
+            }
+
         // Default value for range is "50", so it's never empty.
         // If skipQuestion is true, the value is ignored anyway.
         // Therefore, we don't need validation here.
