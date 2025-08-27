@@ -1,8 +1,8 @@
 {
   "name": "@openstad-headless/auth-server",
   "version": "1.0.0",
-  "author": "Tosh Koevoets",
   "description": "SSO authentication for openstad apps",
+  "author": "OpenStad",
   "license": "MIT",
   "main": "app.js",
   "dependencies": {

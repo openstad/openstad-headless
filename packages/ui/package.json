@@ -10,7 +10,7 @@
     "test:component": "cypress run --component"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@cypress/react": "^9.0.1",
     "@cypress/vite-dev-server": "^6.0.3",

@@ -29,7 +29,7 @@
     "multer": "^2.0.2",
     "yargs": "^17.5.1"
   },
-  "author": "Gemeente Amsterdam",
+  "author": "OpenStad",
   "license": "MIT",
   "devDependencies": {
     "nodemon": "^3.0.1"
