@@ -73,6 +73,10 @@ export type DocumentUploadProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageTekst?: string;
+    nextPageTekst?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const DocumentUploadField: FC<DocumentUploadProps> = ({

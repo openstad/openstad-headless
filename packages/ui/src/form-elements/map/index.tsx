@@ -15,6 +15,7 @@ import {ProjectSettingProps} from "@openstad-headless/types/project-setting-prop
 import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
 import {Spacer} from "../../spacer";
 import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type MapProps = BaseProps &
     AreaProps &
@@ -25,7 +26,7 @@ export type MapProps = BaseProps &
     fieldRequired: boolean;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: {name: string, value: FormValue}) => void;
     requiredWarning?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -33,6 +34,10 @@ export type MapProps = BaseProps &
     infoImage?: string;
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
+    defaultValue?: string;
+    prevPageTekst?: string;
+    nextPageTekst?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 type Point = {
