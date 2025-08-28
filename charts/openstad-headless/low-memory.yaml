@@ -31,8 +31,6 @@ auth:
   extraEnvVars:
     - name: NODE_OPTIONS
       value: '--max-old-space-size=128 --max-semi-space-size=8'
-  fromEmail: noreply@headless-acc.draad.dev
-  fromName: Openstad Openstad Headless ACC
   resources:
     limits:
       memory: 256Mi
