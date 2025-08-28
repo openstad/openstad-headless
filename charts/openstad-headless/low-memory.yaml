@@ -1,0 +1,72 @@
+admin:
+  extraEnvVars:
+    - name: NODE_OPTIONS
+      value: '--max-old-space-size=128 --max-semi-space-size=8'
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 256Mi
+  customCommand:
+    - npm
+    - run
+    - start
+  customWorkingDir: /opt/openstad-headless/apps/admin-server
+
+api:
+  extraEnvVars:
+    - name: NODE_OPTIONS
+      value: '--max-old-space-size=128 --max-semi-space-size=8'
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 256Mi
+  customCommand:
+    - node
+    - server.js
+  customWorkingDir: /opt/openstad-headless/apps/api-server
+
+auth:
+  extraEnvVars:
+    - name: NODE_OPTIONS
+      value: '--max-old-space-size=128 --max-semi-space-size=8'
+  fromEmail: noreply@headless-acc.draad.dev
+  fromName: Openstad Openstad Headless ACC
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 256Mi
+  customCommand:
+    - node
+    - app.js
+  customWorkingDir: /opt/openstad-headless/apps/auth-server
+
+cms:
+  extraEnvVars:
+    - name: NODE_OPTIONS
+      value: '--max-old-space-size=128 --max-semi-space-size=8'
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 256Mi
+  customCommand:
+    - node
+    - app.js
+  customWorkingDir: /opt/openstad-headless/apps/cms-server
+
+image:
+  extraEnvVars:
+    - name: NODE_OPTIONS
+      value: '--max-old-space-size=128 --max-semi-space-size=8'
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 256Mi
+  customCommand:
+    - node
+    - server.js
+  customWorkingDir: /opt/openstad-headless/apps/image-server
