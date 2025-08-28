@@ -164,7 +164,7 @@ const MapField: FC<MapProps> = ({
                   fieldRequired={fieldRequired}
                   markerIcon={undefined}
                   centerOnEditorMarker={false}
-                  autoZoomAndCenter='area'
+                  autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
                   area={polygon}
                   {...zoom}
                   dataLayerSettings={dataLayerSettings}
