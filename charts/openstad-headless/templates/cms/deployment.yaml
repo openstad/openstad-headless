@@ -74,6 +74,12 @@ spec:
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
+        {{- if .Values.cms.customCommand }}
+        command: {{ toYaml .Values.cms.customCommand | nindent 12 }}
+        {{- end }}
+        {{- if .Values.cms.customWorkingDir }}
+        workingDir: {{ .Values.cms.customWorkingDir }}
+        {{- end }}
         resources:
 {{ toYaml .Values.cms.resources | indent 12 }}
         volumeMounts:
