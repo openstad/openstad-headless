@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
 
 const fetchAll = async () => {

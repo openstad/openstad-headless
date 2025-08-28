@@ -24,58 +24,6 @@ type Point = {
   lng: number;
 };
 
-function generateLineStyleSVG(features: any[]): string {
-  const DEFAULT_STYLE = {
-    stroke: 'rgb(85, 85, 85)',
-    'stroke-width': 2,
-    'stroke-opacity': 1,
-  };
-
-  const styleMap: Record<string, { count: number, width: number, color: string, opacity: number }> = {};
-
-  features.forEach(feature => {
-    if (feature.geometry?.type !== 'LineString') return;
-
-    const props = feature.properties || {};
-    const stroke = props.stroke || DEFAULT_STYLE.stroke;
-    const width = props['stroke-width'] || DEFAULT_STYLE['stroke-width'];
-    const opacity = props['stroke-opacity'] ?? DEFAULT_STYLE['stroke-opacity'];
-
-    const key = `${stroke}-${width}-${opacity}`;
-    if (!styleMap[key]) {
-      styleMap[key] = { count: 0, width, color: stroke, opacity };
-    }
-    styleMap[key].count++;
-  });
-
-  const totalWeight = Object.values(styleMap).reduce((sum, style) => sum + (style.width * style.count), 0);
-
-  let currentX = 0;
-  const height = 13;
-  const width = 13;
-  const svgParts = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`
-  ];
-
-  Object.values(styleMap).forEach(style => {
-    const relativeWidth = (style.width * style.count) / totalWeight * width;
-    svgParts.push(`
-      <rect 
-        x="${currentX}" 
-        y="0" 
-        width="${relativeWidth}" 
-        height="${height}" 
-        fill="${style.color}" 
-        opacity="${style.opacity}" 
-      />
-    `);
-    currentX += relativeWidth;
-  });
-
-  svgParts.push('</svg>');
-  return `data:image/svg+xml;base64,${btoa(svgParts.join(''))}`;
-}
-
 const ResourceOverviewMap = ({
   categorize = undefined,
   markerHref = undefined,
@@ -99,6 +47,7 @@ const ResourceOverviewMap = ({
   const { data: resources } = datastore.useResources(
     {
       projectId: props.projectId,
+      pageSize: 99999,
     },
     { suspense: !!givenResources }
   );
@@ -192,6 +141,30 @@ const ResourceOverviewMap = ({
       return marker;
     }) || [];
 
+  const projectMarkers = selectedProjects.map((project) => {
+    const marker: MarkerProps = {
+      lat: project.projectLat ? parseFloat(project.projectLat) : undefined,
+      lng: project.projectLng ? parseFloat(project.projectLng) : undefined,
+      href: project.overviewUrl || '',
+      title: project.overviewTitle || project.name || '',
+      icon: project.overviewMarkerIcon
+        ? L.icon({
+          iconUrl: project.overviewMarkerIcon,
+          iconSize: [30, 40],
+          iconAnchor: [15, 40],
+          className: 'custom-image-icon',
+        })
+        : undefined,
+    };
+
+    if (marker.lat && marker.lng) {
+      return marker;
+    }
+    return null;
+  }).filter(marker => marker !== null);
+
+  currentMarkers = currentMarkers.concat(projectMarkers);
+
   if (givenResources) {
     resources.metadata.totalCount = givenResources.length;
   }
@@ -233,35 +206,6 @@ const ResourceOverviewMap = ({
     areaId && Array.isArray(areas) && areas.length > 0
       ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
       : [];
-
-  const { data: datalayers } = datastore.useDatalayer({
-    projectId: props.projectId,
-  });
-
-  const mapDataLayers: { layer: any; icon?: any, name: string, id: string, activeOnInit: boolean }[] = [];
-  const selectedDataLayers = props?.resourceOverviewMapWidget?.datalayer || [];
-  const showOnOffButtons = props?.resourceOverviewMapWidget?.enableOnOffSwitching || false;
-
-  if (selectedDataLayers && Array.isArray(selectedDataLayers) && Array.isArray(datalayers) && datalayers.length > 0) {
-    selectedDataLayers.forEach((selectedDataLayer: DataLayer, index: number) => {
-      const foundDatalayer = datalayers.find((datalayer: DataLayer) => {
-        const isMatch = datalayer.id === selectedDataLayer.id;
-        return isMatch;
-      });
-
-      if (foundDatalayer) {
-        const stableId = `layer-${index}`;
-
-        mapDataLayers.push({
-          layer: foundDatalayer.layer,
-          icon: foundDatalayer.icon,
-          name: selectedDataLayer.name,
-          activeOnInit: typeof(selectedDataLayer?.activeOnInit) === 'boolean' ? selectedDataLayer.activeOnInit : true,
-          id: stableId
-        });
-      }
-    });
-  }
 
   function calculateCenter(polygon: Point[] | Point[][]) {
     if (!polygon || polygon.length === 0) {
@@ -311,28 +255,6 @@ const ResourceOverviewMap = ({
     }
   };
 
-  const [activeLayers, setActiveLayers] = useState<{ [key: string]: boolean }>({});
-
-  useEffect(() => {
-    if (mapDataLayers.length > 0 && Object.keys(activeLayers).length === 0) {
-      const initialLayers = mapDataLayers.reduce((acc, layer) => {
-        acc[layer.id] = layer.activeOnInit;
-        return acc;
-      }, {} as { [key: string]: boolean });
-
-      setActiveLayers(initialLayers);
-    }
-  }, [mapDataLayers]);
-
-  const toggleLayer = (id: string) => {
-    setActiveLayers(prevState => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
-  };
-
-  const visibleMapDataLayers = mapDataLayers.filter(layer => activeLayers[layer.id]);
-
   if ( !!props?.map && typeof(props?.map) === 'object' ) {
     props.map = {
       ...props.map,
@@ -341,48 +263,24 @@ const ResourceOverviewMap = ({
     }
   }
 
+  const dataLayerSettings = !!props?.datalayer ? {
+    datalayer: props?.datalayer || [],
+    enableOnOffSwitching: props?.enableOnOffSwitching || false,
+  } : props?.resourceOverviewMapWidget || {};
+
   return ((polygon && center) || !Number(areaId)) ? (
     <div className='map-container--buttons'>
       <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
-      { mapDataLayers.length > 0 && (
-        <ul className="legend">
-          {mapDataLayers.map(layer => (
-            <li key={layer.id} className="legend-item">
-              <label className="legend-label">
-                {showOnOffButtons && (
-                  <input
-                    type="checkbox"
-                    checked={!!activeLayers[layer.id]}
-                    onChange={() => toggleLayer(layer.id)}
-                  />
-                )}
-                <div className="legend-info">
-                  {layer.icon && layer.icon[0] && layer.icon[0].url ? (
-                    <img src={layer.icon[0].url} alt="Layer icon" className="legend-icon" />
-                  ) : layer.layer?.features?.some((f: any) => f?.geometry?.type === 'LineString') ? (
-                    <img
-                      src={generateLineStyleSVG(layer.layer.features)}
-                      alt="Layer line preview"
-                      className="legend-icon legend-icon--line"
-                    />
-                  ) : null}
-                  <span>{layer.name || 'Naamloze laag'}</span>
-                </div>
-              </label>
-            </li>
-          ))}
-        </ul>
-      )}
       <BaseMap
         {...props}
         {...zoom}
         area={polygon}
-        mapDataLayers={visibleMapDataLayers}
-        autoZoomAndCenter="area"
+        autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
         categorize={{ categories, categorizeByField }}
         center={center}
         markers={currentMarkers}
         locationProx={locationProx}
+        dataLayerSettings={dataLayerSettings}
       >
       </BaseMap>
       <div className='map-buttons'>

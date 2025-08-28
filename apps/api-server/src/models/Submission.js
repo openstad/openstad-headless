@@ -66,11 +66,11 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   Submission.auth = Submission.prototype.auth = {
-    listableBy: 'admin',
-    viewableBy: ['admin', 'owner'],
+    listableBy: 'editor',
+    viewableBy: ['editor', 'owner'],
     createableBy: 'all',
-    updateableBy: 'admin',
-    deleteableBy: 'admin',
+    updateableBy: 'editor',
+    deleteableBy: 'editor',
   };
 
   Submission.associate = function (models) {

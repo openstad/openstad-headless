@@ -115,6 +115,7 @@ CMS_PORT=${process.env.CMS_PORT}
 CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}
 CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI || 'mongodb://openstad-mongo:27017/{database}'}
 CMS_DEFAULT_SETTINGS=${process.env.CMS_DEFAULT_SETTINGS}
+CMS_DISABLE_WIDGET_PREVIEW=${process.env.CMS_DISABLE_WIDGET_PREVIEW || 'false'}
 `;
 
     await fs.writeFile('./.env', configfile);

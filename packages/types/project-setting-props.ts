@@ -77,5 +77,6 @@ export type ProjectSettingProps = {
     areaId: string;
     tilesVariant?: string;
     customUrl?: string;
+    autoZoomAndCenter?: "area" | "markers";
   };
 };

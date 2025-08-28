@@ -15,7 +15,7 @@ const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
-  return hasRole( user, 'moderator')
+  return hasRole( user, 'editor')
 };
 
 // scopes: for all get requests
@@ -106,11 +106,12 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeUser');
   }
 
-  if (req?.query?.projectIds && typeof req?.query?.projectIds === "object") {
+  if (req?.query?.projectIds && (typeof req?.query?.projectIds === "object" || typeof req?.query?.projectIds === "string")) {
     let projectIds = req.query.projectIds;
 
     if (!Array.isArray(projectIds)) projectIds = [projectIds];
     req.scope.push({ method: ['selectProjectIds', projectIds] });
+    req.query.projectIds = projectIds;
   }
 
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
@@ -642,6 +643,130 @@ router
       .catch(next);
   });
 
+
+// Multiple resource routes
+// -------------------------
+
+// Delete multiple resources
+router
+    .route ('/delete')
+    .delete(auth.useReqUser)
+    .delete( rateLimiter(), async function (req, res, next)  {
+      let ids = req.body.ids;
+
+      if (!ids || !Array.isArray(ids)) {
+        return next(new Error('Invalid request: ids must be an array'));
+      }
+
+      ids = ids.filter((id) => Number.isInteger(id));
+      if (ids.length === 0) {
+        return next(new Error('Invalid request: no valid ids provided'));
+      }
+
+      try {
+        const resources = await db.Resource.scope(...req.scope).findAll({
+          where: { id: ids }
+        });
+
+        if (resources.length === 0) {
+          return res.status(404).json({ error: 'No resources found for the provided IDs' });
+        }
+
+        for (const resource of resources) {
+          if (!resource.can || !resource.can('delete')) {
+            return next(new Error(`You cannot delete resource with ID ${resource.id}`));
+          }
+        }
+
+        await db.Resource.destroy({
+          where: { id: ids }
+        });
+
+        res.json({ message: 'Resources deleted successfully' });
+      } catch (error) {
+        next(error);
+      }
+    })
+
+// Duplicate multiple resources
+router
+    .route('/duplicate')
+    .post(auth.useReqUser)
+    .post(rateLimiter(), async function (req, res, next) {
+      let ids = req.body.ids;
+      const projectId = req.params.projectId;
+
+      if (!ids || !Array.isArray(ids)) {
+        return next(new Error('Invalid request: ids must be an array'));
+      }
+
+      ids = ids.filter((id) => Number.isInteger(id));
+      if (ids.length === 0) {
+        return next(new Error('Invalid request: no valid ids provided'));
+      }
+
+      try {
+        req.scope.push('includeTags', 'includeStatuses');
+        const resources = await db.Resource.scope(...req.scope).findAll({
+          where: { id: ids }
+        });
+
+        if (resources.length === 0) {
+          return res.status(404).json({ error: 'No resources found for the provided IDs' });
+        }
+
+        for (const resource of resources) {
+          if (!resource.can || !resource.can('create')) {
+            return next(new Error(`You cannot duplicate resource with ID ${resource.id}`));
+          }
+        }
+
+        const duplicatedResources = await Promise.all(
+            resources.map(async (resource) => {
+              const resourceData = resource.dataValues;
+              const { id, createdAt, updatedAt, deletedAt, ...newResourceData } = resourceData;
+              newResourceData.startDate = newResourceData.publishDate = new Date();
+
+              let statuses = newResourceData.statuses || [];
+              let tags = newResourceData.tags || [];
+
+              tags = getOnlyIds(tags);
+              statuses = getOnlyIds(statuses);
+
+              let finalTags = [];
+              if (Array.isArray(tags) && tags.length > 0) {
+                const projectId = req.params.projectId;
+
+                finalTags = await getValidTags(projectId, tags, true);
+              }
+
+              let finalStatuses = [];
+              if (Array.isArray(statuses) && statuses.length > 0) {
+                const projectId = req.params.projectId;
+
+                finalStatuses = await getValidStatuses(projectId, statuses);
+              }
+
+              return db.Resource.create(newResourceData).then((result) => {
+                if (Array.isArray(finalTags) && finalTags.length > 0) {
+                  result.setTags(finalTags);
+                }
+                if (Array.isArray(finalStatuses) && finalStatuses.length > 0) {
+                  result.setStatuses(finalStatuses);
+                }
+
+                return result;
+              });
+            })
+        );
+
+        res.json(duplicatedResources);
+      } catch (error) {
+        next(error);
+      }
+    });
+
+
 // Get all valid tags of the project based on given ids
 async function getValidTags(projectId, tags, canBeGlobal) {
   const uniqueIds = Array.from(new Set(tags));
@@ -667,6 +792,21 @@ async function getValidStatuses(projectId, statuses) {
   });
 
   return statusesOfProject;
+}
+
+// Get all ids from an array of objects
+function getOnlyIds(objArr) {
+  return objArr.map((obj) => {
+    if (typeof obj === 'object' && obj?.id ) {
+      let objId = obj?.id;
+      if (typeof objId === 'string') {
+        objId = parseInt(objId);
+      }
+
+      return objId;
+    }
+    return false;
+  }).filter((obj) => obj !== false);
 }
 
 module.exports = router;

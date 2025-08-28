@@ -95,6 +95,7 @@ export type StemBegrootWidgetProps = BaseProps &
     step1Delete?: string;
     step1Add?: string;
     step1MaxText?: string;
+    filterBehavior?: string;
   };
 
 function StemBegroot({
@@ -115,6 +116,7 @@ function StemBegroot({
   step1Delete = 'Verwijder',
   step1Add = 'Voeg toe',
   step1MaxText = '',
+  filterBehavior = 'or',
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -438,10 +440,15 @@ function StemBegroot({
         &&
         ( !Array.isArray(tagCounter) || (Array.isArray(tagCounter) && tagCounter.length === 0) )
       ) {
+        const numberOrDefault = (value: any, defaultValue: number) => {
+          const parsedValue = Number(value);
+          return !isNaN(parsedValue) ? parsedValue : defaultValue;
+        };
+
         const tagCounterNew: Array<TagType> = tagsToDisplay.map((tag: string) => {
           return {
             [tag]: {
-              min: 1,
+              min: props?.votes?.voteType === "countPerTag" ? numberOrDefault(props.votes.minResources, 1) : numberOrDefault(props.votes.minBudget, 1),
               max: props?.votes?.voteType === "countPerTag" ? props.votes.maxResources || 1 : props.votes.maxBudget || 1,
               current: 0,
               selectedResources: []
@@ -816,6 +823,16 @@ function StemBegroot({
                         setActiveTagTab(tagName);
                         return;
                       }
+
+                      const notOneTagSelected = tagCounter.every(tagObj => {
+                        const key = Object.keys(tagObj)[0];
+                        return tagObj[key].current === 0;
+                      });
+
+                      if (notOneTagSelected) {
+                        notifyVoteMessage('Maak een keuze om verder te kunnen gaan.', true);
+                        return;
+                      }
                     }
 
                     prepareForVote(null);
@@ -1007,6 +1024,7 @@ function StemBegroot({
               hideReadMore={hideReadMore}
               currentPage={page}
               pageSize={itemsPerPage}
+              filterBehavior={filterBehavior}
             />
             <Spacer size={3} />
 

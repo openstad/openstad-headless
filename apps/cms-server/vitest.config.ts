@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     exclude: [
         "modules/openstad-assets/ui/src/vendor/bootstrap/js/tests/*",
+        "apos-build/**"
     ]
   },
 })

@@ -313,11 +313,11 @@ module.exports = ( db, sequelize, DataTypes ) => {
   }
 
   Notification.auth = Notification.prototype.auth = {
-    listableBy: 'admin',
-    viewableBy: 'admin',
-    createableBy: 'admin',
-    updateableBy: 'admin',
-    deleteableBy: 'admin',
+    listableBy: 'editor',
+    viewableBy: 'editor',
+    createableBy: 'editor',
+    updateableBy: 'editor',
+    deleteableBy: 'editor',
   };
 
   return Notification;

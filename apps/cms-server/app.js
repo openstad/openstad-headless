@@ -430,7 +430,6 @@ app.get('/auth/login', (req, res, next) => {
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
-  url = req.query.useOauth ? url + '&useOauth=' + req.query.useOauth : url;
   url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;
 
   return res.redirect(url);
@@ -455,7 +454,6 @@ app.get('/auth/logout', (req, res, next) => {
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/logout?redirectUri=${returnUrl}`;
-  url = req.query.useOauth ? url + '&useOauth=' + req.query.useOauth : url;
   url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;
 
   return res.redirect(url);

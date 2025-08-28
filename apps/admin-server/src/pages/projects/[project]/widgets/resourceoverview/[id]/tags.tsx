@@ -19,11 +19,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import InfoDialog from "@/components/ui/info-hover";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
@@ -41,6 +42,7 @@ const formSchema = z.object({
       message: 'You have to select at least one item.',
     }),
   displayTagGroupName: z.boolean(),
+  filterBehavior: z.string().optional(),
 });
 
 type Tag = {
@@ -76,6 +78,7 @@ export default function WidgetResourceOverviewTags(
     defaultValues: {
       displayTagFilters: props?.displayTagFilters || false,
       showActiveTags: props?.showActiveTags || false,
+      filterBehavior: props?.filterBehavior || 'or',
       tagGroups: props.tagGroups || [],
       displayTagGroupName: props?.displayTagGroupName || false,
     },
@@ -88,7 +91,7 @@ export default function WidgetResourceOverviewTags(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/3 grid grid-cols-1 gap-4">
+          className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="displayTagFilters"
@@ -108,6 +111,37 @@ export default function WidgetResourceOverviewTags(
               <FormItem>
                 <FormLabel style={{display: 'flex'}}>Wil je onder de filters de actieve tags zien waar op is gefilterd? <InfoDialog content={"Dit geeft je de mogelijkheid om de actieve tags te zien waarop momenteel is gefilterd. Dit is vooral handig bij filters waar je meerdere opties kunt selecteren binnen één dropdown. Zo kun je snel een overzicht krijgen van de geselecteerde tags en eenvoudig aanpassen of verwijderen. De actieve tags worden alleen weergegeven bij filteropties die het toestaan om meerdere keuzes tegelijk te selecteren."} /></FormLabel>
                 {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="filterBehavior"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Kies de manier waarop je de filters wilt combineren
+                </FormLabel>
+                <FormDescription>
+                  <strong>Of</strong>: Als er meerdere filters actief zijn, wordt alleen één van de filters toegepast. Bijvoorbeeld, als je zoekt op meerdere eigenschappen, wordt er een resultaat getoond als één van die eigenschappen overeenkomt.<br />
+                  <strong>En</strong>: Als er meerdere filters actief zijn, moeten alle filters tegelijkertijd van toepassing zijn. Alleen resultaten die aan alle geselecteerde criteria voldoen, worden getoond.
+                </FormDescription>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'or'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Of" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="or">Of</SelectItem>
+                    <SelectItem value="and">En</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

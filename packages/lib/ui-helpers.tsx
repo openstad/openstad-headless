@@ -1,3 +1,6 @@
+// @ts-ignore , Otherwise it will not work. The error "dompurify can only be default-imported using the esModuleInterop flag" can't be resolved by changing the import statement to a named import.
+import DOMPurify from 'dompurify';
+
 export function elipsize(value: string, maxLength: number) {
   if (value.length > maxLength) {
     return value.substring(0, maxLength) + '...';
@@ -55,5 +58,5 @@ export function elipsizeHTML(value: string, maxLength: number): string {
     truncatedHTML += truncateNode(tempDiv.childNodes[i], maxLength, currentLength);
   }
 
-  return truncatedHTML;
+  return DOMPurify.sanitize(truncatedHTML);
 }

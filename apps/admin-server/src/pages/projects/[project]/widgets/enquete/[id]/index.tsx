@@ -20,6 +20,8 @@ import WidgetEnqueteGeneral from './general';
 import WidgetEnqueteItems from './items';
 import React from "react";
 import WidgetEnqueteConfirmation from "./confirmation";
+import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
@@ -59,6 +61,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="items">Items</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
+              <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -117,6 +120,32 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="confirmation" className="p-0">
               <WidgetEnqueteConfirmation />
+            </TabsContent>
+            <TabsContent value="datalayers" className="p-0">
+              {previewConfig && (
+                <>
+                  <Alert variant="info" className="mb-4">
+                    <AlertTitle>Let op!</AlertTitle>
+                    <AlertDescription>
+                      De kaartopties zijn alleen van toepassing als je een veld hebt die een kaart bevat.
+                    </AlertDescription>
+                  </Alert>
+                  <WidgetResourcesMapDatalayers
+                    {...previewConfig}
+                    updateConfig={(config) =>
+                      updateConfig({ ...widget.config, ...config })
+                    }
+                    onFieldChanged={(key, value) => {
+                      if (previewConfig) {
+                        updatePreview({
+                          ...previewConfig,
+                          [key]: value,
+                        });
+                      }
+                    }}
+                  />
+                </>
+              )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
