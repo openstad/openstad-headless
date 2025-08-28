@@ -3,6 +3,8 @@ import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-ove
 export type EnqueteProps = {
   widgetId?: number;
   afterSubmitUrl?: string;
+  finalSlideTitle?: string;
+  finalSlideDescription?: string;
   displayTitle?: boolean;
   title?: string;
   displayDescription?: boolean;
@@ -26,6 +28,7 @@ export type Item = {
   key: string;
   description?: string;
   questionType?: string;
+  videoUrl?: string;
   fieldKey?: string;
   minCharacters?: string;
   maxCharacters?: string;
@@ -33,6 +36,8 @@ export type Item = {
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
+  view?: string;
+  group?: string;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
@@ -43,6 +48,7 @@ export type Item = {
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
+  cards?: Array<Card>;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -56,6 +62,13 @@ export type Item = {
 export type Option = {
   trigger: string;
   titles: Array<Title>;
+};
+
+export type Card = {
+    id: string,
+    title: string,
+    description: string,
+    image: string
 };
 
 export type Title = {

@@ -38,6 +38,7 @@ const formSchema = z.object({
   key: z.string(),
   description: z.string().optional(),
   questionType: z.string().optional(),
+  videoUrl: z.string().optional(),
   fieldKey: z.string(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
@@ -59,6 +60,7 @@ const formSchema = z.object({
     .optional(),
   multiple: z.boolean().optional(),
   view: z.string().optional(),
+  group: z.string().optional(),
   image: z.string().optional(),
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
@@ -122,13 +124,15 @@ export default function WidgetEnqueteItems(
           key: values.key,
           description: values.description,
           questionType: values.questionType,
+          videoUrl: values.videoUrl,
           fieldKey: values.fieldKey,
           minCharacters: values.minCharacters,
           maxCharacters: values.maxCharacters,
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
-          view: values.view || '',
+          group: values.group || '',
+          view: values.view || 'default',
           image: values.image || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
@@ -197,13 +201,15 @@ export default function WidgetEnqueteItems(
     question: '',
     questionSubtitle: '',
     questionType: '',
+    videoUrl: '',
     fieldKey: '',
     minCharacters: '',
     maxCharacters: '',
     variant: 'text input',
     options: [],
     multiple: false,
-    view: '',
+    view: 'default',
+    group: '',
     image: '',
     imageAlt: '',
     imageDescription: '',
@@ -248,12 +254,14 @@ export default function WidgetEnqueteItems(
         fieldKey: selectedItem.fieldKey || '',
         description: selectedItem.description || '',
         questionType: selectedItem.questionType || '',
+        videoUrl: selectedItem.videoUrl || '',
         minCharacters: selectedItem.minCharacters || '',
         maxCharacters: selectedItem.maxCharacters || '',
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
-        view: selectedItem.view || '',
+        view: selectedItem.view || 'default',
+        group: selectedItem.group || '',
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
@@ -720,7 +728,7 @@ export default function WidgetEnqueteItems(
             ) : (
               <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                 <div>
-                  <Heading size="xl">Enquete items</Heading>
+                  <Heading size="xl">Video Slider items</Heading>
                   <Separator className="my-4" />
                   <div className="w-full lg:w-2/3 flex flex-col grid gap-y-4">
                     <FormField
@@ -739,6 +747,17 @@ export default function WidgetEnqueteItems(
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Titel/Vraag</FormLabel>
+                          <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="videoUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Video Url</FormLabel>
                           <Input {...field} />
                           <FormMessage />
                         </FormItem>
@@ -956,31 +975,51 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
-
                     {(form.watch('questionType') === 'images') && (
-                      <FormField
-                        control={form.control}
-                        name="view"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Weergave</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="default">Standaard weergave</SelectItem>
-                                <SelectItem value="Jongeren">Jongerenwidget</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="view"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Weergave</FormLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="default">Standaard weergave</SelectItem>
+                                  <SelectItem value="Jongeren">Jongerenwidget</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch('view') === 'Jongeren' && (
+                          <>
+                            <FormField
+                              control={form.control}
+                              name="group"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Groeperen</FormLabel>
+                                  <FormDescription>
+                                    Groepeer meerdere &apos;Antwoordopties met afbeeldingen&apos; onder één item. Dit voegt een slider toe aan de widget, voor elke aparte groep.
+                                    Elke groep moet een unieke naam hebben.
+                                  </FormDescription>
+                                  <Input {...field} />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </>
                         )}
-                      />
+                      </>
                     )}
 
                     <FormField
@@ -1056,7 +1095,7 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {form.watch('questionType') === 'multiple' && (
+                    {/* {form.watch('questionType') === 'multiple' && (
                       <>
                         <FormField
                           control={form.control}
@@ -1089,7 +1128,7 @@ export default function WidgetEnqueteItems(
                           )}
                         />
                       </>
-                    )}
+                    )} */}
 
                     {hasOptions() && (
                       <FormItem>

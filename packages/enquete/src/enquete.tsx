@@ -86,7 +86,6 @@ function Enquete(props: EnqueteWidgetProps) {
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
                 fieldRequired: item.fieldRequired,
             };
-
             switch (item.questionType) {
                 case 'open':
                     fieldData['type'] = 'text';
@@ -140,8 +139,9 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'images':
                     fieldData['type'] = 'imageChoice';
                     fieldData['multiple'] = item.multiple || false;
+                    fieldData['view'] = item.view || 'default';
 
-                    if ( item.options && item.options.length > 0 ) {
+                    if (item.options && item.options.length > 0) {
                         fieldData['choices'] = item.options.map((option) => {
                             return {
                                 value: option.titles[0].key,
@@ -178,20 +178,20 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['showSmileys'] = item.showSmileys;
 
                     const labelOptions = [
-                      <Icon icon="ri-emotion-unhappy-line" key={1} />,
-                      <Icon icon="ri-emotion-sad-line" key={2} />,
-                      <Icon icon="ri-emotion-normal-line" key={3} />,
-                      <Icon icon="ri-emotion-happy-line" key={4} />,
-                      <Icon icon="ri-emotion-laugh-line" key={5} />
+                        <Icon icon="ri-emotion-unhappy-line" key={1} />,
+                        <Icon icon="ri-emotion-sad-line" key={2} />,
+                        <Icon icon="ri-emotion-normal-line" key={3} />,
+                        <Icon icon="ri-emotion-happy-line" key={4} />,
+                        <Icon icon="ri-emotion-laugh-line" key={5} />
                     ]
 
                     fieldData['fieldOptions'] = labelOptions.map((label, index) => {
                         const currentValue = index + 1;
-                          return {
+                        return {
                             value: currentValue,
                             label: item.showSmileys ? label : currentValue,
-                          }
-                        });
+                        }
+                    });
                     break;
                 case 'map':
                     fieldData['type'] = 'map';
@@ -204,6 +204,16 @@ function Enquete(props: EnqueteWidgetProps) {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
 
+                    break;
+                case 'swipe':
+                    fieldData['type'] = 'swipe';
+                    fieldData['cards'] = item?.options?.map((card) => {
+                        return {
+                            id: card.trigger,
+                            description: card.titles[0].key,
+                            image: card.titles[0].image || '',
+                        };
+                    });
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
@@ -241,7 +251,10 @@ function Enquete(props: EnqueteWidgetProps) {
                 {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
                 <div className="osc-enquete-item-description">
                     {props.displayDescription && props.description && (
-                        <Paragraph>{props.description}</Paragraph>
+                        <>
+                            <Paragraph>{props.description}</Paragraph>
+                            <Spacer size={2} />
+                        </>
                     )}
                 </div>
                 <Form
