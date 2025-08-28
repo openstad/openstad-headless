@@ -189,7 +189,12 @@ spec:
           {{- if .Values.auth.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
-
+        {{- if .Values.auth.customCommand }}
+        command: {{ .Values.auth.customCommand }}
+        {{- end }}
+        {{- if .Values.auth.customWorkingDir }}
+        workingDir: {{ .Values.auth.customWorkingDir }}
+        {{- end }}
         resources:
 {{ toYaml .Values.auth.resources | indent 12 }}
         readinessProbe:
