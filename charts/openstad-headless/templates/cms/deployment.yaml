@@ -75,7 +75,7 @@ spec:
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
         {{- if .Values.cms.customCommand }}
-        command: {{ .Values.cms.customCommand }}
+        command: {{ toYaml .Values.cms.customCommand | nindent 12 }}
         {{- end }}
         {{- if .Values.cms.customWorkingDir }}
         workingDir: {{ .Values.cms.customWorkingDir }}

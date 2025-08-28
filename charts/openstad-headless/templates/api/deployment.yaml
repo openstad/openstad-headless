@@ -215,7 +215,7 @@ spec:
               name: http
               protocol: TCP
           {{- if .Values.api.customCommand }}
-          command: {{ .Values.api.customCommand }}
+          command: {{ toYaml .Values.api.customCommand | nindent 12}}
           {{- end }}
           {{- if .Values.api.customWorkingDir }}
           workingDir: {{ .Values.api.customWorkingDir }}
