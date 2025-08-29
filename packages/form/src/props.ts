@@ -11,7 +11,6 @@ import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-element
 import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
 import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
 import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/number";
-import type { SwipeWidgetProps } from "@openstad-headless/swipe/src/swipe";
 
 export type FormProps = {
     title?: string;
@@ -42,7 +41,6 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'hidden' } & HiddenInputProps)
     | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
     | ({ type?: 'map' } & MapProps)
-    | ({ type?: 'swipe' } & SwipeWidgetProps)
     | ({ type?: 'none' } & InfoFieldProps);
 
 type ComponentFieldProps = (
@@ -64,7 +62,6 @@ type CombinedFieldProps = (
     HiddenInputProps |
     ImageChoiceFieldProps |
     NumberInputProps |
-    SwipeWidgetProps |
     InfoFieldProps
 );
 

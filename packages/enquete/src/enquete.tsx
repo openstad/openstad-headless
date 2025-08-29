@@ -139,7 +139,6 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'images':
                     fieldData['type'] = 'imageChoice';
                     fieldData['multiple'] = item.multiple || false;
-                    fieldData['view'] = item.view || 'default';
 
                     if (item.options && item.options.length > 0) {
                         fieldData['choices'] = item.options.map((option) => {
@@ -205,16 +204,6 @@ function Enquete(props: EnqueteWidgetProps) {
                     }
 
                     break;
-                case 'swipe':
-                    fieldData['type'] = 'swipe';
-                    fieldData['cards'] = item?.options?.map((card) => {
-                        return {
-                            id: card.trigger,
-                            description: card.titles[0].key,
-                            image: card.titles[0].image || '',
-                        };
-                    });
-                    break;
                 case 'none':
                     fieldData['type'] = 'none';
                     fieldData['image'] = item?.image || '';
@@ -251,10 +240,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
                 <div className="osc-enquete-item-description">
                     {props.displayDescription && props.description && (
-                        <>
-                            <Paragraph>{props.description}</Paragraph>
-                            <Spacer size={2} />
-                        </>
+                        <Paragraph>{props.description}</Paragraph>
                     )}
                 </div>
                 <Form

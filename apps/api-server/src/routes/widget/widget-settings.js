@@ -624,17 +624,6 @@ let moduleDefinitions = {
       pointsLeftoverText: "Overige punten"
     },
   },
-  videoSlider: {
-    packageName: '@openstad-headless/videoSlider',
-    directory: 'videoSlider',
-    js: ['dist/videoSlider.iife.js'],
-    css: ['dist/videoSlider.css'],
-    functionName: 'OpenstadHeadlessVideoSlider',
-    componentName: 'VideoSlider',
-    defaultConfig: {
-      projectId: null,
-    },
-  },
 };
 
 const requiredKeys = [

@@ -13,7 +13,6 @@ import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice";
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
-import SwipeField from "@openstad-headless/swipe/src/swipe";
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
@@ -110,7 +109,6 @@ function Form({
     }
 
     const componentMap: { [key: string]: React.ComponentType<ComponentFieldProps> } = {
-        swipe: SwipeField as React.ComponentType<ComponentFieldProps>,
         text: TextInput as React.ComponentType<ComponentFieldProps>,
         range: RangeSlider as React.ComponentType<ComponentFieldProps>,
         checkbox: CheckboxField as React.ComponentType<ComponentFieldProps>,

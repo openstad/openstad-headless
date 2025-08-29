@@ -50,7 +50,6 @@
     "@openstad-headless/leaflet-map": "*",
     "@openstad-headless/likes": "*",
     "@openstad-headless/multi-project-resource-overview": "*",
-    "@openstad-headless/videoSlider": "*",
     "@openstad-headless/raw-resource": "*",
     "@openstad-headless/resource-detail": "*",
     "@openstad-headless/resource-detail-with-map": "*",
