@@ -14,7 +14,7 @@ import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/num
 
 export type FormProps = {
     title?: string;
-    fields: Array<CombinedFieldProps>;
+    fields: Array<FieldWithOptionalFields>;
     submitText?: string;
     submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;
     getValuesOnChange?: (values: { [p: string]: string | Record<number, never> | []}) => void;
@@ -65,4 +65,13 @@ type CombinedFieldProps = (
     InfoFieldProps
 );
 
-export type { CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};
+// These fields have no use outside the form component itself, so we make them optional here to avoid having to define them in every form field
+type FieldWithOptionalFields =
+  CombinedFieldProps & {
+    trigger?: string
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
+}
+
+export type { FieldWithOptionalFields, CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};

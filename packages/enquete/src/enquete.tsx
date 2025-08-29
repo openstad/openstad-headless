@@ -85,6 +85,10 @@ function Enquete(props: EnqueteWidgetProps) {
                 fieldKey: item.fieldKey,
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
                 fieldRequired: item.fieldRequired,
+                routingInitiallyHide: item.routingInitiallyHide || false,
+                routingSelectedQuestion: item.routingSelectedQuestion || '',
+                routingSelectedAnswer: item.routingSelectedAnswer || '',
+                trigger: item.trigger || '',
             };
 
             switch (item.questionType) {
@@ -120,7 +124,8 @@ function Enquete(props: EnqueteWidgetProps) {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 isOtherOption: option.titles[0].isOtherOption,
-                                defaultValue: option.titles[0].defaultValue
+                                defaultValue: option.titles[0].defaultValue,
+                                trigger: option.trigger || ''
                             };
                         });
                     }
@@ -148,7 +153,8 @@ function Enquete(props: EnqueteWidgetProps) {
                                 label: option.titles[0].key,
                                 imageSrc: option.titles[0].image,
                                 imageAlt: option.titles[0].key,
-                                hideLabel: option.titles[0].hideLabel
+                                hideLabel: option.titles[0].hideLabel,
+                                trigger: option.trigger || ''
                             };
                         });
                     } else {

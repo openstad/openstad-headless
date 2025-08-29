@@ -1,6 +1,6 @@
 import type { ZodType } from "zod";
 import {getSchemaForField} from "./validation.js";
-import type {CombinedFieldPropsWithType} from "./props";
+import type {CombinedFieldPropsWithType} from "../props";
 
 export const handleSubmit = (
     fields: Array<CombinedFieldPropsWithType>,

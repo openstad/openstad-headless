@@ -9,7 +9,8 @@ import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-sli
 import ImageUploadField from "@openstad-headless/ui/src/form-elements/image-upload";
 import DocumentUploadField from "@openstad-headless/ui/src/form-elements/document-upload";
 import MapField from "@openstad-headless/ui/src/form-elements/map";
-import { handleSubmit } from "./submit";
+import { handleSubmit } from "./utils/submit";
+import { updateRouting } from "./utils/routing";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice";
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
@@ -38,15 +39,28 @@ function Form({
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
+    const initialHiddenFields: string[] = [];
+    const fieldsWithImpactOnRouting: string[] = [];
+
     fields.forEach((field) => {
-        if (field.fieldKey) {
+        const fieldKey = field.fieldKey || '';
+
+        if (fieldKey) {
             //@ts-expect-error
-            initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
-            initialFormValues[field.fieldKey] = field.type === 'map' ? {} : initialFormValues[field.fieldKey];
+            initialFormValues[fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
+            initialFormValues[fieldKey] = field.type === 'map' ? {} : initialFormValues[fieldKey];
 
             if (field.type === 'tickmark-slider') {
                 //@ts-expect-error
-                initialFormValues[field.fieldKey] = Math.ceil((field?.fieldOptions?.length || 2) / 2).toString();
+                initialFormValues[fieldKey] = Math.ceil((field?.fieldOptions?.length || 2) / 2).toString();
+            }
+
+            if (field?.routingInitiallyHide && field?.routingSelectedQuestion && field?.routingSelectedAnswer) {
+                const getRoutingSelectedQuestionField = fields.find((f) => f.trigger === field.routingSelectedQuestion);
+                const routingSelectedQuestionFieldKey = getRoutingSelectedQuestionField?.fieldKey || '';
+
+                fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
+                initialHiddenFields.push(fieldKey);
             }
         }
     });
@@ -55,6 +69,8 @@ function Form({
     const [formErrors, setFormErrors] = useState<{ [key: string]: string | null }>({});
     const formRef = useRef<HTMLFormElement>(null);
     const resetFunctions = useRef<Array<() => void>>([]);
+    const [routingHiddenFields, setRoutingHiddenFields] = useState<Array<string>>(initialHiddenFields);
+    const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
 
     const handleFormSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -83,6 +99,7 @@ function Form({
     const handleInputChange = (event: { name: string, value: FormValue }) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
+        setLastUpdatedKey(name);
     };
 
     const resetForm = () => {
@@ -94,6 +111,17 @@ function Form({
     useEffect(() => {
         if (getValuesOnChange) {
             getValuesOnChange(formValues)
+        }
+
+        if (lastUpdatedKey && fieldsWithImpactOnRouting.length > 0 && fieldsWithImpactOnRouting.includes(lastUpdatedKey)) {
+            updateRouting({
+                fields,
+                initialFormValues,
+                routingHiddenFields,
+                setFormValues,
+                setRoutingHiddenFields,
+                formValues
+            });
         }
     }, [formValues]);
 
@@ -154,6 +182,10 @@ function Form({
                     {fields.map((field: ComponentFieldProps, index: number) => {
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
+
+                        if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
+                            return null;
+                        }
 
                         return (
                             <div className={`question question-type-${field.type}`} key={index}>
