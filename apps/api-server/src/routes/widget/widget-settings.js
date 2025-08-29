@@ -623,7 +623,7 @@ let moduleDefinitions = {
       pointsErrorMessage: "Er zijn niet genoeg punten over om deze verdeling te maken. Pas je keuze aan zodat de overige punten <b>0 punten</b> is",
       pointsLeftoverText: "Overige punten"
     },
-  }
+  },
 };
 
 const requiredKeys = [

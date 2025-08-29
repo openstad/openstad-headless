@@ -84,7 +84,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     const ChoiceComponent = multiple ? Checkbox : RadioButton;
 
     return (
-        <div className="question">
+        <div className={`question`}>
             <Fieldset
                 aria-invalid={fieldInvalid}
                 aria-describedby={`${randomId}_error`}

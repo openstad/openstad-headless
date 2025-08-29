@@ -697,20 +697,19 @@ function ResourceOverviewInner({
           if (sort === 'createdAt_asc') {
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           }
-          if ( selectedProjects.length > 0 ) {
-            if (sort === 'title') {
-              return a.title.localeCompare(b.title);
-            }
-            if (sort === 'votes_desc') {
-              return b.yes - a.yes;
-            }
-            if (sort === 'votes_asc' || sort === 'ranking') {
-              return a.yes - b.yes;
-            }
-            if (sort === 'random') {
-              return Math.random() - 0.5;
-            }
+          if (sort === 'title') {
+            return a.title.localeCompare(b.title);
           }
+          if (sort === 'votes_desc') {
+            return b.yes - a.yes;
+          }
+          if (sort === 'votes_asc' || sort === 'ranking') {
+            return a.yes - b.yes;
+          }
+          if (sort === 'random') {
+            return Math.random() - 0.5;
+          }
+
           return 0;
         });
 
