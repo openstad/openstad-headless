@@ -58,7 +58,6 @@ const formSchema = z.object({
     )
     .optional(),
   multiple: z.boolean().optional(),
-  view: z.string().optional(),
   image: z.string().optional(),
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
@@ -128,7 +127,6 @@ export default function WidgetEnqueteItems(
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
-          view: values.view || '',
           image: values.image || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
@@ -203,7 +201,6 @@ export default function WidgetEnqueteItems(
     variant: 'text input',
     options: [],
     multiple: false,
-    view: '',
     image: '',
     imageAlt: '',
     imageDescription: '',
@@ -253,7 +250,6 @@ export default function WidgetEnqueteItems(
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
-        view: selectedItem.view || '',
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
@@ -361,7 +357,6 @@ export default function WidgetEnqueteItems(
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
-      case 'swipe':
       case 'multiple':
       case 'images':
         return true;
@@ -373,7 +368,6 @@ export default function WidgetEnqueteItems(
   const hasList = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
-      case 'swipe':
       case 'multiple':
       case 'images':
         return true;
@@ -484,7 +478,7 @@ export default function WidgetEnqueteItems(
                       (() => {
                         const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
                         const activeOption = currentOption !== -1 ? currentOption : options.length;
-                        return (form.watch("questionType") !== "images" && form.watch("questionType") !== "swipe") ? (
+                        return form.watch("questionType") !== "images" ? (
                           <>
                             <FormField
                               control={form.control}
@@ -582,46 +576,42 @@ export default function WidgetEnqueteItems(
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Titel</FormLabel>
-                                  {form.watch('questionType') !== 'swipe' && (
                                     <FormDescription>
                                       Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
                                       De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
                                     </FormDescription>
-                                  )}
                                   <Input {...field} />
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
 
-                            {form.watch('questionType') !== 'swipe' && (
-                              <FormField
-                                control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.hideLabel`}
+                            <FormField
+                              control={form.control}
+                              // @ts-ignore
+                              name={`options.${activeOption}.titles.0.hideLabel`}
 
-                                render={({ field }) => (
-                                  <>
-                                    <FormItem
-                                      style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
-                                        marginTop: '10px'
-                                      }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
-                                      <FormMessage />
-                                    </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
-                                    </FormDescription>
-                                  </>
-                                )}
-                              />
-                            )}
+                              render={({ field }) => (
+                                <>
+                                  <FormItem
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'flex-start',
+                                      flexDirection: 'row',
+                                      marginTop: '10px'
+                                    }}>
+                                    {YesNoSelect(field, props)}
+                                    <FormLabel
+                                      style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                    <FormMessage />
+                                  </FormItem>
+                                  <FormDescription>
+                                    Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                  </FormDescription>
+                                </>
+                              )}
+                            />
                           </>
                         );
                       })()
@@ -822,7 +812,6 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
                               <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
-                              <SelectItem value="swipe">Swipe</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -949,32 +938,6 @@ export default function WidgetEnqueteItems(
                               <SelectContent>
                                 <SelectItem value="true">Ja</SelectItem>
                                 <SelectItem value="false">Nee</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-
-                    {(form.watch('questionType') === 'images') && (
-                      <FormField
-                        control={form.control}
-                        name="view"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Weergave</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="default">Standaard weergave</SelectItem>
-                                <SelectItem value="Jongeren">Jongerenwidget</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />

@@ -139,7 +139,6 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'images':
                     fieldData['type'] = 'imageChoice';
                     fieldData['multiple'] = item.multiple || false;
-                    fieldData['view'] = item.view || 'default';
 
                     if (item.options && item.options.length > 0) {
                         fieldData['choices'] = item.options.map((option) => {
@@ -204,16 +203,6 @@ function Enquete(props: EnqueteWidgetProps) {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
 
-                    break;
-                case 'swipe':
-                    fieldData['type'] = 'swipe';
-                    fieldData['cards'] = item?.options?.map((card) => {
-                        return {
-                            id: card.trigger,
-                            description: card.titles[0].key,
-                            image: card.titles[0].image || '',
-                        };
-                    });
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
