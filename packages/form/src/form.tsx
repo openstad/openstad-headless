@@ -78,7 +78,8 @@ function Form({
             fields as unknown as Array<CombinedFieldPropsWithType>,
             formValues,
             setFormErrors,
-            submitHandler
+            submitHandler,
+            routingHiddenFields
         );
 
         if (firstErrorKey && formRef.current) {
