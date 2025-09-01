@@ -2,7 +2,7 @@
   "name": "@openstad-headless/auth-server",
   "version": "1.0.0",
   "description": "SSO authentication for openstad apps",
-  "author": "OpenStad",
+  "author": "Gemeente Amsterdam",
   "license": "MIT",
   "main": "app.js",
   "dependencies": {
