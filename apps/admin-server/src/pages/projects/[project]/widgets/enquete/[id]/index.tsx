@@ -89,7 +89,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
-                  widgetConfig={widget.config}
                   onFieldChanged={(key, value) => {
                     if (previewConfig) {
                       updatePreview({

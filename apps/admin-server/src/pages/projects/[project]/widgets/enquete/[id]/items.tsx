@@ -85,7 +85,7 @@ const formSchema = z.object({
 });
 
 export default function WidgetEnqueteItems(
-  props: EnqueteWidgetProps & EditFieldProps<EnqueteWidgetProps> & { widgetConfig: {items?: Item[] } }
+  props: EnqueteWidgetProps & EditFieldProps<EnqueteWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);

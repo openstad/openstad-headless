@@ -54,6 +54,7 @@ export const updateRouting = ({
     const selectedOption: choiceType = fieldChoices.find((choice: choiceType) => choice.trigger === field.routingSelectedAnswer);
     const selectedOptionValue = selectedOption ? selectedOption.value : null;
 
+    // This may seem a bit complex, but this way all the TypeScript warnings are gone
     if (
       Array.isArray(answer) &&
       answer.length > 0 &&
