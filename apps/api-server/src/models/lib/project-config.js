@@ -28,6 +28,10 @@ module.exports = {
   anonymize: {
     type: 'object',
     subset: {
+      allowAnonymizeUsersAfterEndDate: {
+        type: 'boolean',
+        default: false,
+      },
       anonymizeUsersXDaysAfterEndDate: {
         type: 'int',
         default: 60,

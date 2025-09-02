@@ -23,12 +23,15 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toast from 'react-hot-toast';
 import InfoDialog from '@/components/ui/info-hover';
+import {YesNoSelect} from "@/lib/form-widget-helpers";
+import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
   warnUsersAfterXDaysOfInactivity: z.coerce.number(),
   anonymizeUsersAfterXDaysOfInactivity: z.coerce.number(),
-  anonymizeUserName: z.string().optional()
+  anonymizeUserName: z.string().optional(),
+  allowAnonymizeUsersAfterEndDate: z.boolean().optional(),
 });
 
 const emailFormSchema = z.object({
@@ -36,7 +39,18 @@ const emailFormSchema = z.object({
   template: z.string(),
 });
 
-export default function ProjectSettingsAnonymization() {
+type ProjectSettingsAnonymizationProps = {
+  anonymizeUsersXDaysAfterEndDate?: number;
+  warnUsersAfterXDaysOfInactivity?: number;
+  anonymizeUsersAfterXDaysOfInactivity?: number;
+  anonymizeUserName?: string;
+  allowAnonymizeUsersAfterEndDate?: boolean;
+};
+
+export default function ProjectSettingsAnonymization(
+  props: ProjectSettingsAnonymizationProps &
+    EditFieldProps<ProjectSettingsAnonymizationProps>
+) {
   const category = 'anonymize';
 
   const router = useRouter();
@@ -50,6 +64,7 @@ export default function ProjectSettingsAnonymization() {
   } = useProject();
   const defaults = useCallback(
     () => ({
+      allowAnonymizeUsersAfterEndDate: data?.config?.[category]?.allowAnonymizeUsersAfterEndDate || false,
       anonymizeUsersXDaysAfterEndDate:
         data?.config?.[category]?.anonymizeUsersXDaysAfterEndDate || null,
       warnUsersAfterXDaysOfInactivity:
@@ -159,22 +174,41 @@ export default function ProjectSettingsAnonymization() {
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-4 lg:w-1/2">
+
                     <FormField
                       control={form.control}
-                      name="anonymizeUsersXDaysAfterEndDate"
+                      name={`allowAnonymizeUsersAfterEndDate`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Na hoeveel dagen na het einde van het project worden gebruikers geanonimiseerd?
-                            <InfoDialog content={`Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "${ form.watch("anonymizeUserName") || "Gebruiker is geanonimiseerd" }".`} />
+                            Gebruikers automatisch anonimiseren na het beëindigen van het project?
+                            <InfoDialog content={`Als je deze optie aanzet worden gebruikers na het aantal dagen dat je hieronder instelt automatisch geanonimiseerd. Dit gebeurt alleen als het project een einddatum heeft en deze datum is verstreken.`} />
                           </FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="60" {...field} />
-                          </FormControl>
+                          {YesNoSelect(field, props)}
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    { !!form.watch("allowAnonymizeUsersAfterEndDate") && (
+                      <FormField
+                        control={form.control}
+                        name="anonymizeUsersXDaysAfterEndDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Na hoeveel dagen na het einde van het project worden gebruikers geanonimiseerd?
+                              <InfoDialog content={`Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "${ form.watch("anonymizeUserName") || "Gebruiker is geanonimiseerd" }".`} />
+                            </FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="60" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     <FormField
                       control={form.control}
                       name="warnUsersAfterXDaysOfInactivity"

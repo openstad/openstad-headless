@@ -11,6 +11,7 @@ export type ProjectSettingProps = {
     warnUsersAfterXDaysOfInactivity: number;
     anonymizeUsersAfterXDaysOfInactivity: number;
     anonymizeUserName: string;
+    allowAnonymizeUsersAfterEndDate: boolean;
   };
   auth: {
     default: string;
