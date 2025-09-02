@@ -42,6 +42,8 @@ function Form({
     const initialHiddenFields: string[] = [];
     const fieldsWithImpactOnRouting: string[] = [];
 
+    console.log( "Form LOOOOOP" );
+
     fields.forEach((field) => {
         const fieldKey = field.fieldKey || '';
 
@@ -99,11 +101,13 @@ function Form({
 
     const handleInputChange = (event: { name: string, value: FormValue }) => {
         const { name, value } = event;
+        console.log( "Input aanpassing" );
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
         setLastUpdatedKey(name);
     };
 
     const resetForm = () => {
+        console.log( "Reset Formulier aanpassing" );
         setFormValues(initialFormValues);
         setFormErrors({});
         resetFunctions.current.forEach(reset => reset());
@@ -111,8 +115,9 @@ function Form({
 
     useEffect(() => {
         if (getValuesOnChange) {
-            getValuesOnChange(formValues)
+            getValuesOnChange(formValues, routingHiddenFields)
         }
+        console.log( "Formulier aanpassing", lastUpdatedKey );
 
         if (lastUpdatedKey && fieldsWithImpactOnRouting.length > 0 && fieldsWithImpactOnRouting.includes(lastUpdatedKey)) {
             updateRouting({

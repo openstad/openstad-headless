@@ -17,7 +17,7 @@ export type FormProps = {
     fields: Array<FieldWithOptionalFields>;
     submitText?: string;
     submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;
-    getValuesOnChange?: (values: { [p: string]: string | Record<number, never> | []}) => void;
+    getValuesOnChange?: (values: { [p: string]: string | Record<number, never> | []}, hiddenFields?: string[]) => void;
     submitDisabled?: boolean;
     allowResetAfterSubmit?: boolean;
     secondaryLabel?: string;
