@@ -361,28 +361,33 @@ app.use(function (req, res, next) {
  * if openstad.org exists of course.
  */
 app.use('/:sitePrefix', function (req, res, next) {
-    const domainAndPath = req.openstadDomain + '/' + req.params.sitePrefix;
+  // Skip if we already have a site and sitePrefix
+  if (req.sitePrefix && req.site) {
+    next();
+  }
+  
+  const domainAndPath = req.openstadDomain + '/' + req.params.sitePrefix;
 
-    const site = projects[domainAndPath] ? projects[domainAndPath] : false;
+  const site = projects[domainAndPath] ? projects[domainAndPath] : false;
 
-    console.log (req.ip, req.originalUrl, 'Checking for site prefix:', domainAndPath, site ? 'FOUND' : 'not found');
+  console.log (req.ip, req.originalUrl, 'Checking for site prefix:', domainAndPath, site ? 'FOUND' : 'not found');
 
-    if (site) {
-      site.sitePrefix = req.params.sitePrefix;
-      req.sitePrefix  = req.params.sitePrefix;
-      req.site        = site;
-
-
-      // Remove the prefix from the URL
-      req.url = req.url.replace(`/${req.params.sitePrefix}`, '');
+  if (site) {
+    site.sitePrefix = req.params.sitePrefix;
+    req.sitePrefix  = req.params.sitePrefix;
+    req.site        = site;
 
 
-      // Reinitialize route parameters, so the next middleware will see the correct parameters
-      req.app._router.handle(req, res, next);
+    // Remove the prefix from the URL
+    req.url = req.url.replace(`/${req.params.sitePrefix}`, '');
 
-    } else {
-      next();
-    }
+
+    // Reinitialize route parameters, so the next middleware will see the correct parameters
+    req.app._router.handle(req, res, next);
+
+  } else {
+    next();
+  }
 
 });
 
@@ -390,8 +395,8 @@ app.use('/:sitePrefix', function (req, res, next) {
 // This fixes a bug where basicAuth would only apply to subdirectories
 app.use((req, res, next) => {
   
-  console.log (req.ip, req.originalUrl, 'No site prefix, checking for site:', req.openstadDomain, req.site, projects[req.openstadDomain] ? 'FOUND' : 'not found');
   if (!req.site) {
+    console.log (req.ip, req.originalUrl, 'No site yet, checking for site:', req.sitePrefix ? req.sitePrefix : 'No prefix', req.openstadDomain, req.site, projects[req.openstadDomain] ? 'FOUND' : 'not found');
     if (projects[req.openstadDomain]) {
       req.site = projects[req.openstadDomain];
     }
