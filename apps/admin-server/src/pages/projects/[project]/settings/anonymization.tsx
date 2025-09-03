@@ -25,6 +25,8 @@ import toast from 'react-hot-toast';
 import InfoDialog from '@/components/ui/info-hover';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
 import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
+import {NotificationForm} from "@/components/notification-form";
+import useNotificationTemplate from "@/hooks/use-notification-template";
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
@@ -59,7 +61,6 @@ export default function ProjectSettingsAnonymization(
     data,
     isLoading,
     updateProject,
-    updateProjectEmails,
     anonymizeUsersOfProject,
   } = useProject();
   const defaults = useCallback(
@@ -116,21 +117,6 @@ export default function ProjectSettingsAnonymization(
     }
   }
 
-  async function onSubmitEmail(values: z.infer<typeof emailFormSchema>) {
-    try {
-      await updateProjectEmails({
-        [category]: {
-          inactiveWarningEmail: {
-            subject: values.subject,
-            template: values.template,
-          },
-        },
-      });
-    } catch (error) {
-      console.error('Could not update', error);
-    }
-  }
-
   async function anonymizeAllUsers() {
     try {
       await anonymizeUsersOfProject();
@@ -139,6 +125,9 @@ export default function ProjectSettingsAnonymization(
       toast.error("Het project moet eerst zijn beëindigd voordat gebruikers geanonimiseerd kunnen worden.")
     }
   }
+
+  const { data: notificationTemplates } = useNotificationTemplate(project as string);
+  const template = notificationTemplates?.find((t: {type: string}) => t.type === 'user account about to expire');
 
   return (
     <div>
@@ -264,40 +253,17 @@ export default function ProjectSettingsAnonymization(
               <div className="p-6 bg-white rounded-md mt-4">
                 <Form {...emailForm}>
                   <Heading size="xl">Waarschuwingsmail inactiviteit<InfoDialog content={'Content voor een waarschuwings email'} /></Heading>
-                  
 
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={emailForm.handleSubmit(onSubmitEmail)}
-                    className="space-y-4 lg:w-1/2">
-                    <FormField
-                      control={emailForm.control}
-                      name="subject"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>E-mail template onderwerp</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={emailForm.control}
-                      name="template"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>E-mail template tekst</FormLabel>
-                          <FormControl>
-                            <Textarea rows={12} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit">Opslaan</Button>
-                  </form>
+                  <NotificationForm
+                    type="user account about to expire"
+                    label="Gebruikersaccount staat op het punt te verlopen"
+                    engine={template.engine}
+                    id={template.id}
+                    subject={template.subject}
+                    body={template.body}
+                  />
+
                 </Form>
               </div>
             </TabsContent>

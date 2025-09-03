@@ -18,50 +18,65 @@ module.exports = {
     task: async (next) => {
 
       try {
-
-        // for each project
         let projects = await db.Project.findAll();
-        for (let i=0; i < projects.length; i++) {
-          let project = projects[i];
-          let anonymizeUsersXDaysAfterNotification = project.config.anonymize.anonymizeUsersAfterXDaysOfInactivity - project.config.anonymize.warnUsersAfterXDaysOfInactivity;
 
-          // find users that have not logged in for a while
-          let anonymizeUsersAfterXDaysOfInactivity = project.config.anonymize.warnUsersAfterXDaysOfInactivity;
-          let targetDate = new Date();
-          targetDate.setDate(targetDate.getDate() - anonymizeUsersAfterXDaysOfInactivity);
+        for (const project of projects) {
           let users = await db.User.findAll({
             where: {
               projectId: project.id,
-              role: 'member',
-              lastLogin: {
-                [Sequelize.Op.lte]: targetDate,
-              }
+              role: 'member'
             }
           })
-          if (users.length > 0) {
 
+          if (users.length > 0) {
             // for each user
-            for (let i = 0; i < users.length; i++) {
-              let user = users[i];
+            for ( const user of users ) {
+              const warnUsersAfterXDaysOfInactivity = project?.config?.anonymize?.warnUsersAfterXDaysOfInactivity || 770;
+              const anonymizeUsersAfterXDaysOfInactivity = project?.config?.anonymize?.anonymizeUsersAfterXDaysOfInactivity || 860;
 
               if (user.isNotifiedAboutAnonymization) {
                 let daysSinceNotification = parseInt( (Date.now() - new Date(user.isNotifiedAboutAnonymization).getTime()) / ( 24 * 60 * 60 * 1000 ) );
+                let anonymizeUsersXDaysAfterNotification = anonymizeUsersAfterXDaysOfInactivity - warnUsersAfterXDaysOfInactivity;
+
                 if (daysSinceNotification > anonymizeUsersXDaysAfterNotification) {
                   console.log('CRON anonymize-inactive-users: anonymize user', user.email, user.lastLogin);
                   // anonymize user
                   user.doAnonymize();
                 }
               } else {
-                // send notification
+                // send notification logic
                 if (user.email) {
+                  const lastLoginDate = new Date(user.lastLogin);
+
+                  const anonymizeAfterXDays = warnUsersAfterXDaysOfInactivity;
+                  const lastLoginTime = new Date(user.lastLogin).getTime();
+                  const targetAnonymizeWarnTime = lastLoginTime + (warnUsersAfterXDaysOfInactivity * 24 * 60 * 60 * 1000);
+
+                  if (Date.now() < targetAnonymizeWarnTime) {
+                    // Skip sending email to user, not enough inactivity yet
+                    continue;
+                  }
                   console.log('CRON anonymize-inactive-users: send warning email to user', user.email, user.lastLogin);
+
+                  const anonymizeDate = new Date(lastLogin.getTime() + anonymizeAfterXDays * 24 * 60 * 60 * 1000);
+
+                  const dateInDDMMYYYY = (date) => {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}-${month}-${year}`;
+                  }
+
                   db.Notification.create({
                     type: "user account about to expire",
-			              projectId: project.id,
+                    projectId: project.id,
                     data: {
                       userId: user.id,
+                      projectUrl: project.url,
+                      projectName: project.name,
+                      anonymizeDate: dateInDDMMYYYY(anonymizeDate)
                     }
-			            })
+                  })
                   user.update({ isNotifiedAboutAnonymization: new Date() });
                 }
               }
@@ -76,7 +91,7 @@ module.exports = {
         console.log('error in anonymize-inactive-users cron');
         next(err); // let the locked function handle this
       }
-      
+
     }
   })
 
