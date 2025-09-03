@@ -206,6 +206,7 @@ const BaseMap = ({
     datalayer: [],
     enableOnOffSwitching: false,
   },
+  zoomAfterInit = true,
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
 
@@ -297,55 +298,68 @@ const BaseMap = ({
   let [mapRef] = useMapRef(mapId);
 
   const setBoundsAndCenter = useCallback(
-    (polygons: Array<Array<LocationType>>) => {
-      let allPolygons: LocationType[][] = [];
+    (polygons: Array<Array<LocationType>>, focus: "area" | "markers", depth: number) => {
+      if (focus === 'area') {
+        let allPolygons: LocationType[][] = [];
 
-      if (polygons && Array.isArray(polygons)) {
-        polygons.forEach((points: Array<LocationType>) => {
-          let poly: LocationType[] = [];
-          if (points && Array.isArray(points)) {
-            points.forEach((point: LocationType) => {
-              parseLocation(point);
-              if (point.lat) {
-                poly.push(point);
-              }
-            });
-          }
-          if (poly.length > 0) {
-            allPolygons.push(poly);
-          }
+        if (polygons && Array.isArray(polygons)) {
+          polygons.forEach((points: Array<LocationType>) => {
+            let poly: LocationType[] = [];
+            if (points && Array.isArray(points)) {
+              points.forEach((point: LocationType) => {
+                parseLocation(point);
+                if (point.lat) {
+                  poly.push(point);
+                }
+              });
+            }
+            if (poly.length > 0) {
+              allPolygons.push(poly);
+            }
+          });
+        }
+
+        if (allPolygons.length == 0) {
+          mapRef.panTo(
+            new LatLng(definedCenterPoint.lat, definedCenterPoint.lng)
+          );
+          return;
+        }
+
+        if (allPolygons.length == 1 && allPolygons[0].length == 1 && allPolygons[0][0].lat && allPolygons[0][0].lng) {
+          mapRef.panTo(new LatLng(allPolygons[0][0].lat, allPolygons[0][0].lng));
+          return;
+        }
+
+        let combinedBounds = latLngBounds([]);
+        allPolygons.forEach((poly) => {
+          let bounds = latLngBounds(
+            poly.map(
+              (p) =>
+                new LatLng(
+                  p.lat || definedCenterPoint.lat,
+                  p.lng || definedCenterPoint.lng
+                )
+            )
+          );
+          combinedBounds.extend(bounds);
         });
+
+        mapRef.fitBounds(combinedBounds);
+      } else if (focus === 'markers') {
+        const markersForBounds = currentMarkers?.filter((m) => m.lat && m.lng) || [];
+
+        if (markersForBounds.length == 0) {
+          if (depth < 2) {
+            centerAndZoomHandler('area', { bounceDepth: depth + 1 });
+          }
+          return;
+        }
+
+        mapRef.fitBounds( latLngBounds(markersForBounds as [{ "lat": number, "lng": number }]) );
       }
-
-      if (allPolygons.length == 0) {
-        mapRef.panTo(
-          new LatLng(definedCenterPoint.lat, definedCenterPoint.lng)
-        );
-        return;
-      }
-
-      if (allPolygons.length == 1 && allPolygons[0].length == 1 && allPolygons[0][0].lat && allPolygons[0][0].lng) {
-        mapRef.panTo(new LatLng(allPolygons[0][0].lat, allPolygons[0][0].lng));
-        return;
-      }
-
-      let combinedBounds = latLngBounds([]);
-      allPolygons.forEach((poly) => {
-        let bounds = latLngBounds(
-          poly.map(
-            (p) =>
-              new LatLng(
-                p.lat || definedCenterPoint.lat,
-                p.lng || definedCenterPoint.lng
-              )
-          )
-        );
-        combinedBounds.extend(bounds);
-      });
-
-      mapRef.fitBounds(combinedBounds);
     },
-    [center, mapRef]
+    [center, mapRef, currentMarkers]
   );
 
   // map is ready
@@ -354,46 +368,51 @@ const BaseMap = ({
     window.dispatchEvent(event);
   }, [mapId]);
 
-  // auto zoom and center on init
+  const centerAndZoomHandler = useCallback((overwriteAutoZoomAndCenter: string = '', opts: { bounceDepth?: number } = {}) => {
+    const depth = opts.bounceDepth ?? 0;
+    const autoZoomAndCenterSetting = overwriteAutoZoomAndCenter || autoZoomAndCenter;
+
+    if (autoZoomAndCenterSetting === 'area') {
+        if (area?.length) {
+          const updatedArea = Array.isArray(area[0]) ? area : [area];
+          setBoundsAndCenter(updatedArea as any, 'area', depth);
+          return;
+        }
+
+        if (!area?.length && visibleMapDataLayers?.length) {
+          const coords = visibleMapDataLayers.reduce((acc: Array<{ lat: number, lng: number }>, layer: MapDataLayer) => {
+            const features = layer?.layer?.features ?? [];
+            features.forEach((feature: MapDataLayerFeature) => {
+              if (feature?.geometry?.type === 'LineString' && Array.isArray(feature.geometry.coordinates)) {
+                (feature.geometry.coordinates as Array<[number, number]>).forEach((coord) => {
+                  acc.push({lat: coord[1], lng: coord[0]});
+                });
+              } else if (feature?.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)) {
+                const coord = feature.geometry.coordinates as [number, number];
+                acc.push({lat: coord[1], lng: coord[0]});
+              }
+            });
+            return acc;
+          }, []);
+
+          if (coords.length > 0) {
+            const bounds = latLngBounds(coords.map((c: any) => [c.lat, c.lng] as [number, number]));
+            mapRef.fitBounds(bounds);
+          }
+          return;
+        }
+      } else if (autoZoomAndCenterSetting === "markers" && currentMarkers?.length || isMapReady) {
+        setBoundsAndCenter([], 'markers', depth);
+      }
+    },
+    [autoZoomAndCenter, area, setBoundsAndCenter, mapRef, visibleMapDataLayers, currentMarkers]
+  )
+
   useEffect(() => {
     if (!mapRef || !autoZoomAndCenter) return;
+    if ( !zoomAfterInit && isMapReady ) return;
 
-    if (autoZoomAndCenter === 'area') {
-      if (area?.length) {
-        const updatedArea = Array.isArray(area[0]) ? area : [area];
-        setBoundsAndCenter(updatedArea as any);
-        return;
-      }
-
-      if (!area?.length && visibleMapDataLayers?.length) {
-        const coords = visibleMapDataLayers.reduce((acc: Array<{ lat: number, lng: number }>, layer: MapDataLayer) => {
-          const features = layer?.layer?.features ?? [];
-          features.forEach((feature: MapDataLayerFeature) => {
-            if (feature?.geometry?.type === 'LineString' && Array.isArray(feature.geometry.coordinates)) {
-              (feature.geometry.coordinates as Array<[number, number]>).forEach((coord) => {
-                acc.push({ lat: coord[1], lng: coord[0] });
-              });
-            } else if (feature?.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)) {
-              const coord = feature.geometry.coordinates as [number, number];
-              acc.push({ lat: coord[1], lng: coord[0] });
-            }
-          });
-          return acc;
-        }, []);
-
-        if (coords.length > 0) {
-          const bounds = latLngBounds(coords.map((c: any) => [c.lat, c.lng] as [number, number]));
-          mapRef.fitBounds(bounds);
-        }
-        return;
-      }
-    }
-
-    if (currentMarkers?.length) {
-      setBoundsAndCenter(currentMarkers as any);
-    } else if (center) {
-      setBoundsAndCenter([center] as any);
-    }
+    centerAndZoomHandler();
   }, [isMapReady, mapRef, area, center, autoZoomAndCenter, mapDataLayers, currentMarkers, setBoundsAndCenter]);
 
   // Quick fix for map not being ready on first render. This will set the center and zoom settings correctly.
@@ -589,12 +608,12 @@ const BaseMap = ({
 
   // ToDo: waarom kan ik die niet gewoon als props meesturen
   const tileLayerProps = {
+    ...props,
     tilesVariant,
-    customUrlSetting,
+    "customUrl": customUrlSetting,
     tiles,
     minZoom,
     maxZoom,
-    ...props,
   };
 
   useEffect(() => {

@@ -64,6 +64,12 @@ spec:
           {{- if .Values.image.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
+        {{- if .Values.image.customCommand }}
+        command: {{ toYaml .Values.image.customCommand | nindent 12 }}
+        {{- end }}
+        {{- if .Values.image.customWorkingDir }}
+        workingDir: {{ .Values.image.customWorkingDir }}
+        {{- end }}
         resources:
 {{ toYaml .Values.image.resources | indent 12 }}
         volumeMounts:

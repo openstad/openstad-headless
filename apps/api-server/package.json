@@ -112,6 +112,6 @@
     "sequelize-mock": "^0.10.2",
     "supertest": "^4.0.2"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Gemeente Amsterdam",
+  "license": "MIT"
 }
