@@ -27,6 +27,7 @@ import {YesNoSelect} from "@/lib/form-widget-helpers";
 import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
 import {NotificationForm} from "@/components/notification-form";
 import useNotificationTemplate from "@/hooks/use-notification-template";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
@@ -129,6 +130,9 @@ export default function ProjectSettingsAnonymization(
   const { data: notificationTemplates } = useNotificationTemplate(project as string);
   const template = notificationTemplates?.find((t: {type: string}) => t.type === 'user account about to expire');
 
+  const sendEmail = data?.emailConfig?.notifications?.fromAddress;
+  const isSendEmailNotSet = sendEmail === '' || sendEmail === 'email@not.set';
+
   return (
     <div>
       <PageLayout
@@ -198,6 +202,17 @@ export default function ProjectSettingsAnonymization(
                       />
                     )}
 
+                    {isSendEmailNotSet && (
+                      <Alert variant="error" className="mb-4">
+                        <AlertTitle>Let op!</AlertTitle>
+                        <AlertDescription>
+                          Het e-mailadres voor het versturen van notificaties is nog niet ingesteld.
+                          Stel deze eerst in bij de <a href={`/projects/${project}/settings/notifications`} className="underline">e-mail instellingen</a>.
+                          Zonder een juist ingesteld e-mailadres kunnen er geen waarschuwingsmails worden verstuurd en zullen gebruikers worden geanonimiseerd zonder waarschuwing.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     <FormField
                       control={form.control}
                       name="warnUsersAfterXDaysOfInactivity"
@@ -258,10 +273,10 @@ export default function ProjectSettingsAnonymization(
                   <NotificationForm
                     type="user account about to expire"
                     label="Gebruikersaccount staat op het punt te verlopen"
-                    engine={template.engine}
-                    id={template.id}
-                    subject={template.subject}
-                    body={template.body}
+                    engine={template?.engine}
+                    id={template?.id}
+                    subject={template?.subject}
+                    body={template?.body}
                   />
 
                 </Form>
