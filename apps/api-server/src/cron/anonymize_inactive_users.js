@@ -48,7 +48,6 @@ module.exports = {
                 if (user.email) {
                   const lastLoginDate = new Date(user.lastLogin);
 
-                  const anonymizeAfterXDays = warnUsersAfterXDaysOfInactivity;
                   const lastLoginTime = new Date(user.lastLogin).getTime();
                   const targetAnonymizeWarnTime = lastLoginTime + (warnUsersAfterXDaysOfInactivity * 24 * 60 * 60 * 1000);
 
@@ -58,7 +57,7 @@ module.exports = {
                   }
                   console.log('CRON anonymize-inactive-users: send warning email to user', user.email, user.lastLogin);
 
-                  const anonymizeDate = new Date(lastLogin.getTime() + anonymizeAfterXDays * 24 * 60 * 60 * 1000);
+                  const anonymizeDate = new Date(lastLoginTime + warnUsersAfterXDaysOfInactivity * 24 * 60 * 60 * 1000);
 
                   const dateInDDMMYYYY = (date) => {
                     const day = String(date.getDate()).padStart(2, '0');
