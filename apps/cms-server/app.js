@@ -365,7 +365,7 @@ app.use('/:sitePrefix', function (req, res, next) {
 
     const site = projects[domainAndPath] ? projects[domainAndPath] : false;
 
-    console.log ('Checking for site prefix:', domainAndPath, site ? 'FOUND' : 'not found');
+    console.log (req.ip, req.originalUrl, 'Checking for site prefix:', domainAndPath, site ? 'FOUND' : 'not found');
 
     if (site) {
       site.sitePrefix = req.params.sitePrefix;
@@ -390,7 +390,7 @@ app.use('/:sitePrefix', function (req, res, next) {
 // This fixes a bug where basicAuth would only apply to subdirectories
 app.use((req, res, next) => {
   
-  console.log ('No site prefix, checking for site:', req.openstadDomain, req.site, projects[req.openstadDomain] ? 'FOUND' : 'not found');
+  console.log (req.ip, req.originalUrl, 'No site prefix, checking for site:', req.openstadDomain, req.site, projects[req.openstadDomain] ? 'FOUND' : 'not found');
   if (!req.site) {
     if (projects[req.openstadDomain]) {
       req.site = projects[req.openstadDomain];
@@ -464,7 +464,7 @@ app.get('/auth/logout', (req, res, next) => {
 
 app.use(async function (req, res, next){
   const completeDomain = req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
-  console.log ('Incoming request for domain:', completeDomain, projects[completeDomain] ? 'FOUND' : 'not found');
+  console.log (req.ip, req.originalUrl, 'Incoming request for domain:', completeDomain, projects[completeDomain] ? 'FOUND' : 'not found');
     if (projects[completeDomain]) {
       return await serveSite(req, res, projects[completeDomain], req.forceRestart);
     }
