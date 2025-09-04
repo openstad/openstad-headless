@@ -59,14 +59,35 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [currentAnswers, setCurrentAnswers] = useState<{ [key: string]: string }>({});
+    const [hiddenFields, setHiddenFields ] = useState< string[] >([]);
 
     const sidebarRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions, choicesType);
+        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions, choicesType, hiddenFields);
         setWeights(initialWeights);
-    }, [items, choiceOption]);
+    }, [items, choiceOption, hiddenFields]);
+
+    const getChangedAnswers = (newAnswers: { [key: string]: string}, newHiddenFields: string[]) => {
+        if (
+          newHiddenFields.length !== hiddenFields.length ||
+          !newHiddenFields.every(field => hiddenFields.includes(field))
+        ) {
+            setHiddenFields(newHiddenFields);
+        }
+
+        let answersChanged = false;
+        Object.keys(newAnswers).forEach((key) => {
+            if (JSON.stringify(newAnswers[key]) !== JSON.stringify(currentAnswers[key])) {
+                answersChanged = true;
+            }
+        });
+
+        if (answersChanged) {
+            setCurrentAnswers(newAnswers);
+        }
+    }
 
     useEffect(() => {
         const updatedAnswers = { ...answers, ...currentAnswers };
@@ -89,7 +110,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
             ...formData
         }));
 
-        const finalAnswers = { ...completeAnswers, ...formData };
+        const finalAnswers = { ...completeAnswers, ...formData, hiddenFields };
 
         if (currentPage < totalPages - 1) {
             setCurrentPage((prevPage) => prevPage + 1);
@@ -154,7 +175,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     submitText={currentPage < totalPages - 1 ? (nextButtonText || "Volgende") : (submitButtonText || "Versturen")}
                     submitHandler={onSubmit}
                     secondaryLabel={""}
-                    getValuesOnChange={setCurrentAnswers}
+                    getValuesOnChange={(currentAnswers:{ [key: string]: string}, hiddenFields) => getChangedAnswers(currentAnswers, hiddenFields)}
                     allowResetAfterSubmit={false}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
@@ -172,6 +193,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                         weights={weights}
                         answers={answers}
                         widgetId={widgetId}
+                        hiddenFields={hiddenFields}
                       />
                   )}
               </div>

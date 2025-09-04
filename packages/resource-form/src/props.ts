@@ -68,6 +68,9 @@ export type Item = {
     defaultValue?: string,
     maxChoices?: string,
     maxChoicesMessage?: string,
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
 };
 
 export type Option = {

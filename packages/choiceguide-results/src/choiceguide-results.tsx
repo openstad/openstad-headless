@@ -26,10 +26,12 @@ function ChoiceGuideResults(props: ChoiceGuideResultsProps) {
 
     useEffect(() => {
         if (!items || items.length === 0 || !choiceOption) return;
+        const hiddenFields = answers?.hiddenFields as string[] || [];
 
-        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions, choiceGuide?.choicesType || 'default');
+        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions, choiceGuide?.choicesType || 'default', hiddenFields);
+
         setWeights(initialWeights);
-    }, [items, choiceOption]);
+    }, [items, choiceOption, answers]);
 
     useEffect(() => {
         if (!props.choiceguideWidgetId) return;
@@ -55,6 +57,7 @@ function ChoiceGuideResults(props: ChoiceGuideResultsProps) {
                         weights={weights}
                         answers={answers}
                         widgetId={widgetId}
+                        hiddenFields={answers?.hiddenFields || []}
                       />
                   </div>
               </div>

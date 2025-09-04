@@ -13,7 +13,8 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
       props.choiceOptions,
       props.answers,
       props.weights,
-      props.choicesType
+      props.choicesType,
+      props.hiddenFields
     );
     setScore(itemScore);
   }, [props.choiceOptions, props.answers, props.weights]);

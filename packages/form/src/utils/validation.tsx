@@ -1,5 +1,5 @@
 import { z } from "zod";
-import {CombinedFieldPropsWithType} from "./props";
+import {CombinedFieldPropsWithType} from "../props";
 
 export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     const fileSchema = z.object({

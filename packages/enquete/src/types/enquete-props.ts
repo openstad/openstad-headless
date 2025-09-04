@@ -43,6 +43,9 @@ export type Item = {
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
+  routingInitiallyHide?: boolean;
+  routingSelectedQuestion?: string;
+  routingSelectedAnswer?: string;
 
   // Keeping this for backwards compatibility
   image1?: string;
