@@ -26,10 +26,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {Checkbox} from "@/components/ui/checkbox";
-import {handleTagCheckboxGroupChange} from "@/lib/form-widget-helpers/TagGroupHelper";
 import React, {useEffect, useState} from "react";
 import useTags from "@/hooks/use-tags";
 import _ from "lodash";
+
 const formSchema = z.object({
   displayBanner: z.boolean(),
   displayMap: z.boolean(),
