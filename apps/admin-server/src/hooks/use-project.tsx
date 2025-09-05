@@ -118,7 +118,10 @@ export function useProject(scopes?: Array<string>) {
         },
       }
     );
-    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error('Could not anonymize users of the project');
+    }
   }
 
   return {

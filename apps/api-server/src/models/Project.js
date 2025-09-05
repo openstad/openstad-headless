@@ -283,9 +283,6 @@ module.exports = function (db, sequelize, DataTypes) {
       // do not anonymize admins
       result.admins = users.filter( user => userHasRole(user, 'admin') );
       result.users  = users.filter( user => !userHasRole(user, 'admin') );
-
-      // extract externalUserIds
-      result.externalUserIds = result.users.filter( user => user.idpUser && user.idpUser.identifier ).map( user => user.idpUser.identifier );
     } catch (err) {
       console.log(err);
       throw err;
@@ -294,7 +291,7 @@ module.exports = function (db, sequelize, DataTypes) {
     return result;
   }
 
-  Project.prototype.doAnonymizeAllUsers = async function (usersToAnonymize, externalUserIds, useAuth='default') {
+  Project.prototype.doAnonymizeAllUsers = async function (usersToAnonymize, useAuth='default') {
     // anonymize all users for this project
     let self = this;
     const amountOfUsersPerSecond = 50;
@@ -302,33 +299,25 @@ module.exports = function (db, sequelize, DataTypes) {
 
       // Anonymize users
       let providers = {};
+
       for (const user of usersToAnonymize) {
         await new Promise((resolve, reject) => {
           setTimeout(async function() {
-            providers[ user.idpUser?.identifier ] = user.idpUser?.provider
-            user.project = self;
-            let res = await user.doAnonymize();
-            user.project = null;
-          }, 1000 / amountOfUsersPerSecond)
+            try {
+              providers[user.idpUser?.identifier] = user.idpUser?.provider;
+              user.project = self;
+              await user.doAnonymize();
+              user.project = null;
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          }, 1000 / amountOfUsersPerSecond);
         })
         .then(result => Promise.resolve() )
           .catch(function (err) {
             throw err;
           });
-      }
-
-      for (let externalUserId of externalUserIds) {
-        let users = await db.User.findAll({ where: { idpUser: { identifier: externalUserId } } });
-        if (users.length == 0) {
-          // no api users left for this oauth user; let the oauth server know we dont need this user anymore
-          let authConfig = await authSettings.config({ project: self, useAuth: providers[ externalUserId ] })
-          let adapter = await authSettings.adapter({ authConfig });
-          if (adapter && adapter.service && adapter.service.deleteUser) {
-            // TODO: niet getest
-            await adapter.service.deleteUser({ authConfig, userData: { id: externalUserId }})
-          }
-
-        }
       }
     } catch (err) {
       console.log(err);

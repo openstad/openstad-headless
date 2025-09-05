@@ -554,33 +554,27 @@ module.exports = function (db, sequelize, DataTypes) {
     let result = await self.willAnonymize();
 
     try {
-
       // anonymize
-
-      let extraData = {};
       if (!self.project) throw Error('Project not found');
-      if (self.project.config.users && self.project.config.users.extraData) {
-        Object.keys(self.project.config.users.extraData).map( key => extraData[key] = null );
-      }
-      
+
       await self.update({
         idpUser: {},
         role: 'anonymous',
-        passwordHash: null,
+        extraData: {},
+        email: null,
+        nickName: null,
+        name: ( self?.project?.config?.anonymize?.anonymizeUserName ) || 'Gebruiker is geanonimiseerd',
+        firstname: null,
+        lastname: null,
         listableByRole: 'editor',
         detailsViewableByRole: 'editor',
-        viewableByRole: 'admin',
-        email: null,
-        nickName: null, 
-        name: ( config.users && config.users.anonymize && config.users.anonymize.name ) || 'Gebruiker is ganonimiseerd',
-        postcode: null,
-        city: null,
-        country: null,
-        address: null,
         phoneNumber: null,
-        extraData,
+        address: null,
+        city: null,
+        postcode: null,
         lastLogin: '1970-01-01T00:00:00.000Z',
         isNotifiedAboutAnonymization: null,
+        updatedAt: new Date(),
       })
 
       // remove existing votes
@@ -589,7 +583,6 @@ module.exports = function (db, sequelize, DataTypes) {
           await vote.destroy();
         };
       }
-      
     } catch (err) {
       console.log(err);
       throw err;
