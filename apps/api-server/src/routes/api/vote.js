@@ -149,9 +149,6 @@ router.route('/')
 				vote.user = entry.user;
 				vote.userId = entry.userId;
 
-				console.log( 'vote.user', vote.user );
-				console.log( 'entry.userId', entry.userId );
-
 				if (vote.user && vote.user.auth && typeof vote.user.auth === 'object') {
 					vote.user.auth.user = req.user;
 				}
