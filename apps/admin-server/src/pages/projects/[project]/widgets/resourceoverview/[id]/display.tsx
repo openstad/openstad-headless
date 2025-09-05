@@ -25,6 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {Checkbox} from "@/components/ui/checkbox";
+import {handleTagCheckboxGroupChange} from "@/lib/form-widget-helpers/TagGroupHelper";
+import React, {useEffect, useState} from "react";
+import useTags from "@/hooks/use-tags";
+import _ from "lodash";
 const formSchema = z.object({
   displayBanner: z.boolean(),
   displayMap: z.boolean(),
@@ -48,7 +53,6 @@ const formSchema = z.object({
   displayLikeButton: z.boolean(),
   clickableImage: z.boolean(),
   displayBudget: z.boolean(),
-  displayTags: z.boolean(),
   displayLocationFilter: z.boolean(),
   listTabTitle: z.string().optional(),
   mapTabTitle: z.string().optional(),
@@ -57,6 +61,10 @@ const formSchema = z.object({
   // displayShareButtons: z.boolean(),
   // displayEditLink: z.boolean(),
   // displayCaption: z.boolean(),
+  displayOverviewTagGroups: z.boolean().optional(),
+  displayTags: z.boolean().optional(),
+  overviewTagGroups: z.array(z.string()).optional(),
+  dialogTagGroups: z.array(z.string()).optional(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -99,6 +107,9 @@ export default function WidgetResourceOverviewDisplay(
       displayLocationFilter: props?.displayLocationFilter === true,
       listTabTitle: typeof (props?.listTabTitle) === 'undefined' ? 'Lijst' : props.listTabTitle,
       mapTabTitle: typeof (props?.mapTabTitle) === 'undefined' ? 'Kaart' : props.mapTabTitle,
+      displayOverviewTagGroups: props?.displayOverviewTagGroups || false,
+      overviewTagGroups: props?.overviewTagGroups  || [],
+      dialogTagGroups: props?.dialogTagGroups || [],
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -112,6 +123,32 @@ export default function WidgetResourceOverviewDisplay(
   const displayMap = watch('displayMap');
   const displayDocuments = watch('displayDocuments');
   const displayAsTabs = watch('displayAsTabs');
+  const displayOverviewTagGroups = watch('displayOverviewTagGroups');
+  const displayTags = watch('displayTags');
+
+  const { data: tags } = useTags(props.projectId);
+  const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
+
+  type Tag = {
+    type: string;
+  };
+
+  useEffect(() => {
+    if (Array.isArray(tags)) {
+      const fetchedTags = tags as Array<Tag>;
+      const groupNames = _.chain(fetchedTags).map('type').uniq().value();
+      setGroupedNames(groupNames);
+    }
+  }, [tags]);
+
+  // If props.dialogTagGroups is undefined, set it to all tag groups
+  useEffect(() => {
+    if (displayTags && typeof props.dialogTagGroups === 'undefined' ) {
+      const allTagGroups = tagGroupNames;
+      form.setValue('dialogTagGroups', allTagGroups);
+      props.onFieldChanged('dialogTagGroups', allTagGroups);
+    }
+  }, [displayTags, tagGroupNames]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -298,6 +335,73 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displayOverviewTagGroups"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tags tonen in de tegels in het overzicht
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          { displayOverviewTagGroups && (
+            <FormField
+              control={form.control}
+              name="overviewTagGroups"
+              render={() => (
+                <FormItem className="col-span-full">
+                  <div>
+                    <FormLabel>Selecteer van welke tag groepen de tags getoond moeten worden in de tegels
+                    </FormLabel>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
+                    {(tagGroupNames || []).map((groupName, index) => (
+                      <>
+                        <FormField
+                          key={`parent${groupName}`}
+                          control={form.control}
+                          name="overviewTagGroups"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={groupName}
+                                className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={(field.value ?? []).includes(groupName)}
+                                    onCheckedChange={(checked: boolean) => {
+                                      let updatedFields = field.value ?? [];
+                                      if (checked) {
+                                        updatedFields = [...updatedFields, groupName];
+                                      } else {
+                                        updatedFields = updatedFields.filter((name) => name !== groupName);
+                                      }
+                                      field.onChange(updatedFields);
+                                      props.onFieldChanged(field.name, updatedFields);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {groupName}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+
+                      </>
+                    ))}
+                  </div>
+                </FormItem>
+              )}
+            />
+          )}
 
 
           <Heading size="xl" className="col-span-full mt-6">Tegels</Heading>
@@ -571,20 +675,6 @@ export default function WidgetResourceOverviewDisplay(
 
           <FormField
             control={form.control}
-            name="displayTags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Tags in dialog weergeven
-                </FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="clickableImage"
             render={({ field }) => (
               <FormItem>
@@ -661,8 +751,75 @@ export default function WidgetResourceOverviewDisplay(
                 </FormItem>
               )}
             />
-          </>
-        )}
+            </>
+          )}
+
+            <FormField
+              control={form.control}
+              name="displayTags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Tags in dialog weergeven
+                  </FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+              { displayTags && (
+                <FormField
+                  control={form.control}
+                  name="dialogTagGroups"
+                  render={() => (
+                    <FormItem className="col-span-full">
+                      <div>
+                        <FormLabel>Selecteer van welke tag groepen de tags getoond moeten worden in de dialog
+                        </FormLabel>
+                      </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
+                        {(tagGroupNames || []).map((groupName, index) => (
+                          <>
+                            <FormField
+                              key={`parent${groupName}`}
+                              control={form.control}
+                              name="dialogTagGroups"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={groupName}
+                                    className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={(field.value ?? []).includes(groupName)}
+                                        onCheckedChange={(checked: boolean) => {
+                                          let updatedFields = field.value ?? [];
+                                          if (checked) {
+                                            updatedFields = [...updatedFields, groupName];
+                                          } else {
+                                            updatedFields = updatedFields.filter((name) => name !== groupName);
+                                          }
+                                          field.onChange(updatedFields);
+                                          props.onFieldChanged(field.name, updatedFields);
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {groupName}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+
+                          </>
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
