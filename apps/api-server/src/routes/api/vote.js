@@ -149,9 +149,9 @@ router.route('/')
 				vote.user = entry.user;
 				vote.userId = entry.userId;
 
-				if (vote.user.auth && typeof vote.user.auth === 'object' ) {
-					vote.user.auth.user = req.user
-				};
+				if (vote.user && vote.user.auth && typeof vote.user.auth === 'object') {
+					vote.user.auth.user = req.user;
+				}
 			}
 
 			if (entry.resource) {
