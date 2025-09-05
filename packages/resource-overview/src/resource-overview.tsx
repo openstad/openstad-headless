@@ -1,6 +1,6 @@
 import './resource-overview.css';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
+import {Carousel, Icon, Paginator, Pill} from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
@@ -125,6 +125,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     clickableImage?: boolean;
     displayBudget?: boolean;
     displayTags?: boolean;
+    displayOverviewTagGroups?: boolean;
+    overviewTagGroups?: string[];
+    dialogTagGroups?: string[];
     selectedProjects?: {
       id: string;
       name: string;
@@ -161,7 +164,7 @@ const defaultHeaderRenderer = (
   displayHeader?: boolean,
   displayMap?: boolean,
   selectedProjects?: any[],
-  location?: PostcodeAutoFillLocation
+  location?: PostcodeAutoFillLocation,
 ) => {
   return (
     <>
@@ -270,6 +273,13 @@ const defaultItemRenderer = (
 
   const isProjectCard = !resource?.id ? 'project-card' : '';
 
+  const overviewTagGroups = props.overviewTagGroups || [];
+  const displayOverviewTagGroups = props.displayOverviewTagGroups || [];
+
+  const resourceFilteredTags = (overviewTagGroups && Array.isArray(overviewTagGroups) && Array.isArray(resource?.tags))
+    ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
+    : resource?.tags || [];
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
@@ -311,6 +321,17 @@ const defaultItemRenderer = (
                  <a href={getUrl()} className="resource-card--link_trigger" dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.title, props.titleMaxLength || 20)}}/>
               </Heading4>
             ) : null}
+
+            {(displayOverviewTagGroups && resourceFilteredTags.length > 0) && (
+              <>
+                <Spacer size={.5} />
+                <div className="pill-grid">
+                  {(resourceFilteredTags as Array<{ type: string; name: string }>)
+                    ?.filter((t) => t.type !== 'status')
+                    ?.map((t) => <Pill text={t.name} />)}
+                </div>
+              </>
+            )}
 
             {props.displaySummary ? (
               <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20)}}/>
@@ -380,6 +401,17 @@ const defaultItemRenderer = (
               </Heading4>
             ) : null}
 
+            {(displayOverviewTagGroups && resourceFilteredTags.length > 0) && (
+              <>
+                <Spacer size={.5} />
+                <div className="pill-grid">
+                  {(resourceFilteredTags as Array<{ type: string; name: string }>)
+                    ?.filter((t) => t.type !== 'status')
+                    ?.map((t) => <Pill text={t.name} />)}
+                </div>
+              </>
+            )}
+
             {props.displaySummary ? (
               <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20)}}/>
             ) : null}
@@ -428,7 +460,6 @@ function ResourceOverviewInner({
   showActiveTags = false,
   displayLikeButton = false,
   clickableImage = false,
-  displayTags = true,
   displayBudget= true,
   documentsTitle = '',
   documentsDesc = '',
@@ -444,6 +475,10 @@ function ResourceOverviewInner({
   listTabTitle = 'Lijst',
   mapTabTitle = 'Kaart',
   filterBehavior = 'or',
+  displayTags = true,
+  displayOverviewTagGroups = false,
+  overviewTagGroups = [],
+  dialogTagGroups = undefined,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -810,7 +845,7 @@ function ResourceOverviewInner({
           ?.map((resource: any, index: number) => {
             return (
               <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
-                {renderItem(resource, { ...props, displayType, selectedProjects }, () => {
+                {renderItem(resource, { ...props, displayType, selectedProjects, displayOverviewTagGroups, overviewTagGroups }, () => {
                   onResourceClick(resource, index);
                 })}
               </React.Fragment>
@@ -838,6 +873,7 @@ function ResourceOverviewInner({
                 documentsTitle={documentsTitle}
                 documentsDesc={documentsDesc}
                 displayTags={displayTags}
+                dialogTagGroups={dialogTagGroups}
                 displayBudget={displayBudget}
                 displayLikeButton={displayLikeButton}
                 clickableImage={clickableImage}
