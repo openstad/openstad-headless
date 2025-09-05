@@ -141,7 +141,6 @@ export default function WidgetResourceOverviewDisplay(
     }
   }, [tags]);
 
-  // If props.dialogTagGroups is undefined, set it to all tag groups
   useEffect(() => {
     if (displayTags && typeof props.dialogTagGroups === 'undefined' ) {
       const allTagGroups = tagGroupNames;
