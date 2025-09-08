@@ -86,7 +86,7 @@ jobs:
     steps:
       - name: Get chart version
         id: chart_version
-        run: echo "version=$(yq '.version' charts/openstad-headless/Chart.yaml)" >> $GITHUB_OUTPUT
+        run: echo "version=$(yq '.version' ./charts/openstad-headless/Chart.yaml)" >> $GITHUB_OUTPUT
 
       - name: Checkout
         uses: actions/checkout@v4
