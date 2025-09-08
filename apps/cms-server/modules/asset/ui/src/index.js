@@ -96,34 +96,42 @@ function adjustMenu() {
     isMobile = false;
   }
 
-  closeButton.setAttribute('aria-controls', 'main-menu');
-  closeButton.setAttribute('aria-expanded', 'false');
-  mainMenuContainer.setAttribute('aria-hidden', 'true');
+  if (isMobile) {
+    closeButton.setAttribute('aria-controls', 'main-menu');
+    closeButton.setAttribute('aria-expanded', 'false');
+    mainMenuContainer.setAttribute('aria-hidden', 'true');
 
-  closeButton.replaceWith(closeButton.cloneNode(true));
-  const newCloseButton = document.querySelector('.close-button');
+    closeButton.replaceWith(closeButton.cloneNode(true));
+    const newCloseButton = document.querySelector('.close-button');
 
-  newCloseButton.addEventListener('click', () => {
-    const isExpanded = newCloseButton.getAttribute('aria-expanded') === 'true';
-    newCloseButton.setAttribute('aria-expanded', !isExpanded);
-    mainMenuContainer.setAttribute('aria-hidden', isExpanded);
+    newCloseButton.addEventListener('click', () => {
+      const isExpanded = newCloseButton.getAttribute('aria-expanded') === 'true';
+      newCloseButton.setAttribute('aria-expanded', !isExpanded);
+      mainMenuContainer.setAttribute('aria-hidden', isExpanded);
 
-    navContainer.classList.toggle('--show');
-    closeButtonSpan.textContent = isExpanded ? 'Menu tonen' : 'Menu verbergen';
+      navContainer.classList.toggle('--show');
+      closeButtonSpan.textContent = isExpanded ? 'Menu tonen' : 'Menu verbergen';
 
-    if (!isExpanded) {
-      trapFocus(navContainer);
-    }
-  });
+      if (!isExpanded) {
+        trapFocus(navContainer);
+      }
+    });
 
-  navbar.addEventListener('focusout', (event) => {
-    if (
-      !navbar.contains(event.relatedTarget) &&
-      !header.contains(event.relatedTarget)
-    ) {
-      closeMenu();
-    }
-  });
+    navbar.addEventListener('focusout', (event) => {
+      if (
+          !navbar.contains(event.relatedTarget) &&
+          !header.contains(event.relatedTarget)
+      ) {
+        closeMenu();
+      }
+    });
+  } else {
+    closeButton.removeAttribute('aria-controls');
+    closeButton.removeAttribute('aria-expanded');
+    mainMenuContainer.removeAttribute('aria-hidden');
+    navContainer.classList.remove('--show');
+    closeButton.replaceWith(closeButton.cloneNode(true));
+  }
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
