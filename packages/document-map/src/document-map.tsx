@@ -905,6 +905,7 @@ function DocumentMap({
 
                               {group && group.multiple ? (
                                 <MultiSelect
+                                  id={group.type}
                                   label={'Selecteer een optie'}
                                   onItemSelected={(optionValue: string) => {
                                     const value = parseInt(optionValue, 10);
