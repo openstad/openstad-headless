@@ -6,7 +6,6 @@ LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
 
 ARG VERSION
 LABEL version=$VERSION
-ENV VERSION=$VERSION
 
 # Create app directory
 WORKDIR /opt/openstad-headless
@@ -77,8 +76,11 @@ FROM node:24-slim AS release
 ARG APP
 ARG PORT
 ARG NODE_ENV
+
+ARG VERSIO
 ENV WORKSPACE=apps/${APP}
 ENV NODE_ENV=${NODE_ENV:-production}
+ENV VERSION=$VERSION
 
 WORKDIR /opt/openstad-headless
 
@@ -101,6 +103,11 @@ CMD ["npm", "run", "start", "-w", "${WORKSPACE}"]
 
 # Release image with additional packages if needed
 FROM release AS release-with-packages
+
+ARG VERSION
+ENV VERSION=$VERSION
+ENV WORKSPACE=apps/${APP}
+ENV NODE_ENV=${NODE_ENV:-production}
 
 WORKDIR /opt/openstad-headless
 
