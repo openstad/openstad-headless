@@ -1,17 +1,14 @@
-require('dotenv').config({ path: '../../.env' })
+:require('dotenv').config({ path: '../../.env' })
 require('dotenv').config({ path: '.env' })
 
 const db = require('../db');
 
 const { Umzug, SequelizeStorage } = require('umzug');
 
-const forbiddenCharacters = [':'];
+const { AUTH_ADMIN_CLIENT_ID: authId, AUTH_ADMIN_CLIENT_SECRET: authSecret } = process.env;
 
-const containsForbiddenChar = str =>
-  forbiddenCharacters.some(char => str.includes(char));
-
-if (containsForbiddenChar(process.env.AUTH_ADMIN_CLIENT_ID) || containsForbiddenChar(process.env.AUTH_ADMIN_CLIENT_SECRET)) {
-  throw new Error("Your auth client id/secret contains a forbidden character");
+if (authId.includes(':') || authSecret.includes(':')) {
+  throw new Error("Auth client id/secret must not contain ':'");
 }
 
 (async () => {
