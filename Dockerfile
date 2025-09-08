@@ -6,6 +6,7 @@ LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
 
 ARG VERSION
 LABEL version=$VERSION
+ENV VERSION=$VERSION
 
 # Create app directory
 WORKDIR /opt/openstad-headless
