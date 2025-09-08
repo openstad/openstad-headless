@@ -47,6 +47,16 @@ jobs:
           BUILD_ID=${GITHUB_SHA}-$(date +%s)
           echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
 
+      - name: Get current dir
+        run: pwd | rev
+
+      - name: Get current dir contents
+        run: ls | rev
+
+      - name: Get chart version
+        id: chart_version
+        run: echo "version=$(yq '.version' ./charts/openstad-headless/Chart.yaml)" >> $GITHUB_OUTPUT
+
   component-test:
     name: Run Component tests
     runs-on: ubuntu-latest
