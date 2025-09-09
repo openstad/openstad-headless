@@ -272,7 +272,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
               transform = `translate(${dragState.deltaX}px, ${dragState.deltaY * 0.5}px) rotate(${rotation}deg)`;
             } else if (isTop && swipeDirection && isAnimating) {
               const direction = swipeDirection === 'right' ? 1 : -1;
-              transform = `translateX(${direction * 150}px) rotate(${direction * 30}deg)`;
+              transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
             }
             return (
               <div
@@ -336,7 +336,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             tabIndex={0}
           >
             <i className="ri-thumb-up-fill"></i>
-            <span>eens</span>
+            <span>Eens</span>
           </button>
         </div>
   )

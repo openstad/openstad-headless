@@ -88,12 +88,12 @@
 }
 
 .swipe-widget .swipe-card:nth-child(2) {
-  transform: scale(0.95) translateY(30px);
+  transform: scale(0.95) translateY(35px);
   z-index: 2;
 }
 
 .swipe-widget .swipe-card:nth-child(3) {
-  transform: scale(0.9) translateY(60px);
+  transform: scale(0.9) translateY(75px);
   z-index: 1;
 }
 
@@ -218,6 +218,7 @@
   justify-content: center;
   gap: 30px;
   padding: 0px 20px 20px 20px;
+  margin-top: 20px;
 }
 
 .swipe-widget .swipe-info-btn {
