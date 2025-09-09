@@ -54,6 +54,11 @@ module.exports = {
               label: 'Link url',
               type: 'url'
             },
+            linkScreenReaderText: {
+              label: 'Link screenreader tekst',
+              help: 'Standaard is de screenreader tekst hetzelfde als de link tekst. Door dit veld te vullen overschrijf je de standaard screenreader tekst',
+              type: 'string'
+            },
             target: {
               label: 'Open link in nieuw venster',
               type: 'boolean',
