@@ -122,7 +122,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         removeCurrentCard();
         setSwipeDirection(null);
         setIsAnimating(false);
-      }, 300);
+      }, 200);
     }
   };
 
@@ -137,7 +137,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         removeCurrentCard();
         setSwipeDirection(null);
         setIsAnimating(false);
-      }, 300);
+      }, 200);
     }
   };
 
@@ -298,13 +298,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 {isTop && swipeDirection && (
                   <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
                     {swipeDirection === 'left' ? (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" role="img" aria-label="Afwijzen icoon" focusable="false">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
+                      <i className="ri-thumb-down-fill"></i>
+
                     ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" role="img" aria-label="Goedkeuren icoon" focusable="false">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
+                      <i className="ri-thumb-up-fill"></i>
                     )}
                   </div>
                 )}
@@ -322,9 +319,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             aria-label="Afwijzen"
             tabIndex={0}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="Afwijzen icoon" focusable="false">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
+            <i className="ri-thumb-down-fill"></i>
+            <span>Oneens</span>
+          </button>
+          <button
+            className="swipe-info-btn"
+            onClick={(e) => { console.log(e); e.preventDefault(); }}
+          >
+            <span>Info</span>
           </button>
           <button
             className="swipe-btn swipe-btn-like"
@@ -333,13 +335,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             aria-label="Goedkeuren"
             tabIndex={0}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="Goedkeuren icoon" focusable="false">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
+            <i className="ri-thumb-up-fill"></i>
+            <span>eens</span>
           </button>
         </div>
-      )}
-    </div>
+  )
+}
+    </div >
   );
 }
 export { SwipeField };

@@ -1,12 +1,11 @@
 .swipe-widget {
-  --swipe-active-background: var(--setSwipeActiveBackground,var(--utrecht-button-primary-action-background-color, #238641));
-  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground,var(--utrecht-button-primary-action-background-color, #238641));
+  --swipe-active-background: var(--setSwipeActiveBackground, #238641);
+  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, #238641);
   --swipe-progress-bar-color: var(--setSwipeProgressBarColor, var(--utrecht-button-disabled-color, #d5e7d4));
-  
-  --swipe-like-color: var(--setSwipeLikeColor, #ff4458);
-  --swipe-dislike-color: var(--setSwipeDislikeColor, #42c767);
-
-
+  --swipe-like-color: var(--setSwipeLikeColor, #248641);
+  --swipe-dislike-color: var(--setSwipeDislikeColor, #CF1C08);
+  --swipe-like-fill: var(--setSwipeLikeFill, white);
+  --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
   max-width: 500px;
   max-height: 850px;
   width: 100%;
@@ -21,20 +20,20 @@
   grid-gap: 20px 0;
 }
 
-.swipe-counter {
+.swipe-widget .swipe-counter {
   text-align: center;
   font-size: 14px;
   color: #666;
   font-weight: 500;
 }
 
-.swipe-container {
+.swipe-widget .swipe-container {
   position: relative;
   perspective: 1000px;
   width: 100%;
 }
 
-.swipe-stack {
+.swipe-widget .swipe-stack {
   position: relative;
   width: 100%;
   height: 100%;
@@ -43,64 +42,135 @@
   align-items: center;
 }
 
-.swipe-card {
+.swipe-widget .swipe-card {
   position: absolute;
   width: 100%;
   height: calc(100% - 25px);
   align-self: start;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0px 5.49px 6.27px 0px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   cursor: grab;
   user-select: none;
   transform-origin: center;
+  animation: cardAppear 0.4s ease-out;
+  transition: transform 0.3s cubic-bezier(0.33, 0.05, 0.58, 0.98), opacity 0.3s cubic-bezier(0.33, 0.05, 0.58, 0.98), box-shadow 0.3s cubic-bezier(0.33, 0.05, 0.58, 0.98);
+  border: solid 1px #BFBFBF;
 }
 
-.swipe-card:not(.swipe-card--top) .swipe-card-content {
+.swipe-widget .swipe-card:not(.swipe-card--top) .swipe-card-image img {
   opacity: 0;
 }
 
-.swipe-card--top {
+.swipe-widget .swipe-card:not(.swipe-card--top) .swipe-card-content {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+.swipe-widget .swipe-card--animating {
+  transition: transform 0.2s cubic-bezier(0.33, 0.05, 0.58, 0.98), opacity 0.2s cubic-bezier(0.33, 0.05, 0.58, 0.98) !important;
+}
+
+.swipe-widget .swipe-card--top {
   cursor: grab;
   touch-action: none;
 }
 
-.swipe-card--top:active {
+.swipe-widget .swipe-card--top:active {
   cursor: grabbing;
 }
 
-/* Card stacking effect */
-.swipe-card:nth-child(1) {
+.swipe-widget .swipe-card:nth-child(1) {
   transform: scale(1) translateY(0px);
   z-index: 3;
 }
 
-.swipe-card:nth-child(2) {
+.swipe-widget .swipe-card:nth-child(2) {
   transform: scale(0.95) translateY(30px);
   z-index: 2;
-  /* opacity: 0.8; */
 }
 
-.swipe-card:nth-child(3) {
+.swipe-widget .swipe-card:nth-child(3) {
   transform: scale(0.9) translateY(60px);
   z-index: 1;
-  /* opacity: 0.6; */
 }
 
-/* Swipe animations */
-.swipe-card--animating {
-  transition:
-    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-    opacity 0.3s ease !important;
+.swipe-widget .swipe-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* Remove old Swiper-specific styles */
+.swipe-widget .swipe-card .swipe-card-image {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  border-radius: 10px;
+}
 
-/* Swipe indicators */
-.swipe-indicator {
+.swipe-widget .swipe-card .swipe-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.2s ease-in-out;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.swipe-widget .swipe-card:hover .swipe-card-image img {
+  transform: scale(1.02);
+}
+
+.swipe-widget .swipe-card .swipe-card-content {
+  padding: 20px;
+  background: var(--swipe-active-background);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  color: white;
+  text-align: center;
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.3s cubic-bezier(0.33, 0.05, 0.58, 0.98);
+  border-radius: 0 0 10px 10px;
+}
+
+.swipe-widget .swipe-card .swipe-card-header {
+  margin-bottom: 8px;
+}
+
+.swipe-widget .swipe-card .swipe-card-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.swipe-widget .swipe-card .swipe-card-age {
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.swipe-widget .swipe-card .swipe-card-location {
+  font-size: 14px;
+  margin: 4px 0 0 0;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.swipe-widget .swipe-card .swipe-card-description {
+  font-size: 16px;
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.swipe-widget .swipe-indicator {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -115,116 +185,62 @@
   font-weight: bold;
   z-index: 10;
   pointer-events: none;
-  animation: pulseIndicator 0.3s ease-in-out;
 }
 
-.swipe-indicator--left {
-  background: var(--swipe-like-color);
-  color: white;
-  opacity: 0.8;
-}
-
-.swipe-indicator--right {
+.swipe-widget .swipe-indicator--left {
   background: var(--swipe-dislike-color);
   color: white;
   opacity: 0.8;
 }
 
-.swipe-indicator svg {
+.swipe-widget .swipe-indicator--left svg {
+  transform: rotate(180deg);
+  fill: var(--swipe-dislike-fill);
+}
+
+.swipe-widget .swipe-indicator--right {
+  background: var(--swipe-like-color);
+  color: white;
+  opacity: 0.8;
+}
+
+.swipe-widget .swipe-indicator--right svg {
+  fill: var(--swipe-like-fill);
+}
+
+.swipe-widget .swipe-indicator svg {
   width: 32px;
   height: 32px;
 }
 
-@keyframes pulseIndicator {
-  0% {
-    transform: translate(-50%, -50%) scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-}
-
-.swipe-card-image {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-
-.swipe-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-  pointer-events: none;
-}
-
-.swipe-card:hover .swipe-card-image img {
-  transform: scale(1.02);
-}
-
-.swipe-card-content {
-  padding: 20px;
-  background: var(--swipe-active-background);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  color: white;
-  text-align: center;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.swipe-card-header {
-  margin-bottom: 8px;
-}
-
-.swipe-card-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.swipe-card-age {
-  font-weight: 400;
-  opacity: 0.9;
-}
-
-.swipe-card-location {
-  font-size: 14px;
-  margin: 4px 0 0 0;
-  opacity: 0.8;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.swipe-card-description {
-  font-size: 16px;
-  margin: 0;
-  opacity: 0.9;
-  line-height: 1.4;
-}
-
-.swipe-actions {
+.swipe-widget .swipe-actions {
   display: flex;
   justify-content: center;
   gap: 30px;
   padding: 0px 20px 20px 20px;
 }
 
-.swipe-btn {
+.swipe-widget .swipe-info-btn {
+  border-radius: 50%;
+  border: solid 1px #BFBFBF;
+  box-shadow: 0px 2.35px 6.27px 0px rgba(0, 0, 0, 0.149);
+  font-size: 1rem;
+  background: #fff;
   width: 50px;
   height: 50px;
+  margin-top: 4px;
+  transition: all 0.2s ease;
+}
+
+.swipe-widget .swipe-info-btn:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.swipe-widget .swipe-btn {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -232,66 +248,69 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   position: relative;
-  overflow: hidden;
-  background: white;
-  border: 2px solid #e1e5e9;
+  overflow: visible;
 }
 
-.swipe-btn:disabled {
+.swipe-widget .swipe-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
 }
 
-.swipe-btn:not(:disabled):hover {
+.swipe-widget .swipe-btn:not(:disabled):hover {
   transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
-.swipe-btn:not(:disabled):active {
+.swipe-widget .swipe-btn:not(:disabled):active {
   transform: scale(0.95);
 }
 
-.swipe-btn svg {
-  width: 20px;
-  height: 20px;
+.swipe-widget .swipe-btn i {
+  font-size: 1.3rem;
   transition: transform 0.2s ease;
 }
 
-.swipe-btn-pass {
-  border-color: var(--swipe-like-color);
-  color: var(--swipe-like-color);
+.swipe-widget .swipe-btn span {
+  display: block;
+  position: absolute;
+  bottom: -30px;
 }
 
-.swipe-btn-pass:hover {
+.swipe-widget .swipe-btn-like {
   background: var(--swipe-like-color);
-  color: white;
+}
+
+.swipe-widget .swipe-btn-like:hover {
   transform: scale(1.1);
 }
 
-.swipe-btn-pass:hover svg {
-  transform: rotate(90deg);
-}
-
-.swipe-btn-like {
-  border-color: var(--swipe-dislike-color);
-  color: var(--swipe-dislike-color);
-}
-
-.swipe-btn-like:hover {
-  background: var(--swipe-dislike-color);
-  color: white;
-  transform: scale(1.1);
-}
-
-.swipe-btn-like:hover svg {
+.swipe-widget .swipe-btn-like:hover i {
   transform: scale(1.2);
 }
 
-/* Finished State */
-.swipe-finished {
+.swipe-widget .swipe-btn-like i {
+  color: var(--swipe-like-fill);
+}
+
+.swipe-widget .swipe-btn-pass {
+  background: var(--swipe-dislike-color);
+}
+
+.swipe-widget .swipe-btn-pass:hover {
+  transform: scale(1.1);
+}
+
+.swipe-widget .swipe-btn-pass:hover i {
+  transform: scale(1.2);
+}
+
+.swipe-widget .swipe-btn-pass i {
+  color: var(--swipe-dislike-fill);
+}
+
+.swipe-widget .swipe-finished {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -303,21 +322,21 @@
   min-height: 750px;
 }
 
-.swipe-finished-content h2 {
+.swipe-widget .swipe-finished .swipe-finished-content h2 {
   font-size: 28px;
   margin: 0 0 16px 0;
   font-weight: 700;
   text-align: center;
 }
 
-.swipe-finished-content p {
+.swipe-widget .swipe-finished .swipe-finished-content p {
   font-size: 16px;
   margin: 0 0 24px 0;
   opacity: 0.9;
   text-align: center;
 }
 
-.swipe-reset-btn {
+.swipe-widget .swipe-reset-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
@@ -330,39 +349,13 @@
   backdrop-filter: blur(10px);
 }
 
-.swipe-reset-btn:hover {
+.swipe-widget .swipe-reset-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
 }
 
-/* Remove old Swiper styles and enhance card animations */
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: scale(0.8) translateY(50px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Smooth transitions for stacked cards - combined with animation */
-.swipe-card {
-  animation: cardAppear 0.4s ease-out;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.swipe-card:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-}
-
-/* Progress bar styles */
-.swipe-progress {
+.swipe-widget .swipe-progress {
   width: 100%;
   height: 5px;
   border-radius: 4px;
@@ -370,7 +363,8 @@
   overflow: hidden;
   margin-bottom: 5px;
 }
-.swipe-progress progress {
+
+.swipe-widget .swipe-progress progress {
   width: 100%;
   height: 100%;
   appearance: none;
@@ -378,23 +372,31 @@
   inset: 0;
 }
 
-/* For Webkit browsers */
-.swipe-progress progress::-webkit-progress-bar {
+.swipe-widget .swipe-progress progress::-webkit-progress-bar {
   background-color: var(--swipe-progress-bar-color);
 }
 
-/* For Firefox */
-.swipe-progress progress::-moz-progress-bar {
+.swipe-widget .swipe-progress progress::-moz-progress-bar {
   background-color: var(--swipe-progress-bar-color);
   transition: width 0.5s;
 }
 
-/* For IE/Edge */
-.swipe-progress progress::-ms-fill {
+.swipe-widget .swipe-progress progress::-ms-fill {
   background-color: var(--swipe-progress-bar-color);
   transition: width 0.5s;
 }
 
-.swipe-progress progress::-webkit-progress-value {
+.swipe-widget .swipe-progress progress::-webkit-progress-value {
   background: var(--swipe-progress-bar-background);
+}
+
+@keyframes cardAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
