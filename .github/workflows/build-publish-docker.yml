@@ -51,7 +51,8 @@ jobs:
     name: Run Component tests
     runs-on: ubuntu-latest
     needs: generate-ci-build-id
-
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -186,7 +187,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [generate-ci-build-id, build-and-push-docker-image]
     #if: github.event_name == 'pull_request' && github.base_ref == 'main'
-
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
