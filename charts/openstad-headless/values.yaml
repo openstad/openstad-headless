@@ -379,6 +379,7 @@ image:
     ccRequests: 100
 
   hqOriginalMaxPixels: 160000
+  disableWebpConversion: false
 
   # Inject extra environment variables
   extraEnvVars: []

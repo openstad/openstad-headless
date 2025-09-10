@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { FormValue } from "@openstad-headless/form/src/form";
 export type CheckboxFieldProps = {
     title: string;
     description?: string;
@@ -15,7 +16,7 @@ export type CheckboxFieldProps = {
     type?: string;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | [];
+        value: FormValue;
     }) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -25,6 +26,13 @@ export type CheckboxFieldProps = {
     maxChoicesMessage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const CheckboxField: FC<CheckboxFieldProps>;
 export default CheckboxField;

@@ -22,6 +22,8 @@ const imageMulterConfig = {
   }
 }
 
+const disableWebpSupport = process.env.DISABLE_WEBP_CONVERSION === 'true';
+
 const imageSteamConfig = {
   "storage": {
     "defaults": {
@@ -51,6 +53,7 @@ const imageSteamConfig = {
         enabled: 'false',
       },
     },
+    supportWebP: !disableWebpSupport,
     hqOriginalMaxPixels: process.env.HQ_ORIGINAL_MAX_PIXELS || 160000,  // default value of image-steam is 400 * 400 = 160000 px
   },
 };

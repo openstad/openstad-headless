@@ -45,6 +45,8 @@ spec:
             value: "{{ .Values.image.throttle.ccRequests | default 100 }}"
           - name: HQ_ORIGINAL_MAX_PIXELS
             value: "{{ .Values.image.hqOriginalMaxPixels | default 160000 }}"
+          - name: DISABLE_WEBP_CONVERSION
+            value: "{{ .Values.image.disableWebpConversion | default false }}"
           - name: IMAGE_VERIFICATION_TOKEN
             valueFrom:
               secretKeyRef:
@@ -64,6 +66,12 @@ spec:
           {{- if .Values.image.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
+        {{- if .Values.image.customCommand }}
+        command: {{ toYaml .Values.image.customCommand | nindent 12 }}
+        {{- end }}
+        {{- if .Values.image.customWorkingDir }}
+        workingDir: {{ .Values.image.customWorkingDir }}
+        {{- end }}
         resources:
 {{ toYaml .Values.image.resources | indent 12 }}
         volumeMounts:

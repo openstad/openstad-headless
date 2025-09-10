@@ -2,11 +2,12 @@ import {FormLabel, FormFieldDescription, Paragraph, AccordionProvider} from '@ut
 import React, { FC, useState } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
+import { FormValue } from '@openstad-headless/form/src/form';
 
 export type TickmarkSliderProps = {
     index: number;
     title: string;
-    fieldOptions: { value: string; label: string }[];
+    fieldOptions?: { value: string; label: string }[];
     fieldRequired: boolean;
     fieldKey: string;
     imageSrc?: string;
@@ -14,7 +15,7 @@ export type TickmarkSliderProps = {
     imageDescription?: string;
     description?: string;
     disabled?: boolean;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }) => void;
     type?: string;
     showSmileys?: boolean;
     showMoreInfo?: boolean;
@@ -23,6 +24,9 @@ export type TickmarkSliderProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({

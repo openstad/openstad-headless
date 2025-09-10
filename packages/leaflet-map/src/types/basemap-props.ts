@@ -20,6 +20,7 @@ export type BaseMapProps = {
   onMarkerClick?: (e: LeafletMouseEvent, map: any) => void,
   zoomposition?: string,
 	disableDefaultUI?: boolean,
+  zoomAfterInit?: boolean,
   clustering?: MarkerClusterGroupProps,
   categorize?: CategorizeType,
   minZoom?: number,

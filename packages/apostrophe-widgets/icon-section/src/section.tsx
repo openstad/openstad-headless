@@ -19,31 +19,45 @@ const renderCards = (items) => {
       <div className="icon-section-grid">
         <div className="container u-small-dropdowns">
 
-          {items.map((item: any, index: number) => (
-            <article className="icon-section-card" key={index}>
-              {item.image &&
-                <Image
-                  alt={item.imageAlt}
-                  height={item.image.height}
-                  width={item.image.width}
-                  src={item.image._urls.full}
-                />
-              }
-              <div className="icon-section-content">
-                {item.title &&
-                  <Heading3>{item.title}</Heading3>
-                }
-                {item.description && 
-                  <Paragraph>{item.description}</Paragraph>
-                }
-                {item.href && (
-                  <div>
-                    <Link href={item.href} target={( typeof(item.target) !== "undefined" && item.target === false) ? '_self' : '_blank'}>{item.linkText}</Link>
+          {items.map((item: any, index: number) => {
+            const linkProps = item.href ? {
+              href: item.href,
+              target: (typeof (item.target) !== "undefined" && item.target === false) ? '_self' : '_blank'
+            } : {};
+
+            if (item.linkScreenReaderText) {
+              linkProps['aria-label'] = item.linkScreenReaderText;
+            }
+
+            return (
+                <article className="icon-section-card" key={index}>
+                  {item.image &&
+                      <Image
+                          alt={item.imageAlt}
+                          height={item.image.height}
+                          width={item.image.width}
+                          src={item.image._urls.full}
+                      />
+                  }
+                  <div className="icon-section-content">
+                    {item.title &&
+                        <Heading3>{item.title}</Heading3>
+                    }
+                    {item.description &&
+                        <Paragraph>{item.description}</Paragraph>
+                    }
+                    {item.href && (
+                      <div>
+                        <Link {...linkProps }>
+                          {item.linkText}
+                        </Link>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </article>
-          ))}
+                </article>
+              )
+            }
+          )}
           
         </div>
       </div>

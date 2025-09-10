@@ -29,8 +29,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
-import {YesNoSelect} from "@/lib/form-widget-helpers";
-import {ProjectSettingProps} from "@openstad-headless/types";
+import { YesNoSelect } from "@/lib/form-widget-helpers";
+import { ProjectSettingProps } from "@openstad-headless/types";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -41,6 +41,8 @@ const formSchema = z.object({
   fieldKey: z.string(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
+  nextPageText: z.string().optional(),
+  prevPageText: z.string().optional(),
   variant: z.string().optional(),
   options: z
     .array(
@@ -108,7 +110,7 @@ export default function WidgetEnqueteItems(
     if (selectedItem) {
       setItems((currentItems) =>
         currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? {...item, ...values} : item
+          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
         )
       );
       setItem(null);
@@ -127,6 +129,8 @@ export default function WidgetEnqueteItems(
           fieldKey: values.fieldKey,
           minCharacters: values.minCharacters,
           maxCharacters: values.maxCharacters,
+          nextPageText: values.nextPageText || '',
+          prevPageText: values.prevPageText || '',
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
@@ -173,9 +177,9 @@ export default function WidgetEnqueteItems(
             };
           }
 
-          return typeof(option?.trigger) !== "undefined" ? option : false;
+          return typeof (option?.trigger) !== "undefined" ? option : false;
         })
-        .filter((option) => option !== false);
+          .filter((option) => option !== false);
 
         return updatedOptions;
       });
@@ -204,6 +208,8 @@ export default function WidgetEnqueteItems(
     fieldKey: '',
     minCharacters: '',
     maxCharacters: '',
+    nextPageText: 'Volgende',
+    prevPageText: 'Vorige',
     variant: 'text input',
     options: [],
     multiple: false,
@@ -256,6 +262,8 @@ export default function WidgetEnqueteItems(
         questionType: selectedItem.questionType || '',
         minCharacters: selectedItem.minCharacters || '',
         maxCharacters: selectedItem.maxCharacters || '',
+        nextPageText: selectedItem.nextPageText || '',
+        prevPageText: selectedItem.prevPageText || '',
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
@@ -490,17 +498,16 @@ export default function WidgetEnqueteItems(
                       (() => {
                         const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
                         const activeOption = currentOption !== -1 ? currentOption : options.length;
-
                         return form.watch("questionType") !== "images" ? (
                           <>
                             <FormField
                               control={form.control}
                               name={`options.${activeOption}.titles.0.key`}
-                              render={({field}) => (
+                              render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Optie tekst</FormLabel>
                                   <Input {...field} />
-                                  <FormMessage/>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -509,7 +516,7 @@ export default function WidgetEnqueteItems(
                               control={form.control}
                               // @ts-ignore
                               name={`options.${activeOption}.titles.0.isOtherOption`}
-                              render={({field}) => (
+                              render={({ field }) => (
                                 <>
                                   <FormItem
                                     style={{
@@ -521,8 +528,8 @@ export default function WidgetEnqueteItems(
                                     }}>
                                     {YesNoSelect(field, props)}
                                     <FormLabel
-                                      style={{marginTop: 0, marginLeft: '6px'}}>Is &apos;Anders, namelijk...&apos;</FormLabel>
-                                    <FormMessage/>
+                                      style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                    <FormMessage />
                                   </FormItem>
                                   <FormDescription>
                                     Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
@@ -533,12 +540,12 @@ export default function WidgetEnqueteItems(
                               )}
                             />
 
-                            { form.watch('questionType') === 'multiple' && (
+                            {form.watch('questionType') === 'multiple' && (
                               <FormField
                                 control={form.control}
                                 // @ts-ignore
                                 name={`options.${activeOption}.titles.0.defaultValue`}
-                                render={({field}) => (
+                                render={({ field }) => (
                                   <>
                                     <FormItem
                                       style={{
@@ -550,8 +557,8 @@ export default function WidgetEnqueteItems(
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{marginTop: 0, marginLeft: '6px'}}>Standaard aangevinkt?</FormLabel>
-                                      <FormMessage/>
+                                        style={{ marginTop: 0, marginLeft: '6px' }}>Standaard aangevinkt?</FormLabel>
+                                      <FormMessage />
                                     </FormItem>
                                     <FormDescription>
                                       Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
@@ -561,73 +568,73 @@ export default function WidgetEnqueteItems(
                               />
                             )}
                           </>
-                          ) : (
-                            <>
-                              <ImageUploader
-                                form={form}
-                                project={project as string}
-                                fieldName="imageOptionUpload"
-                                imageLabel="Afbeelding"
-                                allowedTypes={["image/*"]}
-                                onImageUploaded={(imageResult) => {
-                                  const image = imageResult ? imageResult.url : '';
+                        ) : (
+                          <>
+                            <ImageUploader
+                              form={form}
+                              project={project as string}
+                              fieldName="imageOptionUpload"
+                              imageLabel="Afbeelding"
+                              allowedTypes={["image/*"]}
+                              onImageUploaded={(imageResult) => {
+                                const image = imageResult ? imageResult.url : '';
 
-                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
-                                  form.resetField('imageOptionUpload');
-                                }}
-                              />
+                                form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                form.resetField('imageOptionUpload');
+                              }}
+                            />
 
-                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
-                                <div style={{ position: 'relative' }}>
-                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
-                                </div>
+                            {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                              <div style={{ position: 'relative' }}>
+                                <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                              </div>
+                            )}
+
+                            <FormField
+                              control={form.control}
+                              name={`options.${activeOption}.titles.0.key`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Titel</FormLabel>
+                                  <FormDescription>
+                                    Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                    De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                  </FormDescription>
+                                  <Input {...field} />
+                                  <FormMessage />
+                                </FormItem>
                               )}
+                            />
 
-                              <FormField
-                                control={form.control}
-                                name={`options.${activeOption}.titles.0.key`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Titel</FormLabel>
-                                    <FormDescription>
-                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
-                                    </FormDescription>
-                                    <Input {...field} />
+                            <FormField
+                              control={form.control}
+                              // @ts-ignore
+                              name={`options.${activeOption}.titles.0.hideLabel`}
+                              render={({ field }) => (
+                                <>
+                                  <FormItem
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'flex-start',
+                                      flexDirection: 'row',
+                                      marginTop: '10px'
+                                    }}>
+                                    {YesNoSelect(field, props)}
+                                    <FormLabel
+                                      style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
                                     <FormMessage />
                                   </FormItem>
-                                )}
-                              />
-
-                              <FormField
-                                control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.hideLabel`}
-                                render={({field}) => (
-                                  <>
-                                    <FormItem
-                                      style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
-                                        marginTop: '10px'
-                                      }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{marginTop: 0, marginLeft: '6px'}}>Titel verbergen?</FormLabel>
-                                      <FormMessage/>
-                                    </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
-                                    </FormDescription>
-                                  </>
-                                )}
-                              />
-                            </>
-                          );
-                        })()
-                      )}
+                                  <FormDescription>
+                                    Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                  </FormDescription>
+                                </>
+                              )}
+                            />
+                          </>
+                        );
+                      })()
+                    )}
 
                     <Button
                       className="w-full bg-secondary text-black hover:text-white mt-4"
@@ -644,7 +651,7 @@ export default function WidgetEnqueteItems(
                       type="button"
                       onClick={() => {
                         setSettingOptions(() => !settingOptions),
-                        setOption(null);
+                          setOption(null);
                       }}>
                       Annuleer
                     </Button>
@@ -767,17 +774,19 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Beschrijving</FormLabel>
-                          <Textarea rows={6} {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch('questionType') !== 'pagination' && (
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Beschrijving</FormLabel>
+                            <Textarea rows={6} {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     {form.watch('questionType') === 'open' && (
 
@@ -824,6 +833,7 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
                               <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
+                              <SelectItem value="pagination">Voeg pagina toe</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -880,6 +890,33 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
+                    {form.watch('questionType') === 'pagination' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="prevPageText"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tekst voor: Vorige pagina</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                                                <FormField
+                          control={form.control}
+                          name="nextPageText"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tekst voor: Volgende pagina</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
+
                     {form.watch('questionType') === 'none' && (
                       <>
                         <ImageUploader
@@ -928,7 +965,7 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' ) && (
+                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images') && (
                       <FormField
                         control={form.control}
                         name="multiple"
@@ -957,33 +994,34 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
-
-                    <FormField
-                      control={form.control}
-                      name="fieldRequired"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Is dit veld verplicht?
-                          </FormLabel>
-                          <Select
-                            onValueChange={(e: string) => field.onChange(e === 'true')}
-                            value={field.value ? 'true' : 'false'}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Kies een optie" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="false">Nee</SelectItem>
-                              <SelectItem value="true">Ja</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch('questionType') !== 'pagination' && (
+                      <FormField
+                        control={form.control}
+                        name="fieldRequired"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Is dit veld verplicht?
+                            </FormLabel>
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     {form.watch('questionType') === 'scale' && (
                       <FormField
@@ -1254,6 +1292,6 @@ export default function WidgetEnqueteItems(
           </div>
         </form>
       </Form>
-    </div>
+    </div >
   );
 }

@@ -23,11 +23,18 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toast from 'react-hot-toast';
 import InfoDialog from '@/components/ui/info-hover';
+import {YesNoSelect} from "@/lib/form-widget-helpers";
+import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
+import {NotificationForm} from "@/components/notification-form";
+import useNotificationTemplate from "@/hooks/use-notification-template";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
   warnUsersAfterXDaysOfInactivity: z.coerce.number(),
   anonymizeUsersAfterXDaysOfInactivity: z.coerce.number(),
+  anonymizeUserName: z.string().optional(),
+  allowAnonymizeUsersAfterEndDate: z.boolean().optional(),
 });
 
 const emailFormSchema = z.object({
@@ -35,7 +42,18 @@ const emailFormSchema = z.object({
   template: z.string(),
 });
 
-export default function ProjectSettingsAnonymization() {
+type ProjectSettingsAnonymizationProps = {
+  anonymizeUsersXDaysAfterEndDate?: number;
+  warnUsersAfterXDaysOfInactivity?: number;
+  anonymizeUsersAfterXDaysOfInactivity?: number;
+  anonymizeUserName?: string;
+  allowAnonymizeUsersAfterEndDate?: boolean;
+};
+
+export default function ProjectSettingsAnonymization(
+  props: ProjectSettingsAnonymizationProps &
+    EditFieldProps<ProjectSettingsAnonymizationProps>
+) {
   const category = 'anonymize';
 
   const router = useRouter();
@@ -44,17 +62,19 @@ export default function ProjectSettingsAnonymization() {
     data,
     isLoading,
     updateProject,
-    updateProjectEmails,
     anonymizeUsersOfProject,
   } = useProject();
   const defaults = useCallback(
     () => ({
+      allowAnonymizeUsersAfterEndDate: data?.config?.[category]?.allowAnonymizeUsersAfterEndDate || false,
       anonymizeUsersXDaysAfterEndDate:
         data?.config?.[category]?.anonymizeUsersXDaysAfterEndDate || null,
       warnUsersAfterXDaysOfInactivity:
         data?.config?.[category]?.warnUsersAfterXDaysOfInactivity || null,
       anonymizeUsersAfterXDaysOfInactivity:
         data?.config?.[category]?.anonymizeUsersAfterXDaysOfInactivity || null,
+      anonymizeUserName:
+        data?.config?.[category]?.anonymizeUserName || 'Gebruiker is geanonimiseerd'
     }),
     [data?.config]
   );
@@ -98,28 +118,20 @@ export default function ProjectSettingsAnonymization() {
     }
   }
 
-  async function onSubmitEmail(values: z.infer<typeof emailFormSchema>) {
-    try {
-      await updateProjectEmails({
-        [category]: {
-          inactiveWarningEmail: {
-            subject: values.subject,
-            template: values.template,
-          },
-        },
-      });
-    } catch (error) {
-      console.error('Could not update', error);
-    }
-  }
-
   async function anonymizeAllUsers() {
     try {
       await anonymizeUsersOfProject();
+      toast.success('Alle gebruikers zijn geanonimiseerd!');
     } catch (error) {
-      console.error('Could not anonymize the users', error);
+      toast.error("Het project moet eerst zijn beëindigd voordat gebruikers geanonimiseerd kunnen worden.")
     }
   }
+
+  const { data: notificationTemplates } = useNotificationTemplate(project as string);
+  const template = notificationTemplates?.find((t: {type: string}) => t.type === 'user account about to expire');
+
+  const sendEmail = data?.emailConfig?.notifications?.fromAddress;
+  const isSendEmailNotSet = sendEmail === '' || sendEmail === 'email@not.set';
 
   return (
     <div>
@@ -155,22 +167,52 @@ export default function ProjectSettingsAnonymization() {
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-4 lg:w-1/2">
+
                     <FormField
                       control={form.control}
-                      name="anonymizeUsersXDaysAfterEndDate"
+                      name={`allowAnonymizeUsersAfterEndDate`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Na hoeveel dagen na het einde van het project worden gebruikers geanonimiseerd?
-                            <InfoDialog content={'Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "gebruiker verwijderd".'} />
+                            Gebruikers automatisch anonimiseren na het beëindigen van het project?
+                            <InfoDialog content={`Als je deze optie aanzet worden gebruikers na het aantal dagen dat je hieronder instelt automatisch geanonimiseerd. Dit gebeurt alleen als het project een einddatum heeft en deze datum is verstreken.`} />
                           </FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="60" {...field} />
-                          </FormControl>
+                          {YesNoSelect(field, props)}
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    { !!form.watch("allowAnonymizeUsersAfterEndDate") && (
+                      <FormField
+                        control={form.control}
+                        name="anonymizeUsersXDaysAfterEndDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Na hoeveel dagen na het einde van het project worden gebruikers geanonimiseerd?
+                              <InfoDialog content={`Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "${ form.watch("anonymizeUserName") || "Gebruiker is geanonimiseerd" }".`} />
+                            </FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="60" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {isSendEmailNotSet && (
+                      <Alert variant="error" className="mb-4">
+                        <AlertTitle>Let op!</AlertTitle>
+                        <AlertDescription>
+                          Het e-mailadres voor het versturen van notificaties is nog niet ingesteld.
+                          Stel deze eerst in bij de <a href={`/projects/${project}/settings/notifications`} className="underline">e-mail instellingen</a>.
+                          Zonder een juist ingesteld e-mailadres kunnen er geen waarschuwingsmails worden verstuurd en zullen gebruikers worden geanonimiseerd zonder waarschuwing.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     <FormField
                       control={form.control}
                       name="warnUsersAfterXDaysOfInactivity"
@@ -203,6 +245,22 @@ export default function ProjectSettingsAnonymization() {
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="anonymizeUserName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Hoe worden gebruikers genoemd na anonimisering?
+                            <InfoDialog content={'Standaard wordt de naam van de gebruiker aangepast naar "Gebruiker is geanonimiseerd". Je kunt dit hier aanpassen naar een andere tekst.'} />
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="text" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <Button type="submit">Opslaan</Button>
                   </form>
                 </Form>
@@ -210,40 +268,17 @@ export default function ProjectSettingsAnonymization() {
               <div className="p-6 bg-white rounded-md mt-4">
                 <Form {...emailForm}>
                   <Heading size="xl">Waarschuwingsmail inactiviteit<InfoDialog content={'Content voor een waarschuwings email'} /></Heading>
-                  
 
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={emailForm.handleSubmit(onSubmitEmail)}
-                    className="space-y-4 lg:w-1/2">
-                    <FormField
-                      control={emailForm.control}
-                      name="subject"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>E-mail template onderwerp</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={emailForm.control}
-                      name="template"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>E-mail template tekst</FormLabel>
-                          <FormControl>
-                            <Textarea rows={12} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit">Opslaan</Button>
-                  </form>
+                  <NotificationForm
+                    type="user account about to expire"
+                    label="Gebruikersaccount staat op het punt te verlopen"
+                    engine={template?.engine}
+                    id={template?.id}
+                    subject={template?.subject}
+                    body={template?.body}
+                  />
+
                 </Form>
               </div>
             </TabsContent>

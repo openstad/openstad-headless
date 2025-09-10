@@ -18,7 +18,7 @@ import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | Record<number, never> | [];
+export type FormValue = string | string[] | Record<number, never> | [] | number | boolean;
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -36,6 +36,7 @@ function Form({
     currentPage,
     setCurrentPage,
     prevPage,
+    prevPageText,
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -173,6 +174,7 @@ function Form({
         }
     };
 
+
     return (
         <div className="form-widget">
             <div className="form-widget-container">
@@ -184,7 +186,10 @@ function Form({
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
-                        if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
+                        if (
+                            (field.fieldKey && routingHiddenFields.includes(field.fieldKey))
+                            || field.type !== 'pagination'
+                        ) {
                             return null;
                         }
 
@@ -202,9 +207,8 @@ function Form({
                                     }
                                 </FormFieldErrorMessage>
                             </div>
-                        );
-                      }
-                    )}
+                        )
+                    })}
                     {secondaryLabel && (
                         <Button
                           appearance='primary-action-button'
@@ -214,7 +218,7 @@ function Form({
                             {secondaryLabel}
                         </Button>
                     )}
-                    <div className="button-group">
+                    <div className="button-group --flex">
                         {currentPage > 0 && (
                             <Button
                                 appearance='secondary-action-button'
@@ -225,7 +229,7 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                Vorige
+                                {prevPageText || 'vorige'}
                             </Button>
                         )}
                         <Button
