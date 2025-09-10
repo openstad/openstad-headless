@@ -182,6 +182,7 @@ jobs:
           tags: 'ghcr.io/${{ steps.meta.outputs.tags }}'
           build-args: |
             APP=${{ matrix.app }}
+            OPENSTAD_VERSION=${{ steps.chart_version.outputs.openstad_version }} \
           cache-from: type=local,src=/tmp/.buildx-cache
       - name: Add image output
         id: image_output
