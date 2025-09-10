@@ -319,6 +319,20 @@ module.exports = function (db, sequelize, DataTypes) {
             throw err;
           });
       }
+
+      for (let externalUserId of externalUserIds) {
+        let users = await db.User.findAll({ where: { idpUser: { identifier: externalUserId } } });
+        if (users.length == 0) {
+          // no api users left for this oauth user; let the oauth server know we dont need this user anymore
+          let authConfig = await authSettings.config({ project: self, useAuth: providers[ externalUserId ] })
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter && adapter.service && adapter.service.deleteUser) {
+            // TODO: niet getest
+            await adapter.service.deleteUser({ authConfig, userData: { id: externalUserId }})
+          }
+
+        }
+      }
     } catch (err) {
       console.log(err);
       throw err;
