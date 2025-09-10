@@ -56,7 +56,7 @@ module.exports = function (db, sequelize, DataTypes) {
       userId: {
         type: DataTypes.INTEGER,
         auth: {
-          updateableBy: 'moderator',
+          updateableBy: 'editor',
         },
         allowNull: false,
         defaultValue: 0,
@@ -64,7 +64,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       startDate: {
         auth: {
-          updateableBy: 'moderator',
+          updateableBy: 'editor',
         },
         type: DataTypes.DATE,
         allowNull: false,
@@ -96,8 +96,8 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.ENUM(
           'superuser',
           'admin',
-          'editor',
           'moderator',
+          'editor',
           'member',
           'anonymous',
           'all'
@@ -213,7 +213,7 @@ module.exports = function (db, sequelize, DataTypes) {
       budget: {
         type: DataTypes.INTEGER,
         auth: {
-          updateableBy: 'moderator',
+          updateableBy: 'editor',
         },
         allowNull: true,
         set: function (budget) {
@@ -236,8 +236,8 @@ module.exports = function (db, sequelize, DataTypes) {
       modBreak: {
         type: DataTypes.TEXT,
         auth: {
-          createableBy: 'moderator',
-          updateableBy: 'moderator',
+          createableBy: 'editor',
+          updateableBy: 'editor',
         },
         allowNull: true,
         set: function (text) {
@@ -249,8 +249,8 @@ module.exports = function (db, sequelize, DataTypes) {
       modBreakUserId: {
         type: DataTypes.INTEGER,
         auth: {
-          createableBy: 'moderator',
-          updateableBy: 'moderator',
+          createableBy: 'editor',
+          updateableBy: 'editor',
         },
         allowNull: true,
       },
@@ -258,8 +258,8 @@ module.exports = function (db, sequelize, DataTypes) {
       modBreakDate: {
         type: DataTypes.DATE,
         auth: {
-          createableBy: 'moderator',
-          updateableBy: 'moderator',
+          createableBy: 'editor',
+          updateableBy: 'editor',
         },
         allowNull: true,
       },
@@ -671,7 +671,7 @@ module.exports = function (db, sequelize, DataTypes) {
           where: {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
-                (SELECT resourceId FROM resource_tags 
+                (SELECT resourceId FROM resource_tags
                 WHERE tagId IN (${tags.map(tag => `'${tag}'`).join(', ')}))
               `),
             },
@@ -950,7 +950,7 @@ module.exports = function (db, sequelize, DataTypes) {
     canMutateStatus: function canMutateStatus (user, self) {
       if (!user || !self) return false;
       if (!self.auth.canUpdate(user, self)) return false;
-      return userHasRole(user, 'moderator');
+      return userHasRole(user, 'editor');
     },
     toAuthorizedJSON: function (user, data, self) {
       if (!self.auth.canView(user, self)) {
@@ -1021,7 +1021,7 @@ module.exports = function (db, sequelize, DataTypes) {
       (projectConfig && projectConfig.canEditAfterFirstLikeOrComment) || false;
     if (
       !canEditAfterFirstLikeOrComment &&
-      !userHasRole(instance.auth && instance.auth.user, 'moderator')
+      !userHasRole(instance.auth && instance.auth.user, 'editor')
     ) {
       let firstLikeSubmitted = await db.Vote.count({
         where: { resourceId: instance.id },

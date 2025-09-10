@@ -486,7 +486,6 @@ export default function WidgetEnqueteItems(
                       (() => {
                         const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
                         const activeOption = currentOption !== -1 ? currentOption : options.length;
-
                         return form.watch("questionType") !== "images" ? (
                           <>
                             <FormField

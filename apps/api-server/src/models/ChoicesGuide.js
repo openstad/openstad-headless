@@ -153,7 +153,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     viewableBy: 'all',
     createableBy: 'editor',
     updateableBy: 'editor',
-    deleteableBy: 'admin',
+    deleteableBy: 'editor',
   }
 
   return ChoicesGuide;

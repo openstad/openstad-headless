@@ -211,9 +211,18 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                     }}
                     onremovefile={(error: FilePondErrorDescription | null, file: FilePondFile) => {
                         const fileName = file?.file?.name;
+
                         if (!!fileName) {
-                            const updatedImages = uploadedImages.filter(item => item.name !== fileName);
-                            setUploadedImages(updatedImages);
+                           const uploadImageFileName = fileName.replace(/\./g, '_');
+                           const fileIsInUploadedImages = uploadedImages.find(item => item.name === uploadImageFileName);
+
+                           if (!fileIsInUploadedImages) return;
+
+                           const updatedImages = uploadedImages.filter(item => item.name !== uploadImageFileName);
+                           setUploadedImages(updatedImages);
+
+                           const updatedFiles = files.filter(item => item.file.name !== fileName);
+                           setImages(updatedFiles);
                         }
                     }}
                     id={randomId}

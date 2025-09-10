@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const merge = require('merge');
 const mapUserData = require('../../util/map-user-data');
 const authSettings = require('../../util/auth-settings');

@@ -35,7 +35,7 @@
     "type": "git",
     "url": "git+https://github.com/Amsterdam/openstad-frontend.git"
   },
-  "author": "Team Openstad: Niels Denes & Tosh Koevoets",
+  "author": "Gemeente Amsterdam",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Amsterdam/openstad-frontend/issues"

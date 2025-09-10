@@ -79,7 +79,7 @@ const ResourceDetailMap = ({
         {...props}
         {...zoom}
         area={polygon}
-        autoZoomAndCenter="area"
+        autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
         center={currentCenter}
         markers={[currentMarker]}
       />

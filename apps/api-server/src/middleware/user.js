@@ -1,7 +1,6 @@
 const config = require('config');
 const jwt = require('jsonwebtoken');
 const merge = require('merge');
-const fetch = require('node-fetch');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 

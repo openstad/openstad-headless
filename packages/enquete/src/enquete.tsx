@@ -95,7 +95,6 @@ function Enquete(props: EnqueteWidgetProps) {
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
                 fieldRequired: item.fieldRequired,
             };
-
             switch (item.questionType) {
                 case 'open':
                     fieldData['type'] = 'text';
