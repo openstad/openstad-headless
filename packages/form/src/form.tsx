@@ -47,12 +47,10 @@ function Form({
         const fieldKey = field.fieldKey || '';
 
         if (fieldKey) {
-            //@ts-expect-error
             initialFormValues[fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
             initialFormValues[fieldKey] = field.type === 'map' ? {} : initialFormValues[fieldKey];
 
             if (field.type === 'tickmark-slider') {
-                //@ts-expect-error
                 initialFormValues[fieldKey] = Math.ceil((field?.fieldOptions?.length || 2) / 2).toString();
             }
 
