@@ -285,6 +285,20 @@ export default function WidgetResourceOverviewDisplay(
             </>
           )}
 
+          <FormField
+            control={form.control}
+            name="displayLocationFilter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Locatie filter weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
 
           <Heading size="xl" className="col-span-full mt-6">Tegels</Heading>
           <Separator style={{margin: "-10px 0 0"}} className="my-4 col-span-full" />
@@ -562,20 +576,6 @@ export default function WidgetResourceOverviewDisplay(
               <FormItem>
                 <FormLabel>
                   Tags in dialog weergeven
-                </FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displayLocationFilter"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Locatie filter weergeven
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />

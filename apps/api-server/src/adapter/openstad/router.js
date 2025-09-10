@@ -1,7 +1,6 @@
 const config = require('config');
 const express = require('express');
 const createError = require('http-errors');
-const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
 const db = require('../../db');
@@ -357,7 +356,7 @@ router
 router
   .route('(/project/:projectId)?/uniquecode')
   .all(async function (req, res, next) {
-    if (!hasRole(req.user, 'admin')) return next(new Error('You cannot list these codes'))
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
     return next();
   })
 
@@ -395,7 +394,7 @@ router
 
   // reset
   .post(async function (req, res, next) {
-    if (!hasRole(req.user, 'admin')) return next(new Error('You cannot list these codes'))
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
 
     let uniqueCodeId= parseInt(req.params.uniqueCodeId);
     if (!uniqueCodeId) return next(new Error('No code id found'))

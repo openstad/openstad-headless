@@ -5,6 +5,12 @@ const db = require('../db');
 
 const { Umzug, SequelizeStorage } = require('umzug');
 
+const { AUTH_ADMIN_CLIENT_ID: authId, AUTH_ADMIN_CLIENT_SECRET: authSecret } = process.env;
+
+if (authId.includes(':') || authSecret.includes(':')) {
+  throw new Error("Auth client id/secret must not contain ':'");
+}
+
 (async () => {
   const resetDatabase = async () => {
     try {
@@ -24,7 +30,8 @@ const { Umzug, SequelizeStorage } = require('umzug');
       
       console.log('Create database...');
       await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true })
-      await db.sequelize.sync({ force: true });
+      console.log ('Syncing models')
+      await db.sequelize.sync();
     
       console.log('Marking migrations as done...');
       let pendingMigrations = await umzug.pending();

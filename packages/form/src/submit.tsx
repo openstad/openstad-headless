@@ -1,12 +1,13 @@
 import type { ZodType } from "zod";
 import {getSchemaForField} from "./validation.js";
 import type {CombinedFieldPropsWithType} from "./props";
+import {FormValue} from "./form";
 
 export const handleSubmit = (
     fields: Array<CombinedFieldPropsWithType>,
-    formValues: { [p: string]: string | Record<number, never> | [] },
+    formValues: { [p: string]: FormValue },
     setFormErrors: React.Dispatch<React.SetStateAction<{ [p: string]: string | null }>>,
-    submitHandler: (values: { [p: string]: string | Record<number, never> | [] }) => void
+    submitHandler: (values: { [p: string]: FormValue }) => void
 ): string | null => {
     const errors: { [key: string]: string | null } = {};
     let firstErrorKey: string | null = null;

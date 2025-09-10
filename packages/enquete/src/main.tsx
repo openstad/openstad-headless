@@ -10,9 +10,8 @@ const config: EnqueteWidgetProps = {
   resourceId: import.meta.env.VITE_RESOURCE_ID,
   login: {
     label: import.meta.env.VITE_LOGIN_LABEL,
-    url: `${import.meta.env.VITE_API_URL}/auth/project/${
-      import.meta.env.VITE_PROJECT_ID
-    }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
+    url: `${import.meta.env.VITE_API_URL}/auth/project/${import.meta.env.VITE_PROJECT_ID
+      }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
   },
   displayTitle: true,
   title: 'Denk je met ons mee voor jouw woning en woongebouw?',
@@ -163,6 +162,8 @@ const config: EnqueteWidgetProps = {
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Enquete {...config} />
+    <div className="openstad">
+      <Enquete {...config} />
+    </div>
   </React.StrictMode>
 );

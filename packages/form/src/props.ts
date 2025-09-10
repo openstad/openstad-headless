@@ -12,22 +12,33 @@ import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
 import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
 import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/number";
 import {MatrixFieldProps} from "@openstad-headless/ui/src/form-elements/matrix";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type FormProps = {
     title?: string;
+    fieldKey?: any;
     fields: Array<CombinedFieldProps>;
     submitText?: string;
-    submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;
-    getValuesOnChange?: (values: { [p: string]: string | Record<number, never> | []}) => void;
+    submitHandler: (values: { [p: string]: FormValue}) => void;
+    getValuesOnChange?: (values: { [p: string]: FormValue}) => void;
     submitDisabled?: boolean;
     allowResetAfterSubmit?: boolean;
     secondaryLabel?: string;
-    secondaryHandler?: (values: { [p: string]: string | Record<number, never> | []}) => void;
+    secondaryHandler?: (values: { [p: string]: FormValue}) => void;
     placeholder?: string;
     currentPage?: any;
     setCurrentPage?: (page: number) => void;
     prevPage?: any;
+    prevPageText?: string;
 }
+
+type PaginationFieldProps = {
+    type: 'pagination';
+    fieldKey?: string;
+    prevPageText?: any;
+    nextPageText?: any;
+    defaultValue?: string;
+};
 
 type CombinedFieldPropsWithType =
     | ({ type?: 'text' } & TextInputProps)
@@ -43,6 +54,7 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
     | ({ type?: 'map' } & MapProps)
     | ({ type?: 'matrix' } & MatrixFieldProps)
+    | ({ type?: 'pagination' } & PaginationFieldProps)
     | ({ type?: 'none' } & InfoFieldProps);
 
 type ComponentFieldProps = (
@@ -53,6 +65,7 @@ type ComponentFieldProps = (
 )
 
 type CombinedFieldProps = (
+    PaginationFieldProps|
     TextInputProps |
     TickmarkSliderProps |
     RangeSliderProps |

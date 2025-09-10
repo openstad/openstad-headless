@@ -8,20 +8,24 @@
     "setup": "node ./scripts/setup-all.js",
     "start": "node ./scripts/start-all.js",
     "init-databases": "node ./scripts/init-databases.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:unit:admin": "vitest run apps/admin-server",
     "test:unit:api": "vitest run apps/api-server",
     "test:unit:auth": "vitest run apps/auth-server",
     "test:unit:cms": "vitest run apps/cms-server",
-    "test:unit:image": "vitest run apps/image-server"
+    "test:unit:image": "vitest run apps/image-server",
+    "test:e2e": "cypress run",
+    "test:component": "node ./scripts/run-component-tests.js",
+    "cy:open": "cypress open"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/openstad/openstad-headless.git"
   },
   "author": "OpenStad",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/openstad/openstad-headless/issues"
   },
@@ -34,6 +38,7 @@
   "private": true,
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "cypress": "^14.4.1",
     "mysql2": "^3.11.3",
     "prettier": "3.0.3",
     "vitest": "^3.2.3"

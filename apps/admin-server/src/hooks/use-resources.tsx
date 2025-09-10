@@ -53,14 +53,17 @@ export default function useResources(projectId?: string, includeGlobalTags?: boo
     }
   }
 
-  async function remove(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
+  async function remove(id: number, multiple?: boolean, ids?: number[]) {
+    const deleteUrl = multiple
+      ? `/api/openstad/api/project/${projectNumber}/resource/delete`
+      : `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: multiple ? JSON.stringify({ ids }) : undefined,
     });
 
     if (res.ok) {
@@ -72,5 +75,27 @@ export default function useResources(projectId?: string, includeGlobalTags?: boo
       throw new Error('Could not remove the plan');
     }
   }
-  return { ...resourcesListSwr, create, update, remove };
+
+  async function duplicate(ids: number[]) {
+    const duplicateUrl = `/api/openstad/api/project/${projectNumber}/resource/duplicate`;
+
+    const res = await fetch(duplicateUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+
+      resourcesListSwr.mutate([...resourcesListSwr.data, ...data]);
+      return data;
+    } else {
+      throw new Error('Could not duplicate the widgets');
+    }
+  }
+
+  return { ...resourcesListSwr, create, update, remove, duplicate };
 }

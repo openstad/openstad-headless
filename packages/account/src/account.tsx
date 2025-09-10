@@ -205,10 +205,6 @@ function Account({
     return str.charAt(0).toLowerCase() + str.slice(1);
   }
 
-  useEffect(() => {
-    console.log('userFormData', userFormData);
-  }, [userFormData]);
-
   return (
     <section className="account">
       <div>

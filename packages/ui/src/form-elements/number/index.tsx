@@ -8,6 +8,7 @@ import {
 } from "@utrecht/component-library-react";
 import {Spacer } from '@openstad-headless/ui/src';
 import './style.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type NumberInputProps = {
     title: string;
@@ -16,7 +17,7 @@ export type NumberInputProps = {
     fieldKey: string;
     defaultValue?: string | number;
     disabled?: boolean;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }) => void;
     reset?: (resetFn: () => void) => void;
     format?: boolean;
     prepend?: string;
@@ -25,6 +26,9 @@ export type NumberInputProps = {
     placeholder?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const NumberInput: FC<NumberInputProps> = ({

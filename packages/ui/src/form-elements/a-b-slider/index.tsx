@@ -30,7 +30,7 @@ export type RangeSliderProps = {
     maxCharacters?: number;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | valueObject | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue | valueObject }) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -41,6 +41,10 @@ export type RangeSliderProps = {
     skipQuestionAllowExplanation?: boolean;
     skipQuestionExplanation?: string;
     skipQuestionLabel?: string;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 type valueObject = {value: string, skipQuestion: boolean, skipQuestionExplanation: string | undefined};
@@ -81,9 +85,13 @@ const RangeSlider: FC<RangeSliderProps> = ({
         skipQuestionExplanation: ''
     });
 
-    class HtmlContent extends React.Component<{ html: any }> {
+    class HtmlContent extends React.Component<{ html: any, bold?: boolean }> {
         render() {
-            let { html } = this.props;
+            let { html, bold = false } = this.props;
+
+            if (bold) {
+                html = `<strong>${html}</strong>`;
+            }
             return <Paragraph dangerouslySetInnerHTML={{ __html: html }} />;
         }
     }
@@ -131,7 +139,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
             )}
             {description && (
-                <Paragraph dangerouslySetInnerHTML={{ __html: description }}></Paragraph>
+                <HtmlContent html={description} />
             )}
             {showMoreInfo && (
                 <>
@@ -161,8 +169,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     {showLabels && (<p className="label">A</p>)}
                     {(titleA || descriptionA || imageA) && (
                         <div className="a-b-info">
-                            {titleA && <Paragraph><Strong>{titleA}</Strong></Paragraph>}
-                            {descriptionA && <Paragraph>{descriptionA}</Paragraph>}
+                            {titleA && <HtmlContent html={titleA} bold={true} />}
+                            {descriptionA && <HtmlContent html={descriptionA} />}
                             {!!imageA && (<figure><img src={imageA} alt={`${titleA} - ${descriptionA}`} /></figure>)}
                         </div>
                     )}
@@ -171,8 +179,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 {showLabels && (<p className="label">B</p>)}
                     {(titleB || descriptionB || imageB) && (
                         <div className="a-b-info">
-                            {titleB && <Paragraph><Strong>{titleB}</Strong></Paragraph>}
-                            {descriptionB && <Paragraph>{descriptionB}</Paragraph>}
+                            {titleB && <HtmlContent html={titleB} bold={true} />}
+                            {descriptionB && <HtmlContent html={descriptionB} />}
                             {!!imageB && (<figure><img src={imageB} alt={`${titleB} - ${descriptionB}`} /></figure>)}
                         </div>
                     )}
