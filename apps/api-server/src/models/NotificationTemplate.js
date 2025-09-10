@@ -52,11 +52,11 @@ module.exports = ( db, sequelize, DataTypes ) => {
   });
 
   NotificationTemplate.auth = NotificationTemplate.prototype.auth = {
-    listableBy: 'admin',
-    viewableBy: 'admin',
-    createableBy: 'admin',
-    updateableBy: 'admin',
-    deleteableBy: 'admin'
+    listableBy: 'editor',
+    viewableBy: 'editor',
+    createableBy: 'editor',
+    updateableBy: 'editor',
+    deleteableBy: 'editor'
   };
 
   NotificationTemplate.associate = function (models) {

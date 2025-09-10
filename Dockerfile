@@ -1,8 +1,11 @@
 # Image used for building dependencies
-FROM node:18-slim AS builder
+FROM node:24-slim AS builder
 ENV GITHUB_REPOSITORY=openstad/openstad-headless
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
+
+ARG OPENSTAD_VERSION
+LABEL version=$OPENSTAD_VERSION
 
 # Create app directory
 WORKDIR /opt/openstad-headless
@@ -47,6 +50,10 @@ RUN npm prune -ws
 # Development image
 FROM base AS development
 ENV NODE_ENV=${NODE_ENV:-development}
+ARG OPENSTAD_VERSION
+ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
+ENV NEXT_PUBLIC_OPENSTAD_VERSION=$OPENSTAD_VERSION
+
 # Create app directory
 WORKDIR /opt/openstad-headless
 
@@ -65,16 +72,22 @@ CMD ["npm", "run", "dev", "-w", "${WORKSPACE}"]
 FROM base AS prepare-production
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
+ARG OPENSTAD_VERSION
+ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
+ENV NEXT_PUBLIC_OPENSTAD_VERSION=$OPENSTAD_VERSION
 RUN npm run build --if-present -w $WORKSPACE
 RUN npm prune -ws --production
 
 # Release image
-FROM node:18-slim AS release
+FROM node:24-slim AS release
 ARG APP
 ARG PORT
 ARG NODE_ENV
+
+ARG OPENSTAD_VERSION
 ENV WORKSPACE=apps/${APP}
 ENV NODE_ENV=${NODE_ENV:-production}
+ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
 
 WORKDIR /opt/openstad-headless
 
@@ -97,6 +110,11 @@ CMD ["npm", "run", "start", "-w", "${WORKSPACE}"]
 
 # Release image with additional packages if needed
 FROM release AS release-with-packages
+
+ARG OPENSTAD_VERSION
+ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
+ENV WORKSPACE=apps/${APP}
+ENV NODE_ENV=${NODE_ENV:-production}
 
 WORKDIR /opt/openstad-headless
 

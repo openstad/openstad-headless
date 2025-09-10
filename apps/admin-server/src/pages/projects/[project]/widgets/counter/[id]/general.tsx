@@ -31,6 +31,7 @@ import { FormObjectSelectField } from '@/components/ui/form-object-select-field'
 import useTags from "@/hooks/use-tags";
 import {Spacer} from "@/components/ui/spacer";
 import {CheckboxList} from "@/components/checkbox-list";
+import useEnqueteWidgets from "@/hooks/use-enquete-widgets";
 
 const formSchema = z.object({
   label: z.string().optional(),
@@ -42,6 +43,7 @@ const formSchema = z.object({
     'static',
     'argument',
     'choiceGuideResults',
+    'enqueteResults',
   ]),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
@@ -63,6 +65,7 @@ export default function CounterDisplay(
 
   const projectId = router.query.project as string;
   const { data: choiceGuides } = useChoiceGuideWidgets(projectId as string);
+  const { data: enquetes } = useEnqueteWidgets(projectId as string);
   const { data: resourceList } = useResources(projectId as string);
   const resources = resourceList as { id: string; title: string }[];
 
@@ -161,15 +164,18 @@ export default function CounterDisplay(
                   <SelectItem value="resource">
                     Aantal inzendingen
                   </SelectItem>
-                  <SelectItem value="vote">Hoeveelheid stemmen</SelectItem>
+                  <SelectItem value="vote">Aantal stemmen</SelectItem>
                   <SelectItem value="votedUsers">
-                    Hoeveelheid gestemde gebruikers
+                    Aantal gestemde gebruikers
                   </SelectItem>
-                  <SelectItem value="static">Vaste waarde</SelectItem>
                   <SelectItem value="argument">Aantal reacties</SelectItem>
                   <SelectItem value="choiceGuideResults">
                     Aantal inzendingen keuzewijzer
                   </SelectItem>
+                  <SelectItem value="enqueteResults">
+                    Aantal inzendingen formulier
+                  </SelectItem>
+                  <SelectItem value="static">Vaste waarde</SelectItem>
                 </SelectContent>
               </Select>
             </FormItem>
@@ -276,6 +282,19 @@ export default function CounterDisplay(
             label={(ch) => `${ch.description} (Widget ID ${ch.id})`}
             onFieldChanged={props.onFieldChanged}
             noSelection="Selecteer uw gewenste keuzewijzer"
+          />
+        ) : null}
+
+        {props.counterType === 'enqueteResults' ? (
+          <FormObjectSelectField
+            form={form}
+            fieldName="widgetToFetchId"
+            fieldLabel="Gewenste enquête"
+            items={enquetes}
+            keyForValue="id"
+            label={(ch) => `${ch.description} (Widget ID ${ch.id})`}
+            onFieldChanged={props.onFieldChanged}
+            noSelection="Selecteer uw gewenste enquête"
           />
         ) : null}
           </div>

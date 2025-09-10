@@ -10,6 +10,7 @@ import {
 import React, { useState } from "react";
 import {FC} from "react";
 import {MultiSelect, Spacer} from '@openstad-headless/ui/src';
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type SelectFieldProps = {
     title?: string;
@@ -20,7 +21,7 @@ export type SelectFieldProps = {
     fieldKey: string;
     defaultOption?: string;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: {name: string, value: FormValue}) => void;
     type?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -30,6 +31,9 @@ export type SelectFieldProps = {
     fieldInvalid?: boolean;
     multiple?: boolean;
     defaultValue?: string | string[];
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const SelectField: FC<SelectFieldProps> = ({

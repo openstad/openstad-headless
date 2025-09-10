@@ -14,6 +14,10 @@ export type InfoFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const InfoField: FC<InfoFieldProps> = ({

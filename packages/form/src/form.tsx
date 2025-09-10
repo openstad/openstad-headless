@@ -18,7 +18,7 @@ import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | Record<number, never> | [];
+export type FormValue = string | string[] | Record<number, never> | [] | number | boolean;
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -36,6 +36,7 @@ function Form({
     currentPage,
     setCurrentPage,
     prevPage,
+    prevPageText,
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -146,6 +147,7 @@ function Form({
         }
     };
 
+
     return (
         <div className="form-widget">
             <div className="form-widget-container">
@@ -157,21 +159,24 @@ function Form({
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
-                        return (
-                            <div className={`question question-type-${field.type}`} key={index}>
-                                {renderField(field, index, randomId, fieldInvalid)}
-                                <FormFieldErrorMessage className="error-message">
-                                    {field.fieldKey && formErrors[field.fieldKey] &&
-                                      <span
-                                        id={`${randomId}_error`}
-                                        aria-live="assertive"
-                                      >
-                                          {formErrors[field.fieldKey]}
-                                      </span>
-                                    }
-                                </FormFieldErrorMessage>
-                            </div>
-                        );
+                        if (field.type !== 'pagination') {
+                            return (
+                                <div className={`question question-type-${field.type}`} key={index}>
+                                    {renderField(field, index, randomId, fieldInvalid)}
+                                    <FormFieldErrorMessage className="error-message">
+                                        {field.fieldKey && formErrors[field.fieldKey] &&
+                                          <span
+                                            id={`${randomId}_error`}
+                                            aria-live="assertive"
+                                          >
+                                              {formErrors[field.fieldKey]}
+                                          </span>
+                                        }
+                                    </FormFieldErrorMessage>
+                                </div>
+                            );
+                        }
+                        return null;
                       }
                     )}
                     {secondaryLabel && (
@@ -183,7 +188,7 @@ function Form({
                             {secondaryLabel}
                         </Button>
                     )}
-                    <div className="button-group">
+                    <div className="button-group --flex">
                         {currentPage > 0 && (
                             <Button
                                 appearance='secondary-action-button'
@@ -194,7 +199,7 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                Vorige
+                                {prevPageText || 'vorige'}
                             </Button>
                         )}
                         <Button

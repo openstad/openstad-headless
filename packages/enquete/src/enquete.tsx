@@ -10,7 +10,7 @@ import {
 } from '@openstad-headless/ui/src';
 import hasRole from '../../lib/has-role';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
@@ -20,14 +20,16 @@ import {
 } from '@utrecht/component-library-react';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import { FormValue } from "@openstad-headless/form/src/form";
+
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
     EnquetePropsType;
 
 function Enquete(props: EnqueteWidgetProps) {
+    const datastore = new DataStore(props);
     const notifyCreate = () => NotificationService.addNotification("Enquete ingediend", "success");
 
-    const datastore = new DataStore(props);
 
     const { create: createSubmission } = datastore.useSubmissions({
         projectId: props.projectId,
@@ -45,31 +47,38 @@ function Enquete(props: EnqueteWidgetProps) {
     );
 
     async function onSubmit(formData: any) {
-        formData.confirmationUser = props?.confirmation?.confirmationUser || false;
-        formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
-        formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
 
-        const getUserEmailFromField = formData.confirmationUser && !formOnlyVisibleForUsers;
+        if (currentPage < totalPages - 1) {
+            setCurrentPage((prevPage) => prevPage + 1);
+        } else {
 
-        if (getUserEmailFromField) {
-            const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
+            formData.confirmationUser = props?.confirmation?.confirmationUser || false;
+            formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
+            formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
 
-            if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
-                formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
+            const getUserEmailFromField = formData.confirmationUser && !formOnlyVisibleForUsers;
+
+            if (getUserEmailFromField) {
+                const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
+
+                if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
+                    formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
+                }
+            }
+
+            formData.embeddedUrl = window.location.href;
+
+            const result = await createSubmission(formData, props.widgetId);
+
+            if (result) {
+                if (props.afterSubmitUrl) {
+                    location.href = props.afterSubmitUrl.replace("[id]", result.id)
+                } else {
+                    notifyCreate();
+                }
             }
         }
 
-        formData.embeddedUrl = window.location.href;
-
-        const result = await createSubmission(formData, props.widgetId);
-
-        if (result) {
-            if (props.afterSubmitUrl) {
-                location.href = props.afterSubmitUrl.replace("[id]", result.id)
-            } else {
-                notifyCreate();
-            }
-        }
     }
 
 
@@ -86,7 +95,6 @@ function Enquete(props: EnqueteWidgetProps) {
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
                 fieldRequired: item.fieldRequired,
             };
-
             switch (item.questionType) {
                 case 'open':
                     fieldData['type'] = 'text';
@@ -141,7 +149,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['type'] = 'imageChoice';
                     fieldData['multiple'] = item.multiple || false;
 
-                    if ( item.options && item.options.length > 0 ) {
+                    if (item.options && item.options.length > 0) {
                         fieldData['choices'] = item.options.map((option) => {
                             return {
                                 value: option.titles[0].key,
@@ -178,32 +186,37 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['showSmileys'] = item.showSmileys;
 
                     const labelOptions = [
-                      <Icon icon="ri-emotion-unhappy-line" key={1} />,
-                      <Icon icon="ri-emotion-sad-line" key={2} />,
-                      <Icon icon="ri-emotion-normal-line" key={3} />,
-                      <Icon icon="ri-emotion-happy-line" key={4} />,
-                      <Icon icon="ri-emotion-laugh-line" key={5} />
+                        <Icon icon="ri-emotion-unhappy-line" key={1} />,
+                        <Icon icon="ri-emotion-sad-line" key={2} />,
+                        <Icon icon="ri-emotion-normal-line" key={3} />,
+                        <Icon icon="ri-emotion-happy-line" key={4} />,
+                        <Icon icon="ri-emotion-laugh-line" key={5} />
                     ]
 
                     fieldData['fieldOptions'] = labelOptions.map((label, index) => {
                         const currentValue = index + 1;
-                          return {
+                        return {
                             value: currentValue,
                             label: item.showSmileys ? label : currentValue,
-                          }
-                        });
+                        }
+                    });
                     break;
                 case 'map':
                     fieldData['type'] = 'map';
 
-                    if ( !!props?.datalayer ) {
+                    if (!!props?.datalayer) {
                         fieldData['datalayer'] = props?.datalayer;
                     }
 
-                    if ( typeof(props?.enableOnOffSwitching) === 'boolean' ) {
+                    if (typeof (props?.enableOnOffSwitching) === 'boolean') {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
 
+                    break;
+                case 'pagination':
+                    fieldData['type'] = 'pagination';
+                    fieldData['prevPageText'] = item?.prevPageText || '1';
+                    fieldData['nextPageText'] = item?.nextPageText || '2';
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
@@ -222,6 +235,39 @@ function Enquete(props: EnqueteWidgetProps) {
             formFields.push(fieldData);
         }
     }
+
+    const defaultAnswers = formFields.reduce((acc, item) => {
+        if (typeof item.fieldKey !== 'undefined') {
+            acc[item.fieldKey] = typeof item.defaultValue !== 'undefined' ? item.defaultValue : '';
+        }
+        return acc;
+    }, {} as { [key: string]: FormValue });
+
+    const [answers, setAnswers] = useState<{ [key: string]: FormValue }>(defaultAnswers);
+    const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
+    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [currentAnswers, setCurrentAnswers] = useState<{ [key: string]: string }>({});
+
+    const totalPages = formFields.filter(field => field.type === 'pagination').length + 1 || 1;
+    // Find indices of all pagination fields
+    const paginationIndices = formFields
+        .map((field, idx) => field.type === 'pagination' ? idx : -1)
+        .filter(idx => idx !== -1);
+
+    // Add start and end indices for slicing
+    const pageStartIndices = [0, ...paginationIndices.map(idx => idx + 1)];
+    const pageEndIndices = [...paginationIndices, formFields.length];
+
+    // Get fields for the current page
+    const currentFields = formFields.slice(pageStartIndices[currentPage], pageEndIndices[currentPage]);
+
+    useEffect(() => {
+        const updatedAnswers = { ...answers, ...currentAnswers };
+        setAnswers(updatedAnswers);
+    }, [currentAnswers]);
+
+    const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageText || 'Vorige';
+    const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageText || 'Volgende';
 
     return (
         <div className="osc">
@@ -251,11 +297,15 @@ function Enquete(props: EnqueteWidgetProps) {
                     )}
                 </div>
                 <Form
-                    fields={formFields}
+                    fields={currentFields}
                     submitHandler={onSubmit}
                     title=""
-                    submitText="Versturen"
+                    submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
                     submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    prevPage={currentPage > 0 ? currentPage - 1 : null}
+                    prevPageText={getPrevPageTitle}
                     {...props}
                 />
             </div>

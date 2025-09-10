@@ -1,6 +1,5 @@
 const express 				= require('express');
 const config 					= require('config');
-const fetch           = require('node-fetch');
 const merge           = require('merge');
 const Sequelize       = require('sequelize');
 const db      				= require('../../db');
@@ -364,7 +363,7 @@ router.route('/')
               identifier: req.user?.idpUser?.identifier || 'no identifier found',
               provider: req.user?.idpUser?.provider || 'no provider found',
             },
-            role: 'admin',
+            [Op.or]: [{role: 'admin'}, {role: 'editor'}]
           }
         })
         let projectIds = users.map(u => u.projectId);
@@ -373,6 +372,9 @@ router.route('/')
 
       // now find the corresponding projects
       let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+      if (req.user?.role === 'editor') {
+        result.rows = result.rows.filter(project => project.id !== 1);
+      }
 
       if ( req.scope.includes("getBasicInformation") ) {
         result.rows = result.rows.map(project => {
@@ -440,6 +442,10 @@ router.route('/')
       let providersDone = [];
       for (let provider of providers) {
         let authConfig = await authSettings.config({ project, useAuth: provider });
+
+        // Prevent prototype pollution
+        if (authConfig?.provider === '__proto__' || authConfig?.provider === 'constructor' || authConfig?.provider === 'prototype') continue;
+
         if ( !providersDone[authConfig.provider] ) { // filter for duplicates like 'default'
           let adapter = await authSettings.adapter({ authConfig });
           if (adapter.service.createClient) {
@@ -794,9 +800,7 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 
 		req.project.doAnonymizeAllUsers(
 			[...result.users],
-			[...result.externalUserIds],
 			req.query.useAuth
-
 		);
       }
       next();

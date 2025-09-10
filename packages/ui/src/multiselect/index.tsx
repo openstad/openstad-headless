@@ -12,11 +12,12 @@ export function MultiSelect({
   onItemSelected,
   defaultOpen,
   options,
+  id
 }: {
   label: string;
   options: Array<{ value: string; label: string; checked?: boolean }>;
   defaultOpen?: boolean;
-  id?: string;
+  id: string;
   onItemSelected: (optionValue: string, optionLabel?: string) => void;
 }) {
 
@@ -44,6 +45,8 @@ export function MultiSelect({
         onClick={() => {
           setOpen(!isOpen);
         }}
+        test-id="multi-select-button"
+        id={ id }
       >
         {label}
         <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />

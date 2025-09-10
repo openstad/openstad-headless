@@ -5,6 +5,7 @@ import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Heading5, Paragraph, Strong, Button } from "@utrecht/component-library-react";
+import {TagType} from "../../stem-begroot";
 
 export const StemBegrootBudgetList = ({
   introText = '',
@@ -26,6 +27,7 @@ export const StemBegrootBudgetList = ({
   typeIsPerTag = false,
   setActiveTagTab,
   step1MaxText = '',
+  tagCounter = []
 }: {
   allResourceInList: Array<any>
   selectedResources: Array<any>;
@@ -46,13 +48,24 @@ export const StemBegrootBudgetList = ({
   typeIsPerTag?: boolean;
   setActiveTagTab?: Dispatch<SetStateAction<string>>;
   step1MaxText?: string;
+  tagCounter?: Array<TagType>;
 }) => {
-  const budgetUsed = selectedResources.reduce(
+
+  const canAddMore = decideCanAddMore();
+
+  let filteredResources = selectedResources;
+
+  if (typeIsPerTag && !!tagCounter && !!activeTagTab) {
+    const tagObj = tagCounter.find((tagObj) => Object.keys(tagObj)[0] === activeTagTab);
+    if (tagObj) {
+      filteredResources = tagObj[activeTagTab]?.selectedResources;
+    }
+  }
+
+  const budgetUsed = filteredResources.reduce(
     (total, cv) => total + cv.budget,
     0
   );
-
-  const canAddMore = decideCanAddMore();
 
   return (
     <>
@@ -69,7 +82,7 @@ export const StemBegrootBudgetList = ({
             <BudgetStatusPanel
               typeIsBudgeting={typeIsBudgeting}
               maxNrOfResources={maxNrOfResources}
-              nrOfResourcesSelected={selectedResources.length}
+              nrOfResourcesSelected={filteredResources.length}
               maxBudget={maxBudget}
               budgetUsed={budgetUsed}
               showInfoMenu={showInfoMenu}
@@ -93,7 +106,7 @@ export const StemBegrootBudgetList = ({
         <Spacer size={1} />
         <div className="budget-list-selections">
           <div className="budget-list-selection-indicaction-container" role="status">
-            {selectedResources.map((resource) => {
+            {filteredResources.map((resource) => {
               let defaultImage = '';
 
               interface Tag {

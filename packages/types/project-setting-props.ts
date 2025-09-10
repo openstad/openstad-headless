@@ -10,6 +10,8 @@ export type ProjectSettingProps = {
     anonymizeUsersXDaysAfterEndDate: number;
     warnUsersAfterXDaysOfInactivity: number;
     anonymizeUsersAfterXDaysOfInactivity: number;
+    anonymizeUserName: string;
+    allowAnonymizeUsersAfterEndDate: boolean;
   };
   auth: {
     default: string;
@@ -77,5 +79,6 @@ export type ProjectSettingProps = {
     areaId: string;
     tilesVariant?: string;
     customUrl?: string;
+    autoZoomAndCenter?: "area" | "markers";
   };
 };
