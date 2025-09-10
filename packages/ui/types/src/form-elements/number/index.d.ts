@@ -1,5 +1,6 @@
 import { FC } from "react";
 import './style.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 export type NumberInputProps = {
     title: string;
     description?: string;
@@ -9,7 +10,7 @@ export type NumberInputProps = {
     disabled?: boolean;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | [];
+        value: FormValue;
     }) => void;
     reset?: (resetFn: () => void) => void;
     format?: boolean;
@@ -19,6 +20,12 @@ export type NumberInputProps = {
     placeholder?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    prevPageTekst?: string;
+    nextPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const NumberInput: FC<NumberInputProps>;
 export default NumberInput;

@@ -17,7 +17,7 @@ import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | Record<number, never> | [];
+export type FormValue = string | string[] | Record<number, never> | [] | number | boolean;
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -35,17 +35,16 @@ function Form({
     currentPage,
     setCurrentPage,
     prevPage,
+    prevPageText,
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
-            //@ts-expect-error
             initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
             initialFormValues[field.fieldKey] = field.type === 'map' ? {} : initialFormValues[field.fieldKey];
 
             if (field.type === 'tickmark-slider') {
-                //@ts-expect-error
                 initialFormValues[field.fieldKey] = Math.ceil((field?.fieldOptions?.length || 2) / 2).toString();
             }
         }
@@ -156,21 +155,24 @@ function Form({
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
-                        return (
-                            <div className={`question question-type-${field.type}`} key={index}>
-                                {renderField(field, index, randomId, fieldInvalid)}
-                                <FormFieldErrorMessage className="error-message">
-                                    {field.fieldKey && formErrors[field.fieldKey] &&
-                                      <span
-                                        id={`${randomId}_error`}
-                                        aria-live="assertive"
-                                      >
-                                          {formErrors[field.fieldKey]}
-                                      </span>
-                                    }
-                                </FormFieldErrorMessage>
-                            </div>
-                        );
+                        if (field.type !== 'pagination') {
+                            return (
+                                <div className={`question question-type-${field.type}`} key={index}>
+                                    {renderField(field, index, randomId, fieldInvalid)}
+                                    <FormFieldErrorMessage className="error-message">
+                                        {field.fieldKey && formErrors[field.fieldKey] &&
+                                          <span
+                                            id={`${randomId}_error`}
+                                            aria-live="assertive"
+                                          >
+                                              {formErrors[field.fieldKey]}
+                                          </span>
+                                        }
+                                    </FormFieldErrorMessage>
+                                </div>
+                            );
+                        }
+                        return null;
                       }
                     )}
                     {secondaryLabel && (
@@ -182,7 +184,7 @@ function Form({
                             {secondaryLabel}
                         </Button>
                     )}
-                    <div className="button-group">
+                    <div className="button-group --flex">
                         {currentPage > 0 && (
                             <Button
                                 appearance='secondary-action-button'
@@ -193,7 +195,7 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                Vorige
+                                {prevPageText || 'vorige'}
                             </Button>
                         )}
                         <Button

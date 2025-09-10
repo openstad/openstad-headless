@@ -26,6 +26,13 @@ export type ImageUploadProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageTekst?: string;
+    nextPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const ImageUploadField: FC<ImageUploadProps>;
 export default ImageUploadField;
