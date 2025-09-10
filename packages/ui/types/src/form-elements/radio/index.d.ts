@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { FormValue } from "@openstad-headless/form/src/form";
 export type RadioboxFieldProps = {
     title: string;
     description?: string;
@@ -15,7 +16,7 @@ export type RadioboxFieldProps = {
     type?: string;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | [];
+        value: FormValue;
     }) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -23,6 +24,13 @@ export type RadioboxFieldProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageTekst?: string;
+    nextPageTekst?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const RadioboxField: FC<RadioboxFieldProps>;
 export default RadioboxField;

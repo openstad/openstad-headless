@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { FormValue } from "@openstad-headless/form/src/form";
 export type SelectFieldProps = {
     title?: string;
     description?: string;
@@ -13,7 +14,7 @@ export type SelectFieldProps = {
     disabled?: boolean;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | [];
+        value: FormValue;
     }) => void;
     type?: string;
     showMoreInfo?: boolean;
@@ -24,6 +25,12 @@ export type SelectFieldProps = {
     fieldInvalid?: boolean;
     multiple?: boolean;
     defaultValue?: string | string[];
+    prevPageTekst?: string;
+    nextPageTekst?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const SelectField: FC<SelectFieldProps>;
 export default SelectField;

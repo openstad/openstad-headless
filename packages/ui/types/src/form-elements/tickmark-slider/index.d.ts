@@ -1,9 +1,10 @@
 import { FC } from 'react';
 import './style.css';
+import { FormValue } from '@openstad-headless/form/src/form';
 export type TickmarkSliderProps = {
     index: number;
     title: string;
-    fieldOptions: {
+    fieldOptions?: {
         value: string;
         label: string;
     }[];
@@ -16,7 +17,7 @@ export type TickmarkSliderProps = {
     disabled?: boolean;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | [];
+        value: FormValue;
     }) => void;
     type?: string;
     showSmileys?: boolean;
@@ -26,6 +27,9 @@ export type TickmarkSliderProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageTekst?: string;
+    nextPageTekst?: string;
 };
 declare const TickmarkSlider: FC<TickmarkSliderProps>;
 export default TickmarkSlider;

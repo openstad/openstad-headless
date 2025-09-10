@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import './a-b-slider.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 export type RangeSliderProps = {
     title: string;
     description?: string;
@@ -20,7 +21,7 @@ export type RangeSliderProps = {
     type?: string;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | valueObject | [];
+        value: FormValue | valueObject;
     }) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -32,6 +33,13 @@ export type RangeSliderProps = {
     skipQuestionAllowExplanation?: boolean;
     skipQuestionExplanation?: string;
     skipQuestionLabel?: string;
+    defaultValue?: string;
+    prevPageTekst?: string;
+    nextPageTekst?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 type valueObject = {
     value: string;
