@@ -181,6 +181,9 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['imageUrl'] = props?.imageUrl;
                     fieldData['multiple'] = item.multiple;
                     break;
+                case 'documentUpload':
+                    fieldData['type'] = 'documentUpload';
+                    fieldData['multiple'] = item.multiple;
                 case 'scale':
                     fieldData['type'] = 'tickmark-slider';
                     fieldData['showSmileys'] = item.showSmileys;
