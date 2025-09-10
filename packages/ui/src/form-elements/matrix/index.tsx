@@ -37,6 +37,8 @@ export type MatrixFieldProps = {
     fieldInvalid?: boolean;
     matrixMultiple?: boolean;
     matrix?: Matrix;
+    defaultValue?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const MatrixField: FC<MatrixFieldProps> = ({
