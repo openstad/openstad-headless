@@ -287,10 +287,6 @@
   transform: scale(1.1);
 }
 
-.swipe-widget .swipe-btn-like:hover i {
-  transform: scale(1.2);
-}
-
 .swipe-widget .swipe-btn-like i {
   color: var(--swipe-like-fill);
 }
@@ -301,10 +297,6 @@
 
 .swipe-widget .swipe-btn-pass:hover {
   transform: scale(1.1);
-}
-
-.swipe-widget .swipe-btn-pass:hover i {
-  transform: scale(1.2);
 }
 
 .swipe-widget .swipe-btn-pass i {
