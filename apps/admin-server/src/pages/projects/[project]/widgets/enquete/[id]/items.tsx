@@ -107,7 +107,7 @@ const matrixList: {type: 'rows' | 'columns', heading: string, description: strin
   }, {
     type: 'columns',
     heading: 'Lijst van antwoordopties',
-    description: 'Dit zijn de antwoordopties die gekozen kunnen worden per onderwerp. Deze komen in de eerste kolom (horizontaal) van de matrix.',
+    description: 'Dit zijn de antwoordopties die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
   }
 ];
 
