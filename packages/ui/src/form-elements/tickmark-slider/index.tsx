@@ -25,8 +25,8 @@ export type TickmarkSliderProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     defaultValue?: string;
-    prevPageTekst?: string;
-    nextPageTekst?: string;
+    prevPageText?: string;
+    nextPageText?: string;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({

@@ -30,7 +30,7 @@ export type TextInputProps = {
     fieldInvalid?: boolean;
     minCharactersError?: string;
     maxCharactersError?: string;
-    nextPageTekst?: string;
+    nextPageText?: string;
     prevPageTekst?: string;
     fieldOptions?: {
         value: string;

@@ -29,7 +29,7 @@ export type TickmarkSliderProps = {
     fieldInvalid?: boolean;
     defaultValue?: string;
     prevPageTekst?: string;
-    nextPageTekst?: string;
+    nextPageText?: string;
 };
 declare const TickmarkSlider: FC<TickmarkSliderProps>;
 export default TickmarkSlider;

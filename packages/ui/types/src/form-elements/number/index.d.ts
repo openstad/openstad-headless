@@ -21,7 +21,7 @@ export type NumberInputProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     prevPageTekst?: string;
-    nextPageTekst?: string;
+    nextPageText?: string;
     fieldOptions?: {
         value: string;
         label: string;

@@ -25,7 +25,7 @@ export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
     enableOnOffSwitching?: boolean;
     defaultValue?: string;
     prevPageTekst?: string;
-    nextPageTekst?: string;
+    nextPageText?: string;
     fieldOptions?: {
         value: string;
         label: string;

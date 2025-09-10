@@ -26,7 +26,7 @@ export type SelectFieldProps = {
     multiple?: boolean;
     defaultValue?: string | string[];
     prevPageTekst?: string;
-    nextPageTekst?: string;
+    nextPageText?: string;
     fieldOptions?: {
         value: string;
         label: string;

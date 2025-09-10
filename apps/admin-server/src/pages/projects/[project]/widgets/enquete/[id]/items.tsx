@@ -41,8 +41,8 @@ const formSchema = z.object({
   fieldKey: z.string(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
-  nextPageTekst: z.string().optional(),
-  prevPageTekst: z.string().optional(),
+  nextPageText: z.string().optional(),
+  prevPageText: z.string().optional(),
   variant: z.string().optional(),
   options: z
     .array(
@@ -126,8 +126,8 @@ export default function WidgetEnqueteItems(
           fieldKey: values.fieldKey,
           minCharacters: values.minCharacters,
           maxCharacters: values.maxCharacters,
-          nextPageTekst: values.nextPageTekst || '',
-          prevPageTekst: values.prevPageTekst || '',
+          nextPageText: values.nextPageText || '',
+          prevPageText: values.prevPageText || '',
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
@@ -202,8 +202,8 @@ export default function WidgetEnqueteItems(
     fieldKey: '',
     minCharacters: '',
     maxCharacters: '',
-    nextPageTekst: 'Volgende',
-    prevPageTekst: 'Vorige',
+    nextPageText: 'Volgende',
+    prevPageText: 'Vorige',
     variant: 'text input',
     options: [],
     multiple: false,
@@ -253,8 +253,8 @@ export default function WidgetEnqueteItems(
         questionType: selectedItem.questionType || '',
         minCharacters: selectedItem.minCharacters || '',
         maxCharacters: selectedItem.maxCharacters || '',
-        nextPageTekst: selectedItem.nextPageTekst || '',
-        prevPageTekst: selectedItem.prevPageTekst || '',
+        nextPageText: selectedItem.nextPageText || '',
+        prevPageText: selectedItem.prevPageText || '',
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
@@ -882,7 +882,7 @@ export default function WidgetEnqueteItems(
                       <>
                         <FormField
                           control={form.control}
-                          name="prevPageTekst"
+                          name="prevPageText"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Tekst voor: Vorige pagina</FormLabel>
@@ -893,7 +893,7 @@ export default function WidgetEnqueteItems(
                         />
                                                 <FormField
                           control={form.control}
-                          name="nextPageTekst"
+                          name="nextPageText"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Tekst voor: Volgende pagina</FormLabel>

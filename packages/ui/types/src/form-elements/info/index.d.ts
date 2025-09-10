@@ -13,7 +13,7 @@ export type InfoFieldProps = {
     infoImage?: string;
     defaultValue?: string;
     prevPageTekst?: string;
-    nextPageTekst?: string;
+    nextPageText?: string;
     fieldOptions?: {
         value: string;
         label: string;

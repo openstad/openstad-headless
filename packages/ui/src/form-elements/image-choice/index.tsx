@@ -28,8 +28,8 @@ export type ImageChoiceFieldProps = {
     fieldInvalid?: boolean;
     multiple?: boolean;
     defaultValue?: string;
-    prevPageTekst?: string;
-    nextPageTekst?: string;
+    prevPageText?: string;
+    nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
 }
 

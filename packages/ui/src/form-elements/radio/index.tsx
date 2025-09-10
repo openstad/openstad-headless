@@ -30,8 +30,8 @@ export type RadioboxFieldProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     defaultValue?: string;
-    prevPageTekst?: string;
-    nextPageTekst?: string;
+    prevPageText?: string;
+    nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
 }
 

@@ -215,8 +215,8 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'pagination':
                     fieldData['type'] = 'pagination';
-                    fieldData['prevPageTekst'] = item?.prevPageTekst || '1';
-                    fieldData['nextPageTekst'] = item?.nextPageTekst || '2';
+                    fieldData['prevPageText'] = item?.prevPageText || '1';
+                    fieldData['nextPageText'] = item?.nextPageText || '2';
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
@@ -260,8 +260,8 @@ function Enquete(props: EnqueteWidgetProps) {
         setAnswers(updatedAnswers);
     }, [currentAnswers]);
 
-    const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageTekst || 'Vorige';
-    const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageTekst || 'Volgende';
+    const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageText || 'Vorige';
+    const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageText || 'Volgende';
 
     return (
         <div className="osc">

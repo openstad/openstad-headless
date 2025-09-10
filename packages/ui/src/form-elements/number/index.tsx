@@ -26,8 +26,8 @@ export type NumberInputProps = {
     placeholder?: string;
     randomId?: string;
     fieldInvalid?: boolean;
-    prevPageTekst?: string;
-    nextPageTekst?: string;
+    prevPageText?: string;
+    nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
 }
 

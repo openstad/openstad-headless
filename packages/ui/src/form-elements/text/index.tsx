@@ -38,8 +38,8 @@ export type TextInputProps = {
     fieldInvalid?: boolean;
     minCharactersError?: string;
     maxCharactersError?: string;
-    nextPageTekst?: string;
-    prevPageTekst?: string;
+    nextPageText?: string;
+    prevPageText?: string;
     fieldOptions?: { value: string; label: string }[];
 }
 

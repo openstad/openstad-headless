@@ -34,8 +34,8 @@ export type FormProps = {
 type PaginationFieldProps = {
     type: 'pagination';
     fieldKey?: string;
-    prevPageTekst?: any;
-    nextPageTekst?: any;
+    prevPageText?: any;
+    nextPageText?: any;
     defaultValue?: string;
 };
 
