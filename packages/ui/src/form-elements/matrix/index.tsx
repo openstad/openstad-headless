@@ -39,6 +39,8 @@ export type MatrixFieldProps = {
     matrix?: Matrix;
     defaultValue?: string;
     fieldOptions?: { value: string; label: string }[];
+    nextPageText?: string;
+    prevPageText?: string;
 }
 
 const MatrixField: FC<MatrixFieldProps> = ({
