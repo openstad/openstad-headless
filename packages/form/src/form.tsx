@@ -15,6 +15,7 @@ import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice";
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
+import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
@@ -149,6 +150,7 @@ function Form({
         hidden: HiddenInput as React.ComponentType<ComponentFieldProps>,
         imageChoice: ImageChoiceField as React.ComponentType<ComponentFieldProps>,
         number: NumberInput as React.ComponentType<ComponentFieldProps>,
+        matrix: MatrixField as React.ComponentType<ComponentFieldProps>,
         none: InfoField as React.ComponentType<ComponentFieldProps>,
     };
 

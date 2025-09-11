@@ -45,6 +45,8 @@ export type Item = {
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
+  matrix?: Matrix;
+  matrixMultiple?: boolean;
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
   routingSelectedAnswer?: string;
@@ -78,3 +80,13 @@ export type Confirmation = {
   overwriteEmailAddress?: string;
   userEmailAddress?: string;
 };
+
+export type Matrix = {
+  columns: Array<MatrixOption>;
+  rows: Array<MatrixOption>;
+}
+
+export type MatrixOption = {
+  trigger: string;
+  text?: string;
+}

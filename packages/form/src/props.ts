@@ -11,6 +11,7 @@ import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-element
 import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
 import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
 import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/number";
+import {MatrixFieldProps} from "@openstad-headless/ui/src/form-elements/matrix";
 import { FormValue } from "@openstad-headless/form/src/form";
 
 export type FormProps = {
@@ -52,6 +53,7 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'hidden' } & HiddenInputProps)
     | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
     | ({ type?: 'map' } & MapProps)
+    | ({ type?: 'matrix' } & MatrixFieldProps)
     | ({ type?: 'pagination' } & PaginationFieldProps)
     | ({ type?: 'none' } & InfoFieldProps);
 
@@ -75,6 +77,7 @@ type CombinedFieldProps = (
     HiddenInputProps |
     ImageChoiceFieldProps |
     NumberInputProps |
+    MatrixFieldProps |
     InfoFieldProps
 );
 
