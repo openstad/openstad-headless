@@ -68,13 +68,6 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       const choiceOptions = selectedWidget?.config?.choiceOption?.choiceOptions || [];
       const choiceType = selectedWidget?.config?.choicesType || 'default';
 
-      let weights: any = {};
-      try {
-        weights = InitializeWeights(items, choiceOptions, choiceType);
-      } catch (error) {
-        weights = {};
-      }
-
       const fieldKeyToTitleMap = new Map();
       items.forEach((item: any) => {
         if (item.type === 'none') {
@@ -108,10 +101,19 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
       data = data.map((row: any) => {
         const scores: { [key: string]: any } = {};
+        const result = row?.result || {};
+        const hiddenFields = result?.hiddenFields || [];
+
+        let weights: any = {};
+        try {
+          weights = InitializeWeights(items, choiceOptions, choiceType, hiddenFields);
+        } catch (error) {
+          weights = {};
+        }
 
         choiceOptions.forEach((choiceOption: any) => {
           try {
-            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType);
+            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType, hiddenFields);
             scores[choiceOption.title] = calculatedScores.x ? (calculatedScores.x).toFixed(0) : 0;
           } catch (error) {
             scores[choiceOption.title] = 0;

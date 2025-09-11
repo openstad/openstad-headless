@@ -27,7 +27,7 @@ export type DocumentUploadProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     defaultValue?: string;
-    prevPageTekst?: string;
+    prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {
         value: string;

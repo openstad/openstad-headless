@@ -34,7 +34,7 @@ export type RangeSliderProps = {
     skipQuestionExplanation?: string;
     skipQuestionLabel?: string;
     defaultValue?: string;
-    prevPageTekst?: string;
+    prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {
         value: string;

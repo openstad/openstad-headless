@@ -63,6 +63,9 @@ const formSchema = z.object({
             })
         )
         .optional(),
+    routingInitiallyHide: z.boolean().optional(),
+    routingSelectedQuestion: z.string().optional(),
+    routingSelectedAnswer: z.string().optional(),
 });
 
 export default function WidgetResourceFormItems(
@@ -117,6 +120,9 @@ export default function WidgetResourceFormItems(
                     variant: values.variant || 'text input',
                     multiple: values.multiple || false,
                     options: values.options || [],
+                    routingInitiallyHide: values.routingInitiallyHide || false,
+                    routingSelectedQuestion: values.routingSelectedQuestion || '',
+                    routingSelectedAnswer: values.routingSelectedAnswer || '',
                 },
             ]);
         }
@@ -175,6 +181,9 @@ export default function WidgetResourceFormItems(
         variant: 'text input',
         multiple: false,
         options: [],
+        routingInitiallyHide: false,
+        routingSelectedQuestion: '',
+        routingSelectedAnswer: '',
     });
 
     const form = useForm<FormData>({
@@ -215,6 +224,9 @@ export default function WidgetResourceFormItems(
                 maxChoicesMessage: selectedItem.maxChoicesMessage || '',
                 variant: selectedItem.variant || '',
                 multiple: selectedItem.multiple || false,
+                routingInitiallyHide: selectedItem.routingInitiallyHide || false,
+                routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
+                routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
             });
             setOptions(selectedItem.options || []);
         }
@@ -1025,6 +1037,152 @@ export default function WidgetResourceFormItems(
                                               </FormItem>
                                             )}
                                           />
+                                        )}
+
+                                        { !['title', 'summary', 'description'].includes(form.watch('type') || '') && (
+                                            <FormField
+                                              control={form.control}
+                                              name="routingInitiallyHide"
+                                              render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Is deze vraag altijd zichtbaar?</FormLabel>
+                                                    <Select
+                                                      onValueChange={(e: string) => field.onChange(e === 'true')}
+                                                      value={field.value ? 'true' : 'false'}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Kies een optie" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {/* True and false are deliberately switched */}
+                                                            <SelectItem value="true">Nee</SelectItem>
+                                                            <SelectItem value="false">Ja</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                              )}
+                                            />
+                                        )}
+
+                                        { form.watch('routingInitiallyHide') && (
+                                          <>
+                                              <FormField
+                                                control={form.control}
+                                                name="routingSelectedQuestion"
+                                                render={({ field }) => {
+                                                    const formFields = items || [];
+                                                    let formMultipleChoiceFields = formFields
+                                                      .filter((f: any) =>
+                                                        (
+                                                          f.type === 'radiobox'
+                                                          || f.type === 'checkbox'
+                                                          || f.type === 'select'
+                                                          || f.type === 'tags'
+                                                        )
+                                                        && f.trigger !== form.watch('trigger'));
+
+                                                    return (
+                                                      <FormItem>
+                                                          <FormLabel>Welke vraag beïnvloedt de zichtbaarheid van deze vraag?</FormLabel>
+
+                                                          { formMultipleChoiceFields.length === 0 ? (
+                                                            <p
+                                                              className="text-sm"
+                                                              style={{
+                                                                  padding: "11px",
+                                                                  borderLeft: "4px solid red",
+                                                                  backgroundColor: "#ffdbd7",
+                                                                  borderTopRightRadius: '5px',
+                                                                  borderBottomRightRadius: '5px',
+                                                                  marginTop: '12px',
+                                                              }}
+                                                            >
+                                                                Je hebt nog geen meerkeuze, multiplechoice of afbeelding keuze vragen toegevoegd. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                                            </p>
+                                                          ) : (
+                                                            <Select
+                                                              value={field.value}
+                                                              onValueChange={field.onChange}>
+                                                                <FormControl>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue placeholder="Kies een vraag" />
+                                                                    </SelectTrigger>
+                                                                </FormControl>
+                                                                <SelectContent>
+                                                                    { formMultipleChoiceFields.map((f: any) => (
+                                                                      <SelectItem key={f.trigger} value={f.trigger}>{f.title || f.fieldKey}</SelectItem>
+                                                                    )) }
+                                                                </SelectContent>
+                                                            </Select>
+                                                          )}
+
+                                                          <FormMessage/>
+                                                      </FormItem>
+                                                    )
+                                                }}
+                                              />
+
+                                              { form.watch("routingSelectedQuestion") !== '' && (
+                                                <FormField
+                                                  control={form.control}
+                                                  name="routingSelectedAnswer"
+                                                  render={({ field }) => {
+                                                      const selectedQuestion = items?.find((i: any) => i.trigger === form.watch("routingSelectedQuestion"));
+                                                      let options = selectedQuestion?.options || [];
+
+                                                      if ( selectedQuestion?.type === 'tags' ) {
+                                                          options = allTags
+                                                            .filter((tag: any) => tag.type === selectedQuestion.tags)
+                                                            .map((tag: any, index: number) => ({
+                                                                trigger: `${index}`,
+                                                                titles: [{key: tag.name}]
+                                                            }));
+                                                      }
+
+                                                      return (
+                                                        <FormItem>
+                                                            <FormLabel>Bij welk antwoord moet deze vraag getoond worden?</FormLabel>
+
+                                                            { options.length === 0 ? (
+                                                              <p
+                                                                className="text-sm"
+                                                                style={{
+                                                                    padding: "11px",
+                                                                    borderLeft: "4px solid red",
+                                                                    backgroundColor: "#ffdbd7",
+                                                                    borderTopRightRadius: '5px',
+                                                                    borderBottomRightRadius: '5px',
+                                                                    marginTop: '12px',
+                                                                }}
+                                                              >
+                                                                  De geselecteerde vraag heeft nog geen antwoordopties. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                                              </p>
+                                                            ) : (
+                                                              <Select
+                                                                value={field.value}
+                                                                onValueChange={field.onChange}>
+                                                                  <FormControl>
+                                                                      <SelectTrigger>
+                                                                          <SelectValue placeholder="Kies een antwoord" />
+                                                                      </SelectTrigger>
+                                                                  </FormControl>
+                                                                  <SelectContent>
+                                                                      { options.map((o: any) => (
+                                                                        <SelectItem key={o.trigger} value={o.trigger}>{o.titles?.[0]?.key || o.trigger}</SelectItem>
+                                                                      )) }
+                                                                  </SelectContent>
+                                                              </Select>
+                                                            )}
+
+                                                            <FormMessage/>
+                                                        </FormItem>
+                                                      )
+                                                  }}
+                                                />
+                                              )}
+                                          </>
                                         )}
 
                                         {hasOptions() && (

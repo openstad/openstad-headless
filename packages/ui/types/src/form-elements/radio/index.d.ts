@@ -25,7 +25,7 @@ export type RadioboxFieldProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     defaultValue?: string;
-    prevPageTekst?: string;
+    prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {
         value: string;
