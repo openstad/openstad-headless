@@ -44,6 +44,10 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 minCharactersWarning: data?.choiceGuide?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.choiceGuide?.minCharactersError|| 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.choiceGuide?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+                routingInitiallyHide: item?.routingInitiallyHide || false,
+                routingSelectedQuestion: item?.routingSelectedQuestion || '',
+                routingSelectedAnswer: item?.routingSelectedAnswer || '',
+                trigger: item.trigger || '',
             };
 
             switch (item.type) {
@@ -65,7 +69,8 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 isOtherOption: option.titles[0].isOtherOption,
-                                defaultValue: option.titles[0].defaultValue
+                                defaultValue: option.titles[0].defaultValue,
+                                trigger: option.trigger || ''
                             }
                         });
 

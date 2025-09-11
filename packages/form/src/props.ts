@@ -16,11 +16,11 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type FormProps = {
     title?: string;
+    fields: Array<FieldWithOptionalFields>;
     fieldKey?: any;
-    fields: Array<CombinedFieldProps>;
     submitText?: string;
     submitHandler: (values: { [p: string]: FormValue}) => void;
-    getValuesOnChange?: (values: { [p: string]: FormValue}) => void;
+    getValuesOnChange?: (values: { [p: string]: FormValue}, hiddenFields?: string[]) => void;
     submitDisabled?: boolean;
     allowResetAfterSubmit?: boolean;
     secondaryLabel?: string;
@@ -81,4 +81,13 @@ type CombinedFieldProps = (
     InfoFieldProps
 );
 
-export type { CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};
+// These fields have no use outside the form component itself, so we make them optional here to avoid having to define them in every form field
+type FieldWithOptionalFields =
+  CombinedFieldProps & {
+    trigger?: string
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
+}
+
+export type { FieldWithOptionalFields, CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};

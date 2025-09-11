@@ -71,6 +71,9 @@ export type Item = {
     maxChoicesMessage?: string,
     matrix?: Matrix;
     matrixMultiple?: boolean;
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
 };
 
 export type Option = {

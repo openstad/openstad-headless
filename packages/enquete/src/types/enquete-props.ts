@@ -47,6 +47,9 @@ export type Item = {
   imageOptionUpload?: string;
   matrix?: Matrix;
   matrixMultiple?: boolean;
+  routingInitiallyHide?: boolean;
+  routingSelectedQuestion?: string;
+  routingSelectedAnswer?: string;
 
   // Keeping this for backwards compatibility
   image1?: string;

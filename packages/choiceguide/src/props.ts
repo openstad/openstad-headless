@@ -63,6 +63,7 @@ export type ChoiceGuideSidebarProps = {
     showPageCountAndCurrentPageInButton?: boolean;
     weights?: WeightOverview;
     widgetId?: string;
+    hiddenFields?: string[];
 }
 
 export type Score = {
@@ -115,6 +116,9 @@ export type Item = {
     skipQuestionLabel?: string;
     matrix?: Matrix;
     matrixMultiple?: boolean;
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
 };
 
 export type Option = {
