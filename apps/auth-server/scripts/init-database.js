@@ -7,7 +7,11 @@ const { Umzug, SequelizeStorage } = require('umzug');
 
 const { AUTH_ADMIN_CLIENT_ID: authId, AUTH_ADMIN_CLIENT_SECRET: authSecret } = process.env;
 
-if (authId.includes(':') || authSecret.includes(':')) {
+if (
+    ( !!authId && authId.includes(':') )
+    ||
+    ( !!authSecret && authSecret.includes(':') )
+) {
   throw new Error("Auth client id/secret must not contain ':'");
 }
 
