@@ -12,7 +12,7 @@ type Props = {
   tagType: string;
   placeholder?: string;
   onlyIncludeIds?: number[];
-  onUpdateFilter?: (filter: string) => void;
+  onUpdateFilter?: (filter: any, label?: string) => void;
   title: string;
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
@@ -80,7 +80,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
             const tagId = tag?.id?.toString();
 
             if ( defaultValue !== tagId ) {
-              onUpdateFilter(tagId);
+              onUpdateFilter(tagId, tag?.name || '');
               setDefaultValue(tagId);
             }
           }
@@ -100,9 +100,9 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
               label: tag.name,
             }))}
             title={props.title}
-            onValueChange={(value) => {
+            onValueChange={(value, label) => {
               setStopUsingDefaultValue(true);
-              onUpdateFilter && onUpdateFilter(value);
+              onUpdateFilter && onUpdateFilter(value, label);
             }}
             defaultValue={
               (preFilterTags && preFilterTags.length > 0) ?
