@@ -186,14 +186,11 @@ function Form({
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
-                        if (
-                            (field.fieldKey && routingHiddenFields.includes(field.fieldKey))
-                            || field.type !== 'pagination'
-                        ) {
+                        if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
                             return null;
                         }
 
-                        return (
+                        return field.type === 'pagination' ? null : (
                             <div className={`question question-type-${field.type}`} key={index}>
                                 {renderField(field, index, randomId, fieldInvalid)}
                                 <FormFieldErrorMessage className="error-message">

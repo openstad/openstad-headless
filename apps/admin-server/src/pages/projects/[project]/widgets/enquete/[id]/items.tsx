@@ -1402,30 +1402,32 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    <FormField
-                      control={form.control}
-                      name="routingInitiallyHide"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Is deze vraag altijd zichtbaar?</FormLabel>
-                          <Select
-                            onValueChange={(e: string) => field.onChange(e === 'true')}
-                            value={field.value ? 'true' : 'false'}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Kies een optie" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {/* True and false are deliberately switched */}
-                              <SelectItem value="true">Nee</SelectItem>
-                              <SelectItem value="false">Ja</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    { form.watch('questionType') !== 'pagination' && (
+                      <FormField
+                        control={form.control}
+                        name="routingInitiallyHide"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Is deze vraag altijd zichtbaar?</FormLabel>
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {/* True and false are deliberately switched */}
+                                <SelectItem value="true">Nee</SelectItem>
+                                <SelectItem value="false">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     { form.watch('routingInitiallyHide') && (
                       <>
