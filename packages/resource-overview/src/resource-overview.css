@@ -236,6 +236,14 @@ p.osc-searchtext {
   margin-top: -38px;
 }
 
+.osc-resource-overview-resource-collection .resource-card--link {
+  display: grid;
+}
+
+.osc-carousel.osc-carousel-container {
+  order: -1;
+}
+
 .osc-resource-overview-content .resource-has-no-images .osc-carousel .carousel-items .image-container,
 .osc-carousel .carousel-items .osc-gridder-resource-detail .resource-has-no-images .image-container {
   width: 100%;

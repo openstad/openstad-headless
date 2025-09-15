@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { FormValue } from "@openstad-headless/form/src/form";
 export type ImageChoiceFieldProps = {
     title: string;
     description?: string;
@@ -10,7 +11,7 @@ export type ImageChoiceFieldProps = {
     type?: string;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | [];
+        value: FormValue;
     }) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -19,6 +20,13 @@ export type ImageChoiceFieldProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     multiple?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 export type ChoiceItem = {
     label: string;

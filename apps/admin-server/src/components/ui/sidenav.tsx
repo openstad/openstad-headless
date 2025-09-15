@@ -118,7 +118,8 @@ export function Sidenav({
       <div
         className={cn(
           'p-4 flex flex-col gap-2',
-          narrow ? 'items-center' : null
+          narrow ? 'items-center' : null,
+          process.env.NEXT_PUBLIC_OPENSTAD_VERSION ? 'pb-6' : null
         )}>
         <Link href="/signout">
           <Button
@@ -131,6 +132,12 @@ export function Sidenav({
             {narrow ? '' : 'Uitloggen'}
           </Button>
         </Link>
+
+        {process.env.NEXT_PUBLIC_OPENSTAD_VERSION &&
+          <p className={cn('absolute left-0 right-0 bottom-2 text-center text-gray-400 text-xs')}>
+            v{process.env.NEXT_PUBLIC_OPENSTAD_VERSION}
+          </p>
+        }
       </div>
     </nav>
   );

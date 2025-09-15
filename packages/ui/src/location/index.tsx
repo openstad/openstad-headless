@@ -42,6 +42,8 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
   const [proximity, setProximity] = useState("0.5");
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if ( !locationDefault && input !== '' ) {
@@ -102,6 +104,7 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         if (!selected) setInput('');
         setShowDropdown(false);
+        setHighlightedIndex(0);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -118,6 +121,10 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
     setSuggestions([]);
     setSelected(null);
     setShowDropdown(false);
+    setHighlightedIndex(0);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   useEffect(() => {
@@ -140,6 +147,7 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
         <div className="input-wrapper">
           <input
             type="text"
+            ref={inputRef}
             value={input}
             onChange={e => {
               setInput(e.target.value);
@@ -150,6 +158,11 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
             className="utrecht-textbox utrecht-textbox--html-input"
             id="locationField"
             autoComplete="off"
+            aria-autocomplete="list"
+            aria-controls="suggestion-list"
+            aria-expanded={showDropdown}
+            aria-activedescendant={ showDropdown && suggestions.length > 0 ? `suggestion-${highlightedIndex}` : undefined }
+            role="combobox"
           />
           {selected && (
             <button
@@ -163,12 +176,36 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
           )}
         </div>
 
-        {loading && <p className="loading">Laden...</p>}
+        {loading && <p className="loading" aria-live="polite">Laden...</p>}
 
         {!loading && showDropdown && suggestions.length > 0 && (
-          <ul className="suggestion-list">
+          <ul className="suggestion-list" id="suggestion-list" role="listbox"
+              onKeyDown={e => {
+                if (showDropdown && suggestions.length > 0) {
+                  if (e.key === 'ArrowDown') {
+                    setHighlightedIndex(i => Math.min(i + 1, suggestions.length - 1));
+                    e.preventDefault();
+                  } else if (e.key === 'ArrowUp') {
+                    setHighlightedIndex(i => Math.max(i - 1, 0));
+                    e.preventDefault();
+                  } else if (e.key === 'Enter') {
+                    handleSelect(suggestions[highlightedIndex]);
+                    e.preventDefault();
+                  } else if (e.key === ' ') {
+                    e.preventDefault();
+                  }
+                }
+              }}
+          >
             {suggestions.map((s: Suggestion, index) => (
-              <li key={index} onClick={() => handleSelect(s)}>
+              <li
+                key={index}
+                onClick={() => handleSelect(s)}
+                role="option"
+                id={`suggestion-${index}`}
+                aria-selected={highlightedIndex === index}
+                tabIndex={-1}
+              >
                 <strong>{s.postcode}</strong> {s.straat}, {s.woonplaats}
               </li>
             ))}

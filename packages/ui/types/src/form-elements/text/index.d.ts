@@ -1,5 +1,6 @@
 import { FC } from "react";
 import './style.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 export type TextInputProps = {
     title: string;
     description?: string;
@@ -18,7 +19,7 @@ export type TextInputProps = {
     type?: string;
     onChange?: (e: {
         name: string;
-        value: string | Record<number, never> | [];
+        value: FormValue;
     }) => void;
     reset?: (resetFn: () => void) => void;
     showMoreInfo?: boolean;
@@ -29,6 +30,12 @@ export type TextInputProps = {
     fieldInvalid?: boolean;
     minCharactersError?: string;
     maxCharactersError?: string;
+    nextPageText?: string;
+    prevPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const TextInput: FC<TextInputProps>;
 export default TextInput;

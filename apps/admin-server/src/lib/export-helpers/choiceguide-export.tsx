@@ -2,6 +2,7 @@ import {calculateScoreForItem} from "../../../../../packages/choiceguide/src/par
 import {InitializeWeights} from "../../../../../packages/choiceguide/src/parts/init-weights";
 import {useEffect, useState} from "react";
 import * as XLSX from "xlsx";
+import { fetchMatrixData } from "./fetch-matrix-data";
 
 export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string, limit: number) => {
   const fetchResults = async () => {
@@ -68,13 +69,6 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       const choiceOptions = selectedWidget?.config?.choiceOption?.choiceOptions || [];
       const choiceType = selectedWidget?.config?.choicesType || 'default';
 
-      let weights: any = {};
-      try {
-        weights = InitializeWeights(items, choiceOptions, choiceType);
-      } catch (error) {
-        weights = {};
-      }
-
       const fieldKeyToTitleMap = new Map();
       items.forEach((item: any) => {
         if (item.type === 'none') {
@@ -91,7 +85,14 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
         const newKey = item.type + '-' + item.trigger;
 
-        fieldKeyToTitleMap.set(newKey, title);
+        if (item.type === 'matrix') {
+          item.matrix?.rows?.forEach((row: any) => {
+            const matrixKey = `${newKey}_${row.trigger}`;
+            fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
+          });
+        } else {
+          fieldKeyToTitleMap.set(newKey, title);
+        }
 
         if (item.options && Array.isArray(item.options) && item.options.length > 0) {
           item.options.forEach((option: {titles: [{key?: string, title?: string, isOtherOption?: boolean}], trigger: string}) => {
@@ -108,10 +109,19 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
       data = data.map((row: any) => {
         const scores: { [key: string]: any } = {};
+        const result = row?.result || {};
+        const hiddenFields = result?.hiddenFields || [];
+
+        let weights: any = {};
+        try {
+          weights = InitializeWeights(items, choiceOptions, choiceType, hiddenFields);
+        } catch (error) {
+          weights = {};
+        }
 
         choiceOptions.forEach((choiceOption: any) => {
           try {
-            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType);
+            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType, hiddenFields);
             scores[choiceOption.title] = calculatedScores.x ? (calculatedScores.x).toFixed(0) : 0;
           } catch (error) {
             scores[choiceOption.title] = 0;
@@ -122,7 +132,11 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         fieldKeyToTitleMap.forEach((value, key) => {
           const index = Array.from(fieldKeyToTitleMap.keys()).indexOf(key);
 
-          if (row?.result && row?.result[key]) {
+          if ( key?.startsWith('matrix') ) {
+            const rowResult = fetchMatrixData(key, items, row?.result || []) || '-';
+
+            rowMap.set(index, {'result': rowResult, 'value': value });
+          } else if (row?.result && row?.result[key]) {
             rowMap.set(index, {'result': row?.result[key], 'value': value });
           } else {
             rowMap.set(index, {'result': '-', 'value': value});

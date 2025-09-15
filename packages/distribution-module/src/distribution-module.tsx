@@ -10,7 +10,7 @@ import {
     Spacer,
 } from '@openstad-headless/ui/src';
 import {ProjectSettingProps, BaseProps} from '@openstad-headless/types';
-import Form from "@openstad-headless/form/src/form";
+import Form, {FormValue} from "@openstad-headless/form/src/form";
 import {
     Paragraph,
     Heading2,
@@ -100,7 +100,7 @@ function DistributionModule(props: DistributionModuleProps) {
         });
     }
 
-    const valuesChanged = (values: { [p: string]: string | [] | Record<number, never> }) => {
+    const valuesChanged = (values: { [p: string]: FormValue }) => {
         const checkIfValuesAreNotEmpty = Object.values(values).filter((value): value is string => typeof value === "string" && value !== "");
 
         if (checkIfValuesAreNotEmpty.length === 0) {

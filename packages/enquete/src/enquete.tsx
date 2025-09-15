@@ -10,7 +10,7 @@ import {
 } from '@openstad-headless/ui/src';
 import hasRole from '../../lib/has-role';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
@@ -20,14 +20,16 @@ import {
 } from '@utrecht/component-library-react';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import { FormValue } from "@openstad-headless/form/src/form";
+
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
     EnquetePropsType;
 
 function Enquete(props: EnqueteWidgetProps) {
+    const datastore = new DataStore(props);
     const notifyCreate = () => NotificationService.addNotification("Enquete ingediend", "success");
 
-    const datastore = new DataStore(props);
 
     const { create: createSubmission } = datastore.useSubmissions({
         projectId: props.projectId,
@@ -45,44 +47,50 @@ function Enquete(props: EnqueteWidgetProps) {
     );
 
     async function onSubmit(formData: any) {
-        formData.confirmationUser = props?.confirmation?.confirmationUser || false;
-        formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
-        formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
 
-        const getUserEmailFromField = formData.confirmationUser && !formOnlyVisibleForUsers;
+        if (currentPage < totalPages - 1) {
+            setCurrentPage((prevPage) => prevPage + 1);
+        } else {
+            formData.confirmationUser = props?.confirmation?.confirmationUser || false;
+            formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
+            formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
 
-        if (getUserEmailFromField) {
-            const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
+            const getUserEmailFromField = formData.confirmationUser && !formOnlyVisibleForUsers;
 
-            if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
-                formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
+            if (getUserEmailFromField) {
+                const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
+
+                if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
+                    formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
+                }
+            }
+
+            const embeddedUrl = window.location.href;
+
+            const cleanUrlFromEndingQuestionMarks = (url: string) => {
+                const length = url.length;
+                let returnUrl = url;
+
+                if ( url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&' ) {
+                    returnUrl = url.slice(0, length - 1);
+                }
+
+                return returnUrl;
+            }
+
+            formData.embeddedUrl = cleanUrlFromEndingQuestionMarks(embeddedUrl);
+
+            const result = await createSubmission(formData, props.widgetId);
+
+            if (result) {
+                if (props.afterSubmitUrl) {
+                    location.href = props.afterSubmitUrl.replace("[id]", result.id)
+                } else {
+                    notifyCreate();
+                }
             }
         }
 
-        const embeddedUrl = window.location.href;
-
-        const cleanUrlFromEndingQuestionMarks = (url: string) => {
-            const length = url.length;
-            let returnUrl = url;
-
-            if ( url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&' ) {
-                returnUrl = url.slice(0, length - 1);
-            }
-
-            return returnUrl;
-        }
-
-        formData.embeddedUrl = cleanUrlFromEndingQuestionMarks(embeddedUrl);
-
-        const result = await createSubmission(formData, props.widgetId);
-
-        if (result) {
-            if (props.afterSubmitUrl) {
-                location.href = props.afterSubmitUrl.replace("[id]", result.id)
-            } else {
-                notifyCreate();
-            }
-        }
     }
 
 
@@ -98,6 +106,10 @@ function Enquete(props: EnqueteWidgetProps) {
                 fieldKey: item.fieldKey,
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
                 fieldRequired: item.fieldRequired,
+                routingInitiallyHide: item.routingInitiallyHide || false,
+                routingSelectedQuestion: item.routingSelectedQuestion || '',
+                routingSelectedAnswer: item.routingSelectedAnswer || '',
+                trigger: item.trigger || '',
             };
             switch (item.questionType) {
                 case 'open':
@@ -132,7 +144,8 @@ function Enquete(props: EnqueteWidgetProps) {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 isOtherOption: option.titles[0].isOtherOption,
-                                defaultValue: option.titles[0].defaultValue
+                                defaultValue: option.titles[0].defaultValue,
+                                trigger: option.trigger || ''
                             };
                         });
                     }
@@ -160,7 +173,8 @@ function Enquete(props: EnqueteWidgetProps) {
                                 label: option.titles[0].key,
                                 imageSrc: option.titles[0].image,
                                 imageAlt: option.titles[0].key,
-                                hideLabel: option.titles[0].hideLabel
+                                hideLabel: option.titles[0].hideLabel,
+                                trigger: option.trigger || ''
                             };
                         });
                     } else {
@@ -208,14 +222,19 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'map':
                     fieldData['type'] = 'map';
 
-                    if ( !!props?.datalayer ) {
+                    if (!!props?.datalayer) {
                         fieldData['datalayer'] = props?.datalayer;
                     }
 
-                    if ( typeof(props?.enableOnOffSwitching) === 'boolean' ) {
+                    if (typeof (props?.enableOnOffSwitching) === 'boolean') {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
 
+                    break;
+                case 'pagination':
+                    fieldData['type'] = 'pagination';
+                    fieldData['prevPageText'] = item?.prevPageText || '1';
+                    fieldData['nextPageText'] = item?.nextPageText || '2';
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
@@ -223,11 +242,50 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['imageAlt'] = item?.imageAlt || '';
                     fieldData['imageDescription'] = item?.imageDescription || '';
                     break;
+                case 'matrix':
+                    fieldData['type'] = 'matrix';
+                    fieldData['matrix'] = item?.matrix || undefined;
+                    fieldData['matrixMultiple'] = item?.matrixMultiple || false;
+                    fieldData['defaultValue'] = [];
+                    break;
             }
 
             formFields.push(fieldData);
         }
     }
+
+    const defaultAnswers = formFields.reduce((acc, item) => {
+        if (typeof item.fieldKey !== 'undefined') {
+            acc[item.fieldKey] = typeof item.defaultValue !== 'undefined' ? item.defaultValue : '';
+        }
+        return acc;
+    }, {} as { [key: string]: FormValue });
+
+    const [answers, setAnswers] = useState<{ [key: string]: FormValue }>(defaultAnswers);
+    const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
+    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [currentAnswers, setCurrentAnswers] = useState<{ [key: string]: string }>({});
+
+    const totalPages = formFields.filter(field => field.type === 'pagination').length + 1 || 1;
+    // Find indices of all pagination fields
+    const paginationIndices = formFields
+        .map((field, idx) => field.type === 'pagination' ? idx : -1)
+        .filter(idx => idx !== -1);
+
+    // Add start and end indices for slicing
+    const pageStartIndices = [0, ...paginationIndices.map(idx => idx + 1)];
+    const pageEndIndices = [...paginationIndices, formFields.length];
+
+    // Get fields for the current page
+    const currentFields = formFields.slice(pageStartIndices[currentPage], pageEndIndices[currentPage]);
+
+    useEffect(() => {
+        const updatedAnswers = { ...answers, ...currentAnswers };
+        setAnswers(updatedAnswers);
+    }, [currentAnswers]);
+
+    const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageText || 'Vorige';
+    const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageText || 'Volgende';
 
     return (
         <div className="osc">
@@ -257,11 +315,15 @@ function Enquete(props: EnqueteWidgetProps) {
                     )}
                 </div>
                 <Form
-                    fields={formFields}
+                    fields={currentFields}
                     submitHandler={onSubmit}
                     title=""
-                    submitText="Versturen"
+                    submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
                     submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    prevPage={currentPage > 0 ? currentPage - 1 : null}
+                    prevPageText={getPrevPageTitle}
                     {...props}
                 />
             </div>
