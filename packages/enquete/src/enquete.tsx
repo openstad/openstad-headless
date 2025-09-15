@@ -51,7 +51,6 @@ function Enquete(props: EnqueteWidgetProps) {
         if (currentPage < totalPages - 1) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
-
             formData.confirmationUser = props?.confirmation?.confirmationUser || false;
             formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
             formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
@@ -66,7 +65,20 @@ function Enquete(props: EnqueteWidgetProps) {
                 }
             }
 
-            formData.embeddedUrl = window.location.href;
+            const embeddedUrl = window.location.href;
+
+            const cleanUrlFromEndingQuestionMarks = (url: string) => {
+                const length = url.length;
+                let returnUrl = url;
+
+                if ( url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&' ) {
+                    returnUrl = url.slice(0, length - 1);
+                }
+
+                return returnUrl;
+            }
+
+            formData.embeddedUrl = cleanUrlFromEndingQuestionMarks(embeddedUrl);
 
             const result = await createSubmission(formData, props.widgetId);
 
