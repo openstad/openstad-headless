@@ -230,6 +230,16 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['imageAlt'] = item?.imageAlt || '';
                     fieldData['imageDescription'] = item?.imageDescription || '';
                     break;
+                case 'swipe':
+                    fieldData['type'] = 'swipe';
+                    fieldData['cards'] = item?.options?.map((card) => {
+                        return {
+                            id: card.trigger,
+                            description: card.titles[0].key,
+                            image: card.titles[0].image || '',
+                        };
+                    });
+                    break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';
                     fieldData['matrix'] = item?.matrix || undefined;
