@@ -25,11 +25,6 @@
   background-color: var(--nlds-enquete-background-color,var(--nlds-default-background-color, #F0F4F8));
 }
 
-.form-container > div:nth-child(even) fieldset.utrecht-form-fieldset__fieldset table.utrecht-table .utrecht-table__body > .utrecht-table__row,
-.form-container > div:nth-child(even) fieldset.utrecht-form-fieldset__fieldset table.utrecht-table .utrecht-table__header > .utrecht-table__row {
-  background-color: white;
-}
-
 .form-container figure img {
   max-height: 15rem;
   object-fit: cover;
