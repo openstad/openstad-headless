@@ -31,7 +31,7 @@ export type TextInputProps = {
     minCharactersError?: string;
     maxCharactersError?: string;
     nextPageText?: string;
-    prevPageTekst?: string;
+    prevPageText?: string;
     fieldOptions?: {
         value: string;
         label: string;

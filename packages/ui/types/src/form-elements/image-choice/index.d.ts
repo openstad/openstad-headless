@@ -21,7 +21,7 @@ export type ImageChoiceFieldProps = {
     fieldInvalid?: boolean;
     multiple?: boolean;
     defaultValue?: string;
-    prevPageTekst?: string;
+    prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {
         value: string;
