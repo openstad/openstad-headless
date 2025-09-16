@@ -7,8 +7,28 @@ fieldset.utrecht-form-fieldset__fieldset {
  overflow: auto;
 }
 
+fieldset.utrecht-form-fieldset__fieldset table.utrecht-table,
+fieldset.utrecht-form-fieldset__fieldset table.utrecht-table th,
+fieldset.utrecht-form-fieldset__fieldset table.utrecht-table td {
+  border: 1px solid var(--utrecht-table-row-border-block-end-color, transparent);
+  border-collapse: collapse;
+}
+
+fieldset.utrecht-form-fieldset__fieldset table.utrecht-table th {
+ text-align: center;
+}
+
+fieldset.utrecht-form-fieldset__fieldset table.utrecht-table td:not(:first-child) .utrecht-form-label {
+ justify-content: center;
+ margin-bottom: 0;
+}
+
+fieldset.utrecht-form-fieldset__fieldset table.utrecht-table td:not(:first-child) .utrecht-form-label input {
+ margin: 0;
+}
+
 fieldset.utrecht-form-fieldset__fieldset table.utrecht-table .utrecht-table__body > .utrecht-table__row:nth-child(odd) {
- background-color: rgb(241 241 241);
+ background-color: var(--nlds-enquete-background-color,var(--nlds-default-background-color, #F0F4F8));
 }
 
 fieldset.utrecht-form-fieldset__fieldset table.utrecht-table[data-columns="1"] {

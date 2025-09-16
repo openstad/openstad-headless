@@ -111,8 +111,8 @@ const matrixList: {type: 'rows' | 'columns', heading: string, description: strin
     description: 'Dit zijn de onderwerpen die in de matrix worden weergegeven. Deze komen in de eerste kolom (verticaal) van de matrix.',
   }, {
     type: 'columns',
-    heading: 'Lijst van antwoordopties',
-    description: 'Dit zijn de antwoordopties die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
+    heading: 'Lijst van kopjes',
+    description: 'Dit zijn de kopjes die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
   }
 ];
 
