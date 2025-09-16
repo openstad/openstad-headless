@@ -598,7 +598,7 @@ export default function WidgetEnqueteItems(
                               setMatrixOptions(matrixDefault);
                               setSettingOptions(false);
                             }}>
-                            {`${item.title || 'Geen titel'}`}
+                            {`${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : 'Geen titel')}`}
                           </span>
                           <span className="gap-2 py-3 px-2">
                             <X
@@ -1003,50 +1003,52 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Titel/Vraag</FormLabel>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {form.watch('questionType') !== 'none' && (
-                      <FormField
-                        control={form.control}
-                        name="fieldKey"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Key voor het opslaan
-                              <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
-                            </FormLabel>
-                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
-                            <Input {...field} />
-                            {(!field.value || !isFieldKeyUnique) && (
-                              <FormMessage>
-                                {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
-                              </FormMessage>
-                            )}
-                          </FormItem>
-                        )}
-                      />
-                    )}
                     {form.watch('questionType') !== 'pagination' && (
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Beschrijving</FormLabel>
-                            <Textarea rows={6} {...field} />
-                            <FormMessage />
-                          </FormItem>
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titel/Vraag</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch('questionType') !== 'none' && (
+                          <FormField
+                            control={form.control}
+                            name="fieldKey"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Key voor het opslaan
+                                  <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                                </FormLabel>
+                                <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+                                <Input {...field} />
+                                {(!field.value || !isFieldKeyUnique) && (
+                                  <FormMessage>
+                                    {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
+                                  </FormMessage>
+                                )}
+                              </FormItem>
+                            )}
+                          />
                         )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Beschrijving</FormLabel>
+                              <Textarea rows={6} {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
 
                     {form.watch('questionType') === 'open' && (
@@ -1577,14 +1579,14 @@ export default function WidgetEnqueteItems(
                         setOptions([]);
                         setMatrixOptions(matrixDefault);
                       }}
-                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none'}
+                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none' && form.watch('questionType') !== 'pagination'}
                     >
                       {selectedItem
                         ? 'Sla wijzigingen op'
                         : 'Voeg item toe aan lijst'}
                     </Button>
                   </div>
-                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
+                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'pagination' && (
                     <FormMessage>
                       {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
                     </FormMessage>
