@@ -97,10 +97,13 @@ function Form({
         }
     };
 
-    const handleInputChange = (event: { name: string, value: FormValue }) => {
+    const handleInputChange = (event: { name: string, value: FormValue }, triggerSetLastKey: boolean = true) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
-        setLastUpdatedKey(name);
+
+        if (triggerSetLastKey) {
+            setLastUpdatedKey(name);
+        }
     };
 
     const resetForm = () => {

@@ -65,7 +65,7 @@ export type DocumentUploadProps = {
     disabled?: boolean;
     multiple?: boolean;
     type?: string;
-    onChange?: (e: { name: string; value: { name: string; url: string }[] }) => void;
+    onChange?: (e: { name: string; value: { name: string; url: string }[] }, triggerSetLastKey?: boolean) => void;
     imageUrl?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
