@@ -6,6 +6,8 @@ module.exports = function( req, res, next ) {
 
 	let url = req.headers && req.headers.origin;
 
+	console.log( "Req headers origin", url, req.path, req.method );
+
 	let domain = ''
 	try {
 		domain = new URL(url).host;
@@ -13,6 +15,10 @@ module.exports = function( req, res, next ) {
 
 	let allowedDomains = (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains;
 	allowedDomains = prefillAllowedDomains(allowedDomains || []);
+
+	console.log( "Original allowed", (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains );
+	console.log( "Prefilled allowed", allowedDomains, "Domain", domain );
+	console.log( "Allowed", !allowedDomains || allowedDomains.indexOf(domain) === -1, "!allowedDomains", !allowedDomains, "indexOf", allowedDomains ? allowedDomains.indexOf(domain) : 'n/a' );
 
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
 		url = config.url || req.protocol + '://' + req.host;
