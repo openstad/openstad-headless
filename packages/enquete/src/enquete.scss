@@ -124,8 +124,20 @@ label.utrecht-form-label {
 
 
 .osc-enquete-item-content {
+
+  --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, #248641);
+  --youth-intro-card-title-color: var(--setYouthIntroCardTitleColor, #ffffff);
+  --youth-intro-card-description-color: var(--setYouthIntroCardDescriptionColor, #ffffff);
+
+  --youth-intro-card-title-font-size: var(--setYouthIntroCardTitleFontSize, 32px);
+  --youth-intro-card-description-font-size: var(--setYouthIntroCardDescriptionFontSize, 18px);
+
   &.--youth {
     height: 100dvh;
+    max-width: 365px;
+    max-height: 680px;
+    margin: 0 auto;
+    position: relative;
 
     .form-widget,
     .form-widget-container,
@@ -136,17 +148,34 @@ label.utrecht-form-label {
 
     &:not(:has(.button-group .osc-prev-button)) {
       .question.question-type-none {
-        background: green;
+        background: var(--youth-intro-card-background-color);
+
+        .info-field-container {
+          .info-field-title {
+            color: var(--youth-intro-card-title-color);
+            font-size: var(--youth-intro-card-title-font-size);
+          }
+
+          .info-field-description {
+            color: var(--youth-intro-card-description-color);
+            font-size: var(--youth-intro-card-description-font-size);
+          }
+        }
       }
     }
 
     .button-group.--flex {
       padding: unset;
-      display: unset;
       flex-direction: unset;
       gap: unset;
       color: unset;
       background-color: unset;
+
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .question.question-type-none {
@@ -154,8 +183,23 @@ label.utrecht-form-label {
         text-align: center;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
         height: 100%;
+
+        .info-field-title {
+          font-family: TheMixB;
+          font-weight: 530;
+          font-style: W7 Bold;
+          line-height: 135%;
+
+        }
+
+        .info-field-description {
+          font-family: TheSans C4s;
+          font-weight: 500;
+          font-style: Regular;
+          line-height: 150%;
+
+        }
       }
     }
   }

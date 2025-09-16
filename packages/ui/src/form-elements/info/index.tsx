@@ -42,7 +42,7 @@ const InfoField: FC<InfoFieldProps> = ({
     <div className="info-field-container">
         {title && <Paragraph className="info-field-title"><Strong>{title}</Strong></Paragraph>}
         {description &&
-          <Paragraph dangerouslySetInnerHTML={{ __html: description }} />
+          <Paragraph className="info-field-description" dangerouslySetInnerHTML={{ __html: description }} />
         }
 
         {showMoreInfo && (
