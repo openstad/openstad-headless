@@ -165,15 +165,26 @@ export function Filters({
     });
   };
 
-  const updateTagListSingle = (tagType: string, updatedTag: string) => {
+  const updateTagListSingle = (tagType: string, updatedTag: string, updatedLabel?: string) => {
     const existingTags = selectedOptions[tagType];
     let selected = [...(existingTags || [])];
 
     if (updatedTag === '') {
       selected = [];
+
+      setNewActiveTagsDraft((prevSelectedOptions) => {
+        return (prevSelectedOptions || []).filter(tag => tag.type !== tagType);
+      })
     } else {
       selected = [updatedTag];
+
+      setNewActiveTagsDraft((prevSelectedOptions) => {
+        const filtered = (prevSelectedOptions || []).filter(tag => tag.type !== tagType);
+        const label = updatedLabel || '';
+        return [...filtered, { id: Number(updatedTag), label: label, type: tagType }];
+      })
     }
+
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
   }
@@ -184,7 +195,12 @@ export function Filters({
 
     const updatedSelectedOptions = {
       ...selectedOptions,
-      [tagType]: (selectedOptions[tagType] || []).filter((id: number) => id !== tagId),
+      [tagType]: Array.isArray(selectedOptions[tagType])
+        ? (selectedOptions[tagType] || []).filter((id: number | string) => {
+            const isMatch = (typeof id === 'number' ? id === tagId : Number(id) === tagId);
+            return !isMatch;
+          })
+        : [],
     };
     setSelected(updatedSelectedOptions);
     setTags(tagType, updatedSelectedOptions[tagType]);
@@ -272,8 +288,8 @@ export function Filters({
                     placeholder={tagGroup.label}
                     title={`Selecteer een item`}
                     onlyIncludeIds={tagsLimitation}
-                    onUpdateFilter={(updatedTag) =>
-                      updateTagListSingle(tagGroup.type, updatedTag)
+                    onUpdateFilter={(updatedTag, updatedLabel) =>
+                      updateTagListSingle(tagGroup.type, updatedTag, updatedLabel)
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
                     preFilterTags={preFilterTags}

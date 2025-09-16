@@ -1096,6 +1096,7 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
                               <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
+                              <SelectItem value="documentUpload">Document upload</SelectItem>
                               <SelectItem value="matrix">Matrix vraag</SelectItem>
                               <SelectItem value="pagination">Voeg pagina toe</SelectItem>
                             </SelectContent>
@@ -1229,14 +1230,14 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images') && (
+                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' || form.watch('questionType') === 'documentUpload') && (
                       <FormField
                         control={form.control}
                         name="multiple"
                         render={({ field }) => (
                           <FormItem>
-                            {form.watch('questionType') === 'imageUpload' ? (
-                              <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
+                            {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'documentUpload') ? (
+                              <FormLabel>Mogen er meerdere {form.watch('questionType') === 'documentUpload' ? 'documenten' : 'afbeeldingen'} tegelijkertijd geüpload worden?</FormLabel>
                             ) : (
                               <FormLabel>Mogen er meerdere afbeeldingen geselecteerd worden?</FormLabel>
                             )}
