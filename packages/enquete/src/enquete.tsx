@@ -51,7 +51,6 @@ function Enquete(props: EnqueteWidgetProps) {
         if (currentPage < totalPages - 1) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
-
             formData.confirmationUser = props?.confirmation?.confirmationUser || false;
             formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
             formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
@@ -66,7 +65,20 @@ function Enquete(props: EnqueteWidgetProps) {
                 }
             }
 
-            formData.embeddedUrl = window.location.href;
+            const embeddedUrl = window.location.href;
+
+            const cleanUrlFromEndingQuestionMarks = (url: string) => {
+                const length = url.length;
+                let returnUrl = url;
+
+                if ( url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&' ) {
+                    returnUrl = url.slice(0, length - 1);
+                }
+
+                return returnUrl;
+            }
+
+            formData.embeddedUrl = cleanUrlFromEndingQuestionMarks(embeddedUrl);
 
             const result = await createSubmission(formData, props.widgetId);
 
@@ -94,6 +106,10 @@ function Enquete(props: EnqueteWidgetProps) {
                 fieldKey: item.fieldKey,
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
                 fieldRequired: item.fieldRequired,
+                routingInitiallyHide: item.routingInitiallyHide || false,
+                routingSelectedQuestion: item.routingSelectedQuestion || '',
+                routingSelectedAnswer: item.routingSelectedAnswer || '',
+                trigger: item.trigger || '',
             };
             switch (item.questionType) {
                 case 'open':
@@ -128,7 +144,8 @@ function Enquete(props: EnqueteWidgetProps) {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 isOtherOption: option.titles[0].isOtherOption,
-                                defaultValue: option.titles[0].defaultValue
+                                defaultValue: option.titles[0].defaultValue,
+                                trigger: option.trigger || ''
                             };
                         });
                     }
@@ -156,7 +173,8 @@ function Enquete(props: EnqueteWidgetProps) {
                                 label: option.titles[0].key,
                                 imageSrc: option.titles[0].image,
                                 imageAlt: option.titles[0].key,
-                                hideLabel: option.titles[0].hideLabel
+                                hideLabel: option.titles[0].hideLabel,
+                                trigger: option.trigger || ''
                             };
                         });
                     } else {
@@ -227,6 +245,12 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['image'] = item?.image || '';
                     fieldData['imageAlt'] = item?.imageAlt || '';
                     fieldData['imageDescription'] = item?.imageDescription || '';
+                    break;
+                case 'matrix':
+                    fieldData['type'] = 'matrix';
+                    fieldData['matrix'] = item?.matrix || undefined;
+                    fieldData['matrixMultiple'] = item?.matrixMultiple || false;
+                    fieldData['defaultValue'] = [];
                     break;
             }
 

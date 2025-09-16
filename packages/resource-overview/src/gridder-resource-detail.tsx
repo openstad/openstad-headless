@@ -39,6 +39,7 @@ export type GridderResourceDetailProps =
   documentsDesc?: string;
   displayTags?: boolean;
   displayBudget?: boolean;
+  dialogTagGroups?: string[];
   likeWidget?: Omit<
     LikeWidgetProps,
     keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -55,12 +56,15 @@ export const GridderResourceDetail = ({
   clickableImage = false,
   displayTags = true,
   displayBudget = true,
+  dialogTagGroups = undefined,
   currentUser,
   ...props
 }: GridderResourceDetailProps) => {
   // When resource is correctly typed the we will not need :any
-  const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
-  const area = resource.tags?.filter((t: any) => t.type === 'area')?.at(0);
+
+  const resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
+    ? resource?.tags.filter((tag: { type: string }) => dialogTagGroups.includes(tag.type))
+    : resource?.tags;
 
   const resourceUserId = resource?.userId || null;
   const canDelete = hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
@@ -125,7 +129,7 @@ export const GridderResourceDetail = ({
                 <Heading4>Tags</Heading4>
                 <Spacer size={.5} />
                 <div className="pill-grid">
-                      {(resource.tags as Array<{ type: string; name: string }>)
+                      {(resourceFilteredTags as Array<{ type: string; name: string }>)
                         ?.filter((t) => t.type !== 'status')
                         ?.map((t) => <Pill text={t.name} />)}
                 </div>

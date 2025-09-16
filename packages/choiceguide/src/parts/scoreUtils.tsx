@@ -17,7 +17,8 @@ export const calculateScoreForItem = (
   choiceOption: ChoiceOptions | ChoiceOptions[],
   answers: Record<string, string>,
   weights: Record<string, Record<string, Record<string, any>>>,
-  choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden'
+  choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden',
+  hiddenFields: string[]
 ): Score => {
     const results: Score = { x: 0, y: 0, z: 0 };
     let totalScores = { x: 0, y: 0, z: 0 };

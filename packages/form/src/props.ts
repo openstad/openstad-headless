@@ -11,15 +11,16 @@ import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-element
 import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
 import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
 import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/number";
+import {MatrixFieldProps} from "@openstad-headless/ui/src/form-elements/matrix";
 import { FormValue } from "@openstad-headless/form/src/form";
 
 export type FormProps = {
     title?: string;
+    fields: Array<FieldWithOptionalFields>;
     fieldKey?: any;
-    fields: Array<CombinedFieldProps>;
     submitText?: string;
     submitHandler: (values: { [p: string]: FormValue}) => void;
-    getValuesOnChange?: (values: { [p: string]: FormValue}) => void;
+    getValuesOnChange?: (values: { [p: string]: FormValue}, hiddenFields?: string[]) => void;
     submitDisabled?: boolean;
     allowResetAfterSubmit?: boolean;
     secondaryLabel?: string;
@@ -52,6 +53,7 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'hidden' } & HiddenInputProps)
     | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
     | ({ type?: 'map' } & MapProps)
+    | ({ type?: 'matrix' } & MatrixFieldProps)
     | ({ type?: 'pagination' } & PaginationFieldProps)
     | ({ type?: 'none' } & InfoFieldProps);
 
@@ -75,7 +77,17 @@ type CombinedFieldProps = (
     HiddenInputProps |
     ImageChoiceFieldProps |
     NumberInputProps |
+    MatrixFieldProps |
     InfoFieldProps
 );
 
-export type { CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};
+// These fields have no use outside the form component itself, so we make them optional here to avoid having to define them in every form field
+type FieldWithOptionalFields =
+  CombinedFieldProps & {
+    trigger?: string
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
+}
+
+export type { FieldWithOptionalFields, CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};
