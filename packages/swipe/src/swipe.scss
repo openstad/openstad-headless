@@ -10,7 +10,7 @@
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
 
   max-width: 500px;
-  max-height: 850px;
+  max-height: 600px;
   width: 100%;
   height: 100dvh;
   margin: 0 auto;
@@ -20,13 +20,18 @@
   display: grid;
   grid-template-columns: auto;
   grid-template-rows: auto 1fr auto;
-  grid-gap: 20px 0;
+  grid-gap: 10px 0;
+  margin-top: 20px;
 
   .swipe-counter {
     text-align: center;
     font-size: 14px;
     color: #666;
     font-weight: 500;
+
+    position: absolute;
+    top: -20px;
+    right: 0;
   }
 
   .swipe-container {
@@ -95,12 +100,12 @@
     }
 
     &:nth-child(2) {
-      transform: scale(0.95) translateY(35px);
+      transform: scale(0.95) translateY(20px);
       z-index: 2;
     }
 
     &:nth-child(3) {
-      transform: scale(0.9) translateY(75px);
+      transform: scale(0.9) translateY(45px);
       z-index: 1;
     }
 
@@ -112,7 +117,8 @@
       flex: 1;
       overflow: hidden;
       position: relative;
-      border-radius: 10px;;
+      border-radius: 10px;
+      ;
 
       img {
         width: 100%;
@@ -294,8 +300,7 @@
         transform: scale(1.1);
       }
 
-      &:hover i {
-      }
+      &:hover i {}
 
       i {
         color: var(--swipe-like-fill);
@@ -309,8 +314,7 @@
         transform: scale(1.1);
       }
 
-      &:hover i {
-      }
+      &:hover i {}
 
       i {
         color: var(--swipe-dislike-fill);

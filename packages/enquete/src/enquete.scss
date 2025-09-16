@@ -132,12 +132,19 @@ label.utrecht-form-label {
   --youth-intro-card-title-font-size: var(--setYouthIntroCardTitleFontSize, 32px);
   --youth-intro-card-description-font-size: var(--setYouthIntroCardDescriptionFontSize, 18px);
 
+  --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, #F8D62D);
+
   &.--youth {
-    height: 100dvh;
+    height: 100%;
     max-width: 365px;
-    max-height: 680px;
+    min-height: 680px;
     margin: 0 auto;
     position: relative;
+    display: grid;
+
+    .osc-enquete-item-description{
+      display: none;
+    }
 
     .form-widget,
     .form-widget-container,
@@ -176,9 +183,68 @@ label.utrecht-form-label {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      pointer-events: none;
+
+      >button {
+        pointer-events: all;
+      }
+
+      .utrecht-button--secondary-action {
+        padding: 0;
+        border: unset;
+        background: unset;
+        position: absolute;
+        top: 16px;
+        left: 24px;
+        
+        &:before {
+          content: '';
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
+          width: 20px;
+          height: 20px;
+          mask-size: contain;
+          mask-repeat: no-repeat;
+          background-color: var(--_utrecht-button-color);
+        }
+      }
+
+
+      .utrecht-button--primary-action {
+        position: absolute;
+        bottom: 24px;
+        right: 24px;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--youth-next-button-background-color);
+        margin: 0;
+        padding: 0;
+        max-width: unset;
+
+        &:before {
+          content: '';
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--%3E%3Cpath d='M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z'/%3E%3C/svg%3E");
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 26px;
+          height: 26px;
+          background-size: contain;
+          background-repeat: no-repeat;
+          animation: nextPagePulse 2s infinite;
+
+        }
+
+        span {
+          display: none;
+        }
+      }
     }
 
     .question.question-type-none {
+      padding: 64px 32px;
+
       .info-field-container {
         text-align: center;
         display: flex;
@@ -202,5 +268,23 @@ label.utrecht-form-label {
         }
       }
     }
+  }
+}
+
+@keyframes nextPagePulse {
+  0% {
+    transform: translate(-50%, -50%);
+  }
+  25% {
+    transform: translate(-30%, -50%);
+
+  }
+  75% {
+    transform: translate(-60%, -50%);
+
+  }
+  100% {
+    transform: translate(-50%, -50%);
+
   }
 }
