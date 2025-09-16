@@ -20,7 +20,7 @@ export type TextInputProps = {
     onChange?: (e: {
         name: string;
         value: FormValue;
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     reset?: (resetFn: () => void) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;

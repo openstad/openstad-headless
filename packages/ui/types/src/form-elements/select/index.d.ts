@@ -15,7 +15,7 @@ export type SelectFieldProps = {
     onChange?: (e: {
         name: string;
         value: FormValue;
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     type?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;

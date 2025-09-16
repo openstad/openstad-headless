@@ -11,7 +11,7 @@ export type NumberInputProps = {
     onChange?: (e: {
         name: string;
         value: FormValue;
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     reset?: (resetFn: () => void) => void;
     format?: boolean;
     prepend?: string;
