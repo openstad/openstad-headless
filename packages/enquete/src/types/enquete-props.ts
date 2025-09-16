@@ -9,6 +9,7 @@ export type EnqueteProps = {
   description?: string;
   items?: Array<Item>;
   formVisibility?: string;
+  formStyle?: string;
   imageUrl?: string;
   multiple?: boolean;
   confirmation?: Confirmation;

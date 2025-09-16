@@ -214,7 +214,7 @@ function Form({
                           onClick={() => secondaryHandler(formValues)}
                           type="button"
                         >
-                            {secondaryLabel}
+                            <span>{secondaryLabel}</span>
                         </Button>
                     )}
                     <div className="button-group --flex">
@@ -228,7 +228,7 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                {prevPageText || 'vorige'}
+                                <span>{prevPageText || 'vorige'}</span>
                             </Button>
                         )}
                         <Button
@@ -239,7 +239,7 @@ function Form({
                                 scrollTop();
                             }}
                         >
-                            {submitText}
+                            <span>{submitText}</span>
                         </Button>
                     </div>
                 </form>

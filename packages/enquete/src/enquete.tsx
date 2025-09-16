@@ -305,7 +305,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     </>
                 )}
 
-            <div className="osc-enquete-item-content">
+            <div className={`osc-enquete-item-content --${props.formStyle}`}>
                 {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
                 <div className="osc-enquete-item-description">
                     {props.displayDescription && props.description && (

@@ -121,3 +121,42 @@ label.utrecht-form-label {
 .question-type-text input[type="text"] {
   max-width: none;
 }
+
+
+.osc-enquete-item-content {
+  &.--youth {
+    height: 100dvh;
+
+    .form-widget,
+    .form-widget-container,
+    .form-container,
+    .question.question-type-none {
+      height: 100%;
+    }
+
+    &:not(:has(.button-group .osc-prev-button)) {
+      .question.question-type-none {
+        background: green;
+      }
+    }
+
+    .button-group.--flex {
+      padding: unset;
+      display: unset;
+      flex-direction: unset;
+      gap: unset;
+      color: unset;
+      background-color: unset;
+    }
+
+    .question.question-type-none {
+      .info-field-container {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+      }
+    }
+  }
+}
