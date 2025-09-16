@@ -7,6 +7,7 @@ export type InfoFieldProps = {
     image?: string;
     imageAlt?: string;
     imageDescription?: string;
+    infoBlockStyle?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;

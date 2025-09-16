@@ -10,6 +10,7 @@ export type InfoFieldProps = {
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
+  infoBlockStyle?: string;
   showMoreInfo?: boolean;
   moreInfoButton?: string;
   moreInfoContent?: string;
@@ -40,7 +41,7 @@ const InfoField: FC<InfoFieldProps> = ({
 
   return (
     <div className="info-field-container">
-        {title && <Paragraph className="info-field-title"><Strong>{title}</Strong></Paragraph>}
+        {title && <Paragraph className="info-field-title"><Strong><div dangerouslySetInnerHTML={{ __html: title }} /></Strong></Paragraph>}
         {description &&
           <Paragraph className="info-field-description" dangerouslySetInnerHTML={{ __html: description }} />
         }

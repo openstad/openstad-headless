@@ -229,6 +229,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['image'] = item?.image || '';
                     fieldData['imageAlt'] = item?.imageAlt || '';
                     fieldData['imageDescription'] = item?.imageDescription || '';
+                    fieldData['infoBlockStyle'] = item?.infoBlockStyle || 'default';
                     break;
                 case 'swipe':
                     fieldData['type'] = 'swipe';

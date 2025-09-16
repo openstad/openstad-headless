@@ -191,9 +191,8 @@ function Form({
                         if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
                             return null;
                         }
-
                         return field.type === 'pagination' ? null : (
-                            <div className={`question question-type-${field.type}`} key={index}>
+                            <div className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`} key={index}>
                                 {renderField(field, index, randomId, fieldInvalid)}
                                 <FormFieldErrorMessage className="error-message">
                                     {field.fieldKey && formErrors[field.fieldKey] &&

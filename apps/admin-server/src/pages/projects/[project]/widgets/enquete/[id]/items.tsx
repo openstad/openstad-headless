@@ -300,6 +300,7 @@ export default function WidgetEnqueteItems(
     image: '',
     imageAlt: '',
     imageDescription: '',
+    infoBlockStyle: 'default',
     fieldRequired: false,
     maxChoices: '',
     maxChoicesMessage: '',
@@ -356,6 +357,7 @@ export default function WidgetEnqueteItems(
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
+        infoBlockStyle: selectedItem.infoBlockStyle || 'default',
         fieldRequired: selectedItem.fieldRequired || false,
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
@@ -1257,6 +1259,41 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+
+                        <FormField
+                          control={form.control}
+                          name="infoBlockStyle"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Informatie blok stijl</FormLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="default">
+                                    Standaard uiterlijk
+                                  </SelectItem>
+                                  <SelectItem value="youth-intro">
+                                    Jongeren widget, introductie
+                                  </SelectItem>
+                                  <SelectItem value="youth-page">
+                                    Jongeren widget, tussenpagina
+                                  </SelectItem>
+                                  <SelectItem value="youth-outro">
+                                    Jongeren widget, afsluiting
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <hr />
 
                       </>
                     )}

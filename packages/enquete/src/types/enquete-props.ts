@@ -39,6 +39,7 @@ export type Item = {
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
+  infoBlockStyle?: string;
   fieldRequired?: boolean;
   maxChoices?: string,
   maxChoicesMessage?: string,
