@@ -298,7 +298,7 @@ const BaseMap = ({
   let [mapRef] = useMapRef(mapId);
 
   const setBoundsAndCenter = useCallback(
-    (polygons: Array<Array<LocationType>>, focus: "area" | "markers") => {
+    (polygons: Array<Array<LocationType>>, focus: "area" | "markers", depth: number) => {
       if (focus === 'area') {
         let allPolygons: LocationType[][] = [];
 
@@ -350,7 +350,9 @@ const BaseMap = ({
         const markersForBounds = currentMarkers?.filter((m) => m.lat && m.lng) || [];
 
         if (markersForBounds.length == 0) {
-          centerAndZoomHandler('area');
+          if (depth < 2) {
+            centerAndZoomHandler('area', { bounceDepth: depth + 1 });
+          }
           return;
         }
 
@@ -366,13 +368,14 @@ const BaseMap = ({
     window.dispatchEvent(event);
   }, [mapId]);
 
-  const centerAndZoomHandler = useCallback((overwriteAutoZoomAndCenter: string = '') => {
+  const centerAndZoomHandler = useCallback((overwriteAutoZoomAndCenter: string = '', opts: { bounceDepth?: number } = {}) => {
+    const depth = opts.bounceDepth ?? 0;
     const autoZoomAndCenterSetting = overwriteAutoZoomAndCenter || autoZoomAndCenter;
 
     if (autoZoomAndCenterSetting === 'area') {
         if (area?.length) {
           const updatedArea = Array.isArray(area[0]) ? area : [area];
-          setBoundsAndCenter(updatedArea as any, 'area');
+          setBoundsAndCenter(updatedArea as any, 'area', depth);
           return;
         }
 
@@ -398,10 +401,8 @@ const BaseMap = ({
           }
           return;
         }
-      }
-
-      if (currentMarkers?.length || isMapReady) {
-        setBoundsAndCenter([], 'markers');
+      } else if (autoZoomAndCenterSetting === "markers" && currentMarkers?.length || isMapReady) {
+        setBoundsAndCenter([], 'markers', depth);
       }
     },
     [autoZoomAndCenter, area, setBoundsAndCenter, mapRef, visibleMapDataLayers, currentMarkers]

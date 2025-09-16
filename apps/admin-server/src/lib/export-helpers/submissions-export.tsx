@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { fetchMatrixData } from "./fetch-matrix-data";
 
 export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWidget: any) => {
   function transformString() {
@@ -61,7 +62,12 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       if (item.questionType === 'none' && selectedWidget?.type !== "distributionmodule") return;
 
       const title = item.title || item.fieldKey;
-      if (title) {
+      if (item.questionType === 'matrix') {
+        item.matrix?.rows?.forEach((row: any) => {
+          const matrixKey = `${item.fieldKey}_${row.trigger}`;
+          fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
+        });
+      } else if (title) {
         fieldKeyToTitleMap.set(item.fieldKey || title, title);
       }
 
@@ -107,7 +113,11 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
 
     const keyCount: Record<string, number> = {};
     Array.from(fieldKeyToTitleMap.entries()).forEach(([key, title]) => {
-      const rawValue = row.submittedData?.[key];
+      let rawValue = row.submittedData?.[key];
+
+      if (key?.startsWith('matrix')) {
+        rawValue = fetchMatrixData(key, selectedWidget?.config?.items, row?.submittedData || [], false) || '';
+      }
 
       const baseKey = title;
       const keyHeader = keyCount[baseKey]

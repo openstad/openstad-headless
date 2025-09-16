@@ -228,8 +228,12 @@ export function Filters({
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
+    console.log( "filterToSubmit", updatedFilter, filter );
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
+
+    console.log( "newActiveTagsDraft", newActiveTagsDraft );
+    console.log( "updatedTags", updatedTags );
 
     if (updatedTags) {
       setActiveTags(updatedTags);

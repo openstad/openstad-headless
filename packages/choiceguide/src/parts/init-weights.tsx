@@ -1,7 +1,12 @@
 // @ts-nocheck
 import {ChoiceOptions, WeightOverview} from '../props';
 
-export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[], choicesType: string ) => {
+export const InitializeWeights = (
+  items: any[],
+  choiceOptions: ChoiceOptions[],
+  choicesType: string,
+  hiddenFields: string[]
+) => {
   let weights: WeightOverview = {};
 
   if (choicesType === 'plane') {
@@ -23,6 +28,8 @@ export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[], 
 
       const { trigger, weights: itemWeights = {} } = item;
       const triggerKey = `${itemType}-${trigger}`
+
+      if (hiddenFields?.includes(triggerKey)) return;
 
       // @ts-ignore
       if (
