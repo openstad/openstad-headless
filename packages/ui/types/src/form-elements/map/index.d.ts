@@ -15,7 +15,7 @@ export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
     onChange?: (e: {
         name: string;
         value: FormValue;
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     requiredWarning?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;

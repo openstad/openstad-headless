@@ -19,7 +19,7 @@ export type ImageChoiceFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: FormValue }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;

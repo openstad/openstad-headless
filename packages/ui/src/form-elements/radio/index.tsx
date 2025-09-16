@@ -22,7 +22,7 @@ export type RadioboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: FormValue }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -85,7 +85,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     onChange({
                         name: key,
                         value: ""
-                    });
+                    }, false);
                 }
             }
         });
@@ -101,7 +101,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
             onChange({
                 name: e.name,
                 value: e.value
-            });
+            }, false);
         }
     };
 
