@@ -34,7 +34,18 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
   };
 
   const getCurrentPage = (e: string) => {
-    return window.location.href.includes(e.replaceAll(' ', '-')) ? 'page' : undefined;
+    const currentPath = window.location.pathname.toLowerCase();
+    const allPaths = currentPath.split('/').filter(Boolean);
+
+    if (allPaths.length === 0) return undefined;
+
+    const lastPath = allPaths[allPaths.length - 1];
+
+    if (lastPath === '') return undefined;
+
+    const formattedTitle = e.toLowerCase().replace(/\s+/g, '-');
+
+    return lastPath === formattedTitle ? 'page' : undefined;
   }
 
 
@@ -47,12 +58,22 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
       <Link className="level-1" href={`${prefix}${item.slug}`} aria-current={getCurrentPage(item.title)}>{item.title}</Link>
       {item._children.length > 0 && (
         <>
-          <button className="toggle-submenu" onClick={() => setOpenIndex(index)}>
+          <button
+            className="toggle-submenu"
+            onClick={() => setOpenIndex(index)}
+            aria-expanded={open}
+            aria-controls={`submenu-${index}`}
+            aria-haspopup="true"
+            aria-label={`Submenu van ${item.title}`}
+            id={`submenu-button-${index}`}
+          >
             <i className="ri-arrow-down-s-line"></i>
-            <span className="sr-only">Toon onderliggende pagina's</span>
           </button>
           {open && (
-            <div className="submenu" onMouseLeave={() => setOpenIndex(null)} onBlur={handleBlur} tabIndex={-1} ref={ref}>
+            <div
+              id={`submenu-${index}`}
+              aria-labelledby={`submenu-button-${index}`}
+              className="submenu" onMouseLeave={() => setOpenIndex(null)} onBlur={handleBlur} tabIndex={-1} ref={ref}>
               {item._children && item._children.map((child: any, childIndex: number) => (
                 <Link className="level-2" key={`${index}-${childIndex}`} href={`${prefix}${child.slug}`} aria-current={getCurrentPage(child.title)}>{child.title}</Link>
               ))}

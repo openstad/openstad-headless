@@ -3,6 +3,7 @@
 {% set mainMenu = data.global.mainMenuItems | json | replace("'", "&#39;") %}
 
 <div id="navbar"
+     aria-labelledby="menu-button"
       data-content='{{ mainMenu }}'
       data-prefix='{{ data.prefix }}'
 ></div>
@@ -11,7 +12,9 @@
 {% if not data.global.compactMenu %}
 {% set menuData = data.home._children | json | replace("'", "&#39;") %}
 
-  <div id="navbar"
+  <div
+    id="navbar"
+    aria-labelledby="menu-button"
        {% if not data.home.orphan %}
        data-home='
         [{

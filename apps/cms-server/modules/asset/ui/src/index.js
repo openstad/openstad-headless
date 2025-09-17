@@ -76,7 +76,6 @@ function adjustMenu() {
     closeButton.setAttribute('aria-expanded', 'false');
     mainMenuContainer.setAttribute('aria-hidden', 'true');
     navContainer.classList.remove('--show');
-    closeButtonSpan.textContent = 'Menu tonen';
   }
 
   function trapFocus(buttonContainer, menuContainer) {
@@ -158,7 +157,6 @@ function adjustMenu() {
       mainMenuContainer.setAttribute('aria-hidden', isExpanded);
 
       navContainer.classList.toggle('--show');
-      closeButtonSpan.textContent = isExpanded ? 'Menu tonen' : 'Menu verbergen';
 
       if (!isExpanded) {
         trapFocus(menuWrapperContainer, menuWrapperNavbar);

@@ -111,7 +111,14 @@
       </div>
 
         <div class="header_navbar-container">
-          <button class="close-button"><span>Menu tonen</span></button>
+          <button
+            class="close-button"
+            id="menu-button"
+            aria-label="Mobiel menu"
+            aria-haspopup="true"
+            aria-controls="navbar"
+          ></button>
+
           {% if data.global.compactMenu %}
             {% set menuData = data.home._children | json | replace("'", "&#39;") %}
             <div id="navbar"
