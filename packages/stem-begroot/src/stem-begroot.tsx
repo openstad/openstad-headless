@@ -141,6 +141,7 @@ function StemBegroot({
   //   useState<boolean>(false);
 
   const [activeTagTab, setActiveTagTab] = useState<string>('');
+  const [visitedTagTabs, setVisitedTagTabs] = useState<Array<string>>([]);
 
   const stringToArray = (str: string) => {
     return str
@@ -830,6 +831,16 @@ function StemBegroot({
                     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
                       const unmetTags = tagCounter.filter(tagObj => {
                         const key = Object.keys(tagObj)[0];
+
+                        if (
+                          tagObj[key].min === 0 &&
+                          tagObj[key].current === 0 &&
+                          key !== activeTagTab &&
+                          !visitedTagTabs.includes(key)
+                        ) {
+                          return true;
+                        }
+
                         return tagObj[key].current < tagObj[key].min;
                       });
 
@@ -840,6 +851,7 @@ function StemBegroot({
 
                       if (nextUnmetTag) {
                         const tagName = Object.keys(nextUnmetTag)[0];
+                        setVisitedTagTabs( prev => prev.includes(activeTagTab) ? prev : [...prev, activeTagTab] );
                         setActiveTagTab(tagName);
                         return;
                       }
@@ -921,6 +933,16 @@ function StemBegroot({
                     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
                       const unmetTags = tagCounter.filter(tagObj => {
                         const key = Object.keys(tagObj)[0];
+
+                        if (
+                          tagObj[key].min === 0 &&
+                          tagObj[key].current === 0 &&
+                          key !== activeTagTab &&
+                          !visitedTagTabs.includes(key)
+                        ) {
+                          return true;
+                        }
+
                         return tagObj[key].current < tagObj[key].min;
                       });
 
