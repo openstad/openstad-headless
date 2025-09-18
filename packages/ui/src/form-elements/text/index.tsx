@@ -28,7 +28,7 @@ export type TextInputProps = {
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined | number;
     type?: string;
-    onChange?: (e: { name: string, value: FormValue }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     reset?: (resetFn: () => void) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;

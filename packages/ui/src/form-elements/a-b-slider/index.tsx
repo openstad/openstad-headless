@@ -30,7 +30,7 @@ export type RangeSliderProps = {
     maxCharacters?: number;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: FormValue | valueObject }) => void;
+    onChange?: (e: { name: string, value: FormValue | valueObject }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;

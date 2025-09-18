@@ -5,7 +5,7 @@ export type HiddenInputProps = {
     fieldKey: string;
     defaultValue: string;
     type?: string;
-    onChange?: (e: {name: string, value: FormValue}) => void;
+    onChange?: (e: {name: string, value: FormValue}, triggerSetLastKey?: boolean) => void;
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];

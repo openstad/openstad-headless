@@ -27,7 +27,7 @@ export type MatrixFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | [] | string[]}) => void;
+    onChange?: (e: {name: string, value: string | Record<number, never> | [] | string[]}, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;

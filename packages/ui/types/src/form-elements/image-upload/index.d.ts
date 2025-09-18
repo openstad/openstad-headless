@@ -18,7 +18,7 @@ export type ImageUploadProps = {
             name: string;
             url: string;
         }[];
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     imageUrl?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;

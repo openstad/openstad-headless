@@ -38,6 +38,7 @@ export type Submit = {
     submitButton?: string;
     saveButton?: string;
     saveConceptButton?: string;
+    defaultAddedTags?: string;
 };
 
 export type Info = {
