@@ -371,7 +371,7 @@ label.utrecht-form-label {
         }
 
         .info-image-container {
-          animation: showImage 0.5s ease-in-out;
+          animation: showImage 2s infinite ease-in-out;
           height: 100%;
 
           img {
@@ -409,16 +409,14 @@ label.utrecht-form-label {
 
 @keyframes showImage {
   0% {
-    opacity: 0;
-    transform: scale(1.1);
+    transform: scale(1) rotate(0deg);
   }
-
-  60% {
-    transform: scale(1.2);
+  
+  50% {
+    transform: scale(1.03) rotate(2deg);
   }
 
   100% {
-    opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
 }
