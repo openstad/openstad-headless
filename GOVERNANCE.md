@@ -27,6 +27,8 @@ Core Team geeft opdracht aan deze maintainer voor community management:
 Core Team geeft opdracht aan deze maintainers voor beheer en onderhoud van code:
 - [Rudi van Hierden (Draad)](https://github.com/rudivanhierden)
 - [Ian Rieken (Gemeente Amsterdam)](https://github.com/IanR01)
+- [Ian de Bruin (Draad)](https://github.com/iandebruin98)
+- [Freek van der Horst (Draad)](https://github.com/freekDraad)
 
 Core Team werkt samen met deze partij voor ontwikkeling van code:
 - [Bart Nieuwenweg (Draad)](https://github.com/bartnieuwenweg)
