@@ -31,7 +31,7 @@ figure.info-image-container {
     gap: 1rem;
 }
 
-html body .question .marginTop10.marginBottom15 {
+.question .marginTop10.marginBottom15 {
     margin-top: 10px;
     margin-bottom: 15px;
 }
