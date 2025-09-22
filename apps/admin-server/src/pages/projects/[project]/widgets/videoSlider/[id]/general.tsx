@@ -45,6 +45,7 @@ export default function WidgetEnqueteGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
+      // @ts-ignore
       finalSlideTitle: props.finalSlideTitle || '',
       // @ts-ignore
       finalSlideDescription: props.finalSlideDescription || '',
