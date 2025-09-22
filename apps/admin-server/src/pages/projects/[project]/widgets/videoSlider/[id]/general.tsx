@@ -46,6 +46,7 @@ export default function WidgetEnqueteGeneral(
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
       finalSlideTitle: props.finalSlideTitle || '',
+      // @ts-ignore
       finalSlideDescription: props.finalSlideDescription || '',
       minCharactersWarning: props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
