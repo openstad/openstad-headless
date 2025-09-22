@@ -21,12 +21,18 @@ De huidige leden zijn:
 - Marijn van Dam (Gemeente Zwolle)
 - May-Britt Jansen (Gemeente Amsterdam)
 
+Core Team geeft opdracht aan deze maintainer voor community management:
+- [Bauke Huijbers (Sniglet)](https://github.com/BaukeHuijbers)
+
 Core Team geeft opdracht aan deze maintainers voor beheer en onderhoud van code:
 - [Rudi van Hierden (Draad)](https://github.com/rudivanhierden)
 - [Ian Rieken (Gemeente Amsterdam)](https://github.com/IanR01)
 
-Core Team werkt samen met deze marktpartij voor ontwikkeling van code:
-- [Bart Nieuwenweg (Draad)](https://github.com/bartnieuwenweg) 
+Core Team werkt samen met deze partij voor ontwikkeling van code:
+- [Bart Nieuwenweg (Draad)](https://github.com/bartnieuwenweg)
+
+Core Team werkt samen met deze partij voor organisatie van OpenStad Live:
+- [Jasper van Laar (Democracy Agency)](mailto:jasper@democracyagency.nl)
 
 ### Verantwoordelijkheden
 
