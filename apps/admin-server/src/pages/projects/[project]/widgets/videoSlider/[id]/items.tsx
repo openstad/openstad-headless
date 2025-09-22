@@ -254,13 +254,16 @@ export default function WidgetEnqueteItems(
         fieldKey: selectedItem.fieldKey || '',
         description: selectedItem.description || '',
         questionType: selectedItem.questionType || '',
+        // @ts-ignore
         videoUrl: selectedItem.videoUrl || '',
         minCharacters: selectedItem.minCharacters || '',
         maxCharacters: selectedItem.maxCharacters || '',
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
+        // @ts-ignore
         view: selectedItem.view || 'default',
+        // @ts-ignore
         group: selectedItem.group || '',
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
