@@ -15,6 +15,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +33,7 @@ import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import { YesNoSelect } from "@/lib/form-widget-helpers";
 import { ProjectSettingProps } from "@openstad-headless/types";
+import { info } from 'console';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -87,6 +90,10 @@ const formSchema = z.object({
   routingInitiallyHide: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
   routingSelectedAnswer: z.string().optional(),
+  infoBlockStyle: z.string().optional(),
+  infoBlockShareButton: z.boolean().optional(),
+  infoBlockExtraButton: z.string().optional(),
+
 
   // Keeping these for backwards compatibility
   image1Upload: z.string().optional(),
@@ -301,6 +308,8 @@ export default function WidgetEnqueteItems(
     imageAlt: '',
     imageDescription: '',
     infoBlockStyle: 'default',
+    infoBlockShareButton: false,
+    infoBlockExtraButton: '',
     fieldRequired: false,
     maxChoices: '',
     maxChoicesMessage: '',
@@ -358,6 +367,8 @@ export default function WidgetEnqueteItems(
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
         infoBlockStyle: selectedItem.infoBlockStyle || 'default',
+        infoBlockShareButton: selectedItem.infoBlockShareButton || false,
+        infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
         fieldRequired: selectedItem.fieldRequired || false,
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
@@ -1275,24 +1286,64 @@ export default function WidgetEnqueteItems(
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
+
                                   <SelectItem value="default">
                                     Standaard uiterlijk
                                   </SelectItem>
-                                  <SelectItem value="youth-intro">
-                                    Jongeren widget, introductie
-                                  </SelectItem>
-                                  <SelectItem value="youth-page">
-                                    Jongeren widget, tussenpagina
-                                  </SelectItem>
-                                  <SelectItem value="youth-outro">
-                                    Jongeren widget, afsluiting
-                                  </SelectItem>
+                                  <SelectGroup>
+                                    <SelectLabel>Jongeren widgets</SelectLabel>
+                                    <SelectItem value="youth-intro">
+                                      - Introductie
+                                    </SelectItem>
+                                    <SelectItem value="youth-page">
+                                      - Tussenpagina
+                                    </SelectItem>
+                                    <SelectItem value="youth-outro">
+                                      - Afsluiting
+                                    </SelectItem>
+                                  </SelectGroup>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+
+                        {form.watch('infoBlockStyle') === 'youth-outro' && (
+                          <div className="border border-secondary p-6 rounded-md bg-secondary/60">
+                            <FormField
+                              control={form.control}
+                              name={'infoBlockShareButton'}
+
+                              render={({ field }) => (
+                                <>
+                                  <FormItem>
+                                    <FormLabel
+                                      style={{ marginTop: 0, marginLeft: '6px' }}>Toon 'Deel' knop?</FormLabel>
+                                    <FormMessage />
+                                    {YesNoSelect(field, props)}
+                                  </FormItem>
+                                </>
+                              )}
+                            />
+                            <br />
+                            <hr />
+                            <br />
+
+                            <FormField
+                              control={form.control}
+                              name="infoBlockExtraButton"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Extra knop (Blijf op de hoogte)</FormLabel>
+                                  <Input {...field} />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+
                         <hr />
 
                       </>

@@ -40,6 +40,8 @@ export type Item = {
   imageAlt?: string;
   imageDescription?: string;
   infoBlockStyle?: string;
+  infoBlockShareButton?: boolean;
+  infoBlockExtraButton?: string;
   fieldRequired?: boolean;
   maxChoices?: string,
   maxChoicesMessage?: string,

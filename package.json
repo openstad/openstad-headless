@@ -38,6 +38,7 @@
   "private": true,
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/cron": "^2.4.3",
     "cypress": "^14.4.1",
     "mysql2": "^3.11.3",
     "prettier": "3.0.3",
