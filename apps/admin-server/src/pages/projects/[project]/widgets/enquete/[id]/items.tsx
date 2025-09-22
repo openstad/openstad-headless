@@ -1319,7 +1319,7 @@ export default function WidgetEnqueteItems(
                                 <>
                                   <FormItem>
                                     <FormLabel
-                                      style={{ marginTop: 0, marginLeft: '6px' }}>Toon 'Deel' knop?</FormLabel>
+                                      style={{ marginTop: 0, marginLeft: '6px' }}>Toon &apos;Deel&apos; knop?</FormLabel>
                                     <FormMessage />
                                     {YesNoSelect(field, props)}
                                   </FormItem>
