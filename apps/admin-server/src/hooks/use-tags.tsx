@@ -1,10 +1,13 @@
 import useSWR from 'swr';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useTag(projectId?: string) {
+export default function useTag(projectId?: string, includeGlobalTags?: boolean) {
   const projectNumber: number | undefined = validateProjectNumber(projectId, true);
 
-  let url = `/api/openstad/api/project/${projectNumber}/tag?includeGlobalTags=true`;
+  let url = `/api/openstad/api/project/${projectNumber}/tag`;
+  if (includeGlobalTags !== false) {
+    url += '?includeGlobalTags=true';
+  }
 
   const tagListSwr = useSWR((projectNumber || projectNumber === 0 ) ? url : null);
 
