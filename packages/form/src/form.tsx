@@ -192,6 +192,7 @@ function Form({
                             return null;
                         }
                         return field.type === 'pagination' ? null : (
+                            // @ts-ignore
                             <div className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`} key={index}>
                                 {renderField(field, index, randomId, fieldInvalid)}
                                 <FormFieldErrorMessage className="error-message">

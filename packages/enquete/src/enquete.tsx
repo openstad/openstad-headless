@@ -230,6 +230,8 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['imageAlt'] = item?.imageAlt || '';
                     fieldData['imageDescription'] = item?.imageDescription || '';
                     fieldData['infoBlockStyle'] = item?.infoBlockStyle || 'default';
+                    fieldData['infoBlockShareButton'] = item?.infoBlockShareButton || false;
+                    fieldData['infoBlockExtraButton'] = item?.infoBlockExtraButton || '';
                     break;
                 case 'swipe':
                     fieldData['type'] = 'swipe';
