@@ -2,6 +2,10 @@ const config = require('config');
 const prefillAllowedDomains = require('../services/prefillAllowedDomains');
 const URL    = require('url').URL;
 
+function logCORS(context, data) {
+	console.log(`[${new Date().toISOString()}] [CORS] ${context}:`, data);
+}
+
 module.exports = function( req, res, next ) {
 
 	let url = req.headers && req.headers.origin;
@@ -14,17 +18,38 @@ module.exports = function( req, res, next ) {
 	let allowedDomains = (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains;
 	allowedDomains = prefillAllowedDomains(allowedDomains || []);
 
+	if ( url !== undefined ) {
+		logCORS(`${url} ${(!allowedDomains || allowedDomains.indexOf(domain) === -1) ? 'is not allowed' : 'is allowed'}`, '');
+	}
+
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
 		url = config.url || req.protocol + '://' + req.host;
-		
+
 		// Exception for URLs without project - we allow all origins
 		// see project middleware for list of exceptions
 		if (req.headers && req.headers.origin && (req.path.match('^(/api/repo|/api/template|/api/area|/api/widget|/api/image|/api/document|/api/widget-type|/widget|/api/project/0/tag|/$)') || req.path.match('^(/api/lock(/[^/]*)?)$') || (req.path.match('^(/api/user)') && req.method == 'GET') || (req.path.match('^(/api/project)$') && req.method == 'GET'))) {
-				url = req.headers.origin;
-				console.log ('no project, allowing origin', url, req.path);
+			url = req.headers.origin;
+
+			logCORS('Exception: allowing origin', {
+				origin: req.headers.origin,
+				path: req.path
+			});
+		} else {
+
+			logCORS('Not allowed', {
+				origin: req.headers.origin,
+				path: req.path,
+				method: req.method,
+				url: req.url,
+				fullUrl: req.protocol + '://' + req.get('host') + req.originalUrl,
+				peerName: req?.client?._peername || req?.client?.sockname || null,
+				project: req.project ? req.project.id : null,
+				allowedDomains
+			});
+
 			}
 	}
-	
+
 	if (config.dev && config.dev['Header-Access-Control-Allow-Origin'] && process.env.NODE_ENV == 'development') {
     res.header('Access-Control-Allow-Origin', config.dev['Header-Access-Control-Allow-Origin'] );
   } else {
