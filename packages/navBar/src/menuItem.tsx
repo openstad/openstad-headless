@@ -49,7 +49,7 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
         <>
           <button className="toggle-submenu" onClick={() => setOpenIndex(index)}>
             <i className="ri-arrow-down-s-line"></i>
-            <span className="sr-only">Toon onderliggende pagina's</span>
+            <span className="sr-only">{open ? "Verberg onderliggende pagina's" : "Toon onderliggende pagina's"}</span>
           </button>
           {open && (
             <div className="submenu" onMouseLeave={() => setOpenIndex(null)} onBlur={handleBlur} tabIndex={-1} ref={ref}>
