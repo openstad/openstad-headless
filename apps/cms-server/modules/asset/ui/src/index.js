@@ -76,6 +76,8 @@ function adjustMenu() {
     closeButton.setAttribute('aria-expanded', 'false');
     mainMenuContainer.setAttribute('aria-hidden', 'true');
     navContainer.classList.remove('--show');
+    closeButton.innerHTML = '<span>Menu openen</span>';
+
   }
 
   function trapFocus(buttonContainer, menuContainer) {
@@ -118,6 +120,7 @@ function adjustMenu() {
 
   if (window.innerWidth <= mobileThreshold) {
     if (document.getElementsByClassName('--compact').length > 0) {
+
       if (
         navContainer.offsetWidth + logo.offsetWidth >=
         mainContainer.offsetWidth
@@ -137,19 +140,27 @@ function adjustMenu() {
         navContainer.classList.remove('--mobile');
       }
     }
+
   } else {
     navContainer.classList.remove('--mobile');
     navbar.classList.remove('--hidden');
     isMobile = false;
+
   }
 
   if (isMobile) {
     closeButton.setAttribute('aria-controls', 'main-menu');
     closeButton.setAttribute('aria-expanded', 'false');
     mainMenuContainer.setAttribute('aria-hidden', 'true');
-
+    
+    
     closeButton.replaceWith(closeButton.cloneNode(true));
     const newCloseButton = document.querySelector('.close-button');
+    newCloseButton.innerHTML = '<span>Menu openen</span>';
+
+    function setMenuButtonText(isOpen) {
+      newCloseButton.innerHTML = isOpen ? '<span>Menu sluiten</span>' : '<span>Menu openen</span>';
+    }
 
     newCloseButton.addEventListener('click', () => {
       const isExpanded = newCloseButton.getAttribute('aria-expanded') === 'true';
@@ -157,6 +168,9 @@ function adjustMenu() {
       mainMenuContainer.setAttribute('aria-hidden', isExpanded);
 
       navContainer.classList.toggle('--show');
+      setMenuButtonText(!isExpanded);
+
+
 
       if (!isExpanded) {
         trapFocus(menuWrapperContainer, menuWrapperNavbar);
@@ -177,6 +191,8 @@ function adjustMenu() {
     mainMenuContainer.removeAttribute('aria-hidden');
     navContainer.classList.remove('--show');
     closeButton.replaceWith(closeButton.cloneNode(true));
+    closeButtonSpan.innerHTML = '<span>Menu openen</span>';
+
   }
 
   document.addEventListener('keydown', (event) => {
