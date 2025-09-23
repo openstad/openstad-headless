@@ -10,17 +10,6 @@ module.exports = function( req, res, next ) {
 
 	let url = req.headers && req.headers.origin;
 
-	logCORS('Incoming request', {
-		origin: req.headers.origin,
-		path: req.path,
-		method: req.method,
-		project: req.project ? req.project.id : null
-	});
-
-	if (!!url || url === 'null') {
-		logCORS( 'No url in headers', { url } );
-	}
-
 	let domain = ''
 	try {
 		domain = new URL(url).host;
@@ -29,19 +18,10 @@ module.exports = function( req, res, next ) {
 	let allowedDomains = (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains;
 	allowedDomains = prefillAllowedDomains(allowedDomains || []);
 
-	logCORS('Allowed', {
-		checkedDomain: domain,
-		isAllowed: allowedDomains && allowedDomains.indexOf(domain) !== -1
-	});
+	logCORS(`${url} ${ (!allowedDomains || allowedDomains.indexOf(domain) === -1) ? 'is not allowed' : 'is allowed' }`, '');
 
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
 		url = config.url || req.protocol + '://' + req.host;
-
-		logCORS('Blocked origin', {
-			origin: req.headers.origin,
-			fallbackUrl: url,
-			path: req.path
-		});
 
 		// Exception for URLs without project - we allow all origins
 		// see project middleware for list of exceptions
@@ -52,7 +32,19 @@ module.exports = function( req, res, next ) {
 					origin: req.headers.origin,
 					path: req.path
 				});
-			}
+			} else {
+
+			logCORS('Not allowed', {
+				origin: req.headers.origin,
+				path: req.path,
+				method: req.method,
+				url: req.url,
+				peerName: req?.client?._peername || req?.client?.sockname || null,
+				project: req.project ? req.project.id : null,
+				allowedDomains
+			});
+
+		}
 	}
 	
 	if (config.dev && config.dev['Header-Access-Control-Allow-Origin'] && process.env.NODE_ENV == 'development') {
