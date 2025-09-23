@@ -652,7 +652,7 @@ export default function WidgetResourceOverviewDisplay(
                   Tag icoon weergeven in de tegels
                 </FormLabel>
                 <FormDescription>
-                  Bij de tags kun je een 'Icoon voor de kaart' uploaden. Als je dit aanvinkt, wordt dit icoon ook in de tegels getoond.
+                  Bij de tags kun je een &apos;Icoon voor de kaart&apos; uploaden. Als je dit aanvinkt, wordt dit icoon ook in de tegels getoond.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
