@@ -125,6 +125,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     clickableImage?: boolean;
     displayBudget?: boolean;
     displayTags?: boolean;
+    displayTagIcon?: boolean;
     displayOverviewTagGroups?: boolean;
     overviewTagGroups?: string[];
     dialogTagGroups?: string[];
@@ -280,6 +281,13 @@ const defaultItemRenderer = (
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
     : resource?.tags || [];
 
+  const firstTag = resource?.tags
+    ? resource.tags
+    .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
+    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
+    : false;
+  const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
@@ -363,6 +371,15 @@ const defaultItemRenderer = (
             )}
           />
 
+          { props.displayTagIcon && firstTag && MapIconImage && (
+            <div className="resource-card--link_tagicon">
+              <Image
+                src={MapIconImage}
+                alt={ firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon' }
+              />
+            </div>
+          )}
+
         </div>
 
       ) : (
@@ -440,6 +457,15 @@ const defaultItemRenderer = (
               />
             )}
           />
+
+          { props.displayTagIcon && firstTag && MapIconImage && (
+            <div className="resource-card--link_tagicon">
+              <Image
+                src={MapIconImage}
+                alt={ firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon' }
+              />
+            </div>
+          )}
 
         </div>
       )}

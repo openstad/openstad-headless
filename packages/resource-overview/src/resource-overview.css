@@ -294,6 +294,25 @@ p.osc-searchtext {
   color: rgb(100, 116, 139);
 }
 
+.osc-resource-overview-content .resource-card--link_tagicon {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: auto;
+  top: auto;
+  width: 45px;
+  height: 60px;
+}
+
+.osc-resource-overview-content .resource-card--link_tagicon .image-container {
+  background-color: transparent;
+}
+
+.osc-resource-overview-content .resource-card--link_tagicon .image-container > img {
+  aspect-ratio: 3 / 4;
+}
+
+
 /* Text Colors */
 .color-FFFFFF { color: #FFFFFF; }
 .color-000000 { color: #000000; }
