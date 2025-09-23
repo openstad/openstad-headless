@@ -31,9 +31,14 @@ figure.info-image-container {
     gap: 1rem;
 }
 
-.question .marginTop10.marginBottom15 {
-    margin-top: 10px;
-    margin-bottom: 15px;
+.question-type-radiobox .utrecht-textbox,
+.question-type-checkbox .utrecht-textbox {
+ margin-top: -0.5rem;
+ margin-bottom: 1rem;
+}
+
+.utrecht-form-field--text>.utrecht-form-field__input {
+ margin-block-start: 1rem;
 }
 
 .utrecht-form-field.utrecht-form-field--checkbox .utrecht-form-label--checkbox .utrecht-checkbox--custom.utrecht-checkbox--html-input:disabled {
