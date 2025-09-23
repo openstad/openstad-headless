@@ -4,6 +4,7 @@ import { Agenda } from './agenda.js';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    <div className="openstad">
     <Agenda
       tagTypes={[
         {
@@ -56,5 +57,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         resourceId: import.meta.env.VITE_RESOURCE_ID,
       }}
     />
+    </div>
   </React.StrictMode>
 );
