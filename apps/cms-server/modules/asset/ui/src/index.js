@@ -69,6 +69,53 @@ function adjustMenu() {
   const navbar = document.getElementById('navbar');
   const header = document.querySelector('.main-header-container');
 
+  const menuWrapperContainer = document.querySelector('.header_navbar-container');
+  const menuWrapperNavbar = document.querySelector('#navbar');
+
+  function closeMenu() {
+    closeButton.setAttribute('aria-expanded', 'false');
+    mainMenuContainer.setAttribute('aria-hidden', 'true');
+    navContainer.classList.remove('--show');
+  }
+
+  function trapFocus(buttonContainer, menuContainer) {
+    const focusableElements = menuContainer.querySelectorAll('a, button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])');
+    const closeButton = buttonContainer.querySelector('button');
+
+    const lastFocusableElement = focusableElements[focusableElements.length - 1];
+
+    closeButton.addEventListener('keydown', (event) => {
+      const isTabPressed = (event.key === 'Tab' || event.keyCode === 9);
+
+      if (!isTabPressed || !event.shiftKey || document.activeElement !== closeButton) {
+        return;
+      }
+
+      lastFocusableElement.focus();
+      event.preventDefault();
+    });
+
+    menuContainer.addEventListener('keydown', (event) => {
+      const isTabPressed = (event.key === 'Tab' || event.keyCode === 9);
+
+      if (!isTabPressed) {
+        return;
+      }
+
+      if (event.shiftKey) {
+        if (document.activeElement === closeButton) {
+          lastFocusableElement.focus();
+          event.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastFocusableElement) {
+          closeButton.focus();
+          event.preventDefault();
+        }
+      }
+    });
+  }
+
   if (window.innerWidth <= mobileThreshold) {
     if (document.getElementsByClassName('--compact').length > 0) {
       if (
@@ -110,10 +157,9 @@ function adjustMenu() {
       mainMenuContainer.setAttribute('aria-hidden', isExpanded);
 
       navContainer.classList.toggle('--show');
-      closeButtonSpan.textContent = isExpanded ? 'Menu tonen' : 'Menu verbergen';
 
       if (!isExpanded) {
-        trapFocus(navContainer);
+        trapFocus(menuWrapperContainer, menuWrapperNavbar);
       }
     });
 
