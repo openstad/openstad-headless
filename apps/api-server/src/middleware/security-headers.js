@@ -18,7 +18,9 @@ module.exports = function( req, res, next ) {
 	let allowedDomains = (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains;
 	allowedDomains = prefillAllowedDomains(allowedDomains || []);
 
-	logCORS(`${url} ${ (!allowedDomains || allowedDomains.indexOf(domain) === -1) ? 'is not allowed' : 'is allowed' }`, '');
+	if ( url !== undefined ) {
+		logCORS(`${url} ${(!allowedDomains || allowedDomains.indexOf(domain) === -1) ? 'is not allowed' : 'is allowed'}`, '');
+	}
 
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
 		url = config.url || req.protocol + '://' + req.host;
@@ -34,15 +36,19 @@ module.exports = function( req, res, next ) {
 				});
 			} else {
 
-			logCORS('Not allowed', {
-				origin: req.headers.origin,
-				path: req.path,
-				method: req.method,
-				url: req.url,
-				peerName: req?.client?._peername || req?.client?.sockname || null,
-				project: req.project ? req.project.id : null,
-				allowedDomains
-			});
+			if ( req.headers && req.headers.origin ) {
+				logCORS('Not allowed', {
+					origin: req.headers.origin,
+					path: req.path,
+					method: req.method,
+					url: req.url,
+					newUrl: config.url || req.protocol + '://' + req.host,
+					fullUrl: req.protocol + '://' + req.get('host') + req.originalUrl,
+					peerName: req?.client?._peername || req?.client?.sockname || null,
+					project: req.project ? req.project.id : null,
+					allowedDomains
+				});
+			}
 
 		}
 	}
