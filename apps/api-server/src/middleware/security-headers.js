@@ -48,6 +48,15 @@ module.exports = function( req, res, next ) {
 					project: req.project ? req.project.id : null,
 					allowedDomains
 				});
+			} else {
+				logCORS('No origin header', {
+					path: req.path,
+					url: req.url,
+					newUrl: config.url || req.protocol + '://' + req.host,
+					fullUrl: req.protocol + '://' + req.get('host') + req.originalUrl,
+					project: req.project ? req.project.id : null,
+					allowedDomains
+				});
 			}
 
 		}
