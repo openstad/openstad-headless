@@ -164,6 +164,19 @@ async function doStartServer(domain, req, res) {
   }
 }
 
+// Generate a session secret based on project details and environment variables
+// This ensures the session secret is the same for each restart of this server,
+// but different for each project and version of the cms server
+async function getSessionSecret(projectUrl, projectId) {
+  const crypto = require('crypto');
+  const hash = crypto.createHash('sha256');
+  const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
+  const data = (process.env.APOS_RELEASE_ID || '') + apiUrl + projectUrl + projectId;
+  hash.update(data);
+  
+  return hash.digest('hex');
+}
+
 async function run(id, projectData, options, callback) {
 
 
@@ -172,8 +185,9 @@ async function run(id, projectData, options, callback) {
   const protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
   projectData.url = protocol + url.hostname + (url.port ? ':' + url.port : '');
 
+  const sessionSecret = await getSessionSecret(projectData.url, projectData.id);
+  
   const project = {
-    ...aposConfig,
     baseUrl: /*process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : */projectData.url,
     options: projectData,
     project: projectData,
@@ -181,6 +195,16 @@ async function run(id, projectData, options, callback) {
     shortName: 'openstad-' + projectData.id,
     mongo: {},
     prefix: projectData.sitePrefix ? '/' + projectData.sitePrefix : false,
+    modules: {
+      ...aposConfig.modules,
+      '@apostrophecms/express': {
+        options: {
+          session: {
+            secret: sessionSecret
+          }
+        }
+      }
+    },
   };
 
   if (process.env.MONGODB_URI) {
