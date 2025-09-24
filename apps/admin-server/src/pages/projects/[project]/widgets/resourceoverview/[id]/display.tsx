@@ -65,6 +65,7 @@ const formSchema = z.object({
   displayTags: z.boolean().optional(),
   overviewTagGroups: z.array(z.string()).optional(),
   dialogTagGroups: z.array(z.string()).optional(),
+  displayTagIcon: z.boolean().optional(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -104,6 +105,7 @@ export default function WidgetResourceOverviewDisplay(
       clickableImage: props?.clickableImage || false,
       displayBudget: props?.displayBudget !== false,
       displayTags: props?.displayTags !== false,
+      displayTagIcon: props?.displayTagIcon || false,
       displayLocationFilter: props?.displayLocationFilter === true,
       listTabTitle: typeof (props?.listTabTitle) === 'undefined' ? 'Lijst' : props.listTabTitle,
       mapTabTitle: typeof (props?.mapTabTitle) === 'undefined' ? 'Kaart' : props.mapTabTitle,
@@ -636,6 +638,23 @@ export default function WidgetResourceOverviewDisplay(
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayTagIcon"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tag icoon weergeven in de tegels
+                </FormLabel>
+                <FormDescription>
+                  Bij de tags kun je een &apos;Icoon voor de kaart&apos; uploaden. Als je dit aanvinkt, wordt dit icoon ook in de tegels getoond.
+                </FormDescription>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}

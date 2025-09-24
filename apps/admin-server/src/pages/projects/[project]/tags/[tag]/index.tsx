@@ -297,7 +297,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                       form={form}
                       fieldName="mapIconUploader"
                       imageLabel="Icoon op de kaart"
-                      description="De geüploade afbeelding wordt automatisch ingesteld als de marker op de kaart voor de resource die aan deze tag is gekoppeld. De ideale afmetingen voor een icoon zijn 30x40 pixels. Het ideale type is een .png of .svg"
+                      description="De geüploade afbeelding wordt automatisch ingesteld als de marker op de kaart voor de resource die aan deze tag is gekoppeld. De ideale afmetingen voor een icoon zijn 45x60 pixels. Het ideale type is een .png of .svg"
                       allowedTypes={['image/*']}
                       onImageUploaded={(imageResult) => {
                         const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
