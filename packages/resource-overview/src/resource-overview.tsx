@@ -622,7 +622,7 @@ function ResourceOverviewInner({
     ...props,
     search,
     tags: [],
-    sort,
+    sort: undefined,
     projectIds: projectIds || [],
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1
   });
@@ -969,7 +969,7 @@ function ResourceOverviewInner({
                 } else {
                   setTags(f.tags);
                 }
-                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                if (['createdAt_desc', 'createdAt_asc', 'title', 'votes_desc', 'votes_asc', 'ranking', 'random'].includes(f.sort)) {
                   setSort(f.sort);
                 }
                 setSearch(f.search.text);
