@@ -57,7 +57,7 @@ const formSchema = z.object({
   logo: z.string().optional(),
   imageFavicon: z.string().optional(),
   favicon: z.string().optional(),
-  authProviderId: z.string().optional(),
+  authProviders: z.array( z.string().or(z.number()) ),
   cssUrl: z.string().optional(),
   clientDisclaimerUrl: z.string().optional(),
   clientStylesheets: z.array(z.object({
@@ -83,7 +83,7 @@ export default function ProjectAuthentication() {
       defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
       logo: data?.config?.auth?.provider?.openstad?.config?.styling?.logo,
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
-      authProviderId: data?.config?.authProviderId ? 'id-' + data?.config?.authProviderId : undefined,
+      authProviders: data?.config?.authProviders || ['openstad'],
       clientDisclaimerUrl: data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
       cssUrl: (Array.isArray(data?.config?.auth?.provider?.openstad?.config?.clientStylesheets) && data?.config?.auth?.provider?.openstad?.config?.clientStylesheets?.length)
         ? data?.config?.auth?.provider?.openstad?.config?.clientStylesheets[0]?.url
@@ -98,7 +98,7 @@ export default function ProjectAuthentication() {
   });
 
   const authProvidersEnabled = useAuthProvidersEnabledCheck();
-  const { data: authProviders, isLoading, error } = useAuthProvidersList();
+  const { data: authProviders } = useAuthProvidersList();
 
   useEffect(() => {
     form.reset(defaults());
@@ -126,7 +126,7 @@ export default function ProjectAuthentication() {
             };
           };
         },
-        authProviderId: string | null
+        authProviders?: (string | number)[]
       } = {
         auth: {
           provider: {
@@ -146,7 +146,7 @@ export default function ProjectAuthentication() {
             }
           }
         },
-        authProviderId: (values?.authProviderId?.indexOf('id-') === 0) ? values.authProviderId.substring(3) : null
+        authProviders: values.authProviders
       }
 
       if (values.cssUrl) {
@@ -168,16 +168,13 @@ export default function ProjectAuthentication() {
     }
   }
 
-  const [showEmailFields, setShowEmailFields] = useState(false)
-  useEffect(() => {
-    // Get form values
-    const formValues = form.getValues();
-    // data is not available right away
-    setShowEmailFields(formValues.authTypes?.includes('Url'));
-    setShowAuthSettings((formValues.authProviderId ?? null) == null);
+  const { watch } = form;
 
-    console.log ('formValues', formValues);
-  }, [data]);
+  const currentSelectedAuthTypes = watch('authTypes');
+  const showEmailFields = Array.isArray(currentSelectedAuthTypes) && currentSelectedAuthTypes?.includes('Url');
+
+  const currentSelectedProviders = watch('authProviders');
+  const showAuthSettings = Array.isArray(currentSelectedProviders) && currentSelectedProviders.includes('openstad');
 
   const infoDialogContents: { [key: string]: string } = {
     'UniqueCode': 'Unieke code',
@@ -185,8 +182,6 @@ export default function ProjectAuthentication() {
     'Phonenumber': 'SMS verificatie',
     'Local': 'Wachtwoord',
   }
-
-  const [showAuthSettings, setShowAuthSettings] = useState(true);
 
   return (
     <div>
@@ -214,50 +209,62 @@ export default function ProjectAuthentication() {
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6">
-                {authProvidersEnabled && (
-                <FormField
-                control={form.control}
-                name="authProviderId"
-                render={() => (
-                  <FormItem className="col-span-full">
-                    <div>
 
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <FormField name="authProviderId" defaultValue="" control={form.control}
-                                 render={({ field }) => {
-                                   return (
-                                     <FormItem>
-                                       <FormLabel>
-                                         Authenticatie provider
-                                       </FormLabel>
-                                       <Select
-                                         onValueChange={(e) => {
-                                           field.onChange(e);
-                                           setShowAuthSettings(e == null || e == '' || typeof e == 'undefined');
-                                         }}
-                                         value={field.value}>
-                                         <FormControl>
-                                           <SelectTrigger>
-                                             <SelectValue placeholder="Geen - standaard Openstad authenticatie" />
-                                           </SelectTrigger>
-                                         </FormControl>
-                                         <SelectContent>
-                                           <SelectItem value="">Geen - standaard Openstad authenticatie</SelectItem>
-                                           {authProviders && authProviders.map((provider: { id: string; name: string }) => (
-                                             <SelectItem key={`auth-provider-${provider.id}`}
-                                                         value={`id-${provider.id}`}>{provider.name}</SelectItem>
-                                           ))}
-                                         </SelectContent>
-                                       </Select>
-                                       <FormMessage />
-                                     </FormItem>
-                                   );
-                                 }}></FormField>
-                    </div>
-                  </FormItem>
-                )} />
+                {authProvidersEnabled && (
+                  <FormField
+                    control={form.control}
+                    name="authProviders"
+                    render={() => (
+                      <FormItem className="col-span-full">
+                        <div>
+                          <FormLabel>
+                            Authenticatie provider
+                          </FormLabel>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {authProviders && Array.isArray(authProviders) &&
+                            [{ id: "openstad", name: "Standaard Openstad authenticatie" }, ...authProviders]
+                              .map((provider: { id: string; name: string }) => (
+                            <FormField
+                              key={provider.id}
+                              control={form.control}
+                              name="authProviders"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={provider.id}
+                                    className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value?.includes(provider.id)}
+                                        onCheckedChange={(checked: any) => {
+                                          return checked
+                                            ? field.onChange([
+                                              ...(Array.isArray(field.value) ? field.value : []),
+                                              provider.id,
+                                            ])
+                                            : field.onChange(
+                                              field.value?.filter(
+                                                (value) => value !== provider.id
+                                              )
+                                            );
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {provider.name}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </FormItem>
+                    )}
+                  />
                 )}
+
                 {showAuthSettings && (
                   <>
                 <FormField
@@ -285,7 +292,6 @@ export default function ProjectAuthentication() {
                                   <Checkbox
                                     checked={field.value?.includes(item.id)}
                                     onCheckedChange={(checked: any) => {
-                                      if (item.id == 'Url') setShowEmailFields(checked)
                                       return checked
                                         ? field.onChange([
                                             ...(Array.isArray(field.value) ? field.value : []),

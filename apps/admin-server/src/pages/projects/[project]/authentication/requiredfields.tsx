@@ -22,39 +22,49 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Spacer } from "@/components/ui/spacer";
+import useAuthProvidersList, {useAuthProvidersEnabledCheck} from "@/hooks/use-auth-providers";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 
 const requiredUserFields = [
   {
     id: 'name',
     label: 'Naam',
+    defaultMappingKey: "irma-demo.gemeente.personalData.fullname"
   },
   {
     id: 'email',
     label: 'E-mailadres',
+    defaultMappingKey: "irma-demo.sidn-pbdf.email.email"
   },
   {
     id: 'phoneNumber',
     label: 'Telefoonnummer',
+    defaultMappingKey: "irma-demo.sidn-pbdf.phoneNumber.phoneNumber"
   },
   {
     id: 'streetName',
     label: 'Straatnaam',
+    defaultMappingKey: "irma-demo.gemeente.address.street"
   },
   {
     id: 'suffix',
     label: 'Tussenvoegsel',
+    defaultMappingKey: "irma-demo.gemeente.personalData.infix"
   },
   {
     id: 'houseNumber',
     label: 'Huisnummer',
+    defaultMappingKey: "irma-demo.gemeente.address.housenumber"
   },
   {
     id: 'city',
     label: 'Stad',
+    defaultMappingKey: "irma-demo.gemeente.address.city"
   },
   {
     id: 'postcode',
     label: 'Postcode',
+    defaultMappingKey: "irma-demo.gemeente.address.postalcode"
   },
 ];
 
@@ -65,6 +75,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   buttonText: z.string().optional(),
   info: z.string().optional(),
+  authProvidersRequiredUserFields: z.record(z.array(z.string())).optional(),
 });
 
 export default function ProjectAuthenticationRequiredFields() {
@@ -87,6 +98,7 @@ export default function ProjectAuthenticationRequiredFields() {
       description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || '',
       buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || '',
       info: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.info || '',
+      authProvidersRequiredUserFields: data?.config?.authProvidersRequiredUserFields || {},
     }),
     [data?.config]
   );
@@ -118,7 +130,8 @@ export default function ProjectAuthenticationRequiredFields() {
               },
             }
           }
-        }
+        },
+        authProvidersRequiredUserFields: values?.authProvidersRequiredUserFields
       };
 
       const project = await updateProject(updatedConfig);
@@ -134,11 +147,11 @@ export default function ProjectAuthenticationRequiredFields() {
     }
   }
 
-  const [showPageFields, setShowPageFields] = useState(false)
-  useEffect(() => {
-    // data is not available right away
-    setShowPageFields(data?.config?.auth?.provider?.openstad?.requiredUserFields?.length > 0);
-  }, [data]);
+  const selectedUserFields = form.watch('requiredUserFields');
+  const showPageFields = Array.isArray(selectedUserFields) && selectedUserFields.length > 0;
+
+  const authProvidersEnabled = useAuthProvidersEnabledCheck();
+  const { data: authProviders } = useAuthProvidersList();
   
   return (
     <div>
@@ -159,173 +172,316 @@ export default function ProjectAuthenticationRequiredFields() {
           },
         ]}>
         <div className="container py-6">
-          <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Verplichte velden</Heading>
-            <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 lg:w-1/2">
-              <div>
-                <FormLabel>
-                  Een nieuwe gebruiker moet de volgende velden invullen:
-                </FormLabel>
-              </div>
+          <Tabs defaultValue="velden-os">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+              <TabsTrigger value="velden-os">Verplichte velden OpenStad</TabsTrigger>
+              {authProvidersEnabled && authProviders && authProviders.length > 0 ? (
+                  <TabsTrigger value="velden-ap">Verplichte velden per Auth Provider</TabsTrigger>
+              ) : null}
+            </TabsList>
+            <TabsContent value="velden-os" className="p-0">
+              <Form {...form} className="p-6 bg-white rounded-md">
+                <Heading size="xl">Verplichte velden</Heading>
+                <Separator className="my-4" />
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4 lg:w-1/2">
+                  <div>
+                    <FormLabel>
+                      Een nieuwe gebruiker moet de volgende velden invullen:
+                    </FormLabel>
+                  </div>
 
-              <FormField
-                control={form.control}
-                name="requiredUserFields"
-                render={() => (
-                  <FormItem className="col-span-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {requiredUserFields.map((item) => (
-                        <FormField
-                          key={item.id}
-                          control={form.control}
-                          name="requiredUserFields"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={item.id}
-                                className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item.id)}
-                                    onCheckedChange={(checked: any) => {
-                                      setShowPageFields(field.value.length > 1 || checked)
-                                      return checked
-                                        ? field.onChange([
-                                            ...field.value,
-                                            item.id,
-                                          ])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== item.id
-                                            )
-                                          );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {item.label}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {showPageFields ? (
-                  <>
-                    <Spacer size={2} />
-                    <div>
-                      <FormLabel>
-                        Standaard staat de titel van de bovenstaande geselecteerde verplichte velden als de titel boven het invulveld. Hier kun je dit per verplicht veld aanpassen.
-                      </FormLabel>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {requiredUserFields.map((item) => {
-                        const fieldValue = form.getValues('requiredUserFieldsLabels')[item.id] ?? '';
-                        return form.watch('requiredUserFields').includes(item.id) ? (
+                  <FormField
+                    control={form.control}
+                    name="requiredUserFields"
+                    render={() => (
+                      <FormItem className="col-span-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {requiredUserFields.map((item) => (
                             <FormField
-                                key={item.id}
-                                control={form.control}
-                                name={`requiredUserFieldsLabels.${item.id}`}
-                                render={({field}) => (
-                                    <FormItem>
-                                      <FormLabel>{item.label}</FormLabel>
-                                      <FormControl>
-                                        <Input
-                                            placeholder={item.label}
-                                            defaultValue={fieldValue}
-                                            onChange={(e) => {
-                                              field.onChange(e);
-                                            }}
-                                        />
+                              key={item.id}
+                              control={form.control}
+                              name="requiredUserFields"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={item.id}
+                                    className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value?.includes(item.id)}
+                                        onCheckedChange={(checked: any) => {
+                                          return checked
+                                            ? field.onChange([
+                                                ...field.value,
+                                                item.id,
+                                              ])
+                                            : field.onChange(
+                                                field.value?.filter(
+                                                  (value) => value !== item.id
+                                                )
+                                              );
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {item.label}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </FormItem>
+                    )}
+                  />
 
-                                      </FormControl>
-                                      <FormMessage/>
+                  {showPageFields ? (
+                      <>
+                        <Spacer size={2} />
+                        <div>
+                          <FormLabel>
+                            Standaard staat de titel van de bovenstaande geselecteerde verplichte velden als de titel boven het invulveld. Hier kun je dit per verplicht veld aanpassen.
+                          </FormLabel>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {requiredUserFields.map((item) => {
+                            const fieldValue = form.getValues('requiredUserFieldsLabels')[item.id] ?? '';
+                            return form.watch('requiredUserFields').includes(item.id) ? (
+                                <FormField
+                                    key={item.id}
+                                    control={form.control}
+                                    name={`requiredUserFieldsLabels.${item.id}`}
+                                    render={({field}) => (
+                                        <FormItem>
+                                          <FormLabel>{item.label}</FormLabel>
+                                          <FormControl>
+                                            <Input
+                                                placeholder={item.label}
+                                                defaultValue={fieldValue}
+                                                onChange={(e) => {
+                                                  field.onChange(e);
+                                                }}
+                                            />
+
+                                          </FormControl>
+                                          <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                            ) : null
+                          })}
+                        </div>
+                        <Spacer size={5} />
+                      </>
+                  ) : null}
+
+                  {showPageFields ? (
+                  <>
+                  <Separator className="my-4" />
+                  <div>
+                    <FormLabel>
+                      Als een gebruiker één of meer van deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
+                    </FormLabel>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Titel</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Beschrijving</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="buttonText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Knoptekst</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="info"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Help tekst</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  </>
+                  ) : null}
+
+                  <Button type="submit">Opslaan</Button>
+                </form>
+              </Form>
+            </TabsContent>
+            <TabsContent value="velden-ap" className="p-0">
+              <Form {...form} className="p-6 bg-white rounded-md">
+                <Heading size="xl">Verplichte velden per Auth Provider</Heading>
+                <Separator className="my-4" />
+                <p>
+                  Geef hier aan welke velden een gebruiker moet invullen als die zich aanmeldt.
+                  Je kunt ook aangeven hoe de gegevens uit de authenticatiebron (bijv. IRMA) gekoppeld moeten worden aan de verplichte velden.
+                  <br/>
+                  <br/>
+                  Laat je dit leeg, dan wordt het veld niet getoond en kan de gebruiker deze informatie niet invullen.
+                  <br/>
+                  <br/>
+                  <strong>Let op:</strong> Als je een veld verplicht stelt, zorg er dan voor dat je een juiste mapping opgeeft zodat het veld automatisch ingevuld kan worden vanuit de authenticatiebron.
+                  Als er geen waarde is om het veld automatisch in te vullen, kan de gebruiker zich niet registreren.
+                  <br/>
+                  <br/>
+                  Zie voor de mogelijke mapping keys van jouw authenticatiebron de documentatie of vraag dit na bij de beheerder van de authenticatiebron.
+                  <br/>
+                  <br/>
+                  <br/>
+                </p>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4 lg:w-2/3"
+                >
+                  {authProviders && authProviders.length > 0 ? (
+                      authProviders.map((provider: {id: string, name: string}) => {
+                        const providerId = provider.id;
+                        const providerName = provider.name;
+
+                        return (
+                            <div key={providerId} className="mb-6">
+                              <Heading size="lg">{providerName}</Heading>
+                              <Separator className="my-4" />
+                              <FormField
+                                  control={form.control}
+                                  name={`authProvidersRequiredUserFields.${providerId}`}
+                                  render={() => (
+                                    <>
+                                      <FormItem className="col-span-full">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                                          <strong className="mt-3">
+                                            Verplicht veld
+                                          </strong>
+                                          <strong className="mt-3">
+                                            Mapping key authenticatiebron
+                                          </strong>
+
+                                          {requiredUserFields.map((item) => (
+                                            <>
+                                              <FormField
+                                                  key={item.id}
+                                                  control={form.control}
+                                                  name={`authProvidersRequiredUserFields.${providerId}`}
+                                                  render={({ field }) => {
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-center space-x-3 space-y-0">
+                                                          <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value?.includes(item.id)}
+                                                                onCheckedChange={(checked: any) => {
+                                                                  const currentValues = form.getValues(`authProvidersRequiredUserFields.${providerId}`) || [];
+                                                                  return checked
+                                                                      ? field.onChange([
+                                                                        ...currentValues,
+                                                                        item.id,
+                                                                      ])
+                                                                      : field.onChange(
+                                                                          currentValues?.filter(
+                                                                              (value) => value !== item.id
+                                                                          )
+                                                                      );
+                                                                }}
+                                                            />
+                                                          </FormControl>
+                                                          <FormLabel className="font-normal">
+                                                            {item.label}
+                                                          </FormLabel>
+                                                        </FormItem>
+                                                    );
+                                                  }}
+                                              />
+
+                                              { form.watch(`authProvidersRequiredUserFields.${providerId}`)?.includes(item.id) ? (
+                                                  <FormField
+                                                      key={item.id}
+                                                      control={form.control}
+                                                      name={`authProvidersRequiredUserFields.${providerId}.${item.id}.mapping`}
+                                                      render={({field}) => {
+                                                        const fieldValue = form.getValues('authProvidersRequiredUserFields') || {};
+                                                        const providerFields = fieldValue[providerId] || {};
+                                                        const itemField = providerFields[item.id] || {};
+                                                        const mappingValue = itemField['mapping'] || item.defaultMappingKey || '';
+
+                                                        return (
+                                                            <FormItem>
+                                                              <FormControl>
+                                                                <Input
+                                                                    defaultValue={mappingValue}
+                                                                    onChange={(e) => {
+                                                                      field.onChange(e);
+                                                                    }}
+                                                                />
+                                                              </FormControl>
+                                                              <FormMessage/>
+                                                            </FormItem>
+                                                        )
+                                                      }}
+                                                  />
+                                                ) : <div></div>
+                                              }
+                                          </>
+                                        ))}
+                                      </div>
                                     </FormItem>
+                                      <Spacer size={3} />
+                                  </>
                                 )}
                             />
-                        ) : null
-                      })}
-                    </div>
-                    <Spacer size={5} />
-                  </>
-              ) : null}
 
-              {showPageFields ? (
-              <>
-              <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Als een gebruiker één of meer van deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
-                </FormLabel>
-              </div>
+                          </div>
+                        )
+                      })
+                  ) : (
+                      <div>Geen Auth Providers gevonden</div>
+                  )}
+                  <Button type="submit">Opslaan</Button>
+                </form>
+              </Form>
+            </TabsContent>
 
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beschrijving</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="buttonText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Knoptekst</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="info"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Help tekst</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              </>
-              ) : null}
-
-              <Button type="submit">Opslaan</Button>
-            </form>
-          </Form>
+          </Tabs>
         </div>
       </PageLayout>
     </div>
