@@ -243,6 +243,8 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'sort':
                     fieldData['options'] = item?.options || [];
                     fieldData['type'] = 'sort';
+                    fieldData['title'] = item?.title || '';
+                    fieldData['description'] = item?.description || '';
                     break;
                 case 'none':
                     fieldData['type'] = 'none';

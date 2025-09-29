@@ -4,7 +4,7 @@ import React, { FC, useState, ReactNode } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Paragraph, Strong } from "@utrecht/component-library-react";
+import { FormFieldDescription, FormLabel, Paragraph, } from "@utrecht/component-library-react";
 
 import "./sort.css";
 
@@ -18,6 +18,8 @@ type Option = {
 
 export type SortFieldProps = {
     options?: Option[];
+    title?: string;
+    description?: string;
     onSort?: (sorted: Option[]) => void;
 };
 
@@ -32,7 +34,6 @@ const SortableItem: FC<SortableItemProps> = ({ id, dragHandle, children }) => {
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        marginBottom: "8px"
     };
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
@@ -44,6 +45,8 @@ const SortableItem: FC<SortableItemProps> = ({ id, dragHandle, children }) => {
 
 const SortField: FC<SortFieldProps> = ({
     options = [],
+    title,
+    description,
     onSort,
 }) => {
     const [items, setItems] = useState(options);
@@ -61,54 +64,70 @@ const SortField: FC<SortFieldProps> = ({
 
     return (
         <div className="sort-field-container">
-            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext
-                    items={items.map(opt => opt.titles?.[0]?.key || "")}
-                    strategy={verticalListSortingStrategy}
-                >
-                    {items.map((option, index) => (
-                        <SortableItem
-                            key={option.titles?.[0]?.key || index}
-                            id={option.titles?.[0]?.key || String(index)}
-                            dragHandle={<i className="ri-draggable"></i>}
-                        >
-                            <span className="sortable-item-title">{option.titles?.[0]?.key}</span>
-                            <div className="sortable-item-actions">
-                                <button
-                                    type="button"
-                                    aria-label="Move up"
-                                    disabled={index === 0}
-                                    onClick={(e) => {
-                                        if (index > 0) {
-                                            const newItems = arrayMove(items, index, index - 1);
-                                            setItems(newItems);
-                                            if (onSort) onSort(newItems);
-                                        }
-                                        e.preventDefault();
-                                    }}
-                                >
-                                    <i className="ri-arrow-up-line"></i>
-                                </button>
-                                <button
-                                    type="button"
-                                    aria-label="Move down"
-                                    disabled={index === items.length - 1}
-                                    onClick={(e) => {
-                                        if (index < items.length - 1) {
-                                            const newItems = arrayMove(items, index, index + 1);
-                                            setItems(newItems);
-                                            if (onSort) onSort(newItems);
-                                        }
-                                        e.preventDefault();
-                                    }}
-                                >
-                                    <i className="ri-arrow-down-line"></i>
-                                </button>
-                            </div>
-                        </SortableItem>
-                    ))}
-                </SortableContext>
-            </DndContext>
+
+
+            <div className="sortable-intro">
+                {title && (
+                    <Paragraph className="utrecht-form-field__label">
+                        <strong>{title}</strong>
+                    </Paragraph>
+                )}
+                {description &&
+                    <>
+                        <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
+                    </>
+                }
+            </div>
+            <div className="sortable-context">
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext
+                        items={items.map(opt => opt.titles?.[0]?.key || "")}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        {items.map((option, index) => (
+                            <SortableItem
+                                key={option.titles?.[0]?.key || index}
+                                id={option.titles?.[0]?.key || String(index)}
+                                dragHandle={<i className="ri-draggable"></i>}
+                            >
+                                <span className="sortable-item-title">{option.titles?.[0]?.key}</span>
+                                <div className="sortable-item-actions">
+                                    <button
+                                        type="button"
+                                        aria-label="Move up"
+                                        disabled={index === 0}
+                                        onClick={(e) => {
+                                            if (index > 0) {
+                                                const newItems = arrayMove(items, index, index - 1);
+                                                setItems(newItems);
+                                                if (onSort) onSort(newItems);
+                                            }
+                                            e.preventDefault();
+                                        }}
+                                    >
+                                        <i className="ri-arrow-up-line"></i>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        aria-label="Move down"
+                                        disabled={index === items.length - 1}
+                                        onClick={(e) => {
+                                            if (index < items.length - 1) {
+                                                const newItems = arrayMove(items, index, index + 1);
+                                                setItems(newItems);
+                                                if (onSort) onSort(newItems);
+                                            }
+                                            e.preventDefault();
+                                        }}
+                                    >
+                                        <i className="ri-arrow-down-line"></i>
+                                    </button>
+                                </div>
+                            </SortableItem>
+                        ))}
+                    </SortableContext>
+                </DndContext>
+            </div>
         </div>
     );
 };

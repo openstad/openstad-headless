@@ -8,6 +8,8 @@ type Option = {
 };
 export type SortFieldProps = {
     options?: Option[];
+    title?: string;
+    description?: string;
     onSort?: (sorted: Option[]) => void;
 };
 declare const SortField: FC<SortFieldProps>;
