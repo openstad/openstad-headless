@@ -506,6 +506,7 @@ export default function WidgetEnqueteItems(
       case 'multiple':
       case 'images':
       case 'matrix':
+      case 'sort':
         return true;
       default:
         return false;
@@ -517,6 +518,7 @@ export default function WidgetEnqueteItems(
       case 'multiplechoice':
       case 'multiple':
       case 'images':
+      case 'sort':
         return true;
       default:
         return false;
@@ -1099,6 +1101,7 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="documentUpload">Document upload</SelectItem>
                               <SelectItem value="matrix">Matrix vraag</SelectItem>
                               <SelectItem value="pagination">Voeg pagina toe</SelectItem>
+                              <SelectItem value="sort">Sorteren</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
