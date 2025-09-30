@@ -1263,7 +1263,7 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {form.watch('questionType') !== 'pagination' && (
+                    {form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'sort' && (
                       <FormField
                         control={form.control}
                         name="fieldRequired"
