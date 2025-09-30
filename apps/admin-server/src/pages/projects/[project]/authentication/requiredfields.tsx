@@ -75,7 +75,13 @@ const formSchema = z.object({
   description: z.string().optional(),
   buttonText: z.string().optional(),
   info: z.string().optional(),
-  authProvidersRequiredUserFields: z.record(z.array(z.string())).optional(),
+  authProvidersRequiredUserFields: z.record(
+    z.record(
+      z.object({
+        mapping: z.string().optional()
+      }).optional()
+    ).optional()
+  ).optional(),
 });
 
 export default function ProjectAuthenticationRequiredFields() {
@@ -113,6 +119,10 @@ export default function ProjectAuthenticationRequiredFields() {
   }, [form, defaults]);
   
   async function onSubmit(values: z.infer<typeof formSchema>) {
+
+    console.log( 'Waardes', values );
+    return;
+
     try {
       const updatedConfig = {
         auth: {
@@ -251,7 +261,7 @@ export default function ProjectAuthenticationRequiredFields() {
                             const fieldValue = form.getValues('requiredUserFieldsLabels')[item.id] ?? '';
                             return form.watch('requiredUserFields').includes(item.id) ? (
                                 <FormField
-                                    key={item.id}
+                                    key={`openstad_${item.id}`}
                                     control={form.control}
                                     name={`requiredUserFieldsLabels.${item.id}`}
                                     render={({field}) => (
@@ -399,29 +409,31 @@ export default function ProjectAuthenticationRequiredFields() {
                                           {requiredUserFields.map((item) => (
                                             <>
                                               <FormField
-                                                  key={item.id}
+                                                  key={`field_${providerId}_${item.id}`}
                                                   control={form.control}
                                                   name={`authProvidersRequiredUserFields.${providerId}`}
                                                   render={({ field }) => {
+                                                    const checked = !!(field.value && field.value[item.id] !== undefined);
+
                                                     return (
                                                         <FormItem
-                                                            key={item.id}
                                                             className="flex flex-row items-center space-x-3 space-y-0">
                                                           <FormControl>
                                                             <Checkbox
-                                                                checked={field.value?.includes(item.id)}
+                                                                checked={checked}
                                                                 onCheckedChange={(checked: any) => {
-                                                                  const currentValues = form.getValues(`authProvidersRequiredUserFields.${providerId}`) || [];
-                                                                  return checked
-                                                                      ? field.onChange([
-                                                                        ...currentValues,
-                                                                        item.id,
-                                                                      ])
-                                                                      : field.onChange(
-                                                                          currentValues?.filter(
-                                                                              (value) => value !== item.id
-                                                                          )
-                                                                      );
+                                                                  const currentValues = form.getValues(`authProvidersRequiredUserFields.${providerId}`) || {};
+                                                                  if ( checked ) {
+                                                                    field.onChange({
+                                                                      ...currentValues,
+                                                                      [item.id]: {
+                                                                        mapping: currentValues[item.id]?.mapping || item.defaultMappingKey
+                                                                      }
+                                                                    });
+                                                                  } else {
+                                                                    const {[item.id]: _, ...rest} = currentValues;
+                                                                    field.onChange(rest);
+                                                                  }
                                                                 }}
                                                             />
                                                           </FormControl>
@@ -432,35 +444,42 @@ export default function ProjectAuthenticationRequiredFields() {
                                                     );
                                                   }}
                                               />
+                                              {(() => {
+                                                const providerFields = form.watch(`authProvidersRequiredUserFields.${providerId}`) || {};
 
-                                              { form.watch(`authProvidersRequiredUserFields.${providerId}`)?.includes(item.id) ? (
-                                                  <FormField
-                                                      key={item.id}
+                                                if (providerFields[item.id] !== undefined) {
+                                                  return (
+                                                    <FormField
+                                                      key={`mapping_${providerId}_${item.id}`}
                                                       control={form.control}
                                                       name={`authProvidersRequiredUserFields.${providerId}.${item.id}.mapping`}
                                                       render={({field}) => {
                                                         const fieldValue = form.getValues('authProvidersRequiredUserFields') || {};
                                                         const providerFields = fieldValue[providerId] || {};
                                                         const itemField = providerFields[item.id] || {};
-                                                        const mappingValue = itemField['mapping'] || item.defaultMappingKey || '';
+                                                        const mappingValue = itemField['mapping'];
 
                                                         return (
-                                                            <FormItem>
-                                                              <FormControl>
-                                                                <Input
-                                                                    defaultValue={mappingValue}
-                                                                    onChange={(e) => {
-                                                                      field.onChange(e);
-                                                                    }}
-                                                                />
-                                                              </FormControl>
-                                                              <FormMessage/>
-                                                            </FormItem>
+                                                          <FormItem>
+                                                            <FormControl>
+                                                              <Input
+                                                                defaultValue={mappingValue}
+                                                                onChange={(e) => {
+                                                                  field.onChange(e);
+                                                                }}
+                                                              />
+                                                            </FormControl>
+                                                            <FormMessage/>
+                                                          </FormItem>
                                                         )
                                                       }}
-                                                  />
-                                                ) : <div></div>
-                                              }
+                                                    />
+                                                  )
+                                                } else {
+                                                  return <div></div>
+                                                }
+
+                                              })()}
                                           </>
                                         ))}
                                       </div>
