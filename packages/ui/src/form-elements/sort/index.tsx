@@ -99,10 +99,9 @@ const SortField: FC<SortFieldProps> = ({
                                 id={option.titles?.[0]?.key || String(index)}
                                 dragHandle={<i className="ri-draggable"></i>}
                             >
-                                <span className="sortable-item-title">{option.titles?.[0]?.key}</span>
+                                <Paragraph className="sortable-item-title">{option.titles?.[0]?.key}</Paragraph>
                                 <div className="sortable-item-actions">
                                     <button
-                                        type="button"
                                         aria-label="Zet omhoog"
                                         disabled={index === 0}
                                         onClick={(e) => {
@@ -117,7 +116,6 @@ const SortField: FC<SortFieldProps> = ({
                                         <i className="ri-arrow-up-line"></i>
                                     </button>
                                     <button
-                                        type="button"
                                         aria-label="Zet omlaag"
                                         disabled={index === items.length - 1}
                                         onClick={(e) => {
