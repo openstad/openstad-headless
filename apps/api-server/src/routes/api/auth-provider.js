@@ -102,12 +102,14 @@ router.route('/:id', auth.can('AuthProvider', 'get'))
     // Ensure the auth provider is not used in any project
     // Config is a json object, so we need to check if the id is in the config
     db.Project.findAll({
-        where: Sequelize.literal(`JSON_CONTAINS(config, '{"authProviderId": ${provider.id}}')`),
+        where: Sequelize.literal(
+            `JSON_CONTAINS(config->'$.authProviders', '${JSON.stringify([provider.id])}')`
+        )
       })
       .then((project) => {
-        if (project) {
+        if (project && project.length) {
           const ids = project.map((p) => p.id);
-          return next(new createError(400, `Auth provider is in use by projects with the following IDs: ${ids.join(', ')}`));
+          return next(new createError(400, `Deze authenticatie provider wordt nog gebruikt in project: ${ids.join(', ')}.`));
         } else {
           provider
             .destroy()
