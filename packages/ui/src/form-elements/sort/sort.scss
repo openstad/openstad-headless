@@ -12,9 +12,10 @@
     gap: .5rem;
     color: var(--sort-text-color);
 
-    .sortable-intro{
+    .sortable-intro {
         margin-bottom: .5rem;
     }
+
     .sortable-context {
         display: flex;
         flex-direction: column;
@@ -41,11 +42,13 @@
                 transition: color .2s ease-in-out;
             }
 
-            span:has(.ri-draggable){
+            span:has(.ri-draggable) {
                 transition: background .2s ease-in-out;
             }
-            span:has(.ri-draggable:hover){
+
+            span:has(.ri-draggable:hover) {
                 background: var(--sort-drag-active-background-color);
+
                 .ri-draggable {
                     color: var(--sort-drag-active-color);
                 }
