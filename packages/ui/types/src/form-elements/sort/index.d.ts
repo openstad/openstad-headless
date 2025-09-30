@@ -22,6 +22,8 @@ export type SortFieldProps = {
         name: string;
         value: any;
     }, triggerSetLastKey?: boolean) => void;
+    prevPageText?: string;
+    nextPageText?: string;
 };
 declare const SortField: FC<SortFieldProps>;
 export default SortField;

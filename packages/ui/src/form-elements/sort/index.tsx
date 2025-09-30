@@ -26,6 +26,8 @@ export type SortFieldProps = {
     defaultValue?: string;
     fieldOptions?: { value: string; label: string }[];
     onChange?: (e: { name: string; value: any }, triggerSetLastKey?: boolean) => void;
+    prevPageText?: string;
+    nextPageText?: string;
 };
 
 type SortableItemProps = {
@@ -70,7 +72,7 @@ const SortField: FC<SortFieldProps> = ({
     };
 
     useEffect(() => {
-        onChange && onChange({ name: fieldKey, value: items.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key)});
+        onChange && onChange({ name: fieldKey, value: items.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key) });
     }, [items]);
 
     return (
