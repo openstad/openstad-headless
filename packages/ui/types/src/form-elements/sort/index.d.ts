@@ -11,6 +11,17 @@ export type SortFieldProps = {
     title?: string;
     description?: string;
     onSort?: (sorted: Option[]) => void;
+    fieldKey: string;
+    type?: string;
+    defaultValue?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
+    onChange?: (e: {
+        name: string;
+        value: any;
+    }, triggerSetLastKey?: boolean) => void;
 };
 declare const SortField: FC<SortFieldProps>;
 export default SortField;

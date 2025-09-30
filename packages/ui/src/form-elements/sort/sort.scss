@@ -38,6 +38,7 @@
                 cursor: grab;
                 padding: var(--sort-padding);
                 display: block;
+                transition: color .2s ease-in-out;
             }
 
             span:has(.ri-draggable){
@@ -45,6 +46,9 @@
             }
             span:has(.ri-draggable:hover){
                 background: var(--sort-drag-active-background-color);
+                .ri-draggable {
+                    color: var(--sort-drag-active-color);
+                }
             }
 
             .sortable-item-title {

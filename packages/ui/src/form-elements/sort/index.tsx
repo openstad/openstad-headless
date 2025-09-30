@@ -1,10 +1,10 @@
 // Drag-and-drop sort field using @dnd-kit/core
 
-import React, { FC, useState, ReactNode } from "react";
+import React, { FC, useState, ReactNode, useEffect } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { FormFieldDescription, FormLabel, Paragraph, } from "@utrecht/component-library-react";
+import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-react";
 
 import "./sort.css";
 
@@ -21,6 +21,11 @@ export type SortFieldProps = {
     title?: string;
     description?: string;
     onSort?: (sorted: Option[]) => void;
+    fieldKey: string;
+    type?: string;
+    defaultValue?: string;
+    fieldOptions?: { value: string; label: string }[];
+    onChange?: (e: { name: string; value: any }, triggerSetLastKey?: boolean) => void;
 };
 
 type SortableItemProps = {
@@ -47,6 +52,7 @@ const SortField: FC<SortFieldProps> = ({
     options = [],
     title,
     description,
+    onChange,
     onSort,
 }) => {
     const [items, setItems] = useState(options);
@@ -62,10 +68,13 @@ const SortField: FC<SortFieldProps> = ({
         }
     };
 
+    useEffect(() => {
+        console.log('options changed', items);
+        onChange && onChange({ name: 'sortedOptions', value: items });
+    }, [items]);
+
     return (
         <div className="sort-field-container">
-
-
             <div className="sortable-intro">
                 {title && (
                     <Paragraph className="utrecht-form-field__label">
@@ -73,9 +82,7 @@ const SortField: FC<SortFieldProps> = ({
                     </Paragraph>
                 )}
                 {description &&
-                    <>
-                        <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
-                    </>
+                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
                 }
             </div>
             <div className="sortable-context">
@@ -94,7 +101,7 @@ const SortField: FC<SortFieldProps> = ({
                                 <div className="sortable-item-actions">
                                     <button
                                         type="button"
-                                        aria-label="Move up"
+                                        aria-label="Zet omhoog"
                                         disabled={index === 0}
                                         onClick={(e) => {
                                             if (index > 0) {
@@ -109,7 +116,7 @@ const SortField: FC<SortFieldProps> = ({
                                     </button>
                                     <button
                                         type="button"
-                                        aria-label="Move down"
+                                        aria-label="Zet omlaag"
                                         disabled={index === items.length - 1}
                                         onClick={(e) => {
                                             if (index < items.length - 1) {
