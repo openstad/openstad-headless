@@ -54,6 +54,7 @@ const SortField: FC<SortFieldProps> = ({
     description,
     onChange,
     onSort,
+    fieldKey
 }) => {
     const [items, setItems] = useState(options);
 
@@ -69,8 +70,7 @@ const SortField: FC<SortFieldProps> = ({
     };
 
     useEffect(() => {
-        console.log('options changed', items);
-        onChange && onChange({ name: 'sortedOptions', value: items });
+        onChange && onChange({ name: fieldKey, value: items.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key)});
     }, [items]);
 
     return (
