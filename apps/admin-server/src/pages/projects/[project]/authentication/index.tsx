@@ -27,6 +27,7 @@ import InfoDialog from '@/components/ui/info-hover';
 import {ImageUploader} from "@/components/image-uploader";
 import {X} from "lucide-react";
 import useAuthProvidersList, { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
+import {Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const authTypes = [
   {
@@ -103,6 +104,16 @@ export default function ProjectAuthentication() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
+
+  const [showRequiredFieldsInfo, setShowRequiredFieldsInfo] = useState(false);
+
+  useEffect(() => {
+    if (Array.isArray(form.getValues('authProviders')) && form.getValues('authProviders').some((provider) => provider !== 'openstad')) {
+      setShowRequiredFieldsInfo(true);
+    } else {
+      setShowRequiredFieldsInfo(false);
+    }
+  }, [form.getValues('authProviders')]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -263,6 +274,17 @@ export default function ProjectAuthentication() {
                       </FormItem>
                     )}
                   />
+                )}
+
+                { showRequiredFieldsInfo && (
+                  <Alert variant="info" className="mb-4">
+                    <AlertTitle>Let op!</AlertTitle>
+                    <AlertDescription>
+                      Je hebt een andere authenticatie provider geselecteerd dan de standaard Openstad authenticatie. Zorg ervoor dat je bij deze provider ook de verplichte velden hebt ingesteld, anders kunnen gebruikers zich mogelijk niet aanmelden.
+                      <br />
+                      De verplichte velden kun je in de kolom links vinden bij <strong>Authenticatie &gt; Verplichte velden</strong>
+                    </AlertDescription>
+                  </Alert>
                 )}
 
                 {showAuthSettings && (
