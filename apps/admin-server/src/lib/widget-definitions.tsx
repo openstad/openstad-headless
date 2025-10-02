@@ -51,7 +51,7 @@ export const WidgetDefinitions = {
   },
   datecountdownbar: {
     name: 'Aftelbalk',
-    description: 'Balk die aftelt tot een zelf in te stellen datum',
+    description: 'Een aftellende klok tot een bepaalde deadline',
     image: '/widget_preview/date_count_down_preview.png',
   },
   // keuzewijzer: {
@@ -75,7 +75,7 @@ export const WidgetDefinitions = {
     image: '/widget_preview/resource_detail_preview.png',
   },
   resourceform: {
-    name: 'Inzendingformulier',
+    name: 'Inzending',
     description: 'Laat inwoners inzendingen versturen die openbaar getoond kunnen worden',
     image: '/widget_preview/resource_form_preview.png',
   },
