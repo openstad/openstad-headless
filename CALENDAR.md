@@ -6,6 +6,7 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 ### Oktober
 - Donderdag 2-10-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### November
+- Donderdag 6-11-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 - Donderdag 13-11-2025 12:00-17:00 OpenStad Live, Provinciehuis Noord-Holland
 ### December
 - Donderdag 4-12-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
