@@ -2,7 +2,7 @@ import DataStore from '@openstad-headless/data-store/src';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { LatLng } from 'leaflet';
-import { Polygon, Popup } from 'react-leaflet';
+import { Polygon, Popup, Tooltip } from 'react-leaflet';
 import type { AreaProps } from './types/area-props';
 
 import { difference, polygon as tPolygon } from 'turf';
@@ -75,6 +75,7 @@ export function Area({
     fillColor: '#000',
     fillOpacity: 0.15,
   },
+  interactionType = 'default',
   ...props
 }: BaseProps & AreaProps) {
   const datastore = new DataStore({});
@@ -124,7 +125,7 @@ export function Area({
     });
   }
 
-
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
     <>
@@ -136,25 +137,38 @@ export function Area({
               {...props}
               pathOptions={areaPolygonStyle}
               positions={item.polygon}
-              eventHandlers={{
-                mouseover: (e) => {
-                  e.target.setStyle({
-                    fillOpacity: 0.05,
-                  });
-                },
-                mouseout: (e) => {
-                  e.target.setStyle(areaPolygonStyle);
-                },
-              }}
+              eventHandlers={
+                interactionType !== 'direct'
+                  ? {
+                    mouseover: (e) => {
+                      e.target.setStyle({
+                        fillOpacity: 0.05,
+                      });
+                    },
+                    mouseout: (e) => {
+                      e.target.setStyle(areaPolygonStyle);
+                    },
+                  }
+                  : {
+                    click: () => {
+                      if (item.url) window.open(item.url, '_self');
+                    },
+                    mouseover: () => setHoveredIndex(index),
+                    mouseout: () => setHoveredIndex(null)
+                  }
+              }
             >
-              {item.title &&
+              {(item.title && interactionType !== 'direct') ? (
                 <>
                   <Popup className={'leaflet-popup'}>
                     {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
                     {item.url && <a className="pop-up-link" href={item.url}>Lees verder</a>}
                   </Popup>
                 </>
-              }
+              ) : (
+                (item.title && hoveredIndex === index) &&
+                <Tooltip permanent direction="center">{item.title}</Tooltip>
+              )}
             </Polygon>
 
           </>
