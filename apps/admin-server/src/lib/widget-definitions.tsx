@@ -1,52 +1,52 @@
 export const WidgetDefinitions = {
   agenda: {
     name: 'Agenda',
-    description: 'agendamodule',
+    description: 'Een tijdlijn van aankomende gebeurtenissen',
     image: '/widget_preview/agenda_preview.png',
   },
   choiceguide: {
     name: 'Keuzewijzer',
-    description: 'Keuzewijzermodule',
+    description: 'Een vragenlijst waarbij je directe gevolgen kunt communiceren van je keuzes.',
     image: '/widget_preview/keuzewijzer_preview.png',
   },
   choiceguideResults: {
     name: 'Keuzewijzer resultaat',
-    description: 'Keuzewijzer resultaat',
+    description: 'Toon de resultaten van de keuzewijzer',
     image: '/widget_preview/keuzewijzerresultaten-preview.png',
   },
   comments: {
     name: 'Reacties',
-    description: 'Reactiemodule',
+    description: 'Reageer op inzendingen van inwoners, en reageer op elkaar',
     image: '/widget_preview/arguments_preview.png',
   },
   begrootmodule: {
     name: 'Begrootmodule',
-    description: 'Module voor begroten',
+    description: 'Laat inwoners stemmen op basis van budget of aantallen',
     image: '/widget_preview/begrootmodule_preview.png',
   },
   simplevoting: {
     name: 'Stemmodule',
-    description: 'Module om te stemmen',
+    description: 'De versimpelde begrootmodule - richt snel een stemproject in.',
     image: '/widget_preview/stemmodule_preview.png',
   },
   enquete: {
     name: 'Enquête',
-    description: 'Enquête module',
+    description: 'Maak een vragenlijst zonder in te hoeven loggen',
     image: '/widget_preview/enquete_preview.png',
   },
   resourcesmap: {
     name: 'Inzending overzicht kaart',
-    description: 'Map showing resource overview',
+    description: 'Kaart met een overzicht van inzendingen',
     image: '/widget_preview/resource_map_preview.png',
   },
   resourcedetailmap: {
     name: 'Resource detail map',
-    description: 'Map showing resource details',
+    description: 'Kaart met details van een specifieke inzending',
     image: '/widget_preview/resource_map_preview.png',
   },
   counter: {
     name: 'Teller',
-    description: 'Tellermodule',
+    description: 'Een teller die verschillende variabelen kan tellen',
     image: '/widget_preview/counter_preview.png',
   },
   datecountdownbar: {
@@ -61,62 +61,62 @@ export const WidgetDefinitions = {
   // },
   likes: {
     name: 'Like',
-    description: 'Likemodule',
+    description: 'Laat je steun zien! Eenvoudig stemmen met likes.',
     image: '/widget_preview/likes-preview.png',
   },
   rawresource: {
     name: 'Inzending maatwerk',
-    description: 'Module for raw resources',
+    description: '',
     image: '/widget_preview/raw_resource_preview.png',
   },
   resourcedetail: {
     name: 'Inzending detailpagina',
-    description: 'Module showing resource details',
+    description: 'De details van een specifieke inzending',
     image: '/widget_preview/resource_detail_preview.png',
   },
   resourceform: {
     name: 'Inzendingformulier',
-    description: 'Formulier om inzending informatie op te vragen',
+    description: 'Laat inwoners inzendingen versturen die openbaar getoond kunnen worden',
     image: '/widget_preview/resource_form_preview.png',
   },
   resourceoverview: {
     name: 'Inzending overzicht tegels',
-    description: 'Overview of resources',
+    description: 'Een overzicht van alle inzendingen',
     image: '/widget_preview/resource_overview_preview.png',
   },
   resourcewithmap: {
     name: 'Interactieve kaart',
-    description: 'Resource module with map',
+    description: 'Toon bewonersinzendingen op een kaart, en laad kaartlagen in.',
     image: '/widget_preview/resource_with_map_preview.png',
   },
   resourcedetailwithmap: {
     name: 'Inzending interactieve kaart',
-    description: 'Detailed resource module with map',
+    description: 'Toon de details van een inzending met een kaart',
     image: '/widget_preview/resource_detail_with_map_preview.png',
   },
   documentmap: {
     name: 'Interactieve afbeelding',
-    description: 'Map showing documents with comments',
+    description: 'Reageer op een afbeelding door er markers op te plaatsen',
     image: '/widget_preview/documents_with_comments_preview.png',
   },
   account: {
     name: 'Accountgegevens',
-    description: 'Accountdetailmodule',
+    description: 'Laat inwoners hun eigen gegevens inzien en bewerken',
     image: '/widget_preview/account_preview.png',
   },
   activity: {
     name: 'Gebruikersactiviteit',
-    description: 'Module voor gebruikersactiviteit',
+    description: 'Laat inwoners hun eigen gegevens inzien en bewerken',
     image: '/widget_preview/activity_preview.png',
   },
   distributionmodule: {
     name: 'Verdeel module',
-    description: 'Module voor het verdelen van punten of budget',
+    description: 'Verdeel budgetten en punten',
     image: '/widget_preview/verdeelmodule-preview.png',
   },
   multiprojectresourceoverview: {
     name: 'Multi project inzending overzicht',
-    description: 'Overview van inzendingen van meerdere projecten',
+    description: 'Toon inzendingen en project-tegels van verschillende projecten in één widget.',
     image: '/widget_preview/multiproject-inzendingenoverzicht-preview.png',
   },
 };
