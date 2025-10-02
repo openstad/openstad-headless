@@ -125,8 +125,6 @@ export function Area({
     });
   }
 
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   return (
     <>
       {multiPolygon.length > 0 ? (
@@ -153,8 +151,6 @@ export function Area({
                     click: () => {
                       if (item.url) window.open(item.url, '_self');
                     },
-                    mouseover: () => setHoveredIndex(index),
-                    mouseout: () => setHoveredIndex(null)
                   }
               }
             >
@@ -166,7 +162,6 @@ export function Area({
                   </Popup>
                 </>
               ) : (
-                (item.title && hoveredIndex === index) &&
                 <Tooltip permanent direction="center">{item.title}</Tooltip>
               )}
             </Polygon>

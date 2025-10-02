@@ -170,7 +170,7 @@ export default function WidgetResourcesMapButton(
                     <SelectItem value="default"><strong>Standaard</strong>: Op een polygoon klikken opent een pop-up met de titel van de polygoon en een knop met de ingevulde URL (als deze is ingevuld).
                     </SelectItem>
                     <SelectItem value="direct">
-                      <strong>Direct naar URL</strong>: Op een polygoon klikken opent direct de ingevulde URL. Als je over de polygoon hovert, wordt de titel van de polygoon getoond.
+                      <strong>Direct naar URL</strong>: Op een polygoon klikken opent direct de ingevulde URL. De titel van de polygoon wordt ook direct getoond.
                     </SelectItem>
                   </SelectContent>
                 </Select>
