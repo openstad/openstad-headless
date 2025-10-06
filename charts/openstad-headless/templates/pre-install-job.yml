@@ -64,7 +64,7 @@ spec:
       volumes:
         - name: keys-volume
       containers:
-        - image: bitnami/kubectl
+        - image: bitnamilegacy/kubectl
           imagePullPolicy: IfNotPresent
           name: kubectl-init-auth-certificates-container
           volumeMounts:
