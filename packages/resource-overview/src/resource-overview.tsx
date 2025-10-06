@@ -62,10 +62,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
       resources?: any,
       title?: string,
       displayHeader?: boolean,
-      headingLevel?: string,
       displayMap?: boolean,
       selectedProjects?: any[],
       location?: PostcodeAutoFillLocation,
+      headingLevel?: string,
       displayAsTabs?: boolean,
     ) => React.JSX.Element; renderItem?: (
       resource: any,
@@ -164,11 +164,11 @@ const defaultHeaderRenderer = (
   widgetProps: ResourceOverviewWidgetProps,
   resources?: any,
   title?: string,
-  headingLevel?: string,
   displayHeader?: boolean,
   displayMap?: boolean,
   selectedProjects?: any[],
   location?: PostcodeAutoFillLocation,
+  headingLevel?: string,
 ) => {
   return (
     <>
@@ -929,8 +929,7 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel) : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -992,7 +991,7 @@ function ResourceOverviewInner({
                 {overviewSection}
               </TabsContent>
               <TabsContent value="map">
-                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location)}
+                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location, props.headingLevel)}
               </TabsContent>
             </div>
           ) : (
