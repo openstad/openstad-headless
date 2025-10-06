@@ -22,7 +22,7 @@ export const InitializeWeights = (
 
     items.forEach((item) => {
       const itemType = item.type || '';
-      const allowedTypes = ["radiobox", "checkbox", "select", "a-b-slider"];
+      const allowedTypes = ["radiobox", "checkbox", "select", "a-b-slider", "images"];
 
       if (!allowedTypes.includes(itemType) || !itemType) return;
 

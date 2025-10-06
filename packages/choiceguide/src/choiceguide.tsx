@@ -194,6 +194,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                         answers={answers}
                         widgetId={widgetId}
                         hiddenFields={hiddenFields}
+                        items={formFields}
                       />
                   )}
               </div>
