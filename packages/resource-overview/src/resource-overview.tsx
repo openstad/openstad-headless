@@ -929,7 +929,7 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel || '4') : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -991,7 +991,7 @@ function ResourceOverviewInner({
                 {overviewSection}
               </TabsContent>
               <TabsContent value="map">
-                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location, props.headingLevel)}
+                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location, props.headingLevel || '4')}
               </TabsContent>
             </div>
           ) : (
