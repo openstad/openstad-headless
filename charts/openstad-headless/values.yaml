@@ -72,6 +72,7 @@ public:
   environmentName:
 
 rateLimit:
+  existingSecret:
   windowMs: 60000
   limit: 100
 
@@ -140,6 +141,7 @@ admin:
 
   # Secret values
   secrets:
+    existingSecret:
     cookieSecret:
     apiKey:
 
@@ -332,6 +334,7 @@ image:
   label: openstad-image-service
 
   secrets:
+    existingSecret:
     verificationToken:
 
   # Service settings:
@@ -492,17 +495,21 @@ secrets:
     imageApiToken:
 
   api:
+    existingSecret:
     jwtSecret:
 
   auth:
+    existingSessionSecret:
     sessionSecret:
     phoneHashSalt:
 
   cms:
+    existingSecret:
     apiKey:
     mongodbUri:
 
   database:
+    existingSecret:
     ### These values are for the MySQL db
     username:
     password:
@@ -524,10 +531,13 @@ secrets:
     ### Default db passwords for when you use the dependency
     rootPassword:
     replicationPassword:
+    existingPasswordSecret:
 
     ### Overwrites for auth db
     auth:
+      existingDbSecret:
       dbName: auth
+      existingCredentialsSecret:
       credentials:
         clientId:
         clientSecret:
@@ -556,6 +566,7 @@ secrets:
     jwtSecret:
 
   cdn:
+    existingSecret:
     reactUrl: https://unpkg.com/react@18.3.1/umd/react.production.min.js
     reactDomUrl: https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
     zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
@@ -563,6 +574,7 @@ secrets:
 
   ### Mail server secretes
   mail:
+    existingSecret:
     host: smtp.localhost
     port: '25'
     username: user

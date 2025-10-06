@@ -29,11 +29,19 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{- define "openstad.admin.secret.fullname" -}}
+{{- if not .Values.admin.secrets.existingSecret -}}
 {{- printf "%s-admin-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.admin.secrets.existingSecret }}
+{{- end -}}
 {{- end -}}
 
 {{- define "openstad.cdn.secret.fullname" -}}
+{{- if not .Values.secrets.cdn.existingSecret -}}
 {{- printf "%s-cdn-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.cdn.existingSecret}}
+{{- end -}}
 {{- end -}}
 
 {{- define "openstad.adminer.fullname" -}}
@@ -43,15 +51,49 @@ If release name contains chart name it will be used as a full name.
 {{- define "openstad.auth.fullname" -}}
 {{- printf "%s-%s" (include "openstad.fullname" .) .Values.auth.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{- define "openstad.database.credentialsSecret.fullname" -}}
+{{- if not .Values.secrets.database.existingSecret -}}
+{{- printf "%s-db-credentials" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.database.existingSecret }}
+{{- end -}}
+{{- end -}}
+
+{{- define "openstad.auth.databaseSecret.fullname" -}}
+{{- if not .Values.secrets.database.auth.existingDbSecret -}}
+{{- printf "%s-auth-db" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.database.auth.existingDbSecret }}
+{{- end -}}
+{{- end -}}
+
 {{- define "openstad.auth.secret.fullname" -}}
+{{- if not .Values.secrets.database.auth.existingCredentialsSecret -}}
 {{- printf "%s-auth-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.database.auth.existingCredentialsSecret }}
+{{- end -}}
 {{- end -}}
 
 {{- define "openstad.cms.fullname" -}}
 {{- printf "%s-%s" (include "openstad.fullname" .) .Values.cms.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
 {{- define "openstad.cms.secret.fullname" -}}
+{{- if not .Values.secrets.cms.existingSecret -}}
 {{- printf "%s-cms-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.cms.existingSecret }}
+{{- end -}}
+{{- end -}}
+
+{{- define "openstad.passwordSecret.fullname" -}}
+{{- if not .Values.secrets.database.existingPasswordSecret -}}
+mysql-secret
+{{- else -}}
+{{ .Values.secrets.database.existingPasswordSecret }}
+{{- end -}}
 {{- end -}}
 
 {{- define "openstad.admin.fullname" -}}
@@ -68,7 +110,11 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{- define "openstad.image.secret.fullname" -}}
+{{- if not .Values.image.secrets.existingSecret -}}
 {{- printf "%s-image-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.image.secrets.existingSecret }}
+{{- end -}}
 {{- end -}}
 
 {{- define "openstad.clusterIssuer.staging.fullname" -}}
@@ -199,13 +245,33 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "openstad.email.secret.fullname" -}}
+{{- if not .Values.secrets.mail.existingSecret -}}
 {{- printf "%s-email-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.mail.existingSecret }}
+{{- end -}}
 {{- end -}}
 
 {{- define "openstad.api.secret.fullname" -}}
+{{- if not .Values.secrets.api.existingSecret -}}
 {{- printf "%s-api-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.api.existingSecret }}
+{{- end -}}
 {{- end -}}
 
 {{- define "openstad.ratelimit.secret.fullname" -}}
+{{- if not .Values.rateLimit.existingSecret -}}
 {{- printf "%s-ratelimit-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.rateLimit.existingSecret }}
+{{- end -}}
+{{- end -}}
+
+{{- define "openstad.session.secret.fullname" -}}
+{{- if not .Values.secrets.auth.existingSessionSecret -}}
+{{- printf "%s-session-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.auth.existingSessionSecret }}
+{{- end -}}
 {{- end -}}
