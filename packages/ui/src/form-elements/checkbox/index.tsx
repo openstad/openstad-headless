@@ -20,7 +20,7 @@ export type CheckboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: FormValue}) => void;
+    onChange?: (e: {name: string, value: FormValue}, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -98,7 +98,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     onChange({
                         name: `${fieldKey}_${index}_other`,
                         value: ""
-                    });
+                    }, false);
                 }
             }
         }
@@ -113,7 +113,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
             onChange({
                 name: e.name,
                 value: e.value
-            });
+            }, false);
         }
     };
 

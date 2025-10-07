@@ -22,7 +22,7 @@ export type RangeSliderProps = {
     onChange?: (e: {
         name: string;
         value: FormValue | valueObject;
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;

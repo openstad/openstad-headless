@@ -7,6 +7,7 @@ export type BaseMapWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
     customPolygon?: any;
+    interactionType?: 'default' | 'direct';
     mapDataLayers?: any;
     locationProx?: PostcodeAutoFillLocation
   } & MapPropsType;

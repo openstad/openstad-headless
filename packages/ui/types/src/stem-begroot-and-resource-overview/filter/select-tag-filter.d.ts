@@ -4,7 +4,7 @@ type Props = {
     tagType: string;
     placeholder?: string;
     onlyIncludeIds?: number[];
-    onUpdateFilter?: (filter: string) => void;
+    onUpdateFilter?: (filter: any, label?: string) => void;
     title: string;
     tagGroupProjectId?: any;
     preFilterTags?: Array<number>;

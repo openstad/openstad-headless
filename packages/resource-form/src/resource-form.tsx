@@ -11,7 +11,7 @@ import NotificationService from '@openstad-headless/lib/NotificationProvider/not
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
-    const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
+    const { submitButton, saveConceptButton, defaultAddedTags} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
     const { confirmationUser, confirmationAdmin} = props.confirmation  || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
@@ -60,6 +60,18 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                     }
                 }
             }
+        }
+
+        if (defaultAddedTags) {
+            const defaultTagsArray = defaultAddedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+
+            defaultTagsArray.forEach(tag => {
+                const tagNumber = Number(tag);
+
+                if (!isNaN(tagNumber) && !tags.includes(tagNumber)) {
+                    tags.push(tagNumber);
+                }
+            });
         }
 
         formData.tags = tags;

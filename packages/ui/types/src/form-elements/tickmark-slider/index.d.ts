@@ -18,7 +18,7 @@ export type TickmarkSliderProps = {
     onChange?: (e: {
         name: string;
         value: FormValue;
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     type?: string;
     showSmileys?: boolean;
     showMoreInfo?: boolean;

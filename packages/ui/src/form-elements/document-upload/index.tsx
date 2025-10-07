@@ -65,7 +65,7 @@ export type DocumentUploadProps = {
     disabled?: boolean;
     multiple?: boolean;
     type?: string;
-    onChange?: (e: { name: string; value: { name: string; url: string }[] }) => void;
+    onChange?: (e: { name: string; value: { name: string; url: string }[] }, triggerSetLastKey?: boolean) => void;
     imageUrl?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -126,7 +126,9 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             for (let i = 0; i < documents.length; i++) {
                 const file = documents[i].file;
                 if (file && file.name) {
-                    let fileInUploadedDocuments = uploadedDocuments.find(o => o.name === file.name);
+                    const sanitizedFileName = file.name.replace(/\./g, '_');
+
+                    let fileInUploadedDocuments = uploadedDocuments.find(o => o.name === sanitizedFileName);
 
                     if (fileInUploadedDocuments) {
                         allDocuments.push(fileInUploadedDocuments);
@@ -141,7 +143,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                 value: allDocuments,
             });
         }
-    }, [documents.length, uploadedDocuments.length]);
+    }, [uploadedDocuments.length, setUploadedDocuments, setDocuments]);
 
     function waitForElm(selector: any) {
         return new Promise(resolve => {
@@ -258,6 +260,22 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                     }}
                     aria-invalid={fieldInvalid}
                     aria-describedby={`${randomId}_error`}
+                    onremovefile={(error: FilePondErrorDescription | null, file: FilePondFile) => {
+                        const fileName = file?.file?.name;
+
+                        if (!!fileName) {
+                           const uploadDocumentFileName = fileName.replace(/\./g, '_');
+                           const fileIsInUploadedDocuments = uploadedDocuments.find(item => item.name === uploadDocumentFileName);
+
+                           if (!fileIsInUploadedDocuments) return;
+
+                           const updatedDocuments = uploadedDocuments.filter(item => item.name !== uploadDocumentFileName);
+                           setUploadedDocuments(updatedDocuments);
+
+                           const updatedFiles = documents.filter(item => item.file.name !== fileName);
+                           setDocuments(updatedFiles);
+                        }
+                    }}
                     {...filePondSettings}
                 />
                 <NotificationProvider />
