@@ -63,7 +63,9 @@ const formSchema = z.object({
           key: z.string(),
           weights: z.record(weightSchema).optional(),
           isOtherOption: z.boolean().optional(),
-          defaultValue: z.boolean().optional()
+          defaultValue: z.boolean().optional(),
+          image: z.string().optional(),
+          hideLabel: z.boolean().optional()
         }))
       })
     )
@@ -105,6 +107,7 @@ const formSchema = z.object({
   routingInitiallyHide: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
   routingSelectedAnswer: z.string().optional(),
+  imageOptionUpload: z.string().optional(),
 });
 
 const matrixDefault = {
@@ -536,6 +539,7 @@ export default function WidgetChoiceGuideItems(
       case 'checkbox':
       case 'select':
       case 'radiobox':
+      case 'images':
       case 'matrix':
         return true;
       default:
@@ -548,6 +552,7 @@ export default function WidgetChoiceGuideItems(
       case 'checkbox':
       case 'select':
       case 'radiobox':
+      case 'images':
         return true;
       default:
         return false;
@@ -941,7 +946,7 @@ export default function WidgetChoiceGuideItems(
                           const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
                           const activeOption = currentOption !== -1 ? currentOption : options.length;
 
-                          return (
+                          return form.watch("type") !== "images" ? (
                             <>
                               <FormField
                                 control={form.control}
@@ -1011,7 +1016,71 @@ export default function WidgetChoiceGuideItems(
                                 />
                               )}
                             </>
-                          );
+                          ) : (
+                            <>
+                              <ImageUploader
+                                form={form}
+                                project={project as string}
+                                fieldName="imageOptionUpload"
+                                imageLabel="Afbeelding"
+                                allowedTypes={["image/*"]}
+                                onImageUploaded={(imageResult) => {
+                                  const image = imageResult ? imageResult.url : '';
+
+                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                  form.resetField('imageOptionUpload');
+                                }}
+                              />
+
+                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                                <div style={{ position: 'relative' }}>
+                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                </div>
+                              )}
+
+                              <FormField
+                                control={form.control}
+                                name={`options.${activeOption}.titles.0.key`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Titel</FormLabel>
+                                    <FormDescription>
+                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                    </FormDescription>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                // @ts-ignore
+                                name={`options.${activeOption}.titles.0.hideLabel`}
+                                render={({ field }) => (
+                                  <>
+                                    <FormItem
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        flexDirection: 'row',
+                                        marginTop: '10px'
+                                      }}>
+                                      {YesNoSelect(field, props)}
+                                      <FormLabel
+                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                      <FormMessage />
+                                    </FormItem>
+                                    <FormDescription>
+                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                    </FormDescription>
+                                  </>
+                                )}
+                              />
+                            </>
+                          )
                         })()
                       )}
 
@@ -1174,6 +1243,7 @@ export default function WidgetChoiceGuideItems(
                                 <SelectItem value="select">Dropdown</SelectItem>
                                 <SelectItem value="a-b-slider">Van A naar B slider</SelectItem>
                                 <SelectItem value="matrix">Matrix vraag</SelectItem>
+                                <SelectItem value="images">Antwoordopties met afbeeldingen</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -1426,13 +1496,17 @@ export default function WidgetChoiceGuideItems(
                         />
                       )}
 
-                      { (form.watch('type') === 'imageUpload' || form.watch('type') === 'documentUpload') && (
+                      { (form.watch('type') === 'imageUpload' || form.watch('type') === 'images' || form.watch('type') === 'documentUpload') && (
                         <FormField
                           control={form.control}
                           name="multiple"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Mogen er meerdere {form.watch('type') === 'documentUpload' ? 'documenten' : 'afbeeldingen'} tegelijkertijd geüpload worden?</FormLabel>
+                              {(form.watch('type') === 'imageUpload' || form.watch('type') === 'documentUpload') ? (
+                                <FormLabel>Mogen er meerdere {form.watch('type') === 'documentUpload' ? 'documenten' : 'afbeeldingen'} tegelijkertijd geüpload worden?</FormLabel>
+                              ) : (
+                                <FormLabel>Mogen er meerdere afbeeldingen geselecteerd worden?</FormLabel>
+                              )}
                               <Select
                                 onValueChange={(e: string) => field.onChange(e === 'true')}
                                 value={field.value ? 'true' : 'false'}>
@@ -1798,6 +1872,7 @@ export default function WidgetChoiceGuideItems(
                                   (
                                     f.type === 'select'
                                     || f.type === 'radiobox'
+                                    || f.type === 'images'
                                     || f.type === 'checkbox'
                                   )
                                   && f.trigger !== form.watch('trigger'));
@@ -1943,7 +2018,7 @@ export default function WidgetChoiceGuideItems(
                     <div className="w-full mt-4 flex flex-col gap-y-4">
                       {(() => {
                         const isPlaneType = widget?.config?.choiceGuide?.choicesType === "plane";
-                        const isCheckboxType = ['checkbox', 'radiobox', 'select'].includes(form.watch('type') || "");
+                        const isCheckboxType = ['checkbox', 'radiobox', 'select', 'images'].includes(form.watch('type') || "");
 
                         if (isCheckboxType && isPlaneType) {
                           return weightOptionsFields({ id: "plane" }, 999);

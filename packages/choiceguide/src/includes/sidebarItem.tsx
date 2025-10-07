@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChoiceOptions, Score } from '../props';
+import {ChoiceOptions, Item, Score} from '../props';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
 
 const defaultBarColor = {
@@ -16,6 +16,8 @@ type ChoiceItemProps = {
   choicesPreferenceMinColor?: string;
   choicesPreferenceMaxColor?: string;
   showPageCountAndCurrentPageInButton?: boolean;
+  hiddenFields?: string[];
+  items?: Array<Item>;
 };
 
 const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
@@ -27,7 +29,9 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
       props.choiceOption,
       props.answers,
       props.weights,
-      props.choicesType
+      props.choicesType,
+      props.hiddenFields,
+      props.items
     );
     setScore(itemScore);
   }, [props.choiceOption, props.answers, props.weights]);
