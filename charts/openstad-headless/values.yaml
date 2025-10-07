@@ -449,6 +449,7 @@ cms:
       hosts: []
 
   disableWidgetPreview: "false"
+  useS3: "false"
 
   # Inject extra environment variables
   extraEnvVars: []
@@ -503,10 +504,19 @@ secrets:
     sessionSecret:
     phoneHashSalt:
 
+  s3:
+    existingSecret:
+
   cms:
     existingSecret:
     apiKey:
     mongodbUri:
+    s3:
+      endpoint:
+      bucket:
+      region:
+      key:
+      secret:
 
   database:
     existingSecret:

@@ -88,6 +88,14 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 {{- end -}}
 
+{{- define "openstad.s3.secret.fullname" -}}
+{{- if not .Values.secrets.s3.existingSecret -}}
+{{- printf "%s-s3-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.s3.existingSecret }}
+{{- end -}}
+{{- end -}}
+
 {{- define "openstad.passwordSecret.fullname" -}}
 {{- if not .Values.secrets.database.existingPasswordSecret -}}
 mysql-secret
