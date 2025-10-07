@@ -13,16 +13,16 @@ const Paginator = ({
   totalPages: number;
   onPageChange: (page: number) => void;
 }) => {
-  const pages = Array.from({length:totalPages}, (_, index) => index);
+  const pages = Array.from({ length: totalPages }, (_, index) => index);
 
   return (
-    <div className="osc-paginator">
+    <nav className="osc-paginator" aria-label="Paginering">
       <IconButton
         icon="ri-arrow-left-s-line"
         className="secondary round"
         onClick={() => onPageChange(page - 1)}
         disabled={page === 0}
-        text="Vorige pagina"
+        aria-label={`Vorige pagina${page === 0 ? ' (Niet beschikbaar)' : ''}`}
         iconOnly={true}
         test-id={"previous-page-button"}
       >
@@ -35,6 +35,8 @@ const Paginator = ({
           onClick={() => onPageChange(pageNr)}
           disabled={pageNr === page}
           test-id={`page-button-${pageNr}`}
+          aria-label={`Pagina ${pageNr + 1}${pageNr === page ? ' (Huidige pagina)' : ''}`}
+          aria-current={pageNr === page ? "page" : undefined}
         >
           {pageNr + 1}
         </IconButton>
@@ -44,12 +46,12 @@ const Paginator = ({
         icon="ri-arrow-right-s-line"
         className="secondary round"
         onClick={() => onPageChange(page + 1)}
-        disabled={page >= totalPages -1}
-        text="Volgende pagina"
+        disabled={page >= totalPages - 1}
+        aria-label={`Volgende pagina${page >= totalPages - 1 ? ' (Niet beschikbaar)' : ''}`}
         iconOnly={true}
         test-id={"next-page-button"}
       ></IconButton>
-    </div>
+    </nav>
   );
 };
 
