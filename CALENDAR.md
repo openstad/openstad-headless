@@ -3,8 +3,6 @@
 Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team. [Deel een opmerking of vraag via een issue](https://github.com/openstad/openstad-headless/blob/main/CONTRIBUTING.md).
 
 ## 2025
-### Oktober
-- Donderdag 2-10-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### November
 - Donderdag 6-11-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 - Donderdag 13-11-2025 12:00-17:00 OpenStad Live, Provinciehuis Noord-Holland
@@ -13,29 +11,32 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 
 ## 2026
 ### Januari
-- Donderdag 8-1-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 8-1-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Februari
-- Donderdag 5-2-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 5-2-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 26-2-2026 13:00-14:00 OpenStad Projectenparade+
 ### Maart
-- Donderdag 5-3-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 5-3-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### April
-- Donderdag 2-4-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 2-4-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Mei
-- Donderdag 7-5-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 7-5-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 22-5-2026 13:00-14:00 OpenStad Projectenparade+
 ### Juni
-- Donderdag 4-6-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 4-6-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Juli
-- Donderdag 2-7-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 2-7-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Augustus
-- Donderdag 6-8-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 6-8-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 27-8-2025 13:00-14:00 OpenStad Projectenparade+
 ### September
-- Donderdag 3-9-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 3-9-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Oktober
-- Donderdag 1-10-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 1-10-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### November
-- Donderdag 5-11-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 5-11-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### December
-- Donderdag 3-12-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
+- Donderdag 3-12-2026 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 
 # Uitgangspunten
 - Evenement vindt plaats buiten schoolvakantie van alle regio’s in Nederland
@@ -46,6 +47,8 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 
 # Historie
 ## 2025
+### Oktober
+- Donderdag 2-10-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### September
 - Donderdag 11-9-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Augustus
