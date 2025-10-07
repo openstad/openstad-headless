@@ -312,14 +312,14 @@ function CommentsInner({
         {!args.canComment ? (
           <Banner>
             <Spacer size={2} />
-            <Heading level={4} appearance='utrecht-heading-6'>{args.closedText}</Heading>
+            <p>{args.closedText}</p>
             <Spacer size={2} />
           </Banner>
         ) : null}
 
         {!args.canComment && hasRole(currentUser, 'moderator') ? (
           <Banner>
-            <Heading level={4} appearance='utrecht-heading-6'>U kunt nog reageren vanwege uw rol als moderator</Heading>
+            <p>U kunt nog reageren vanwege uw rol als moderator</p>
             <Spacer size={2} />
           </Banner>
         ) : null}
@@ -332,11 +332,12 @@ function CommentsInner({
                   <Spacer size={1} />
                 </>
               )}
-              <Banner className="big">
-                <Heading level={4} appearance='utrecht-heading-6'>{ loginText }</Heading>
+              <Banner className="big" role="complementary">
+                <p id="login-description">{ loginText }</p>
                 <Spacer size={1} />
                 <Button
                   appearance="primary-action-button"
+                  aria-describedby="login-description"
                   onClick={() => {
                     // login
                     if (args.login?.url) {
