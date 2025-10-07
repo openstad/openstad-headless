@@ -498,11 +498,13 @@ secrets:
   api:
     existingSecret:
     jwtSecret:
+    dbNameKey:
 
   auth:
     existingSessionSecret:
     sessionSecret:
     phoneHashSalt:
+    dbNameKey: "auth-database"
 
   s3:
     existingSecret:

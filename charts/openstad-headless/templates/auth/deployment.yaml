@@ -75,7 +75,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "openstad.auth.databaseSecret.fullname" . }}
-                key: database
+                key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
 
           # SMTP MAIL
           - name: MAIL_SERVER_URL
@@ -248,4 +248,4 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "openstad.auth.databaseSecret.fullname" . }}
-                key: database
+                key: {{ .Values.secrets.auth.dbNameKey | default "database" }}

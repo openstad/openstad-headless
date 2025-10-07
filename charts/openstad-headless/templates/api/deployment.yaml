@@ -62,7 +62,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "openstad.api.secret.fullname" . }}
-                key: database
+                key: {{ .Values.secrets.api.dbNameKey | default "database" }}
 
           - name: EMAILADDRESS
             value: {{ .Values.api.emailAddress }}
@@ -275,7 +275,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ template "openstad.api.secret.fullname" . }}
-                  key: database
+                  key: {{ .Values.secrets.api.dbNameKey | default "database" }}
 
             - name: EMAILADDRESS
               value: {{ .Values.api.emailAddress }}
