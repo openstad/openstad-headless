@@ -883,35 +883,6 @@ export default function WidgetEnqueteItems(
                                 )}
                               />
 
-                              {form.watch('questionType') !== 'swipe' && (
-                                <FormField
-                                  control={form.control}
-                                  // @ts-ignore
-                                  name={`options.${activeOption}.titles.0.hideLabel`}
-
-                                  render={({ field }) => (
-                                    <>
-                                      <FormItem
-                                        style={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'flex-start',
-                                          flexDirection: 'row',
-                                          marginTop: '10px'
-                                        }}>
-                                        {YesNoSelect(field, props)}
-                                        <FormLabel
-                                          style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
-                                        <FormMessage />
-                                      </FormItem>
-                                      <FormDescription>
-                                        Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
-                                      </FormDescription>
-                                    </>
-                                  )}
-                                />
-                              )}
-
                               <FormField
                                 control={form.control}
                                 // @ts-ignore

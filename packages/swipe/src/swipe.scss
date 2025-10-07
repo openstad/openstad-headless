@@ -147,6 +147,40 @@
       transform: scale(1);
       transition: all 0.3s cubic-bezier(.33, .05, .58, .98);
       border-radius: 0 0 10px 10px;
+      z-index: 1;
+    }
+
+    .swipe-card-info {
+      position: absolute;
+      inset: 0;
+      background: #F1F1F1;
+      padding: 25px;
+      overflow: hidden;
+      border-radius: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease-in-out;
+      scale: .98;
+      transform: translateY(10px);
+
+
+      &[aria-visible='true'] {
+        opacity: 1;
+        scale: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+
+
+      h3 {
+        font-size: 16px;
+      }
+
+      p {
+        font-size: 12px;
+        line-height: 20px;
+      }
     }
 
     .swipe-card-header {
@@ -245,6 +279,7 @@
     height: 50px;
     margin-top: 4px;
     transition: all 0.2s ease;
+    line-height: 49px;
 
     &:hover {
       cursor: pointer;

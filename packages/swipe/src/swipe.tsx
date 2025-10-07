@@ -2,6 +2,7 @@ import './swipe.css';
 import React, { useState, useEffect, useMemo, FC } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
+import { Heading, Paragraph } from '@utrecht/component-library-react';
 
 export type SwipeCard = {
   id: string;
@@ -83,6 +84,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaX: 0,
     deltaY: 0,
   });
+  const [isInfoVisible, setIsInfoVisible] = useState(false);
 
   const swipeCards = useMemo(() => {
     return cards.length > 0 ? cards : defaultCards;
@@ -142,6 +144,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
   const removeCurrentCard = () => {
+    setIsInfoVisible(false);
+
     setRemainingCards(prev => {
       const newCards = prev.slice(1);
       if (newCards.length === 0) {
@@ -295,6 +299,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 <div className="swipe-card-content">
                   <p className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.description}</p>
                 </div>
+
+                <div className="swipe-card-info" aria-visible={isInfoVisible ? 'true' : 'false'}>
+                  <Heading level={3} className="swipe-card-title">Toelichting</Heading>
+                  <Paragraph>
+                    Ipsum lorem incididunt sed sint enim labore. Incididunt sed sint enim labore. Sint enim labore excepteur, elit est. Excepteur elit est tempor culpa. Est tempor culpa pariatur. Culpa pariatur quis, occaecat sit anim.
+                    Lorem incididunt sed, sint enim. Sint enim labore excepteur, elit est. Excepteur elit est tempor culpa. Est tempor culpa pariatur. Culpa pariatur quis, occaecat sit anim.
+                  </Paragraph>
+                </div>
                 {isTop && swipeDirection && (
                   <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
                     {swipeDirection === 'left' ? (
@@ -324,7 +336,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           </button>
           <button
             className="swipe-info-btn"
-            onClick={(e) => { console.log(e); e.preventDefault(); }}
+            onClick={(e) => { setIsInfoVisible(!isInfoVisible); e.preventDefault(); }}
           >
             <span>Info</span>
           </button>
@@ -339,8 +351,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             <span>Eens</span>
           </button>
         </div>
-  )
-}
+      )
+      }
     </div >
   );
 }
