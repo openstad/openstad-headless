@@ -67,6 +67,14 @@ spec:
         - image: bitnamilegacy/kubectl
           imagePullPolicy: IfNotPresent
           name: kubectl-init-auth-certificates-container
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - mountPath: /home/keys
               name: keys-volume
