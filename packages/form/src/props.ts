@@ -30,6 +30,8 @@ export type FormProps = {
     setCurrentPage?: (page: number) => void;
     prevPage?: any;
     prevPageText?: string;
+    totalFieldCount?: number;
+    formStyle?: string;
 }
 
 type PaginationFieldProps = {

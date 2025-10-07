@@ -31,6 +31,7 @@ figure.info-image-container {
     gap: 1rem;
 }
 
+
 html body .question .marginTop10.marginBottom15 {
     margin-top: 10px;
     margin-bottom: 15px;
@@ -42,4 +43,41 @@ html body .question .marginTop10.marginBottom15 {
     border-width: var(--utrecht-checkbox-disabled-border-width, var(--utrecht-checkbox-border-width));
     cursor: var(--utrecht-action-disabled-cursor, not-allowed);
     background-image: var(--utrecht-checkbox-disabled-background-image, none);
+}
+
+.form-fieldCounter {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    z-index: 99;
+    height: 4px;
+    inset: 20px 20px auto 20px;
+
+    li {
+        width: 100%;
+        height: 4px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 2px;
+        position: relative;
+        overflow: hidden;
+
+        &:before {
+            content: '';
+            background: rgba(0, 0, 0, 0.5);
+
+            position: absolute;
+            inset: 0 100% 0 0;
+            transition: all 0.3s ease;
+        }
+
+        &:has(~.--active),
+        &.--active {
+            &:before {
+                inset: 0 0 0 0;
+            }
+        }
+    }
 }

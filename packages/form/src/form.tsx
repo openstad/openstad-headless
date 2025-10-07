@@ -39,6 +39,8 @@ function Form({
     setCurrentPage,
     prevPage,
     prevPageText,
+    totalFieldCount = 0,
+    formStyle = 'default',
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -180,17 +182,25 @@ function Form({
         }
     };
 
-
     return (
         <div className="form-widget">
             <div className="form-widget-container">
                 {title && <h5 className="form-widget-title">{title}</h5>}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
+                    {formStyle === 'youth' && totalFieldCount > 0 && (
+                        <ul className="form-fieldCounter">
+                            {Array.from({ length: totalFieldCount }, (_, index) => (
+                                <li key={index} className={`${currentPage === index ? '--active' : ''}`} aria-label={`Pagina ${index + 1}`}></li>
+                            ))}
+                        </ul>
+                    )}
+
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
                     {fields.map((field: ComponentFieldProps, index: number) => {
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
+
 
                         if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
                             return null;
@@ -212,7 +222,7 @@ function Form({
                                 {/* @ts-ignore */}
                                 {field.infoBlockStyle === "youth-outro" && (
                                     <div className="info-block-buttons">
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                         {field.infoBlockExtraButton && (
                                             <button className="update-button">
                                                 <span>Blijf op de hoogte</span>
@@ -220,7 +230,7 @@ function Form({
                                         )}
                                         {/* @ts-ignore */}
                                         {field.infoBlockShareButton && (
-                                            <div className="share-buttons" onClick={() => {setShowShareDropdown(!showShareDropdown)}}>
+                                            <div className="share-buttons" onClick={() => { setShowShareDropdown(!showShareDropdown) }}>
                                                 <span>Delen</span>
 
                                                 <ul className={`share-icons ${showShareDropdown ? '--show' : ''}`}>
@@ -279,6 +289,7 @@ function Form({
                             appearance='primary-action-button'
                             type="submit"
                             disabled={submitDisabled}
+                            data-label="Overslaan"
                             onClick={() => {
                                 scrollTop();
                             }}

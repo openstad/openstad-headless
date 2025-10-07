@@ -256,7 +256,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   return (
     <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0}>
-      <div className="swipe-intro" role="group" aria-label="Voortgang">
+      {/* <div className="swipe-intro" role="group" aria-label="Voortgang">
         <div className="swipe-progress">
           <label htmlFor="swipe-progress-bar" className="sr-only">Voortgang</label>
           <progress id="swipe-progress-bar" value={100 - (remainingCards.length / cards.length) * 100} max="100" aria-valuenow={100 - (remainingCards.length / cards.length) * 100} aria-valuemax={100} aria-label="Voortgang"></progress>
@@ -264,7 +264,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         <div className="swipe-counter" aria-live="polite" tabIndex={0}>
           Stelling {cards.length - remainingCards.length + 1} van de {cards.length}
         </div>
-      </div>
+      </div> */}
       <div className="swipe-container" role="list" aria-label="Stellingen">
         <div className="swipe-stack">
           {remainingCards.slice(0, 3).map((card, index) => {

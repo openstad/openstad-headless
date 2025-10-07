@@ -71,7 +71,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 const length = url.length;
                 let returnUrl = url;
 
-                if ( url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&' ) {
+                if (url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&') {
                     returnUrl = url.slice(0, length - 1);
                 }
 
@@ -92,7 +92,6 @@ function Enquete(props: EnqueteWidgetProps) {
         }
 
     }
-
 
     const formFields: FieldProps[] = [];
     if (typeof (props) !== 'undefined'
@@ -270,6 +269,7 @@ function Enquete(props: EnqueteWidgetProps) {
             formFields.push(fieldData);
         }
     }
+    const totalFieldCount = props.items?.filter(item => item.questionType !== 'pagination').length || 0;
 
     const defaultAnswers = formFields.reduce((acc, item) => {
         if (typeof item.fieldKey !== 'undefined') {
@@ -341,6 +341,8 @@ function Enquete(props: EnqueteWidgetProps) {
                     setCurrentPage={setCurrentPage}
                     prevPage={currentPage > 0 ? currentPage - 1 : null}
                     prevPageText={getPrevPageTitle}
+                    totalFieldCount={totalFieldCount}
+                    formStyle={props.formStyle || 'default'}
                     {...props}
                 />
             </div>
