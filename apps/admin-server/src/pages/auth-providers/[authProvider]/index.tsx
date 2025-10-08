@@ -29,6 +29,52 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InfoDialog from '@/components/ui/info-hover';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import React from 'react';
+import {Checkbox} from "@/components/ui/checkbox";
+import {Spacer} from "@/components/ui/spacer";
+
+const requiredUserFields = [
+  {
+    id: 'name',
+    label: 'Naam',
+    defaultMappingKey: "irma-demo.gemeente.personalData.fullname"
+  },
+  {
+    id: 'email',
+    label: 'E-mailadres',
+    defaultMappingKey: "irma-demo.sidn-pbdf.email.email"
+  },
+  {
+    id: 'phoneNumber',
+    label: 'Telefoonnummer',
+    defaultMappingKey: "irma-demo.sidn-pbdf.phoneNumber.phoneNumber"
+  },
+  {
+    id: 'streetName',
+    label: 'Straatnaam',
+    defaultMappingKey: "irma-demo.gemeente.address.street"
+  },
+  {
+    id: 'suffix',
+    label: 'Tussenvoegsel',
+    defaultMappingKey: "irma-demo.gemeente.personalData.infix"
+  },
+  {
+    id: 'houseNumber',
+    label: 'Huisnummer',
+    defaultMappingKey: "irma-demo.gemeente.address.housenumber"
+  },
+  {
+    id: 'city',
+    label: 'Stad',
+    defaultMappingKey: "irma-demo.gemeente.address.city"
+  },
+  {
+    id: 'postcode',
+    label: 'Postcode',
+    defaultMappingKey: "irma-demo.gemeente.address.postalcode"
+  },
+];
+
 
 const formSchema = z.object({
   name: z.string(),
@@ -37,19 +83,26 @@ const formSchema = z.object({
     clientId: z.string(),
     clientSecret: z.string(),
     pkceEnabled: z.enum(['true', 'false']).default('true'),
-    userMapping: z.string(),
     serverLoginPath: z.string(),
     serverLogoutPath: z.string(),
     serverUserInfoPath: z.string(),
     serverExchangeCodePath: z.string(),
     serverExchangeContentType: z.string(),
     brokerConfiguration: z.string().optional(),
-    /*    userName: z.string(),
-        askPhoneNumber: z.enum(['true', 'false']).default('false'),*/
+    userFieldMapping: z.object({
+      name: z.string().optional(),
+      email: z.string().optional(),
+      phoneNumber: z.string().optional(),
+      streetName: z.string().optional(),
+      suffix: z.string().optional(),
+      houseNumber: z.string().optional(),
+      city: z.string().optional(),
+      postcode: z.string().optional(),
+    }).optional(),
   }),
 });
 
-function EditAuthProvider() {
+export default function AuthProviderEdit() {
 
   const router = useRouter();
   const { authProvider } = router.query;
@@ -114,168 +167,6 @@ function EditAuthProvider() {
   if (!data) return null;
 
   return (
-    <div className="p-6 bg-white rounded-md">
-      <Form {...form}>
-        <Heading size="xl">Algemene instellingen</Heading>
-        <FormDescription>
-          Configureer hier de authenticate provider die je wilt gebruiken voor een project. <br />
-          Dit kan momenteel alleen een OpenID Connect provider zijn, bijvoorbeeld Signicat. <br />
-          Het is verplicht een clientId en clientSecret op te geven. De overige gegevens kunnen ofwel handmatig, of
-          via de Broker configuration opgegeven worden.
-        </FormDescription>
-        <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-1 gap-4 ">
-
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="mt-auto">
-                <FormLabel>Naam</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="config.clientId"
-            render={({ field }) => (
-              <FormItem className="mt-auto">
-                <FormLabel>Client ID</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="config.clientSecret"
-            render={({ field }) => (
-              <FormItem className="mt-auto">
-                <FormLabel>Client Secret</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="config.brokerConfiguration"
-            render={({ field }) => (
-              <FormItem className="mt-auto">
-                <FormLabel>Broker configuration
-                  <InfoDialog
-                    content={'De Broker configuration is een URL naar een JSON bestand dat de configuratie bevat van de provider, deze eindigt meestal op ".well-known/openid-configuration"'} />
-                </FormLabel>
-                <FormControl className={'col-2'}>
-                  <Input {...field} />
-                </FormControl>
-                {/*<Button className={'col-2'} onClick={fetchBrokerConfig}>Haal configuratie op</Button>*/}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/*<FormField
-                control={form.control}
-                name="config.userName"
-                render={({ field }) => (
-                  <FormItem className="mt-auto">
-                    <FormLabel>Gebruikersnaam</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Volledige naam" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="irma-demo.gemeente.personalData.fullname">Volledige naam</SelectItem>
-                        <SelectItem value="irma-demo.gemeente.personalData.surname">Achternaam</SelectItem>
-                        <SelectItem value="irma-demo.gemeente.personalData.firstnames">Voornamen</SelectItem>
-                        <SelectItem value="irma-demo.gemeente.personalData.initials">Initialen</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="config.askPhoneNumber"
-                render={({ field }) => (
-                  <FormItem className="mt-auto">
-                    <FormLabel>Vraag telefoonnummer op</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />*/}
-
-          <Button className="col-span-full w-fit" type="submit">
-            Opslaan
-          </Button>
-
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="destructive">Authenticatie provider verwijderen</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogTitle>Bevestiging</DialogTitle>
-                      <DialogDescription>
-                        Weet je zeker dat je deze authenticatie provider wilt verwijderen? Dit kan alleen als deze provider niet wordt gebruikt in een project.
-                      </DialogDescription>
-                      <DialogFooter>
-                        <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
-                          Annuleren
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={async () => {
-                            setIsDialogOpen(false);
-                            await deleteProvider();
-                          }}
-                        >
-                          Bevestigen
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-        </form>
-      </Form>
-    </div>
-  );
-}
-
-
-export default function AuthProviderEdit() {
-
-  return (
     <div>
       <PageLayout
         pageHeader="Authenticatie providers"
@@ -299,9 +190,240 @@ export default function AuthProviderEdit() {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemene instellingen</TabsTrigger>
+              <TabsTrigger value="mapping">Gebruikers velden mapping</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              <EditAuthProvider />
+              <div className="p-6 bg-white rounded-md">
+                <Form {...form}>
+                  <Heading size="xl">Algemene instellingen</Heading>
+                  <FormDescription>
+                    Configureer hier de authenticate provider die je wilt gebruiken voor een project. <br />
+                    Dit kan momenteel alleen een OpenID Connect provider zijn, bijvoorbeeld Signicat. <br />
+                    Het is verplicht een clientId en clientSecret op te geven. De overige gegevens kunnen ofwel handmatig, of
+                    via de Broker configuration opgegeven worden.
+                  </FormDescription>
+                  <Separator className="my-4" />
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="lg:w-2/3 grid grid-cols-1 gap-4 ">
+
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({field}) => (
+                        <FormItem className="mt-auto">
+                          <FormLabel>Naam</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="config.clientId"
+                      render={({field}) => (
+                        <FormItem className="mt-auto">
+                          <FormLabel>Client ID</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="config.clientSecret"
+                      render={({field}) => (
+                        <FormItem className="mt-auto">
+                          <FormLabel>Client Secret</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="config.brokerConfiguration"
+                      render={({field}) => (
+                        <FormItem className="mt-auto">
+                          <FormLabel>Broker configuration
+                            <InfoDialog
+                              content={'De Broker configuration is een URL naar een JSON bestand dat de configuratie bevat van de provider, deze eindigt meestal op ".well-known/openid-configuration"'}/>
+                          </FormLabel>
+                          <FormControl className={'col-2'}>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="col-span-full md:col-span-1 flex flex-row justify-between mt-auto">
+                      <Button className="col-span-full w-fit" type="submit">
+                        Opslaan
+                      </Button>
+
+                      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="destructive">Authenticatie provider verwijderen</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogTitle>Bevestiging</DialogTitle>
+                          <DialogDescription>
+                            Weet je zeker dat je deze authenticatie provider wilt verwijderen? Dit kan alleen als deze provider niet
+                            wordt gebruikt in een project.
+                          </DialogDescription>
+                          <DialogFooter>
+                            <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+                              Annuleren
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={async () => {
+                                setIsDialogOpen(false);
+                                await deleteProvider();
+                              }}
+                            >
+                              Bevestigen
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+
+                  </form>
+                </Form>
+              </div>
+            </TabsContent>
+            <TabsContent value="general" className="p-0">
+              <div className="p-6 bg-white rounded-md">
+                <Form {...form}>
+                  <Heading size="xl">Algemene instellingen</Heading>
+                  <FormDescription>
+                    Geef hier aan welke velden een gebruiker moet invullen als die zich aanmeldt.
+                    Je kunt ook aangeven hoe de gegevens uit de authenticatiebron (bijv. IRMA) gekoppeld moeten worden aan de verplichte velden.
+                    <br/><br/>
+                    Laat je dit leeg, dan wordt het veld niet getoond en kan de gebruiker deze informatie niet invullen.
+                    <br/><br/>
+                    <strong>Let op:</strong> Als je een veld verplicht stelt, zorg er dan voor dat je een juiste mapping opgeeft zodat het veld automatisch ingevuld kan worden vanuit de authenticatiebron.
+                    Als er geen waarde is om het veld automatisch in te vullen, kan de gebruiker zich niet registreren.
+                    <br/><br/>
+                    Zie voor de mogelijke mapping keys van jouw authenticatiebron de documentatie of vraag dit na bij de beheerder van de authenticatiebron.
+                    <br/><br/><br/>
+                  </FormDescription>
+                  <Separator className="my-4" />
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="lg:w-2/3 grid grid-cols-1 gap-4 ">
+
+                    <FormField
+                      control={form.control}
+                      name={`userFieldMapping`}
+                      render={() => (
+                        <>
+                          <FormItem className="col-span-full">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                              <strong className="mt-3">
+                                Verplicht veld
+                              </strong>
+                              <strong className="mt-3">
+                                Mapping key authenticatiebron
+                              </strong>
+
+                              {requiredUserFields.map((item) => (
+                                <>
+                                  <FormField
+                                    key={`field_${item.id}`}
+                                    control={form.control}
+                                    name={`userFieldMapping`}
+                                    render={({ field }) => {
+                                      const checked = !!(field.value && field.value[item.id] !== undefined);
+
+                                      return (
+                                        <FormItem
+                                          className="flex flex-row items-center space-x-3 space-y-0">
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={checked}
+                                              onCheckedChange={(checked: any) => {
+                                                const currentValues = form.getValues(`userFieldMapping`) || {};
+                                                if ( checked ) {
+                                                  field.onChange({
+                                                    ...currentValues,
+                                                    [item.id]: {
+                                                      mapping: currentValues[item.id]?.mapping || item.defaultMappingKey
+                                                    }
+                                                  });
+                                                } else {
+                                                  const {[item.id]: _, ...rest} = currentValues;
+                                                  field.onChange(rest);
+                                                }
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <FormLabel className="font-normal">
+                                            {item.label}
+                                          </FormLabel>
+                                        </FormItem>
+                                      );
+                                    }}
+                                  />
+                                  {(() => {
+                                    const providerFields = form.watch(`userFieldMapping`) || {};
+
+                                    if (providerFields[item.id] !== undefined) {
+                                      return (
+                                        <FormField
+                                          key={`mapping_${providerId}_${item.id}`}
+                                          control={form.control}
+                                          name={`userFieldMapping.${item.id}.mapping`}
+                                          render={({field}) => {
+                                            const fieldValue = form.getValues('authProvidersRequiredUserFields') || {};
+                                            const providerFields = fieldValue[providerId] || {};
+                                            const itemField = providerFields[item.id] || {};
+                                            const mappingValue = itemField['mapping'];
+
+                                            return (
+                                              <FormItem>
+                                                <FormControl>
+                                                  <Input
+                                                    defaultValue={mappingValue}
+                                                    onChange={(e) => {
+                                                      field.onChange(e);
+                                                    }}
+                                                  />
+                                                </FormControl>
+                                                <FormMessage/>
+                                              </FormItem>
+                                            )
+                                          }}
+                                        />
+                                      )
+                                    } else {
+                                      return <div></div>
+                                    }
+
+                                  })()}
+                                </>
+                              ))}
+                            </div>
+                          </FormItem>
+                          <Spacer size={3} />
+                        </>
+                      )}
+                    />
+
+                  </form>
+                </Form>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
