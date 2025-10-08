@@ -1,3 +1,4 @@
+{{- if ne .Values.cms.useS3 "true" }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -44,6 +45,7 @@ spec:
   {{- else}}
       storage: 1Gi
   {{- end}}
+{{- end}}
 {{- if ne .Values.cms.useS3 "true" }}
 ---
 apiVersion: v1

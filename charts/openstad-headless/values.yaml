@@ -342,6 +342,8 @@ image:
   service:
     httpPort: 31450
 
+  useS3: "false"
+
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
     name: image

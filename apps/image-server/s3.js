@@ -25,9 +25,8 @@ module.exports = {
         accessKeyId: process.env.S3_KEY,
         secretAccessKey: process.env.S3_SECRET,
       },
-      region: process.env.AWS_REGION || 'us-east-1',
+      region: process.env.S3_REGION || 'us-east-1',
     });
-    console.log (this.client, 's3 client');
 
     return this.client;
   }
