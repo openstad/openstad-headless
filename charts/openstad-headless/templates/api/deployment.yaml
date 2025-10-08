@@ -375,6 +375,10 @@ spec:
 
             - name: BASE_DOMAIN
               value: {{ .Values.host.base }}
+
+            {{- if .Values.api.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
           image: {{ .Values.api.deploymentContainer.image }}
           imagePullPolicy: IfNotPresent
           name: init-db-ready

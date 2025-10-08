@@ -249,3 +249,7 @@ spec:
               secretKeyRef:
                 name: {{ template "openstad.auth.databaseSecret.fullname" . }}
                 key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
+
+          {{- if .Values.auth.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}
