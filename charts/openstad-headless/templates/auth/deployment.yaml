@@ -81,25 +81,25 @@ spec:
           - name: MAIL_SERVER_URL
             valueFrom:
               secretKeyRef:
-                key: host
+                key: {{ .Values.secrets.mail.hostKey | default "host" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_PORT
             valueFrom:
               secretKeyRef:
-                key: port
+                key: {{ .Values.secrets.mail.portKey | default "port" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: password
+                key: {{ .Values.secrets.mail.passwordKey | default "password" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_USER_NAME
             valueFrom:
               secretKeyRef:
-                key: username
+                key: {{ .Values.secrets.mail.usernameKey | default "username" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_SECURE
