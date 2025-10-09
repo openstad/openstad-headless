@@ -32,6 +32,38 @@ import React from 'react';
 import {Checkbox} from "@/components/ui/checkbox";
 import {Spacer} from "@/components/ui/spacer";
 
+const configureUserMapping = (
+  name: string | undefined,
+  email: string | undefined,
+  phoneNumber: string | undefined,
+  streetName: string | undefined,
+  houseNumber: string | undefined,
+  city: string | undefined,
+  postcode: string | undefined,
+) => {
+  return JSON.stringify({
+    identifier: "user => user['irma-demo.sidn-pbdf.uniqueid.uniqueid'] || user.id",
+    name: name ? `user => (user['${name}'] || '').trim() || null` : "null",
+    email: email ? `user => user['${email}'] == '' ? null : user['${email}']` : "null",
+    phoneNumber: phoneNumber ? `user => user['${phoneNumber}'] == '' ? null : user['${phoneNumber}']` : "null",
+    suffix: "null",
+    address: (streetName && houseNumber ) ? `user => user['${streetName}'] && user['${houseNumber}'] ? (user['${streetName}'] + ' ' + user['${houseNumber}']).trim() : null` : "null",
+    city: city ? `user => user['${city}'] == '' ? null : user['${city}']` : "null",
+    postcode: postcode ? `user => user['${postcode}'] == '' ? null : user['${postcode}']` : "null",
+    role: "user => user.role || 'admin'",
+  });
+}
+
+const defaultMapping = configureUserMapping(
+  "irma-demo.gemeente.personalData.fullname",
+  "irma-demo.sidn-pbdf.email.email",
+  "irma-demo.sidn-pbdf.phoneNumber.phoneNumber",
+  "irma-demo.gemeente.address.street",
+  "irma-demo.gemeente.address.housenumber",
+  "irma-demo.gemeente.address.city",
+  "irma-demo.gemeente.address.postalcode",
+);
+
 const requiredUserFields = [
   {
     id: 'name',
@@ -54,11 +86,6 @@ const requiredUserFields = [
     defaultMappingKey: "irma-demo.gemeente.address.street"
   },
   {
-    id: 'suffix',
-    label: 'Tussenvoegsel',
-    defaultMappingKey: "irma-demo.gemeente.personalData.infix"
-  },
-  {
     id: 'houseNumber',
     label: 'Huisnummer',
     defaultMappingKey: "irma-demo.gemeente.address.housenumber"
@@ -74,7 +101,6 @@ const requiredUserFields = [
     defaultMappingKey: "irma-demo.gemeente.address.postalcode"
   },
 ];
-
 
 const formSchema = z.object({
   name: z.string(),
@@ -99,8 +125,14 @@ const formSchema = z.object({
       city: z.string().optional(),
       postcode: z.string().optional(),
     }).optional(),
+    userMapping: z.string().optional(),
   }),
 });
+
+const defaultUserFieldMapping = requiredUserFields.reduce((acc, field) => {
+  acc[field.id] = field.defaultMappingKey;
+  return acc;
+}, {} as Record<string, string>);
 
 export default function AuthProviderEdit() {
 
@@ -116,7 +148,10 @@ export default function AuthProviderEdit() {
     () => ({
       name: provider?.name || '',
       type: 'oidc',
-      config: provider?.config || {},
+      config: provider?.config || {
+        userFieldMapping: provider?.config?.userFieldMapping || defaultUserFieldMapping,
+        userMapping: provider?.config?.userMapping || defaultMapping,
+      },
     }),
     [provider],
   );
@@ -134,19 +169,42 @@ export default function AuthProviderEdit() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      const userMapping = configureUserMapping(
+        values.config.userFieldMapping?.name,
+        values.config.userFieldMapping?.email,
+        values.config.userFieldMapping?.phoneNumber,
+        values.config.userFieldMapping?.streetName,
+        values.config.userFieldMapping?.houseNumber,
+        values.config.userFieldMapping?.city,
+        values.config.userFieldMapping?.postcode
+      );
+
+      if (
+        provider.configserverLoginPath &&
+        provider.configserverLogoutPath &&
+        provider.configserverUserInfoPath &&
+        provider.configbrokerConfiguration &&
+        provider.configserverExchangeCodePath &&
+        provider.configserverExchangeContentType
+      ) {
+        // All required config is already set, no need to fetch broker config
+        await updateAuthProvider({ ...values, userMapping, id: provider.id });
+      }
       const brokerConfigLoaded = await fetchBrokerConfig(null, values, form.setValue);
       if (!brokerConfigLoaded) {
         throw new Error('Kon broker configuratie niet ophalen');
       }
       const newValues = form.getValues();
-      await updateAuthProvider({ ...newValues, id: provider.id });
+      await updateAuthProvider({ ...newValues, userMapping, id: provider.id });
       toast.success('Auth provider is bijgewerkt');
     } catch (err: any) {
       toast.error(err.message || 'Auth provider kon niet worden bijgewerkt');
     }
   }
 
-
+  useEffect(() => {
+    console.log( "Values", form.getValues() );
+  }, [form.getValues()]);
 
   async function deleteProvider () {
 
@@ -302,122 +360,68 @@ export default function AuthProviderEdit() {
                 </Form>
               </div>
             </TabsContent>
-            <TabsContent value="general" className="p-0">
+            <TabsContent value="mapping" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
-                  <Heading size="xl">Algemene instellingen</Heading>
+                  <Heading size="xl">
+                    Gebruikers velden mapping
+                  </Heading>
+                  <Spacer size={1} />
                   <FormDescription>
-                    Geef hier aan welke velden een gebruiker moet invullen als die zich aanmeldt.
-                    Je kunt ook aangeven hoe de gegevens uit de authenticatiebron (bijv. IRMA) gekoppeld moeten worden aan de verplichte velden.
+                    Je kunt aangeven hoe de gegevens uit de authenticatiebron (bijv. IRMA) gekoppeld moeten worden aan de verplichte velden.
+                    <br/>
+                    <strong>Let op:</strong>Als er geen waarde is opgegeven voor een veld, kan dit leiden tot fouten bij het aanmaken van een gebruiker.
+                    <br/>
+                    Zie voor de mogelijke mapping keys van jouw authenticatiebron de <a href="https://attribute-index.yivi.app/en/pbdf.html" target="_blank">documentatie</a> of vraag dit na bij de beheerder van de authenticatiebron.
                     <br/><br/>
-                    Laat je dit leeg, dan wordt het veld niet getoond en kan de gebruiker deze informatie niet invullen.
-                    <br/><br/>
-                    <strong>Let op:</strong> Als je een veld verplicht stelt, zorg er dan voor dat je een juiste mapping opgeeft zodat het veld automatisch ingevuld kan worden vanuit de authenticatiebron.
-                    Als er geen waarde is om het veld automatisch in te vullen, kan de gebruiker zich niet registreren.
-                    <br/><br/>
-                    Zie voor de mogelijke mapping keys van jouw authenticatiebron de documentatie of vraag dit na bij de beheerder van de authenticatiebron.
-                    <br/><br/><br/>
                   </FormDescription>
-                  <Separator className="my-4" />
+                  <Spacer size={1} />
+
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="lg:w-2/3 grid grid-cols-1 gap-4 ">
 
                     <FormField
                       control={form.control}
-                      name={`userFieldMapping`}
+                      name={`config.userFieldMapping`}
                       render={() => (
-                        <>
-                          <FormItem className="col-span-full">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <FormItem className="col-span-full">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+                            {requiredUserFields.map((item) => {
+                              const userFieldMapping = form.getValues('config.userFieldMapping');
 
-                              <strong className="mt-3">
-                                Verplicht veld
-                              </strong>
-                              <strong className="mt-3">
-                                Mapping key authenticatiebron
-                              </strong>
+                              return (
+                                <FormField
+                                  key={item.id}
+                                  control={form.control}
+                                  name={`config.userFieldMapping.${item.id as keyof typeof userFieldMapping}`}
+                                  render={({field}) => {
+                                    const getMappingField = requiredUserFields.find(i => i.id === item.id);
+                                    const defaultMapping = getMappingField ? getMappingField.defaultMappingKey : '';
+                                    const mappingValue = userFieldMapping?.[item.id as keyof typeof userFieldMapping] ?? defaultMapping;
 
-                              {requiredUserFields.map((item) => (
-                                <>
-                                  <FormField
-                                    key={`field_${item.id}`}
-                                    control={form.control}
-                                    name={`userFieldMapping`}
-                                    render={({ field }) => {
-                                      const checked = !!(field.value && field.value[item.id] !== undefined);
-
-                                      return (
-                                        <FormItem
-                                          className="flex flex-row items-center space-x-3 space-y-0">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={checked}
-                                              onCheckedChange={(checked: any) => {
-                                                const currentValues = form.getValues(`userFieldMapping`) || {};
-                                                if ( checked ) {
-                                                  field.onChange({
-                                                    ...currentValues,
-                                                    [item.id]: {
-                                                      mapping: currentValues[item.id]?.mapping || item.defaultMappingKey
-                                                    }
-                                                  });
-                                                } else {
-                                                  const {[item.id]: _, ...rest} = currentValues;
-                                                  field.onChange(rest);
-                                                }
-                                              }}
-                                            />
-                                          </FormControl>
-                                          <FormLabel className="font-normal">
-                                            {item.label}
-                                          </FormLabel>
-                                        </FormItem>
-                                      );
-                                    }}
-                                  />
-                                  {(() => {
-                                    const providerFields = form.watch(`userFieldMapping`) || {};
-
-                                    if (providerFields[item.id] !== undefined) {
-                                      return (
-                                        <FormField
-                                          key={`mapping_${providerId}_${item.id}`}
-                                          control={form.control}
-                                          name={`userFieldMapping.${item.id}.mapping`}
-                                          render={({field}) => {
-                                            const fieldValue = form.getValues('authProvidersRequiredUserFields') || {};
-                                            const providerFields = fieldValue[providerId] || {};
-                                            const itemField = providerFields[item.id] || {};
-                                            const mappingValue = itemField['mapping'];
-
-                                            return (
-                                              <FormItem>
-                                                <FormControl>
-                                                  <Input
-                                                    defaultValue={mappingValue}
-                                                    onChange={(e) => {
-                                                      field.onChange(e);
-                                                    }}
-                                                  />
-                                                </FormControl>
-                                                <FormMessage/>
-                                              </FormItem>
-                                            )
-                                          }}
-                                        />
-                                      )
-                                    } else {
-                                      return <div></div>
-                                    }
-
-                                  })()}
-                                </>
-                              ))}
-                            </div>
-                          </FormItem>
-                          <Spacer size={3} />
-                        </>
+                                    return (
+                                      <FormItem>
+                                        <FormLabel>
+                                          {item.label}
+                                        </FormLabel>
+                                        <FormControl>
+                                          <Input
+                                            defaultValue={mappingValue}
+                                            onChange={(e) => {
+                                              field.onChange(e);
+                                            }}
+                                          />
+                                        </FormControl>
+                                        <FormMessage/>
+                                      </FormItem>
+                                    )
+                                  }}
+                                />
+                              )
+                            })}
+                          </div>
+                        </FormItem>
                       )}
                     />
 
