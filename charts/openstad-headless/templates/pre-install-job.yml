@@ -94,7 +94,7 @@ spec:
       restartPolicy: Never
 {{- end }}
 # For ArgoCD we can't use helm hooks, so we must use sync-waves
-{{- if not .Values.disablePreInstallHelm }}
+{{- if not .Values.disablePreInstallArgoCd }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
