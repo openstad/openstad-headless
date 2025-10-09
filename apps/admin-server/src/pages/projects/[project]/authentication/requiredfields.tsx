@@ -28,43 +28,35 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 const requiredUserFields = [
   {
     id: 'name',
-    label: 'Naam',
-    defaultMappingKey: "irma-demo.gemeente.personalData.fullname"
+    label: 'Naam'
   },
   {
     id: 'email',
-    label: 'E-mailadres',
-    defaultMappingKey: "irma-demo.sidn-pbdf.email.email"
+    label: 'E-mailadres'
   },
   {
     id: 'phoneNumber',
-    label: 'Telefoonnummer',
-    defaultMappingKey: "irma-demo.sidn-pbdf.phoneNumber.phoneNumber"
+    label: 'Telefoonnummer'
   },
   {
     id: 'streetName',
-    label: 'Straatnaam',
-    defaultMappingKey: "irma-demo.gemeente.address.street"
+    label: 'Straatnaam'
   },
   {
     id: 'suffix',
-    label: 'Tussenvoegsel',
-    defaultMappingKey: "irma-demo.gemeente.personalData.infix"
+    label: 'Tussenvoegsel'
   },
   {
     id: 'houseNumber',
-    label: 'Huisnummer',
-    defaultMappingKey: "irma-demo.gemeente.address.housenumber"
+    label: 'Huisnummer'
   },
   {
     id: 'city',
-    label: 'Stad',
-    defaultMappingKey: "irma-demo.gemeente.address.city"
+    label: 'Stad'
   },
   {
     id: 'postcode',
-    label: 'Postcode',
-    defaultMappingKey: "irma-demo.gemeente.address.postalcode"
+    label: 'Postcode'
   },
 ];
 
@@ -75,13 +67,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   buttonText: z.string().optional(),
   info: z.string().optional(),
-  authProvidersRequiredUserFields: z.record(
-    z.record(
-      z.object({
-        mapping: z.string().optional()
-      }).optional()
-    ).optional()
-  ).optional(),
+  authProvidersRequiredUserFields: z.record(z.array(z.string()).default([])).default({}),
 });
 
 export default function ProjectAuthenticationRequiredFields() {
@@ -119,10 +105,6 @@ export default function ProjectAuthenticationRequiredFields() {
   }, [form, defaults]);
   
   async function onSubmit(values: z.infer<typeof formSchema>) {
-
-    console.log( 'Waardes', values );
-    return;
-
     try {
       const updatedConfig = {
         auth: {
@@ -363,135 +345,71 @@ export default function ProjectAuthenticationRequiredFields() {
                 <Separator className="my-4" />
                 <p>
                   Geef hier aan welke velden een gebruiker moet invullen als die zich aanmeldt.
-                  Je kunt ook aangeven hoe de gegevens uit de authenticatiebron (bijv. IRMA) gekoppeld moeten worden aan de verplichte velden.
-                  <br/>
-                  <br/>
-                  Laat je dit leeg, dan wordt het veld niet getoond en kan de gebruiker deze informatie niet invullen.
-                  <br/>
-                  <br/>
-                  <strong>Let op:</strong> Als je een veld verplicht stelt, zorg er dan voor dat je een juiste mapping opgeeft zodat het veld automatisch ingevuld kan worden vanuit de authenticatiebron.
-                  Als er geen waarde is om het veld automatisch in te vullen, kan de gebruiker zich niet registreren.
-                  <br/>
-                  <br/>
-                  Zie voor de mogelijke mapping keys van jouw authenticatiebron de documentatie of vraag dit na bij de beheerder van de authenticatiebron.
-                  <br/>
-                  <br/>
+                  Laat je dit leeg, dan wordt deze informatie niet opgevraagd bij registratie.
                   <br/>
                 </p>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4 lg:w-2/3"
+                  className="space-y-4 lg:w-2/3 mt-4"
                 >
                   {authProviders && authProviders.length > 0 ? (
-                      authProviders.map((provider: {id: string, name: string}) => {
-                        const providerId = provider.id;
-                        const providerName = provider.name;
+                    authProviders.map((provider: {id: string, name: string}) => {
+                      const providerId = provider.id;
+                      const providerName = provider.name;
 
-                        return (
-                            <div key={providerId} className="mb-6">
-                              <Heading size="lg">{providerName}</Heading>
-                              <Separator className="my-4" />
-                              <FormField
-                                  control={form.control}
-                                  name={`authProvidersRequiredUserFields.${providerId}`}
-                                  render={() => (
-                                    <>
-                                      <FormItem className="col-span-full">
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      return (
+                        <div key={providerId} className="mb-6">
+                          <Heading size="lg">{providerName}</Heading>
+                          <Separator className="my-4" />
+                          <FormField
+                            control={form.control}
+                            name={`authProvidersRequiredUserFields.${providerId}`}
+                            render={() => (
+                              <>
+                                <FormItem className="col-span-full">
+                                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-                                          <strong className="mt-3">
-                                            Verplicht veld
-                                          </strong>
-                                          <strong className="mt-3">
-                                            Mapping key authenticatiebron
-                                          </strong>
+                                    {requiredUserFields.map((item) => {
+                                      return item.id === 'suffix' ? null : (
+                                        <FormField
+                                          key={`field_${providerId}_${item.id}`}
+                                          control={form.control}
+                                          name={`authProvidersRequiredUserFields.${providerId}`}
+                                          render={({field}) => {
+                                            const checked = Array.isArray(field.value) && field.value.includes(item.id);
 
-                                          {requiredUserFields.map((item) => (
-                                            <>
-                                              <FormField
-                                                  key={`field_${providerId}_${item.id}`}
-                                                  control={form.control}
-                                                  name={`authProvidersRequiredUserFields.${providerId}`}
-                                                  render={({ field }) => {
-                                                    const checked = !!(field.value && field.value[item.id] !== undefined);
-
-                                                    return (
-                                                        <FormItem
-                                                            className="flex flex-row items-center space-x-3 space-y-0">
-                                                          <FormControl>
-                                                            <Checkbox
-                                                                checked={checked}
-                                                                onCheckedChange={(checked: any) => {
-                                                                  const currentValues = form.getValues(`authProvidersRequiredUserFields.${providerId}`) || {};
-                                                                  if ( checked ) {
-                                                                    field.onChange({
-                                                                      ...currentValues,
-                                                                      [item.id]: {
-                                                                        mapping: currentValues[item.id]?.mapping || item.defaultMappingKey
-                                                                      }
-                                                                    });
-                                                                  } else {
-                                                                    const {[item.id]: _, ...rest} = currentValues;
-                                                                    field.onChange(rest);
-                                                                  }
-                                                                }}
-                                                            />
-                                                          </FormControl>
-                                                          <FormLabel className="font-normal">
-                                                            {item.label}
-                                                          </FormLabel>
-                                                        </FormItem>
-                                                    );
-                                                  }}
-                                              />
-                                              {(() => {
-                                                const providerFields = form.watch(`authProvidersRequiredUserFields.${providerId}`) || {};
-
-                                                if (providerFields[item.id] !== undefined) {
-                                                  return (
-                                                    <FormField
-                                                      key={`mapping_${providerId}_${item.id}`}
-                                                      control={form.control}
-                                                      name={`authProvidersRequiredUserFields.${providerId}.${item.id}.mapping`}
-                                                      render={({field}) => {
-                                                        const fieldValue = form.getValues('authProvidersRequiredUserFields') || {};
-                                                        const providerFields = fieldValue[providerId] || {};
-                                                        const itemField = providerFields[item.id] || {};
-                                                        const mappingValue = itemField['mapping'];
-
-                                                        return (
-                                                          <FormItem>
-                                                            <FormControl>
-                                                              <Input
-                                                                defaultValue={mappingValue}
-                                                                onChange={(e) => {
-                                                                  field.onChange(e);
-                                                                }}
-                                                              />
-                                                            </FormControl>
-                                                            <FormMessage/>
-                                                          </FormItem>
-                                                        )
-                                                      }}
-                                                    />
-                                                  )
-                                                } else {
-                                                  return <div></div>
-                                                }
-
-                                              })()}
-                                          </>
-                                        ))}
-                                      </div>
-                                    </FormItem>
-                                      <Spacer size={3} />
-                                  </>
-                                )}
-                            />
-
-                          </div>
-                        )
-                      })
+                                            return (
+                                              <FormItem
+                                                className="flex flex-row items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                  <Checkbox
+                                                    checked={checked}
+                                                    onCheckedChange={(checked: any) => {
+                                                      const newValue = checked
+                                                        ? [...(field.value || []), item.id]
+                                                        : (field.value || []).filter((value: string) => value !== item.id);
+                                                      field.onChange(newValue);
+                                                    }}
+                                                  />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                  {item.label}
+                                                </FormLabel>
+                                              </FormItem>
+                                            );
+                                          }}
+                                        />
+                                      )
+                                    })}
+                                  </div>
+                                </FormItem>
+                                <Spacer size={3} />
+                              </>
+                            )}
+                          />
+                        </div>
+                      )
+                    })
                   ) : (
                       <div>Geen Auth Providers gevonden</div>
                   )}
