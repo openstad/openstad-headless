@@ -594,6 +594,11 @@ secrets:
     username: user
     password: password
 
+    hostKey:
+    portKey:
+    passwordKey:
+    usernameKey:
+
     auth:
       emailAssetsUrl:
       secure: 'yes'
