@@ -76,13 +76,13 @@ spec:
           - name: MAIL_TRANSPORT_SMTP_PORT
             valueFrom:
               secretKeyRef:
-                key: port
+                key: {{ .Values.secrets.mail.portKey | default "port" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_TRANSPORT_SMTP_HOST
             valueFrom:
               secretKeyRef:
-                key: host
+                key: {{ .Values.secrets.mail.hostKey | default "host" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_TRANSPORT_SMTP_REQUIRESSL
@@ -91,13 +91,13 @@ spec:
           - name: MAIL_TRANSPORT_SMTP_AUTH_USER
             valueFrom:
               secretKeyRef:
-                key: username
+                key: {{ .Values.secrets.mail.usernameKey | default "username" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_TRANSPORT_SMTP_AUTH_PASS
             valueFrom:
               secretKeyRef:
-                key: password
+                key: {{ .Values.secrets.mail.passwordKey | default "password" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: NOTIFICATIONS_ADMIN_EMAILADDRESS
