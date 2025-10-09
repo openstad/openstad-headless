@@ -501,21 +501,15 @@ secrets:
     imageApiToken:
 
   api:
-    existingSecret:
     jwtSecret:
     dbNameKey:
 
   auth:
-    existingSessionSecret:
     sessionSecret:
     phoneHashSalt:
     dbNameKey: "auth-database"
 
-  s3:
-    existingSecret:
-
   cms:
-    existingSecret:
     apiKey:
     mongodbUri:
     s3:
@@ -526,7 +520,6 @@ secrets:
       secret:
 
   database:
-    existingSecret:
     ### These values are for the MySQL db
     username:
     password:
@@ -548,13 +541,10 @@ secrets:
     ### Default db passwords for when you use the dependency
     rootPassword:
     replicationPassword:
-    existingPasswordSecret:
 
     ### Overwrites for auth db
     auth:
-      existingDbSecret:
       dbName: auth
-      existingCredentialsSecret:
       credentials:
         clientId:
         clientSecret:
@@ -583,7 +573,6 @@ secrets:
     jwtSecret:
 
   cdn:
-    existingSecret:
     reactUrl: https://unpkg.com/react@18.3.1/umd/react.production.min.js
     reactDomUrl: https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
     zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
@@ -591,7 +580,6 @@ secrets:
 
   ### Mail server secretes
   mail:
-    existingSecret:
     host: smtp.localhost
     port: '25'
     username: user
