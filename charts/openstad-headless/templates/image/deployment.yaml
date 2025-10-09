@@ -105,7 +105,7 @@ spec:
         {{- end }}
         resources:
 {{ toYaml .Values.image.resources | indent 12 }}
-{{- if eq .Values.image.useS3 "true" }}
+{{- if ne .Values.image.useS3 "true" }}
         volumeMounts:
           - mountPath: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
             name: data-vol
