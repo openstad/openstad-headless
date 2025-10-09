@@ -167,7 +167,7 @@ spec:
             - if kubectl -n "{{ .Release.Namespace }}" get secret openstad-auth-certificates; then
                 echo "Secret already exists, skipping.";
                 exit 0;
-              fi
+              fi;
               echo "Generating certificates";
               cd /home/keys;
               openssl genrsa -out ./privatekey.pem 2048;
