@@ -1,5 +1,8 @@
 # Optional Dependencies
 
+disablePreInstallHelm: false
+disablePreInstallArgoCd: true
+
 ##
 ## In this block you can toggle all optional dependencies.
 ## If you want to use an existing database(s) or services, disable

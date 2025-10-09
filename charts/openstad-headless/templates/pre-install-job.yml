@@ -1,4 +1,4 @@
-{{- if not .Values.disablePreInstall }}
+{{- if not .Values.disablePreInstallHelm }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -82,6 +82,93 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - echo "Generating certificates";
+              cd /home/keys;
+              openssl genrsa -out ./privatekey.pem 2048;
+              openssl req -new -key ./privatekey.pem -out ./certrequest.csr -subj "/C=NL/ST=All/L=Amsterdam/O=openstad/CN=www.{{ .Values.host.base}}";
+              openssl x509 -req -in ./certrequest.csr -signkey ./privatekey.pem -days 3650 -out ./certificate.pem;
+              ls -ltra;
+              echo "Creating keys in namespace {{ .Release.Namespace }}";
+              kubectl -n "{{ .Release.Namespace }}" delete secret openstad-auth-certificates;
+              kubectl -n "{{ .Release.Namespace }}" create secret generic openstad-auth-certificates --from-file ./privatekey.pem --from-file ./certrequest.csr --from-file ./certificate.pem;
+              echo "Secrets are stored";
+      restartPolicy: Never
+{{- end }}
+# For ArgoCD we can't use helm hooks, so we must use sync-waves
+{{- if not .Values.disablePreInstallHelm }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: openstad-secrets-sa
+  annotations:
+     argocd.argoproj.io/sync-wave: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: secret-creator
+  annotations:
+     argocd.argoproj.io/sync-wave: "1"
+rules:
+  - apiGroups: ['']
+    resources: ['secrets']
+    verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-creator-role-to-openstad-secrets-sa
+  namespace: {{ .Release.Namespace }}
+  annotations:
+     argocd.argoproj.io/sync-wave: "2"
+roleRef:
+  apiGroup: ''
+  kind: Role
+  name: secret-creator
+subjects:
+  - kind: ServiceAccount
+    name: openstad-secrets-sa
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: {{ .Release.Namespace }}
+  annotations:
+     argocd.argoproj.io/sync-wave: "3"
+spec:
+  ttlSecondsAfterFinished: 10
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-batch"
+    spec:
+      serviceAccountName: openstad-secrets-sa
+      volumes:
+        - name: keys-volume
+      containers:
+        - image: bitnamilegacy/kubectl
+          imagePullPolicy: IfNotPresent
+          name: kubectl-init-auth-certificates-container
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /home/keys
+              name: keys-volume
+              readOnly: false
+          command: ["/bin/sh", "-c"]
+          args:
+            - if kubectl -n "{{ .Release.Namespace }}" get secret openstad-auth-certificates; then
+                echo "Secret already exists, skipping.";
+                exit 0;
+              fi
+              echo "Generating certificates";
               cd /home/keys;
               openssl genrsa -out ./privatekey.pem 2048;
               openssl req -new -key ./privatekey.pem -out ./certrequest.csr -subj "/C=NL/ST=All/L=Amsterdam/O=openstad/CN=www.{{ .Values.host.base}}";
