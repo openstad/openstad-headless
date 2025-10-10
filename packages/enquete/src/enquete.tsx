@@ -168,7 +168,6 @@ function Enquete(props: EnqueteWidgetProps) {
 
                     if (item.options && item.options.length > 0) {
                         fieldData['choices'] = item.options.map((option) => {
-                            console.log('option', item.infoField);
                             return {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
