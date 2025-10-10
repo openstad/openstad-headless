@@ -1,5 +1,5 @@
 import './swipe.scss';
-import React, { useState, useEffect, useMemo, FC } from 'react';
+import React, { useState, useEffect, useMemo, FC, useCallback } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
 import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
@@ -65,9 +65,41 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   enableKeyboard = true,
   ...props
 }) => {
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>([]);
+  const swipeCards = useMemo(() => {
+    return cards.length > 0 ? cards : defaultCards;
+  }, [cards]);
+
+  // Generate a unique key for this widget instance based on cards
+  const storageKey = useMemo(() => {
+    const cardIds = swipeCards.map(card => card.id).join('-');
+    return `swipe-widget-state-${cardIds}`;
+  }, [swipeCards]);
+
+  // Load persisted state or use defaults (only from sessionStorage, not on page refresh)
+  const loadPersistedState = useCallback(() => {
+    try {
+      // Only load from sessionStorage (persists during tab session, not page refresh)
+      const saved = sessionStorage.getItem(storageKey);
+      if (saved) {
+        const parsedState = JSON.parse(saved);
+        // Validate that the saved state matches current cards
+        if (parsedState.cardIds && JSON.stringify(parsedState.cardIds) === JSON.stringify(swipeCards.map(c => c.id))) {
+          return parsedState;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted swipe state:', error);
+    }
+    return null;
+  }, [storageKey, swipeCards]);
+
+  const persistedState = loadPersistedState();
+
+  const [currentCardIndex, setCurrentCardIndex] = useState(persistedState?.currentCardIndex ?? 0);
+  const [isFinished, setIsFinished] = useState(persistedState?.isFinished ?? false);
+  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(
+    persistedState?.remainingCards ?? swipeCards
+  );
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [dragState, setDragState] = useState({
@@ -80,19 +112,61 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaY: 0,
   });
   const [isInfoVisible, setIsInfoVisible] = useState(false);
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>({});
-  const [showSummary, setShowSummary] = useState(false);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(
+    persistedState?.swipeAnswers ?? {}
+  );
+  const [showSummary, setShowSummary] = useState(persistedState?.showSummary ?? false);
 
-  const swipeCards = useMemo(() => {
-    return cards.length > 0 ? cards : defaultCards;
-  }, [cards]);
+  // Persist state to sessionStorage (only during tab session, not across page refreshes)
+  const persistState = useCallback(() => {
+    try {
+      const stateToSave = {
+        currentCardIndex,
+        isFinished,
+        remainingCards,
+        swipeAnswers,
+        showSummary,
+        cardIds: swipeCards.map(card => card.id),
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem(storageKey, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.warn('Failed to persist swipe state:', error);
+    }
+  }, [currentCardIndex, isFinished, remainingCards, swipeAnswers, showSummary, swipeCards, storageKey]);
 
-  // Initialize remaining cards when cards prop changes
+  // Handle browser visibility changes to persist/restore state
   useEffect(() => {
-    setRemainingCards(swipeCards);
-    setCurrentCardIndex(0);
-    setIsFinished(false);
-  }, [swipeCards]);
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Browser tab becomes hidden - save state
+        persistState();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Also save state before page unload (but not on refresh since sessionStorage will be cleared)
+    const handleBeforeUnload = () => {
+      persistState();
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [persistState]);
+
+  // Initialize remaining cards when cards prop changes (only if no persisted state)
+  useEffect(() => {
+    if (!persistedState) {
+      setRemainingCards(swipeCards);
+      setCurrentCardIndex(0);
+      setIsFinished(false);
+    }
+  }, [swipeCards, persistedState]);
 
   // Keyboard handling
   useEffect(() => {
@@ -251,6 +325,12 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsFinished(false);
     setSwipeAnswers({});
     setShowSummary(false);
+    // Clear persisted state
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch (error) {
+      console.warn('Failed to clear persisted swipe state:', error);
+    }
   };
 
   const handleAnswerChange = (cardId: string, newAnswer: 'left' | 'right') => {
