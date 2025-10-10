@@ -1,4 +1,4 @@
-import './swipe.css';
+import './swipe.scss';
 import React, { useState, useEffect, useMemo, FC } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
@@ -80,6 +80,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaY: 0,
   });
   const [isInfoVisible, setIsInfoVisible] = useState(false);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>({});
+  const [showSummary, setShowSummary] = useState(false);
 
   const swipeCards = useMemo(() => {
     return cards.length > 0 ? cards : defaultCards;
@@ -113,6 +115,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       setIsAnimating(true);
       setSwipeDirection('left');
       const currentCard = remainingCards[0];
+      
+      // Store the answer
+      setSwipeAnswers(prev => ({
+        ...prev,
+        [currentCard.id]: 'left'
+      }));
+      
       onSwipeLeft?.(currentCard);
 
       setTimeout(() => {
@@ -128,6 +137,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       setIsAnimating(true);
       setSwipeDirection('right');
       const currentCard = remainingCards[0];
+      
+      // Store the answer
+      setSwipeAnswers(prev => ({
+        ...prev,
+        [currentCard.id]: 'right'
+      }));
+      
       onSwipeRight?.(currentCard);
 
       setTimeout(() => {
@@ -233,17 +249,62 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setRemainingCards(swipeCards);
     setCurrentCardIndex(0);
     setIsFinished(false);
+    setSwipeAnswers({});
+    setShowSummary(false);
+  };
+
+  const handleAnswerChange = (cardId: string, newAnswer: 'left' | 'right') => {
+    setSwipeAnswers(prev => ({
+      ...prev,
+      [cardId]: newAnswer
+    }));
   };
 
   if (isFinished) {
     return (
       <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
         <div className="swipe-finished-content">
-          <h2>Klaar!</h2>
-          <p>Je hebt alle stellingen gehad.</p>
-          <button onClick={(e) => { resetCards(); e.preventDefault(); }} className="swipe-reset-btn" aria-label="Begin opnieuw">
-            Begin opnieuw
-          </button>
+          <h2>Jouw antwoorden</h2>
+          <p>Bekijk en wijzig eventueel je antwoorden op de stellingen:</p>
+          
+          <div className="swipe-summary">
+            {swipeCards.map((card) => {
+              const answer = swipeAnswers[card.id];
+              return (
+                <div key={card.id} className="swipe-summary-item">
+                  <div className="swipe-summary-question">
+                    {card.image && (
+                      <div className="swipe-summary-image">
+                        <img src={card.image} alt="" />
+                      </div>
+                    )}
+                    <p>{card.title}</p>
+                  </div>
+                  <div className="swipe-summary-answer">
+                    <div className="swipe-summary-buttons">
+                      <button 
+                        className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
+                        onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'left'); }}
+                        aria-label={`Oneens met: ${card.title}`}
+                      >
+                        <i className="ri-thumb-down-fill"></i>
+                        <span>Oneens</span>
+                      </button>
+                      <button 
+                        className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
+                        onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'right'); }}
+                        aria-label={`Eens met: ${card.title}`}
+                      >
+                        <i className="ri-thumb-up-fill"></i>
+                        <span>Eens</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
         </div>
       </div>
     );

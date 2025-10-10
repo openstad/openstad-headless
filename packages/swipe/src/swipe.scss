@@ -10,17 +10,16 @@
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
 
   max-width: 500px;
-  max-height: 700px;
   width: 100%;
   height: 100%;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   position: relative;
-  display: grid;
-  grid-template-columns: auto;
-  grid-template-rows: 1fr auto;
+  display: flex;
+  flex-direction: column;
   grid-gap: 10px 0;
   margin-top: 20px;
+
 
   .swipe-counter {
     text-align: center;
@@ -37,6 +36,8 @@
     position: relative;
     // perspective: 1000px;
     width: 100%;
+    max-height: 700px;
+    height: 100%;
   }
 
   .swipe-stack {
@@ -95,7 +96,7 @@
     &:nth-child(1 of .swipe-card) {
       transform: scale(1) translateY(0px);
       z-index: 3;
-      animation: cardAppear 1s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: cardAppear .3s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     &:nth-child(2 of .swipe-card) {
@@ -351,8 +352,8 @@
   }
 
   .swipe-reset-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: var(--swipe-active-background);
+    border: 2px solid var(--swipe-active-background);
     color: white;
     padding: 12px 24px;
     border-radius: 8px;
@@ -360,13 +361,123 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(35, 134, 65, 0.9);
+      border-color: rgba(35, 134, 65, 0.9);
       transform: translateY(-2px);
     }
+  }
+
+  .swipe-summary {
+    width: 100%;
+    max-width: 600px;
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .swipe-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+    }
+  }
+
+  .swipe-summary-question {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #333;
+
+      @media (min-width: 768px) {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .swipe-summary-image {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .swipe-summary-answer {
+    flex-shrink: 0;
+  }
+
+  .swipe-summary-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .swipe-summary-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    min-width: 90px;
+    justify-content: center;
+
+    &:hover {
+      border-color: #c0c0c0;
+      transform: translateY(-1px);
+    }
+
+    &.active {
+      border-color: var(--swipe-active-background);
+      background: var(--swipe-active-background);
+      color: white;
+
+      &:hover {
+        border-color: rgba(35, 134, 65, 0.8);
+        background: rgba(35, 134, 65, 0.8);
+      }
+    }
+
+    i {
+      font-size: 16px;
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+
+  .swipe-summary-actions {
+    margin-top: 24px;
+    text-align: center;
   }
 
   .swipe-progress {
@@ -411,24 +522,9 @@
     transform: scale(0.8) translateY(50px);
   }
 
-  40% {
+  100% {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
 
-
-  60% {
-    opacity: 1;
-    transform: scale(1) translate(40px, 20px) rotate(10deg);
-  }
-
-  80% {
-    opacity: 1;
-    transform: scale(1) translate(-20px, 10px) rotate(-5deg);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1) translate(0) rotate(0deg);
-  }
 }
