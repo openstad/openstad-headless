@@ -142,6 +142,12 @@ label.utrecht-form-label {
 
 
 // Youth widgets
+
+.osc:has(.--youth) {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
 .osc-enquete-item-content {
 
   --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, #248641);
@@ -166,11 +172,10 @@ label.utrecht-form-label {
 
   &.--youth {
     height: 100%;
-    max-width: 500px;
     min-height: 800px;
-    margin: 0 auto;
     position: relative;
     display: grid;
+    transform: translate(0, 0);
 
     &:has(.question-type-none),
     &:has(:required) {
@@ -180,7 +185,6 @@ label.utrecht-form-label {
     }
 
     &:has(:required) {
-
       .button-group.--flex .utrecht-button--primary-action:after {
         pointer-events: none;
         opacity: .5;
@@ -430,11 +434,13 @@ label.utrecht-form-label {
         background: unset;
         scale: unset;
         pointer-events: none;
+        height: 64px;
 
         &:before {
           content: attr(data-label);
           position: absolute;
           left: 0;
+          bottom: 0;
           white-space: nowrap;
           text-decoration: underline;
           color: rgba(75, 75, 75, 1);
@@ -543,6 +549,8 @@ label.utrecht-form-label {
 
       label.utrecht-form-label {
         margin: 0;
+        // dirty fix for DH custom styles.
+        background-color: unset !important;
       }
 
       .utrecht-form-fieldset__legend.utrecht-form-fieldset__legend--html-legend {
@@ -565,13 +573,14 @@ label.utrecht-form-label {
         gap: 10px;
         margin-top: 140px;
         position: relative;
+        justify-content: center;
 
         &:before {
-          content: "Of";
+          content: "OF";
           position: absolute;
-          top: 50%;
+          top: 0;
           left: 50%;
-          transform: translate(-50%, -50%);
+          transform: translate(-50%, 130px);
           z-index: 1;
           background: #fff;
           border-radius: 100%;
@@ -579,7 +588,6 @@ label.utrecht-form-label {
           height: 35px;
           line-height: 35px;
           text-align: center;
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
           font-weight: 700;
           font-size: 15.58px;
           letter-spacing: 0px;
@@ -635,6 +643,77 @@ label.utrecht-form-label {
   }
 }
 
+
+.more-info-btn {
+  border-radius: 50%;
+  border: solid 1px #BFBFBF;
+  box-shadow: 0px 2.35px 6.27px 0px rgba(0, 0, 0, 0.149);
+  font-size: 1rem;
+  background: #fff;
+  width: 50px;
+  height: 50px;
+  margin-top: 4px;
+  transition: all 0.2s ease;
+  line-height: 49px;
+
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translate(-50%, 0);
+
+  &:hover:not(:disabled) {
+    cursor: pointer;
+    transform: scale(1.05) translate(-50%, 0);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.info-card {
+  position: fixed;
+  inset: 1px;
+  z-index: 100;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+
+  transition: all 0.3s ease-in-out;
+
+
+  &-container {
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+    scale: .98;
+    transform: translateY(10px);
+    padding: 25px;
+    position: absolute;
+    inset: auto 0 0 0;
+
+    .utrecht-button {
+      width: 100%;
+      max-width: none;
+      margin-top: 40px;
+    }
+  }
+
+
+  &[aria-hidden='false'] {
+    opacity: 1;
+    pointer-events: all;
+
+    .info-card-container {
+      opacity: 1;
+      scale: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+  }
+}
+
 @keyframes nextPagePulse {
   0% {
     background-position: 50% 50%;
@@ -650,5 +729,54 @@ label.utrecht-form-label {
 
   100% {
     background-position: 50% 50%;
+  }
+}
+
+
+
+// Fullscreen enquete
+
+.osc:has(.--youth) {
+  max-width: 500px;
+
+  .youth-form-actions {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    .youth-fullscreen-btn {
+      padding: 0;
+      margin: 0;
+      border: unset;
+      background: unset;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+  }
+
+  &.--fullscreen {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 9999;
+    max-width: unset;
+
+    .youth-form-actions {
+      padding: 0 40px;
+
+    }
+
+    .--youth {
+      height: calc(100% - 80px);
+      min-height: 800px;
+      position: relative;
+      display: grid;
+      transform: translate(0);
+      width: calc(100% - 80px);
+      margin: 0 auto;
+    }
   }
 }

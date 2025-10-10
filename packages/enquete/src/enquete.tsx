@@ -164,16 +164,19 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'images':
                     fieldData['type'] = 'imageChoice';
                     fieldData['multiple'] = item.multiple || false;
+                    fieldData['infoField'] = item.infoField || '';
 
                     if (item.options && item.options.length > 0) {
                         fieldData['choices'] = item.options.map((option) => {
+                            console.log('option', item.infoField);
                             return {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 imageSrc: option.titles[0].image,
                                 imageAlt: option.titles[0].key,
                                 hideLabel: option.titles[0].hideLabel,
-                                trigger: option.trigger || ''
+                                trigger: option.trigger || '',
+                                description: option.titles[0].description || '',
                             };
                         });
                     } else {
@@ -253,7 +256,8 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['cards'] = item?.options?.map((card) => {
                         return {
                             id: card.trigger,
-                            description: card.titles[0].key,
+                            title: card.titles[0].key,
+                            infoField: card.titles[0].infoField,
                             image: card.titles[0].image || '',
                         };
                     });
@@ -304,8 +308,24 @@ function Enquete(props: EnqueteWidgetProps) {
     const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageText || 'Vorige';
     const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageText || 'Volgende';
 
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    useEffect(() => {
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isFullscreen) {
+                setIsFullscreen(false);
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            }
+        };
+        window.addEventListener('keydown', handleEscape);
+        return () => {
+            window.removeEventListener('keydown', handleEscape);
+        };
+    }, []);
+
     return (
-        <div className="osc">
+        <div className={`osc${isFullscreen ? ' --fullscreen' : ''}`}>
             {
                 (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
                     <>
@@ -323,6 +343,26 @@ function Enquete(props: EnqueteWidgetProps) {
                         <Spacer size={2} />
                     </>
                 )}
+            {props.formStyle === 'youth' && (
+                <div className="youth-form-actions">
+                    <button
+                        type="button"
+                        className="youth-fullscreen-btn"
+                        onClick={() => {
+                            if (document.fullscreenElement) {
+                                setIsFullscreen(false);
+                                document.exitFullscreen();
+                            } else {
+                                setIsFullscreen(true);
+                                document.documentElement.requestFullscreen();
+                            }
+                        }}
+                    >
+                        {isFullscreen ? <i className="ri-fullscreen-exit-line"></i> : <i className="ri-fullscreen-line"></i>}
+                        <span>{isFullscreen ? 'Verlaat volledig scherm' : 'Bekijk in volledig scherm'}</span>
+                    </button>
+                </div>
+            )}
 
             <div className={`osc-enquete-item-content --${props.formStyle}`}>
                 {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}

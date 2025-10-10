@@ -54,6 +54,7 @@ export type Item = {
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
   routingSelectedAnswer?: string;
+  infoField?: string;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -72,10 +73,12 @@ export type Option = {
 export type Title = {
   text?: string;
   key: string;
+  infoField?: string;
   isOtherOption?: boolean;
   defaultValue?: boolean;
   image?: string;
   hideLabel?: boolean;
+  description?: string;
 };
 
 export type Confirmation = {

@@ -2,12 +2,12 @@ import './swipe.css';
 import React, { useState, useEffect, useMemo, FC } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
-import { Heading, Paragraph } from '@utrecht/component-library-react';
+import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
 
 export type SwipeCard = {
   id: string;
   title: string;
-  description: string;
+  infoField?: string;
   image?: string;
 
 };
@@ -32,32 +32,27 @@ export type SwipeProps = {
 const defaultCards: SwipeCard[] = [
   {
     id: '1',
-    title: 'Sportmogelijkheden',
-    description: 'Iedere wijk in Den Haag moet evenveel sportmogelijkheden hebben.',
+    title: 'Iedere wijk in Den Haag moet evenveel sportmogelijkheden hebben.',
     image: 'https://picsum.photos/seed/1752819645426/400/600'
   },
   {
     id: '2',
-    title: 'Lorem Ipsum',
-    description: 'Lorem ipsum dolor sit amet, consecdidunt ut labore et dolore magna aliqua.',
+    title: 'Lorem ipsum dolor sit amet, consecdidunt ut labore et dolore magna aliqua.',
     image: 'https://picsum.photos/seed/17528196455426/400/600'
   },
   {
     id: '3',
-    title: 'est et esse consequat',
-    description: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    title: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     image: 'https://picsum.photos/seed/17528139645426/400/600'
   },
   {
     id: '4',
-    title: 'Sportmogelijkheden',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
+    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
     image: 'https://picsum.photos/seed/17528119645426/400/600'
   },
   {
     id: '5',
-    title: 'Sportmogelijkheden',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     image: 'https://picsum.photos/seed/175281679645426/400/600'
   },
 ];
@@ -279,45 +274,52 @@ const SwipeField: FC<SwipeWidgetProps> = ({
               transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
             }
             return (
-              <div
-                key={card.id}
-                className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
-                style={{ zIndex, transform }}
-                onPointerDown={isTop ? handlePointerDown : undefined}
-                onPointerMove={isTop ? handlePointerMove : undefined}
-                onPointerUp={isTop ? handlePointerUp : undefined}
-                role="listitem"
-                aria-label={card.title}
-                tabIndex={isTop ? 0 : -1}
-                aria-describedby={`swipe-card-desc-${card.id}`}
-              >
-                {card.image && (
-                  <div className="swipe-card-image">
-                    <img src={card.image} alt={card.title || `afbeelding voor: ${card.description}`} />
+              <>
+                <div
+                  key={card.id}
+                  className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
+                  style={{ zIndex, transform }}
+                  onPointerDown={isTop ? handlePointerDown : undefined}
+                  onPointerMove={isTop ? handlePointerMove : undefined}
+                  onPointerUp={isTop ? handlePointerUp : undefined}
+                  role="listitem"
+                  aria-label={card.title}
+                  tabIndex={isTop ? 0 : -1}
+                  aria-describedby={`swipe-card-desc-${card.id}`}
+                >
+                  {card.image && (
+                    <div className="swipe-card-image">
+                      <img src={card.image} alt={card.title || `afbeelding voor: ${card.title}`} />
+                    </div>
+                  )}
+                  <div className="swipe-card-content">
+                    <p className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</p>
                   </div>
-                )}
-                <div className="swipe-card-content">
-                  <p className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.description}</p>
-                </div>
 
-                <div className="swipe-card-info" aria-visible={isInfoVisible ? 'true' : 'false'}>
-                  <Heading level={3} className="swipe-card-title">Toelichting</Heading>
-                  <Paragraph>
-                    Ipsum lorem incididunt sed sint enim labore. Incididunt sed sint enim labore. Sint enim labore excepteur, elit est. Excepteur elit est tempor culpa. Est tempor culpa pariatur. Culpa pariatur quis, occaecat sit anim.
-                    Lorem incididunt sed, sint enim. Sint enim labore excepteur, elit est. Excepteur elit est tempor culpa. Est tempor culpa pariatur. Culpa pariatur quis, occaecat sit anim.
-                  </Paragraph>
-                </div>
-                {isTop && swipeDirection && (
-                  <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
-                    {swipeDirection === 'left' ? (
-                      <i className="ri-thumb-down-fill"></i>
 
-                    ) : (
-                      <i className="ri-thumb-up-fill"></i>
-                    )}
+                  {isTop && swipeDirection && (
+                    <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
+                      {swipeDirection === 'left' ? (
+                        <i className="ri-thumb-down-fill"></i>
+
+                      ) : (
+                        <i className="ri-thumb-up-fill"></i>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {card.infoField && (
+                <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
+                  <div className="info-card-container">
+                    <Paragraph>
+                        {card.infoField}
+                    </Paragraph>
+
+                    <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
                   </div>
+                </div>
                 )}
-              </div>
+              </>
             );
           })}
         </div>
@@ -334,12 +336,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             <i className="ri-thumb-down-fill"></i>
             <span>Oneens</span>
           </button>
-          <button
+            <button
             className="swipe-info-btn"
             onClick={(e) => { setIsInfoVisible(!isInfoVisible); e.preventDefault(); }}
-          >
+            disabled={!remainingCards[0]?.infoField}
+            aria-label="Toon info"
+            >
             <span>Info</span>
-          </button>
+            </button>
           <button
             className="swipe-btn swipe-btn-like"
             onClick={(e) => { handleSwipeRight(); e.preventDefault(); }}

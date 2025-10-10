@@ -134,7 +134,7 @@ function Form({
     }, [formValues]);
 
     const scrollTop = () => {
-        const formWidget = document.querySelector('.form-widget');
+        const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth)');
         if (formWidget) {
             const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
             window.scrollTo({

@@ -54,6 +54,8 @@ const formSchema = z.object({
         titles: z.array(z.object({
           text: z.string().optional(),
           key: z.string(),
+          infoField: z.string().optional(),
+          description: z.string().optional(),
           image: z.string().optional(),
           isOtherOption: z.boolean().optional(),
           defaultValue: z.boolean().optional(),
@@ -93,6 +95,7 @@ const formSchema = z.object({
   infoBlockStyle: z.string().optional(),
   infoBlockShareButton: z.boolean().optional(),
   infoBlockExtraButton: z.string().optional(),
+  infoField: z.string().optional(),
 
 
   // Keeping these for backwards compatibility
@@ -188,7 +191,7 @@ export default function WidgetEnqueteItems(
           routingInitiallyHide: values.routingInitiallyHide || false,
           routingSelectedQuestion: values.routingSelectedQuestion || '',
           routingSelectedAnswer: values.routingSelectedAnswer || '',
-
+          infoField: values.infoField || '',
           // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
@@ -321,6 +324,7 @@ export default function WidgetEnqueteItems(
     routingInitiallyHide: false,
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
+    infoField: '',
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -380,6 +384,7 @@ export default function WidgetEnqueteItems(
         routingInitiallyHide: selectedItem.routingInitiallyHide || false,
         routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
+        infoField: selectedItem.infoField || '',
 
         // Keeping these for backwards compatibility
         image1: selectedItem.image1 || '',
@@ -882,32 +887,65 @@ export default function WidgetEnqueteItems(
                                   </FormItem>
                                 )}
                               />
-
-                              <FormField
-                                control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.hideLabel`}
-                                render={({ field }) => (
-                                  <>
+                              {form.watch("questionType") === "images" && (
+                                <FormField
+                                  control={form.control}
+                                  name={`options.${activeOption}.titles.0.description`}
+                                  render={({ field }) => (
                                     <FormItem
                                       style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
                                         marginTop: '10px'
                                       }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                      <FormLabel>Beschrijving</FormLabel>
+                                      <Textarea rows={6} {...field} />
                                       <FormMessage />
                                     </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
-                                    </FormDescription>
-                                  </>
-                                )}
-                              />
+                                  )}
+                                />
+                              )}
+                              {form.watch("questionType") !== "swipe" && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.hideLabel`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
+                              {form.watch("questionType") === "swipe" && (
+                                <FormField
+                                  control={form.control}
+                                  name={`options.${activeOption}.titles.0.infoField`}
+                                  render={({ field }) => (
+                                    <FormItem
+                                      style={{
+                                        marginTop: '10px'
+                                      }}>
+                                      <FormLabel>Extra informatie</FormLabel>
+                                      <Textarea rows={6} {...field} />
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              )}
                             </>
                           );
                         })()
@@ -1519,6 +1557,23 @@ export default function WidgetEnqueteItems(
                                 <SelectItem value="false">Ja</SelectItem>
                               </SelectContent>
                             </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("questionType") === "images" && (
+                      <FormField
+                        control={form.control}
+                        name={`infoField`}
+                        render={({ field }) => (
+                          <FormItem
+                            style={{
+                              marginTop: '10px'
+                            }}>
+                            <FormLabel>Meer informatie</FormLabel>
+                            <Textarea rows={6} {...field} />
                             <FormMessage />
                           </FormItem>
                         )}
