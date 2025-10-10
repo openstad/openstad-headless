@@ -310,6 +310,10 @@ function Enquete(props: EnqueteWidgetProps) {
 
     const [isFullscreen, setIsFullscreen] = useState(false);
     useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape' && isFullscreen) {
                 setIsFullscreen(false);
@@ -318,11 +322,15 @@ function Enquete(props: EnqueteWidgetProps) {
                 }
             }
         };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
         window.addEventListener('keydown', handleEscape);
+
         return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
             window.removeEventListener('keydown', handleEscape);
         };
-    }, []);
+    }, [isFullscreen]);
 
     return (
         <div className={`osc${isFullscreen ? ' --fullscreen' : ''}`}>

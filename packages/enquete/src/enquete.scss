@@ -229,6 +229,8 @@ label.utrecht-form-label {
             i {
               font-style: normal;
               color: black;
+              font-weight: inherit;
+              font-family: inherit;
             }
           }
 
@@ -249,9 +251,12 @@ label.utrecht-form-label {
 
         .info-field-container {
           .info-field-title {
+            
             i {
               color: #1D6B34;
               font-style: normal;
+              font-weight: inherit;
+              font-family: inherit;
 
               &:nth-of-type(even) {
                 color: #094B81;
@@ -281,6 +286,8 @@ label.utrecht-form-label {
             i {
               font-style: normal;
               color: black;
+              font-weight: inherit;
+              font-family: inherit;
             }
           }
 
@@ -302,7 +309,7 @@ label.utrecht-form-label {
 
       .update-button {
         background: #fff;
-        font-family: TheSans C4s;
+        font-family: "TheSans B4 SemiLight";
         font-weight: 500;
         font-size: 20px;
         line-height: 130%;
@@ -322,7 +329,7 @@ label.utrecht-form-label {
         background: #0000;
         border: solid 1px #fff;
         position: relative;
-        font-family: TheSans C4s;
+        font-family: "TheSans B4 SemiLight";
         font-weight: 500;
         font-size: 18px;
         line-height: 150%;
@@ -445,7 +452,7 @@ label.utrecht-form-label {
           text-decoration: underline;
           color: rgba(75, 75, 75, 1);
           pointer-events: all;
-          font-family: TheSans C4s;
+          font-family: "TheSans B4 SemiLight";
           font-weight: 500;
           font-size: 20px;
           line-height: 130%;
@@ -491,16 +498,15 @@ label.utrecht-form-label {
         padding-bottom: 30px;
 
         .info-field-title {
-          font-family: TheMixB;
-          font-weight: 530;
-          font-style: W7 Bold;
+          font-family: "The Mix Bold";
+          font-weight: 700;
           line-height: 135%;
           font-size: var(--youth-page-card-title-font-size);
           text-align: center;
         }
 
         .info-field-description {
-          font-family: TheSans C4s;
+          font-family: "TheSans B4 SemiLight";
           font-weight: 500;
           font-style: Regular;
           line-height: 150%;
@@ -554,9 +560,8 @@ label.utrecht-form-label {
       }
 
       .utrecht-form-fieldset__legend.utrecht-form-fieldset__legend--html-legend {
-        font-family: TheMixB;
-        font-weight: 530;
-        font-style: W7 Bold;
+        font-family: "The Mix Bold";
+        font-weight: 700;
         line-height: 135%;
         font-size: var(--youth-page-card-title-font-size);
         text-align: center;
@@ -760,7 +765,7 @@ label.utrecht-form-label {
   &.--fullscreen {
     position: fixed;
     inset: 0;
-    background: white;
+    background: #f7f7f7;
     z-index: 9999;
     max-width: unset;
 
@@ -770,13 +775,56 @@ label.utrecht-form-label {
     }
 
     .--youth {
-      height: calc(100% - 80px);
-      min-height: 800px;
+      height: calc(100% - 40px);
+      min-height: unset;
       position: relative;
       display: grid;
       transform: translate(0);
-      width: calc(100% - 80px);
+      width: 100%;
       margin: 0 auto;
+      max-width: 1200px;
+      max-height: 1370px;
+      box-shadow: 0 6px 17px 0px #0000001a;
+
+      .question {
+        justify-content: center;
+
+        .question {
+          height: unset;
+          padding: 0;
+        }
+
+        &.-- {
+          background: #fff;
+        }
+
+        &.--youth-intro,
+        &.--youth-page,
+        &.--youth-outro {
+          >div {
+            max-width: 500px;
+            max-height: 500px;
+            align-self: center;
+          }
+        }
+      }
+    }
+
+    .info-card {
+
+      .info-card-container {
+        position: absolute;
+        max-width: 500px;
+        border-radius: 25px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(.95);
+        bottom: unset;
+      }
+
+      &[aria-hidden='false'] .info-card-container {
+        transform: translate(-50%, -50%) scale(1);
+      }
     }
   }
 }
