@@ -61,7 +61,6 @@
     cursor: grab;
     user-select: none;
     transform-origin: center;
-    animation: cardAppear 0.4s ease-out;
     transition:
       transform 0.3s cubic-bezier(.33, .05, .58, .98),
       opacity 0.3s cubic-bezier(.33, .05, .58, .98),
@@ -96,6 +95,7 @@
     &:nth-child(1 of .swipe-card) {
       transform: scale(1) translateY(0px);
       z-index: 3;
+      animation: cardAppear 1s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     &:nth-child(2 of .swipe-card) {
@@ -411,8 +411,24 @@
     transform: scale(0.8) translateY(50px);
   }
 
-  100% {
+  40% {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+
+
+  60% {
+    opacity: 1;
+    transform: scale(1) translate(40px, 20px) rotate(10deg);
+  }
+
+  80% {
+    opacity: 1;
+    transform: scale(1) translate(-20px, 10px) rotate(-5deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translate(0) rotate(0deg);
   }
 }

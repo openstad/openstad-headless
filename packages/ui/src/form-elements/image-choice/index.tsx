@@ -101,8 +101,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 aria-invalid={fieldInvalid}
                 aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend>
-                    <div dangerouslySetInnerHTML={{ __html: title }}></div>
+                <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }}>
                 </FieldsetLegend>
 
                 {description &&

@@ -134,8 +134,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
               aria-invalid={fieldInvalid}
               aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend>
-                    {title}
+                <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }}>
                 </FieldsetLegend>
 
                 {description &&

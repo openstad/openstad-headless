@@ -18,7 +18,7 @@ const config: SwipeProps = {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <div className="openstad">
+    <div className="openstad" style={{height: '100vh'}}>
     <SwipeField {...config} />
     </div>
   </React.StrictMode>
