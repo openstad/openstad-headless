@@ -215,6 +215,15 @@ function Enquete(props: EnqueteWidgetProps) {
                         <Icon icon="ri-emotion-happy-line" key={4} />,
                         <Icon icon="ri-emotion-laugh-line" key={5} />
                     ]
+                    
+                    {props.formStyle === 'youth' && (
+                        labelOptions[0] = <span key={1}>😡</span>,
+                        labelOptions[1] = <span key={2}>🙁</span>,
+                        labelOptions[2] = <span key={3}>😐</span>,
+                        labelOptions[3] = <span key={4}>😀</span>,
+                        labelOptions[4] = <span key={5}>😍</span>
+                    )}
+
 
                     fieldData['fieldOptions'] = labelOptions.map((label, index) => {
                         const currentValue = index + 1;

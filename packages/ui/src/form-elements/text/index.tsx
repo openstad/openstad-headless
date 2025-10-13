@@ -140,7 +140,7 @@ const TextInput: FC<TextInputProps> = ({
         <FormField type="text">
             {title && (
                 <Paragraph className="utrecht-form-field__label">
-                    <FormLabel htmlFor={randomId}>{title}</FormLabel>
+                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{__html: title}} />
                 </Paragraph>
             )}
             {description &&

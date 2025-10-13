@@ -64,7 +64,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     return (
         <div className="a-b-slider-container">
             <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={`a-to-b-range--${index}`}>{title}</FormLabel>
+                <FormLabel htmlFor={`a-to-b-range--${index}`} dangerouslySetInnerHTML={{__html: title}} />
             </Paragraph>
             {description &&
                 <>

@@ -642,6 +642,8 @@ label.utrecht-form-label {
     }
 
     .question-type-radiobox {
+      justify-content: center;
+      align-items: center;
 
       label.utrecht-form-label {
         margin: 0;
@@ -662,12 +664,153 @@ label.utrecht-form-label {
       }
     }
 
+    .question-type-tickmark-slider {
+      --scale-hover: 3;
+      --range-slider-height: 8px;
+      --range-thumb-size: 44px;
+      --range-slider-background: #F1F1F1;
+      --range-slider-thumb-background: #268641;
+      --range-slider-thumb-borderRadius: 50%;
+      --range-thumb-backgroundImage: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Pro v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--%3E%3Cpath fill='%23ffffff' d='M342.6 73.4C330.1 60.9 309.8 60.9 297.3 73.4L153.3 217.4C140.8 229.9 140.8 250.2 153.3 262.7C165.8 275.2 186.1 275.2 198.6 262.7L320 141.3L441.4 262.6C453.9 275.1 474.2 275.1 486.7 262.6C499.2 250.1 499.2 229.8 486.7 217.3L342.7 73.3zM486.6 422.7C499.1 410.2 499.1 389.9 486.6 377.4C474.1 364.9 453.8 364.9 441.3 377.4L320 498.7L198.6 377.4C186.1 364.9 165.8 364.9 153.3 377.4C140.8 389.9 140.8 410.2 153.3 422.7L297.3 566.7C309.8 579.2 330.1 579.2 342.6 566.7L486.6 422.7z'/%3E%3C/svg%3E");
+      --range-thumb-backgroundSize: 24px;
+      align-items: center;
+      justify-content: center;
 
+
+      .a-b-slider-container {
+        position: relative;
+        display: flex;
+        flex-direction: column-reverse;
+
+        .utrecht-form-field__label .utrecht-form-label {
+          position: relative;
+          z-index: 2;
+          margin-bottom: 50px;
+        }
+
+        input[type=range] {
+          margin-bottom: 0;
+          margin-top: 30px;
+
+          &:before {
+            content: '';
+            inset: 0;
+            position: absolute;
+            z-index: 1;
+          }
+
+
+          &[value="1"]~.range-slider-labels>span:nth-of-type(1) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="2"]~.range-slider-labels>span:nth-of-type(2) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="3"]~.range-slider-labels>span:nth-of-type(3) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="4"]~.range-slider-labels>span:nth-of-type(4) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="5"]~.range-slider-labels>span:nth-of-type(5) {
+            scale: var(--scale-hover);
+          }
+        }
+
+        .range-slider-labels>span {
+          transition: all 0.3s ease;
+          scale: 1.4;
+          display: block;
+          text-align: center;
+          line-height: 53px;
+          padding-left: 4px;
+        }
+
+
+
+
+        /* Basis styling van de slider */
+        input[type="range"] {
+          -webkit-appearance: none;
+          width: 100%;
+          height: var(--range-slider-height);
+          background: var(--range-slider-background);
+          outline: none;
+        }
+
+        /* Voor Chrome, Safari, Edge (WebKit) */
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: var(--range-thumb-size);
+          height: var(--range-thumb-size);
+          border-radius: var(--range-slider-thumb-borderRadius);
+          background-color: var(--range-slider-thumb-background);
+          background-image: var(--range-thumb-backgroundImage);
+          background-size: var(--range-thumb-backgroundSize);
+          background-repeat: no-repeat;
+          background-position: center;
+          transform: rotate(90deg);
+          cursor: pointer;
+          transition: background 0.2s, transform 0.1s;
+        }
+
+        /* Voor Firefox */
+        input[type="range"]::-moz-range-thumb {
+          width: var(--range-thumb-size);
+          height: var(--range-thumb-size);
+          border-radius: var(--range-slider-thumb-borderRadius);
+          background-color: var(--range-slider-thumb-background);
+          background-image: var(--range-thumb-backgroundImage);
+          background-size: var(--range-thumb-backgroundSize);
+          background-repeat: no-repeat;
+          background-position: center;
+          transform: rotate(90deg);
+          cursor: pointer;
+          transition: background 0.2s, transform 0.1s;
+        }
+
+        /* Voor Edge (Chromium gebruikt ook WebKit, maar voor oudere versies) */
+        input[type="range"]::-ms-thumb {
+          width: var(--range-thumb-size);
+          height: var(--range-thumb-size);
+          border-radius: var(--range-slider-thumb-borderRadius);
+          background-color: var(--range-slider-thumb-background);
+          background-image: var(--range-thumb-backgroundImage);
+          background-size: var(--range-thumb-backgroundSize);
+          background-repeat: no-repeat;
+          background-position: center;
+          transform: rotate(90deg);
+          cursor: pointer;
+        }
+      }
+
+      .utrecht-form-field-error-message.error-message {
+        margin-top: 20px;
+      }
+    }
+
+    .question-type-text {
+      justify-content: center;
+      align-items: center;
+
+      .utrecht-form-field__input.help-text-active {
+        margin-top: 30px;
+      }
+    }
+
+    .question-type-text .utrecht-form-field__label .utrecht-form-label,
+    .a-b-slider-container .utrecht-form-field__label .utrecht-form-label,
     .utrecht-form-fieldset__legend.utrecht-form-fieldset__legend--html-legend {
       font-family: "The Mix Bold";
       font-weight: 700;
       line-height: 135%;
       font-size: var(--youth-page-card-title-font-size);
+      color: #000;
 
 
       i {
@@ -804,6 +947,14 @@ label.utrecht-form-label {
     max-width: unset;
     overflow: auto;
 
+    .form-widget,
+    .form-widget-container,
+    .form-container,
+    .question.question-type-none {
+      height: 100%;
+      overflow: auto;
+    }
+
     .youth-form-actions {
       padding: 0 40px;
 
@@ -820,6 +971,7 @@ label.utrecht-form-label {
       max-width: 1200px;
       max-height: 1370px;
       box-shadow: 0 6px 17px 0px #0000001a;
+      background: #fff;
 
       .question {
         justify-content: center;
