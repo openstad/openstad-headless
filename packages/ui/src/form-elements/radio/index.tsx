@@ -52,6 +52,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
 }) => {
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -119,7 +120,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         <div className="question">
             <Fieldset
                 role="radiogroup"
-                aria-invalid={fieldInvalid}
+                aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             >
                 <FieldsetLegend dangerouslySetInnerHTML={{__html: title}}>
@@ -165,7 +166,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                         id={`${fieldKey}_${index}`}
                                         name={fieldKey}
                                         required={fieldRequired}
-                                        onChange={() => handleRadioChange(choice.value, index)}
+                                        onChange={() => {handleRadioChange(choice.value, index), setCheckInvalid(false)}}
                                         disabled={disabled}
                                         value={choice && choice.value}
                                     />

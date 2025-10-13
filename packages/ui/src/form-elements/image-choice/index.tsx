@@ -94,11 +94,12 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
     const ChoiceComponent = multiple ? Checkbox : RadioButton;
 
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
 
     return (
         <div className={`question`}>
             <Fieldset
-                aria-invalid={fieldInvalid}
+                aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             >
                 <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }}>
@@ -147,7 +148,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                                     id={`${fieldKey}_${index}`}
                                                     name={fieldKey}
                                                     required={fieldRequired}
-                                                    onChange={() => handleChoiceChange(choice.value)}
+                                                    onChange={() => { handleChoiceChange(choice.value), setCheckInvalid(false) }}
                                                     disabled={disabled}
                                                 />
                                                 {(choice.label && !choice.hideLabel && !choice.description) && (

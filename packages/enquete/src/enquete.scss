@@ -179,13 +179,13 @@ label.utrecht-form-label {
     transform: translate(0, 0);
 
     &:has(.question-type-none),
-    &:has(:required) {
+    &:has([aria-invalid="true"]) {
       .button-group.--flex .utrecht-button--primary-action:before {
         display: none;
       }
     }
 
-    &:has(:required) {
+    &:has([aria-invalid="true"]) {
       .button-group.--flex .utrecht-button--primary-action:after {
         pointer-events: none;
         opacity: .5;
@@ -193,11 +193,18 @@ label.utrecht-form-label {
       }
     }
 
-    &:has(:required):has(:required:valid) {
+    &:has([aria-invalid="false"]) {
       .button-group.--flex .utrecht-button--primary-action:after {
         pointer-events: all;
         opacity: 1;
         animation: nextPagePulse .8s infinite ease-in-out;
+      }
+    }
+
+    &:has([required]),
+    &:has(:required) {
+      .button-group.--flex .utrecht-button--primary-action:before {
+        display: none;
       }
     }
 
@@ -448,7 +455,8 @@ label.utrecht-form-label {
           content: attr(data-label);
           position: absolute;
           left: 0;
-          bottom: 0;
+          top: 50%;
+          transform: translateY(-50%);
           white-space: nowrap;
           text-decoration: underline;
           color: rgba(75, 75, 75, 1);

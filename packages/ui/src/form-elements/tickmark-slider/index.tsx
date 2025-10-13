@@ -1,5 +1,5 @@
 import {FormLabel, FormFieldDescription, Paragraph, AccordionProvider} from '@utrecht/component-library-react';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from '@openstad-headless/form/src/form';
@@ -61,6 +61,9 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         }
     }
 
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+
+
     return (
         <div className="a-b-slider-container">
             <Paragraph className="utrecht-form-field__label">
@@ -115,6 +118,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 required={fieldRequired}
                 onChange={(e) => {
                     setValue(e.target.value);
+                    setCheckInvalid(false);
                     if (onChange) {
                         onChange({
                             name: fieldKey,
@@ -123,7 +127,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                     }
                 }}
                 disabled={disabled}
-                aria-invalid={fieldInvalid}
+                aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             />
             <div className={`range-slider-labels ${showSmileys && 'smiley-scale'}`} aria-hidden="true">
