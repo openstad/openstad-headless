@@ -383,7 +383,7 @@ service.updateClient = async function({ authConfig, project }) {
   
 }
 
-service.fetchUniqueCode = async function({ authConfig }) {
+service.fetchUniqueCode = async function({ authConfig, isExport = false }) {
 
   let clientId = authConfig.clientId;
   if (!clientId) {
@@ -392,7 +392,14 @@ service.fetchUniqueCode = async function({ authConfig }) {
 
   try {
 
-    let url = `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${clientId}&amount=3`;
+    let url = `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${clientId}`;
+
+    if (isExport) {
+      url += '&export=true';
+    } else {
+      url += '&amount=3';
+    }
+
     let response = await fetch(url, {
 	    headers: {
         Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
