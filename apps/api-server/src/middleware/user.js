@@ -41,7 +41,7 @@ module.exports = async function getUser( req, res, next ) {
     }
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['authorization']);
     let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider })
-    
+
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);
     }
@@ -129,7 +129,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
           ]});
       } else {
         where.projectId = config.admin.projectId;
-        where.role = 'admin';
+        where.role = { [db.Sequelize.Op.in]: ['admin', 'editor'] };
       }
     }
 
