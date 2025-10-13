@@ -62,12 +62,12 @@ function Enquete(props: EnqueteWidgetProps) {
 
         const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#fd79a8'];
 
-        // Create particles
-        for (let i = 0; i < 150; i++) {
+        // Create particles - more particles with staggered timing
+        for (let i = 0; i < 300; i++) {
             particles.push({
-                x: Math.random() * canvas.width,
-                y: -10,
-                vx: (Math.random() - 0.5) * 20,
+                x: Math.random() * canvas.width * 1.2 - canvas.width * 0.1, // Spread beyond screen width
+                y: -Math.random() * 600 - 10, // Much more spread out height above screen
+                vx: (Math.random() - 0.5) * 30, // Increased horizontal spread
                 vy: Math.random() * 3 + 2,
                 color: colors[Math.floor(Math.random() * colors.length)],
                 size: Math.random() * 8 + 4,
@@ -108,12 +108,12 @@ function Enquete(props: EnqueteWidgetProps) {
 
         animate();
 
-        // Also remove after 5 seconds as a safety measure
+        // Also remove after 8 seconds as a safety measure - longer duration
         setTimeout(() => {
             if (document.body.contains(canvas)) {
                 document.body.removeChild(canvas);
             }
-        }, 5000);
+        }, 8000);
     };
 
 
@@ -190,10 +190,6 @@ function Enquete(props: EnqueteWidgetProps) {
         }
 
     }
-
-
-    fireConfetti();
-
 
     const formFields: FieldProps[] = [];
     if (typeof (props) !== 'undefined'
