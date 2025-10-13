@@ -48,9 +48,16 @@ function Enquete(props: EnqueteWidgetProps) {
 
     async function onSubmit(formData: any) {
 
-        if (currentPage < totalPages - 1) {
+        // Filter out pagination fields
+        const nonPaginationFields = formFields.filter(field => field.type !== 'pagination');
+
+        if (currentPage < totalPages - 1 && !(currentPage === totalPages - 2 && nonPaginationFields[totalPages - 1].infoBlockStyle === 'youth-outro')) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
+            if((currentPage === totalPages - 2 && nonPaginationFields[totalPages - 1].infoBlockStyle === 'youth-outro')){
+                setCurrentPage((prevPage) => prevPage + 1);
+            }
+
             formData.confirmationUser = props?.confirmation?.confirmationUser || false;
             formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
             formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
