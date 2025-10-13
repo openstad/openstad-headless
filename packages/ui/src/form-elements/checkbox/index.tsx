@@ -9,6 +9,7 @@ import {
 } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type CheckboxFieldProps = {
     title: string;
@@ -19,7 +20,7 @@ export type CheckboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: {name: string, value: FormValue}, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -28,6 +29,10 @@ export type CheckboxFieldProps = {
     maxChoicesMessage?: string,
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -93,7 +98,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     onChange({
                         name: `${fieldKey}_${index}_other`,
                         value: ""
-                    });
+                    }, false);
                 }
             }
         }
@@ -108,7 +113,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
             onChange({
                 name: e.name,
                 value: e.value
-            });
+            }, false);
         }
     };
 

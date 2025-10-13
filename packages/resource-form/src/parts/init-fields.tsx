@@ -52,6 +52,10 @@ export const InitializeFormFields = (items, data) => {
                 minCharactersWarning: data?.general?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.general?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.general?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+                routingInitiallyHide: item?.routingInitiallyHide || false,
+                routingSelectedQuestion: item?.routingSelectedQuestion || '',
+                routingSelectedAnswer: item?.routingSelectedAnswer || '',
+                trigger: item.trigger || '',
             };
 
             if ( item.defaultValue ) {
@@ -76,7 +80,8 @@ export const InitializeFormFields = (items, data) => {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 isOtherOption: option.titles[0].isOtherOption,
-                                defaultValue: option.titles[0].defaultValue
+                                defaultValue: option.titles[0].defaultValue,
+                                trigger: option.trigger || ''
                             }
                         });
 
@@ -100,7 +105,11 @@ export const InitializeFormFields = (items, data) => {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return { value: (option.titles[0].key).toString(), label: option.titles[0].text }
+                            return {
+                                value: (option.titles[0].key).toString(),
+                                label: option.titles[0].text,
+                                trigger: option.trigger || ''
+                            }
                         });
                     }
                     break;
@@ -116,6 +125,13 @@ export const InitializeFormFields = (items, data) => {
                     if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
                         fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
                     }
+                    break;
+                case 'matrix':
+                    fieldData['type'] = 'matrix';
+                    fieldData['matrix'] = item?.matrix || undefined;
+                    fieldData['matrixMultiple'] = item?.matrixMultiple || false;
+                    fieldData['defaultValue'] = [];
+                    break;
             }
 
             formFields.push(fieldData);

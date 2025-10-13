@@ -11,6 +11,7 @@ import {
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
 import { useEffect } from "react";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type RadioboxFieldProps = {
     title: string;
@@ -21,13 +22,17 @@ export type RadioboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -80,7 +85,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     onChange({
                         name: key,
                         value: ""
-                    });
+                    }, false);
                 }
             }
         });
@@ -96,7 +101,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
             onChange({
                 name: e.name,
                 value: e.value
-            });
+            }, false);
         }
     };
 

@@ -1,3 +1,4 @@
+import { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
 import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
@@ -37,6 +38,7 @@ export type Submit = {
     submitButton?: string;
     saveButton?: string;
     saveConceptButton?: string;
+    defaultAddedTags?: string;
 };
 
 export type Info = {
@@ -68,6 +70,11 @@ export type Item = {
     defaultValue?: string,
     maxChoices?: string,
     maxChoicesMessage?: string,
+    matrix?: Matrix;
+    matrixMultiple?: boolean;
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
 };
 
 export type Option = {

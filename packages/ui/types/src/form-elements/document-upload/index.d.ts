@@ -18,7 +18,7 @@ export type DocumentUploadProps = {
             name: string;
             url: string;
         }[];
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     imageUrl?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -26,6 +26,13 @@ export type DocumentUploadProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const DocumentUploadField: FC<DocumentUploadProps>;
 export default DocumentUploadField;

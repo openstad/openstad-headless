@@ -30,7 +30,7 @@ export type RangeSliderProps = {
     maxCharacters?: number;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | valueObject | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue | valueObject }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -41,6 +41,10 @@ export type RangeSliderProps = {
     skipQuestionAllowExplanation?: boolean;
     skipQuestionExplanation?: string;
     skipQuestionLabel?: string;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 type valueObject = {value: string, skipQuestion: boolean, skipQuestionExplanation: string | undefined};

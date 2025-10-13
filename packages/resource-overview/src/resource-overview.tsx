@@ -125,6 +125,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     clickableImage?: boolean;
     displayBudget?: boolean;
     displayTags?: boolean;
+    displayTagIcon?: boolean;
     displayOverviewTagGroups?: boolean;
     overviewTagGroups?: string[];
     dialogTagGroups?: string[];
@@ -280,39 +281,18 @@ const defaultItemRenderer = (
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
     : resource?.tags || [];
 
+  const firstTag = resource?.tags
+    ? resource.tags
+    .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
+    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
+    : false;
+  const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
         <div
           className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' } >
-
-          <Carousel
-            items={resourceImages}
-            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
-            itemRenderer={(i) => (
-              <Image
-                src={i.url}
-                imageFooter={
-                  props.displayStatusLabel && (
-                    <div
-                        className={`${hasImages} ${statusClasses}`}
-                    >
-                      <Paragraph className="osc-resource-overview-content-item-status">
-                        {!!multiProjectLabel ? (
-                          <span className="status-label">{multiProjectLabel}</span>
-                        ) : (
-                          resource.statuses?.map((statusTag: any) => (
-                            <span className="status-label" key={statusTag.label}>{statusTag.label}</span>
-                          ))
-                        )}
-                      </Paragraph>
-                    </div>
-                    )
-                }
-              />
-            )}
-          />
-
 
           <div>
             <Spacer size={1}/>
@@ -362,13 +342,11 @@ const defaultItemRenderer = (
               />
             ) : null}
           </div>
-        </div>
 
-      ) : (
-        <div className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' }>
           <Carousel
             items={resourceImages}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
+            className="osc-carousel-container"
             itemRenderer={(i) => (
               <Image
                 src={i.url}
@@ -382,7 +360,7 @@ const defaultItemRenderer = (
                           <span className="status-label">{multiProjectLabel}</span>
                         ) : (
                           resource.statuses?.map((statusTag: any) => (
-                            <span className="status-label">{statusTag.label}</span>
+                            <span className="status-label" key={statusTag.label}>{statusTag.label}</span>
                           ))
                         )}
                       </Paragraph>
@@ -392,6 +370,20 @@ const defaultItemRenderer = (
               />
             )}
           />
+
+          { props.displayTagIcon && firstTag && MapIconImage && (
+            <div className="resource-card--link_tagicon">
+              <Image
+                src={MapIconImage}
+                alt={ firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon' }
+              />
+            </div>
+          )}
+
+        </div>
+
+      ) : (
+        <div className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' }>
 
           <div>
             <Spacer size={1} />
@@ -437,6 +429,44 @@ const defaultItemRenderer = (
               />
             ) : null}
           </div>
+
+          <Carousel
+            items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
+            className="osc-carousel-container"
+            itemRenderer={(i) => (
+              <Image
+                src={i.url}
+                imageFooter={
+                  props.displayStatusLabel && (
+                    <div
+                      className={`${hasImages} ${statusClasses}`}
+                    >
+                      <Paragraph className="osc-resource-overview-content-item-status">
+                        {!!multiProjectLabel ? (
+                          <span className="status-label">{multiProjectLabel}</span>
+                        ) : (
+                          resource.statuses?.map((statusTag: any) => (
+                            <span className="status-label">{statusTag.label}</span>
+                          ))
+                        )}
+                      </Paragraph>
+                    </div>
+                  )
+                }
+              />
+            )}
+          />
+
+          { props.displayTagIcon && firstTag && MapIconImage && (
+            <div className="resource-card--link_tagicon">
+              <Image
+                src={MapIconImage}
+                alt={ firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon' }
+              />
+            </div>
+          )}
+
         </div>
       )}
 
@@ -592,7 +622,7 @@ function ResourceOverviewInner({
     ...props,
     search,
     tags: [],
-    sort,
+    sort: undefined,
     projectIds: projectIds || [],
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1
   });
@@ -939,7 +969,7 @@ function ResourceOverviewInner({
                 } else {
                   setTags(f.tags);
                 }
-                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                if (['createdAt_desc', 'createdAt_asc', 'title', 'votes_desc', 'votes_asc', 'ranking', 'random'].includes(f.sort)) {
                   setSort(f.sort);
                 }
                 setSearch(f.search.text);

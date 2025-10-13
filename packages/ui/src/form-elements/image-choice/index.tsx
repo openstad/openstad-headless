@@ -8,6 +8,7 @@ import {
     Paragraph, FormFieldDescription, AccordionProvider, Checkbox
 } from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type ImageChoiceFieldProps = {
     title: string;
@@ -18,7 +19,7 @@ export type ImageChoiceFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -26,6 +27,10 @@ export type ImageChoiceFieldProps = {
     randomId?: string;
     fieldInvalid?: boolean;
     multiple?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
 }
 
 export type ChoiceItem = {

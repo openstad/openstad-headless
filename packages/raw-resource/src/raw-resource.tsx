@@ -10,6 +10,7 @@ import { renderRawTemplate } from '../includes/template-render';
 
 export type RawResourceWidgetProps = BaseProps &
   ProjectSettingProps & {
+    currentUser?: any;
     projectId?: string;
   } & {
     resourceId?: string;
@@ -27,15 +28,23 @@ function RawResource(props: RawResourceWidgetProps) {
     targetUrl: props.resourceIdRelativePath,
   })); // todo: make it a number throughout the code
 
-  const updatedProps = { ...props, resourceId };
-
   const datastore = new DataStore({
-    projectId: updatedProps.projectId,
+    projectId: props.projectId,
     resourceId: resourceId,
-    api: updatedProps.api,
+    api: props.api,
   });
 
-  const { data: resource } = resourceId ? datastore.useResource(updatedProps) : { data: null };
+  const {
+    data: currentUser,
+} = datastore.useCurrentUser({ ...props });
+
+let updatedProps = { ...props, resourceId, currentUser };
+
+  const { data: resource } = resourceId ? datastore.useResource({...updatedProps, currentUser}) : { data: null };
+
+  if (resource.images && resource.images[0] && resource.images[0].url) {
+    resource.firstImageUrl = resource.images[0].url
+  }
 
   const stylingClasses =
     updatedProps.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||

@@ -18,7 +18,7 @@ export type ImageUploadProps = {
             name: string;
             url: string;
         }[];
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     imageUrl?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -26,6 +26,13 @@ export type ImageUploadProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
 };
 declare const ImageUploadField: FC<ImageUploadProps>;
 export default ImageUploadField;

@@ -11,7 +11,9 @@
  cursor: pointer;
 }
 
-.form-element.postcode-autofill .suggestion-list li:hover {
+.form-element.postcode-autofill .suggestion-list li:hover,
+.form-element.postcode-autofill .suggestion-list li:focus,
+.form-element.postcode-autofill .suggestion-list li[aria-selected="true"] {
  background-color: #eaeaea;
 }
 

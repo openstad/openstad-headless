@@ -47,11 +47,27 @@ jobs:
           BUILD_ID=${GITHUB_SHA}-$(date +%s)
           echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
 
+  get-openstad-version:
+    name: Get Openstad version from Helm Chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+        openstad_version: ${{ steps.chart_version.outputs.openstad_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get chart version
+        id: chart_version
+        run: echo "openstad_version=$(yq '.version' ./charts/openstad-headless/Chart.yaml)" >> $GITHUB_OUTPUT
+
   component-test:
     name: Run Component tests
     runs-on: ubuntu-latest
     needs: generate-ci-build-id
-
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,8 +76,8 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install Cypress
-        run: npm install cypress
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
@@ -79,7 +95,7 @@ jobs:
   build-builder-stage:
     name: Build `builder` stage
     runs-on: ubuntu-latest
-    needs: [unit-test, component-test]
+    needs: [unit-test, component-test, get-openstad-version]
     permissions:
       contents: read
     steps:
@@ -104,11 +120,12 @@ jobs:
             --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --load \
+            --build-arg OPENSTAD_VERSION=${{ needs.get-openstad-version.outputs.openstad_version }} \
             -t builder-stage:latest \
             .
   # define job to build and publish docker image
   build-and-push-docker-image:
-    needs: build-builder-stage
+    needs: [get-openstad-version, build-builder-stage]
     permissions:
       contents: read
       packages: write
@@ -176,6 +193,7 @@ jobs:
           tags: 'ghcr.io/${{ steps.meta.outputs.tags }}'
           build-args: |
             APP=${{ matrix.app }}
+            OPENSTAD_VERSION=${{ needs.get-openstad-version.outputs.openstad_version }}
           cache-from: type=local,src=/tmp/.buildx-cache
       - name: Add image output
         id: image_output
@@ -186,7 +204,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [generate-ci-build-id, build-and-push-docker-image]
     #if: github.event_name == 'pull_request' && github.base_ref == 'main'
-
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
