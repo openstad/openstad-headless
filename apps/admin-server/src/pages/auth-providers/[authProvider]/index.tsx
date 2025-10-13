@@ -33,26 +33,29 @@ import {Checkbox} from "@/components/ui/checkbox";
 import {Spacer} from "@/components/ui/spacer";
 
 const configureUserMapping = (
-  name: string | undefined,
-  email: string | undefined,
-  phoneNumber: string | undefined,
-  streetName: string | undefined,
-  houseNumber: string | undefined,
-  city: string | undefined,
-  postcode: string | undefined,
+  name?: string,
+  email?: string,
+  phoneNumber?: string,
+  streetName?: string,
+  houseNumber?: string,
+  city?: string,
+  postcode?: string,
 ) => {
-  return JSON.stringify({
+  const mapping: Record<string, string> = {
     identifier: "user => user['irma-demo.sidn-pbdf.uniqueid.uniqueid'] || user.id",
-    name: name ? `user => (user['${name}'] || '').trim() || null` : "null",
-    email: email ? `user => user['${email}'] == '' ? null : user['${email}']` : "null",
-    phoneNumber: phoneNumber ? `user => user['${phoneNumber}'] == '' ? null : user['${phoneNumber}']` : "null",
-    suffix: "null",
-    address: (streetName && houseNumber ) ? `user => user['${streetName}'] && user['${houseNumber}'] ? (user['${streetName}'] + ' ' + user['${houseNumber}']).trim() : null` : "null",
-    city: city ? `user => user['${city}'] == '' ? null : user['${city}']` : "null",
-    postcode: postcode ? `user => user['${postcode}'] == '' ? null : user['${postcode}']` : "null",
-    role: "user => user.role || 'admin'",
-  });
-}
+    role: "member"
+  };
+
+  if (name) mapping.name = `user => (user['${name}'] || '').trim() || null`;
+  if (email) mapping.email = `user => user['${email}'] == '' ? null : user['${email}']`;
+  if (phoneNumber) mapping.phoneNumber = `user => user['${phoneNumber}'] == '' ? null : user['${phoneNumber}']`;
+  if (streetName && houseNumber)
+    mapping.address = `user => user['${streetName}'] && user['${houseNumber}'] ? (user['${streetName}'] + ' ' + user['${houseNumber}']).trim() : null`;
+  if (city) mapping.city = `user => user['${city}'] == '' ? null : user['${city}']`;
+  if (postcode) mapping.postcode = `user => user['${postcode}'] == '' ? null : user['${postcode}']`;
+
+  return JSON.stringify(mapping);
+};
 
 const defaultMapping = configureUserMapping(
   "irma-demo.gemeente.personalData.fullname",
@@ -120,7 +123,6 @@ const formSchema = z.object({
       email: z.string().optional(),
       phoneNumber: z.string().optional(),
       streetName: z.string().optional(),
-      suffix: z.string().optional(),
       houseNumber: z.string().optional(),
       city: z.string().optional(),
       postcode: z.string().optional(),
@@ -133,6 +135,15 @@ const defaultUserFieldMapping = requiredUserFields.reduce((acc, field) => {
   acc[field.id] = field.defaultMappingKey;
   return acc;
 }, {} as Record<string, string>);
+
+const hasBrokerConfigLoaded = (config: any) => {
+  return config.serverUrl &&
+    config.clientId &&
+    config.clientSecret &&
+    config.serverLogoutPath &&
+    config.serverUserInfoPath &&
+    config.serverExchangeCodePath;
+}
 
 export default function AuthProviderEdit() {
 
@@ -148,7 +159,17 @@ export default function AuthProviderEdit() {
     () => ({
       name: provider?.name || '',
       type: 'oidc',
-      config: provider?.config || {
+      config: {
+        serverUrl: provider?.config?.serverUrl || '',
+        clientId: provider?.config?.clientId || '',
+        clientSecret: provider?.config?.clientSecret || '',
+        pkceEnabled: provider?.config?.pkceEnabled || 'true',
+        serverLoginPath: provider?.config?.serverLoginPath || '',
+        serverLogoutPath: provider?.config?.serverLogoutPath || '',
+        serverUserInfoPath: provider?.config?.serverUserInfoPath || '',
+        serverExchangeCodePath: provider?.config?.serverExchangeCodePath || '',
+        serverExchangeContentType: provider?.config?.serverExchangeContentType || 'application/x-www-form-urlencoded',
+        brokerConfiguration: provider?.config?.brokerConfiguration || '',
         userFieldMapping: provider?.config?.userFieldMapping || defaultUserFieldMapping,
         userMapping: provider?.config?.userMapping || defaultMapping,
       },
@@ -170,30 +191,22 @@ export default function AuthProviderEdit() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const userMapping = configureUserMapping(
-        values.config.userFieldMapping?.name,
-        values.config.userFieldMapping?.email,
-        values.config.userFieldMapping?.phoneNumber,
-        values.config.userFieldMapping?.streetName,
-        values.config.userFieldMapping?.houseNumber,
-        values.config.userFieldMapping?.city,
-        values.config.userFieldMapping?.postcode
+        values.config?.userFieldMapping?.name,
+        values.config?.userFieldMapping?.email,
+        values.config?.userFieldMapping?.phoneNumber,
+        values.config?.userFieldMapping?.streetName,
+        values.config?.userFieldMapping?.houseNumber,
+        values.config?.userFieldMapping?.city,
+        values.config?.userFieldMapping?.postcode
       );
 
-      if (
-        provider.configserverLoginPath &&
-        provider.configserverLogoutPath &&
-        provider.configserverUserInfoPath &&
-        provider.configbrokerConfiguration &&
-        provider.configserverExchangeCodePath &&
-        provider.configserverExchangeContentType
-      ) {
-        // All required config is already set, no need to fetch broker config
-        await updateAuthProvider({ ...values, userMapping, id: provider.id });
+      if ( values.config && !hasBrokerConfigLoaded(values.config) ) {
+        const brokerConfigLoaded = await fetchBrokerConfig(null, values, form.setValue);
+        if (!brokerConfigLoaded) {
+          throw new Error('Kon broker configuratie niet ophalen');
+        }
       }
-      const brokerConfigLoaded = await fetchBrokerConfig(null, values, form.setValue);
-      if (!brokerConfigLoaded) {
-        throw new Error('Kon broker configuratie niet ophalen');
-      }
+
       const newValues = form.getValues();
       await updateAuthProvider({ ...newValues, userMapping, id: provider.id });
       toast.success('Auth provider is bijgewerkt');
@@ -387,44 +400,38 @@ export default function AuthProviderEdit() {
                       render={() => (
                         <FormItem className="col-span-full">
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
-                            {requiredUserFields.map((item) => {
-                              const userFieldMapping = form.getValues('config.userFieldMapping');
-
-                              return (
+                            {requiredUserFields.map((item) => (
                                 <FormField
                                   key={item.id}
                                   control={form.control}
-                                  name={`config.userFieldMapping.${item.id as keyof typeof userFieldMapping}`}
-                                  render={({field}) => {
-                                    const getMappingField = requiredUserFields.find(i => i.id === item.id);
-                                    const defaultMapping = getMappingField ? getMappingField.defaultMappingKey : '';
-                                    const mappingValue = userFieldMapping?.[item.id as keyof typeof userFieldMapping] ?? defaultMapping;
-
-                                    return (
+                                  name={`config.userFieldMapping.${item.id}` as any}
+                                  render={({field}) => (
                                       <FormItem>
                                         <FormLabel>
                                           {item.label}
                                         </FormLabel>
                                         <FormControl>
                                           <Input
-                                            defaultValue={mappingValue}
-                                            onChange={(e) => {
-                                              field.onChange(e);
-                                            }}
+                                            {...field}
                                           />
                                         </FormControl>
                                         <FormMessage/>
                                       </FormItem>
                                     )
-                                  }}
+                                  }
                                 />
                               )
-                            })}
+                            )}
                           </div>
                         </FormItem>
                       )}
                     />
 
+                    <div className="col-span-full md:col-span-1 flex flex-row justify-between mt-auto">
+                      <Button className="col-span-full w-fit" type="submit">
+                        Opslaan
+                      </Button>
+                    </div>
                   </form>
                 </Form>
               </div>
