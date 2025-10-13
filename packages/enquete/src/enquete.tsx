@@ -24,11 +24,97 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
-    EnquetePropsType;
+    EnquetePropsType &
+{ infoBlockStyle?: string };
 
 function Enquete(props: EnqueteWidgetProps) {
     const datastore = new DataStore(props);
     const notifyCreate = () => NotificationService.addNotification("Enquete ingediend", "success");
+
+    // Confetti function for youth outro page
+    const fireConfetti = () => {
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '9999';
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        document.body.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const particles: Array<{
+            x: number;
+            y: number;
+            vx: number;
+            vy: number;
+            color: string;
+            size: number;
+            rotation: number;
+            rotationSpeed: number;
+        }> = [];
+
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#fd79a8'];
+
+        // Create particles
+        for (let i = 0; i < 150; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: -10,
+                vx: (Math.random() - 0.5) * 20,
+                vy: Math.random() * 3 + 2,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                size: Math.random() * 8 + 4,
+                rotation: Math.random() * 360,
+                rotationSpeed: (Math.random() - 0.5) * 10
+            });
+        }
+
+        const animate = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += 0.1; // gravity
+                particle.rotation += particle.rotationSpeed;
+
+                ctx.save();
+                ctx.translate(particle.x, particle.y);
+                ctx.rotate((particle.rotation * Math.PI) / 180);
+                ctx.fillStyle = particle.color;
+                ctx.fillRect(-particle.size / 2, -particle.size / 2, particle.size, particle.size);
+                ctx.restore();
+
+                // Remove particles that are off screen
+                if (particle.y > canvas.height + 10) {
+                    particles.splice(index, 1);
+                }
+            });
+
+            if (particles.length > 0) {
+                requestAnimationFrame(animate);
+            } else {
+                // Clean up
+                document.body.removeChild(canvas);
+            }
+        };
+
+        animate();
+
+        // Also remove after 5 seconds as a safety measure
+        setTimeout(() => {
+            if (document.body.contains(canvas)) {
+                document.body.removeChild(canvas);
+            }
+        }, 5000);
+    };
 
 
     const { create: createSubmission } = datastore.useSubmissions({
@@ -51,10 +137,11 @@ function Enquete(props: EnqueteWidgetProps) {
         // Filter out pagination fields
         const nonPaginationFields = formFields.filter(field => field.type !== 'pagination');
 
-        if (currentPage < totalPages - 1 && !(currentPage === totalPages - 2 && nonPaginationFields[totalPages - 1].infoBlockStyle === 'youth-outro')) {
+
+        if (currentPage < totalPages - 1 && !(currentPage === totalPages - 2 && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro')) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
-            if((currentPage === totalPages - 2 && nonPaginationFields[totalPages - 1].infoBlockStyle === 'youth-outro')){
+            if ((currentPage === totalPages - 2 && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro')) {
                 setCurrentPage((prevPage) => prevPage + 1);
             }
 
@@ -94,11 +181,19 @@ function Enquete(props: EnqueteWidgetProps) {
                     location.href = props.afterSubmitUrl.replace("[id]", result.id)
                 } else {
                     notifyCreate();
+                    if (((nonPaginationFields[currentPage + 1] as any)?.infoBlockStyle === 'youth-outro')) {
+                        // if the page is youth outro, fire confetti
+                        fireConfetti();
+                    }
                 }
             }
         }
 
     }
+
+
+    fireConfetti();
+
 
     const formFields: FieldProps[] = [];
     if (typeof (props) !== 'undefined'
@@ -222,14 +317,16 @@ function Enquete(props: EnqueteWidgetProps) {
                         <Icon icon="ri-emotion-happy-line" key={4} />,
                         <Icon icon="ri-emotion-laugh-line" key={5} />
                     ]
-                    
-                    {props.formStyle === 'youth' && (
-                        labelOptions[0] = <span key={1}>😡</span>,
-                        labelOptions[1] = <span key={2}>🙁</span>,
-                        labelOptions[2] = <span key={3}>😐</span>,
-                        labelOptions[3] = <span key={4}>😀</span>,
-                        labelOptions[4] = <span key={5}>😍</span>
-                    )}
+
+                    {
+                        props.formStyle === 'youth' && (
+                            labelOptions[0] = <span key={1}>😡</span>,
+                            labelOptions[1] = <span key={2}>🙁</span>,
+                            labelOptions[2] = <span key={3}>😐</span>,
+                            labelOptions[3] = <span key={4}>😀</span>,
+                            labelOptions[4] = <span key={5}>😍</span>
+                        )
+                    }
 
 
                     fieldData['fieldOptions'] = labelOptions.map((label, index) => {
@@ -347,70 +444,74 @@ function Enquete(props: EnqueteWidgetProps) {
         };
     }, [isFullscreen]);
 
+
+
     return (
         <div className={`osc${isFullscreen ? ' --fullscreen' : ''}`}>
-            {
-                (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
-                    <>
-                        <Banner className="big">
-                            <Heading6>Inloggen om deel te nemen.</Heading6>
-                            <Spacer size={1} />
-                            <Button
-                                type="button"
-                                onClick={() => {
-                                    document.location.href = props.login?.url || '';
-                                }}>
-                                Inloggen
-                            </Button>
-                        </Banner>
-                        <Spacer size={2} />
-                    </>
-                )}
-            {props.formStyle === 'youth' && (
-                <div className="youth-form-actions">
-                    <button
-                        type="button"
-                        className="youth-fullscreen-btn"
-                        onClick={() => {
-                            if (document.fullscreenElement) {
-                                setIsFullscreen(false);
-                                document.exitFullscreen();
-                            } else {
-                                setIsFullscreen(true);
-                                document.documentElement.requestFullscreen();
-                            }
-                        }}
-                    >
-                        {isFullscreen ? <i className="ri-fullscreen-exit-line"></i> : <i className="ri-fullscreen-line"></i>}
-                        <span>{isFullscreen ? 'Verlaat volledig scherm' : 'Bekijk in volledig scherm'}</span>
-                    </button>
-                </div>
-            )}
-
-            <div className={`osc-enquete-item-content --${props.formStyle}`}>
-                {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
-                <div className="osc-enquete-item-description">
-                    {props.displayDescription && props.description && (
-                        <Paragraph>{props.description}</Paragraph>
+            <div className="container">
+                {
+                    (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
+                        <>
+                            <Banner className="big">
+                                <Heading6>Inloggen om deel te nemen.</Heading6>
+                                <Spacer size={1} />
+                                <Button
+                                    type="button"
+                                    onClick={() => {
+                                        document.location.href = props.login?.url || '';
+                                    }}>
+                                    Inloggen
+                                </Button>
+                            </Banner>
+                            <Spacer size={2} />
+                        </>
                     )}
-                </div>
-                <Form
-                    fields={currentFields}
-                    submitHandler={onSubmit}
-                    title=""
-                    submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
-                    submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    prevPage={currentPage > 0 ? currentPage - 1 : null}
-                    prevPageText={getPrevPageTitle}
-                    totalFieldCount={totalFieldCount}
-                    formStyle={props.formStyle || 'default'}
-                    {...props}
-                />
-            </div>
+                {props.formStyle === 'youth' && (
+                    <div className="youth-form-actions">
+                        <button
+                            type="button"
+                            className="youth-fullscreen-btn"
+                            onClick={() => {
+                                if (document.fullscreenElement) {
+                                    setIsFullscreen(false);
+                                    document.exitFullscreen();
+                                } else {
+                                    setIsFullscreen(true);
+                                    document.documentElement.requestFullscreen();
+                                }
+                            }}
+                        >
+                            {isFullscreen ? <i className="ri-close-line"></i> : <i className="ri-fullscreen-line"></i>}
+                            <span>{isFullscreen ? 'Verlaat volledig scherm' : 'Bekijk in volledig scherm'}</span>
+                        </button>
+                    </div>
+                )}
 
-            <NotificationProvider />
+                <div className={`osc-enquete-item-content --${props.formStyle}`}>
+                    {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
+                    <div className="osc-enquete-item-description">
+                        {props.displayDescription && props.description && (
+                            <Paragraph>{props.description}</Paragraph>
+                        )}
+                    </div>
+                    <Form
+                        fields={currentFields}
+                        submitHandler={onSubmit}
+                        title=""
+                        submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
+                        submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        prevPage={currentPage > 0 ? currentPage - 1 : null}
+                        prevPageText={getPrevPageTitle}
+                        totalFieldCount={totalFieldCount}
+                        formStyle={props.formStyle || 'default'}
+                        {...props}
+                    />
+                </div>
+
+                <NotificationProvider />
+            </div>
         </div>
     );
 }

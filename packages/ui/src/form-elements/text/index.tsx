@@ -188,7 +188,11 @@ const TextInput: FC<TextInputProps> = ({
                         if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
                             setCheckInvalid(false);
                         } else {
-                            setCheckInvalid(true);
+                            if(fieldRequired){
+                                setCheckInvalid(true);
+                            }else{
+                                setCheckInvalid(false);
+                            }
                         }
 
                         if (onChange) {

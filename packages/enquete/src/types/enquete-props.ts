@@ -19,6 +19,7 @@ export type EnqueteProps = {
   maxCharactersError?: string;
   datalayer?: DataLayer[];
   enableOnOffSwitching?: boolean;
+  infoBlockStyle?: string;
 };
 
 export type Item = {

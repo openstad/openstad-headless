@@ -40,6 +40,7 @@ type PaginationFieldProps = {
     prevPageText?: any;
     nextPageText?: any;
     defaultValue?: string;
+    infoBlockStyle?: string;
 };
 
 type CombinedFieldPropsWithType =
@@ -58,6 +59,7 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'matrix' } & MatrixFieldProps)
     | ({ type?: 'pagination' } & PaginationFieldProps)
     | ({ type?: 'none' } & InfoFieldProps);
+
 
 type ComponentFieldProps = (
     {
@@ -81,6 +83,7 @@ type CombinedFieldProps = (
     NumberInputProps |
     MatrixFieldProps |
     InfoFieldProps
+    & {infoBlockStyle?: string;}
 );
 
 // These fields have no use outside the form component itself, so we make them optional here to avoid having to define them in every form field
@@ -90,6 +93,7 @@ type FieldWithOptionalFields =
     routingInitiallyHide?: boolean;
     routingSelectedQuestion?: string;
     routingSelectedAnswer?: string;
+    infoBlockStyle?: string;
 }
 
 export type { FieldWithOptionalFields, CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};
