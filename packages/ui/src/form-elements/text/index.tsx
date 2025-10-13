@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useRef } from "react";
 import {
     AccordionProvider,
     FormField,
@@ -12,6 +12,20 @@ import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
 
+import "trix";
+import 'trix/dist/trix.css';
+// Temporary TypeScript declaration for 'trix-editor'
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'trix-editor': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & { input?: string },
+        HTMLElement
+      >;
+    }
+  }
+}
+
 export type TextInputProps = {
     title: string;
     description?: string;
@@ -22,7 +36,7 @@ export type TextInputProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
-    variant?: 'text input' | 'textarea';
+    variant?: 'text input' | 'textarea' | 'richtext';
     placeholder?: string;
     defaultValue?: string;
     disabled?: boolean;
@@ -43,10 +57,72 @@ export type TextInputProps = {
     fieldOptions?: { value: string; label: string }[];
 }
 
+const TrixEditor: React.FC<{
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  value: string;
+}> = ({ onChange, value }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const editorElement = editorRef.current;
+
+    const handleTrixInitialize = () => {
+      // Remove the file attachment button from the toolbar
+      const toolbar = document.querySelector('trix-toolbar');
+      if (toolbar) {
+        const fileButton = toolbar.querySelector('[data-trix-action="attachFiles"]');
+        if (fileButton) {
+          fileButton.remove(); // Remove the file attachment button
+        }
+      }
+    };
+
+    if (editorElement) {
+      const inputElement = document.getElementById('trix-editor') as HTMLInputElement;
+
+      if (inputElement) {
+        // Set the initial value of the input element
+        inputElement.value = value;
+
+        // Trigger Trix initialization
+        editorElement.dispatchEvent(new Event('trix-initialize'));
+      }
+
+      // Listen for Trix change events
+      editorElement.addEventListener('trix-change', (event: Event) => {
+        const input = event.target as HTMLInputElement;
+
+        const syntheticEvent = {
+          target: { value: input.value },
+        } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
+
+        onChange(syntheticEvent);
+      });
+
+      // Listen for the Trix initialization event
+      document.addEventListener('trix-initialize', handleTrixInitialize);
+    }
+
+    return () => {
+      if (editorElement) {
+        editorElement.removeEventListener('trix-change', () => {});
+      }
+      document.removeEventListener('trix-initialize', handleTrixInitialize);
+    };
+  }, [onChange, value]);
+
+  return (
+    <div>
+      <input id="trix-editor" type="hidden" />
+      <trix-editor ref={editorRef} input="trix-editor"></trix-editor>
+    </div>
+  );
+};
+
 const TextInput: FC<TextInputProps> = ({
     title,
     description,
-    variant,
+    variant = 'textarea',
     fieldKey,
     fieldRequired = false,
     placeholder,
@@ -66,7 +142,14 @@ const TextInput: FC<TextInputProps> = ({
     randomId = '',
     fieldInvalid = false,
 }) => {
-    const InputComponent = variant === 'textarea' ? Textarea : Textbox;
+    const variantMap = {
+        'text input': Textbox,
+        'textarea': Textarea,
+        'richtext': TrixEditor
+    }
+    const InputComponent = variantMap[variant];
+
+    
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -181,7 +264,7 @@ const TextInput: FC<TextInputProps> = ({
                     type={getType(fieldKey)}
                     placeholder={placeholder}
                     value={value}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                         setValue(e.target.value);
                         if (onChange) {
                             onChange({
@@ -189,7 +272,7 @@ const TextInput: FC<TextInputProps> = ({
                                 value: e.target.value,
                             });
                         }
-                        characterHelpText(e.target.value.length)
+                        characterHelpText(e.target.value.length);
                     }}
                     disabled={disabled}
                     rows={rows}
