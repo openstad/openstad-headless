@@ -229,6 +229,64 @@ async function revertConfigResourceSettings(req, errors) {
   }
 }
 
+async function updateAllServerLoginPaths(project) {
+  const authProviders = project.config.authProviders || [];
+  const requiredFieldsMap = project.config.authProvidersRequiredUserFields || {};
+  const authProvidersServerLoginPath = {};
+
+  // Fetch all auth provider configs from DB
+  const providers = await db.AuthProvider.findAll({
+    where: { id: authProviders.filter(id => typeof id === 'number') }
+  });
+
+  for (const providerId of authProviders) {
+    if (typeof providerId !== 'number') continue;
+    const provider = providers.find(p => p.id === providerId);
+    if (!provider) continue;
+    const requiredFields = requiredFieldsMap[providerId] || [];
+    authProvidersServerLoginPath[providerId] = createServerLoginPath(requiredFields, provider);
+  }
+
+  // Update project config
+  project.config.authProvidersServerLoginPath = authProvidersServerLoginPath;
+  await project.update({ config: project.config });
+}
+
+const createServerLoginPath = (requiredFields, authProviderData) => {
+  if (!authProviderData) return '';
+
+  const userFieldMapping = authProviderData.config?.userFieldMapping || {};
+  let url = "/broker/sp/oidc/authenticate?client_id=[[clientId]]&redirect_uri=[[redirectUri]]&response_type=code&scope=openid";
+  const endUrl = "&code_challenge=[[codeChallenge]]&code_challenge_method=S256&response_mode=query";
+
+  if (userFieldMapping['identifier']) {
+    url += ` ${userFieldMapping['identifier']}`;
+  }
+
+  requiredFields.forEach((field) => {
+    const mappedField = userFieldMapping[field];
+    if (!!mappedField) {
+      url += ` ${mappedField}`;
+    }
+  });
+
+  url = encodeURIComponent(url.trim());
+
+  return `${url}${endUrl}`;
+}
+
+async function setServerLoginPathForProvider(project, authProviderId, provider) {
+  const requiredFields = (project.config.authProvidersRequiredUserFields || {})[authProviderId] || [];
+  const loginPath = createServerLoginPath(requiredFields, provider);
+
+  let config = project.config ? JSON.parse(JSON.stringify(project.config)) : {};
+  config.authProvidersServerLoginPath = config.authProvidersServerLoginPath || {};
+  config.authProvidersServerLoginPath[authProviderId] = loginPath;
+  project.config = config;
+
+  await project.update({ config: project.config });
+}
+
 // Endpoint to delete duplicated project and its associated data
 router.route('/delete-duplicated-data')
   .post(auth.can('Project', 'delete'))
@@ -575,6 +633,47 @@ router.route('/issues')
     });
 		res.json(req.results);
   })
+
+router.route('/:projectId/update-server-login-path/:authProviderId')
+    .put(async function(req, res, next) {
+
+      const project = await db.Project.scope('includeConfig').findOne({ where: { id: req.params.projectId } });
+      if (!(project && project.can && project.can('update'))) return next(new Error('You cannot update this project'));
+
+      const isAdmin = hasRole(req.user, 'admin');
+      if (!isAdmin) return next(new Error('Not authorized'));
+
+      const authProviderId = parseInt(req.params.authProviderId);
+      if (isNaN(authProviderId)) return next(new Error('Invalid authProviderId'));
+
+      const provider = await db.AuthProvider.findByPk(authProviderId);
+      if (!provider) return next(new Error('Auth provider not found'));
+
+      await setServerLoginPathForProvider(project, authProviderId, provider);
+
+      res.json({ success: true, authProvidersServerLoginPath: project.config.authProvidersServerLoginPath });
+    });
+
+router.route('/update-server-login-paths-for-auth-provider/:authProviderId')
+    .put(async function(req, res, next) {
+      const authProviderId = parseInt(req.params.authProviderId);
+      if (isNaN(authProviderId)) return next(new Error('Invalid authProviderId'));
+
+      const projects = await db.Project.findAll({
+        where: Sequelize.literal(
+            `JSON_CONTAINS(config->'$.authProviders', '${authProviderId}')`
+        )
+      });
+
+      console.log(`Found ${projects.length} projects using authProviderId ${authProviderId}`);
+      console.log('Projects:', projects.map(p => p.id));
+
+      for (const project of projects) {
+        await setServerLoginPathForProvider(project, authProviderId, null);
+      }
+
+      res.json({ success: true, updatedProjects: projects.map(p => p.id) });
+    });
 
 // one project routes: get project
 // -------------------------

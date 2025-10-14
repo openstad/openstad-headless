@@ -133,11 +133,11 @@ export default function ProjectAuthentication2FA() {
           },
           {
             name: 'Authenticatie',
-            url: '/projects/1/authentication',
+            url: `/projects/${data?.id}/authentication`,
           },
           {
             name: 'Tweestapsverificatie',
-            url: '/projects/1/authentication/2fa',
+            url: `/projects/${data?.id}/authentication/2fa`,
           },
         ]}>
         <div className="container py-6">

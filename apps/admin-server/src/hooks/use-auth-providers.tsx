@@ -35,7 +35,27 @@ export default function useAuthProvidersList() {
   let authProvidersListSwrKey =`/api/openstad/api/auth-provider?includeConfig=1`;
 
   let authProvidersListSwr = useSWR(authProvidersListSwrKey);
-  return { ...authProvidersListSwr };
+
+  async function updateAuthProviderServerLoginPath(body: any) {
+    let id = !!body?.id ? parseInt(body.id, 10) : null;
+    let projectId = !!body?.projectId ? parseInt(body.projectId, 10) : null;
+
+    if (!id || !projectId) {
+      throw new Error('Deze auth provider kan niet worden bewerkt');
+    }
+
+    const res = await fetch(`/api/openstad/api/project/${projectId}/update-server-login-path/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) throw new Error('Auth provider update failed')
+
+    return await res.json();
+  }
+
+  return { ...authProvidersListSwr, updateAuthProviderServerLoginPath };
 }
 
 export function useAuthProvider(id?: string) {
@@ -62,6 +82,24 @@ export function useAuthProvider(id?: string) {
 
     return await res.json();
 
+  }
+
+  async function updateServerLoginPathForEachAffectedProject(body: any) {
+    let id = !!body?.id ? parseInt(body.id, 10) : null;
+
+    if (!id) {
+      throw new Error('Deze auth provider kan niet worden bewerkt');
+    }
+
+    const res = await fetch(`/api/openstad/api/project/update-server-login-paths-for-auth-provider/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) throw new Error('Auth provider update failed')
+
+    return await res.json();
   }
 
   async function createAuthProvider(name: string, config: object) {
@@ -92,5 +130,5 @@ export function useAuthProvider(id?: string) {
 
   }
 
-  return { ...authProviderSwr, updateAuthProvider, createAuthProvider, deleteAuthProvider};
+  return { ...authProviderSwr, updateAuthProvider, createAuthProvider, deleteAuthProvider, updateServerLoginPathForEachAffectedProject};
 }

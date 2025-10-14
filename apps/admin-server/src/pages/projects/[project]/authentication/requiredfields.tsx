@@ -129,6 +129,21 @@ export default function ProjectAuthenticationRequiredFields() {
       const project = await updateProject(updatedConfig);
       const doubleSave = await updateProject(updatedConfig);
 
+      // For each auth provider we need to update the server login path
+      if ( project?.config?.authProvidersRequiredUserFields ) {
+        const authProviders = Object.keys(project.config.authProvidersRequiredUserFields);
+        for (const providerId of authProviders) {
+          try {
+            await updateAuthProviderServerLoginPath({
+              id: providerId,
+              projectId: project.id,
+            });
+          } catch (error) {
+            console.error('Could not update auth provider server login path', error);
+          }
+        }
+      }
+
       if ( doubleSave && project ) {
         toast.success('Project aangepast!');
       } else {
@@ -143,8 +158,8 @@ export default function ProjectAuthenticationRequiredFields() {
   const showPageFields = Array.isArray(selectedUserFields) && selectedUserFields.length > 0;
 
   const authProvidersEnabled = useAuthProvidersEnabledCheck();
-  const { data: authProviders } = useAuthProvidersList();
-  
+  const { data: authProviders, updateAuthProviderServerLoginPath } = useAuthProvidersList();
+
   return (
     <div>
       <PageLayout
@@ -156,11 +171,11 @@ export default function ProjectAuthenticationRequiredFields() {
           },
           {
             name: 'Authenticatie',
-            url: '/projects/1/authentication',
+            url: `/projects/${data?.id}/authentication`,
           },
           {
             name: 'Verplichte velden',
-            url: '/projects/1/authentication/requiredfields',
+            url: `/projects/${data?.id}/authentication/requiredfields`,
           },
         ]}>
         <div className="container py-6">
@@ -353,7 +368,7 @@ export default function ProjectAuthenticationRequiredFields() {
                   className="space-y-4 lg:w-2/3 mt-4"
                 >
                   {authProviders && authProviders.length > 0 ? (
-                    authProviders.map((provider: {id: string, name: string}) => {
+                    authProviders.map((provider: { id: string, name: string, config: {userFieldMapping?: Record<string, string>} }) => {
                       const providerId = provider.id;
                       const providerName = provider.name;
 
@@ -385,9 +400,16 @@ export default function ProjectAuthenticationRequiredFields() {
                                                   <Checkbox
                                                     checked={checked}
                                                     onCheckedChange={(checked: any) => {
+                                                      const userFieldMapping = provider.config?.userFieldMapping || {};
+                                                      if (checked && !userFieldMapping[item.id]) {
+                                                        toast.error(`Het veld ${item.label} is geselecteerd als verplicht, maar er is geen mapping voor opgegeven in deze Auth Provider.`);
+                                                        return;
+                                                      }
+
                                                       const newValue = checked
                                                         ? [...(field.value || []), item.id]
                                                         : (field.value || []).filter((value: string) => value !== item.id);
+
                                                       field.onChange(newValue);
                                                     }}
                                                   />

@@ -33,6 +33,7 @@ import {Checkbox} from "@/components/ui/checkbox";
 import {Spacer} from "@/components/ui/spacer";
 
 const configureUserMapping = (
+  identifier?: string,
   name?: string,
   email?: string,
   phoneNumber?: string,
@@ -42,10 +43,10 @@ const configureUserMapping = (
   postcode?: string,
 ) => {
   const mapping: Record<string, string> = {
-    identifier: "user => user['irma-demo.sidn-pbdf.uniqueid.uniqueid'] || user.id",
     role: "member"
   };
 
+  if (identifier) mapping.identifier = `user => user['${identifier}'] || user.id`;
   if (name) mapping.name = `user => (user['${name}'] || '').trim() || null`;
   if (email) mapping.email = `user => user['${email}'] == '' ? null : user['${email}']`;
   if (phoneNumber) mapping.phoneNumber = `user => user['${phoneNumber}'] == '' ? null : user['${phoneNumber}']`;
@@ -57,51 +58,38 @@ const configureUserMapping = (
   return JSON.stringify(mapping);
 };
 
-const defaultMapping = configureUserMapping(
-  "irma-demo.gemeente.personalData.fullname",
-  "irma-demo.sidn-pbdf.email.email",
-  "irma-demo.sidn-pbdf.phoneNumber.phoneNumber",
-  "irma-demo.gemeente.address.street",
-  "irma-demo.gemeente.address.housenumber",
-  "irma-demo.gemeente.address.city",
-  "irma-demo.gemeente.address.postalcode",
-);
-
 const requiredUserFields = [
+  {
+    id: 'identifier',
+    label: 'Unieke ID (identifier)',
+  },
   {
     id: 'name',
     label: 'Naam',
-    defaultMappingKey: "irma-demo.gemeente.personalData.fullname"
   },
   {
     id: 'email',
     label: 'E-mailadres',
-    defaultMappingKey: "irma-demo.sidn-pbdf.email.email"
   },
   {
     id: 'phoneNumber',
     label: 'Telefoonnummer',
-    defaultMappingKey: "irma-demo.sidn-pbdf.phoneNumber.phoneNumber"
   },
   {
     id: 'streetName',
     label: 'Straatnaam',
-    defaultMappingKey: "irma-demo.gemeente.address.street"
   },
   {
     id: 'houseNumber',
     label: 'Huisnummer',
-    defaultMappingKey: "irma-demo.gemeente.address.housenumber"
   },
   {
     id: 'city',
     label: 'Stad',
-    defaultMappingKey: "irma-demo.gemeente.address.city"
   },
   {
     id: 'postcode',
     label: 'Postcode',
-    defaultMappingKey: "irma-demo.gemeente.address.postalcode"
   },
 ];
 
@@ -131,11 +119,6 @@ const formSchema = z.object({
   }),
 });
 
-const defaultUserFieldMapping = requiredUserFields.reduce((acc, field) => {
-  acc[field.id] = field.defaultMappingKey;
-  return acc;
-}, {} as Record<string, string>);
-
 const hasBrokerConfigLoaded = (config: any) => {
   return config.serverUrl &&
     config.clientId &&
@@ -150,7 +133,7 @@ export default function AuthProviderEdit() {
   const router = useRouter();
   const { authProvider } = router.query;
 
-  const { data, updateAuthProvider, deleteAuthProvider } = useAuthProvider(authProvider as string);
+  const { data, updateAuthProvider, deleteAuthProvider, updateServerLoginPathForEachAffectedProject } = useAuthProvider(authProvider as string);
 
   let provider = data;
   if (Array.isArray(data)) provider = data[0];
@@ -170,8 +153,8 @@ export default function AuthProviderEdit() {
         serverExchangeCodePath: provider?.config?.serverExchangeCodePath || '',
         serverExchangeContentType: provider?.config?.serverExchangeContentType || 'application/x-www-form-urlencoded',
         brokerConfiguration: provider?.config?.brokerConfiguration || '',
-        userFieldMapping: provider?.config?.userFieldMapping || defaultUserFieldMapping,
-        userMapping: provider?.config?.userMapping || defaultMapping,
+        userFieldMapping: provider?.config?.userFieldMapping || {},
+        userMapping: provider?.config?.userMapping || configureUserMapping(),
       },
     }),
     [provider],
@@ -209,6 +192,8 @@ export default function AuthProviderEdit() {
 
       const newValues = form.getValues();
       await updateAuthProvider({ ...newValues, userMapping, id: provider.id });
+      await updateServerLoginPathForEachAffectedProject({ id: provider.id });
+
       toast.success('Auth provider is bijgewerkt');
     } catch (err: any) {
       toast.error(err.message || 'Auth provider kon niet worden bijgewerkt');
@@ -381,11 +366,13 @@ export default function AuthProviderEdit() {
                   </Heading>
                   <Spacer size={1} />
                   <FormDescription>
-                    Je kunt aangeven hoe de gegevens uit de authenticatiebron (bijv. IRMA) gekoppeld moeten worden aan de verplichte velden.
+                    Je kunt aangeven hoe de gegevens uit de authenticatiebron gekoppeld moeten worden aan de verplichte velden.
                     <br/>
-                    <strong>Let op:</strong>Als er geen waarde is opgegeven voor een veld, kan dit leiden tot fouten bij het aanmaken van een gebruiker.
+                    <strong>Let op:</strong> Als er geen waarde is opgegeven voor een veld, kan dit leiden tot fouten bij het aanmaken van een gebruiker.
                     <br/>
-                    Zie voor de mogelijke mapping keys van jouw authenticatiebron de <a href="https://attribute-index.yivi.app/en/pbdf.html" target="_blank">documentatie</a> of vraag dit na bij de beheerder van de authenticatiebron.
+                    Zie voor de mogelijke mapping keys van jouw authenticatiebron de <a style={{textDecoration: 'underline'}} href="https://attribute-index.yivi.app/en/pbdf.html" target="_blank">documentatie</a> of vraag dit na bij de beheerder van de authenticatiebron.
+                    <br/><br/>
+                    Een voorbeeld mapping is: <code>irma-demo.gemeente.personalData.fullname</code> voor de naam.
                     <br/><br/>
                   </FormDescription>
                   <Spacer size={1} />

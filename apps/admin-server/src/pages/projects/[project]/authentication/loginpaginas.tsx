@@ -177,11 +177,11 @@ export default function ProjectAuthentication() {
           },
           {
             name: 'Authenticatie',
-            url: '/projects/1/authentication',
+            url: `/projects/${data?.id}/authentication`,
           },
           {
             name: 'Login pagina&apos;s',
-            url: '/projects/1/authentication/loginpaginas',
+            url: `/projects/${data?.id}/authentication/loginpaginas`,
           },
         ]}>
         <div className="container py-6">
