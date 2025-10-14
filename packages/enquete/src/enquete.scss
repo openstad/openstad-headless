@@ -661,6 +661,10 @@ label.utrecht-form-label {
         align-items: center
       }
 
+      .utrecht-radio-button--html-input:invalid{
+        border-color: black;
+      }
+
       .utrecht-form-field.utrecht-form-field--radio {
         border: solid 1px rgba(210, 210, 210, 1);
         padding: 0;
@@ -704,7 +708,7 @@ label.utrecht-form-label {
 
           &:before {
             content: '';
-            inset: 0;
+            inset: 0 0 -20px 0;
             position: absolute;
             z-index: 1;
           }
