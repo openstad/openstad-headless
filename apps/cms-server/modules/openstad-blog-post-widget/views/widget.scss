@@ -1,24 +1,135 @@
-    .related-posts {
+.related-posts {
+    .news-card.--highlight {
+        border: 2px solid green;
+    }
 
-        .related-post-heading{
-            margin-bottom: 2rem;
-        }
+    .related-post-heading {
+        margin-bottom: 2rem;
+    }
 
-        ul {
+    // Static grid layout (default)
+    .static-grid {
+        .static-list {
             list-style: none;
             padding: 0;
             margin: 0;
             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             width: 100%;
             gap: 20px;
-            grid-template-columns: 1fr 1fr 1fr;
 
             li {
                 width: 100%;
             }
         }
+    }
 
-        a {
-            display: block;
+    // Carousel layout
+    &.carousel-enabled {
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            padding: 0 1px;
+        }
+
+        .carousel-track {
+            list-style: none;
+            padding: 0;
+            margin: 0 -10px; // To counteract li padding
+            display: flex;
+            transition: transform 0.3s ease-in-out;
+            gap: 0px;
+
+            li {
+                min-width: 0;
+                padding: 0 10px;
+                // Flex basis will be set dynamically by JavaScript
+                
+                // Responsive overrides
+                @media (max-width: 1023px) {
+                    // On tablet, max 2 items regardless of config
+                    flex: 0 0 calc(50% - 10px) !important;
+                }
+
+                @media (max-width: 767px) {
+                    // On mobile, always 1 item
+                    flex: 0 0 calc(100% - 0px) !important;
+                }
+            }
+        }
+
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+
+            .carousel-btn {
+                background: #fff;
+                border: 2px solid #ddd;
+                border-radius: 50%;
+                width: 44px;
+                height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                font-size: 18px;
+                font-weight: bold;
+                color: #666;
+
+                &:hover:not(:disabled) {
+                    border-color: #999;
+                    color: #333;
+                    transform: scale(1.05);
+                }
+
+                &:disabled {
+                    opacity: 0.4;
+                    cursor: not-allowed;
+                }
+
+                &:focus {
+                    outline: 2px solid #007bff;
+                    outline-offset: 2px;
+                }
+            }
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+
+            .carousel-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                border: none;
+                background: #ddd;
+                cursor: pointer;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    background: #999;
+                    transform: scale(1.2);
+                }
+
+                &.active {
+                    background: #007bff;
+                }
+
+                &:focus {
+                    outline: 2px solid #007bff;
+                    outline-offset: 2px;
+                }
+            }
         }
     }
+
+    a {
+        display: block;
+    }
+}

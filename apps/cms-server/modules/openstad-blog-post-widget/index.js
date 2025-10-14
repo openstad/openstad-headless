@@ -46,6 +46,23 @@ module.exports = {
         if: {
           selectionType: 'manual'
         }
+      },
+      enableCarousel: {
+        type: 'boolean',
+        label: 'Carrousel modus inschakelen',
+        def: false,
+        help: 'Schakel dit in om de berichten als een schuifbare carrousel te tonen.'
+      },
+      carouselItemsVisible: {
+        type: 'integer',
+        label: 'Aantal zichtbare items in carrousel',
+        def: 3,
+        min: 1,
+        max: 10,
+        help: 'Bepaal hoeveel berichten tegelijk zichtbaar zijn in de carrousel (1-10).',
+        if: {
+          enableCarousel: true
+        }
       }
     }
   },
@@ -102,7 +119,14 @@ module.exports = {
               posts = posts.concat(additionalPosts.slice(0, remainingSlots));
             }
             
-            widget.relatedPosts = posts;
+            // Ensure createdAt is a valid ISO string for each post
+            widget.relatedPosts = posts.map(post => {
+              if (post.createdAt) {
+                const dateObj = new Date(post.createdAt);
+                post.createdAt = isNaN(dateObj.getTime()) ? null : dateObj.toISOString();
+              }
+              return post;
+            });
           } catch (error) {
             console.error('Error loading related posts:', error);
             widget.relatedPosts = [];

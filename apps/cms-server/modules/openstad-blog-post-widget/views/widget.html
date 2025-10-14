@@ -1,6 +1,7 @@
-<section class="related-posts section">
+<section class="related-posts section{% if data.widget.enableCarousel %} carousel-enabled{% endif %}">
   <h2 class="utrecht-heading-2 related-post-heading">{{ data.widget.title }}</h2>
-  <ul>
+  <div class="carousel-container{% if not data.widget.enableCarousel %} static-grid{% endif %}">
+    <ul class="{% if data.widget.enableCarousel %}carousel-track{% else %}static-list{% endif %}"{% if data.widget.enableCarousel %} data-carousel-track data-items-visible="{{ data.widget.carouselItemsVisible or '3' }}"{% endif %}>
     {% for post in data.widget.relatedPosts %}
     <li>
       <a href="{{ post._url }}" class="news-card{% if loop.first and data.widget.highlightedPost and data.widget.highlightedPost.length > 0 %} --highlight{% endif %}">
@@ -14,25 +15,26 @@
         {% endif %}
         <div class="card-content">
           <div class="date">
-            {% set postDate = post.publishedAt or post.createdAt %} {% if
-            postDate %}
-            <script>
-              document.write(
-                new Date('{{ postDate }}').toLocaleDateString('nl-NL', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })
-              );
-            </script>
-            <noscript>{{ postDate | date('Y-m-d') }}</noscript>
-            {% endif %}
+            {{ post.createdAt | date('MMMM D, YYYY')}}
           </div>
-          <h3 class="utrecht-heading-4">{{ post.title }}</h2>
+          <h3 class="utrecht-heading-4">{{ post.title }}</h3>
           <p class="utrecht-paragraph">{{ post.summary | truncate(150) }}</p>
         </div>
       </a>
     </li>
     {% endfor %}
-  </ul>
+    </ul>
+    
+    {% if data.widget.enableCarousel %}
+    <div class="carousel-controls">
+      <button class="carousel-btn carousel-prev" data-carousel-prev aria-label="Vorige berichten">
+        <span>‹</span>
+      </button>
+      <button class="carousel-btn carousel-next" data-carousel-next aria-label="Volgende berichten">
+        <span>›</span>
+      </button>
+    </div>
+    
+    {% endif %}
+  </div>
 </section>
