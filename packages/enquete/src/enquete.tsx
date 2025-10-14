@@ -361,6 +361,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'swipe':
                     fieldData['type'] = 'swipe';
+                    fieldData['required'] = item?.fieldRequired || false;
                     fieldData['cards'] = item?.options?.map((card) => {
                         return {
                             id: card.trigger,

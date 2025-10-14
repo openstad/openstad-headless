@@ -180,7 +180,8 @@ label.utrecht-form-label {
     transform: translate(0, 0);
 
     &:has(.question-type-none),
-    &:has([aria-invalid="true"]) {
+    &:has([aria-invalid="true"]),
+    &:has(.swipe-finished) {
       .button-group.--flex .utrecht-button--primary-action:before {
         display: none;
       }

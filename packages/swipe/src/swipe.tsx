@@ -26,6 +26,7 @@ export type SwipeProps = {
   enableKeyboard?: boolean;
   fieldKey?: string;
   type?: string;
+  required?: boolean;
 };
 
 // Default demo cards - moved outside component to prevent recreation
@@ -63,6 +64,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   onSwipeRight = () => { console.log('Swiped RIGHT'); },
   showButtons = true,
   enableKeyboard = true,
+  required = false,
   ...props
 }) => {
   const swipeCards = useMemo(() => {
@@ -435,7 +437,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }
 
   return (
-    <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0}>
+    <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'}>
       <div className="swipe-container" role="list" aria-label="Stellingen">
         <div className="swipe-stack">
           {remainingCards.slice(0, 3).map((card, index) => {
