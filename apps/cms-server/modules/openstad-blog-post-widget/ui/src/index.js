@@ -74,8 +74,8 @@ function initCarousel(container) {
     const containerWidth = container.offsetWidth;
     if (containerWidth < 768) return 1;
     
-    // On tablet, respect config but max 2 items
-    if (containerWidth < 1024) return Math.min(configuredItems, 2);
+    // On tablet, respect config: if configuredItems < 2, use configuredItems, else max 2 items
+    if (containerWidth < 1024) return configuredItems < 2 ? configuredItems : 2;
     
     // On desktop, use the configured value (max 10 for safety)
     return Math.min(configuredItems, 10);
@@ -89,9 +89,10 @@ function initCarousel(container) {
     
     // Apply the calculated width to all carousel items
     items.forEach(item => {
-      // Skip responsive overrides by checking screen size
       const containerWidth = container.offsetWidth;
-      if (containerWidth >= 768) { // Only apply on tablet and up
+      if (containerWidth < 768) {
+        item.style.flex = '0 0 100%';
+      } else {
         item.style.flex = `0 0 ${itemWidth}`;
       }
     });

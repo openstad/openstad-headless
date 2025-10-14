@@ -1,10 +1,43 @@
 .related-posts {
-    .news-card.--highlight {
-        border: 2px solid green;
-    }
 
-    .related-post-heading {
+    .related-post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
         margin-bottom: 2rem;
+
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+
+            .carousel-prev,
+            .carousel-next {
+                span {
+                    display: block;
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+
+            .carousel-prev span {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,1)'%3E%3Cpath d='M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+            }
+
+            .carousel-next span {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,1)'%3E%3Cpath d='M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+            }
+
+            .carousel-prev:disabled span {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(0,0,0,1)'%3E%3Cpath d='M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+            }
+
+            .carousel-next:disabled span {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(0,0,0,1)'%3E%3Cpath d='M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+            }
+        }
     }
 
     // Static grid layout (default)
@@ -35,7 +68,7 @@
         .carousel-track {
             list-style: none;
             padding: 0;
-            margin: 0 -10px; // To counteract li padding
+            margin: 0 -10px;
             display: flex;
             transition: transform 0.3s ease-in-out;
             gap: 0px;
@@ -43,90 +76,17 @@
             li {
                 min-width: 0;
                 padding: 0 10px;
-                // Flex basis will be set dynamically by JavaScript
-                
-                // Responsive overrides
+
                 @media (max-width: 1023px) {
-                    // On tablet, max 2 items regardless of config
-                    flex: 0 0 calc(50% - 10px) !important;
+                    flex: 0 0 calc(50% - 10px);
                 }
 
                 @media (max-width: 767px) {
-                    // On mobile, always 1 item
-                    flex: 0 0 calc(100% - 0px) !important;
+                    flex: 0 0 calc(100% - 0px);
                 }
             }
         }
 
-        .carousel-controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-
-            .carousel-btn {
-                background: #fff;
-                border: 2px solid #ddd;
-                border-radius: 50%;
-                width: 44px;
-                height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                font-size: 18px;
-                font-weight: bold;
-                color: #666;
-
-                &:hover:not(:disabled) {
-                    border-color: #999;
-                    color: #333;
-                    transform: scale(1.05);
-                }
-
-                &:disabled {
-                    opacity: 0.4;
-                    cursor: not-allowed;
-                }
-
-                &:focus {
-                    outline: 2px solid #007bff;
-                    outline-offset: 2px;
-                }
-            }
-        }
-
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
-
-            .carousel-dot {
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                border: none;
-                background: #ddd;
-                cursor: pointer;
-                transition: all 0.2s ease;
-
-                &:hover {
-                    background: #999;
-                    transform: scale(1.2);
-                }
-
-                &.active {
-                    background: #007bff;
-                }
-
-                &:focus {
-                    outline: 2px solid #007bff;
-                    outline-offset: 2px;
-                }
-            }
-        }
     }
 
     a {

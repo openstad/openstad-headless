@@ -1,6 +1,20 @@
 <section class="related-posts section{% if data.widget.enableCarousel %} carousel-enabled{% endif %}">
-  <h2 class="utrecht-heading-2 related-post-heading">{{ data.widget.title }}</h2>
+  <div class="related-post-header">
+      <h2 class="utrecht-heading-2 related-post-heading">{{ data.widget.title }}</h2>
+
+      {% if data.widget.enableCarousel %}
+      <div class="carousel-controls">
+        <button class="utrecht-button osc-icon-button carousel-prev" data-carousel-prev aria-label="Vorige berichten">
+          <span></span>
+        </button>
+        <button class="utrecht-button osc-icon-button carousel-next" data-carousel-next aria-label="Volgende berichten">
+          <span></span>
+        </button>
+      </div>
+      {% endif %}
+  </div>
   <div class="carousel-container{% if not data.widget.enableCarousel %} static-grid{% endif %}">
+
     <ul class="{% if data.widget.enableCarousel %}carousel-track{% else %}static-list{% endif %}"{% if data.widget.enableCarousel %} data-carousel-track data-items-visible="{{ data.widget.carouselItemsVisible or '3' }}"{% endif %}>
     {% for post in data.widget.relatedPosts %}
     <li>
@@ -24,17 +38,6 @@
     </li>
     {% endfor %}
     </ul>
-    
-    {% if data.widget.enableCarousel %}
-    <div class="carousel-controls">
-      <button class="carousel-btn carousel-prev" data-carousel-prev aria-label="Vorige berichten">
-        <span>‹</span>
-      </button>
-      <button class="carousel-btn carousel-next" data-carousel-next aria-label="Volgende berichten">
-        <span>›</span>
-      </button>
-    </div>
-    
-    {% endif %}
+  
   </div>
 </section>
