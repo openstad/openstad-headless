@@ -1,0 +1,24 @@
+    .related-posts {
+
+        .related-post-heading{
+            margin-bottom: 2rem;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            width: 100%;
+            gap: 20px;
+            grid-template-columns: 1fr 1fr 1fr;
+
+            li {
+                width: 100%;
+            }
+        }
+
+        a {
+            display: block;
+        }
+    }

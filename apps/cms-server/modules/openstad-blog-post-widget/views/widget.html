@@ -1,0 +1,38 @@
+<section class="related-posts section">
+  <h2 class="utrecht-heading-2 related-post-heading">{{ data.widget.title }}</h2>
+  <ul>
+    {% for post in data.widget.relatedPosts %}
+    <li>
+      <a href="{{ post._url }}" class="news-card{% if loop.first and data.widget.highlightedPost and data.widget.highlightedPost.length > 0 %} --highlight{% endif %}">
+        {% if post.image %}
+        <figure>
+          <img
+            src="{{ apos.attachment.url(post.image) }}"
+            alt="{{ post.image.title or post.title }}"
+          />
+        </figure>
+        {% endif %}
+        <div class="card-content">
+          <div class="date">
+            {% set postDate = post.publishedAt or post.createdAt %} {% if
+            postDate %}
+            <script>
+              document.write(
+                new Date('{{ postDate }}').toLocaleDateString('nl-NL', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })
+              );
+            </script>
+            <noscript>{{ postDate | date('Y-m-d') }}</noscript>
+            {% endif %}
+          </div>
+          <h3 class="utrecht-heading-4">{{ post.title }}</h2>
+          <p class="utrecht-paragraph">{{ post.summary | truncate(150) }}</p>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
