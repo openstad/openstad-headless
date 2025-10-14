@@ -117,6 +117,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   );
   const [showSummary, setShowSummary] = useState(persistedState?.showSummary ?? false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
+  const [isDialogClosing, setIsDialogClosing] = useState(false);
 
   // Persist state to sessionStorage (only during tab session, not across page refreshes)
   const persistState = useCallback(() => {
@@ -186,14 +187,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }, [enableKeyboard, remainingCards.length, isAnimating]);
 
   const handleSwipeLeft = () => {
-
     if (remainingCards.length > 0 && !isAnimating) {
       console.log(remainingCards[0].explanationRequired)
-      setShowExplanationDialog(remainingCards[0].explanationRequired || false)
+      
+      const currentCard = remainingCards[0];
 
       setIsAnimating(true);
       setSwipeDirection('left');
-      const currentCard = remainingCards[0];
 
       // Store the answer
       setSwipeAnswers(prev => ({
@@ -203,19 +203,27 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
       onSwipeLeft?.(currentCard);
 
-      setTimeout(() => {
-        removeCurrentCard();
-        setSwipeDirection(null);
-        setIsAnimating(false);
-      }, 200);
+      // If explanation is required, show dialog and wait for it to close
+      if (currentCard.explanationRequired) {
+        setShowExplanationDialog(true);
+        // Animation will continue when dialog is closed - handled in the dialog close handlers
+      } else {
+        // No explanation required, proceed immediately with animation
+        setTimeout(() => {
+          removeCurrentCard();
+          setSwipeDirection(null);
+          setIsAnimating(false);
+        }, 200);
+      }
     }
   };
 
   const handleSwipeRight = () => {
     if (remainingCards.length > 0 && !isAnimating) {
+      const currentCard = remainingCards[0];
+
       setIsAnimating(true);
       setSwipeDirection('right');
-      const currentCard = remainingCards[0];
 
       // Store the answer
       setSwipeAnswers(prev => ({
@@ -225,11 +233,18 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
       onSwipeRight?.(currentCard);
 
-      setTimeout(() => {
-        removeCurrentCard();
-        setSwipeDirection(null);
-        setIsAnimating(false);
-      }, 200);
+      // If explanation is required, show dialog and wait for it to close
+      if (currentCard.explanationRequired) {
+        setShowExplanationDialog(true);
+        // Animation will continue when dialog is closed - handled in the dialog close handlers
+      } else {
+        // No explanation required, proceed immediately with animation
+        setTimeout(() => {
+          removeCurrentCard();
+          setSwipeDirection(null);
+          setIsAnimating(false);
+        }, 200);
+      }
     }
   };
 
@@ -483,13 +498,39 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       )}
 
       {showExplanationDialog && (
-        <div className="explanation-dialog" role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
+        <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
           <div className="explanation-dialog-content">
             <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
             <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
             <textarea placeholder='Toelichting...' rows={5} />
-            <Button appearance="primary-action-button" onClick={() => { setShowExplanationDialog(false); }}>Antwoord verzenden</Button>
-            <Button appearance="secondary-action-button" onClick={() => { setShowExplanationDialog(false); }}>Sluiten zonder toelichting</Button>
+            <Button appearance="primary-action-button" onClick={() => { 
+              setIsDialogClosing(true);
+              // Start closing animation, then continue with card removal
+              setTimeout(() => {
+                setShowExplanationDialog(false);
+                setIsDialogClosing(false);
+                // Continue with the card removal animation after dialog closes
+                setTimeout(() => {
+                  removeCurrentCard();
+                  setSwipeDirection(null);
+                  setIsAnimating(false);
+                }, 200);
+              }, 200); // Wait for closing animation
+            }}>Antwoord verzenden</Button>
+            <Button appearance="secondary-action-button" onClick={() => { 
+              setIsDialogClosing(true);
+              // Start closing animation, then continue with card removal
+              setTimeout(() => {
+                setShowExplanationDialog(false);
+                setIsDialogClosing(false);
+                // Continue with the card removal animation after dialog closes
+                setTimeout(() => {
+                  removeCurrentCard();
+                  setSwipeDirection(null);
+                  setIsAnimating(false);
+                }, 200);
+              }, 200); // Wait for closing animation
+            }}>Sluiten zonder toelichting</Button>
           </div>
         </div>
       )}

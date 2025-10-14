@@ -535,22 +535,38 @@
   inset: 0;
   background: rgba(0,0,0,0.2);
   z-index: 999999;
+  opacity: 0;
+  animation: dialogFadeIn 0.3s ease-out forwards;
 
   .explanation-dialog-content{
     background: #fff;
     padding: 20px;
     border-radius: 8px;
     max-width: 400px;
+    width: 95%;
     top: 100px;
     left: 0;
     right: 0;
     margin: 0 auto;
     position: absolute;
+    transform: translateY(20px) scale(0.95);
+    animation: dialogSlideUp 0.3s ease-out forwards;
 
     textarea{
       width: 100%;
       margin: 20px 0;
       padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 100px;
+
+      &:focus{
+        outline: none;
+        border-color: var(--swipe-active-background);
+        box-shadow: 0 0 0 2px rgba(35, 134, 65, 0.1);
+      }
     }
 
     button{
@@ -561,5 +577,49 @@
         margin-top: 16px;
       }
     }
+  }
+
+  &.explanation-dialog--closing {
+    animation: dialogFadeOut 0.2s ease-in forwards;
+
+    .explanation-dialog-content {
+      animation: dialogSlideDown 0.2s ease-in forwards;
+    }
+  }
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialogFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialogSlideUp {
+  from {
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dialogSlideDown {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(20px) scale(0.95);
   }
 }
