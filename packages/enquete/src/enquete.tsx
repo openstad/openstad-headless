@@ -367,6 +367,7 @@ function Enquete(props: EnqueteWidgetProps) {
                             title: card.titles[0].key,
                             infoField: card.titles[0].infoField,
                             image: card.titles[0].image || '',
+                            explanationRequired: card.titles[0].explanationRequired || false,
                         };
                     });
                     break;

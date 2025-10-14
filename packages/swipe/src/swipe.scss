@@ -528,3 +528,38 @@
   }
 
 }
+
+
+.explanation-dialog{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  z-index: 999999;
+
+  .explanation-dialog-content{
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    top: 100px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    position: absolute;
+
+    textarea{
+      width: 100%;
+      margin: 20px 0;
+      padding: 20px;
+    }
+
+    button{
+      max-width: none;
+      width: 100%;
+
+      & + button{
+        margin-top: 16px;
+      }
+    }
+  }
+}

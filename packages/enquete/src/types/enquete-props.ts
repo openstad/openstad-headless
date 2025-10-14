@@ -80,6 +80,7 @@ export type Title = {
   image?: string;
   hideLabel?: boolean;
   description?: string;
+  explanationRequired?: boolean;
 };
 
 export type Confirmation = {

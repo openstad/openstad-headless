@@ -9,7 +9,7 @@ export type SwipeCard = {
   title: string;
   infoField?: string;
   image?: string;
-
+  explanationRequired?: boolean;
 };
 
 export type SwipeWidgetProps = BaseProps &
@@ -116,6 +116,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     persistedState?.swipeAnswers ?? {}
   );
   const [showSummary, setShowSummary] = useState(persistedState?.showSummary ?? false);
+  const [showExplanationDialog, setShowExplanationDialog] = useState(false);
 
   // Persist state to sessionStorage (only during tab session, not across page refreshes)
   const persistState = useCallback(() => {
@@ -145,12 +146,12 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     // Also save state before page unload (but not on refresh since sessionStorage will be cleared)
     const handleBeforeUnload = () => {
       persistState();
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
@@ -185,17 +186,21 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }, [enableKeyboard, remainingCards.length, isAnimating]);
 
   const handleSwipeLeft = () => {
+
     if (remainingCards.length > 0 && !isAnimating) {
+      console.log(remainingCards[0].explanationRequired)
+      setShowExplanationDialog(remainingCards[0].explanationRequired || false)
+
       setIsAnimating(true);
       setSwipeDirection('left');
       const currentCard = remainingCards[0];
-      
+
       // Store the answer
       setSwipeAnswers(prev => ({
         ...prev,
         [currentCard.id]: 'left'
       }));
-      
+
       onSwipeLeft?.(currentCard);
 
       setTimeout(() => {
@@ -211,13 +216,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       setIsAnimating(true);
       setSwipeDirection('right');
       const currentCard = remainingCards[0];
-      
+
       // Store the answer
       setSwipeAnswers(prev => ({
         ...prev,
         [currentCard.id]: 'right'
       }));
-      
+
       onSwipeRight?.(currentCard);
 
       setTimeout(() => {
@@ -319,19 +324,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
-  const resetCards = () => {
-    setRemainingCards(swipeCards);
-    setCurrentCardIndex(0);
-    setIsFinished(false);
-    setSwipeAnswers({});
-    setShowSummary(false);
-    // Clear persisted state
-    try {
-      sessionStorage.removeItem(storageKey);
-    } catch (error) {
-      console.warn('Failed to clear persisted swipe state:', error);
-    }
-  };
 
   const handleAnswerChange = (cardId: string, newAnswer: 'left' | 'right') => {
     setSwipeAnswers(prev => ({
@@ -340,13 +332,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }));
   };
 
+
   if (isFinished) {
     return (
       <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
         <div className="swipe-finished-content">
           <h2>Jouw antwoorden</h2>
           <p>Bekijk en wijzig eventueel je antwoorden op de stellingen:</p>
-          
+
           <div className="swipe-summary">
             {swipeCards.map((card) => {
               const answer = swipeAnswers[card.id];
@@ -362,7 +355,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   </div>
                   <div className="swipe-summary-answer">
                     <div className="swipe-summary-buttons">
-                      <button 
+                      <button
                         className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
                         onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'left'); }}
                         aria-label={`Oneens met: ${card.title}`}
@@ -370,7 +363,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                         <i className="ri-thumb-down-fill"></i>
                         <span>Oneens</span>
                       </button>
-                      <button 
+                      <button
                         className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
                         onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'right'); }}
                         aria-label={`Eens met: ${card.title}`}
@@ -392,15 +385,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   return (
     <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0}>
-      {/* <div className="swipe-intro" role="group" aria-label="Voortgang">
-        <div className="swipe-progress">
-          <label htmlFor="swipe-progress-bar" className="sr-only">Voortgang</label>
-          <progress id="swipe-progress-bar" value={100 - (remainingCards.length / cards.length) * 100} max="100" aria-valuenow={100 - (remainingCards.length / cards.length) * 100} aria-valuemax={100} aria-label="Voortgang"></progress>
-        </div>
-        <div className="swipe-counter" aria-live="polite" tabIndex={0}>
-          Stelling {cards.length - remainingCards.length + 1} van de {cards.length}
-        </div>
-      </div> */}
       <div className="swipe-container" role="list" aria-label="Stellingen">
         <div className="swipe-stack">
           {remainingCards.slice(0, 3).map((card, index) => {
@@ -450,15 +434,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   )}
                 </div>
                 {card.infoField && (
-                <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
-                  <div className="info-card-container">
-                    <Paragraph>
+                  <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
+                    <div className="info-card-container">
+                      <Paragraph>
                         {card.infoField}
-                    </Paragraph>
+                      </Paragraph>
 
-                    <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
+                      <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
+                    </div>
                   </div>
-                </div>
                 )}
               </>
             );
@@ -477,14 +461,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             <i className="ri-thumb-down-fill"></i>
             <span>Oneens</span>
           </button>
-            <button
+          <button
             className="swipe-info-btn"
             onClick={(e) => { setIsInfoVisible(!isInfoVisible); e.preventDefault(); }}
             disabled={!remainingCards[0]?.infoField}
             aria-label="Toon info"
-            >
+          >
             <span>Info</span>
-            </button>
+          </button>
           <button
             className="swipe-btn swipe-btn-like"
             onClick={(e) => { handleSwipeRight(); e.preventDefault(); }}
@@ -496,8 +480,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             <span>Eens</span>
           </button>
         </div>
-      )
-      }
+      )}
+
+      {showExplanationDialog && (
+        <div className="explanation-dialog" role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
+          <div className="explanation-dialog-content">
+            <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
+            <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
+            <textarea placeholder='Toelichting...' rows={5} />
+            <Button appearance="primary-action-button" onClick={() => { setShowExplanationDialog(false); }}>Antwoord verzenden</Button>
+            <Button appearance="secondary-action-button" onClick={() => { setShowExplanationDialog(false); }}>Sluiten zonder toelichting</Button>
+          </div>
+        </div>
+      )}
     </div >
   );
 }
