@@ -260,6 +260,28 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     });
   };
 
+  // Function to clean up drag state and release pointer capture
+  const cleanupDragState = useCallback((element: Element | null, pointerId?: number) => {
+    setDragState({
+      isDragging: false,
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0,
+      deltaX: 0,
+      deltaY: 0,
+    });
+
+    // Force release pointer capture if element and pointerId are available
+    if (element && pointerId !== undefined) {
+      try {
+        (element as any).releasePointerCapture(pointerId);
+      } catch (error) {
+        // Ignore errors when releasing capture
+      }
+    }
+  }, []);
+
   // Touch/Mouse event handlers
   const handlePointerDown = (event: React.PointerEvent) => {
     if (isAnimating || remainingCards.length === 0) return;
@@ -281,7 +303,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
   const handlePointerMove = (event: React.PointerEvent) => {
-    if (!dragState.isDragging || isAnimating) return;
+    if (!dragState.isDragging) return;
+
+    // If animation starts during drag, immediately stop dragging
+    if (isAnimating) {
+      cleanupDragState(event.currentTarget, event.pointerId);
+      return;
+    }
 
     const clientX = event.clientX;
     const clientY = event.clientY;
@@ -305,12 +333,18 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
   const handlePointerUp = (event: React.PointerEvent) => {
-    if (!dragState.isDragging || isAnimating) return;
+    if (!dragState.isDragging) return;
 
     const swipeThreshold = 100;
     const velocityThreshold = 0.5;
 
     const velocity = Math.abs(dragState.deltaX) / 100;
+
+    // Clean up drag state first
+    cleanupDragState(event.currentTarget, event.pointerId);
+
+    // Don't trigger swipe if already animating
+    if (isAnimating) return;
 
     // Determine if swipe should trigger action
     const shouldSwipe = Math.abs(dragState.deltaX) > swipeThreshold || velocity > velocityThreshold;
@@ -325,18 +359,20 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       // Snap back
       setSwipeDirection(null);
     }
+  };
 
-    setDragState({
-      isDragging: false,
-      startX: 0,
-      startY: 0,
-      currentX: 0,
-      currentY: 0,
-      deltaX: 0,
-      deltaY: 0,
-    });
+  const handlePointerCancel = (event: React.PointerEvent) => {
+    // Handle cases where pointer is cancelled (e.g., browser takes over)
+    cleanupDragState(event.currentTarget, event.pointerId);
+    setSwipeDirection(null);
+  };
 
-    event.currentTarget.releasePointerCapture(event.pointerId);
+  const handlePointerLeave = (event: React.PointerEvent) => {
+    // Handle cases where pointer leaves the element
+    if (dragState.isDragging) {
+      cleanupDragState(event.currentTarget, event.pointerId);
+      setSwipeDirection(null);
+    }
   };
 
 
@@ -422,6 +458,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   onPointerDown={isTop ? handlePointerDown : undefined}
                   onPointerMove={isTop ? handlePointerMove : undefined}
                   onPointerUp={isTop ? handlePointerUp : undefined}
+                  onPointerCancel={isTop ? handlePointerCancel : undefined}
+                  onPointerLeave={isTop ? handlePointerLeave : undefined}
                   role="listitem"
                   aria-label={card.title}
                   tabIndex={isTop ? 0 : -1}
