@@ -14,6 +14,7 @@ function initCarousel(container) {
   const track = container.querySelector('[data-carousel-track]');
   const prevBtn = container.querySelector('[data-carousel-prev]');
   const nextBtn = container.querySelector('[data-carousel-next]');
+  const dotsContainer = container.querySelector('[data-carousel-dots]');
   
   if (!track || !prevBtn || !nextBtn) return;
   
@@ -22,7 +23,9 @@ function initCarousel(container) {
   let itemsPerView = getItemsPerView();
   let maxIndex = Math.max(0, items.length - itemsPerView);
 
-  
+  // Create dots
+  createDots();
+
   // Event listeners
   prevBtn.addEventListener('click', () => navigate(-1));
   nextBtn.addEventListener('click', () => navigate(1));
@@ -62,7 +65,9 @@ function initCarousel(container) {
     // Update buttons
     prevBtn.disabled = currentIndex === 0;
     nextBtn.disabled = currentIndex === maxIndex;
-    
+
+    // Update dots
+    updateDots();
   }
   
   
@@ -120,21 +125,48 @@ function initCarousel(container) {
     }
   }
   
+  // Dots logic
+  function createDots() {
+    if (!dotsContainer) return;
+    const dotCount = Math.max(1, items.length - getItemsPerView() + 1);
+    dotsContainer.innerHTML = '';
+    for (let i = 0; i < dotCount; i++) {
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot';
+      dot.setAttribute('aria-label', `Ga naar slide ${i + 1}`);
+      dot.addEventListener('click', () => {
+        currentIndex = i;
+        updateCarousel();
+      });
+      dotsContainer.appendChild(dot);
+    }
+    updateDots();
+  }
+
+  function updateDots() {
+    if (!dotsContainer) return;
+    const dots = dotsContainer.querySelectorAll('.carousel-dot');
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentIndex);
+    });
+  }
+
   // Initialize
   updateItemWidths();
   updateCarousel();
-  
+
   // Handle resize
   window.addEventListener('resize', () => {
     updateItemWidths();
     const newItemsPerView = getItemsPerView();
     const newMaxIndex = Math.max(0, items.length - newItemsPerView);
-    
+
     // Recalculate if needed
     if (currentIndex > newMaxIndex) {
       currentIndex = newMaxIndex;
     }
-    
+
+    createDots();
     updateCarousel();
   });
 }
