@@ -3,7 +3,7 @@ import { Button } from '../../../../../../components/ui/button';
 import { Input } from '../../../../../../components/ui/input';
 import {
   Form,
-  FormControl, FormItem, FormLabel, FormField, FormMessage
+  FormControl, FormItem, FormLabel, FormField, FormMessage, FormDescription
 } from '../../../../../../components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -121,6 +121,7 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
         >
           {fields.map((field, index) => {
             const title = field.title ? field.title : `Keuze optie ${field.id}`
+            const image = form.getValues(`choiceOptions.${index}.image`) || "";
 
             return (
               <AccordionUI
@@ -194,6 +195,29 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
                             </FormItem>
                           )}
                         />
+
+                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                          {!!image && (
+                            <>
+                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
+                              <section className="grid col-span-full grid-cols-1 gap-y-4">
+                                <div className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
+                                  <img src={image} alt={image} />
+                                  <Button
+                                    color="red"
+                                    onClick={() => {
+                                      form.setValue(`choiceOptions.${index}.image`, '');
+                                      form.resetField(`choiceOptions.${index}.imageUploader`);
+                                    }}
+                                    className="absolute left-0 top-0">
+                                    <X size={24} />
+                                  </Button>
+                                </div>
+                              </section>
+                            </>
+                          )}
+                        </div>
+
                         <Spacer size={2}/>
                       </div>
                     )

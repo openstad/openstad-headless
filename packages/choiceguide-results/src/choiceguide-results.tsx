@@ -58,6 +58,9 @@ function ChoiceGuideResults(props: ChoiceGuideResultsProps) {
                         answers={answers}
                         widgetId={widgetId}
                         hiddenFields={answers?.hiddenFields || []}
+                        displayTitle={props?.displayTitle}
+                        displayDescription={props?.displayDescription}
+                        displayImage={props?.displayImage}
                       />
                   </div>
               </div>

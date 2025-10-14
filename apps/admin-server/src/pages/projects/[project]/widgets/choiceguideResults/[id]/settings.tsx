@@ -5,7 +5,7 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
+  FormLabel, FormMessage,
 } from '../../../../../../components/ui/form';
 import {
   Select,
@@ -23,9 +23,13 @@ import { ChoiceGuideResultsProps } from '@openstad-headless/choiceguide-results/
 import {useWidgetsHook} from "@/hooks/use-widgets";
 import {useRouter} from "next/router";
 import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
+import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
     choiceguideWidgetId: z.string().optional(),
+    displayTitle: z.boolean().optional(),
+    displayDescription: z.boolean().optional(),
+    displayImage: z.boolean().optional(),
 });
 
 export default function ChoiceGuideResultSettings(
@@ -43,6 +47,9 @@ export default function ChoiceGuideResultSettings(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       choiceguideWidgetId: props?.choiceguideWidgetId || "",
+      displayTitle: undefinedToTrueOrProp(props?.displayTitle),
+      displayDescription: props?.displayDescription || false,
+      displayImage: props?.displayImage || false,
     },
   });
 
@@ -76,7 +83,7 @@ export default function ChoiceGuideResultSettings(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-1 gap-4">
 
           <FormField
             control={form.control}
@@ -98,6 +105,48 @@ export default function ChoiceGuideResultSettings(
                     ))}
                   </SelectContent>
                 </Select>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Titel van de keuzeoptie tonen?
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Beschrijving van de keuzeoptie tonen?
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayImage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Afbeelding van de keuzeoptie tonen?
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
               </FormItem>
             )}
           />

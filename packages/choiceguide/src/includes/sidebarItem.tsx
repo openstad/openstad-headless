@@ -23,6 +23,12 @@ type ChoiceItemProps = {
 const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
   const [score, setScore] = useState<Score>({ x: 0, y: 0, z: 0 });
 
+  const {
+    displayTitle = true,
+    displayDescription = false,
+    displayImage = false,
+  } = (props || {});
+
   // Calculate score for this item
   useEffect(() => {
     const itemScore = calculateScoreForItem(
@@ -69,11 +75,21 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
 
       return (
         <div className="osc-choice-default not-minus-to-plus">
-          <h4>{props.choiceOption?.title}</h4>
+          {displayTitle && (<h4>{props.choiceOption?.title}</h4>)}
+          {displayDescription && props.choiceOption?.description && (
+            <div className="osc-choice-description">
+              <p>{props.choiceOption.description}</p>
+            </div>
+          )}
           <div className="osc-choice-bar">
             <div className="osc-choice-bar-mask"></div>
             <div className="osc-choice-bar-progress" data-score={Math.round(percentageValue)}></div>
           </div>
+          {displayImage && props.choiceOption?.image && (
+            <div className="osc-choice-image-container">
+              <img src={props.choiceOption.image} alt={props.choiceOption.title} className="osc-choice-image" />
+            </div>
+          )}
         </div>
       );
     }
