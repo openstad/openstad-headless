@@ -24,7 +24,13 @@ export default defineConfig(({command}) => {
                     fileName: 'resource-detail-map',
                 },
                 rollupOptions: {
-                    external: ['react', 'react-dom', 'remixicon/fonts/remixicon.css'],
+                    external: [
+                        'react',
+                        'react-dom',
+                        'remixicon/fonts/remixicon.css',
+                        '@utrecht/component-library-css',
+                        '@utrecht/design-tokens/dist/root.css',
+                    ],
                     output: {
                         globals: {
                             'react': 'React',

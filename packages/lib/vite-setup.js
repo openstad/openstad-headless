@@ -1,22 +1,23 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import {prefix} from './prefix.js';
 
-// https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
+export function viteSetup(command, entryName, name) {
   // When running in dev mode, use the React plugin
   if (command === 'serve') {
     return {
       plugins: [react()],
+      css: prefix(),
     };
     // During build, use the classic runtime and build as an IIFE so we can deliver it to the browser
   } else {
     return {
       plugins: [react({ jsxRuntime: 'classic' })],
+      css: prefix(),
       build: {
         lib: {
           formats: ['iife'],
-          entry: 'src/button.tsx',
-          name: 'ApostropheWidgetsButton',
+          entry: `src/${entryName}.tsx`,
+          name: name,
         },
         rollupOptions: {
           external: [
@@ -25,10 +26,10 @@ export default defineConfig(({ command }) => {
             'remixicon/fonts/remixicon.css',
             '@utrecht/component-library-css',
             '@utrecht/design-tokens/dist/root.css',
-          ],
+        ],
           output: {
             globals: {
-              'react': 'React',
+              react: 'React',
               'react-dom': 'ReactDOM',
             },
           },
@@ -36,4 +37,4 @@ export default defineConfig(({ command }) => {
       },
     };
   }
-});
+}
