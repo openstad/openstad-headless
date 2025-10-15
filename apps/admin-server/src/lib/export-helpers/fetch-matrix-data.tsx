@@ -1,13 +1,15 @@
-export const fetchMatrixData = (key: string, allItems: any, results: any, fieldkeyHasTrigger = true) => {
+export const fetchMatrixData = (key: string, allItems: any, results: any, isChoiceGuide = true) => {
   const parts = key.split('_');
-  if (parts.length !== 2) {
+
+  if (parts.length !== 2 && isChoiceGuide) {
     return null;
   }
 
   const resultKey = parts[0];
   let item = null;
+  let fieldKey = '';
 
-  if (fieldkeyHasTrigger) {
+  if (isChoiceGuide) {
     const itemParts = resultKey.split('-');
     if (itemParts.length !== 2) {
       return null;
@@ -17,14 +19,26 @@ export const fetchMatrixData = (key: string, allItems: any, results: any, fieldk
 
     item = allItems.find((i: any) => i.type === 'matrix' && i.trigger === itemTrigger);
   } else {
-    item = allItems.find((i: any) => i.questionType === 'matrix' && i.fieldKey === resultKey);
+    fieldKey = key.replace('matrix_', '');
+
+    const fieldKeyParts = fieldKey.split('_');
+
+    if (fieldKeyParts.length < 2) {
+      return null;
+    }
+
+    fieldKeyParts.pop();
+    fieldKey = fieldKeyParts.join('_');
+
+    item = allItems.find((i: any) => i.questionType === 'matrix' && i.fieldKey === fieldKey);
   }
 
-  const rowTrigger = parts[1];
+  const rowTrigger = isChoiceGuide ? parts[1] : key.split('_').pop();
 
   const answers = item?.matrix?.columns || [];
 
-  const resultRow = results?.[resultKey] || '';
+  const resultRowKey = isChoiceGuide ? resultKey : fieldKey;
+  const resultRow = results?.[resultRowKey] || '';
   if (!resultRow) {
     return null;
   }
