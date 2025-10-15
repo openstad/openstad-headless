@@ -84,6 +84,9 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
                       startWithAllQuestionsAnswered={props.startWithAllQuestionsAnswered}
                       hiddenFields={props.hiddenFields}
                       items={props.items}
+                      displayTitle={props?.displayTitle}
+                      displayDescription={props?.displayDescription}
+                      displayImage={props?.displayImage}
                     />
                   </li>
                 ))}
