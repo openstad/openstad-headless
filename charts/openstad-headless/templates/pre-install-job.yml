@@ -101,7 +101,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: openstad-secrets-sa
   annotations:
-     argocd.argoproj.io/sync-wave: "0"
+     argocd.argoproj.io/sync-wave: "-119"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -109,7 +109,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: secret-creator
   annotations:
-     argocd.argoproj.io/sync-wave: "1"
+     argocd.argoproj.io/sync-wave: "-118"
 rules:
   - apiGroups: ['']
     resources: ['secrets']
@@ -121,7 +121,7 @@ metadata:
   name: secret-creator-role-to-openstad-secrets-sa
   namespace: {{ .Release.Namespace }}
   annotations:
-     argocd.argoproj.io/sync-wave: "2"
+     argocd.argoproj.io/sync-wave: "-117"
 roleRef:
   apiGroup: ''
   kind: Role
@@ -136,7 +136,7 @@ metadata:
   name: "{{ .Release.Name }}"
   namespace: {{ .Release.Namespace }}
   annotations:
-     argocd.argoproj.io/sync-wave: "3"
+     argocd.argoproj.io/sync-wave: "-116"
 spec:
   ttlSecondsAfterFinished: 10
   template:
