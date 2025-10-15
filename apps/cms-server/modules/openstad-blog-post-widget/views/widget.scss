@@ -1,5 +1,6 @@
 .related-posts {
     container-type: inline-size;
+    container-name: related-posts-container;
 
     display: grid;
     grid-template-columns: 1fr auto;
@@ -48,6 +49,10 @@
         grid-row: 2;
     }
 
+    .news-card{
+        position: relative;
+    }
+
     // Static grid layout (default)
     .static-grid {
         .static-list {
@@ -55,7 +60,7 @@
             padding: 0;
             margin: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             width: 100%;
             gap: 20px;
 
@@ -131,5 +136,18 @@
             position: absolute;
             inset: 0;
         }
+    }
+}
+
+
+@container related-posts-container (max-width: 450px) {
+    .related-posts {
+        .static-grid{
+            .news-card{
+                figure{
+                    display: none;
+                }
+            }
+        }    
     }
 }
