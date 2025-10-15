@@ -196,10 +196,10 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
                           )}
                         />
 
-                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col mt-3">
                           {!!image && (
                             <>
-                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
+                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mt-3">Afbeelding</label>
                               <section className="grid col-span-full grid-cols-1 gap-y-4">
                                 <div className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
                                   <img src={image} alt={image} />
