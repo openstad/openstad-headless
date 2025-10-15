@@ -412,15 +412,22 @@ const BaseMap = ({
     if (!mapRef || !autoZoomAndCenter) return;
     if ( !zoomAfterInit && isMapReady ) return;
 
+    if (autoZoomAndCenter === 'markers' && (!currentMarkers || currentMarkers.length === 0)) {
+      return; // Wait for markers to load
+    }
+
     centerAndZoomHandler();
   }, [isMapReady, mapRef, area, center, autoZoomAndCenter, mapDataLayers, currentMarkers, setBoundsAndCenter]);
 
-  // Quick fix for map not being ready on first render. This will set the center and zoom settings correctly.
+  // Set map ready when mapRef is available and the Leaflet map instance is ready
   useEffect(() => {
-    window.setTimeout(() => {
+    if (!mapRef) return;
+
+      mapRef.whenReady(() => {
         setIsMapReady(true);
-    }, 500);
-  }, []);
+      });
+  }, [mapRef]);
+  
 
   // markers
   useEffect(() => {
