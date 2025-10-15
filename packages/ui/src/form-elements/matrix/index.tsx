@@ -75,7 +75,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                 value: selectedChoices
             });
         }
-    } , [selectedChoices.length]);
+    } , [ JSON.stringify(selectedChoices) ]);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -91,6 +91,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
         let newSelectedChoices = [...selectedChoices];
         if (removeSelectedRadio) {
             newSelectedChoices = newSelectedChoices.filter((choice) => !choice.startsWith(rowId));
+            newSelectedChoices.push(value);
         } else if (removeSelectedCheckbox) {
             newSelectedChoices = newSelectedChoices.filter((choice) => choice !== value);
         } else {
