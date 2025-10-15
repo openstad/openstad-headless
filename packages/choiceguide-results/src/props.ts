@@ -9,4 +9,6 @@ export type ChoiceGuideResults = {
     displayTitle?: boolean;
     displayDescription?: boolean;
     displayImage?: boolean;
+    displayAsFeaturedOnly?: boolean;
+    hideScores?: boolean;
 };

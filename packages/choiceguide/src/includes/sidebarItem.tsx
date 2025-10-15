@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {ChoiceOptions, Item, Score} from '../props';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
+import RenderContent from '../../../ui/src/rte-formatting/rte-formatting'
 
 const defaultBarColor = {
   default: '#bed200',
@@ -25,6 +26,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
 
   const {
     displayTitle = true,
+    displayScore = true,
     displayDescription = false,
     displayImage = false,
   } = (props || {});
@@ -78,13 +80,15 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
           {displayTitle && (<h4>{props.choiceOption?.title}</h4>)}
           {displayDescription && props.choiceOption?.description && (
             <div className="osc-choice-description">
-              <p>{props.choiceOption.description}</p>
+              <p dangerouslySetInnerHTML={{__html: RenderContent(props.choiceOption.description)}} />
             </div>
           )}
-          <div className="osc-choice-bar">
-            <div className="osc-choice-bar-mask"></div>
-            <div className="osc-choice-bar-progress" data-score={Math.round(percentageValue)}></div>
-          </div>
+          { displayScore && (
+            <div className="osc-choice-bar">
+              <div className="osc-choice-bar-mask"></div>
+              <div className="osc-choice-bar-progress" data-score={Math.round(percentageValue)}></div>
+            </div>
+          )}
           {displayImage && props.choiceOption?.image && (
             <div className="osc-choice-image-container">
               <img src={props.choiceOption.image} alt={props.choiceOption.title} className="osc-choice-image" />
