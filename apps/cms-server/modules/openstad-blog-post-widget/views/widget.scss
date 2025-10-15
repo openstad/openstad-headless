@@ -53,7 +53,6 @@
         position: relative;
     }
 
-    // Static grid layout (default)
     .static-grid {
         .static-list {
             list-style: none;
@@ -70,7 +69,6 @@
         }
     }
 
-    // Carousel layout
     &.carousel-enabled {
         .carousel-container {
             position: relative;
@@ -81,7 +79,7 @@
         .carousel-track {
             list-style: none;
             padding: 0;
-            margin: 0 -10px; // To counteract li padding
+            margin: 0 -10px;
             display: flex;
             transition: transform 0.3s ease-in-out;
             gap: 0px;

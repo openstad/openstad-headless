@@ -81,9 +81,7 @@ module.exports = {
             const maxItems = showAll ? null : (widget.count || 3);
             let posts = [];
             
-            // Add highlighted post first if it exists
             if (widget.highlightedPost && widget.highlightedPost.length > 0) {
-              // Fetch full blog post document to ensure _url is present
               const highlightedId = widget.highlightedPost[0]._id;
               const highlightedDoc = highlightedId
                 ? await blogModule.find(req, { _id: highlightedId }).toObject()
@@ -93,19 +91,16 @@ module.exports = {
             
             let additionalPosts = [];
             if (widget.selectionType === 'manual' && widget.selectedPosts && widget.selectedPosts.length > 0) {
-              // Manual selection: use selected posts, but exclude highlighted post if it's already included
               additionalPosts = widget.selectedPosts.filter(post => {
                 const highlightedId = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0]._id : null;
                 return post._id !== highlightedId;
               });
             } else {
-              // Automatic selection: get newest posts, but exclude highlighted post if it exists
               const criteria = {};
               if (widget.tag) {
                 criteria.tags = widget.tag;
               }
               
-              // Exclude highlighted post from automatic selection
               if (widget.highlightedPost && widget.highlightedPost.length > 0) {
                 criteria._id = { $ne: widget.highlightedPost[0]._id };
               }
@@ -118,10 +113,8 @@ module.exports = {
               additionalPosts = await query.toArray();
             }
             
-            // Add the additional posts
             posts = posts.concat(showAll ? additionalPosts : additionalPosts.slice(0, maxItems ? maxItems - posts.length : undefined));
             
-            // Ensure createdAt is a valid ISO string for each post
             widget.relatedPosts = posts.map(post => {
               if (post.createdAt) {
                 const dateObj = new Date(post.createdAt);
