@@ -24,6 +24,7 @@ import {useWidgetsHook} from "@/hooks/use-widgets";
 import {useRouter} from "next/router";
 import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
 import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
+import { Spacer } from '@/components/ui/spacer';
 
 const formSchema = z.object({
     choiceguideWidgetId: z.string().optional(),
@@ -87,7 +88,7 @@ export default function ChoiceGuideResultSettings(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-1 gap-4">
+          className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-1 gap-2">
 
           <FormField
             control={form.control}
@@ -112,49 +113,49 @@ export default function ChoiceGuideResultSettings(
               </FormItem>
             )}
           />
-
+          <Spacer size={1} />
           <FormField
             control={form.control}
             name="displayTitle"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Titel van de keuzeoptie tonen?
+                  Titel van de keuzeoptie tonen in het scoreblok?
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          <Spacer size={1} />
           <FormField
             control={form.control}
             name="displayDescription"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Beschrijving van de keuzeoptie tonen?
+                  Beschrijving van de keuzeoptie tonen in het scoreblok?
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          <Spacer size={1} />
           <FormField
             control={form.control}
             name="displayImage"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Afbeelding van de keuzeoptie tonen?
+                  Afbeelding van de keuzeoptie tonen in het scoreblok?
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          <Spacer size={1} />
           <FormField
             control={form.control}
             name="displayAsFeaturedOnly"
@@ -170,7 +171,7 @@ export default function ChoiceGuideResultSettings(
               </FormItem>
             )}
           />
-
+          <Spacer size={1} />
           { !!form.watch('displayAsFeaturedOnly') && (
             <FormField
               control={form.control}
@@ -189,7 +190,7 @@ export default function ChoiceGuideResultSettings(
               )}
             />
           )}
-
+          <Spacer size={1} />
           <Button type="submit" className="w-fit col-span-full">
             Opslaan
           </Button>
