@@ -17,8 +17,7 @@ import MarkerClusterGroup from './marker-cluster-group';
 import TileLayer from './tile-layer';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props';
 
-// TODO: Fix cross-package import for gesture handling
-// import '@openstad-headless/document-map/src/gesture.js';
+import '@openstad-headless/document-map/src/gesture';
 
 declare module 'leaflet' {
   function mapInteraction(map: L.Map, options?: any): any;
@@ -300,14 +299,6 @@ const BaseMap = ({
 
   const setBoundsAndCenter = useCallback(
     (polygons: Array<Array<LocationType>>, focus: "area" | "markers", depth: number) => {
-      // Check if mapRef is available and has required methods
-      if (!mapRef || typeof mapRef.panTo !== 'function' || typeof mapRef.fitBounds !== 'function') {
-        console.log('❌ setBoundsAndCenter: mapRef not ready');
-        return;
-      }
-      
-      console.log('🗺️ setBoundsAndCenter executing', { focus, depth, markersCount: currentMarkers?.length });
-      
       if (focus === 'area') {
         let allPolygons: LocationType[][] = [];
 
@@ -378,12 +369,6 @@ const BaseMap = ({
   }, [mapId]);
 
   const centerAndZoomHandler = useCallback((overwriteAutoZoomAndCenter: string = '', opts: { bounceDepth?: number } = {}) => {
-    // Check if mapRef is available before attempting to center/zoom
-    if (!mapRef || typeof mapRef.fitBounds !== 'function') {
-      console.log('❌ centerAndZoomHandler: mapRef not ready');
-      return;
-    }
-    
     const depth = opts.bounceDepth ?? 0;
     const autoZoomAndCenterSetting = overwriteAutoZoomAndCenter || autoZoomAndCenter;
 
@@ -413,14 +398,8 @@ const BaseMap = ({
           if (coords.length > 0) {
             const bounds = latLngBounds(coords.map((c: any) => [c.lat, c.lng] as [number, number]));
             mapRef.fitBounds(bounds);
-            return;
           }
-          
-          // If no coordinates found yet, data layers might still be loading
-          // Don't fall through to default centering, wait for data
-          if (visibleMapDataLayers.some(layer => layer?.layer?.features === undefined)) {
-            return;
-          }
+          return;
         }
       } else if (autoZoomAndCenterSetting === "markers" && currentMarkers?.length || isMapReady) {
         setBoundsAndCenter([], 'markers', depth);
@@ -433,7 +412,6 @@ const BaseMap = ({
     if (!mapRef || !autoZoomAndCenter) return;
     if ( !zoomAfterInit && isMapReady ) return;
 
-    console.log('🎯 Calling centerAndZoomHandler', { isMapReady, autoZoomAndCenter, hasMarkers: !!currentMarkers?.length });
     centerAndZoomHandler();
   }, [isMapReady, mapRef, area, center, autoZoomAndCenter, mapDataLayers, currentMarkers, setBoundsAndCenter]);
 
@@ -441,21 +419,11 @@ const BaseMap = ({
   useEffect(() => {
     if (!mapRef) return;
     
-    // Use Leaflet's whenReady to ensure the map is fully initialized
-    try {
       mapRef.whenReady(() => {
-        console.log('✅ Map whenReady fired, setting isMapReady to true');
         setIsMapReady(true);
       });
-    } catch (err) {
-      // Fallback: If whenReady fails, use a short timeout as backup
-      console.warn('whenReady failed, using fallback timeout:', err);
-      const timer = window.setTimeout(() => {
-        setIsMapReady(true);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
   }, [mapRef]);
+    
 
   // markers
   useEffect(() => {
@@ -810,6 +778,9 @@ function MapEventsListener({
   onMarkerClick = undefined,
 }: MapEventsListenerProps) {
   const map = useMapEvents({
+    load: () => {
+      console.log("ONLOAD");
+    },
     click: (e: LeafletMouseEvent) => {
       const targetElement = e.originalEvent.target as HTMLElement;
       const isMarkerClick = targetElement.closest(".leaflet-marker-icon");
