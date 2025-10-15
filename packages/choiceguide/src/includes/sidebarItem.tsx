@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {ChoiceOptions, Item, Score} from '../props';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
 import RenderContent from '../../../ui/src/rte-formatting/rte-formatting'
+import {Heading4} from "@utrecht/component-library-react";
 
 const defaultBarColor = {
   default: '#bed200',
@@ -77,7 +78,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
 
       return (
         <div className="osc-choice-default not-minus-to-plus">
-          {displayTitle && (<h4>{props.choiceOption?.title}</h4>)}
+          {displayTitle && (<Heading4>{props.choiceOption?.title}</Heading4>)}
           {displayDescription && props.choiceOption?.description && (
             <div className="osc-choice-description">
               <p dangerouslySetInnerHTML={{__html: RenderContent(props.choiceOption.description)}} />

@@ -134,9 +134,9 @@ function ChoiceGuideResults(props: ChoiceGuideResultsProps) {
                                 answers={answers}
                                 weights={weights}
                                 choicesType={'default'}
-                                displayTitle={props?.displayTitle}
-                                displayDescription={props?.displayDescription}
-                                displayImage={props?.displayImage}
+                                displayTitle={true}
+                                displayDescription={true}
+                                displayImage={true}
                                 displayScore={false}
                             />
                         ))}
