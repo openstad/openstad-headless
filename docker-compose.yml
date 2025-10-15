@@ -297,7 +297,7 @@ services:
       - APOS_RELEASE_ID=${APOS_RELEASE_ID}
       - REACT_CDN=${REACT_CDN}
       - REACT_DOM_CDN=${REACT_DOM_CDN}
-      - DISABLE_WIDGET_PREVIEW=${CMS_DISABLE_WIDGET_PREVIEW:-false}
+      - DISABLE_WIDGET_PREVIEW=${CMS_DISABLE_WIDGET_PREVIEW:-true}
     ports:
       - '${CMS_PORT}:${CMS_PORT}'
     volumes:
