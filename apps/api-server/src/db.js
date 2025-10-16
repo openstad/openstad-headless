@@ -28,8 +28,13 @@ const ssl = {
 }
 
 if (dbConfig.mysqlCaCert?.trim?.()) {
+  // support for base64 encoded certs (no newlines)
+  // if it starts with -----BEGIN CERTIFICATE----- we assume it's a raw cert
+  // otherwise we assume it's base64 encoded
+  const caCert = dbConfig.mysqlCaCert.trim().indexOf('-----BEGIN CERTIFICATE-----') === 0 ? dbConfig.mysqlCaCert.trim() : Buffer.from(dbConfig.mysqlCaCert.trim(), 'base64').toString('utf8');
+  
 	ssl.rejectUnauthorized = true;
-	ssl.ca = [ dbConfig.mysqlCaCert ];
+	ssl.ca = [ caCert ];
 }
 
 if (dbConfig.requireSsl === "true" || dbConfig.requireSsl === true) {

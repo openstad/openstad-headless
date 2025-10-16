@@ -69,7 +69,37 @@ spec:
 
           - name: DISABLE_WIDGET_PREVIEW
             value: {{ .Values.cms.disableWidgetPreview | default "false" | quote }}
+{{- if eq .Values.cms.useS3 "true" }}
+          - name: APOS_S3_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                key: cmsEndpoint
+                name: {{ template "openstad.s3.secret.fullname" . }}
 
+          - name: APOS_S3_BUCKET
+            valueFrom:
+              secretKeyRef:
+                key: cmsBucket
+                name: {{ template "openstad.s3.secret.fullname" . }}
+
+          - name: APOS_S3_REGION
+            valueFrom:
+              secretKeyRef:
+                key: cmsRegion
+                name: {{ template "openstad.s3.secret.fullname" . }}
+
+          - name: APOS_S3_KEY
+            valueFrom:
+              secretKeyRef:
+                key: cmsKey
+                name: {{ template "openstad.s3.secret.fullname" . }}
+
+          - name: APOS_S3_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: cmsSecret
+                name: {{ template "openstad.s3.secret.fullname" . }}
+{{- end }}
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
@@ -82,10 +112,14 @@ spec:
         {{- end }}
         resources:
 {{ toYaml .Values.cms.resources | indent 12 }}
+{{- if ne .Values.cms.useS3 "true" }}
         volumeMounts:
           - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/attachments" }}
             name: data-vol
+{{- end }}
+{{- if ne .Values.cms.useS3 "true" }}
       volumes:
         - name: data-vol
           persistentVolumeClaim:
             claimName: cms-data-claim
+{{- end }}
