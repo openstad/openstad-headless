@@ -7,7 +7,7 @@ export default {
       'Content-Type': 'application/json'
     };
 
-    return resourceId ? this.fetch(url, { headers }) : [];
+    return ( !resourceId || resourceId === 'undefined' ) ? [] : this.fetch(url, { headers });
   },
 
   update: async function({ projectId, resourceId }, data) {
