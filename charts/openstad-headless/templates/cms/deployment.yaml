@@ -68,7 +68,7 @@ spec:
             value: {{ .Values.cms.disableRateLimiter | default "false" | quote }}
 
           - name: DISABLE_WIDGET_PREVIEW
-            value: {{ .Values.cms.disableWidgetPreview | default "false" | quote }}
+            value: {{ .Values.cms.disableWidgetPreview | default "true" | quote }}
 
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
