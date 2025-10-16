@@ -80,7 +80,7 @@ const MapField: FC<MapProps> = ({
     });
 
     let areaId = props?.map?.areaId || false;
-    const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
+    const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => String(area.id) === String(areaId)) || {}).polygon : [];
 
 
     function calculateCenter(polygon: Point[]) {
@@ -109,7 +109,7 @@ const MapField: FC<MapProps> = ({
     const [currentCenter, setCurrentCenter] = useState<LocationType | undefined>(undefined);
 
     useEffect( () => {
-        if (polygon.length > 0) {
+        if (polygon?.length > 0) {
             setCurrentCenter( calculateCenter(polygon) );
         }
     }, [polygon] );
@@ -160,7 +160,7 @@ const MapField: FC<MapProps> = ({
             className="form-field-map-container"
             id={`map`}
           >
-            {((areaId && polygon.length) || !Number(areaId)) && (
+            {((areaId && polygon?.length) || !Number(areaId)) && (
               <EditorMap
                   {...props}
                   fieldName={fieldKey}
