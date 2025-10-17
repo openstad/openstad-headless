@@ -377,22 +377,14 @@ module.exports = {
       login: {
         label: 'Menu instellingen',
         fields: [
-          
           'showLoginButton',
           'showLoginInCTA',
-         
           'loginButtonLabel',
-         
           'showAccountButton',
-         
           'accountButtonHref',
-         
           'accountButtonLabel',
-         
           'logoutButtonLabel',
-         
           'ctaButtons',
-         
           'topMenuButtons',
         ,
         ],
