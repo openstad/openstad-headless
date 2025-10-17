@@ -15,7 +15,7 @@ export function Icon({
   iconOnly?: boolean;
 }) {
   return (
-    <div className={`icon ${text === undefined || iconOnly === true ? 'no-label' : ''}`}>
+    <div className={`icon ${text === undefined || iconOnly === true ? 'no-label' : ''}`} aria-hidden={iconOnly ? "true" : "false"}>
       <i className={`${icon} ${variant}`}></i>
       <p>{description ? <span className='sr-only'>{description}</span>: null}{text}</p>
     </div>

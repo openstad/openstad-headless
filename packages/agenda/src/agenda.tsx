@@ -41,24 +41,29 @@ function Agenda(props: AgendaWidgetProps) {
           props.items
             ?.sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
             .map((item) => (
-                <div key={item.trigger} className={`osc-agenda-item ${item.active ? '--active-item' : ''}`}>
-                  <div className="osc-date-circle"></div>
-                  <div className="osc-agenda-content">
-                    <Heading4>{item.title}</Heading4>
-                    <Paragraph>{item.description}</Paragraph>
-                    {item.links && item.links?.length > 0 && (
-                      <LinkList className="osc-agenda-list">
-                        {item.links?.map((link, index) => (
-                          <LinkListLink
-                            href={link.url}
-                            target={link.openInNewWindow ? '_blank' : '_self'}>
-                            {link.title}
-                          </LinkListLink>
-                        ))}
-                      </LinkList>
-                    )}
-                  </div>
+              <div
+                key={item.trigger}
+                className={`osc-agenda-item${item.active ? ' --active-item' : ''}`}
+                aria-current={item.active ? 'true' : undefined}
+              >
+                <div className="osc-date-circle"></div>
+                <div className="osc-agenda-content">
+
+                  <Heading4>{item.title}</Heading4>
+                  <Paragraph>{item.description}</Paragraph>
+                  {item.links && item.links?.length > 0 && (
+                    <LinkList className="osc-agenda-list">
+                      {item.links?.map((link, index) => (
+                        <LinkListLink
+                          href={link.url}
+                          target={link.openInNewWindow ? '_blank' : '_self'}>
+                          {link.title}
+                        </LinkListLink>
+                      ))}
+                    </LinkList>
+                  )}
                 </div>
+              </div>
             ))}
       </section>
     </div>
