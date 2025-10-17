@@ -25,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {Checkbox} from "@/components/ui/checkbox";
-import React, {useEffect, useState} from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import React, { useEffect, useState } from "react";
 import useTags from "@/hooks/use-tags";
 import _ from "lodash";
 
@@ -35,6 +35,7 @@ const formSchema = z.object({
   displayMap: z.boolean(),
   displayAsTabs: z.boolean(),
   displayTitle: z.boolean(),
+  headingLevel: z.string(),
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
   descriptionMaxLength: z.coerce.number(),
@@ -65,6 +66,7 @@ const formSchema = z.object({
   displayTags: z.boolean().optional(),
   overviewTagGroups: z.array(z.string()).optional(),
   dialogTagGroups: z.array(z.string()).optional(),
+  displayTagIcon: z.boolean().optional(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -85,6 +87,7 @@ export default function WidgetResourceOverviewDisplay(
       displayMap: props?.displayMap || false,
       displayAsTabs: props?.displayAsTabs || false,
       displayTitle: props?.displayTitle || false,
+      headingLevel: props?.headingLevel,
       bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
@@ -104,11 +107,12 @@ export default function WidgetResourceOverviewDisplay(
       clickableImage: props?.clickableImage || false,
       displayBudget: props?.displayBudget !== false,
       displayTags: props?.displayTags !== false,
+      displayTagIcon: props?.displayTagIcon || false,
       displayLocationFilter: props?.displayLocationFilter === true,
       listTabTitle: typeof (props?.listTabTitle) === 'undefined' ? 'Lijst' : props.listTabTitle,
       mapTabTitle: typeof (props?.mapTabTitle) === 'undefined' ? 'Kaart' : props.mapTabTitle,
       displayOverviewTagGroups: props?.displayOverviewTagGroups || false,
-      overviewTagGroups: props?.overviewTagGroups  || [],
+      overviewTagGroups: props?.overviewTagGroups || [],
       dialogTagGroups: props?.dialogTagGroups || [],
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
@@ -142,7 +146,7 @@ export default function WidgetResourceOverviewDisplay(
   }, [tags]);
 
   useEffect(() => {
-    if (displayTags && typeof props.dialogTagGroups === 'undefined' ) {
+    if (displayTags && typeof props.dialogTagGroups === 'undefined') {
       const allTagGroups = tagGroupNames;
       form.setValue('dialogTagGroups', allTagGroups);
       props.onFieldChanged('dialogTagGroups', allTagGroups);
@@ -156,52 +160,28 @@ export default function WidgetResourceOverviewDisplay(
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
 
-            <Heading size="xl">Algemeen</Heading>
-            <Separator style={{margin: "-10px 0 0"}} className="my-4 col-span-full" />
+          <Heading size="xl">Algemeen</Heading>
+          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
 
-            <FormField
-              control={form.control}
-              name="displayBanner"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Titel boven het overzicht weergeven?</FormLabel>
-                  {YesNoSelect(field, props)}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {displayBanner && (
-              <FormField
-                control={form.control}
-                name="bannerText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel boven het overzicht</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        {...field}
-                        onChange={(e) => {
-                          onFieldChange(field.name, e.target.value);
-                          field.onChange(e);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <FormField
+            control={form.control}
+            name="displayBanner"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Titel boven het overzicht weergeven?</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
             )}
+          />
 
+          {displayBanner && (
             <FormField
               control={form.control}
-              name="applyText"
+              name="bannerText"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Tekst voor het toepassen van de filters
-                  </FormLabel>
+                  <FormLabel>Titel boven het overzicht</FormLabel>
                   <FormControl>
                     <Input
                       type="text"
@@ -216,41 +196,65 @@ export default function WidgetResourceOverviewDisplay(
                 </FormItem>
               )}
             />
+          )}
 
-            <FormField
-              control={form.control}
-              name="resetText"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Tekst voor het resetten van de filters
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="applyText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tekst voor het toepassen van de filters
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="displayMap"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kaart weergeven</FormLabel>
-                  {YesNoSelect(field, props)}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="resetText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tekst voor het resetten van de filters
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayMap"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Kaart weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {displayMap && (
             <FormField
@@ -272,7 +276,7 @@ export default function WidgetResourceOverviewDisplay(
             />
           )}
 
-          { (displayMap && displayAsTabs) && (
+          {(displayMap && displayAsTabs) && (
             <>
               <FormField
                 control={form.control}
@@ -349,7 +353,7 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          { displayOverviewTagGroups && (
+          {displayOverviewTagGroups && (
             <FormField
               control={form.control}
               name="overviewTagGroups"
@@ -404,7 +408,7 @@ export default function WidgetResourceOverviewDisplay(
 
 
           <Heading size="xl" className="col-span-full mt-6">Tegels</Heading>
-          <Separator style={{margin: "-10px 0 0"}} className="my-4 col-span-full" />
+          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
 
           <FormField
             control={form.control}
@@ -417,29 +421,73 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           />
+          <div>
+            <FormField
+              control={form.control}
+              name="titleMaxLength"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Hoeveelheid karakters van de titel die getoond wordt
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />  
 
-          <FormField
-            control={form.control}
-            name="titleMaxLength"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Hoeveelheid karakters van de titel die getoond wordt
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
+            <br />
+
+            <FormField
+              control={form.control}
+              name="headingLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Heading Level</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      props.onFieldChanged(field.name, value);
                     }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecteer een optie" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem
+                        value={'2'}>
+                        Heading 2 (H2)
+                      </SelectItem>
+                      <SelectItem
+                        value={'3'}>
+                        Heading 3 (H3)
+                      </SelectItem>
+                      <SelectItem
+                        value={'4'}>
+                        Heading 4 (H4)
+                      </SelectItem>
+                      <SelectItem
+                        value={'5'}>
+                        Heading 5 (H5)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           {/* <FormField
             control={form.control}
             name="displayRanking"
@@ -641,8 +689,25 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="displayTagIcon"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tag icoon weergeven in de tegels
+                </FormLabel>
+                <FormDescription>
+                  Bij de tags kun je een &apos;Icoon voor de kaart&apos; uploaden. Als je dit aanvinkt, wordt dit icoon ook in de tegels getoond.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Heading size="xl" className="col-span-full mt-6">Dialog</Heading>
-          <Separator style={{margin: "-10px 0 0"}} className="my-4 col-span-full" />
+          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
 
           <FormField
             control={form.control}
@@ -705,120 +770,120 @@ export default function WidgetResourceOverviewDisplay(
 
           {displayDocuments && (
             <>
-            <FormField
-              control={form.control}
-              name="documentsTitle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Welke titel moet er boven de download knop(pen) komen?
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="documentsTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke titel moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="documentsDesc"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Welke beschrijving moet er boven de download knop(pen) komen?
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="documentsDesc"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke beschrijving moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </>
           )}
 
+          <FormField
+            control={form.control}
+            name="displayTags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tags in dialog weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {displayTags && (
             <FormField
               control={form.control}
-              name="displayTags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Tags in dialog weergeven
-                  </FormLabel>
-                  {YesNoSelect(field, props)}
-                  <FormMessage />
+              name="dialogTagGroups"
+              render={() => (
+                <FormItem className="col-span-full">
+                  <div>
+                    <FormLabel>Selecteer van welke tag groepen de tags getoond moeten worden in de dialog
+                    </FormLabel>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
+                    {(tagGroupNames || []).map((groupName, index) => (
+                      <>
+                        <FormField
+                          key={`parent${groupName}`}
+                          control={form.control}
+                          name="dialogTagGroups"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={groupName}
+                                className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={(field.value ?? []).includes(groupName)}
+                                    onCheckedChange={(checked: boolean) => {
+                                      let updatedFields = field.value ?? [];
+                                      if (checked) {
+                                        updatedFields = [...updatedFields, groupName];
+                                      } else {
+                                        updatedFields = updatedFields.filter((name) => name !== groupName);
+                                      }
+                                      field.onChange(updatedFields);
+                                      props.onFieldChanged(field.name, updatedFields);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {groupName}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+
+                      </>
+                    ))}
+                  </div>
                 </FormItem>
               )}
             />
-
-              { displayTags && (
-                <FormField
-                  control={form.control}
-                  name="dialogTagGroups"
-                  render={() => (
-                    <FormItem className="col-span-full">
-                      <div>
-                        <FormLabel>Selecteer van welke tag groepen de tags getoond moeten worden in de dialog
-                        </FormLabel>
-                      </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
-                        {(tagGroupNames || []).map((groupName, index) => (
-                          <>
-                            <FormField
-                              key={`parent${groupName}`}
-                              control={form.control}
-                              name="dialogTagGroups"
-                              render={({ field }) => {
-                                return (
-                                  <FormItem
-                                    key={groupName}
-                                    className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={(field.value ?? []).includes(groupName)}
-                                        onCheckedChange={(checked: boolean) => {
-                                          let updatedFields = field.value ?? [];
-                                          if (checked) {
-                                            updatedFields = [...updatedFields, groupName];
-                                          } else {
-                                            updatedFields = updatedFields.filter((name) => name !== groupName);
-                                          }
-                                          field.onChange(updatedFields);
-                                          props.onFieldChanged(field.name, updatedFields);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      {groupName}
-                                    </FormLabel>
-                                  </FormItem>
-                                );
-                              }}
-                            />
-
-                          </>
-                        ))}
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              )}
+          )}
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

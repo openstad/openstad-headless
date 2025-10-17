@@ -136,6 +136,10 @@ module.exports = {
                   label: 'secondary-action',
                   value: 'secondary-action',
                 },
+                {
+                  label: 'Extra menu knop',
+                  value: 'menu-button',
+                },
               ],
             },
           },
@@ -164,6 +168,12 @@ module.exports = {
         type: 'boolean',
         def: 'false',
         label: 'Toon login knop',
+      },
+      
+      showLoginInCTA: {
+        type: 'boolean',
+        def: 'false',
+        label: 'Toon login knop in het menu',
       },
 
       loginButtonLabel: {
@@ -367,14 +377,24 @@ module.exports = {
       login: {
         label: 'Menu instellingen',
         fields: [
+          
           'showLoginButton',
+          'showLoginInCTA',
+         
           'loginButtonLabel',
+         
           'showAccountButton',
+         
           'accountButtonHref',
+         
           'accountButtonLabel',
+         
           'logoutButtonLabel',
+         
           'ctaButtons',
+         
           'topMenuButtons',
+        ,
         ],
       },
       cookies: {

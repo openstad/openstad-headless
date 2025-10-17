@@ -141,6 +141,7 @@ function StemBegroot({
   //   useState<boolean>(false);
 
   const [activeTagTab, setActiveTagTab] = useState<string>('');
+  const [visitedTagTabs, setVisitedTagTabs] = useState<Array<string>>([]);
 
   const stringToArray = (str: string) => {
     return str
@@ -528,6 +529,10 @@ function StemBegroot({
     }
   }, [filteredResources]);
 
+  useEffect(() => {
+    setVisitedTagTabs((prev) => prev.includes(activeTagTab) ? prev : [...prev, activeTagTab]);
+  }, [activeTagTab]);
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -830,6 +835,16 @@ function StemBegroot({
                     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
                       const unmetTags = tagCounter.filter(tagObj => {
                         const key = Object.keys(tagObj)[0];
+
+                        if (
+                          tagObj[key].min === 0 &&
+                          tagObj[key].current === 0 &&
+                          key !== activeTagTab &&
+                          !visitedTagTabs.includes(key)
+                        ) {
+                          return true;
+                        }
+
                         return tagObj[key].current < tagObj[key].min;
                       });
 
@@ -921,6 +936,16 @@ function StemBegroot({
                     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
                       const unmetTags = tagCounter.filter(tagObj => {
                         const key = Object.keys(tagObj)[0];
+
+                        if (
+                          tagObj[key].min === 0 &&
+                          tagObj[key].current === 0 &&
+                          key !== activeTagTab &&
+                          !visitedTagTabs.includes(key)
+                        ) {
+                          return true;
+                        }
+
                         return tagObj[key].current < tagObj[key].min;
                       });
 

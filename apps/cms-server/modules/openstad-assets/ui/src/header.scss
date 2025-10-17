@@ -69,7 +69,7 @@ header {
 
 .header_navbar-container {
   display: flex;
-  gap: 20px;
+  gap: 10px;
 }
 
 .header-side-container {
@@ -355,6 +355,7 @@ header:has(.header_navbar-container.--show)~#navbar {
   padding: 2rem 10px 10px 10px;
   justify-items: start;
   overflow: auto;
+  gap: 0;
 
   display: flex;
   flex-direction: column;
@@ -370,6 +371,18 @@ header:has(.header_navbar-container.--show)~#navbar {
 
     &:after {
       transform: translate(-50%, -50%) rotate(-45deg);
+    }
+  }
+
+  .extra-menu-buttons {
+    flex-direction: column;
+
+    a {
+      display: block;
+      width: 100%;
+      max-width: none;
+      padding: 10px;
+      min-height: unset;
     }
   }
 
@@ -445,7 +458,7 @@ header:has(.header_navbar-container.--show)~#navbar {
     align-items: center;
     gap: 10px;
 
-    & > div {
+    &>div {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -466,4 +479,34 @@ header:has(.header_navbar-container.--show)~#navbar {
 
 #navbar.--compact:has(+ .cta-buttons) {
   margin-right: 0;
+}
+
+.extra-menu-buttons {
+  display: flex;
+}
+
+.cta-buttons {
+
+  .utrecht-button-link.utrecht-button-link--account,
+  .utrecht-button-link.utrecht-button-link--menu-button {
+    padding: unset;
+    border: unset;
+
+    padding: 10px;
+    text-decoration: none;
+    color: var(--nlds-main-menu-item-color, #000);
+    border-bottom: solid 2px transparent;
+    white-space: nowrap;
+    font-weight: 600;
+    font-family: var(--bs-body-font-family);
+    line-height: 1.125rem;
+    background: unset;
+
+    &:hover,
+    &:focus-visible {
+      scale: 1;
+      color: var(--nlds-main-menu-item-color--hover, var(--utrecht-link-hover-color));
+      border-color: var(--nlds-main-menu-item-border-color--hover, var(--utrecht-link-hover-color));
+    }
+  }
 }
