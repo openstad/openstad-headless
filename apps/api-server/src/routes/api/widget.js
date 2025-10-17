@@ -58,6 +58,17 @@ router
       return next(new Error('Invalid widget type'));
     }
 
+    try {
+        if (
+            !!widgetDefinition.defaultConfig &&
+            !widgetDefinition.defaultConfig.projectId
+        ) {
+            widgetDefinition.defaultConfig.projectId = projectId;
+        }
+    } catch (err) {
+        console.log('Error setting projectId in defaultConfig', err);
+    }
+
     const createdWidget = await db.Widget.create({
       projectId,
       description: widget.description,

@@ -915,7 +915,7 @@ export default function WidgetResourceFormItems(
                         ) : (
                             <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                                 <div>
-                                    <Heading size="xl">Resource Formulier items</Heading>
+                                    <Heading size="xl">Inzending Formulier items</Heading>
                                     <Separator className="my-4" />
                                     <div className="w-full lg:w-2/3 flex flex-col gap-y-4">
                                         <FormField
@@ -943,17 +943,17 @@ export default function WidgetResourceFormItems(
                                                             <SelectItem value="select">Dropdown</SelectItem>
                                                             <SelectItem value="matrix">Matrix vraag</SelectItem>
 
-                                                            <SelectItem value="title">Resource: Titel</SelectItem>
-                                                            <SelectItem value="summary">Resource: Samenvatting</SelectItem>
-                                                            <SelectItem value="description">Resource: Beschrijving</SelectItem>
-                                                            <SelectItem value="images">Resource: Uploaden afbeeldingen</SelectItem>
-                                                            <SelectItem value="tags">Resource: Tags</SelectItem>
-                                                            <SelectItem value="location">Resource: Locatie</SelectItem>
-                                                            <SelectItem value="estimate">Resource: Geschatte kosten</SelectItem>
-                                                            <SelectItem value="role">Resource: Rol</SelectItem>
-                                                            <SelectItem value="phone">Resource: Telefoonnummer</SelectItem>
-                                                            <SelectItem value="advice">Resource: Tips</SelectItem>
-                                                            <SelectItem value="budget">Resource: Budget</SelectItem>
+                                                            <SelectItem value="title">Inzending: Titel</SelectItem>
+                                                            <SelectItem value="summary">Inzending: Samenvatting</SelectItem>
+                                                            <SelectItem value="description">Inzending: Beschrijving</SelectItem>
+                                                            <SelectItem value="images">Inzending: Uploaden afbeeldingen</SelectItem>
+                                                            <SelectItem value="tags">Inzending: Tags</SelectItem>
+                                                            <SelectItem value="location">Inzending: Locatie</SelectItem>
+                                                            <SelectItem value="estimate">Inzending: Geschatte kosten</SelectItem>
+                                                            <SelectItem value="role">Inzending: Rol</SelectItem>
+                                                            <SelectItem value="phone">Inzending: Telefoonnummer</SelectItem>
+                                                            <SelectItem value="advice">Inzending: Tips</SelectItem>
+                                                            <SelectItem value="budget">Inzending: Budget</SelectItem>
 
                                                         </SelectContent>
                                                     </Select>

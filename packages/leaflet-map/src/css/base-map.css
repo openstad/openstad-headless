@@ -144,3 +144,16 @@
 .osc-map-legend.legend input[type="checkbox"] {
   margin-right: 3px;
 }
+
+.leaflet-tooltip-pane .leaflet-tooltip {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: white;
+  text-shadow: 0 0 4px black;
+  font-size: .9rem;
+}
+
+.leaflet-overlay-pane .leaflet-interactive {
+  pointer-events: none;
+}
