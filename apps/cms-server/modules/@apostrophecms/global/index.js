@@ -97,6 +97,18 @@ module.exports = {
         default: 'Afbeelding van het logo, link naar de homepage',
       },
 
+      footerLogo: {
+        type: 'attachment',
+        label: 'Footer logo',
+        fileGroup: 'images',
+      },
+
+      footerLogoAltText: {
+        type: 'string',
+        label: 'Logo alt text',
+        default: 'Afbeelding van het logo',
+      },
+
       ctaButtons: {
         label: 'Header buttons',
         type: 'array',
@@ -374,6 +386,7 @@ module.exports = {
           'logoutButtonLabel',
           'ctaButtons',
           'topMenuButtons',
+        ,
         ],
       },
       cookies: {
@@ -386,7 +399,7 @@ module.exports = {
       },
       footer: {
         label: 'Footer',
-        fields: ['footerlinks'],
+        fields: ['footerLogo', 'footerLogoAltText', 'footerlinks'],
       },
       errorPage: {
         label: '404 pagina',
