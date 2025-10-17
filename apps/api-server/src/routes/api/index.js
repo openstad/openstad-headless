@@ -79,7 +79,7 @@ router.use( '/template', require('./template') );
 router.use( '/auth-provider', require('./auth-provider') );
 
 // Routes for updating the auth provider server login path
-router.use( '/project/:projectId(\\d+)/update-server-login-paths-for-auth-provider/:authProviderId(\\d+)', require('./project') );
-router.use( '/update-server-login-paths-for-auth-provider/:authProviderId(\\d+)', require('./project') );
+router.use( '/project/:projectId(\\d+)/update-server-login-path/:authProviderId(\\d+)', require('./project') );
+router.use( '/project/update-server-login-paths-for-auth-provider/:authProviderId(\\d+)', require('./project') );
 
 module.exports = router;

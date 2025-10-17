@@ -52,7 +52,7 @@ let getConfig = async function({  project, useAuth = 'default', req }) {
     if (authProvider) {
       let providerConfig = authProvider.config || {};
       let adapterConfig  = projectConfig.adapter[authProvider.type] || {}
-      authConfig = merge.recursive(authConfig, providerConfig, adapterConfig, {adapter: authProvider.type});
+      authConfig = merge.recursive(authConfig, providerConfig, adapterConfig, {adapter: authProvider.type}, {authProviderId: useAuthProvider});
     }
   } else {
     

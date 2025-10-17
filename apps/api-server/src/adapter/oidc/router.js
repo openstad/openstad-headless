@@ -126,6 +126,16 @@ router
       req.project.id &&
       (await isRedirectAllowed(req.project.id, req.query.redirectUri))
     ) {
+      const authConfigId = req.authConfig && req.authConfig.authProviderId;
+      if (!authConfigId)
+        return next(createError(403, 'No authConfig for this project.'));
+
+      const projectServerLoginPaths = req.project && req.project.config && req.project.config.authProvidersServerLoginPath;
+      if (!projectServerLoginPaths || !projectServerLoginPaths[authConfigId])
+          return next(createError(403, 'No serverLoginPath for this project and authConfig.'));
+
+      req.authConfig.serverLoginPath = projectServerLoginPaths[authConfigId];
+
       let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath; // + '&acr_values=loa:low';
       url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
       const apiUrl = config.url;

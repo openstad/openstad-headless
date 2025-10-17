@@ -260,17 +260,17 @@ const createServerLoginPath = (requiredFields, authProviderData) => {
   const endUrl = "&code_challenge=[[codeChallenge]]&code_challenge_method=S256&response_mode=query";
 
   if (userFieldMapping['identifier']) {
-    url += ` ${userFieldMapping['identifier']}`;
+    url += encodeURIComponent(` ${userFieldMapping['identifier']}`);
   }
 
   requiredFields.forEach((field) => {
     const mappedField = userFieldMapping[field];
     if (!!mappedField) {
-      url += ` ${mappedField}`;
+      url += encodeURIComponent(` ${mappedField}`);
     }
   });
 
-  url = encodeURIComponent(url.trim());
+  url = url.trim();
 
   return `${url}${endUrl}`;
 }
@@ -649,7 +649,11 @@ router.route('/:projectId/update-server-login-path/:authProviderId')
       const provider = await db.AuthProvider.findByPk(authProviderId);
       if (!provider) return next(new Error('Auth provider not found'));
 
-      await setServerLoginPathForProvider(project, authProviderId, provider);
+      try {
+        await setServerLoginPathForProvider(project, authProviderId, provider);
+      } catch (error) {
+        console.error(`Error updating project ${project.id}:`, error);
+      }
 
       res.json({ success: true, authProvidersServerLoginPath: project.config.authProvidersServerLoginPath });
     });
@@ -659,17 +663,21 @@ router.route('/update-server-login-paths-for-auth-provider/:authProviderId')
       const authProviderId = parseInt(req.params.authProviderId);
       if (isNaN(authProviderId)) return next(new Error('Invalid authProviderId'));
 
+      const provider = await db.AuthProvider.findByPk(authProviderId);
+      if (!provider) return next(new Error('Auth provider not found'));
+
       const projects = await db.Project.findAll({
         where: Sequelize.literal(
             `JSON_CONTAINS(config->'$.authProviders', '${authProviderId}')`
         )
       });
 
-      console.log(`Found ${projects.length} projects using authProviderId ${authProviderId}`);
-      console.log('Projects:', projects.map(p => p.id));
-
       for (const project of projects) {
-        await setServerLoginPathForProvider(project, authProviderId, null);
+        try {
+          await setServerLoginPathForProvider(project, authProviderId, provider);
+        } catch (error) {
+          console.error(`Error updating project ${project.id}:`, error);
+        }
       }
 
       res.json({ success: true, updatedProjects: projects.map(p => p.id) });

@@ -107,6 +107,7 @@ const formSchema = z.object({
     serverExchangeContentType: z.string(),
     brokerConfiguration: z.string().optional(),
     userFieldMapping: z.object({
+      identifier: z.string().optional(),
       name: z.string().optional(),
       email: z.string().optional(),
       phoneNumber: z.string().optional(),
@@ -174,6 +175,7 @@ export default function AuthProviderEdit() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const userMapping = configureUserMapping(
+        values.config?.userFieldMapping?.identifier,
         values.config?.userFieldMapping?.name,
         values.config?.userFieldMapping?.email,
         values.config?.userFieldMapping?.phoneNumber,
