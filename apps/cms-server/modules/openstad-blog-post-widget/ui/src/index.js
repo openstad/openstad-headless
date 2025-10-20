@@ -70,7 +70,7 @@ function initCarousel(container) {
     const containerWidth = container.offsetWidth;
     if (containerWidth < 768) return 1;
 
-    if (containerWidth < 1024) return configuredItems < 2 ? configuredItems : 2;
+    if (containerWidth < 1024) return Math.min(configuredItems, 2);
 
     return Math.min(configuredItems, 10);
   }
