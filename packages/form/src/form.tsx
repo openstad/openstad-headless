@@ -20,7 +20,7 @@ import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | string[] | Record<number, never> | [] | number | boolean;
+export type FormValue = string | string[] | Record<number, never> | Record<string, any> | [] | number | boolean ;
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";

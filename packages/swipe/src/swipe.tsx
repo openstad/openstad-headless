@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, FC, useCallback } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
 import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
+import { FormValue } from '@openstad-headless/form/src/form';
 
 export type SwipeCard = {
   id: string;
@@ -24,9 +25,10 @@ export type SwipeProps = {
   onSwipeLeft?: (card: SwipeCard) => void;
   showButtons?: boolean;
   enableKeyboard?: boolean;
-  fieldKey?: string;
+  fieldKey: string;
   type?: string;
   required?: boolean;
+  onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
 };
 
 // Default demo cards - moved outside component to prevent recreation
@@ -65,6 +67,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   showButtons = true,
   enableKeyboard = true,
   required = false,
+  onChange,
+  fieldKey,
   ...props
 }) => {
   const swipeCards = useMemo(() => {
@@ -190,8 +194,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   const handleSwipeLeft = () => {
     if (remainingCards.length > 0 && !isAnimating) {
-      console.log(remainingCards[0].explanationRequired)
-      
       const currentCard = remainingCards[0];
 
       setIsAnimating(true);
@@ -385,6 +387,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }));
   };
 
+  useEffect(() => {
+    if (onChange) {
+      onChange({ name: fieldKey, value: swipeAnswers });
+    }
+  }, [swipeAnswers]);
 
   if (isFinished) {
     return (

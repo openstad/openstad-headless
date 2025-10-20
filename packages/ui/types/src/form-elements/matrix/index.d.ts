@@ -12,7 +12,7 @@ export type MatrixFieldProps = {
     onChange?: (e: {
         name: string;
         value: string | Record<number, never> | [] | string[];
-    }) => void;
+    }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
