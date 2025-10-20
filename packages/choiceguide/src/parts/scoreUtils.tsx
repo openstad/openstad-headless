@@ -84,11 +84,12 @@ export const calculateScoreForItem = (
             }
 
             answerArray.forEach((userAnswer) => {
+                const safeUserAnswer = typeof userAnswer === 'string' ? userAnswer?.replace(/\./g, '_DOT_') : userAnswer;
                 const optionWeights = weights[option.id]?.[answerKey];
 
                 if (optionWeights) {
-                    if (typeof userAnswer === 'string' && optionWeights[userAnswer]) {
-                        const dimensions = optionWeights[userAnswer];
+                    if (typeof safeUserAnswer === 'string' && optionWeights[safeUserAnswer]) {
+                        const dimensions = optionWeights[safeUserAnswer];
                         Object.keys(dimensions).forEach((thirdDimension) => {
                             const number = Number(dimensions[thirdDimension]);
 
