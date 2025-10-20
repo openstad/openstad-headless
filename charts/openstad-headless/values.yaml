@@ -1,5 +1,8 @@
 # Optional Dependencies
 
+disablePreInstallHelm: false
+disablePreInstallArgoCd: true
+
 ##
 ## In this block you can toggle all optional dependencies.
 ## If you want to use an existing database(s) or services, disable
@@ -72,6 +75,7 @@ public:
   environmentName:
 
 rateLimit:
+  existingSecret:
   windowMs: 60000
   limit: 100
 
@@ -140,6 +144,7 @@ admin:
 
   # Secret values
   secrets:
+    existingSecret:
     cookieSecret:
     apiKey:
 
@@ -332,12 +337,15 @@ image:
   label: openstad-image-service
 
   secrets:
+    existingSecret:
     verificationToken:
 
   # Service settings:
   # Primarily port configuration
   service:
     httpPort: 31450
+
+  useS3: "false"
 
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
@@ -446,6 +454,7 @@ cms:
       hosts: []
 
   disableWidgetPreview: "false"
+  useS3: "false"
 
   # Inject extra environment variables
   extraEnvVars: []
@@ -493,14 +502,22 @@ secrets:
 
   api:
     jwtSecret:
+    dbNameKey:
 
   auth:
     sessionSecret:
     phoneHashSalt:
+    dbNameKey: "auth-database"
 
   cms:
     apiKey:
     mongodbUri:
+    s3:
+      endpoint:
+      bucket:
+      region:
+      key:
+      secret:
 
   database:
     ### These values are for the MySQL db
@@ -567,6 +584,11 @@ secrets:
     port: '25'
     username: user
     password: password
+
+    hostKey:
+    portKey:
+    passwordKey:
+    usernameKey:
 
     auth:
       emailAssetsUrl:
