@@ -469,15 +469,26 @@ function Enquete(props: EnqueteWidgetProps) {
                         <button
                             type="button"
                             className="youth-fullscreen-btn"
-                            onClick={() => {
-                                if (document.fullscreenElement) {
-                                    setIsFullscreen(false);
-                                    document.exitFullscreen();
-                                } else {
-                                    setIsFullscreen(true);
-                                    document.documentElement.requestFullscreen();
-                                }
-                            }}
+onClick={() => {
+    // Detecteer iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+        setIsFullscreen(!isFullscreen);
+        // Alleen styling togglen, geen native fullscreen API
+    } else {
+        if (document.fullscreenElement) {
+            setIsFullscreen(false);
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        } else {
+            setIsFullscreen(true);
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+        }
+    }
+}}
                         >
                             {isFullscreen ? <i className="ri-close-line"></i> : <i className="ri-fullscreen-line"></i>}
                             <span>{isFullscreen ? 'Verlaat volledig scherm' : 'Bekijk in volledig scherm'}</span>
