@@ -49,17 +49,6 @@ if (s3.isEnabled()) {
   } catch (error) {
     throw new Error(`S3 Multer storage error: ${error.message}`);
   }
-} else {
-  imageMulterConfig.storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, process.env.IMAGES_DIR || 'images/');
-    },
-    filename: function (req, file, cb) {
-      const uniqueFileName = createFilename(file.originalname)
-
-      cb(null, uniqueFileName);
-    }
-  });
 }
 
 const disableWebpSupport = process.env.DISABLE_WEBP_CONVERSION === 'true';
@@ -191,7 +180,6 @@ app.get('/image/*',
       
       // Pipe the S3 response to the client
       const { Readable } = require("stream");
-      console.log('response', response.body)
       Readable.fromWeb(response.body).pipe(res);
     } else {
       req.url = req.url.replace('/image', '');
@@ -324,21 +312,15 @@ app.get('/document/*',
       const path = require('path');
       const documentsDir = path.resolve('documents/');
 
-      const requestedPath = req.path.replace(/^\/documents\//, '');
+      const requestedPath = req.path.replace(/^\/document\//, '');
 
       const resolvedPath = path.resolve(documentsDir, requestedPath);
       
-      // Check if file specified by the resolvedPath exists
-      fs.exists(resolvedPath, function (exists) {
-        if (exists) {
-          const readStream = fs.createReadStream(resolvedPath);
-          handleFileResponse(resolvedPath, readStream, res);
-        } else {
-          res.writeHead(400, { 'Content-Type': 'text/plain' });
-          res.end('ERROR File does not exist');
-        }
-      });
+      if (!resolvedPath.startsWith(documentsDir)) {
+          return res.status(403).send('Forbidden');
+      }
 
+      res.download(resolvedPath);
   });
 
 app.use((req, res, next) => {
@@ -363,7 +345,7 @@ app.use((req, res, next) => {
  */
 app.post('/image',
   imageUpload.single('image'), (req, res, next) => {
-    let fileName = req.file.key;
+    let fileName = req.file.key || req.file.filename;
     fileName = fileName.replace(/^images\//, '');
     let url = `${process.env.APP_URL}/image/${fileName}`;
 
@@ -428,19 +410,19 @@ app.post('/document',
 app.post('/documents',
   documentUpload.array('document', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-       let fileName = file.key || file.filename;
-        fileName = fileName.replace(/^documents\//, '');
-      let url = `${process.env.APP_URL}/document/${fileName}`;
+      let fileName = file.key || file.filename;
+      fileName = fileName.replace(/^documents\//, '');
+      let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
       
       let protocol = '';
-
+      
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+      protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
       }
-
+      
       return {
-        name: sanitizeFileName(file.originalname),
-        url: protocol + url
+      name: sanitizeFileName(file.originalname),
+      url: protocol + url
       }
     })));
   });
