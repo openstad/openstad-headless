@@ -409,7 +409,7 @@ app.post('/documents',
   documentUpload.array('document', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
       let fileName = file.filename || file.key;
-      let url = `${process.env.APP_URL}/image/${encodeURIComponent(fileName)}`;
+      let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
       
       let protocol = '';
       
