@@ -9,8 +9,8 @@ const prefillAllowedDomains = function (allowedDomains) {
       allowedDomains.push(baseUrl.host);
     }
     
-    if (process.env.HOSTNAME) {
-      let hostname = process.env.HOSTNAME;
+    if (process.env.URL) {
+      let hostname = process.env.URL;
       if (hostname.indexOf('http') !== 0) {
         hostname = 'https://' + hostname;
       }
