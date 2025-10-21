@@ -79,6 +79,9 @@ const imageSteamConfig = {
     "ccPrefetchers": process.env.THROTTLE_CC_PREFETCHER || 20,
     "ccRequests": process.env.THROTTLE_CC_REQUESTS || 100
   },
+  log: {
+    errors: true
+  },
   router: {
     originalSteps: {
       metadata: {
