@@ -12,6 +12,7 @@ const ActionButtonsLine = (props: {
   importing: boolean;
   useId: boolean;
   idPresent: boolean;
+  dialogStatus?: string;
 }) => {
   const {
     handleClose,
