@@ -4,10 +4,10 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 
 ## 2025
 ### Oktober
-- Donderdag 2-10-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 - Donderdag 9-10-2025 11:00-12:30 Overleg Core Team en Maintainers
 - Donderdag 30-10-2025 11:00-12:30 Overleg Core Team en Maintainers
 ### November
+- Donderdag 6-11-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 - Donderdag 13-11-2025 12:00-17:00 [OpenStad Live, Provinciehuis Noord-Holland](https://openstad.org/openstad-live-2025)
 - Donderdag 20-11-2025 11:00-12:30 Overleg Core Team en Maintainers
 ### December
@@ -75,6 +75,8 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 
 # Historie
 ## 2025
+### Oktober
+- Donderdag 2-10-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### September
 - Donderdag 11-9-2025 15:00-16:00 [Community Call](https://meet.jit.si/OpenStadCommunityCall)
 ### Augustus
