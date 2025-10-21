@@ -130,6 +130,7 @@ const documentMulterConfig = {
   },
   fileFilter: function (req, file, cb) {
     const allowedTypes = [
+      'image/gif',
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
