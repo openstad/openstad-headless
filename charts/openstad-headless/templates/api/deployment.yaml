@@ -334,6 +334,18 @@ spec:
             - name: AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL
               value: http://{{ template "openstad.auth.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.auth.service.httpPort }}
 
+            - name: AUTH_ADMIN_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: admin_client_id
+                  name: {{ template "openstad.auth.secret.fullname" . }}
+
+            - name: AUTH_ADMIN_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: admin_client_secret
+                  name: {{ template "openstad.auth.secret.fullname" . }}
+
             - name: IMAGE_APP_URL
               value: {{ template "openstad.image.url" . }}
 
