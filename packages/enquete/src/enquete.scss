@@ -223,8 +223,16 @@ label.utrecht-form-label {
 
     &:has(.--youth-intro) {
       .button-group.--flex {
-        .utrecht-button--primary-action:after {
-          box-shadow: -1px -4px 15px 0px rgba(0, 0, 0, 0.1);
+        .utrecht-button--primary-action {
+          opacity: 0;
+          transform: translateY(20px);
+
+          animation: IntroButtonFadeIn .4s ease-out forwards;
+          animation-delay: .4s;
+
+          &:after {
+            box-shadow: -1px -4px 15px 0px rgba(0, 0, 0, 0.1);
+          }
         }
       }
 
@@ -662,7 +670,7 @@ label.utrecht-form-label {
         align-items: center
       }
 
-      .utrecht-radio-button--html-input:invalid{
+      .utrecht-radio-button--html-input:invalid {
         border-color: black;
       }
 
@@ -703,8 +711,13 @@ label.utrecht-form-label {
           margin-bottom: 50px;
         }
 
-        .range-slider-labels{
+        .range-slider-labels {
           pointer-events: none;
+
+          &.smiley-scale {
+            width: 94%;
+            margin: 0 auto;
+          }
         }
 
         input[type=range] {
@@ -818,7 +831,7 @@ label.utrecht-form-label {
         justify-content: center;
       }
 
-      .swipe-finished-content{
+      .swipe-finished-content {
         padding-bottom: 100px;
       }
     }
@@ -945,6 +958,17 @@ label.utrecht-form-label {
   }
 }
 
+@keyframes IntroButtonFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 
 // Fullscreen enquete
