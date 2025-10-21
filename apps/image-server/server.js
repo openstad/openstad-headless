@@ -137,8 +137,6 @@ const argv = require('yargs')
 const ImageServer = new imgSteam.http.Connect(imageSteamConfig);
 const imageHandler = ImageServer.getHandler();
 
-console.log ('ImageSteam config:', imageSteamConfig, imageHandler);
-
 /**
  * Most errors is not found
  * @TODO: requires debugging if other errors are handled by server
@@ -309,8 +307,6 @@ app.get('/document/*',
           return res.status(response.status).send('File not found');
         }
         
-        console.log ('mimeType', mimeType, response.headers);
-        
         res.setHeader('Content-Type', mimeType);
         res.setHeader('Content-Length', response.headers.get('content-length'));
         res.setHeader('Content-Disposition', 'attachment; filename=' + req.url);
@@ -318,7 +314,6 @@ app.get('/document/*',
         
         // Pipe the S3 response to the client
         const { Readable } = require("stream");
-        console.log('response', response.body)
         Readable.fromWeb(response.body).pipe(res);
         return;
       }
@@ -341,7 +336,6 @@ app.get('/document/*',
         }
       });
 
-      //res.download(resolvedPath);
   });
 
 app.use((req, res, next) => {
@@ -385,7 +379,6 @@ app.post('/image',
 app.post('/images',
   imageUpload.array('image', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-      console.log ('files map', file);
       let fileName = file.key || file.filename;
         fileName = fileName.replace(/^images\//, '');
         let url = `${process.env.APP_URL}/image/${fileName}`;
