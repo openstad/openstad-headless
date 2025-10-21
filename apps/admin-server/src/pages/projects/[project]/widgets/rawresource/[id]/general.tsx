@@ -152,6 +152,10 @@ export default function WidgetRawGeneral(
                       className="ml-4">{`{{ resource | tagGroup('[group]') }}: Laat alle gekoppelde tags van de taggroep [group] zien gescheiden met komma's. [group] dient vervangen te worden door de naam van de taggroep.`}</li>
                     <li
                       className="ml-4">{`{{ resource | status }}: Laat alle gekoppelde statussen zien gescheiden met komma's`}</li>
+                    <li
+                      className="ml-4">{`{{currentUser}}: Bevat gegevens van de ingelogde gebruiker (zoals {{currentUser.name}} of {{currentUser.email}})`}</li>
+                    <li
+                      className="ml-4">{`window.openstadLogout(): JavaScript functie om uit te loggen. Voorbeeld: <a href="#" onclick="window.openstadLogout(); return false;">Uitloggen</a>`}</li>
                   </ul>
                 </div>
                 <FormControl>
