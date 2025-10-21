@@ -201,7 +201,7 @@ export const StemBegrootResourceList = ({
         setFilteredResources(filtered);
       }
     }
-  }, [filtered, setFilteredResources]);
+  }, [filtered, setFilteredResources, groupedTags, tags]);
 
   return (
     <List
