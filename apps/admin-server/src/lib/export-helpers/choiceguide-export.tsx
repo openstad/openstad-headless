@@ -121,7 +121,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
         choiceOptions.forEach((choiceOption: any) => {
           try {
-            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType, hiddenFields);
+            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType, hiddenFields, items);
             scores[choiceOption.title] = calculatedScores.x ? (calculatedScores.x).toFixed(0) : 0;
           } catch (error) {
             scores[choiceOption.title] = 0;

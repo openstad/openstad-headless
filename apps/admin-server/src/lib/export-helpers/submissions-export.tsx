@@ -64,7 +64,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       const title = item.title || item.fieldKey;
       if (item.questionType === 'matrix') {
         item.matrix?.rows?.forEach((row: any) => {
-          const matrixKey = `${item.fieldKey}_${row.trigger}`;
+          const matrixKey = `matrix_${item.fieldKey}_${row.trigger}`;
           fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
         });
       } else if (title) {
