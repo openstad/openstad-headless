@@ -281,7 +281,7 @@ app.get('/document/*',
       
       if (s3.isEnabled()) {
       
-        // remove /image/ from the path
+        // remove /document/ from the path
         req.url = req.url.replace(/^\/document\//, '');
       
         const extension = req.url.split('.').pop().toLowerCase();
@@ -384,7 +384,7 @@ app.post('/images',
  */
 app.post('/document',
   documentUpload.single('document'), (req, res, next) => {
-    const fileName = req?.file?.filename || '';
+    const fileName = req?.file?.filename || req?.file?.key || '';
 
     // Check if the filename is not empty
     if (!fileName) {
@@ -408,9 +408,8 @@ app.post('/document',
 app.post('/documents',
   documentUpload.array('document', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-      let fileName = file.key || file.filename;
-      fileName = fileName.replace(/^documents\//, '');
-      let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
+      let fileName = file.filename || file.key;
+      let url = `${process.env.APP_URL}/image/${encodeURIComponent(fileName)}`;
       
       let protocol = '';
       
