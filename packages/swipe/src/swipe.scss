@@ -87,6 +87,7 @@
     &--top {
       cursor: grab;
       touch-action: none;
+      z-index: 9999;
 
       &:active {
         cursor: grabbing;

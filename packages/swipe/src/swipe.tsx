@@ -464,11 +464,76 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   key={card.id}
                   className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
                   style={{ zIndex, transform }}
-                  onPointerDown={isTop ? handlePointerDown : undefined}
-                  onPointerMove={isTop ? handlePointerMove : undefined}
-                  onPointerUp={isTop ? handlePointerUp : undefined}
-                  onPointerCancel={isTop ? handlePointerCancel : undefined}
-                  onPointerLeave={isTop ? handlePointerLeave : undefined}
+                  {...(isTop && /iPad|iPhone|iPod|Android/i.test(navigator.userAgent)
+                    ? {
+                        onTouchStart: (e) => {
+                          e.preventDefault();
+                          const touch = e.touches[0];
+                          setDragState({
+                            isDragging: true,
+                            startX: touch.clientX,
+                            startY: touch.clientY,
+                            currentX: touch.clientX,
+                            currentY: touch.clientY,
+                            deltaX: 0,
+                            deltaY: 0,
+                          });
+                        },
+                        onTouchMove: (e) => {
+                          e.preventDefault();
+                          if (!dragState.isDragging) return;
+                          const touch = e.touches[0];
+                          const deltaX = touch.clientX - dragState.startX;
+                          const deltaY = touch.clientY - dragState.startY;
+                          setDragState(prev => ({
+                            ...prev,
+                            currentX: touch.clientX,
+                            currentY: touch.clientY,
+                            deltaX,
+                            deltaY,
+                          }));
+                          if (Math.abs(deltaX) > 50) {
+                            setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+                          } else {
+                            setSwipeDirection(null);
+                          }
+                        },
+                        onTouchEnd: (e) => {
+                          e.preventDefault();
+                          if (!dragState.isDragging) return;
+                          const swipeThreshold = 100;
+                          const velocityThreshold = 0.5;
+                          const deltaX = dragState.deltaX;
+                          const velocity = Math.abs(deltaX) / 100;
+                          setDragState({
+                            isDragging: false,
+                            startX: 0,
+                            startY: 0,
+                            currentX: 0,
+                            currentY: 0,
+                            deltaX: 0,
+                            deltaY: 0,
+                          });
+                          if (isAnimating) return;
+                          const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
+                          if (shouldSwipe) {
+                            if (deltaX > 0) {
+                              handleSwipeRight();
+                            } else {
+                              handleSwipeLeft();
+                            }
+                          } else {
+                            setSwipeDirection(null);
+                          }
+                        }
+                      }
+                    : {
+                        onPointerDown: handlePointerDown,
+                        onPointerMove: handlePointerMove,
+                        onPointerUp: handlePointerUp,
+                        onPointerCancel: handlePointerCancel,
+                        onPointerLeave: handlePointerLeave
+                      })}
                   role="listitem"
                   aria-label={card.title}
                   tabIndex={isTop ? 0 : -1}

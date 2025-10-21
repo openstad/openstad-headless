@@ -703,6 +703,10 @@ label.utrecht-form-label {
           margin-bottom: 50px;
         }
 
+        .range-slider-labels{
+          pointer-events: none;
+        }
+
         input[type=range] {
           margin-bottom: 0;
           margin-top: 30px;
@@ -909,7 +913,7 @@ label.utrecht-form-label {
   }
 
 
-  &[aria-hidden='false'] {
+  &[aria-hidden='false']:nth-of-type(2) {
     opacity: 1;
     pointer-events: all;
 
