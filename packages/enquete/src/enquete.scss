@@ -292,6 +292,11 @@ label.utrecht-form-label {
         }
       }
 
+      .info-image-container {
+        max-width: 300px;
+        margin: 40px auto;
+      }
+
       .question.question-type-none {
         background: var(--youth-outro-card-background-color);
         z-index: 99;
@@ -359,47 +364,14 @@ label.utrecht-form-label {
         align-items: center;
         justify-content: center;
         display: flex;
+        cursor: pointer;
+        transition: all .2s ease-in-out;
 
-        >span {}
-
-        ul {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          gap: 0.5rem;
-          align-items: center;
-          justify-content: center;
-
-          opacity: 0;
-          position: absolute;
+        &:hover{
           background: #fff;
-
-          transition: opacity .2s ease-in-out;
-
-          &.--show {
-            opacity: 1;
-            width: 100%;
-            height: 100%;
-            border-radius: 3px;
-            gap: 1px;
-          }
-
-          li {
-            height: 100%;
-            padding: 7px;
-            background: #f8d62c;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 25%;
-
-            svg {
-              stroke: #000;
-              width: 100%;
-            }
-          }
+          color: #000;
         }
+
       }
     }
 
