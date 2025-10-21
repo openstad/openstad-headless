@@ -3,9 +3,10 @@ const generateCode = require('../utils/generateCode');
 const Tasks = require('../memoryStorage/tasks');
 
 exports.withAll = (req, res, next) => {
+  const isExport = req.query.export === 'true';
 
-  const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
-  const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
+  const limit = isExport ? undefined : (req.query.limit ? parseInt(req.query.limit, 10) : 1000);
+  const offset = isExport ? undefined : (req.query.offset ? parseInt(req.query.offset, 10) : 0);
   const search = req.query.search ? req.query.search : false;
 
   let where = {};

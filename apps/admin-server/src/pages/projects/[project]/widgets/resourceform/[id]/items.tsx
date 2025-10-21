@@ -1172,6 +1172,7 @@ export default function WidgetResourceFormItems(
                                                                 <SelectContent>
                                                                     <SelectItem value="text input">1 regel</SelectItem>
                                                                     <SelectItem value="textarea">Tekstvak</SelectItem>
+                                                                    <SelectItem value="richtext">Tekstvak met opmaak</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                             <FormMessage />
