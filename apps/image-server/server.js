@@ -345,9 +345,8 @@ app.use((req, res, next) => {
  */
 app.post('/image',
   imageUpload.single('image'), (req, res, next) => {
-    let fileName = req.file.key || req.file.filename;
-    fileName = fileName.replace(/^images\//, '');
-    let url = `${process.env.APP_URL}/image/${fileName}`;
+    const fileName = req.file.filename || req.file.key;
+    let url = `${process.env.APP_URL}/image/${sanitizeFileName(fileName)}`;
 
     let protocol = '';
 
@@ -364,20 +363,19 @@ app.post('/image',
 app.post('/images',
   imageUpload.array('image', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-      let fileName = file.key || file.filename;
-        fileName = fileName.replace(/^images\//, '');
-        let url = `${process.env.APP_URL}/image/${fileName}`;
+      let fileName = file.filename || file.key;
+      let url = `${process.env.APP_URL}/image/${sanitizeFileName(fileName)}`;
 
-        let protocol = '';
+      let protocol = '';
 
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
-        }
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+      }
 
-        return {
-            name: sanitizeFileName(file.originalname),
-            url: protocol + url
-        }
+      return {
+          name: sanitizeFileName(file.originalname),
+          url: protocol + url
+      }
     })));
 });
 
