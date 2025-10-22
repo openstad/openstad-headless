@@ -72,7 +72,11 @@ const SortField: FC<SortFieldProps> = ({
     };
 
     useEffect(() => {
-        onChange && onChange({ name: fieldKey, value: items.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key) });
+        const value = items.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key);
+        onChange && onChange({
+            name: fieldKey,
+            value: JSON.stringify(value)
+        });
     }, [items]);
 
     return (
