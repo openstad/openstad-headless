@@ -77,6 +77,30 @@ spec:
                 name: openstad-auth-db
                 key: database
 
+          - name: MAIL_TRANSPORTER_TYPE
+            valueFrom:
+              secretKeyRef:
+                key: transporterType
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msClientId
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: msClientSecret
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_TENANT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msTenantId
+                name: {{ template "openstad.email.secret.fullname" . }}
+
           # SMTP MAIL
           - name: MAIL_SERVER_URL
             valueFrom:
