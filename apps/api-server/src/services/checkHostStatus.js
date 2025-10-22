@@ -96,9 +96,8 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace, tlsSecret
 }
 
 
-const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tlsExtraDomains) => {
+const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tlsExtraDomains, useClusterIssuer) => {
   
-  const useClusterIssuer = process.env.KUBERNETES_INGRESS_USE_CLUSTER_ISSUER === 'true';
   const prodIssuerName = useClusterIssuer ? (process.env.KUBERNETES_INGRESS_PROD_ISSUER_NAME || 'openstad-letsencrypt-prod') : null;
   
   const defaultAnnotations = process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS ? JSON.parse(process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS) :
@@ -207,11 +206,12 @@ const checkHostStatus = async (conditions) => {
       // Allow the TLS secret name to be set in the project config
       const tlsSecretName = project.config?.tlsSecretName ? project.config.tlsSecretName : project.config.uniqueId;
       const tlsExtraDomains = project.config?.tlsExtraDomains ? project.config.tlsExtraDomains : [];
+      const tlsUseClusterIssuer = project.config?.tlsUseClusterIssuer ? project.config.tlsUseClusterIssuer : process.env.KUBERNETES_INGRESS_USE_CLUSTER_ISSUER === 'true';
       
       // if ip issset but not ingress try to create one
       if (!ingress) {
         try {
-          const response = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace, tlsSecretName, tlsExtraDomains);
+          const response = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace, tlsSecretName, tlsExtraDomains, tlsUseClusterIssuer);
           hostStatus.ingress = true;
         } catch (error) {
           // don't set to false, an error might just be that it already exist and the read check failed
@@ -220,7 +220,7 @@ const checkHostStatus = async (conditions) => {
       } else {
         try {
           hostStatus.ingress = true;
-          const response     = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace, tlsSecretName, tlsExtraDomains);
+          const response     = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace, tlsSecretName, tlsExtraDomains, tlsUseClusterIssuer);
         } catch (error) {
           console.error(`Error updating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`);
         }
