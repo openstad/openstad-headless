@@ -305,6 +305,23 @@ api:
       secretName: openstad-tls-api
       hosts: []
 
+  createdIngresses:
+    className:
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
+    # Is the TLS for this ingress managed by Openstad?
+    # Set to `false` if the secrets are managed manually -- compatible with older versions of Openstad
+    # Set to `true` if you want Openstad to manage the TLS in the ingress
+    # You can then set the project.config.tlsSecretName of a project, and it will be set in the ingress.tls
+    # Allowing you to have per-project TLS certificates, managed through secrets (e.g. externalSecret operator)
+    tlsManagedByOpenstad: false
+
   # Inject extra environment variables
   extraEnvVars: []
 
