@@ -195,13 +195,12 @@ export const StemBegrootResourceList = ({
   useEffect(() => {
     if (setFilteredResources && filtered) {
       const currentFilteredString = JSON.stringify(filtered);
-      // Only update if the content has actually changed
       if (currentFilteredString !== prevFilteredRef.current) {
         prevFilteredRef.current = currentFilteredString;
         setFilteredResources(filtered);
       }
     }
-  }, [filtered, setFilteredResources, groupedTags, tags]);
+  }, [filtered, setFilteredResources]);
 
   return (
     <List
