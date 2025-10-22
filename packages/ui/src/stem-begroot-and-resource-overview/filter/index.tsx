@@ -285,9 +285,6 @@ export function Filters({
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
 
-    console.log( "newActiveTagsDraft", newActiveTagsDraft );
-    console.log( "updatedTags", updatedTags );
-
     if (updatedTags) {
       setActiveTags(updatedTags);
     } else {
