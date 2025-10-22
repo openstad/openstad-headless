@@ -529,6 +529,10 @@ function StemBegroot({
     }
   }, [filteredResources]);
 
+  useEffect(() => {
+    setVisitedTagTabs((prev) => prev.includes(activeTagTab) ? prev : [...prev, activeTagTab]);
+  }, [activeTagTab]);
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -851,7 +855,6 @@ function StemBegroot({
 
                       if (nextUnmetTag) {
                         const tagName = Object.keys(nextUnmetTag)[0];
-                        setVisitedTagTabs( prev => prev.includes(activeTagTab) ? prev : [...prev, activeTagTab] );
                         setActiveTagTab(tagName);
                         return;
                       }

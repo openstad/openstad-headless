@@ -13,10 +13,12 @@
             {% endif %}
           </div>
           <div class="topmenu-static-container">
+            {% if not data.global.showLoginInCTA %}
             {% if data.global.showLoginButton and not data.loggedIn %}
               <div class="login-button">
                 <a href="{{data.baseUrlWithPrefix}}/login">{{data.global.loginButtonLabel}}</a>
               </div>
+            {% endif %}
             {% endif %}
 
             {% if data.global.showAccountButton and data.loggedIn %}
@@ -24,11 +26,13 @@
                 <a href="{{data.global.accountButtonHref}}">{{ data.global.accountButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
               </div>
             {% endif %}
-
+            
+            {% if not data.global.showLoginInCTA %}
             {% if data.loggedIn %}
               <div class="logout-button">
                 <a href="{{data.baseUrlWithPrefix}}/logout">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
               </div>
+            {% endif %}
             {% endif %}
           </div>
         </div>
@@ -127,15 +131,30 @@
              data-prefix='{{ data.prefix }}'
             ></div>
           {% endif %}
+            <div class="extra-menu-buttons">
 
-          {% if data.global.ctaButtons.length > 0 %}
-            <div class="cta-buttons">
-              {% for ctaButton in data.global.ctaButtons %}
-              {% set buttonHref = data.prefix + ctaButton.href if (ctaButton.href and ctaButton.href.startsWith('/'))  else ctaButton.href %}
-              <a href="{{buttonHref}}" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{ctaButton.appearance}}">{{ctaButton.label}}</a>
-              {% endfor %}
+              {% if data.global.ctaButtons.length > 0 %}
+              <div class="cta-buttons">
+                {% for ctaButton in data.global.ctaButtons %}
+                {% set buttonHref = data.prefix + ctaButton.href if (ctaButton.href and ctaButton.href.startsWith('/'))  else ctaButton.href %}
+                <a href="{{buttonHref}}" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{ctaButton.appearance}}">{{ctaButton.label}}</a>
+                {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if data.global.showLoginInCTA %}
+              <div class="cta-buttons">
+                    {% if data.global.showLoginButton and not data.loggedIn %}
+                        <a href="{{data.baseUrlWithPrefix}}/login" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--account">{{data.global.loginButtonLabel}}</a>
+                    {% endif %}
+
+                    {% if data.loggedIn %}
+                        <a href="{{data.baseUrlWithPrefix}}/logout" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--account">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+                    {% endif %}
               </div>
-          {% endif %}
+              {% endif %}
+
+          </div>
         </div>
       </div>
   </div>

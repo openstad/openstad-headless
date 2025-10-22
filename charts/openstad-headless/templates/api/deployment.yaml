@@ -73,6 +73,30 @@ spec:
           - name: MAIL_FROM
             value: {{ .Values.secrets.mail.api.emailFrom | default "Openstad" }}
 
+          - name: MAIL_TRANSPORTER_TYPE
+            valueFrom:
+              secretKeyRef:
+                key: transporterType
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msClientId
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: msClientSecret
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_TENANT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msTenantId
+                name: {{ template "openstad.email.secret.fullname" . }}
+
           - name: MAIL_TRANSPORT_SMTP_PORT
             valueFrom:
               secretKeyRef:
@@ -285,6 +309,30 @@ spec:
 
             - name: MAIL_FROM
               value: {{ .Values.secrets.mail.api.emailFrom | default "Openstad" }}
+
+            - name: MAIL_TRANSPORTER_TYPE
+              valueFrom:
+                secretKeyRef:
+                  key: transporterType
+                  name: {{ template "openstad.email.secret.fullname" . }}
+
+            - name: MAIL_MICROSOFT_GRAPH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: msClientId
+                  name: {{ template "openstad.email.secret.fullname" . }}
+
+            - name: MAIL_MICROSOFT_GRAPH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: msClientSecret
+                  name: {{ template "openstad.email.secret.fullname" . }}
+
+            - name: MAIL_MICROSOFT_GRAPH_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: msTenantId
+                  name: {{ template "openstad.email.secret.fullname" . }}
 
             - name: MAIL_TRANSPORT_SMTP_PORT
               valueFrom:

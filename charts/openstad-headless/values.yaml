@@ -580,6 +580,8 @@ secrets:
 
   ### Mail server secretes
   mail:
+    # Set this to `ms-graph` to use Microsoft Graph API for mail sending
+    transporterType: smtp
     host: smtp.localhost
     port: '25'
     username: user
@@ -589,6 +591,11 @@ secrets:
     portKey:
     passwordKey:
     usernameKey:
+    # Used for Microsoft Graph API mail sending
+    microsoft:
+      clientId:
+      tenantId:
+      clientSecret:
 
     auth:
       emailAssetsUrl:

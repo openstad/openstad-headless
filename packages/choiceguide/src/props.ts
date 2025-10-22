@@ -64,6 +64,7 @@ export type ChoiceGuideSidebarProps = {
     weights?: WeightOverview;
     widgetId?: string;
     hiddenFields?: string[];
+    items?: Array<Item>;
 }
 
 export type Score = {
@@ -119,6 +120,7 @@ export type Item = {
     routingInitiallyHide?: boolean;
     routingSelectedQuestion?: string;
     routingSelectedAnswer?: string;
+    imageOptionUpload?: string;
 };
 
 export type Option = {
@@ -132,6 +134,8 @@ export type Title = {
     weights?: Record<string, Weight>;
     isOtherOption?: boolean;
     defaultValue?: boolean;
+    image?: string;
+    hideLabel?: boolean;
 };
 
 export type Weight = {
