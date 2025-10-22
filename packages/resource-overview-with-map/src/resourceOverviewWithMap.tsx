@@ -19,14 +19,31 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
     const [filteredResources, setFilteredResources] = useState<any[]>([]);
     const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
 
+    const handleLocationChange = (newLocation: PostcodeAutoFillLocation) => {
+      if (
+        JSON.stringify(newLocation) !== JSON.stringify(location)
+      ) {
+        setLocation(newLocation);
+      }
+    }
+
+    const handleFilteredResourcesChange = (newFilteredResources: any[]) => {
+      if (
+        JSON.stringify(newFilteredResources) !== JSON.stringify(filteredResources)
+      ) {
+        setFilteredResources(newFilteredResources);
+      }
+    }
+
     return (
         <div className="map-wrapper">
             <div className="resourceOverviewWithMap-container">
                 <div className="detail-container">
                     <ResourceOverview
                         {...props}
-                        onFilteredResourcesChange={setFilteredResources}
-                        onLocationChange={setLocation}
+                        onFilteredResourcesChange={handleFilteredResourcesChange}
+                        onLocationChange={handleLocationChange}
+                        displayMap={false}
                     />
                 </div>
                 <ResourceOverviewMap
