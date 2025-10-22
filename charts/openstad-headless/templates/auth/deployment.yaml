@@ -50,32 +50,32 @@ spec:
           - name: DB_USER
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: username
 
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: mysql-secret
+                name: {{ template "openstad.passwordSecret.fullname" . }}
                 key: mysql-password
 
           - name: DB_HOST
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostname
 
           - name: DB_PORT
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostport
 
           - name: DB_NAME
             valueFrom:
               secretKeyRef:
-                name: openstad-auth-db
-                key: database
+                name: {{ template "openstad.auth.databaseSecret.fullname" . }}
+                key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
 
           - name: MAIL_TRANSPORTER_TYPE
             valueFrom:
@@ -105,25 +105,25 @@ spec:
           - name: MAIL_SERVER_URL
             valueFrom:
               secretKeyRef:
-                key: host
+                key: {{ .Values.secrets.mail.hostKey | default "host" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_PORT
             valueFrom:
               secretKeyRef:
-                key: port
+                key: {{ .Values.secrets.mail.portKey | default "port" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: password
+                key: {{ .Values.secrets.mail.passwordKey | default "password" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_USER_NAME
             valueFrom:
               secretKeyRef:
-                key: username
+                key: {{ .Values.secrets.mail.usernameKey | default "username" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_SECURE
@@ -172,7 +172,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 key: secret
-                name: openstad-session-secret
+                name: {{ template "openstad.session.secret.fullname" . }}
 
           - name: COOKIE_SECURE_OFF
             value: "{{ .Values.auth.cookie.secureOff | default "no" }}"
@@ -241,35 +241,39 @@ spec:
           - name: DB_USER
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: username
 
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: mysql-secret
+                name: {{ template "openstad.passwordSecret.fullname" . }}
                 key: mysql-password
 
           - name: DB_HOST
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostname
 
           - name: DB_PORT
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostport
 
           - name: DB_MAX_POOL_SIZE
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: maxPoolSize
 
           - name: DB_NAME
             valueFrom:
               secretKeyRef:
-                name: openstad-auth-db
-                key: database
+                name: {{ template "openstad.auth.databaseSecret.fullname" . }}
+                key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
+
+          {{- if .Values.auth.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}

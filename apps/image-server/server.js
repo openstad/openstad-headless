@@ -3,9 +3,15 @@ const express = require('express');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
+const multerS3 = require('multer-s3');
+const s3 = require('./s3');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+const mime      = require('mime-types');
 
 const { createFilename, sanitizeFileName } = require('./utils')
+const fs = require('node:fs');
+
+console.log ('S3 enabled:', s3.isEnabled());
 
 const imageMulterConfig = {
   onError: function (err, next) {
@@ -19,6 +25,29 @@ const imageMulterConfig = {
     }
 
     cb(null, true);
+  }
+}
+
+if (s3.isEnabled()) {
+  try {
+    imageMulterConfig.storage = multerS3({
+      s3: s3.getClient(),
+      bucket: process.env.S3_BUCKET,
+      acl: 'public-read',
+      metadata: function (req, file, cb) {
+        cb(null, {
+          fieldName: file.fieldname,
+        });
+      },
+      destination: function (req, file, cb) {
+        cb(null, 'images/');
+      },
+      key: function (req, file, cb) {
+        cb(null, 'images/' + createFilename(file.originalname));
+      },
+    });
+  } catch (error) {
+    throw new Error(`S3 Multer storage error: ${error.message}`);
   }
 }
 
@@ -58,6 +87,16 @@ const imageSteamConfig = {
   },
 };
 
+if (s3.isEnabled()) {
+  imageSteamConfig.storage.defaults = {
+    driverPath: 'image-steam-s3',
+    endpoint: process.env.S3_ENDPOINT,
+    bucket: process.env.S3_BUCKET,
+    accessKey: process.env.S3_KEY,
+    secretKey: process.env.S3_SECRET,
+  };
+}
+
 imageMulterConfig.dest = process.env.IMAGES_DIR || 'images/';
 
 const imageUpload = multer(imageMulterConfig);
@@ -95,6 +134,7 @@ const imageHandler = ImageServer.getHandler();
  * @TODO: requires debugging if other errors are handled by server
  */
 ImageServer.on('error', (err) => {
+  console.log ('ImageServer error:', err);
   // Don't log 404 errors, so we do nothing here.
 });
 
@@ -114,13 +154,41 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/image/*',
-  function (req, res, next) {
-    req.url = req.url.replace('/image', '');
-
-    /**
-     * Pass request en response to the imageserver
-     */
-    imageHandler(req, res);
+  rateLimiter(),
+  async function (req, res, next) {
+    if (s3.isEnabled()) {
+      // remove /image/ from the path
+      req.url = req.url.replace(/^\/image\//, '');
+      
+      const extension = req.url.split('.').pop().toLowerCase();
+      // get mime type for extension
+      const mimeType  = mime.lookup(extension);
+      
+      const endpoint = process.env.S3_ENDPOINT.replace('https://', `https://${process.env.S3_BUCKET}.`);
+      
+      // build s3 url
+      const s3Url = `${endpoint}/images/${req.url}`;
+      const response = await fetch(s3Url);
+      
+      if (!response.ok) {
+        return res.status(response.status).send('File not found');
+      }
+      
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Length', response.headers.get('content-length'));
+      
+      
+      // Pipe the S3 response to the client
+      const { Readable } = require("stream");
+      Readable.fromWeb(response.body).pipe(res);
+    } else {
+      req.url = req.url.replace('/image', '');
+  
+      /**
+       * Pass request en response to the imageserver
+       */
+      imageHandler(req, res);
+    }
   });
 
 const documentMulterConfig = {
@@ -151,8 +219,32 @@ const documentMulterConfig = {
     }
 
     cb(null, true);
-  },
-  storage: multer.diskStorage({
+  }
+}
+
+if (s3.isEnabled()) {
+  try {
+    documentMulterConfig.storage = multerS3({
+      s3: s3.getClient(),
+      bucket: process.env.S3_BUCKET,
+      acl: 'public-read',
+      metadata: function (req, file, cb) {
+        cb(null, {
+          fieldName: file.fieldname,
+        });
+      },
+      destination: function (req, file, cb) {
+        cb(null, 'documents/');
+      },
+      key: function (req, file, cb) {
+        cb(null, 'documents/' + createFilename(file.originalname));
+      },
+    });
+  } catch (error) {
+    throw new Error(`S3 Multer storage error: ${error.message}`);
+  }
+} else {
+  documentMulterConfig.storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, process.env.DOCUMENTS_DIR || 'documents/');
     },
@@ -161,22 +253,69 @@ const documentMulterConfig = {
 
       cb(null, uniqueFileName);
     }
-  })
+  });
 }
 
 documentMulterConfig.dest = process.env.DOCUMENTS_DIR || 'documents/';
 const documentUpload = multer(documentMulterConfig);
 
+function handleFileResponse(filePath, readStream, res) {
+  // Content-type is very interesting part that guarantee that
+  // Web browser will handle response in an appropriate manner.
+
+  // Get filename
+  const filename = filePath.substring(filePath.lastIndexOf('/') + 1);
+  const mimeType = mime.lookup(filename);
+
+  res.writeHead(200, {
+    'Content-Type': mimeType,
+    'Content-Disposition': 'attachment; filename=' + filename,
+  });
+
+  readStream.pipe(res);
+}
+
 app.get('/document/*',
   rateLimiter(),
-  function (req, res, next) {
+  async function (req, res, next) {
+      
+      if (s3.isEnabled()) {
+      
+        // remove /document/ from the path
+        req.url = req.url.replace(/^\/document\//, '');
+      
+        const extension = req.url.split('.').pop().toLowerCase();
+        // get mime type for extension
+        const mimeType  = mime.lookup(extension);
+        
+        const endpoint = process.env.S3_ENDPOINT.replace('https://', `https://${process.env.S3_BUCKET}.`);
+        
+        // build s3 url
+        const s3Url = `${endpoint}/documents/${req.url}`;
+        const response = await fetch(s3Url);
+        
+        if (!response.ok) {
+          return res.status(response.status).send('File not found');
+        }
+        
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Content-Length', response.headers.get('content-length'));
+        res.setHeader('Content-Disposition', 'attachment; filename=' + req.url);
+        
+        
+        // Pipe the S3 response to the client
+        const { Readable } = require("stream");
+        Readable.fromWeb(response.body).pipe(res);
+        return;
+      }
+      
       const path = require('path');
       const documentsDir = path.resolve('documents/');
 
       const requestedPath = req.path.replace(/^\/document\//, '');
 
       const resolvedPath = path.resolve(documentsDir, requestedPath);
-
+      
       if (!resolvedPath.startsWith(documentsDir)) {
           return res.status(403).send('Forbidden');
       }
@@ -224,18 +363,19 @@ app.post('/image',
 app.post('/images',
   imageUpload.array('image', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-        let url = `${process.env.APP_URL}/image/${sanitizeFileName(file.filename)}`;
+      let fileName = file.filename || file.key;
+      let url = `${process.env.APP_URL}/image/${sanitizeFileName(fileName)}`;
 
-        let protocol = '';
+      let protocol = '';
 
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
-        }
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+      }
 
-        return {
-            name: sanitizeFileName(file.originalname),
-            url: protocol + url
-        }
+      return {
+          name: sanitizeFileName(file.originalname),
+          url: protocol + url
+      }
     })));
 });
 
@@ -244,7 +384,7 @@ app.post('/images',
  */
 app.post('/document',
   documentUpload.single('document'), (req, res, next) => {
-    const fileName = req?.file?.filename || '';
+    const fileName = req?.file?.filename || req?.file?.key || '';
 
     // Check if the filename is not empty
     if (!fileName) {
@@ -268,17 +408,18 @@ app.post('/document',
 app.post('/documents',
   documentUpload.array('document', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-      let url = `${process.env.APP_URL}/document/${encodeURIComponent(file.filename)}`;
-
+      let fileName = file.filename || file.key;
+      let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
+      
       let protocol = '';
-
+      
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+      protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
       }
-
+      
       return {
-        name: sanitizeFileName(file.originalname),
-        url: protocol + url
+      name: sanitizeFileName(file.originalname),
+      url: protocol + url
       }
     })));
   });
