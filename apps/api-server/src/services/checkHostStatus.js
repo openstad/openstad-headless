@@ -161,7 +161,7 @@ const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tls
       metadata: {
         //name must be unique, lowercase, alphanumer, - is allowed
         name: `${name}`,
-        annotations,
+        annotations: defaultAnnotations,
       },
       spec
     }
