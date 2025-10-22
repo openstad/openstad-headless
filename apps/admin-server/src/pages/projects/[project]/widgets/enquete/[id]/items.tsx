@@ -774,33 +774,35 @@ export default function WidgetEnqueteItems(
                               )}
                             />
 
-                            <FormField
-                              control={form.control}
-                              // @ts-ignore
-                              name={`options.${activeOption}.titles.0.isOtherOption`}
-                              render={({ field }) => (
-                                <>
-                                  <FormItem
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'flex-start',
-                                      flexDirection: 'row',
-                                      marginTop: '10px'
-                                    }}>
-                                    {YesNoSelect(field, props)}
-                                    <FormLabel
-                                      style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
-                                    <FormMessage />
-                                  </FormItem>
-                                  <FormDescription>
-                                    Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
-                                    formulier.
-                                    Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
-                                  </FormDescription>
-                                </>
-                              )}
-                            />
+                            {form.watch('questionType') !== 'sort' && (
+                              <FormField
+                                control={form.control}
+                                // @ts-ignore
+                                name={`options.${activeOption}.titles.0.isOtherOption`}
+                                render={({ field }) => (
+                                  <>
+                                    <FormItem
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        flexDirection: 'row',
+                                        marginTop: '10px'
+                                      }}>
+                                      {YesNoSelect(field, props)}
+                                      <FormLabel
+                                        style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                      <FormMessage />
+                                    </FormItem>
+                                    <FormDescription>
+                                      Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
+                                      formulier.
+                                      Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                    </FormDescription>
+                                  </>
+                                )}
+                              />
+                            )}
 
                             {form.watch('questionType') === 'multiple' && (
                               <FormField
