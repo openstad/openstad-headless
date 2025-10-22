@@ -507,7 +507,7 @@ secrets:
   auth:
     sessionSecret:
     phoneHashSalt:
-    dbNameKey: "auth-database"
+    dbNameKey:
 
   cms:
     apiKey:
