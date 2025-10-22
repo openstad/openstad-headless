@@ -10,7 +10,7 @@ async function connectToDatabase() {
       host: process.env.DB_HOST, // Replace with your database host
       user: process.env.DB_USERNAME, // Replace with your database username
       password: dbPassword, // Use the password retrieved from Key Vault
-      database: process.env.LEGACY_DB_NAME, // Replace with your database name
+      database: "apilegacy", // Replace with your database name
     });
 
     console.log("Connected to the MySQL database!");
