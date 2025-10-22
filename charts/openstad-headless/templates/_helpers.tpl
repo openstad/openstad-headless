@@ -24,10 +24,6 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
-{{- define "openstad.frontend.fullname" -}}
-{{- printf "%s-%s" (include "openstad.fullname" .) .Values.frontend.name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "openstad.admin.secret.fullname" -}}
 {{- if not .Values.secrets.existingSecret -}}
 {{- printf "%s-admin-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}

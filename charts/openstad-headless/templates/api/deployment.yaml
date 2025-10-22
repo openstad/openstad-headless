@@ -216,6 +216,27 @@ spec:
                 apiVersion: v1
                 fieldPath: metadata.namespace
 
+          - name: KUBERNETES_FRONTEND_SERVICE_NAME
+            value: {{ template "openstad.cms.fullname" . }}
+
+          - name: KUBERNETES_FRONTEND_SERVICE_PORT
+            value: "{{ .Values.cms.service.httpPort }}"
+
+          - name: KUBERNETES_INGRESS_USE_CLUSTER_ISSUER
+            value: "{{ .Values.clusterIssuer.useProdIssuer }}"
+
+          - name: KUBERNETES_INGRESS_ISSUER_NAME
+            value: "{{ .Values.clusterIssuer.prodIssuerName }}"
+
+          - name: KUBERNETES_INGRESS_CLASS_NAME
+            value: "{{ .Values.api.createdIngresses.className | default "" }}"
+
+          - name: KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS
+            value: '{{ .Values.api.createdIngresses.annotations | default "{}" | toJson }}'
+
+          - name: KUBERNETES_INGRESS_TLS_MANAGED_BY_OPENSTAD
+            value: "{{ .Values.api.createdIngresses.tlsManagedByOpenstad }}"
+
           - name: RATE_LIMIT
             valueFrom:
               secretKeyRef:
