@@ -206,7 +206,7 @@ const checkHostStatus = async (conditions) => {
       // Allow the TLS secret name to be set in the project config
       const tlsSecretName = project.config?.tlsSecretName ? project.config.tlsSecretName : project.config.uniqueId;
       const tlsExtraDomains = project.config?.tlsExtraDomains ? project.config.tlsExtraDomains : [];
-      const tlsUseClusterIssuer = project.config?.tlsUseClusterIssuer ? project.config.tlsUseClusterIssuer : process.env.KUBERNETES_INGRESS_USE_CLUSTER_ISSUER === 'true';
+      const tlsUseClusterIssuer = project.config?.tlsSecretName ? false : process.env.KUBERNETES_INGRESS_USE_CLUSTER_ISSUER === 'true';
       
       // if ip issset but not ingress try to create one
       if (!ingress) {
