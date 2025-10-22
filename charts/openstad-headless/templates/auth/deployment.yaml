@@ -274,6 +274,9 @@ spec:
                 name: {{ template "openstad.auth.databaseSecret.fullname" . }}
                 key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
 
+          - name: AUTH_INITIAL_USERS
+            value: '{{ .Values.auth.initialUsers | default "[]" | toJson }}'
+
           {{- if .Values.auth.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}

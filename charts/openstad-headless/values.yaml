@@ -244,6 +244,9 @@ auth:
   # Inject extra environment variables
   extraEnvVars: []
 
+  # Supply an array of e-mails to create as initial users. The admin client will be set to auth type "URL" and "admin" will be added to the twoFactorRoles.
+  initialUsers: []
+
   # Resources:
   resources:
     # Max resources
