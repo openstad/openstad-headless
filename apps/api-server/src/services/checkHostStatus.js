@@ -123,6 +123,7 @@ const checkHostStatus = async (conditions) => {
 
   if (isOnK8s) {
     
+    const defaultProjectHost = new URL(process.env.CMS_URL).host;
     const projects = await db.Project.findAll({ where });
     
     const promises = projects.map(async (project) => {
@@ -130,6 +131,11 @@ const checkHostStatus = async (conditions) => {
       
       if (!project.url) {
         console.error('No url found for project: ', project.id);
+        return;
+      }
+      
+      if (project.url === defaultProjectHost) {
+        console.log('Skipping default project host: ', project.url);
         return;
       }
       
