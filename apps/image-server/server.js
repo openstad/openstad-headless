@@ -10,6 +10,7 @@ const mime      = require('mime-types');
 
 const { createFilename, sanitizeFileName } = require('./utils')
 const fs = require('node:fs');
+const path = require('path');
 
 console.log ('S3 enabled:', s3.isEnabled());
 
@@ -160,8 +161,23 @@ app.get('/image/*',
       // remove /image/ from the path
       req.url = req.url.replace(/^\/image\//, '');
       
-      const extension = req.url.split('.').pop().toLowerCase();
-      // get mime type for extension
+      // SSRF mitigation: Validate and sanitize image path
+      // Only allow filenames with safe characters and common image extensions
+      const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'];
+      const safeImageNamePattern = /^[a-zA-Z0-9_\-\.]+$/;
+      const unsafePath = req.url;
+
+      // Prevent directory traversal or illegal characters
+      const baseName = path.basename(unsafePath); // strips directory components
+      const extension = baseName.split('.').pop().toLowerCase();
+      if (
+        baseName !== unsafePath // directory component detected
+        || !safeImageNamePattern.test(baseName) // unsafe chars present
+        || !ALLOWED_EXTENSIONS.includes(extension) // extension not allowed
+      ) {
+        return res.status(400).send('Invalid image filename or path');
+      }
+
       const mimeType  = mime.lookup(extension);
       
       const endpoint = process.env.S3_ENDPOINT.replace('https://', `https://${process.env.S3_BUCKET}.`);
