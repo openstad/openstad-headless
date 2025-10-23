@@ -16,6 +16,7 @@ import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choi
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
+import SortField from "@openstad-headless/ui/src/form-elements/sort";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
@@ -155,6 +156,7 @@ function Form({
         number: NumberInput as React.ComponentType<ComponentFieldProps>,
         matrix: MatrixField as React.ComponentType<ComponentFieldProps>,
         none: InfoField as React.ComponentType<ComponentFieldProps>,
+        sort: SortField as React.ComponentType<ComponentFieldProps>,
     };
 
     const renderField = (field: ComponentFieldProps, index: number, randomId: string, fieldInvalid: boolean) => {

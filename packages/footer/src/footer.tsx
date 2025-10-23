@@ -7,9 +7,11 @@ import './footer.css';
 
 interface Item {
   content: string;
+  logo?: any;
+  alt?: string;
 };
 
-function Footer({ content }: Item) {
+function Footer({ content, logo, alt }: Item) {
   return (
     <footer>
       <div className="container">
@@ -28,6 +30,11 @@ function Footer({ content }: Item) {
             )}
           </div>
         ))}
+        {logo &&
+          <figure className="footer-logo">
+            <img src={JSON.parse(logo)?._urls?.original} alt={alt || 'Afbeelding van het logo'} />
+          </figure>
+        }
       </div>
     </footer>
   )

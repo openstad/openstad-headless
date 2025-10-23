@@ -1,0 +1,151 @@
+.related-posts {
+    container-type: inline-size;
+    container-name: related-posts-container;
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem 0;
+
+    .related-post-heading {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .carousel-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        grid-column: 2;
+        grid-row: 1;
+
+        .carousel-prev,
+        .carousel-next {
+            span {
+                display: block;
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        .carousel-prev span {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,1)'%3E%3Cpath d='M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .carousel-next span {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,1)'%3E%3Cpath d='M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .carousel-prev:disabled span {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(0,0,0,1)'%3E%3Cpath d='M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .carousel-next:disabled span {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(0,0,0,1)'%3E%3Cpath d='M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z'%3E%3C/path%3E%3C/svg%3E");
+        }
+    }
+
+    .carousel-container {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .news-card{
+        position: relative;
+    }
+
+    .static-grid {
+        .static-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            width: 100%;
+            gap: 20px;
+
+            li {
+                width: 100%;
+            }
+        }
+    }
+
+    &.carousel-enabled {
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            padding: 0 1px;
+        }
+
+        .carousel-track {
+            list-style: none;
+            padding: 0;
+            margin: 0 -10px;
+            display: flex;
+            transition: transform 0.3s ease-in-out;
+            gap: 0px;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: end;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            background: #e7e7e7;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .carousel-dot.active {
+            background: var(--_utrecht-button-background-color, #228540);
+        }
+
+        .carousel-track {
+            li {
+                min-width: 0;
+                padding: 0 10px;
+                position: relative;
+
+                @media (max-width: 1023px) {
+                    flex: 0 0 calc(50% - 10px);
+                }
+
+                @media (max-width: 767px) {
+                    flex: 0 0 calc(100% - 0px);
+                }
+            }
+        }
+    }
+
+    .read-more {
+        span {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(1px, 1px, 1px, 1px);
+        }
+
+        &:before {
+            content: '';
+            position: absolute;
+            inset: 0;
+        }
+    }
+}
+
+
+@container related-posts-container (max-width: 450px) {
+    .related-posts {
+        .static-grid{
+            .news-card{
+                figure{
+                    display: none;
+                }
+            }
+        }    
+    }
+}

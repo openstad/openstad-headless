@@ -11,6 +11,7 @@ import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-element
 import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
 import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
 import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/number";
+import type {SortFieldProps} from "@openstad-headless/ui/src/form-elements/sort";
 import {MatrixFieldProps} from "@openstad-headless/ui/src/form-elements/matrix";
 import { FormValue } from "@openstad-headless/form/src/form";
 
@@ -55,7 +56,8 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'map' } & MapProps)
     | ({ type?: 'matrix' } & MatrixFieldProps)
     | ({ type?: 'pagination' } & PaginationFieldProps)
-    | ({ type?: 'none' } & InfoFieldProps);
+    | ({ type?: 'none' } & InfoFieldProps)
+    | ({ type?: 'sort' } & SortFieldProps);
 
 type ComponentFieldProps = (
     {
@@ -78,7 +80,8 @@ type CombinedFieldProps = (
     ImageChoiceFieldProps |
     NumberInputProps |
     MatrixFieldProps |
-    InfoFieldProps
+    InfoFieldProps |
+    SortFieldProps
 );
 
 // These fields have no use outside the form component itself, so we make them optional here to avoid having to define them in every form field

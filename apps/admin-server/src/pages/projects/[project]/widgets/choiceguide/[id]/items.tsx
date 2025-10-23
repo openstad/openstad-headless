@@ -711,28 +711,32 @@ export default function WidgetChoiceGuideItems(
               {option.titles[0].key}
             </p>
 
-            {dimensions.length > 0 && dimensions.map((XY, i) => (
-              <FormField
-                control={form.control}
-                name={`weights.${group.id}.choice.${option.titles[0].key}.weight${XY}`}
-                key={`0-${group.id}-${option.titles[0].key}`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className={`weight-${XY.toLowerCase()}-container`}>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
+            {dimensions.length > 0 && dimensions.map((XY, i) => {
+              const safeKey = option?.titles[0]?.key?.replace(/\./g, '_DOT_');
+
+              return (
+                <FormField
+                  control={form.control}
+                  name={`weights.${group.id}.choice.${safeKey}.weight${XY}`}
+                  key={`0-${group.id}-${safeKey}`}
+                  render={({field}) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className={`weight-${XY.toLowerCase()}-container`}>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage/>
+                    </FormItem>
+                  )}
+                />
+              )
+            })}
           </React.Fragment>
         ))}
       </div>

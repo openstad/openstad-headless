@@ -8,6 +8,7 @@ const limitTo           = require('../nunjucks/limitTo');
 const jsonFilter        = require('../nunjucks/json');
 const timestampFilter   = require('../nunjucks/timestamp');
 const mjml2html         = require('mjml');
+const AzureTransport = require('@openstad-headless/lib/azure-transport');
 
 
 const formatTransporter = function ({ host, port, secure, auth }) {
@@ -89,10 +90,23 @@ exports.send = async function ({subject, toName, toEmail, templateString, templa
   }
 
   /**
-   * Create instance of MAIL transporter
+   * Create instance of MAIL transporter2
    */
   transporterConfig = transporterConfig ? transporterConfig : {};
-  const transporter = nodemailer.createTransport(formatTransporter(transporterConfig));
+  
+  const transporterType = !!process.env.MAIL_TRANSPORTER_TYPE ? process.env.MAIL_TRANSPORTER_TYPE : 'smtp';
+  
+  let transporter;
+  if (transporterType === 'ms-graph') {
+    transporter = nodemailer.createTransport(new AzureTransport({
+      clientId:     process.env.MAIL_MICROSOFT_GRAPH_CLIENT_ID,
+      clientSecret: process.env.MAIL_MICROSOFT_GRAPH_CLIENT_SECRET,
+      tenantId:     process.env.MAIL_MICROSOFT_GRAPH_TENANT_ID,
+    }))
+  } else {
+    transporter = nodemailer.createTransport(formatTransporter(transporterConfig));
+  }
+  
 
   return new Promise(function(resolve, reject) {
     // send mail with defined transport object

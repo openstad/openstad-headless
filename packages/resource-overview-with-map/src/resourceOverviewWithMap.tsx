@@ -27,6 +27,7 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
                         {...props}
                         onFilteredResourcesChange={setFilteredResources}
                         onLocationChange={setLocation}
+                        displayMap={false}
                     />
                 </div>
                 <ResourceOverviewMap
