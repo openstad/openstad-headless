@@ -175,6 +175,7 @@ function Form({
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     randomId={randomId}
                     fieldInvalid={fieldInvalid}
+                    value={field.fieldKey && formValues[field.fieldKey]}
                     {...field}
                 />
             );
