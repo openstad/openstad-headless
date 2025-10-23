@@ -300,14 +300,19 @@ app.get('/document/*',
         // remove /document/ from the path
         req.url = req.url.replace(/^\/document\//, '');
       
-        const extension = req.url.split('.').pop().toLowerCase();
+        // Prevent path traversal attacks in S3 requests
+        const sanitizedPath = path.posix.normalize(req.url).replace(/^(\.\.(\/|\\|$))+/, '').replace(/^\/+/, '');
+        if (sanitizedPath.includes('..')) {
+          return res.status(403).send('Forbidden');
+        }
+        const extension = sanitizedPath.split('.').pop().toLowerCase();
         // get mime type for extension
         const mimeType  = mime.lookup(extension);
         
         const endpoint = process.env.S3_ENDPOINT.replace('https://', `https://${process.env.S3_BUCKET}.`);
         
         // build s3 url
-        const s3Url = `${endpoint}/documents/${req.url}`;
+        const s3Url = `${endpoint}/documents/${sanitizedPath}`;
         const response = await fetch(s3Url);
         
         if (!response.ok) {
@@ -316,7 +321,7 @@ app.get('/document/*',
         
         res.setHeader('Content-Type', mimeType);
         res.setHeader('Content-Length', response.headers.get('content-length'));
-        res.setHeader('Content-Disposition', 'attachment; filename=' + req.url);
+        res.setHeader('Content-Disposition', 'attachment; filename=' + sanitizedPath);
         
         
         // Pipe the S3 response to the client
