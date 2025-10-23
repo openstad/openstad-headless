@@ -803,7 +803,7 @@ function ResourceOverviewInner({
         onLocationChange(location);
       }
     }
-  }, [filteredResources]);
+  }, [ JSON.stringify(filteredResources) ]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
