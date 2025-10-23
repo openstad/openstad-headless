@@ -1,5 +1,8 @@
 # Optional Dependencies
 
+disablePreInstallHelm: false
+disablePreInstallArgoCd: true
+
 ##
 ## In this block you can toggle all optional dependencies.
 ## If you want to use an existing database(s) or services, disable
@@ -72,6 +75,7 @@ public:
   environmentName:
 
 rateLimit:
+  existingSecret:
   windowMs: 60000
   limit: 100
 
@@ -140,6 +144,7 @@ admin:
 
   # Secret values
   secrets:
+    existingSecret:
     cookieSecret:
     apiKey:
 
@@ -239,6 +244,9 @@ auth:
   # Inject extra environment variables
   extraEnvVars: []
 
+  # Supply an array of e-mails to create as initial users. The admin client will be set to auth type "URL" and "admin" will be added to the twoFactorRoles.
+  initialUsers: []
+
   # Resources:
   resources:
     # Max resources
@@ -300,6 +308,23 @@ api:
       secretName: openstad-tls-api
       hosts: []
 
+  createdIngresses:
+    className:
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
+    # Is the TLS for this ingress managed by Openstad?
+    # Set to `false` if the secrets are managed manually -- compatible with older versions of Openstad
+    # Set to `true` if you want Openstad to manage the TLS in the ingress
+    # You can then set the project.config.tlsSecretName of a project, and it will be set in the ingress.tls
+    # Allowing you to have per-project TLS certificates, managed through secrets (e.g. externalSecret operator)
+    tlsManagedByOpenstad: false
+
   # Inject extra environment variables
   extraEnvVars: []
 
@@ -332,12 +357,15 @@ image:
   label: openstad-image-service
 
   secrets:
+    existingSecret:
     verificationToken:
 
   # Service settings:
   # Primarily port configuration
   service:
     httpPort: 31450
+
+  useS3: "false"
 
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
@@ -446,6 +474,7 @@ cms:
       hosts: []
 
   disableWidgetPreview: "false"
+  useS3: "false"
 
   # Inject extra environment variables
   extraEnvVars: []
@@ -493,14 +522,22 @@ secrets:
 
   api:
     jwtSecret:
+    dbNameKey:
 
   auth:
     sessionSecret:
     phoneHashSalt:
+    dbNameKey:
 
   cms:
     apiKey:
     mongodbUri:
+    s3:
+      endpoint:
+      bucket:
+      region:
+      key:
+      secret:
 
   database:
     ### These values are for the MySQL db
@@ -563,10 +600,22 @@ secrets:
 
   ### Mail server secretes
   mail:
+    # Set this to `ms-graph` to use Microsoft Graph API for mail sending
+    transporterType: smtp
     host: smtp.localhost
     port: '25'
     username: user
     password: password
+
+    hostKey:
+    portKey:
+    passwordKey:
+    usernameKey:
+    # Used for Microsoft Graph API mail sending
+    microsoft:
+      clientId:
+      tenantId:
+      clientSecret:
 
     auth:
       emailAssetsUrl:

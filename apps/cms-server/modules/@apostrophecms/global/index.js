@@ -23,17 +23,23 @@ module.exports = {
         req.project = self.apos.options.project;
         req.data.global.projectTitle = req.project.title;
         req.data.prefix = self.apos.options.prefix || '';
-        
-        req.data.global.reactCdn = process.env.REACT_CDN || 'https://unpkg.com/react@18.3.1/umd/react.production.min.js';
-        req.data.global.reactDomCdn = process.env.REACT_DOM_CDN || 'https://unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
-        
+
+        req.data.global.reactCdn =
+          process.env.REACT_CDN ||
+          'https://unpkg.com/react@18.3.1/umd/react.production.min.js';
+        req.data.global.reactDomCdn =
+          process.env.REACT_DOM_CDN ||
+          'https://unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
+
         try {
-          if (!!req.project.id){
+          if (!!req.project.id) {
             const project = await projectService.fetchOne(req.project.id);
 
             if (project) {
               const customCssUrls = project.config?.project?.cssUrl || [];
-              req.data.customCssUrls = Array.isArray(customCssUrls) ? customCssUrls : [customCssUrls];
+              req.data.customCssUrls = Array.isArray(customCssUrls)
+                ? customCssUrls
+                : [customCssUrls];
             }
           }
         } catch (error) {}
@@ -68,7 +74,6 @@ module.exports = {
 
   fields: {
     add: {
-
       siteTitle: {
         type: 'string',
         label: 'Site titel',
@@ -90,6 +95,18 @@ module.exports = {
         type: 'string',
         label: 'Logo alt text',
         default: 'Afbeelding van het logo, link naar de homepage',
+      },
+
+      footerLogo: {
+        type: 'attachment',
+        label: 'Footer logo',
+        fileGroup: 'images',
+      },
+
+      footerLogoAltText: {
+        type: 'string',
+        label: 'Logo alt text',
+        default: 'Afbeelding van het logo',
       },
 
       ctaButtons: {
@@ -118,6 +135,10 @@ module.exports = {
                 {
                   label: 'secondary-action',
                   value: 'secondary-action',
+                },
+                {
+                  label: 'Extra menu knop',
+                  value: 'menu-button',
                 },
               ],
             },
@@ -148,6 +169,12 @@ module.exports = {
         def: 'false',
         label: 'Toon login knop',
       },
+      
+      showLoginInCTA: {
+        type: 'boolean',
+        def: 'false',
+        label: 'Toon login knop in het menu',
+      },
 
       loginButtonLabel: {
         label: 'Login knop tekst',
@@ -161,11 +188,11 @@ module.exports = {
       showAccountButton: {
         type: 'boolean',
         def: 'false',
-        label: 'Toon \'mijn account\' knop',
+        label: "Toon 'mijn account' knop",
       },
 
       accountButtonHref: {
-        label: 'Link naar \'mijn account\' pagina',
+        label: "Link naar 'mijn account' pagina",
         def: '/account',
         type: 'string',
         if: {
@@ -174,7 +201,7 @@ module.exports = {
       },
 
       accountButtonLabel: {
-        label: '\'Mijn account\' knop tekst',
+        label: "'Mijn account' knop tekst",
         def: 'Mijn account',
         type: 'string',
         help: '[[name]] wordt vervangen door de naam van de gebruiker',
@@ -333,15 +360,15 @@ module.exports = {
         options: {
           widgets: {
             'openstad-section': {},
-          }
-        }
+          },
+        },
       },
     },
 
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'logoAltText'],
+        fields: ['siteTitle', 'hideSiteTitle', 'siteLogo', 'logoAltText'],
       },
       css: {
         label: 'Vormgeving',
@@ -349,7 +376,18 @@ module.exports = {
       },
       login: {
         label: 'Menu instellingen',
-        fields: ['showLoginButton', 'loginButtonLabel', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'logoutButtonLabel', 'ctaButtons', 'topMenuButtons'],
+        fields: [
+          'showLoginButton',
+          'showLoginInCTA',
+          'loginButtonLabel',
+          'showAccountButton',
+          'accountButtonHref',
+          'accountButtonLabel',
+          'logoutButtonLabel',
+          'ctaButtons',
+          'topMenuButtons',
+        ,
+        ],
       },
       cookies: {
         label: 'Cookie instellingen',
@@ -361,7 +399,7 @@ module.exports = {
       },
       footer: {
         label: 'Footer',
-        fields: ['footerlinks'],
+        fields: ['footerLogo', 'footerLogoAltText', 'footerlinks'],
       },
       errorPage: {
         label: '404 pagina',

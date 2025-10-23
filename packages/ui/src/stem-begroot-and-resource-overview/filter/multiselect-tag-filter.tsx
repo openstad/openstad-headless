@@ -93,7 +93,7 @@ const MultiSelectTagFilter = ({
 
   return tags.length > 0 && (
     <div className="form-element">
-      <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder || 'Selecteer item'}</FormLabel>
+      <FormLabel id={getRandomId(props.placeholder)}>{props.placeholder || 'Selecteer item'}</FormLabel>
       <MultiSelect
         id={getRandomId(props.placeholder)}
         label={props.placeholder || ''}
