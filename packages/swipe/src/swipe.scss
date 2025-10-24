@@ -1,13 +1,15 @@
 .swipe-widget {
-  --swipe-active-background: var(--setSwipeActiveBackground, #238641);
-  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, #238641);
+  --swipe-active-background: var(--setSwipeActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886));
+  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, var(--utrecht-button-primary-action-background-color, #11B886));
   --swipe-progress-bar-color: var(--setSwipeProgressBarColor, var(--utrecht-button-disabled-color, #d5e7d4));
 
-  --swipe-like-color: var(--setSwipeLikeColor, #248641);
+  --swipe-like-color: var(--setSwipeLikeColor, var(--utrecht-button-primary-action-background-color, #11B886));
   --swipe-dislike-color: var(--setSwipeDislikeColor, #CF1C08);
 
   --swipe-like-fill: var(--setSwipeLikeFill, white);
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
+
+  --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886));
 
   max-width: 500px;
   width: 100%;
@@ -302,7 +304,6 @@
         transform: scale(1.1);
       }
 
-      &:hover i {}
 
       i {
         color: var(--swipe-like-fill);
@@ -316,7 +317,6 @@
         transform: scale(1.1);
       }
 
-      &:hover i {}
 
       i {
         color: var(--swipe-dislike-fill);
@@ -457,13 +457,13 @@
     }
 
     &.active {
-      border-color: var(--swipe-active-background);
-      background: var(--swipe-active-background);
+      border-color: var(--swipe-answer-active-background);
+      background: var(--swipe-answer-active-background);
       color: white;
 
       &:hover {
-        border-color: rgba(35, 134, 65, 0.8);
-        background: rgba(35, 134, 65, 0.8);
+        border-color: var(--swipe-answer-active-background);
+        background: var(--swipe-answer-active-background);       
       }
     }
 
@@ -531,15 +531,15 @@
 }
 
 
-.explanation-dialog{
+.explanation-dialog {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
   z-index: 999999;
   opacity: 0;
   animation: dialogFadeIn 0.3s ease-out forwards;
 
-  .explanation-dialog-content{
+  .explanation-dialog-content {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -553,7 +553,7 @@
     transform: translateY(20px) scale(0.95);
     animation: dialogSlideUp 0.3s ease-out forwards;
 
-    textarea{
+    textarea {
       width: 100%;
       margin: 20px 0;
       padding: 20px;
@@ -563,18 +563,18 @@
       resize: vertical;
       min-height: 100px;
 
-      &:focus{
+      &:focus {
         outline: none;
         border-color: var(--swipe-active-background);
         box-shadow: 0 0 0 2px rgba(35, 134, 65, 0.1);
       }
     }
 
-    button{
+    button {
       max-width: none;
       width: 100%;
 
-      & + button{
+      &+button {
         margin-top: 16px;
       }
     }
@@ -593,6 +593,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -602,6 +603,7 @@
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -611,6 +613,7 @@
   from {
     transform: translateY(20px) scale(0.95);
   }
+
   to {
     transform: translateY(0) scale(1);
   }
@@ -620,6 +623,7 @@
   from {
     transform: translateY(0) scale(1);
   }
+
   to {
     transform: translateY(20px) scale(0.95);
   }

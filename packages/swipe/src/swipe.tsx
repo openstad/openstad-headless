@@ -444,7 +444,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }
 
   return (
-    <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'}>
+    <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'} data-required={required}>
       <div className="swipe-container" role="list" aria-label="Stellingen">
         <div className="swipe-stack">
           {remainingCards.slice(0, 3).map((card, index) => {

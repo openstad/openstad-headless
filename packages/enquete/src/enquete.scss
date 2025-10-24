@@ -148,7 +148,7 @@ label.utrecht-form-label {
   margin: 0 auto;
   word-break: auto-phrase;
 
-  --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, #248641);
+  --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
   --youth-intro-card-title-color: var(--setYouthIntroCardTitleColor, #ffffff);
   --youth-intro-card-description-color: var(--setYouthIntroCardDescriptionColor, #ffffff);
 
@@ -159,7 +159,7 @@ label.utrecht-form-label {
   --youth-page-card-title-font-size: var(--setYouthPageCardTitleFontSize, 32px);
   --youth-page-card-description-font-size: var(--setYouthPageCardDescriptionFontSize, 14px);
 
-  --youth-outro-card-background-color: var(--setYouthOutroCardBackgroundColor, #248641);
+  --youth-outro-card-background-color: var(--setYouthOutroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
   --youth-outro-card-title-color: var(--setYouthOutroCardTitleColor, #ffffff);
   --youth-outro-card-description-color: var(--setYouthOutroCardDescriptionColor, #ffffff);
 
@@ -805,6 +805,13 @@ label.utrecht-form-label {
     }
 
     .question-type-swipe {
+      // &:not(:has(.swipe-finished)):has([data-required="true"]) {
+      &:not(:has(.swipe-finished)) {
+        + .button-group .utrecht-button--submit.utrecht-button--primary-action {
+          display: none;
+        }
+      }
+
       .swipe-widget:not(.swipe-finished) {
         justify-content: center;
       }
