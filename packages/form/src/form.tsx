@@ -86,7 +86,7 @@ function Form({
 
     const handleFormSubmit = (event: React.FormEvent) => {
         let pageHandler = undefined;
-        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1) {
+        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && setCurrentPage) {
             allowResetAfterSubmit = false;
             pageHandler = () => setCurrentPage(currentPage + 1);
         }
