@@ -12,6 +12,8 @@ interface Item {
 };
 
 function Footer({ content, logo, alt }: Item) {
+  const hasValidLogo = logo && JSON.parse(logo)?._urls?.original;
+
   return (
     <footer>
       <div className="container">
@@ -30,7 +32,7 @@ function Footer({ content, logo, alt }: Item) {
             )}
           </div>
         ))}
-        {logo &&
+        {hasValidLogo &&
           <figure className="footer-logo">
             <img src={JSON.parse(logo)?._urls?.original} alt={alt || 'Afbeelding van het logo'} />
           </figure>
