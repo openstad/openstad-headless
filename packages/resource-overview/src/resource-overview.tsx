@@ -620,7 +620,7 @@ function ResourceOverviewInner({
     ?.filter(project => !project?.excludeResourcesInOverview)
     .map(project => project.id) || [];
 
-  const { data: resourcesWithPagination } = datastore.useResources({
+  const { data: resourcesWithPagination, isLoading } = datastore.useResources({
     pageSize: 999999,
     ...props,
     search,
@@ -872,7 +872,15 @@ function ResourceOverviewInner({
 
   const overviewSection = (
     <section className="osc-resource-overview-resource-collection" id={randomId}>
-      {filteredResources &&
+      {filteredResources?.length === 0 ? (
+        isLoading ? (
+          <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
+        ) : (
+          <Paragraph className="osc-no-results-text">
+            {search ? `Er zijn geen resultaten gevonden voor "${search}".` : 'Geen resultaten gevonden.'}
+          </Paragraph>
+        )
+      ) :
         filteredResources
           ?.slice(page * pageSize, (page + 1) * pageSize)
           ?.map((resource: any, index: number) => {

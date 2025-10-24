@@ -47,10 +47,6 @@ function Enquete(props: EnqueteWidgetProps) {
     );
 
     async function onSubmit(formData: any) {
-
-        if (currentPage < totalPages - 1) {
-            setCurrentPage((prevPage) => prevPage + 1);
-        } else {
             formData.confirmationUser = props?.confirmation?.confirmationUser || false;
             formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
             formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
@@ -89,10 +85,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     notifyCreate();
                 }
             }
-        }
-
     }
-
 
     const formFields: FieldProps[] = [];
     if (typeof (props) !== 'undefined'
@@ -278,16 +271,13 @@ function Enquete(props: EnqueteWidgetProps) {
 
     const totalPages = formFields.filter(field => field.type === 'pagination').length + 1 || 1;
     // Find indices of all pagination fields
-    const paginationIndices = formFields
+    const paginationFieldPositions = formFields
         .map((field, idx) => field.type === 'pagination' ? idx : -1)
         .filter(idx => idx !== -1);
 
     // Add start and end indices for slicing
-    const pageStartIndices = [0, ...paginationIndices.map(idx => idx + 1)];
-    const pageEndIndices = [...paginationIndices, formFields.length];
-
-    // Get fields for the current page
-    const currentFields = formFields.slice(pageStartIndices[currentPage], pageEndIndices[currentPage]);
+    const pageFieldStartPositions = [0, ...paginationFieldPositions.map(idx => idx + 1)];
+    const pageFieldEndPositions = [...paginationFieldPositions, formFields.length];
 
     useEffect(() => {
         const updatedAnswers = { ...answers, ...currentAnswers };
@@ -325,15 +315,18 @@ function Enquete(props: EnqueteWidgetProps) {
                     )}
                 </div>
                 <Form
-                    fields={currentFields}
+                    fields={formFields}
                     submitHandler={onSubmit}
                     title=""
                     submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
                     submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
+                    totalPages={totalPages}
                     prevPage={currentPage > 0 ? currentPage - 1 : null}
                     prevPageText={getPrevPageTitle}
+                    pageFieldStartPositions={pageFieldStartPositions}
+                    pageFieldEndPositions={pageFieldEndPositions}
                     {...props}
                 />
             </div>
