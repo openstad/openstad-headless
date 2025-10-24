@@ -50,56 +50,80 @@ spec:
           - name: DB_USER
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: username
 
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: mysql-secret
+                name: {{ template "openstad.passwordSecret.fullname" . }}
                 key: mysql-password
 
           - name: DB_HOST
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostname
 
           - name: DB_PORT
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostport
 
           - name: DB_NAME
             valueFrom:
               secretKeyRef:
-                name: openstad-auth-db
-                key: database
+                name: {{ template "openstad.auth.databaseSecret.fullname" . }}
+                key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
+
+          - name: MAIL_TRANSPORTER_TYPE
+            valueFrom:
+              secretKeyRef:
+                key: transporterType
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msClientId
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: msClientSecret
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_TENANT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msTenantId
+                name: {{ template "openstad.email.secret.fullname" . }}
 
           # SMTP MAIL
           - name: MAIL_SERVER_URL
             valueFrom:
               secretKeyRef:
-                key: host
+                key: {{ .Values.secrets.mail.hostKey | default "host" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_PORT
             valueFrom:
               secretKeyRef:
-                key: port
+                key: {{ .Values.secrets.mail.portKey | default "port" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: password
+                key: {{ .Values.secrets.mail.passwordKey | default "password" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_USER_NAME
             valueFrom:
               secretKeyRef:
-                key: username
+                key: {{ .Values.secrets.mail.usernameKey | default "username" }}
                 name: {{ template "openstad.email.secret.fullname" . }}
 
           - name: MAIL_SERVER_SECURE
@@ -148,7 +172,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 key: secret
-                name: openstad-session-secret
+                name: {{ template "openstad.session.secret.fullname" . }}
 
           - name: COOKIE_SECURE_OFF
             value: "{{ .Values.auth.cookie.secureOff | default "no" }}"
@@ -214,38 +238,185 @@ spec:
         args:
           - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/auth-server -- --only-if-empty && npm run migrate-database -w apps/auth-server
         env:
+          - name: APP_URL
+            value: https://{{ template "openstad.auth.url" . }}
+
+          - name: CMS_URL
+            value: https://{{ template "openstad.cms.url" . }}
+
+          - name: BASE_DOMAIN
+            value: {{ .Values.host.base }}
+
+          - name: PORT
+            value: "{{ .Values.auth.service.httpPort }}"
+
+          # MySQL DATABASE
           - name: DB_USER
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: username
 
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: mysql-secret
+                name: {{ template "openstad.passwordSecret.fullname" . }}
                 key: mysql-password
 
           - name: DB_HOST
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostname
 
           - name: DB_PORT
             valueFrom:
               secretKeyRef:
-                name: openstad-db-credentials
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: hostport
-
-          - name: DB_MAX_POOL_SIZE
-            valueFrom:
-              secretKeyRef:
-                name: openstad-db-credentials
-                key: maxPoolSize
 
           - name: DB_NAME
             valueFrom:
               secretKeyRef:
-                name: openstad-auth-db
-                key: database
+                name: {{ template "openstad.auth.databaseSecret.fullname" . }}
+                key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
+
+          - name: MAIL_TRANSPORTER_TYPE
+            valueFrom:
+              secretKeyRef:
+                key: transporterType
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msClientId
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: msClientSecret
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_MICROSOFT_GRAPH_TENANT_ID
+            valueFrom:
+              secretKeyRef:
+                key: msTenantId
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          # SMTP MAIL
+          - name: MAIL_SERVER_URL
+            valueFrom:
+              secretKeyRef:
+                key: {{ .Values.secrets.mail.hostKey | default "host" }}
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_PORT
+            valueFrom:
+              secretKeyRef:
+                key: {{ .Values.secrets.mail.portKey | default "port" }}
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: {{ .Values.secrets.mail.passwordKey | default "password" }}
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_USER_NAME
+            valueFrom:
+              secretKeyRef:
+                key: {{ .Values.secrets.mail.usernameKey | default "username" }}
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_SECURE
+            value: "{{ .Values.secrets.mail.auth.secure | default "yes" }}"
+
+          - name: EMAIL_ASSETS_URL
+            value: https://{{ template "openstad.auth.url" . }}/email
+
+          - name: FROM_NAME
+            value: {{ default .Values.auth.fromName "Openstad api" }}
+
+          - name: FROM_EMAIL
+            value: {{ or .Values.auth.fromEmail .Values.secrets.mail.auth.user }}
+
+          - name: AUTH_ADMIN_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_id
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_ADMIN_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_secret
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_FIRST_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: client_id
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_FIRST_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: client_secret
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_FIRST_LOGIN_CODE
+            valueFrom:
+              secretKeyRef:
+                key: first_login_token
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: SESSION_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: secret
+                name: {{ template "openstad.session.secret.fullname" . }}
+
+          - name: COOKIE_SECURE_OFF
+            value: "{{ .Values.auth.cookie.secureOff | default "no" }}"
+
+          - name: PHONE_HASH_SALT
+            valueFrom:
+              secretKeyRef:
+                key: phone_hash_salt
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: API_URL
+            value: https://{{ template "openstad.api.url" . }}
+
+          - name: ADMIN_URL
+            value: https://{{ template  "openstad.admin.url" . }}
+
+          - name: ALLOWED_ADMIN_DOMAINS
+            value: '["{{ template  "openstad.admin.url" . }}"]'
+
+          - name: ENVIRONMENT_NAME
+            value: {{ .Values.public.environmentName | default "Openstad" | quote }}
+
+          - name: NODE_ENV
+            value: production
+
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
+          - name: AUTH_INITIAL_USERS
+            value: '{{ .Values.auth.initialUsers | default "[]" | toJson }}'
+
+          {{- if .Values.auth.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}

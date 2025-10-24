@@ -350,6 +350,12 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['prevPageText'] = item?.prevPageText || '1';
                     fieldData['nextPageText'] = item?.nextPageText || '2';
                     break;
+                case 'sort':
+                    fieldData['options'] = item?.options || [];
+                    fieldData['type'] = 'sort';
+                    fieldData['title'] = item?.title || '';
+                    fieldData['description'] = item?.description || '';
+                    break;
                 case 'none':
                     fieldData['type'] = 'none';
                     fieldData['image'] = item?.image || '';

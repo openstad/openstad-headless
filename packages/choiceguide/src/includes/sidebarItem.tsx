@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChoiceOptions, Score } from '../props';
+import {ChoiceOptions, Item, Score} from '../props';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
+import RenderContent from '../../../ui/src/rte-formatting/rte-formatting'
+import {Heading4} from "@utrecht/component-library-react";
 
 const defaultBarColor = {
   default: '#bed200',
@@ -16,10 +18,19 @@ type ChoiceItemProps = {
   choicesPreferenceMinColor?: string;
   choicesPreferenceMaxColor?: string;
   showPageCountAndCurrentPageInButton?: boolean;
+  hiddenFields?: string[];
+  items?: Array<Item>;
 };
 
 const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
   const [score, setScore] = useState<Score>({ x: 0, y: 0, z: 0 });
+
+  const {
+    displayTitle = true,
+    displayScore = true,
+    displayDescription = false,
+    displayImage = false,
+  } = (props || {});
 
   // Calculate score for this item
   useEffect(() => {
@@ -27,7 +38,9 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
       props.choiceOption,
       props.answers,
       props.weights,
-      props.choicesType
+      props.choicesType,
+      props.hiddenFields,
+      props.items
     );
     setScore(itemScore);
   }, [props.choiceOption, props.answers, props.weights]);
@@ -65,11 +78,23 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
 
       return (
         <div className="osc-choice-default not-minus-to-plus">
-          <h4>{props.choiceOption?.title}</h4>
-          <div className="osc-choice-bar">
-            <div className="osc-choice-bar-mask"></div>
-            <div className="osc-choice-bar-progress" data-score={Math.round(percentageValue)}></div>
-          </div>
+          {displayTitle && (<Heading4>{props.choiceOption?.title}</Heading4>)}
+          {displayDescription && props.choiceOption?.description && (
+            <div className="osc-choice-description">
+              <p dangerouslySetInnerHTML={{__html: RenderContent(props.choiceOption.description)}} />
+            </div>
+          )}
+          { displayScore && (
+            <div className="osc-choice-bar">
+              <div className="osc-choice-bar-mask"></div>
+              <div className="osc-choice-bar-progress" data-score={Math.round(percentageValue)}></div>
+            </div>
+          )}
+          {displayImage && props.choiceOption?.image && (
+            <div className="osc-choice-image-container">
+              <img src={props.choiceOption.image} alt={props.choiceOption.title} className="osc-choice-image" />
+            </div>
+          )}
         </div>
       );
     }
