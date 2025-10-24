@@ -9,7 +9,7 @@
   --swipe-like-fill: var(--setSwipeLikeFill, white);
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
 
-  --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886));
+  --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, #1260A1);
 
   max-width: 500px;
   width: 100%;
@@ -460,11 +460,6 @@
       border-color: var(--swipe-answer-active-background);
       background: var(--swipe-answer-active-background);
       color: white;
-
-      &:hover {
-        border-color: var(--swipe-answer-active-background);
-        background: var(--swipe-answer-active-background);       
-      }
     }
 
     i {
