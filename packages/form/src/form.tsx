@@ -223,9 +223,9 @@ function Form({
                                     <div className="info-block-buttons">
                                         {/* @ts-ignore */}
                                         {field.infoBlockExtraButton && (
-                                            <button className="update-button">
+                                            <a className="update-button" href={field.infoBlockExtraButton} rel="noreferrer">
                                                 <span>Blijf op de hoogte</span>
-                                            </button>
+                                            </a>
                                         )}
                                         {/* @ts-ignore */}
                                         {field.infoBlockShareButton && (

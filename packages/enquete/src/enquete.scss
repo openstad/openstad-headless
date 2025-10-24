@@ -343,6 +343,11 @@ label.utrecht-form-label {
         border: none;
         height: 42px;
         border-radius: 3px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
       }
 
       .utrecht-button--primary-action {
@@ -367,7 +372,7 @@ label.utrecht-form-label {
         cursor: pointer;
         transition: all .2s ease-in-out;
 
-        &:hover{
+        &:hover {
           background: #fff;
           color: #000;
         }
@@ -560,11 +565,12 @@ label.utrecht-form-label {
       }
 
       .image-choice-container {
-        display: flex;
+        display: grid;
         gap: 10px;
         margin-top: 140px;
         position: relative;
         justify-content: center;
+        grid-template-columns: 1fr 1fr;
 
         &:before {
           content: "OF";
@@ -898,7 +904,7 @@ label.utrecht-form-label {
   }
 
 
-  &[aria-hidden='false']:nth-of-type(2) {
+  &[aria-hidden='false'] {
     opacity: 1;
     pointer-events: all;
 
