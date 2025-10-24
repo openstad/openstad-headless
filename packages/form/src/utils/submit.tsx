@@ -8,7 +8,8 @@ export const handleSubmit = (
     formValues: { [p: string]: FormValue },
     setFormErrors: React.Dispatch<React.SetStateAction<{ [p: string]: string | null }>>,
     routingHiddenFields: string[],
-    submitHandler: (values: { [p: string]: FormValue }) => void
+    submitHandler: (values: { [p: string]: FormValue }) => void,
+    pageHandler: (() => void) | null = null,
 ): string | null => {
     const errors: { [key: string]: string | null } = {};
     let firstErrorKey: string | null = null;
@@ -50,7 +51,11 @@ export const handleSubmit = (
     setFormErrors(errors);
 
     if (Object.values(errors).every((error) => error === null)) {
-        submitHandler(formValues);
+        if (pageHandler) {
+            pageHandler();
+        } else {
+            submitHandler(formValues);
+        }
         return null;
     }
 
