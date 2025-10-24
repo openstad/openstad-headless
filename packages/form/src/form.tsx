@@ -15,6 +15,7 @@ import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice";
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import SwipeField from "@openstad-headless/swipe/src/swipe";
+import DilemmaField from '@openstad-headless/dilemma/src/dilemma';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
 import SortField from "@openstad-headless/ui/src/form-elements/sort";
@@ -161,6 +162,7 @@ function Form({
         matrix: MatrixField as React.ComponentType<ComponentFieldProps>,
         none: InfoField as React.ComponentType<ComponentFieldProps>,
         sort: SortField as React.ComponentType<ComponentFieldProps>,
+        dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     };
 
     const renderField = (field: ComponentFieldProps, index: number, randomId: string, fieldInvalid: boolean) => {

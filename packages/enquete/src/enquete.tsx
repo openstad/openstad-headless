@@ -378,6 +378,21 @@ function Enquete(props: EnqueteWidgetProps) {
                         };
                     });
                     break;
+                case 'dilemma':
+                    console.log(item)
+                    fieldData['type'] = 'dilemma';
+                    fieldData['title'] = item?.title || '';
+                    fieldData['infoField'] = item?.infoField || '';
+                    fieldData['options'] = item?.options?.map((dilemmaOption) => {
+                        console.log(dilemmaOption)
+                        return {
+                            id: dilemmaOption.trigger,
+                            title: dilemmaOption.titles[0].key,
+                            description: dilemmaOption.titles[0].description || '',
+                            image: dilemmaOption.titles[0].image || ''
+                        };
+                    });
+                    break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';
                     fieldData['matrix'] = item?.matrix || undefined;
