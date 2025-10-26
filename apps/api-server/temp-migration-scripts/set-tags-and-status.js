@@ -7,25 +7,31 @@ const declaredArgs = {
 
 const projectId = retrieveArg(declaredArgs.projectId);
 
-async function setTags() {
+async function setTagsAndStatus() {
     const resources = await db.Resource.findAll({ where: { projectId } })
     
     console.log(`Found ${resources.length} resources for projectId ${projectId}`)
 
     const areaSet = new Set()
     const themeSet = new Set()
+    const statusSet = new Set()
 
     const areaNameToIdMap = new Map()
     const themeNameToIdMap = new Map()
+    const statusNameToIdMap = new Map()
 
     resources.forEach(resource => {
         const area = resource.extraData.area
         const theme = resource.extraData.theme
+        const status = resource.extraData.originalOldOpenStadStatus
         if (area) {
             areaSet.add(area)
         }
         if (theme) {
             themeSet.add(theme)
+        }
+        if (status) {
+            statusSet.add(status)
         }
     });
 
@@ -37,6 +43,11 @@ async function setTags() {
     console.log(`Found ${themeSet.size} unique themes:`)
     themeSet.forEach(theme => {
         console.log(theme)
+    })
+
+    console.log(`Found ${statusSet.size} unique statuses:`)
+    statusSet.forEach(status => {
+        console.log(status)
     })
 
     // //////
@@ -117,7 +128,46 @@ async function setTags() {
     })
     resourcesUpdatedWithThemeTags = await Promise.all(updateResourcesWithThemeTagsPromises)
 
-    console.log(`${resourcesUpdatedWithThemeTags.length} resources got an theme-tag assigned.`)
+    console.log(`${resourcesUpdatedWithThemeTags.length} resources got a theme-tag assigned.`)
+
+    // //////
+    // Status
+    // //////
+
+    let statuses
+    const getStatusPromises = Array.from(statusSet).map(async (status, index) => {
+        const statusData = {
+            projectId,
+            name: status,
+            seqnr: (index + 1) * 10,
+            addToNewResources: 0,
+            extraData: { originalOldOpenStadStatus: status},
+            extraFunctionality: {}
+        }
+
+        let returnedStatus
+        let created
+        [returnedStatus, created] = await db.Status.findOrCreate({
+            where: statusData
+        })
+
+        return returnedStatus
+    })
+    statuses = await Promise.all(getStatusPromises)
+
+    statuses.forEach((status) => {
+        statusNameToIdMap.set(status.name, status)
+    })
+
+    let resourcesUpdatedWithStatus
+    const updateResourcesWithStatusPromises = resources.map(async (resource) => {
+        if (resource.extraData.originalOldOpenStadStatus) {
+            return resource.addStatus(statusNameToIdMap.get(resource.extraData.originalOldOpenStadStatus))
+        }
+    })
+    resourcesUpdatedWithStatus = await Promise.all(updateResourcesWithStatusPromises)
+
+    console.log(`${resourcesUpdatedWithStatus.length} resources got a status assigned.`)
 }
 
-setTags()
+setTagsAndStatus()

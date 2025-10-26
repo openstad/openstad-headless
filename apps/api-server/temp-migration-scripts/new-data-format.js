@@ -87,6 +87,7 @@ export const getNewResourceData = (oldIdeaData, userId, modBreakUserId, oldImage
         originalOldOpenStadUserId: oldIdeaData.userId,
         originalOldOpenStadSiteId: oldIdeaData.siteId,
         originalOldOpenStadModBreakUserId: oldIdeaData.modBreakUserId,
+        originalOldOpenStadStatus: oldIdeaData.status,
         ...oldIdeaData.extraData
       }
     }
