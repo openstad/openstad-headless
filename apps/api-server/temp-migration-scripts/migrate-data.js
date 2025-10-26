@@ -6,7 +6,8 @@ const declaredArgs = {
     newProjectId: "new-project-id",
     oldImageUrlPrefix: "old-image-url-prefix",
     newImageUrlPrefix: "new-image-url-prefix",
-    anonymizeUsers: "anonymize-users"
+    anonymizeUsers: "anonymize-users",
+    newAuthDbName: "new-auth-db-name",
 }
 
 const givenArgs = process.argv
@@ -24,6 +25,7 @@ const newProjectId = retrieveArg(declaredArgs.newProjectId);
 const oldImageUrlPrefix = retrieveArg(declaredArgs.oldImageUrlPrefix);
 const newImageUrlPrefix = retrieveArg(declaredArgs.newImageUrlPrefix);
 const anonymizeUsers = retrieveArg(declaredArgs.anonymizeUsers) == "no" ? false : true;
+const newAuthDbName = retrieveArg(declaredArgs.newAuthDbName) || "auth";
 
 const sqlQueries = {
     getApiUsers: `SELECT * FROM users WHERE siteId = ? AND deletedAt IS NULL`,
@@ -199,7 +201,7 @@ async function migrateData() {
       host: process.env.DB_HOST,
       user: process.env.DB_USERNAME,
       password: await getDbPassword(),
-      database: "openstad-auth",
+      database: newAuthDbName,
       ssl,
     });
 
@@ -267,16 +269,23 @@ async function migrateData() {
     console.log("// //////");
     console.log("")
 
+    let newApiUsers
+    let oldToNewApiUserIdMap
+    const existingNewAuthUsers = []
+    const createdNewAuthUsers = []
+
     const getAuthUserId = async (oldUser) => {
         try {
             const [existingNewAuthUser] = await newAuthDbConnection.execute(sqlQueries.getAuthUser, [oldUser.email])
             if (existingNewAuthUser.length > 0) {
+                existingNewAuthUsers.push(existingNewAuthUser[0])
                 return existingNewAuthUser[0].id
             } else {
                 const name = (`${oldUser.firstName} ${oldUser.lastName}`).trim()
                 const now = new Date();
                 const mysqlDatetime = now.toISOString().slice(0, 19).replace('T', ' ');
                 const [createdNewAuthUser] = await newAuthDbConnection.execute(sqlQueries.createAuthUser, [oldUser.email, name, mysqlDatetime, mysqlDatetime])
+                createdNewAuthUsers.push(createdNewAuthUser)
                 return createdNewAuthUser.insertId
             }
         } catch (err) {
@@ -285,8 +294,6 @@ async function migrateData() {
         }
     }
 
-    let newApiUsers
-    let oldToNewApiUserIdMap
     try {
         const writenewApiUsersPromises = oldUsers.map(async (oldUser) => {
             const authUserId = oldUser.email && !anonymizeUsers ? await getAuthUserId(oldUser) : null;
@@ -301,7 +308,9 @@ async function migrateData() {
         console.error("Error writing new users to the new database:", err.message);
         throw err;
     } finally {
-        console.log(`${newApiUsers.length} out of ${oldUsers.length} users are written to the new database: ${newApiUsers.length == oldUsers.length ? "GOOD" : "NOT ALL USERS ARE MIGRATED"}`)
+        console.log(`${newApiUsers.length} out of ${oldUsers.length} users are written to the new api-database: ${newApiUsers.length == oldUsers.length ? "GOOD" : "NOT ALL USERS ARE MIGRATED"}`)
+        console.log(`${existingNewAuthUsers.length} users already existed in the auth-database.`)
+        console.log(`${createdNewAuthUsers.length} users were created in the auth-database.`)
     }
 
     console.log("")
