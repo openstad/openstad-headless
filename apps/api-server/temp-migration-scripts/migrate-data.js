@@ -1,6 +1,5 @@
 const mysql = require('mysql2/promise');
 const db = require('../src/db');
-const { argument } = require('../src/util/sanitize');
 
 const declaredArgs = {
     originalSiteId: "original-site-id",
@@ -27,13 +26,15 @@ const newImageUrlPrefix = retrieveArg(declaredArgs.newImageUrlPrefix);
 const anonymizeUsers = retrieveArg(declaredArgs.anonymizeUsers) == "no" ? false : true;
 
 const sqlQueries = {
-    getUsers: (siteId) => `SELECT * FROM users WHERE siteId = ${siteId} AND deletedAt IS NULL`,
-    getIdeas: (siteId) => `SELECT * FROM ideas WHERE siteId = ${siteId} AND deletedAt IS NULL`,
-    getVotes: (ideaId) => `SELECT * FROM votes WHERE ideaId = ${ideaId}`,
-    getArguments: (ideaId) => `SELECT * FROM arguments WHERE ideaId = ${ideaId}`,
+    getApiUsers: `SELECT * FROM users WHERE siteId = ? AND deletedAt IS NULL`,
+    getIdeas: `SELECT * FROM ideas WHERE siteId = ? AND deletedAt IS NULL`,
+    getVotes: `SELECT * FROM votes WHERE ideaId = ?`,
+    getArguments: `SELECT * FROM arguments WHERE ideaId = ?`,
+    getAuthUser: `SELECT * FROM users WHERE email = ?`,
+    createAuthUser: `INSERT INTO users (email, name, createdAt, updatedAt) VALUES (?, ?, ?, ?)`,
 }
 
-const getNewUserData = (oldUserData) => {
+const getNewApiUserData = (oldUserData, newAuthUserId) => {
     let firstname = null;
     let lastname = null;
 
@@ -52,7 +53,7 @@ const getNewUserData = (oldUserData) => {
 
     return {
         projectId: newProjectId,
-        idpUser: {}, // TODO
+        idpUser: newAuthUserId ? {"provider": "openstad", "identifier": newAuthUserId} : {},
         role: oldUserData.role,
         email: anonymizeUsers ? null : oldUserData.email,
         nickName: anonymizeUsers? null : oldUserData.nickName,
@@ -163,10 +164,12 @@ const getDbPassword = async () => {
 	}
 }
 
-let legacyDbConnection;
+let legacyApiDbConnection;
+let legacyAuthDbConnection;
+let newAuthDbConnection;
 
 async function migrateData() {
-  try { // to connect to the old legacy database
+  try {
     const ssl = {
         rejectUnauthorized: false
     }
@@ -176,8 +179,7 @@ async function migrateData() {
         ssl.require = true;
     }
 
-    // Create a connection to the legacy database
-    legacyDbConnection = await mysql.createConnection({
+    legacyApiDbConnection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USERNAME,
       password: await getDbPassword(),
@@ -185,17 +187,29 @@ async function migrateData() {
       ssl,
     });
 
-    console.log("Connected to the legacy MySQL database!");
+    legacyAuthDbConnection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USERNAME,
+      password: await getDbPassword(),
+      database: "authlegacy",
+      ssl,
+    });
+
+    newAuthDbConnection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USERNAME,
+      password: await getDbPassword(),
+      database: "openstad-auth",
+      ssl,
+    });
 
     console.log("")
     console.log("// //////");
-    console.log("// STEP 1: Get old users");
+    console.log("// STEP 1: Get old (api) users");
     console.log("// //////");
     console.log("")
 
-    const getUsersQuery = sqlQueries.getUsers(originalSiteId)
-    console.log("Running the following query: ", getUsersQuery)
-    const [oldUsers] = await legacyDbConnection.execute(getUsersQuery);
+    const [oldUsers] = await legacyApiDbConnection.execute(sqlQueries.getApiUsers, [originalSiteId]);
     console.log(`Query returned ${oldUsers.length} old users.`);
 
     console.log("")
@@ -204,9 +218,7 @@ async function migrateData() {
     console.log("// //////");
     console.log("")
 
-    const getIdeasQuery = sqlQueries.getIdeas(originalSiteId)
-    console.log("Running the following query: ", getIdeasQuery)
-    const [oldIdeas] = await legacyDbConnection.execute(getIdeasQuery);
+    const [oldIdeas] = await legacyApiDbConnection.execute(sqlQueries.getIdeas, [originalSiteId]);
     console.log(`Query returned ${oldIdeas.length} old ideas.`);
 
     console.log("")
@@ -218,8 +230,7 @@ async function migrateData() {
     let oldVotes;
     try {
         const getOldVotesPromises = oldIdeas.map(async (oldIdea) => {
-            const getOldVotesQuery = sqlQueries.getVotes(oldIdea.id)
-            const [oldVotesForSingleIdea] = await legacyDbConnection.execute(getOldVotesQuery);
+            const [oldVotesForSingleIdea] = await legacyApiDbConnection.execute(sqlQueries.getVotes, [oldIdea.id]);
             return oldVotesForSingleIdea
         })
         oldVotes = (await Promise.all(getOldVotesPromises)).flat()
@@ -239,8 +250,7 @@ async function migrateData() {
     let oldArguments;
     try {
         const getOldArgumentsPromises = oldIdeas.map(async (oldIdea) => {
-            const getOldArgumentsQuery = sqlQueries.getArguments(oldIdea.id);
-            const [oldArgumentsForSingleIdea] = await legacyDbConnection.execute(getOldArgumentsQuery);
+            const [oldArgumentsForSingleIdea] = await legacyApiDbConnection.execute(sqlQueries.getArguments, [oldIdea.id]);
             return oldArgumentsForSingleIdea
         })
         oldArguments = (await Promise.all(getOldArgumentsPromises)).flat()
@@ -257,22 +267,41 @@ async function migrateData() {
     console.log("// //////");
     console.log("")
 
-    let newUsers
-    let oldToNewUserIdMap
+    const getAuthUserId = async (oldUser) => {
+        try {
+            const [existingNewAuthUser] = await newAuthDbConnection.execute(sqlQueries.getAuthUser, [oldUser.email])
+            if (existingNewAuthUser.length > 0) {
+                return existingNewAuthUser[0].id
+            } else {
+                const name = (`${oldUser.firstName} ${oldUser.lastName}`).trim()
+                const now = new Date();
+                const mysqlDatetime = now.toISOString().slice(0, 19).replace('T', ' ');
+                const [createdNewAuthUser] = await newAuthDbConnection.execute(sqlQueries.createAuthUser, [oldUser.email, name, mysqlDatetime, mysqlDatetime])
+                return createdNewAuthUser.insertId
+            }
+        } catch (err) {
+            console.error("Error in getting or creating the userId from the new auth database: ", err.message)
+            throw err;
+        }
+    }
+
+    let newApiUsers
+    let oldToNewApiUserIdMap
     try {
-        const writeNewUsersPromises = oldUsers.map(async (oldUser) => {
-            const newUser = await db.User.create(getNewUserData(oldUser));
+        const writenewApiUsersPromises = oldUsers.map(async (oldUser) => {
+            const authUserId = oldUser.email && !anonymizeUsers ? await getAuthUserId(oldUser) : null;
+            const newUser = await db.User.create(getNewApiUserData(oldUser, authUserId));
             return { newUser, oldUser };
         })
-        const results = await Promise.all(writeNewUsersPromises);
-        newUsers = results.map(result => result.newUser)
-        oldToNewUserIdMap = new Map(results.map(result => [result.oldUser.id, result.newUser.id]))
+        const results = await Promise.all(writenewApiUsersPromises);
+        newApiUsers = results.map(result => result.newUser)
+        oldToNewApiUserIdMap = new Map(results.map(result => [result.oldUser.id, result.newUser.id]))
 
     } catch (err) {
         console.error("Error writing new users to the new database:", err.message);
         throw err;
     } finally {
-        console.log(`${newUsers.length} out of ${oldUsers.length} users are written to the new database: ${newUsers.length == oldUsers.length ? "GOOD" : "NOT ALL USERS ARE MIGRATED"}`)
+        console.log(`${newApiUsers.length} out of ${oldUsers.length} users are written to the new database: ${newApiUsers.length == oldUsers.length ? "GOOD" : "NOT ALL USERS ARE MIGRATED"}`)
     }
 
     console.log("")
@@ -288,8 +317,8 @@ async function migrateData() {
             const newResource = await db.Resource.create(
                 getNewResourceData(
                     oldIdea,
-                    oldToNewUserIdMap.get(oldIdea.userId),
-                    oldToNewUserIdMap.get(oldIdea.modBreakUserId)
+                    oldToNewApiUserIdMap.get(oldIdea.userId),
+                    oldToNewApiUserIdMap.get(oldIdea.modBreakUserId)
                 )
             )
             return { newResource, oldIdea }
@@ -317,7 +346,7 @@ async function migrateData() {
                 getNewVoteData(
                     oldVote,
                     oldIdeaToNewResourceIdMap.get(oldVote.ideaId),
-                    oldToNewUserIdMap.get(oldVote.userId)
+                    oldToNewApiUserIdMap.get(oldVote.userId)
                 )
             )
             return newVote
@@ -349,7 +378,7 @@ async function migrateData() {
                 getNewCommentData(
                     oldArgument,
                     oldIdeaToNewResourceIdMap.get(oldArgument.ideaId),
-                    oldToNewUserIdMap.get(oldArgument.userId)
+                    oldToNewApiUserIdMap.get(oldArgument.userId)
                 )
             )
             return { newComment, oldArgument }
@@ -365,7 +394,7 @@ async function migrateData() {
             const updatedCommentData = getNewCommentData(
                 oldArgument,
                 oldIdeaToNewResourceIdMap.get(oldArgument.ideaId),
-                oldToNewUserIdMap.get(oldArgument.userId),
+                oldToNewApiUserIdMap.get(oldArgument.userId),
                 oldArgumentToNewCommentIdMap.get(oldArgument.parentId)
             )
             const updatedComment = await db.Comment.update(updatedCommentData, {
@@ -387,8 +416,10 @@ async function migrateData() {
 } catch (err) {
     console.error("Error while migrating data:", err.message);
 } finally {
-    await legacyDbConnection.end();
-    console.log("Database connection closed.");
+    await legacyApiDbConnection.end();
+    await legacyAuthDbConnection.end();
+    await newAuthDbConnection.end();
+    console.log("Database connections closed.");
   }
 }
 
