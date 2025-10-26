@@ -88,7 +88,7 @@ async function setTagsAndStatus() {
     })
     resourcesUpdatedWithAreaTags = await Promise.all(updateResourcesWithAreaTagsPromises)
 
-    console.log(`${resourcesUpdatedWithAreaTags.length} resources got an area-tag assigned.`)
+    console.log("Completed area-tag assignment.")
 
     // //////
     // Theme tags
@@ -128,7 +128,7 @@ async function setTagsAndStatus() {
     })
     resourcesUpdatedWithThemeTags = await Promise.all(updateResourcesWithThemeTagsPromises)
 
-    console.log(`${resourcesUpdatedWithThemeTags.length} resources got a theme-tag assigned.`)
+    console.log("Completed theme-tag assignment.")
 
     // //////
     // Status
@@ -167,7 +167,7 @@ async function setTagsAndStatus() {
     })
     resourcesUpdatedWithStatus = await Promise.all(updateResourcesWithStatusPromises)
 
-    console.log(`${resourcesUpdatedWithStatus.length} resources got a status assigned.`)
+    console.log("Completed status assignment.")
 }
 
 setTagsAndStatus()
