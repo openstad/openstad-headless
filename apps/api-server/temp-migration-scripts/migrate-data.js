@@ -1,5 +1,7 @@
 const mysql = require('mysql2/promise');
 const db = require('../src/db');
+const { retrieveArg, getDbPassword } = require('./utils')
+const { getNewApiUserData, getNewResourceData, getNewVoteData, getNewCommentData } = require('./new-data-format')
 
 const declaredArgs = {
     originalSiteId: "original-site-id",
@@ -10,16 +12,6 @@ const declaredArgs = {
     newAuthDbName: "new-auth-db-name",
 }
 
-const givenArgs = process.argv
-
-const retrieveArg = (argToRetrieve) => {
-    const totalArgWithKeyAndValue = givenArgs.find(arg => arg.startsWith(argToRetrieve))
-    let valueFromArg = null
-    if (totalArgWithKeyAndValue) {
-        valueFromArg = totalArgWithKeyAndValue.split("=")[1]
-    }
-    return valueFromArg
-}
 const originalSiteId = retrieveArg(declaredArgs.originalSiteId);
 const newProjectId = retrieveArg(declaredArgs.newProjectId);
 const oldImageUrlPrefix = retrieveArg(declaredArgs.oldImageUrlPrefix);
@@ -34,136 +26,6 @@ const sqlQueries = {
     getArguments: `SELECT * FROM arguments WHERE ideaId = ?`,
     getAuthUser: `SELECT * FROM users WHERE email = ?`,
     createAuthUser: `INSERT INTO users (email, name, createdAt, updatedAt) VALUES (?, ?, ?, ?)`,
-}
-
-const getNewApiUserData = (oldUserData, newAuthUserId) => {
-    let firstname = null;
-    let lastname = null;
-
-    if (oldUserData.firstName || oldUserData.lastName) {
-        if (anonymizeUsers) {
-            firstname = "Geanonimiseerde gebruiker";
-            lastname = `${oldUserData.id}`;
-        } else {
-            firstname = oldUserData.firstName;
-            lastname = oldUserData.lastName;
-        }
-    }
-
-    const newAddress = oldUserData.streetName ? `${oldUserData.streetName} ${oldUserData.houseNumber}${oldUserData.suffix}` : null;
-    const newPostcode = oldUserData.zipCode ? oldUserData.zipCode : oldUserData.postcode;
-
-    return {
-        projectId: newProjectId,
-        idpUser: newAuthUserId ? {"provider": "openstad", "identifier": newAuthUserId} : {},
-        role: oldUserData.role,
-        email: anonymizeUsers ? null : oldUserData.email,
-        nickName: anonymizeUsers? null : oldUserData.nickName,
-        name: firstname || lastname ? (`${firstname} ${lastname}`).trim() : null,
-        firstname,
-        lastname,
-        listableByRole: oldUserData.listableByRole,
-        detailsViewableByRole: oldUserData.detailsViewableByRole,
-        phoneNumber: anonymizeUsers ? null : oldUserData.phoneNumber,
-        address: anonymizeUsers ? null : newAddress,
-        city: anonymizeUsers ? null : oldUserData.city,
-        postcode: anonymizeUsers ? null : newPostcode,
-        isNotifiedAboutAnonymization: oldUserData.isNotifiedAboutAnonymization,
-        createdAt: oldUserData.createdAt,
-        extraData: {
-            originalOldOpenStadUserId: oldUserData.id,
-            originalOldOpenStadSiteId: oldUserData.siteId,
-            originalOldOpenStadExternalUserId: oldUserData.externalUserId,
-            originalOldOpenStadComplete: oldUserData.complete,
-            originalOldOpenStadUserDidHaveZipCode: oldUserData.zipCode ? 'yes' : 'no',
-            originalOldOpenStadUserDidHavePostcode: oldUserData.postcode ? 'yes' : 'no',
-            originalOldOpenStadSignedUpForNewsletter: oldUserData.signedUpForNewsletter,
-            ...oldUserData.extraData
-        }
-    }
-}
-
-const getNewResourceData = (oldIdeaData, userId, modBreakUserId) => {
-    let images = []
-    
-    oldIdeaData.extraData.images.forEach(imageUrl => {
-        let newImageUrl = imageUrl
-        if (oldImageUrlPrefix && newImageUrlPrefix) {
-            newImageUrl = newImageUrl.replace(oldImageUrlPrefix, newImageUrlPrefix)
-        }
-        images.push({"url": newImageUrl})
-    });
-
-    let location = null
-    if (oldIdeaData.location?.x && oldIdeaData.location?.y) {
-        location = {
-            lat: oldIdeaData.location.x,
-            lng: oldIdeaData.location.y
-      }
-    }
-    
-    return {
-      userId,
-      projectId: newProjectId,
-      title: oldIdeaData.title,
-      summary: oldIdeaData.summary,
-      description: oldIdeaData.description,
-      images,
-      location,
-      budget: oldIdeaData.budget,
-      modBreak: oldIdeaData.modBreak,
-      modBreakUserId, 
-      modBreakDate: oldIdeaData.modBreakDate,
-      startDate: oldIdeaData.startDate,
-      publishDate: oldIdeaData.publishDate,
-      createdAt: oldIdeaData.createdAt,
-      viewableByRole: oldIdeaData.viewableByRole,
-      sort: oldIdeaData.sort,
-      extraData: {
-        originalOldOpenStadId: oldIdeaData.id,
-        originalOldOpenStadTypeId: oldIdeaData.typeId,
-        originalOldOpenStadUserId: oldIdeaData.userId,
-        originalOldOpenStadSiteId: oldIdeaData.siteId,
-        originalOldOpenStadModBreakUserId: oldIdeaData.modBreakUserId,
-        ...oldIdeaData.extraData
-      }
-    }
-}
-
-const getNewVoteData = (oldVoteData, resourceId, userId) => {
-    return {
-        resourceId,
-        userId,
-        confirmed: oldVoteData.confirmed,
-        ip: oldVoteData.ip,
-        opinion: oldVoteData.opinion,
-        checked: oldVoteData.checked,
-        createdAt: oldVoteData.createdAt,
-        deletedAt: oldVoteData.deletedAt,
-    }
-}
-
-const getNewCommentData = (oldArgumentData, resourceId, userId, parentId) => {
-    return {
-        parentId,
-        resourceId,
-        userId,
-        sentiment: oldArgumentData.sentiment,
-        description: oldArgumentData.description,
-        label: oldArgumentData.label,
-        createdAt: oldArgumentData.createdAt,
-        deletedAt: oldArgumentData.deletedAt,
-    }
-}
-
-const getDbPassword = async () => {
-	switch(process.env.DB_AUTH_METHOD) {
-		case 'azure-auth-token':
-			const { getAzureAuthToken } = require('../src/util/azure')
-			return await getAzureAuthToken()
-		default:
-			return process.env.DB_PASSWORD
-	}
 }
 
 let legacyApiDbConnection;
@@ -297,7 +159,7 @@ async function migrateData() {
     try {
         const writenewApiUsersPromises = oldUsers.map(async (oldUser) => {
             const authUserId = oldUser.email && !anonymizeUsers ? await getAuthUserId(oldUser) : null;
-            const newUser = await db.User.create(getNewApiUserData(oldUser, authUserId));
+            const newUser = await db.User.create(getNewApiUserData(oldUser, authUserId, anonymizeUsers, newProjectId));
             return { newUser, oldUser };
         })
         const results = await Promise.all(writenewApiUsersPromises);
@@ -327,7 +189,10 @@ async function migrateData() {
                 getNewResourceData(
                     oldIdea,
                     oldToNewApiUserIdMap.get(oldIdea.userId),
-                    oldToNewApiUserIdMap.get(oldIdea.modBreakUserId)
+                    oldToNewApiUserIdMap.get(oldIdea.modBreakUserId),
+                    oldImageUrlPrefix,
+                    newImageUrlPrefix,
+                    newProjectId
                 )
             )
             return { newResource, oldIdea }
