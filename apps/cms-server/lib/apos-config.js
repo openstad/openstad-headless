@@ -36,5 +36,6 @@ module.exports = {
     'openstad-image-widget': { },
     'openstad-carousel-widget': { },
     'openstad-blog-post-widget': { },
+    'openstad-breadcrumbs-widget': { }
   }
 };
