@@ -1,4 +1,4 @@
-export const retrieveArg = (argToRetrieve) => {
+const retrieveArg = (argToRetrieve) => {
     const givenArgs = process.argv
     const totalArgWithKeyAndValue = givenArgs.find(arg => arg.startsWith(argToRetrieve))
     let valueFromArg = null
@@ -8,7 +8,7 @@ export const retrieveArg = (argToRetrieve) => {
     return valueFromArg
 }
 
-export const getDbPassword = async () => {
+const getDbPassword = async () => {
 	switch(process.env.DB_AUTH_METHOD) {
 		case 'azure-auth-token':
 			const { getAzureAuthToken } = require('../src/util/azure')
@@ -17,3 +17,5 @@ export const getDbPassword = async () => {
 			return process.env.DB_PASSWORD
 	}
 }
+
+module.exports = { getDbPassword, retrieveArg }

@@ -1,4 +1,4 @@
-export const getNewApiUserData = (oldUserData, newAuthUserId, anonymizeUsers, newProjectId) => {
+const getNewApiUserData = (oldUserData, newAuthUserId, anonymizeUsers, newProjectId) => {
     let firstname = null;
     let lastname = null;
 
@@ -45,7 +45,7 @@ export const getNewApiUserData = (oldUserData, newAuthUserId, anonymizeUsers, ne
     }
 }
 
-export const getNewResourceData = (oldIdeaData, userId, modBreakUserId, oldImageUrlPrefix, newImageUrlPrefix, newProjectId) => {
+const getNewResourceData = (oldIdeaData, userId, modBreakUserId, oldImageUrlPrefix, newImageUrlPrefix, newProjectId) => {
     let images = []
     
     oldIdeaData.extraData.images.forEach(imageUrl => {
@@ -93,7 +93,7 @@ export const getNewResourceData = (oldIdeaData, userId, modBreakUserId, oldImage
     }
 }
 
-export const getNewVoteData = (oldVoteData, resourceId, userId) => {
+const getNewVoteData = (oldVoteData, resourceId, userId) => {
     return {
         resourceId,
         userId,
@@ -106,7 +106,7 @@ export const getNewVoteData = (oldVoteData, resourceId, userId) => {
     }
 }
 
-export const getNewCommentData = (oldArgumentData, resourceId, userId, parentId) => {
+const getNewCommentData = (oldArgumentData, resourceId, userId, parentId) => {
     return {
         parentId,
         resourceId,
@@ -118,3 +118,5 @@ export const getNewCommentData = (oldArgumentData, resourceId, userId, parentId)
         deletedAt: oldArgumentData.deletedAt,
     }
 }
+
+module.exports = { getNewApiUserData, getNewResourceData, getNewVoteData, getNewCommentData }
