@@ -528,7 +528,7 @@ function StemBegroot({
       setPage(0);
     }
   }, [filteredResources]);
-
+  
   return (
     <>
       <StemBegrootResourceDetailDialog

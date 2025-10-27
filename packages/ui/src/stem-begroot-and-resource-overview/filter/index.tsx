@@ -75,6 +75,18 @@ export function Filters({
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
   const [tagsReadyForParameter, setTagsReadyForParameter] = useState< Array<string | number> >([]);
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (tagsReadyForParameter.length > 0) {
+      const tagString = tagsReadyForParameter.join(',');
+      url.searchParams.set('tagIds', tagString);
+    } else {
+      url.searchParams.delete('tagIds');
+    }
+    
+    window.history.replaceState(null, '', url);
+  }, [tagsReadyForParameter]);
+
   const search = useDebounce(setSearch, 300);
 
   function updateFilter(newFilter: Filter) {
@@ -110,19 +122,6 @@ export function Filters({
       ...filter,
       location: location,
     });
-  }
-
-  const updateParameter = () => {
-    const url = new URL(window.location.href);
-
-    if (tagsReadyForParameter.length > 0) {
-      const tagString = tagsReadyForParameter.join(',');
-      url.searchParams.set('tagIds', tagString);
-    } else {
-      url.searchParams.delete('tagIds');
-    }
-
-    window.history.replaceState(null, '', url);
   }
 
   const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel: string, forceSelected?: boolean) => {
@@ -228,20 +227,14 @@ export function Filters({
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
-    console.log( "filterToSubmit", updatedFilter, filter );
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
-
-    console.log( "newActiveTagsDraft", newActiveTagsDraft );
-    console.log( "updatedTags", updatedTags );
 
     if (updatedTags) {
       setActiveTags(updatedTags);
     } else {
       setActiveTags(newActiveTagsDraft);
     }
-
-    updateParameter();
   };
 
   return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
@@ -347,7 +340,6 @@ export function Filters({
               updateFilter(defaultFilter);
               setTagState({});
               onUpdateFilter && onUpdateFilter(defaultFilter);
-              updateParameter();
               setLocation(undefined);
             }}
             test-id={"filter-reset-button"}
