@@ -48,6 +48,7 @@ const formSchema = z.object({
   tags: z.string().optional(),
   fieldRequired: z.boolean().optional(),
   onlyForModerator: z.boolean().optional(),
+  placeholder: z.string().optional(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
   maxChoices: z.string().optional(),
@@ -197,6 +198,7 @@ export default function WidgetChoiceGuideItems(
           explanationB: values.explanationB || '',
           imageA: values.imageA || '',
           imageB: values.imageB || '',
+          placeholder: values.placeholder || '',
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
           defaultValue: values.defaultValue || '',
@@ -318,6 +320,7 @@ export default function WidgetChoiceGuideItems(
     explanationB: '',
     imageA: '',
     imageB: '',
+    placeholder: '',
     maxChoices: '',
     maxChoicesMessage: '',
     defaultValue: '',
@@ -375,6 +378,7 @@ export default function WidgetChoiceGuideItems(
         sliderTitleUnderB: selectedItem.sliderTitleUnderB || '',
         explanationA: selectedItem.explanationA || '',
         explanationB: selectedItem.explanationB || '',
+        placeholder: selectedItem.placeholder || '',
         imageA: selectedItem.imageA || '',
         imageB: selectedItem.imageB || '',
         maxChoices: selectedItem.maxChoices || '',
@@ -1444,30 +1448,42 @@ export default function WidgetChoiceGuideItems(
                               </FormItem>
                             )}
                           />
-                            <>
-                              <FormField
-                                control={form.control}
-                                name="minCharacters"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Minimaal aantal tekens</FormLabel>
-                                    <Input {...field} />
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="maxCharacters"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Maximaal aantal tekens</FormLabel>
-                                    <Input {...field} />
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </>
+
+                          <FormField
+                            control={form.control}
+                            name="placeholder"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Placeholder</FormLabel>
+                                <Input {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="minCharacters"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Minimaal aantal tekens</FormLabel>
+                                <Input {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="maxCharacters"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Maximaal aantal tekens</FormLabel>
+                                <Input {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </>
                       )}
 
