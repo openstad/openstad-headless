@@ -31,6 +31,9 @@ export type FormProps = {
     setCurrentPage?: (page: number) => void;
     prevPage?: any;
     prevPageText?: string;
+    pageFieldStartPositions?: number[];
+    pageFieldEndPositions?: number[];
+    totalPages?: number;
     totalFieldCount?: number;
     formStyle?: string;
 }
