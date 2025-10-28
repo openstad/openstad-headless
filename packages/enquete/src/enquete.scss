@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem 1rem;
-  height: 100%;
+  // height: 100%;
 }
 
 .form-container .utrecht-form-field .utrecht-form-field-description:empty {
@@ -211,7 +211,7 @@ label.utrecht-form-label {
 
   &.--youth {
     height: 100%;
-    min-height: 800px;
+    // min-height: 500px;
     position: relative;
     display: grid;
     transform: translate(0, 0);
@@ -447,6 +447,8 @@ label.utrecht-form-label {
         position: absolute;
         top: 36px;
         left: 24px;
+        color: var(--setBackColor, #094B81);
+        z-index: 3;
 
         &:before {
           content: '';
@@ -455,7 +457,8 @@ label.utrecht-form-label {
           height: 20px;
           mask-size: contain;
           mask-repeat: no-repeat;
-          background-color: var(--_utrecht-button-color);
+          background-color: var(--setBackColor, #094B81);
+
         }
       }
 
@@ -485,11 +488,35 @@ label.utrecht-form-label {
     }
 
     .question {
-      padding: 90px 30px;
+      padding: 95px 30px 119px 30px;
       background: unset;
+      min-height: 750px;
+      position: relative;
+
+      &:before {
+        content: "";
+        background-color: inherit;
+        mask-image: linear-gradient(180deg, #ffffff 50%, rgba(255, 255, 255, 0) 100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      @media screen and (max-width: 400px) {
+        min-height: unset;
+      }
 
       .question {
         padding: 0;
+        min-height: unset;
+
+        &:before {
+          display: none;
+        }
       }
     }
 
@@ -691,6 +718,7 @@ label.utrecht-form-label {
           position: relative;
           z-index: 2;
           margin-bottom: 50px;
+          text-align: center;
         }
 
         .range-slider-labels {
@@ -809,6 +837,7 @@ label.utrecht-form-label {
     }
 
     .question-type-swipe {
+      padding-bottom: 32px;
 
       // &:not(:has(.swipe-finished)):has([data-required="true"]) {
       &:not(:has(.swipe-finished)) {
@@ -818,7 +847,7 @@ label.utrecht-form-label {
       }
 
       .swipe-widget:not(.swipe-finished) {
-        justify-content: center;
+        justify-content: start;
       }
 
       .swipe-finished-content {
@@ -838,8 +867,9 @@ label.utrecht-form-label {
     }
 
     .question-type-dilemma {
-      .dilemma-field > .utrecht-button--primary-action {
+      .dilemma-field>.utrecht-button--primary-action {
         @include utrecht-button-appearance;
+        position: fixed;
         left: unset;
         width: 64px;
         z-index: 99;
@@ -1058,7 +1088,7 @@ label.utrecht-form-label {
       }
 
       .question {
-        justify-content: center;
+        justify-content: start;
 
         .question {
           height: unset;

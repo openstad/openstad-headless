@@ -567,7 +567,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     </div>
                   )}
                   <div className="swipe-card-content">
-                    <p className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</p>
+                    <Paragraph className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</Paragraph>
                   </div>
 
 

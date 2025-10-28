@@ -38,8 +38,14 @@
     position: relative;
     // perspective: 1000px;
     width: 100%;
-    max-height: 700px;
-    height: 100%;
+    aspect-ratio: 2 / 3;
+    max-height: 517px;
+
+    @media screen and (max-width: 400px) {
+      max-width: 290px;
+      max-height: unset;
+      margin: 0 auto;
+    }
   }
 
   .swipe-stack {
@@ -181,10 +187,12 @@
     }
 
     .swipe-card-description {
-      font-size: 16px;
       margin: 0;
       opacity: 0.9;
       line-height: 1.4;
+      color: #fff;
+      font-family: "TheSans C4s";
+      font-weight: 530;
     }
   }
 
@@ -237,6 +245,9 @@
     justify-content: center;
     gap: 30px;
     padding: 0px 20px 20px 20px;
+    flex-shrink: 0;
+    color: #000;
+
   }
 
   .swipe-info-btn {
@@ -250,6 +261,12 @@
     margin-top: 4px;
     transition: all 0.2s ease;
     line-height: 49px;
+    flex-shrink: 0;
+    color: #000;
+
+    &:disabled {
+      opacity: 0.5;
+    }
 
     &:hover:not(:disabled) {
       cursor: pointer;
@@ -402,11 +419,11 @@
     }
   }
 
-  .swipe-summary-explanation{
+  .swipe-summary-explanation {
     background: #f0f0f0;
     padding: 16px;
 
-    textarea{
+    textarea {
       width: 100%;
       border: none;
       background: #fff;
