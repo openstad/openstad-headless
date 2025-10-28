@@ -250,6 +250,11 @@ module.exports = {
         label: 'Compacte weergave van het hoofdmenu.',
         def: false,
       },
+      mobileMenu: {
+        type: 'boolean',
+        label: 'Altijd het mobiele menu tonen (ook op desktop).',
+        def: false,
+      },
       analyticsType: {
         type: 'select',
         permission: 'admin',
@@ -372,7 +377,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: ['favicon', 'compactMenu'],
+        fields: ['favicon', 'compactMenu', 'mobileMenu'],
       },
       login: {
         label: 'Menu instellingen',
