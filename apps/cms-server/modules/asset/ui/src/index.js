@@ -62,7 +62,6 @@ window.setCookieConsent = function (allowCookies) {
 let isMobile = false;
 
 function adjustMenu() {
-  console.log('Loaded!');
   const mainContainer = document.querySelector('.main-header-container');
   const navContainer = document.querySelector('.header_navbar-container');
   const mainMenuContainer = document.querySelector('#main-menu');
@@ -130,7 +129,6 @@ function adjustMenu() {
     });
   }
 
-  console.log(navbar.getAttribute('data-mobile-menu') === 'true');
 
   if (navbar.getAttribute('data-mobile-menu') === 'true') {
     navContainer.classList.add('--mobile');
