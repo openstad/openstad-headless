@@ -92,9 +92,8 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
-
       // Temp log for use in k9s
-      console.error({widgetBuildError: e});
+      console.error({ widgetBuildError: e });
       return next(
         createError(
           500,
@@ -171,7 +170,9 @@ Object.keys(widgetDefinitions).forEach((widget) => {
       `/${widget}-images`,
       express.static(
         path.resolve(
-          require.resolve(`${widgetDefinitions[widget].packageName}/package.json`),
+          require.resolve(
+            `${widgetDefinitions[widget].packageName}/package.json`
+          ),
           '../../images/'
         )
       )
@@ -184,7 +185,6 @@ Object.keys(widgetDefinitions).forEach((widget) => {
 });
 
 function getDefaultConfig(project, widgetType) {
-
   const loginUrl = `${config.url}/auth/project/${project.id}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
   const loginUrlAnonymous = `${config.url}/auth/project/${project.id}/login?useAuth=anonymous&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
   const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
@@ -218,12 +218,16 @@ function getDefaultConfig(project, widgetType) {
     zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
   };
 
-  if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {
-    result.area = project.area?.polygon
+  if (
+    widgetType == 'resourcedetailmap' ||
+    widgetType == 'resourcesmap' ||
+    widgetType == 'editormap' ||
+    widgetType == 'resourceform'
+  ) {
+    result.area = project.area?.polygon;
   }
 
   return result;
-
 }
 
 function setConfigsToOutput(
@@ -235,10 +239,9 @@ function setConfigsToOutput(
   widgetConfig,
   widgetId
 ) {
-
   // Move general settings to the root to ensure we have the correct config
   if (widgetConfig.hasOwnProperty('general')) {
-    widgetConfig = {...widgetConfig, ...widgetConfig.general};
+    widgetConfig = { ...widgetConfig, ...widgetConfig.general };
   }
 
   let config = merge.recursive(
@@ -250,7 +253,7 @@ function setConfigsToOutput(
     { widgetId }
   );
 
-  config = JSON.stringify(config)
+  config = JSON.stringify(config);
 
   return getWidgetJavascriptOutput(
     widgetSettings,
@@ -266,204 +269,176 @@ function getWidgetJavascriptOutput(
   componentId,
   widgetConfig
 ) {
-  // If we include remix icon in the components, we are sending a lot of data to the client
-  // By using a CDN and loading it through a <link> tag, we reduce the size of the response and leverage browser cache
-
   let output = '';
   let widgetOutput = '';
   let css = '';
-
-  const data = JSON.parse(widgetConfig)
-
+  const data = JSON.parse(widgetConfig);
   const apiUrl = process.env.URL ?? '';
 
-  // TODO: Fix this, it's a hack to get the ChoiceGuide to work
-  if ( widgetSettings.componentName === 'ChoiceGuide' ) {
-
+  // JS & CSS ophalen per widgettype
+  if (widgetSettings.componentName === 'ChoiceGuide') {
     widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/choiceguide', file);
-      if (!fs.existsSync(filePath)) {
-        console.error(`JS file not found: ${filePath}`);
-      } else {
-        widgetOutput += fs.readFileSync(filePath, 'utf8');
-      }
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/choiceguide',
+        file
+      );
+      if (fs.existsSync(filePath)) widgetOutput += fs.readFileSync(filePath, 'utf8');
     });
-
     widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/choiceguide', file);
-      if (!fs.existsSync(filePath)) {
-        console.error(`CSS file not found: ${filePath}`);
-      } else {
-        css += fs.readFileSync(filePath, 'utf8');
-      }
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/choiceguide',
+        file
+      );
+      if (fs.existsSync(filePath)) css += fs.readFileSync(filePath, 'utf8');
     });
-
-  } else if ( widgetSettings.componentName === 'DistributionModule' ) {
-
+  } else if (widgetSettings.componentName === 'DistributionModule') {
     widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/distribution-module', file);
-      if (!fs.existsSync(filePath)) {
-        console.error(`JS file not found: ${filePath}`);
-      } else {
-        widgetOutput += fs.readFileSync(filePath, 'utf8');
-      }
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/distribution-module',
+        file
+      );
+      if (fs.existsSync(filePath)) widgetOutput += fs.readFileSync(filePath, 'utf8');
     });
-
     widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/distribution-module', file);
-      if (!fs.existsSync(filePath)) {
-        console.error(`CSS file not found: ${filePath}`);
-      } else {
-        css += fs.readFileSync(filePath, 'utf8');
-      }
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/distribution-module',
+        file
+      );
+      if (fs.existsSync(filePath)) css += fs.readFileSync(filePath, 'utf8');
     });
-
-  } else if ( widgetSettings.componentName === 'MultiProjectResourceOverview' ) {
-
+  } else if (widgetSettings.componentName === 'MultiProjectResourceOverview') {
     widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
-      if (!fs.existsSync(filePath)) {
-        console.error(`JS file not found: ${filePath}`);
-      } else {
-        widgetOutput += fs.readFileSync(filePath, 'utf8');
-      }
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/multi-project-resource-overview',
+        file
+      );
+      if (fs.existsSync(filePath)) widgetOutput += fs.readFileSync(filePath, 'utf8');
     });
-
     widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
-      if (!fs.existsSync(filePath)) {
-        console.error(`CSS file not found: ${filePath}`);
-      } else {
-        css += fs.readFileSync(filePath, 'utf8');
-      }
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/multi-project-resource-overview',
+        file
+      );
+      if (fs.existsSync(filePath)) css += fs.readFileSync(filePath, 'utf8');
     });
-
   } else {
     widgetSettings.js.forEach((file) => {
-      widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+      widgetOutput += fs.readFileSync(
+        require.resolve(`${widgetSettings.packageName}/${file}`),
+        'utf8'
+      );
     });
-
     widgetSettings.css.forEach((file) => {
-      css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+      css += fs.readFileSync(
+        require.resolve(`${widgetSettings.packageName}/${file}`),
+        'utf8'
+      );
     });
   }
 
-  // End of to do
+  // Rewrite image paths
+  css = css.replaceAll('url(../images/', `url(${config.url}/widget/${widgetType}-images/`);
 
+  const widgetConfigWithCorrectEscapes = widgetConfig
+    .replaceAll('\\', '\\\\')
+    .replaceAll('`', '\\`');
 
-
-
-
-  // Rewrite the url to the images that we serve statically
-  css = css.replaceAll(
-    'url(../images/',
-    `url(${config.url}/widget/${widgetType}-images/`
-  );
-
-  const widgetConfigWithCorrectEscapes = widgetConfig.replaceAll('\\', '\\\\').replaceAll('`', '\\`');
-
-  // Create function to render component
-  // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly
-  // @todo: find a way around this so we don't have to provide the `process` variable
+  // :white_check_mark: Hier begint de shadowRoot-inclusieve versie
   output += `
-    (function () {
-      try {
-        let process = { env: { NODE_ENV: 'production' } };
-        
-        const randomComponentId = '${componentId}-' + Math.floor(Math.random() * 1000000);
-        const renderedWidgets = {};
-        
-        const currentScript = document.currentScript;
-          currentScript.insertAdjacentHTML('afterend', \`<div class="openstad" id="\${randomComponentId}"></div>\`);
+  (function () {
+    try {
+      let process = { env: { NODE_ENV: 'production' } };
 
-          const redirectUri = encodeURI(window.location.href);
-          
-          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
-          
-          function insertCssLinks(urls) {
-            const head = document.querySelector('head');
-            const body = document.querySelector('body');
-            const firstScript = body ? body.querySelector('script') : null;
-  
-            urls.forEach(urlObj => {
-              const url = urlObj?.url;
-              const loadFirst = urlObj?.loadFirst;
-              
-              const existingLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(link => link.href);
-              if (!existingLinks.includes(url)) {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = url;
-                
-                if (loadFirst === true && head) {
-                  head.insertBefore(link, head.firstChild);
-                } else if (head) {
-                  head.appendChild(link);
-                } else if (firstScript) {
-                  firstScript.parentNode.insertBefore(link, firstScript);
-                } else if (body) {
-                  body.appendChild(link);
-                }
-              }
-            });
-          }
-  
-          function normalizeCssUrls(cssUrls) {
-            if (!cssUrls) return [];
-          
-            if (typeof cssUrls === 'string') {
-              return [{ 'url': cssUrls, 'loadFirst': false }];
-            }
-          
-            if (Array.isArray(cssUrls)) {
-              return cssUrls.map(url => ({
-                'url': url,
-                'loadFirst': false
-              }));
-            }
-          
-            if (typeof cssUrls === 'object') {
-              return Object.values(cssUrls).map(url => ({
-                'url': url,
-                'loadFirst': false
-              }));
-            }
-          
-            return [];
-          }
-          
-          let customCssUrls = normalizeCssUrls(config.project?.cssUrl);
-  
-          let customCss = '';
-          if (config.project?.cssCustom) {
-            const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
-            customCssUrls.push({url: customCssUrl, loadFirst: false});
-          }
-  
-          customCssUrls.push({url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}", loadFirst: true});
-  
-          insertCssLinks(customCssUrls);
-          
-          function renderWidget () {
-            
-            // Check if widget has already been rendered
-            if (renderedWidgets[randomComponentId]) {
-              return;
-            }
-            
-            renderedWidgets[randomComponentId] = true;
-            
-            ${widgetOutput}
-            ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
-          }
-          
-          ${reactCheck}
-          currentScript.remove();
-      } catch(e) {
-        console.error("Could not place widget", e);
+      const randomComponentId = '${componentId}-' + Math.floor(Math.random() * 1000000);
+      const renderedWidgets = {};
+      const currentScript = document.currentScript;
+
+      // Host container
+      const host = document.createElement('div');
+      host.className = 'openstad-shadow-host';
+      currentScript.insertAdjacentElement('afterend', host);
+
+      // Shadow root
+      const shadowRoot = host.attachShadow({ mode: 'open' });
+
+      // :point_down: Nieuw: globale opslag voor shadowRoots
+      if (typeof window !== 'undefined') {
+        if (!window.shortcodeShadow || typeof window.shortcodeShadow !== 'object') {
+          window.shortcodeShadow = {};
+        }
+        window.shortcodeShadow[randomComponentId] = shadowRoot;
+        console.log(window.shortcodeShadow);
+      } else {
+        console.warn(':warning: window object not available – could not store shadowRoot globally');
       }
-    })();
-    `;
+
+      const redirectUri = encodeURI(window.location.href);
+      const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
+
+      // Inline CSS in shadowRoot
+      const inlineStyle = document.createElement('style');
+      inlineStyle.textContent = \`${css}\`;
+      shadowRoot.appendChild(inlineStyle);
+
+      // CSS-links
+      function insertCssLinks(urls) {
+        urls.forEach(urlObj => {
+          const url = urlObj?.url;
+          if (!url) return;
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = url;
+          shadowRoot.appendChild(link);
+        });
+      }
+
+      function normalizeCssUrls(cssUrls) {
+        if (!cssUrls) return [];
+        if (typeof cssUrls === 'string') return [{ url: cssUrls }];
+        if (Array.isArray(cssUrls)) return cssUrls.map(url => ({ url }));
+        if (typeof cssUrls === 'object') return Object.values(cssUrls).map(url => ({ url }));
+        return [];
+      }
+
+      let customCssUrls = normalizeCssUrls(config.project?.cssUrl);
+
+      if (config.project?.cssCustom) {
+        const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
+        customCssUrls.push({ url: customCssUrl });
+      }
+
+      customCssUrls.push({ url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}" });
+      insertCssLinks(customCssUrls);
+
+      // Render widget
+      function renderWidget() {
+        if (renderedWidgets[randomComponentId]) return;
+        renderedWidgets[randomComponentId] = true;
+
+        const widgetContainer = document.createElement('div');
+        widgetContainer.id = randomComponentId;
+        shadowRoot.appendChild(widgetContainer);
+
+        ${widgetOutput}
+        ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
+      }
+
+      ${reactCheck}
+      renderWidget();
+
+      currentScript.remove();
+    } catch (e) {
+      console.error("Could not place widget", e);
+    }
+  })();
+  `;
+
   return output;
 }
 
