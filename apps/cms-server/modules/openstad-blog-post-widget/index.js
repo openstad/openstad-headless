@@ -88,18 +88,14 @@ module.exports = {
             let additionalPosts = [];
             if (widget.selectionType === 'manual' && widget.selectedPosts && widget.selectedPosts.length > 0) {
               additionalPosts = widget.selectedPosts.filter(post => {
-                const highlightedId = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0]._id : null;
+                const highlightedDoc = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0] : null;
                 const hasTag = !widget.tag || (post.tags && post.tags.includes(widget.tag));
-                return post._id !== highlightedId && hasTag;
+                return !highlightedDoc || post.slug !== highlightedDoc.slug && hasTag;
               });
             } else {
               const criteria = {};
               if (widget.tag) {
                 criteria.tags = widget.tag;
-              }
-              
-              if (widget.highlightedPost && widget.highlightedPost.length > 0) {
-                criteria._id = { $ne: widget.highlightedPost[0]._id };
               }
 
               let query = blogModule.find(req, criteria).sort({ createdAt: -1 });
@@ -107,10 +103,15 @@ module.exports = {
                 const remainingSlots = maxItems - posts.length;
                 query = query.limit(remainingSlots);
               }
-              additionalPosts = await query.toArray();
+              additionalPosts = (await query.toArray()).filter(post => {
+                const highlightedDoc = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0] : null;
+                return !highlightedDoc || post.slug !== highlightedDoc.slug;
+              });
             }
             
             posts = posts.concat(showAll ? additionalPosts : additionalPosts.slice(0, maxItems ? maxItems - posts.length : undefined));
+            // Remove duplicates
+            posts = posts.filter((post, index, arr) => arr.findIndex(p => p._id === post._id) === index);
             
             widget.relatedPosts = posts.map(post => {
               if (post.createdAt) {
