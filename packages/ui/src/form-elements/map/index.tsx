@@ -126,9 +126,13 @@ const MapField: FC<MapProps> = ({
 
     return (
       <FormField type="text">
-          <Paragraph className="utrecht-form-field__label">
-              <FormLabel htmlFor={randomID}>{title}</FormLabel>
-          </Paragraph>
+
+          {title && (
+              <Paragraph className="utrecht-form-field__label">
+                  <FormLabel htmlFor={randomID} dangerouslySetInnerHTML={{ __html: title }} />
+              </Paragraph>
+          )}
+
           {description &&
             <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
           }

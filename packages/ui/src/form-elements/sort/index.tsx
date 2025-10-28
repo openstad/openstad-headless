@@ -84,7 +84,7 @@ const SortField: FC<SortFieldProps> = ({
             <div className="sortable-intro">
                 {title && (
                     <Paragraph className="utrecht-form-field__label">
-                        <strong>{title}</strong>
+                        <strong dangerouslySetInnerHTML={{ __html: title }} />
                     </Paragraph>
                 )}
                 {description &&

@@ -108,9 +108,10 @@ const MatrixField: FC<MatrixFieldProps> = ({
             aria-invalid={fieldInvalid}
             aria-describedby={`${randomId}_error`}
           >
-            <FieldsetLegend>
-              {title}
-            </FieldsetLegend>
+
+            {title && (
+              <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+            )}
 
             {description &&
                 <>

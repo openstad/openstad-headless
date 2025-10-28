@@ -136,7 +136,11 @@ const RangeSlider: FC<RangeSliderProps> = ({
     return (
         <div className="a-b-slider-container">
             {title && (
-                <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
+                <Paragraph>
+                    <Strong>
+                        <label htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                    </Strong>
+                </Paragraph>
             )}
             {description && (
                 <HtmlContent html={description} />

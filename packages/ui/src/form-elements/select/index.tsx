@@ -77,7 +77,9 @@ const SelectField: FC<SelectFieldProps> = ({
 
     return (
         <FormField type="select">
-            <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
+          {title && (
+            <FormLabel htmlFor={fieldKey} dangerouslySetInnerHTML={{ __html: title }} />
+          )}
             {description &&
                 <>
                     <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />

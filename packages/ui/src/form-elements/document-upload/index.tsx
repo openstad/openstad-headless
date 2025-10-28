@@ -188,9 +188,13 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
     return (
         <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomId}>{title}</FormLabel>
-            </Paragraph>
+
+            {title && (
+                <Paragraph className="utrecht-form-field__label">
+                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                </Paragraph>
+            )}
+
             {description &&
               <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
             }
