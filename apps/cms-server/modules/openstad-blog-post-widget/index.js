@@ -36,7 +36,7 @@ module.exports = {
         label: 'Uitgelicht bericht (optioneel)',
         withType: '@apostrophecms/blog',
         max: 1,
-        help: 'Selecteer één bericht dat altijd als eerste wordt getoond.'
+        help: 'Selecteer één bericht dat altijd als eerste wordt getoond. Het bericht moet gepubliceerd zijn om zichtbaar te zijn voor niet-ingelogde gebruikers.'
       },
       selectedPosts: {
         type: 'relationship',
@@ -82,18 +82,15 @@ module.exports = {
             let posts = [];
             
             if (widget.highlightedPost && widget.highlightedPost.length > 0) {
-              const highlightedId = widget.highlightedPost[0]._id;
-              const highlightedDoc = highlightedId
-                ? await blogModule.find(req, { _id: highlightedId }).toObject()
-                : null;
-              if (highlightedDoc) posts.push(highlightedDoc);
+              posts.push(widget.highlightedPost[0]);
             }
             
             let additionalPosts = [];
             if (widget.selectionType === 'manual' && widget.selectedPosts && widget.selectedPosts.length > 0) {
               additionalPosts = widget.selectedPosts.filter(post => {
                 const highlightedId = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0]._id : null;
-                return post._id !== highlightedId;
+                const hasTag = !widget.tag || (post.tags && post.tags.includes(widget.tag));
+                return post._id !== highlightedId && hasTag;
               });
             } else {
               const criteria = {};
