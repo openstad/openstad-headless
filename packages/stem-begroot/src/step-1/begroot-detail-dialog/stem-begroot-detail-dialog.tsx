@@ -249,6 +249,14 @@ export const StemBegrootResourceDetailDialog = ({
                             ?.filter((t) => t.type !== 'status')
                             ?.map((t) => <Pill text={t.name || 'Geen thema'}/>)}
                         </div>
+                        {originalUrl && (
+                          <>
+                          <Spacer size={1}/>
+                          <Link target="_blank" href={originalUrl} className="ams-standalone-link">
+                            {originalUrl}
+                          </Link>
+                          </>
+                        )}
                       </div>
                     )}
                   </section>
@@ -277,17 +285,6 @@ export const StemBegrootResourceDetailDialog = ({
 
                       <Spacer size={2}/>
 
-                      {originalUrl ? (
-                        <>
-                          <Paragraph className="strong">
-                            Dit een vervolg op het volgende plan:&nbsp;
-                            <Link target="_blank" href={originalUrl}>
-                              {originalUrl}
-                            </Link>
-                          </Paragraph>
-
-                        </>
-                      ) : null}
 
                       <div className="osc-stem-begroot-content-item-footer">
                         {showVoteCount ? (

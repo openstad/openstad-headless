@@ -153,7 +153,6 @@ export const StemBegrootResourceList = ({
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);
         const primaryBtnDisabled = !resourceBtnEnabled(resource);
-        const originalUrl = defineOriginalUrl(resource);
 
         let defaultImage = '';
 
@@ -196,19 +195,7 @@ export const StemBegrootResourceList = ({
               )}
               <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
               <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
-              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, 200)}}/>
 
-              {
-                originalUrl ? (
-                  <>
-                    <Paragraph className="strong">
-                      Dit een vervolg op plan:&nbsp;
-                      <Link target="_blank" href={originalUrl}>
-                        {originalUrl}
-                      </Link>
-                    </Paragraph>
-                  </>
-                ) : null}
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (
                   <div className="price">
