@@ -36,7 +36,7 @@ module.exports = {
         label: 'Uitgelicht bericht (optioneel)',
         withType: '@apostrophecms/blog',
         max: 1,
-        help: 'Selecteer één bericht dat altijd als eerste wordt getoond.'
+        help: 'Selecteer één bericht dat altijd als eerste wordt getoond. Het bericht moet gepubliceerd zijn om zichtbaar te zijn voor niet-ingelogde gebruikers.'
       },
       selectedPosts: {
         type: 'relationship',
@@ -82,27 +82,20 @@ module.exports = {
             let posts = [];
             
             if (widget.highlightedPost && widget.highlightedPost.length > 0) {
-              const highlightedId = widget.highlightedPost[0]._id;
-              const highlightedDoc = highlightedId
-                ? await blogModule.find(req, { _id: highlightedId }).toObject()
-                : null;
-              if (highlightedDoc) posts.push(highlightedDoc);
+              posts.push(widget.highlightedPost[0]);
             }
             
             let additionalPosts = [];
             if (widget.selectionType === 'manual' && widget.selectedPosts && widget.selectedPosts.length > 0) {
               additionalPosts = widget.selectedPosts.filter(post => {
-                const highlightedId = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0]._id : null;
-                return post._id !== highlightedId;
+                const highlightedDoc = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0] : null;
+                const hasTag = !widget.tag || (post.tags && post.tags.includes(widget.tag));
+                return !highlightedDoc || post.slug !== highlightedDoc.slug && hasTag;
               });
             } else {
               const criteria = {};
               if (widget.tag) {
                 criteria.tags = widget.tag;
-              }
-              
-              if (widget.highlightedPost && widget.highlightedPost.length > 0) {
-                criteria._id = { $ne: widget.highlightedPost[0]._id };
               }
 
               let query = blogModule.find(req, criteria).sort({ createdAt: -1 });
@@ -110,10 +103,15 @@ module.exports = {
                 const remainingSlots = maxItems - posts.length;
                 query = query.limit(remainingSlots);
               }
-              additionalPosts = await query.toArray();
+              additionalPosts = (await query.toArray()).filter(post => {
+                const highlightedDoc = widget.highlightedPost && widget.highlightedPost.length > 0 ? widget.highlightedPost[0] : null;
+                return !highlightedDoc || post.slug !== highlightedDoc.slug;
+              });
             }
             
             posts = posts.concat(showAll ? additionalPosts : additionalPosts.slice(0, maxItems ? maxItems - posts.length : undefined));
+            // Remove duplicates
+            posts = posts.filter((post, index, arr) => arr.findIndex(p => p._id === post._id) === index);
             
             widget.relatedPosts = posts.map(post => {
               if (post.createdAt) {
