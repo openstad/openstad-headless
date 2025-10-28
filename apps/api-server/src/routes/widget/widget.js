@@ -406,14 +406,18 @@ function getWidgetJavascriptOutput(
         return [];
       }
 
-      let customCssUrls = normalizeCssUrls(config.project?.cssUrl);
+      let customCssUrls = [{ url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}" }];
+
+      const projectCssUrls = normalizeCssUrls(config.project?.cssUrl);
+      customCssUrls.push(...projectCssUrls);
 
       if (config.project?.cssCustom) {
         const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
         customCssUrls.push({ url: customCssUrl });
       }
 
-      customCssUrls.push({ url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}" });
+      console.log(customCssUrls);
+
       insertCssLinks(customCssUrls);
 
       // Render widget
