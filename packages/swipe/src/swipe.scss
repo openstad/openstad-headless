@@ -380,19 +380,43 @@
   }
 
   .swipe-summary-item {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+
+
+  }
+
+  .swipe-summary-content {
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding: 16px;
     background: white;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     @media (min-width: 768px) {
       flex-direction: row;
       align-items: center;
       gap: 20px;
+    }
+  }
+
+  .swipe-summary-explanation{
+    background: #f0f0f0;
+    padding: 16px;
+
+    textarea{
+      width: 100%;
+      border: none;
+      background: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+      padding: 8px;
+      border-radius: 6px;
+      display: block;
+      height: 60px;
     }
   }
 

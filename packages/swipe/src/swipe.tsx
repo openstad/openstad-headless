@@ -121,6 +121,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(
     persistedState?.swipeAnswers ?? {}
   );
+  const [explanations, setExplanations] = useState<Record<string, string>>(
+    persistedState?.explanations ?? {}
+  );
   const [showSummary, setShowSummary] = useState(persistedState?.showSummary ?? false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
@@ -133,6 +136,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         isFinished,
         remainingCards,
         swipeAnswers,
+        explanations,
         showSummary,
         cardIds: swipeCards.map(card => card.id),
         timestamp: Date.now()
@@ -141,7 +145,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     } catch (error) {
       console.warn('Failed to persist swipe state:', error);
     }
-  }, [currentCardIndex, isFinished, remainingCards, swipeAnswers, showSummary, swipeCards, storageKey]);
+  }, [currentCardIndex, isFinished, remainingCards, swipeAnswers, explanations, showSummary, swipeCards, storageKey]);
 
   // Handle browser visibility changes to persist/restore state
   useEffect(() => {
@@ -387,6 +391,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }));
   };
 
+  const handleExplanationChange = (cardId: string, explanation: string) => {
+    setExplanations(prev => ({
+      ...prev,
+      [cardId]: explanation
+    }));
+  };
+
   useEffect(() => {
     if (onChange) {
       onChange({ name: fieldKey, value: swipeAnswers });
@@ -405,33 +416,44 @@ const SwipeField: FC<SwipeWidgetProps> = ({
               const answer = swipeAnswers[card.id];
               return (
                 <div key={card.id} className="swipe-summary-item">
-                  <div className="swipe-summary-question">
-                    {card.image && (
-                      <div className="swipe-summary-image">
-                        <img src={card.image} alt="" />
-                      </div>
-                    )}
-                    <p>{card.title}</p>
-                  </div>
-                  <div className="swipe-summary-answer">
-                    <div className="swipe-summary-buttons">
-                      <button
-                        className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
-                        onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'left'); }}
-                        aria-label={`Oneens met: ${card.title}`}
-                      >
-                        <i className="ri-thumb-down-fill"></i>
-                        <span>Oneens</span>
-                      </button>
-                      <button
-                        className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
-                        onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'right'); }}
-                        aria-label={`Eens met: ${card.title}`}
-                      >
-                        <i className="ri-thumb-up-fill"></i>
-                        <span>Eens</span>
-                      </button>
+                  <div className="swipe-summary-content">
+                    <div className="swipe-summary-question">
+                      {card.image && (
+                        <div className="swipe-summary-image">
+                          <img src={card.image} alt="" />
+                        </div>
+                      )}
+                      <p>{card.title}</p>
                     </div>
+                    <div className="swipe-summary-answer">
+                      <div className="swipe-summary-buttons">
+                        <button
+                          className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
+                          onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'left'); }}
+                          aria-label={`Oneens met: ${card.title}`}
+                        >
+                          <i className="ri-thumb-down-fill"></i>
+                          <span>Oneens</span>
+                        </button>
+                        <button
+                          className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
+                          onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'right'); }}
+                          aria-label={`Eens met: ${card.title}`}
+                        >
+                          <i className="ri-thumb-up-fill"></i>
+                          <span>Eens</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="swipe-summary-explanation">
+                    <textarea
+                      id={`explanation-${card.id}`}
+                      placeholder="Voeg hier een toelichting (optioneel) toe..."
+                      value={explanations[card.id] || ''}
+                      onChange={(e) => handleExplanationChange(card.id, e.target.value)}
+                      rows={3}
+                    />
                   </div>
                 </div>
               );
@@ -466,74 +488,74 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   style={{ zIndex, transform }}
                   {...(isTop && /iPad|iPhone|iPod|Android/i.test(navigator.userAgent)
                     ? {
-                        onTouchStart: (e) => {
-                          e.preventDefault();
-                          const touch = e.touches[0];
-                          setDragState({
-                            isDragging: true,
-                            startX: touch.clientX,
-                            startY: touch.clientY,
-                            currentX: touch.clientX,
-                            currentY: touch.clientY,
-                            deltaX: 0,
-                            deltaY: 0,
-                          });
-                        },
-                        onTouchMove: (e) => {
-                          e.preventDefault();
-                          if (!dragState.isDragging) return;
-                          const touch = e.touches[0];
-                          const deltaX = touch.clientX - dragState.startX;
-                          const deltaY = touch.clientY - dragState.startY;
-                          setDragState(prev => ({
-                            ...prev,
-                            currentX: touch.clientX,
-                            currentY: touch.clientY,
-                            deltaX,
-                            deltaY,
-                          }));
-                          if (Math.abs(deltaX) > 50) {
-                            setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+                      onTouchStart: (e) => {
+                        e.preventDefault();
+                        const touch = e.touches[0];
+                        setDragState({
+                          isDragging: true,
+                          startX: touch.clientX,
+                          startY: touch.clientY,
+                          currentX: touch.clientX,
+                          currentY: touch.clientY,
+                          deltaX: 0,
+                          deltaY: 0,
+                        });
+                      },
+                      onTouchMove: (e) => {
+                        e.preventDefault();
+                        if (!dragState.isDragging) return;
+                        const touch = e.touches[0];
+                        const deltaX = touch.clientX - dragState.startX;
+                        const deltaY = touch.clientY - dragState.startY;
+                        setDragState(prev => ({
+                          ...prev,
+                          currentX: touch.clientX,
+                          currentY: touch.clientY,
+                          deltaX,
+                          deltaY,
+                        }));
+                        if (Math.abs(deltaX) > 50) {
+                          setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+                        } else {
+                          setSwipeDirection(null);
+                        }
+                      },
+                      onTouchEnd: (e) => {
+                        e.preventDefault();
+                        if (!dragState.isDragging) return;
+                        const swipeThreshold = 100;
+                        const velocityThreshold = 0.5;
+                        const deltaX = dragState.deltaX;
+                        const velocity = Math.abs(deltaX) / 100;
+                        setDragState({
+                          isDragging: false,
+                          startX: 0,
+                          startY: 0,
+                          currentX: 0,
+                          currentY: 0,
+                          deltaX: 0,
+                          deltaY: 0,
+                        });
+                        if (isAnimating) return;
+                        const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
+                        if (shouldSwipe) {
+                          if (deltaX > 0) {
+                            handleSwipeRight();
                           } else {
-                            setSwipeDirection(null);
+                            handleSwipeLeft();
                           }
-                        },
-                        onTouchEnd: (e) => {
-                          e.preventDefault();
-                          if (!dragState.isDragging) return;
-                          const swipeThreshold = 100;
-                          const velocityThreshold = 0.5;
-                          const deltaX = dragState.deltaX;
-                          const velocity = Math.abs(deltaX) / 100;
-                          setDragState({
-                            isDragging: false,
-                            startX: 0,
-                            startY: 0,
-                            currentX: 0,
-                            currentY: 0,
-                            deltaX: 0,
-                            deltaY: 0,
-                          });
-                          if (isAnimating) return;
-                          const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
-                          if (shouldSwipe) {
-                            if (deltaX > 0) {
-                              handleSwipeRight();
-                            } else {
-                              handleSwipeLeft();
-                            }
-                          } else {
-                            setSwipeDirection(null);
-                          }
+                        } else {
+                          setSwipeDirection(null);
                         }
                       }
+                    }
                     : {
-                        onPointerDown: handlePointerDown,
-                        onPointerMove: handlePointerMove,
-                        onPointerUp: handlePointerUp,
-                        onPointerCancel: handlePointerCancel,
-                        onPointerLeave: handlePointerLeave
-                      })}
+                      onPointerDown: handlePointerDown,
+                      onPointerMove: handlePointerMove,
+                      onPointerUp: handlePointerUp,
+                      onPointerCancel: handlePointerCancel,
+                      onPointerLeave: handlePointerLeave
+                    })}
                   role="listitem"
                   aria-label={card.title}
                   tabIndex={isTop ? 0 : -1}
@@ -615,7 +637,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
             <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
             <textarea placeholder='Toelichting...' rows={5} />
-            <Button appearance="primary-action-button" onClick={() => { 
+            <Button appearance="primary-action-button" onClick={() => {
               setIsDialogClosing(true);
               // Start closing animation, then continue with card removal
               setTimeout(() => {
@@ -629,7 +651,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 }, 200);
               }, 200); // Wait for closing animation
             }}>Antwoord verzenden</Button>
-            <Button appearance="secondary-action-button" onClick={() => { 
+            <Button appearance="secondary-action-button" onClick={() => {
               setIsDialogClosing(true);
               // Start closing animation, then continue with card removal
               setTimeout(() => {
