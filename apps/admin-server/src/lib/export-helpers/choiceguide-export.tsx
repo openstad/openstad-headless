@@ -224,9 +224,12 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       const keyCount: Record<string, number> = {};
       Object.values(row.result || {}).forEach((item: any) => {
         const baseKey = item.value;
-        const key = keyCount[baseKey]
+        let key = keyCount[baseKey]
           ? `${baseKey} (${keyCount[baseKey]++})`
           : (keyCount[baseKey] = 1, baseKey);
+
+        key = key && key.replace(/<[^>]*>?/gm, '');
+
         rowObj[key] = normalizeData(item.result);
       });
 

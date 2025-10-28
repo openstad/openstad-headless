@@ -120,9 +120,11 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       }
 
       const baseKey = title;
-      const keyHeader = keyCount[baseKey]
+      let keyHeader = keyCount[baseKey]
         ? `${baseKey} (${keyCount[baseKey]++})`
         : (keyCount[baseKey] = 1, baseKey);
+
+      keyHeader = keyHeader && keyHeader.replace(/<[^>]*>?/gm, '');
 
       rowData[keyHeader] = normalizeData(rawValue);
     });
