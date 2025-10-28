@@ -133,7 +133,7 @@ function Enquete(props: EnqueteWidgetProps) {
     );
 
     async function onSubmit(formData: any) {
-
+        console.log('submit?')
         // Filter out pagination fields
         const nonPaginationFields = formFields.filter(field => field.type !== 'pagination');
 
@@ -379,12 +379,11 @@ function Enquete(props: EnqueteWidgetProps) {
                     });
                     break;
                 case 'dilemma':
-                    console.log(item)
                     fieldData['type'] = 'dilemma';
                     fieldData['title'] = item?.title || '';
                     fieldData['infoField'] = item?.infoField || '';
+                    fieldData['infofieldExplanation'] = item?.infofieldExplanation || false;
                     fieldData['options'] = item?.options?.map((dilemmaOption) => {
-                        console.log(dilemmaOption)
                         return {
                             id: dilemmaOption.trigger,
                             title: dilemmaOption.titles[0].key,
@@ -487,26 +486,26 @@ function Enquete(props: EnqueteWidgetProps) {
                         <button
                             type="button"
                             className="youth-fullscreen-btn"
-onClick={() => {
-    // Detecteer iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-        setIsFullscreen(!isFullscreen);
-        // Alleen styling togglen, geen native fullscreen API
-    } else {
-        if (document.fullscreenElement) {
-            setIsFullscreen(false);
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
-        } else {
-            setIsFullscreen(true);
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            }
-        }
-    }
-}}
+                            onClick={() => {
+                                // Detecteer iOS
+                                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                                if (isIOS) {
+                                    setIsFullscreen(!isFullscreen);
+                                    // Alleen styling togglen, geen native fullscreen API
+                                } else {
+                                    if (document.fullscreenElement) {
+                                        setIsFullscreen(false);
+                                        if (document.exitFullscreen) {
+                                            document.exitFullscreen();
+                                        }
+                                    } else {
+                                        setIsFullscreen(true);
+                                        if (document.documentElement.requestFullscreen) {
+                                            document.documentElement.requestFullscreen();
+                                        }
+                                    }
+                                }
+                            }}
                         >
                             {isFullscreen ? <i className="ri-close-line"></i> : <i className="ri-fullscreen-line"></i>}
                             <span>{isFullscreen ? 'Verlaat volledig scherm' : 'Bekijk in volledig scherm'}</span>
@@ -529,11 +528,11 @@ onClick={() => {
                         submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
-                    totalPages={totalPages}
+                        totalPages={totalPages}
                         prevPage={currentPage > 0 ? currentPage - 1 : null}
                         prevPageText={getPrevPageTitle}
-                    pageFieldStartPositions={pageFieldStartPositions}
-                    pageFieldEndPositions={pageFieldEndPositions}
+                        pageFieldStartPositions={pageFieldStartPositions}
+                        pageFieldEndPositions={pageFieldEndPositions}
                         totalFieldCount={totalFieldCount}
                         formStyle={props.formStyle || 'default'}
                         {...props}

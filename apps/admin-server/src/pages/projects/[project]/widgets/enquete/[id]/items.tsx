@@ -97,6 +97,7 @@ const formSchema = z.object({
   infoBlockShareButton: z.boolean().optional(),
   infoBlockExtraButton: z.string().optional(),
   infoField: z.string().optional(),
+  infofieldExplanation: z.boolean().optional(),
 
 
   // Keeping these for backwards compatibility
@@ -193,6 +194,7 @@ export default function WidgetEnqueteItems(
           routingSelectedQuestion: values.routingSelectedQuestion || '',
           routingSelectedAnswer: values.routingSelectedAnswer || '',
           infoField: values.infoField || '',
+          infofieldExplanation: values.infofieldExplanation || false,
           // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
@@ -386,6 +388,7 @@ export default function WidgetEnqueteItems(
         routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
         infoField: selectedItem.infoField || '',
+        infofieldExplanation: selectedItem.infofieldExplanation || false,
 
 
         // Keeping these for backwards compatibility
@@ -1615,6 +1618,32 @@ export default function WidgetEnqueteItems(
                             <Textarea rows={6} {...field} />
                             <FormMessage />
                           </FormItem>
+                        )}
+                      />
+                    )}
+                    {form.watch("questionType") === "dilemma" && (
+                      <FormField
+                        control={form.control}
+                        name={`infofieldExplanation`}
+                        render={({ field }) => (
+                          <>
+                            <FormItem
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                                flexDirection: 'row',
+                                marginTop: '10px'
+                              }}>
+                              {YesNoSelect(field, props)}
+                              <FormLabel
+                                style={{ marginTop: 0, marginLeft: '6px' }}>Toelichting vragen</FormLabel>
+                              <FormMessage />
+                            </FormItem>
+                            <FormDescription>
+                              Als je deze optie selecteert, wordt er na deze vraag om een toelichting gevraagd.
+                            </FormDescription>
+                          </>
                         )}
                       />
                     )}

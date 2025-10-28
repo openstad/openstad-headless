@@ -89,8 +89,10 @@ function Form({
     }
 
     const handleFormSubmit = (event: React.FormEvent) => {
+        const nonPaginationFields = fields.filter(field => field.type !== 'pagination');
+
         let pageHandler = undefined;
-        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && setCurrentPage) {
+        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && setCurrentPage && typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && !(currentPage === totalPages - 2 && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro')) {
             allowResetAfterSubmit = false;
             pageHandler = () => setCurrentPage(currentPage + 1);
         }
@@ -197,6 +199,8 @@ function Form({
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     randomId={randomId}
                     fieldInvalid={fieldInvalid}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
                     {...field}
                 />
             );
@@ -245,6 +249,7 @@ function Form({
                                     <div className="info-block-buttons">
                                         {/* @ts-ignore */}
                                         {field.infoBlockExtraButton && (
+                                            /* @ts-ignore */
                                             <a className="update-button" href={field.infoBlockExtraButton} rel="noreferrer">
                                                 <span>Blijf op de hoogte</span>
                                             </a>

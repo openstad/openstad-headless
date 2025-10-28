@@ -145,3 +145,13 @@
     }
 
 }
+
+
+// Make sure the 'next' button is not shown when explanation asked for.
+.question-type-dilemma:has(.--explanation) {
+    ~ .button-group{
+        .utrecht-button::after{
+            display: none;
+        }
+    }
+}

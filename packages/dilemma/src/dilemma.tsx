@@ -13,6 +13,9 @@ export type DilemmaFieldProps = BaseProps &
 export type DilemmaProps = {
   title?: string;
   infoField?: string;
+  infofieldExplanation?: boolean;
+  setCurrentPage?: any;
+  currentPage?: number;
   options?: Array<{
     id: number;
     title: string;
@@ -24,16 +27,20 @@ export type DilemmaProps = {
 const DilemmaField: FC<DilemmaFieldProps> = ({
   title,
   infoField,
+  infofieldExplanation,
   options = [],
+  setCurrentPage,
+  currentPage = 0,
   ...props
 }) => {
 
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
+  const [showExplanationDialog, setShowExplanationDialog] = useState<boolean>(false);
 
-  console.log(options)
+  console.log(infofieldExplanation)
 
   return (
-    <div className="dilemma-field">
+    <div className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`} {...props}>
       <div className="dilemma-intro">
         <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
       </div>
@@ -62,6 +69,30 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       <button className="more-info-btn dilemma-info-button" onClick={(e) => (e.preventDefault(), setInfoDialog(true))} type="button" aria-expanded={infoDialog}>
         <span>Info</span>
       </button>
+
+      {infofieldExplanation && (
+        <button className="utrecht-button utrecht-button--submit utrecht-button--primary-action dilemma-explanation-button" onClick={(e) => (e.preventDefault(), setShowExplanationDialog(true))} type="button">
+          <span>Volgende</span>
+        </button>
+      )}
+
+      {showExplanationDialog && (
+        <div className={`explanation-dialog`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
+          <div className="explanation-dialog-content">
+            <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
+            <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
+            <textarea placeholder='Toelichting...' rows={5} />
+            <Button appearance="primary-action-button" onClick={() => {
+              setShowExplanationDialog(false);
+              setCurrentPage(currentPage + 1)
+            }}>Antwoord verzenden</Button>
+            <Button appearance="secondary-action-button" onClick={() => {
+              setShowExplanationDialog(false);
+              setCurrentPage(currentPage + 1)
+            }}>Sluiten zonder toelichting</Button>
+          </div>
+        </div>
+      )}
 
 
       <div className="info-card dilemma-info-field" aria-hidden={!infoDialog}>
