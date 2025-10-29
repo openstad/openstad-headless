@@ -87,6 +87,14 @@ const formSchema = z.object({
   routingInitiallyHide: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
   routingSelectedAnswer: z.string().optional(),
+  currentOptionTitles: z.array(z.object({
+    text: z.string().optional(),
+    key: z.string(),
+    image: z.string().optional(),
+    isOtherOption: z.boolean().optional(),
+    defaultValue: z.boolean().optional(),
+    hideLabel: z.boolean().optional()
+  })).optional(),
 
   // Keeping these for backwards compatibility
   image1Upload: z.string().optional(),
@@ -209,7 +217,7 @@ export default function WidgetEnqueteItems(
 
             return {
               ...option,
-              titles: newTitles,
+              titles: newTitles.length > 0 ? newTitles : [{ key: '', text: '', image: '', isOtherOption: false, defaultValue: false, hideLabel: false }],
             };
           }
 
@@ -222,14 +230,16 @@ export default function WidgetEnqueteItems(
 
       setOption(null);
     } else {
+      const titles = values.currentOptionTitles || [{ key: '', text: '', image: '', isOtherOption: false, defaultValue: false, hideLabel: false }];
       const newOption = {
         trigger: `${options.length > 0
           ? parseInt(options[options.length - 1].trigger) + 1
           : 0
           }`,
-        titles: values.options?.[values.options.length - 1].titles || [],
+        titles: titles,
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
+      form.setValue('currentOptionTitles', [{ key: '', text: '', image: '', isOtherOption: false, defaultValue: false, hideLabel: false }]);
     }
   }
 
@@ -311,6 +321,7 @@ export default function WidgetEnqueteItems(
     routingInitiallyHide: false,
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
+    currentOptionTitles: [{ key: '', text: '', image: '', isOtherOption: false, defaultValue: false, hideLabel: false }],
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -376,7 +387,13 @@ export default function WidgetEnqueteItems(
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
       });
-      setOptions(selectedItem.options || []);
+      setOptions(selectedItem.options?.map(option => {
+        const titles = option.titles || [];
+        if (titles.length === 0 || !titles[0]?.key) {
+          titles[0] = { key: `Optie ${option.trigger}`, text: '', image: '', isOtherOption: false, defaultValue: false, hideLabel: false };
+        }
+        return { ...option, titles };
+      }) || []);
       setMatrixOptions(selectedItem.matrix || matrixDefault);
     }
   }, [selectedItem, form]);
@@ -764,7 +781,7 @@ export default function WidgetEnqueteItems(
                           <>
                             <FormField
                               control={form.control}
-                              name={`options.${activeOption}.titles.0.key`}
+                              name={selectedOption ? `options.${activeOption}.titles.0.key` : `currentOptionTitles.0.key`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Optie tekst</FormLabel>
@@ -778,7 +795,7 @@ export default function WidgetEnqueteItems(
                               <FormField
                                 control={form.control}
                                 // @ts-ignore
-                                name={`options.${activeOption}.titles.0.isOtherOption`}
+                                name={selectedOption ? `options.${activeOption}.titles.0.isOtherOption` : `currentOptionTitles.0.isOtherOption`}
                                 render={({ field }) => (
                                   <>
                                     <FormItem
@@ -791,7 +808,7 @@ export default function WidgetEnqueteItems(
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                        style={{ marginTop: 0, marginLeft: '6px' }}>Is 'Anders, namelijk...'</FormLabel>
                                       <FormMessage />
                                     </FormItem>
                                     <FormDescription>
@@ -808,7 +825,7 @@ export default function WidgetEnqueteItems(
                               <FormField
                                 control={form.control}
                                 // @ts-ignore
-                                name={`options.${activeOption}.titles.0.defaultValue`}
+                                name={selectedOption ? `options.${activeOption}.titles.0.defaultValue` : `currentOptionTitles.0.defaultValue`}
                                 render={({ field }) => (
                                   <>
                                     <FormItem
@@ -843,20 +860,20 @@ export default function WidgetEnqueteItems(
                               onImageUploaded={(imageResult) => {
                                 const image = imageResult ? imageResult.url : '';
 
-                                form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                form.setValue(selectedOption ? `options.${activeOption}.titles.0.image` : `currentOptionTitles.0.image`, image);
                                 form.resetField('imageOptionUpload');
                               }}
                             />
 
-                            {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                            {!!form.getValues(selectedOption ? `options.${activeOption}.titles.0.image` : `currentOptionTitles.0.image`) && (
                               <div style={{ position: 'relative' }}>
-                                <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                <img src={form.getValues(selectedOption ? `options.${activeOption}.titles.0.image` : `currentOptionTitles.0.image`)} />
                               </div>
                             )}
 
                             <FormField
                               control={form.control}
-                              name={`options.${activeOption}.titles.0.key`}
+                              name={selectedOption ? `options.${activeOption}.titles.0.key` : `currentOptionTitles.0.key`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Titel</FormLabel>
@@ -873,7 +890,7 @@ export default function WidgetEnqueteItems(
                             <FormField
                               control={form.control}
                               // @ts-ignore
-                              name={`options.${activeOption}.titles.0.hideLabel`}
+                              name={selectedOption ? `options.${activeOption}.titles.0.hideLabel` : `currentOptionTitles.0.hideLabel`}
                               render={({ field }) => (
                                 <>
                                   <FormItem
@@ -970,7 +987,7 @@ export default function WidgetEnqueteItems(
                               <span
                                 className="py-3 px-2 w-full"
                                 onClick={() => setOption(option)}>
-                                {option?.titles?.[0].key}
+                                {option?.titles?.[0]?.key}
                               </span>
                               <span className="py-3 px-2">
                                 <X
