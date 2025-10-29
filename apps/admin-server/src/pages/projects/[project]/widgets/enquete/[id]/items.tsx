@@ -22,7 +22,7 @@ import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
-import {Item, Matrix, MatrixOption, Option} from '@openstad-headless/enquete/src/types/enquete-props';
+import { Item, Matrix, MatrixOption, Option } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -70,8 +70,9 @@ const formSchema = z.object({
         text: z.string().optional(),
       })),
     })
-    .optional(),
+      .optional(),
   multiple: z.boolean().optional(),
+  randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
@@ -104,7 +105,7 @@ const matrixDefault = {
   rows: [],
 }
 
-const matrixList: {type: 'rows' | 'columns', heading: string, description: string}[] = [
+const matrixList: { type: 'rows' | 'columns', heading: string, description: string }[] = [
   {
     type: 'rows',
     heading: 'Lijst van onderwerpen',
@@ -129,7 +130,7 @@ export default function WidgetEnqueteItems(
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
 
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
-  const [matrixOption, setMatrixOption] = useState<MatrixOption & {type: 'rows' | 'columns'} | null>(null);
+  const [matrixOption, setMatrixOption] = useState<MatrixOption & { type: 'rows' | 'columns' } | null>(null);
 
   const router = useRouter();
   const { project } = router.query;
@@ -167,6 +168,7 @@ export default function WidgetEnqueteItems(
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
+          randomizeItems: values.randomizeItems || false,
           image: values.image || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
@@ -259,13 +261,13 @@ export default function WidgetEnqueteItems(
     } else {
       const newTrigger = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
         ? values?.matrix?.[updatedMatrixOption].reduce((max, option) => {
-            return (parseInt(option?.trigger || '0') > max ? parseInt(option?.trigger || '0') : max);
-          }, 0) + 1
+          return (parseInt(option?.trigger || '0') > max ? parseInt(option?.trigger || '0') : max);
+        }, 0) + 1
         : '0';
 
       const newTextObj = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
-        ? values?.matrix?.[updatedMatrixOption]?.find((option: {trigger?: string}) => typeof(option?.trigger) === 'undefined')
-        : {text: ''};
+        ? values?.matrix?.[updatedMatrixOption]?.find((option: { trigger?: string }) => typeof (option?.trigger) === 'undefined')
+        : { text: '' };
 
       const newText = newTextObj?.text || '';
 
@@ -297,6 +299,7 @@ export default function WidgetEnqueteItems(
     variant: 'text input',
     options: [],
     multiple: false,
+    randomizeItems: false,
     image: '',
     imageAlt: '',
     imageDescription: '',
@@ -353,6 +356,7 @@ export default function WidgetEnqueteItems(
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
+        randomizeItems: selectedItem.randomizeItems || false,
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
@@ -488,7 +492,7 @@ export default function WidgetEnqueteItems(
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith("options.") || key.startsWith("matrix.") ) {
+      if (key.startsWith("options.") || key.startsWith("matrix.")) {
         // @ts-ignore
         delete updatedProps[key];
       }
@@ -627,307 +631,307 @@ export default function WidgetEnqueteItems(
 
             {settingOptions ? (
               <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
-                { form.watch("questionType") === "matrix" ? (
+                {form.watch("questionType") === "matrix" ? (
                   matrixList.map((matrixItem) => (
-                  <>
-                    <div className="flex flex-col justify-between">
-                      <div className="flex flex-col gap-y-2">
-                        <Heading size="xl">{matrixItem.heading}</Heading>
-                        <FormDescription>{matrixItem.description}</FormDescription>
-                        <Separator className="mt-2" />
+                    <>
+                      <div className="flex flex-col justify-between">
+                        <div className="flex flex-col gap-y-2">
+                          <Heading size="xl">{matrixItem.heading}</Heading>
+                          <FormDescription>{matrixItem.description}</FormDescription>
+                          <Separator className="mt-2" />
 
-                        <div className="flex flex-col gap-1">
-                          {matrixOptions?.[matrixItem.type]?.length > 0
-                            ? matrixOptions?.[matrixItem.type]
-                              .sort(
-                                (a, b) =>
-                                  parseInt(a.trigger) - parseInt(b.trigger)
-                              )
-                              .map((option, index) => (
-                                <div
-                                  key={index}
-                                  className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
-                                  'bg-secondary'
-                                  }`}>
-                                <span className="flex gap-2 py-3 px-2">
-                                  <ArrowUp
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveUp',
-                                        option.trigger,
-                                        false,
-                                        true,
-                                        matrixItem.type
-                                      )
-                                    }
-                                  />
-                                  <ArrowDown
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveDown',
-                                        option.trigger,
-                                        false,
-                                        true,
-                                        matrixItem.type
-                                      )
-                                    }
-                                  />
-                                </span>
-                                  <span
-                                    className="py-3 px-2 w-full"
-                                    onClick={() => setMatrixOption({
+                          <div className="flex flex-col gap-1">
+                            {matrixOptions?.[matrixItem.type]?.length > 0
+                              ? matrixOptions?.[matrixItem.type]
+                                .sort(
+                                  (a, b) =>
+                                    parseInt(a.trigger) - parseInt(b.trigger)
+                                )
+                                .map((option, index) => (
+                                  <div
+                                    key={index}
+                                    className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
+                                      'bg-secondary'
+                                      }`}>
+                                    <span className="flex gap-2 py-3 px-2">
+                                      <ArrowUp
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                          handleAction(
+                                            'moveUp',
+                                            option.trigger,
+                                            false,
+                                            true,
+                                            matrixItem.type
+                                          )
+                                        }
+                                      />
+                                      <ArrowDown
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                          handleAction(
+                                            'moveDown',
+                                            option.trigger,
+                                            false,
+                                            true,
+                                            matrixItem.type
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span
+                                      className="py-3 px-2 w-full"
+                                      onClick={() => setMatrixOption({
                                         ...option,
                                         type: matrixItem.type
                                       })}>
-                                  {option?.text}
-                                </span>
-                                  <span className="py-3 px-2">
-                                  <X
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'delete',
-                                        option.trigger,
-                                        false,
-                                        true,
-                                        matrixItem.type
-                                      )
-                                    }
-                                  />
-                                </span>
-                                </div>
-                              ))
-                            : ''}
-                        </div>
+                                      {option?.text}
+                                    </span>
+                                    <span className="py-3 px-2">
+                                      <X
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                          handleAction(
+                                            'delete',
+                                            option.trigger,
+                                            false,
+                                            true,
+                                            matrixItem.type
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                  </div>
+                                ))
+                              : ''}
+                          </div>
 
-                        {(() => {
-                          const currentOption = matrixOptions?.[matrixItem.type].findIndex((option) => option.trigger === matrixOption?.trigger);
-                          const activeOption = currentOption !== -1 ? currentOption : matrixOptions?.[matrixItem.type]?.length;
+                          {(() => {
+                            const currentOption = matrixOptions?.[matrixItem.type].findIndex((option) => option.trigger === matrixOption?.trigger);
+                            const activeOption = currentOption !== -1 ? currentOption : matrixOptions?.[matrixItem.type]?.length;
 
-                          return (
-                            <FormField
-                              control={form.control}
-                              name={`matrix.${matrixItem.type}.${activeOption}.text`}
-                              render={({field}) => (
-                                <FormItem>
-                                  <Input {...field} />
-                                  <FormMessage/>
-                                </FormItem>
-                              )}
-                            />
-                          )
-                        })()}
-
-                        <Button
-                          className="w-full bg-secondary text-black hover:text-white mt-4"
-                          type="button"
-                          onClick={() => handleAddMatrixOption(form.getValues(), matrixItem.type)}>
-                          {(matrixOption && matrixOption.type === matrixItem.type)
-                            ? 'Sla wijzigingen op'
-                            : 'Voeg optie toe aan lijst'}
-                        </Button>
-                      </div>
-
-                      { matrixItem.type === 'rows' && (
-                        <div className="flex gap-2">
-                          <Button
-                            className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                            type="button"
-                            onClick={() => {
-                              setSettingOptions(() => !settingOptions),
-                                setMatrixOption(null);
-                            }}>
-                            Annuleer
-                          </Button>
-                          <Button
-                            className="w-fit mt-4"
-                            type="button"
-                            onClick={() => handleSaveMatrixOptions()}>
-                            Sla antwoordopties op
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                ))) : (
-                <div className="flex flex-col justify-between">
-                  <div className="flex flex-col gap-y-2">
-                    <Heading size="xl">Antwoordopties</Heading>
-                    <Separator className="mt-2" />
-                    {hasList() && (
-                      (() => {
-                        const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
-                        const activeOption = currentOption !== -1 ? currentOption : options.length;
-                        return form.watch("questionType") !== "images" ? (
-                          <>
-                            <FormField
-                              control={form.control}
-                              name={`options.${activeOption}.titles.0.key`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Optie tekst</FormLabel>
-                                  <Input {...field} />
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            {form.watch('questionType') !== 'sort' && (
+                            return (
                               <FormField
                                 control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.isOtherOption`}
+                                name={`matrix.${matrixItem.type}.${activeOption}.text`}
                                 render={({ field }) => (
-                                  <>
-                                    <FormItem
-                                      style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
-                                        marginTop: '10px'
-                                      }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
-                                      <FormMessage />
-                                    </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
-                                      formulier.
-                                      Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
-                                    </FormDescription>
-                                  </>
-                                )}
-                              />
-                            )}
-
-                            {form.watch('questionType') === 'multiple' && (
-                              <FormField
-                                control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.defaultValue`}
-                                render={({ field }) => (
-                                  <>
-                                    <FormItem
-                                      style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
-                                        marginTop: '10px'
-                                      }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Standaard aangevinkt?</FormLabel>
-                                      <FormMessage />
-                                    </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
-                                    </FormDescription>
-                                  </>
-                                )}
-                              />
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <ImageUploader
-                              form={form}
-                              project={project as string}
-                              fieldName="imageOptionUpload"
-                              imageLabel="Afbeelding"
-                              allowedTypes={["image/*"]}
-                              onImageUploaded={(imageResult) => {
-                                const image = imageResult ? imageResult.url : '';
-
-                                form.setValue(`options.${activeOption}.titles.0.image`, image);
-                                form.resetField('imageOptionUpload');
-                              }}
-                            />
-
-                            {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
-                              <div style={{ position: 'relative' }}>
-                                <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
-                              </div>
-                            )}
-
-                            <FormField
-                              control={form.control}
-                              name={`options.${activeOption}.titles.0.key`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Titel</FormLabel>
-                                  <FormDescription>
-                                    Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                    De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
-                                  </FormDescription>
-                                  <Input {...field} />
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              // @ts-ignore
-                              name={`options.${activeOption}.titles.0.hideLabel`}
-                              render={({ field }) => (
-                                <>
-                                  <FormItem
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'flex-start',
-                                      flexDirection: 'row',
-                                      marginTop: '10px'
-                                    }}>
-                                    {YesNoSelect(field, props)}
-                                    <FormLabel
-                                      style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                  <FormItem>
+                                    <Input {...field} />
                                     <FormMessage />
                                   </FormItem>
-                                  <FormDescription>
-                                    Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
-                                  </FormDescription>
-                                </>
-                              )}
-                            />
-                          </>
-                        );
-                      })()
-                    )}
+                                )}
+                              />
+                            )
+                          })()}
 
-                    <Button
-                      className="w-full bg-secondary text-black hover:text-white mt-4"
-                      type="button"
-                      onClick={() => handleAddOption(form.getValues())}>
-                      {selectedOption
-                        ? 'Sla wijzigingen op'
-                        : 'Voeg optie toe aan lijst'}
-                    </Button>
+                          <Button
+                            className="w-full bg-secondary text-black hover:text-white mt-4"
+                            type="button"
+                            onClick={() => handleAddMatrixOption(form.getValues(), matrixItem.type)}>
+                            {(matrixOption && matrixOption.type === matrixItem.type)
+                              ? 'Sla wijzigingen op'
+                              : 'Voeg optie toe aan lijst'}
+                          </Button>
+                        </div>
+
+                        {matrixItem.type === 'rows' && (
+                          <div className="flex gap-2">
+                            <Button
+                              className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                              type="button"
+                              onClick={() => {
+                                setSettingOptions(() => !settingOptions),
+                                  setMatrixOption(null);
+                              }}>
+                              Annuleer
+                            </Button>
+                            <Button
+                              className="w-fit mt-4"
+                              type="button"
+                              onClick={() => handleSaveMatrixOptions()}>
+                              Sla antwoordopties op
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ))) : (
+                  <div className="flex flex-col justify-between">
+                    <div className="flex flex-col gap-y-2">
+                      <Heading size="xl">Antwoordopties</Heading>
+                      <Separator className="mt-2" />
+                      {hasList() && (
+                        (() => {
+                          const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                          const activeOption = currentOption !== -1 ? currentOption : options.length;
+                          return form.watch("questionType") !== "images" ? (
+                            <>
+                              <FormField
+                                control={form.control}
+                                name={`options.${activeOption}.titles.0.key`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Optie tekst</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              {form.watch('questionType') !== 'sort' && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.isOtherOption`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
+                                        formulier.
+                                        Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
+
+                              {form.watch('questionType') === 'multiple' && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.defaultValue`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Standaard aangevinkt?</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <ImageUploader
+                                form={form}
+                                project={project as string}
+                                fieldName="imageOptionUpload"
+                                imageLabel="Afbeelding"
+                                allowedTypes={["image/*"]}
+                                onImageUploaded={(imageResult) => {
+                                  const image = imageResult ? imageResult.url : '';
+
+                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                  form.resetField('imageOptionUpload');
+                                }}
+                              />
+
+                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                                <div style={{ position: 'relative' }}>
+                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                </div>
+                              )}
+
+                              <FormField
+                                control={form.control}
+                                name={`options.${activeOption}.titles.0.key`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Titel</FormLabel>
+                                    <FormDescription>
+                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                    </FormDescription>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                // @ts-ignore
+                                name={`options.${activeOption}.titles.0.hideLabel`}
+                                render={({ field }) => (
+                                  <>
+                                    <FormItem
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        flexDirection: 'row',
+                                        marginTop: '10px'
+                                      }}>
+                                      {YesNoSelect(field, props)}
+                                      <FormLabel
+                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                      <FormMessage />
+                                    </FormItem>
+                                    <FormDescription>
+                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                    </FormDescription>
+                                  </>
+                                )}
+                              />
+                            </>
+                          );
+                        })()
+                      )}
+
+                      <Button
+                        className="w-full bg-secondary text-black hover:text-white mt-4"
+                        type="button"
+                        onClick={() => handleAddOption(form.getValues())}>
+                        {selectedOption
+                          ? 'Sla wijzigingen op'
+                          : 'Voeg optie toe aan lijst'}
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          setSettingOptions(() => !settingOptions),
+                            setOption(null);
+                        }}>
+                        Annuleer
+                      </Button>
+                      <Button
+                        className="w-fit mt-4"
+                        type="button"
+                        onClick={() => handleSaveOptions()}>
+                        Sla antwoordopties op
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        setSettingOptions(() => !settingOptions),
-                          setOption(null);
-                      }}>
-                      Annuleer
-                    </Button>
-                    <Button
-                      className="w-fit mt-4"
-                      type="button"
-                      onClick={() => handleSaveOptions()}>
-                      Sla antwoordopties op
-                    </Button>
-                  </div>
-                </div>
-              )}
+                )}
                 {hasList() && (
                   <div>
                     <Heading size="xl">Lijst van antwoordopties</Heading>
@@ -1173,7 +1177,7 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
-                                                <FormField
+                        <FormField
                           control={form.control}
                           name="nextPageText"
                           render={({ field }) => (
@@ -1269,24 +1273,24 @@ export default function WidgetEnqueteItems(
                       <FormField
                         control={form.control}
                         name="fieldRequired"
-                        render={({field}) => (
+                        render={({ field }) => (
                           <FormItem>
                             <FormLabel>
                               Is dit veld verplicht?
                             </FormLabel>
-                            { form.watch("questionType") === "matrix" && (
+                            {form.watch("questionType") === "matrix" && (
                               <FormDescription>
                                 Als je het veld <b>verplicht</b> maakt moeten gebruikers bij elke rij een antwoord selecteren.
                                 Als je het veld <b>niet verplicht</b> maakt kunnen gebruikers elke rij overslaan en invullen wat ze willen.
                               </FormDescription>
-                              )}
+                            )}
                             <Select
                               onValueChange={(e: string) => field.onChange(e === 'true')}
                               value={field.value ? 'true' : 'false'}
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie"/>
+                                  <SelectValue placeholder="Kies een optie" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -1294,7 +1298,7 @@ export default function WidgetEnqueteItems(
                                 <SelectItem value="true">Ja</SelectItem>
                               </SelectContent>
                             </Select>
-                            <FormMessage/>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -1304,7 +1308,7 @@ export default function WidgetEnqueteItems(
                       <FormField
                         control={form.control}
                         name="matrixMultiple"
-                        render={({field}) => (
+                        render={({ field }) => (
                           <FormItem>
                             <FormLabel>
                               Mogen er meerdere antwoorden per rij worden geselecteerd?
@@ -1315,7 +1319,7 @@ export default function WidgetEnqueteItems(
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie"/>
+                                  <SelectValue placeholder="Kies een optie" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -1323,7 +1327,7 @@ export default function WidgetEnqueteItems(
                                 <SelectItem value="true">Ja</SelectItem>
                               </SelectContent>
                             </Select>
-                            <FormMessage/>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -1410,7 +1414,7 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    { form.watch('questionType') !== 'pagination' && (
+                    {form.watch('questionType') !== 'pagination' && (
                       <FormField
                         control={form.control}
                         name="routingInitiallyHide"
@@ -1437,7 +1441,32 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    { form.watch('routingInitiallyHide') && (
+                    {form.watch('questionType') === 'multiplechoice' && (
+                      <FormField
+                        control={form.control}
+                        // @ts-ignore
+                        name={`randomizeItems`}
+                        render={({ field }) => (
+                          <>
+                            <FormItem
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                                flexDirection: 'row',
+                                marginTop: '10px'
+                              }}>
+                              {YesNoSelect(field, props)}
+                              <FormLabel
+                                style={{ marginTop: 0, marginLeft: '6px' }}>Willekeurige volgorde</FormLabel>
+                              <FormMessage />
+                            </FormItem>
+                          </>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('routingInitiallyHide') && (
                       <>
                         <FormField
                           control={form.control}
@@ -1458,7 +1487,7 @@ export default function WidgetEnqueteItems(
                               <FormItem>
                                 <FormLabel>Welke vraag beïnvloedt de zichtbaarheid van deze vraag?</FormLabel>
 
-                                { formMultipleChoiceFields.length === 0 ? (
+                                {formMultipleChoiceFields.length === 0 ? (
                                   <p
                                     className="text-sm"
                                     style={{
@@ -1482,20 +1511,20 @@ export default function WidgetEnqueteItems(
                                       </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                      { formMultipleChoiceFields.map((f: any) => (
+                                      {formMultipleChoiceFields.map((f: any) => (
                                         <SelectItem key={f.trigger} value={f.trigger}>{f.title || f.fieldKey}</SelectItem>
-                                      )) }
+                                      ))}
                                     </SelectContent>
                                   </Select>
                                 )}
 
-                                <FormMessage/>
+                                <FormMessage />
                               </FormItem>
                             )
                           }}
                         />
 
-                        { form.watch("routingSelectedQuestion") !== '' && (
+                        {form.watch("routingSelectedQuestion") !== '' && (
                           <FormField
                             control={form.control}
                             name="routingSelectedAnswer"
@@ -1507,7 +1536,7 @@ export default function WidgetEnqueteItems(
                                 <FormItem>
                                   <FormLabel>Bij welk antwoord moet deze vraag getoond worden?</FormLabel>
 
-                                  { options.length === 0 ? (
+                                  {options.length === 0 ? (
                                     <p
                                       className="text-sm"
                                       style={{
@@ -1531,14 +1560,14 @@ export default function WidgetEnqueteItems(
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        { options.map((o: any) => (
+                                        {options.map((o: any) => (
                                           <SelectItem key={o.trigger} value={o.trigger}>{o.titles?.[0]?.key || o.trigger}</SelectItem>
-                                        )) }
+                                        ))}
                                       </SelectContent>
                                     </Select>
                                   )}
 
-                                  <FormMessage/>
+                                  <FormMessage />
                                 </FormItem>
                               )
                             }}
@@ -1553,7 +1582,7 @@ export default function WidgetEnqueteItems(
                           className="w-fit mt-4 bg-secondary text-black hover:text-white"
                           type="button"
                           onClick={() => setSettingOptions(!settingOptions)}>
-                          { form.watch("questionType") === "matrix"
+                          {form.watch("questionType") === "matrix"
                             ? `Matrix antwoordopties aanpassen`
                             : `Antwoordopties (${options.length}) aanpassen`}
                         </Button>
