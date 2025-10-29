@@ -812,7 +812,7 @@ function StemBegroot({
               </Button>
             ) : null}
 
-            {/* Dont show on voting step if you are on step 2 your not logged in*/}
+            {/* Dont show on voting step if you are on step 2 you're not logged in*/}
             {(currentStep !== 2 && currentStep !== -1) ? (
               <>
               {currentStep === 4 && props.showNewsletterButton && (

@@ -15,7 +15,7 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, ...props }: Props) => 
   return (
     <>
       <Heading3>{step3Title}</Heading3>
-      <Paragraph>{step3}</Paragraph>
+      <div dangerouslySetInnerHTML={{__html: step3}} />
       <Spacer size={2} />
       <Button
         appearance='primary-action-button'
