@@ -31,6 +31,7 @@ export type RadioboxFieldProps = {
         value: string;
         label: string;
     }[];
+    randomizeItems?: boolean;
 };
 declare const RadioboxField: FC<RadioboxFieldProps>;
 export default RadioboxField;
