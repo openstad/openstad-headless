@@ -8,6 +8,8 @@ import { SessionStorage, hasRole } from '@openstad-headless/lib';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { StemBegrootBudgetList } from './step-1/begroot-budget-list/stem-begroot-budget-list';
 import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/stem-begroot-detail-dialog';
+import { createVotePendingStorage } from './utils/vote-pending-storage';
+import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
 
 import { StemBegrootResourceList } from './step-1/begroot-resource-list/stem-begroot-resource-list';
 import { BudgetUsedList } from './reuseables/used-budget-component';
@@ -21,7 +23,6 @@ import { Step4 } from './step-4';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Heading } from '@utrecht/component-library-react';
-import useTags from "@openstad-headless/admin-server/src/hooks/use-tag";
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
@@ -119,6 +120,17 @@ function StemBegroot({
   filterBehavior = 'or',
   ...props
 }: StemBegrootWidgetProps) {
+  // Initialize storage instances with project ID
+  const votePendingStorage = React.useMemo(
+    () => createVotePendingStorage(props.projectId),
+    [props.projectId]
+  );
+  
+  const selectedResourcesStorage = React.useMemo(
+    () => createSelectedResourcesStorage(props.projectId),
+    [props.projectId]
+  );
+
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,
@@ -184,7 +196,11 @@ function StemBegroot({
   });
 
   // Replace with type when available from datastore
-  const [selectedResources, setSelectedResources] = useState<any[]>([]);
+  // Initialize from storage if available
+  const [selectedResources, setSelectedResources] = useState<any[]>(() => {
+    const stored = selectedResourcesStorage.getSelectedResources();
+    return stored || [];
+  });
 
   const session = new SessionStorage({ projectId: props.projectId });
 
@@ -226,6 +242,13 @@ function StemBegroot({
     props.votes.requiredUserRole &&
     hasRole(currentUser, props.votes.requiredUserRole);
 
+  // Save selectedResources to storage whenever they change
+  useEffect(() => {
+    if (props.votes.voteType !== "countPerTag" && props.votes.voteType !== "budgetingPerTag") {
+      selectedResourcesStorage.setSelectedResources(selectedResources);
+    }
+  }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
+
   useEffect(() => {
     if (props.isSimpleView && currentStep === 1 && lastStep > currentStep) {
       setCurrentStep(0); // Skip step 2
@@ -241,7 +264,7 @@ function StemBegroot({
   // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
-      const pendingPerTag = JSON.parse(localStorage.getItem('oscResourceVotePendingPerTag') || 'null');
+      const pendingPerTag = votePendingStorage.getVotePendingPerTag();
 
       if (pendingPerTag) {
         setTagCounter((prevTagCounter) =>
@@ -270,25 +293,21 @@ function StemBegroot({
         );
       }
     } else {
-      let pending = JSON.parse(localStorage.getItem('oscResourceVotePending') || 'null');
-      if (
-        pending &&
-        resources?.records?.length > 0 &&
-        selectedResources.length === 0
-      ) {
+      const pending = votePendingStorage.getVotePending();
+      if (pending && resources?.records?.length > 0 && selectedResources.length === 0) {
         setSelectedResources(resources?.records?.filter((r: any) => pending[r.id]));
       }
     }
-  }, [resources?.records]);
+  }, [resources?.records, votePendingStorage]);
 
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
     let pending;
 
     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
-      pending = JSON.parse(localStorage.getItem('oscResourceVotePendingPerTag') || 'null');
+      pending = votePendingStorage.getVotePendingPerTag();
     } else {
-      pending = JSON.parse(localStorage.getItem('oscResourceVotePending') || 'null');
+      pending = votePendingStorage.getVotePending();
     }
 
     if (
@@ -312,7 +331,7 @@ function StemBegroot({
         }
       );
 
-      localStorage.setItem('oscResourceVotePending', JSON.stringify(resourcesToVoteFor));
+      votePendingStorage.setVotePending(resourcesToVoteFor);
     } else {
       const resourcesToVoteForPerTag: { [tag: string]: { [key: string]: any } } = {};
 
@@ -326,7 +345,7 @@ function StemBegroot({
         });
       });
 
-      localStorage.setItem('oscResourceVotePendingPerTag', JSON.stringify(resourcesToVoteForPerTag));
+      votePendingStorage.setVotePendingPerTag(resourcesToVoteForPerTag);
     }
   }
 
@@ -546,8 +565,8 @@ function StemBegroot({
         setOpenDetailDialog={setOpenDetailDialog}
         isSimpleView={Boolean(props.isSimpleView)}
         onPrimaryButtonClick={(resource) => {
-          localStorage.removeItem('oscResourceVotePending');
-          localStorage.removeItem('oscResourceVotePendingPerTag');
+          votePendingStorage.clearAllVotePending();
+          selectedResourcesStorage.clearSelectedResources();
 
           let newTagCounter = [...tagCounter];
 
@@ -651,8 +670,7 @@ function StemBegroot({
                 tagCounter={tagCounter}
                 step1MaxText={step1MaxText}
                 onSelectedResourceRemove={(resource: {id: number, budget: number}) => {
-                  localStorage.removeItem('oscResourceVotePending');
-                  localStorage.removeItem('oscResourceVotePendingPerTag');
+                  votePendingStorage.clearAllVotePending();
 
                   let newTagCounter = [...tagCounter];
 
@@ -893,11 +911,13 @@ function StemBegroot({
 
                         if (uniqueResourcesToVote.length > 0) {
                           await doVote(uniqueResourcesToVote);
-                          localStorage.removeItem('oscResourceVotePendingPerTag');
+                          votePendingStorage.clearVotePendingPerTag();
+                          selectedResourcesStorage.clearSelectedResources();
                         }
                       } else {
                         await doVote(selectedResources);
-                        localStorage.removeItem('oscResourceVotePending');
+                        votePendingStorage.clearVotePending();
+                        selectedResourcesStorage.clearSelectedResources();
                       }
                       setCurrentStep(currentStep + 1);
                     } catch (err: any) {
@@ -1021,8 +1041,7 @@ function StemBegroot({
               originalResourceUrl={props.originalResourceUrl}
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
-                localStorage.removeItem('oscResourceVotePending');
-                localStorage.removeItem('oscResourceVotePendingPerTag');
+                votePendingStorage.clearAllVotePending();
 
                 let newTagCounter = [...tagCounter];
 
