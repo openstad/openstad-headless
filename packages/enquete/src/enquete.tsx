@@ -121,7 +121,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'multiplechoice':
                 case 'multiple':
                     fieldData['type'] = item.questionType === 'multiplechoice' ? 'radiobox' : 'checkbox';
-                    fieldData['randomizeOptions'] = item.randomizeOptions || false;
+                    fieldData['randomizeItems'] = item.randomizeItems || false;
 
                     const defaultValue: string[] = [];
 

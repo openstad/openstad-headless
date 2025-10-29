@@ -13,7 +13,6 @@ import TextInput from "../text";
 import { useEffect } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
 
-// Utility function to shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
