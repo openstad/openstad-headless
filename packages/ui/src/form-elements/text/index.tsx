@@ -77,15 +77,15 @@ const TextInput: FC<TextInputProps> = ({
         }
     }
 
-    const finalDefaultValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
 
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
-    const [value, setValue] = useState(finalDefaultValue);
+    const [value, setValue] = useState(initialValue);
 
     useEffect(() => {
         if (reset) {
-            reset(() => setValue(finalDefaultValue));
+            reset(() => setValue(initialValue));
         }
     }, [reset, defaultValue]);
 

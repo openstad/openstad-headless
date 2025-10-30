@@ -66,8 +66,8 @@ const MatrixField: FC<MatrixFieldProps> = ({
        matrixMultiple = false,
        overrideDefaultValue,
 }) => {
-    const defaultSelectedChoices = Array.isArray(overrideDefaultValue) ? overrideDefaultValue as string[] : [];
-    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
+    const initialValue = Array.isArray(overrideDefaultValue) ? overrideDefaultValue as string[] : [];
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;
     const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;

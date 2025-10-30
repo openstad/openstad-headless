@@ -48,17 +48,17 @@ const NumberInput: FC<NumberInputProps> = ({
     fieldInvalid = false,
     overrideDefaultValue,
 }) => {
-  const defaultVal = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
+  const initialValue = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
 
   const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  const [value, setValue] = useState(defaultVal);
+  const [value, setValue] = useState(initialValue);
   const MAX_VALUE = 1_000_000_000_000;
 
   useEffect(() => {
     if (reset) {
-      reset(() => setValue(defaultVal));
+      reset(() => setValue(initialValue));
     }
-  }, [reset, defaultVal]);
+  }, [reset, initialValue]);
 
   const formatNumber = (num: string) => {
     return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");

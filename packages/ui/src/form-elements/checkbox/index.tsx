@@ -54,13 +54,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        fieldInvalid= false,
        overrideDefaultValue,
 }) => {
-    let defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
+    let initialValue = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
 
     try {
-        defaultSelectedChoices = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : defaultSelectedChoices;
+        initialValue = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : initialValue;
     } catch (e) {}
 
-    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;

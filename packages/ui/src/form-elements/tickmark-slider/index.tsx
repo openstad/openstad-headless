@@ -52,9 +52,9 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     overrideDefaultValue,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
-    const overriddenValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
 
-    const [value, setValue] = useState<string>(overriddenValue);
+    const [value, setValue] = useState<string>(initialValue);
 
     const maxCharacters = fieldOptions.length > 0 ? fieldOptions.length.toString() : "1";
 

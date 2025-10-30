@@ -60,13 +60,13 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     multiple = false,
     overrideDefaultValue
 }) => {
-    let defaultSelectedChoices = [];
+    let initialValue = [];
 
     try {
-        defaultSelectedChoices = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : [];
+        initialValue = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : [];
     } catch (e) {}
 
-    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
 
     const handleChoiceChange = (choiceValue: string) => {
         if (!multiple) {

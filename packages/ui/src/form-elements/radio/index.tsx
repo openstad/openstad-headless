@@ -52,9 +52,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     fieldInvalid = false,
     overrideDefaultValue,
 }) => {
-    const defaultValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
-
-    const [selectedOption, setSelectedOption] = useState<string>(defaultValue);
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
+    const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
 
     class HtmlContent extends React.Component<{ html: any }> {

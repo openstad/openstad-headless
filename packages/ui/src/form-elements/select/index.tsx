@@ -71,15 +71,15 @@ const SelectField: FC<SelectFieldProps> = ({
         }
     }
 
-    const initialSelected = multiple
+    let initialValue = multiple
       ? defaultValue
       : (Array.isArray(defaultValue) && defaultValue.length > 0 ? defaultValue[0] : '');
 
-    const overriddenSelected = overrideDefaultValue
+    initialValue = overrideDefaultValue
       ? (overrideDefaultValue as string | string[])
-      : initialSelected;
+      : initialValue;
 
-    const [selected, setSelected] = useState<string | string[]>(overriddenSelected);
+    const [selected, setSelected] = useState<string | string[]>(initialValue);
 
     return (
         <FormField type="select">
