@@ -22,7 +22,8 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         introDescription,
         noOfQuestionsToShow,
         afterUrl,
-        choicesType
+        choicesType,
+        showBackButtonInTopOfPage
     } = choiceGuide;
 
     const {
@@ -182,6 +183,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     pageFieldStartPositions={pageFieldStartPositions}
                     pageFieldEndPositions={pageFieldEndPositions}
                     totalPages={totalPages}
+                    showBackButtonInTopOfPage={showBackButtonInTopOfPage || false}
                     {...props}
                   />
                   <NotificationProvider />

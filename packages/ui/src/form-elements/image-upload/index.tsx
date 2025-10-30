@@ -17,6 +17,7 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import {Spacer} from "../../spacer";
 import DataStore from '@openstad-headless/data-store/src';
+import { FormValue } from "@openstad-headless/form/src/form";
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
@@ -55,6 +56,7 @@ const filePondSettings = {
 
 export type ImageUploadProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;

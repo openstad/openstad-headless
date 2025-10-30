@@ -14,6 +14,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type TextInputProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     minCharacters?: number;
     minCharactersWarning?: string;
@@ -65,6 +66,7 @@ const TextInput: FC<TextInputProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue
 }) => {
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
 
@@ -75,13 +77,15 @@ const TextInput: FC<TextInputProps> = ({
         }
     }
 
+    const finalDefaultValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
+
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
-    const [value, setValue] = useState(defaultValue);
+    const [value, setValue] = useState(finalDefaultValue);
 
     useEffect(() => {
         if (reset) {
-            reset(() => setValue(defaultValue));
+            reset(() => setValue(finalDefaultValue));
         }
     }, [reset, defaultValue]);
 

@@ -3,6 +3,7 @@ import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
 export type TextInputProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     minCharacters?: number;
     minCharactersWarning?: string;

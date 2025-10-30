@@ -15,6 +15,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type RadioboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -49,8 +50,11 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue,
 }) => {
-    const [selectedOption, setSelectedOption] = useState<string>("");
+    const defaultValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
+
+    const [selectedOption, setSelectedOption] = useState<string>(defaultValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
 
     class HtmlContent extends React.Component<{ html: any }> {

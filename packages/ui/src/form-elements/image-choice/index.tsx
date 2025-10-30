@@ -12,6 +12,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type ImageChoiceFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices: ChoiceItem[];
     fieldRequired?: boolean;
@@ -57,8 +58,15 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     randomId = '',
     fieldInvalid = false,
     multiple = false,
+    overrideDefaultValue
 }) => {
-    const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
+    let defaultSelectedChoices = [];
+
+    try {
+        defaultSelectedChoices = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : [];
+    } catch (e) {}
+
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
 
     const handleChoiceChange = (choiceValue: string) => {
         if (!multiple) {
@@ -143,6 +151,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                                 required={fieldRequired}
                                                 onChange={() => handleChoiceChange(choice.value)}
                                                 disabled={disabled}
+                                                checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
                                               />
                                                   {(choice.label && !choice.hideLabel) && (
                                                       choice.label

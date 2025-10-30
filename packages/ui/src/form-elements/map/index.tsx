@@ -20,6 +20,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 export type MapProps = BaseProps &
     AreaProps &
     ProjectSettingProps & {
+    overrideDefaultValue?: FormValue;
     title: string;
     description: string;
     fieldKey: string;

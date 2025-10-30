@@ -14,6 +14,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type RangeSliderProps = {
     title: string;
+    overrideDefaultValue?: FormValue | valueObject;
     description?: string;
     labelA: string;
     labelB: string;
@@ -75,15 +76,17 @@ const RangeSlider: FC<RangeSliderProps> = ({
     skipQuestionAllowExplanation = false,
     skipQuestionExplanation = '',
     skipQuestionLabel = 'Sla vraag over',
+    overrideDefaultValue
 }) => {
-    const [rangeValue, setRangeValue] = useState(undefined);
     const [skipSelected, setSkipSelected] = useState(false);
     const [fieldDisabled, setFieldDisabled] = useState(false);
-    const [value, setValue] = useState<valueObject>({
-        value: '50',
-        skipQuestion: false,
-        skipQuestionExplanation: ''
-    });
+
+    const initialValue = overrideDefaultValue && typeof overrideDefaultValue === 'object' && 'value' in overrideDefaultValue
+      ? overrideDefaultValue
+      : { value: '50', skipQuestion: false, skipQuestionExplanation: '' };
+
+    const [value, setValue] = useState<valueObject>(initialValue);
+    const [rangeValue, setRangeValue] = useState<number>(parseInt(initialValue.value) || 50);
 
     class HtmlContent extends React.Component<{ html: any, bold?: boolean }> {
         render() {
@@ -197,6 +200,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     max="100"
                     step="5"
                     className="a-to-b-range"
+                    value={rangeValue}
                     name={fieldKey}
                     required={fieldRequired}
                     id={randomId}

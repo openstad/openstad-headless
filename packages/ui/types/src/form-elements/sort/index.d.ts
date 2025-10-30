@@ -1,5 +1,6 @@
 import { FC } from "react";
 import "./sort.css";
+import { FormValue } from "@openstad-headless/form/src/form";
 type OptionTitle = {
     key: string;
 };
@@ -24,6 +25,7 @@ export type SortFieldProps = {
     }, triggerSetLastKey?: boolean) => void;
     prevPageText?: string;
     nextPageText?: string;
+    overrideDefaultValue?: FormValue;
 };
 declare const SortField: FC<SortFieldProps>;
 export default SortField;

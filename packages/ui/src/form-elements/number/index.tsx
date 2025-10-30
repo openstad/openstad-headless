@@ -12,6 +12,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type NumberInputProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     requiredWarning?: string;
     fieldKey: string;
@@ -45,16 +46,19 @@ const NumberInput: FC<NumberInputProps> = ({
     placeholder = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue,
 }) => {
+  const defaultVal = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
+
   const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultVal);
   const MAX_VALUE = 1_000_000_000_000;
 
   useEffect(() => {
     if (reset) {
-      reset(() => setValue(defaultValue));
+      reset(() => setValue(defaultVal));
     }
-  }, [reset, defaultValue]);
+  }, [reset, defaultVal]);
 
   const formatNumber = (num: string) => {
     return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");

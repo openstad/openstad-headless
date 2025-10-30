@@ -42,6 +42,7 @@ function Form({
     pageFieldStartPositions,
     pageFieldEndPositions,
     totalPages,
+    showBackButtonInTopOfPage = false,
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -191,17 +192,35 @@ function Form({
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     randomId={randomId}
                     fieldInvalid={fieldInvalid}
+                    overrideDefaultValue={field.fieldKey && formValues[field.fieldKey]}
                     {...field}
                 />
             );
         }
     };
 
-
     return (
         <div className="form-widget">
             <div className="form-widget-container">
                 {title && <h5 className="form-widget-title">{title}</h5>}
+
+                { (!!showBackButtonInTopOfPage && currentPage > 0 ) && (
+                  <div className="button-group --flex">
+                      {currentPage > 0 && (
+                        <Button
+                          appearance='secondary-action-button'
+                          type="button"
+                          className="osc-prev-button"
+                          onClick={() => {
+                              setCurrentPage && setCurrentPage(currentPage - 1);
+                              scrollTop();
+                          }}
+                        >
+                            {prevPageText || 'vorige'}
+                        </Button>
+                      )}
+                  </div>
+                )}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}

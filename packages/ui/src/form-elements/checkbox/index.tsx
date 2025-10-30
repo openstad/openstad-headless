@@ -13,6 +13,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type CheckboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -51,8 +52,14 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        maxChoicesMessage = '',
        randomId= '',
        fieldInvalid= false,
+       overrideDefaultValue,
 }) => {
-    const defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
+    let defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
+
+    try {
+        defaultSelectedChoices = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : defaultSelectedChoices;
+    } catch (e) {}
+
     const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
 

@@ -18,9 +18,11 @@ import {
 import { Spacer } from '@openstad-headless/ui/src';
 import { Matrix } from "@openstad-headless/enquete/src/types/enquete-props";
 import './matrix.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type MatrixFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;
@@ -62,8 +64,10 @@ const MatrixField: FC<MatrixFieldProps> = ({
            rows: [],
        },
        matrixMultiple = false,
+       overrideDefaultValue,
 }) => {
-    const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
+    const defaultSelectedChoices = Array.isArray(overrideDefaultValue) ? overrideDefaultValue as string[] : [];
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;
     const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
@@ -198,6 +202,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                                       required={fieldRequired}
                                       onChange={() => handleChoiceChange(cellIndex, rowIndex)}
                                       disabled={disabled}
+                                      checked={selectedChoices.includes(cellIndex)}
                                     />
                                     <span className="cell-text">{column?.text || ''}</span>
                                   </>
