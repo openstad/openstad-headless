@@ -1,5 +1,7 @@
 import { FC } from "react";
+import { FormValue } from "@openstad-headless/form/src/form";
 export type InfoFieldProps = {
+    overrideDefaultValue?: FormValue;
     title?: string;
     description?: string;
     fieldKey?: string;

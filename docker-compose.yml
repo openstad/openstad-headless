@@ -116,6 +116,8 @@ services:
       - ZIPCODE_API_URL=${ZIPCODE_API_URL}
       - RATE_WINDOW_MS=${RATE_WINDOW_MS}
       - RATE_LIMIT=${RATE_LIMIT}
+      - HASH_IP_ADDRESSES=${HASH_IP_ADDRESSES}
+      - HASH_IP_SALT=${HASH_IP_SALT}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -267,6 +269,8 @@ services:
       - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
       - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
+      - NEXT_PUBLIC_HASH_IP_ADDRESSES=${NEXT_PUBLIC_HASH_IP_ADDRESSES}
+      - HASH_IP_SALT=${HASH_IP_SALT}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:

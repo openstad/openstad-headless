@@ -2,6 +2,7 @@ import React, { FC } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
 
 export type HiddenInputProps = {
+    overrideDefaultValue?: FormValue;
     fieldKey: string;
     defaultValue: string;
     type?: string;
