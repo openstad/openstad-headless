@@ -106,7 +106,7 @@ router.route('/')
 		delete data.submittedData.confirmationAdmin;
 		delete data.submittedData.overwriteEmailAddress;
 
-		if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' && process.env.HASH_IP_SALT) {
+		if ( process.env.HASH_IP_ADDRESSES === 'true' && process.env.HASH_IP_SALT) {
 			const ipSalt = process.env.HASH_IP_SALT;
 
 			const hash = crypto.createHash('md5');

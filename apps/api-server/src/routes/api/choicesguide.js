@@ -183,7 +183,7 @@ router.route('/')
 			createdAt: new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Amsterdam' })),
     };
 
-	  if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' && process.env.HASH_IP_SALT) {
+	  if ( process.env.HASH_IP_ADDRESSES === 'true' && process.env.HASH_IP_SALT) {
 		  const ipSalt = process.env.HASH_IP_SALT;
 
 		  const hash = crypto.createHash('md5');
