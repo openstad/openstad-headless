@@ -3,6 +3,7 @@ import {InitializeWeights} from "../../../../../packages/choiceguide/src/parts/i
 import {useEffect, useState} from "react";
 import * as XLSX from "xlsx";
 import { fetchMatrixData } from "./fetch-matrix-data";
+import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
 
 export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string, limit: number) => {
   const fetchResults = async () => {
@@ -237,7 +238,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
           ? `${baseKey} (${keyCount[baseKey]++})`
           : (keyCount[baseKey] = 1, baseKey);
 
-        key = key && key.replace(/<[^>]*>?/gm, '');
+        key = key && stripHtmlTags(key);
 
         rowObj[key] = normalizeData(item.result);
       });
