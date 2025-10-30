@@ -81,7 +81,7 @@ function adjustMenu() {
     closeButton?.setAttribute('aria-expanded', 'false');
     mainMenuContainer?.setAttribute('aria-hidden', 'true');
     navContainer?.classList.remove('--show');
-    closeButton?.innerHTML = '<span>Menu openen</span>';
+    closeButton.innerHTML = '<span>Menu openen</span>';
   }
 
   function trapFocus(buttonContainer, menuContainer) {
@@ -208,7 +208,7 @@ function adjustMenu() {
     mainMenuContainer?.removeAttribute('aria-hidden');
     navContainer?.classList.remove('--show');
     closeButton?.replaceWith(closeButton.cloneNode(true));
-    closeButtonSpan?.innerHTML = '<span>Menu openen</span>';
+    closeButtonSpan.innerHTML = '<span>Menu openen</span>';
   }
 
   document.addEventListener('keydown', (event) => {
