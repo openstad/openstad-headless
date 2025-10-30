@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { fetchMatrixData } from "./fetch-matrix-data";
+import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
 
 export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWidget: any) => {
   function transformString() {
@@ -128,7 +129,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
         ? `${baseKey} (${keyCount[baseKey]++})`
         : (keyCount[baseKey] = 1, baseKey);
 
-      keyHeader = keyHeader && keyHeader.replace(/<[^>]*>?/gm, '');
+      keyHeader = keyHeader && stripHtmlTags(keyHeader);
 
       rowData[keyHeader] = normalizeData(rawValue);
     });

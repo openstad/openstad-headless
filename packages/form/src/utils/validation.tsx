@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {CombinedFieldPropsWithType} from "../props";
+import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
 
 export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     const fileSchema = z.object({
@@ -8,7 +9,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     });
 
     const fieldTitle = 'title' in field && field.title
-      ? ` '${field.title.replace(/<[^>]*>?/gm, '')}' `
+      ? ` '${stripHtmlTags(field.title)}' `
       : ' ';
 
     switch (field.type) {
