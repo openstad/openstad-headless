@@ -203,12 +203,22 @@ function adjustMenu() {
       }
     });
   } else {
-    closeButton.removeAttribute('aria-controls');
-    closeButton.removeAttribute('aria-expanded');
-    mainMenuContainer.removeAttribute('aria-hidden');
-    navContainer.classList.remove('--show');
-    closeButton.replaceWith(closeButton.cloneNode(true));
-    closeButtonSpan.innerHTML = '<span>Menu openen</span>';
+    if (closeButton) {
+      closeButton.removeAttribute('aria-controls');
+      closeButton.removeAttribute('aria-expanded');
+    }
+    if (mainMenuContainer) {
+      mainMenuContainer.removeAttribute('aria-hidden');
+    }
+    if (navContainer) {
+      navContainer.classList.remove('--show');
+    }
+    if (closeButton) {
+      closeButton.replaceWith(closeButton.cloneNode(true));
+    }
+    if (closeButtonSpan) {
+      closeButtonSpan.innerHTML = '<span>Menu openen</span>';
+    }
   }
 
   document.addEventListener('keydown', (event) => {

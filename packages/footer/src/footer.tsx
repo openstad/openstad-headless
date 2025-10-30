@@ -11,7 +11,11 @@ interface Item {
   alt?: string;
 };
 
-function Footer({ content, logo, alt }: Item) {
+function Footer({
+  content,
+  logo = null,
+  alt = ''
+}: Item) {
   const hasValidLogo = logo && JSON.parse(logo)?._urls?.original;
 
   return (
