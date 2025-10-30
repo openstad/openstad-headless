@@ -20,7 +20,7 @@ import SortField from "@openstad-headless/ui/src/form-elements/sort";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | string[] | Record<number, never> | [] | number | boolean;
+export type FormValue = string | string[] | Record<number, never> | [] | number | boolean | { name: string; url: string }[];
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";

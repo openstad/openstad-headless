@@ -101,8 +101,6 @@ export default function ChoicesSelectorForm(
     form.reset(defaults());
   }, [form, defaults]);
 
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-
   const watchChoicesType = form.watch('choicesType');
 
   return (
