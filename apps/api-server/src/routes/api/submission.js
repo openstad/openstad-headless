@@ -5,6 +5,7 @@ const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 const createError = require("http-errors");
+const crypto = require('crypto');
 
 let router = express.Router({mergeParams: true});
 
@@ -104,6 +105,17 @@ router.route('/')
 		delete data.submittedData.userEmailAddress;
 		delete data.submittedData.confirmationAdmin;
 		delete data.submittedData.overwriteEmailAddress;
+
+		if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' && process.env.HASH_IP_SALT) {
+			const ipSalt = process.env.HASH_IP_SALT;
+
+			const hash = crypto.createHash('md5');
+
+			hash.update(req.ip + ipSalt);
+			const hashedIp = hash.digest('hex');
+
+			data.submittedData.ipAddress = hashedIp;
+		}
 
 		db.Submission
 			.authorizeData(data, 'create', req.user)

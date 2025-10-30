@@ -148,6 +148,11 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
           rowMap.set(index, {'result': scores[key], 'value': `Score: ${key}` });
         });
 
+        if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' && row?.result?.ipAddress ) {
+          const index = rowMap.size;
+          rowMap.set(index, {'result': row?.result?.ipAddress, 'value': 'Gebruikers IP-adres (gehasht)' });
+        }
+
         return {
           ...row,
           result: Object.fromEntries(rowMap)
@@ -220,6 +225,10 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         'Gebruikers woonplaats': row.user?.city || ' ',
         'Gebruikers postcode': row.user?.postcode || ' ',
       };
+
+      if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' ) {
+        rowObj['Gebruikers IP-adres (gehasht)'] = row?.result?.ipAddress || ' ';
+      }
 
       const keyCount: Record<string, number> = {};
       Object.values(row.result || {}).forEach((item: any) => {

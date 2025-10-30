@@ -279,3 +279,11 @@ Create the name of the service account to use
 {{ .Values.secrets.existingSecret }}
 {{- end -}}
 {{- end -}}
+
+{{- define "openstad.ipaddress.secret.fullname" -}}
+{{- if not .Values.secrets.existingSecret -}}
+{{- printf "%s-ipaddress-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.existingSecret }}
+{{- end -}}
+{{- end -}}

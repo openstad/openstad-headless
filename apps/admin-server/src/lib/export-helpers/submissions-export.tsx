@@ -111,6 +111,10 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       'Gebruikers postcode': row.user?.postcode || ' ',
     };
 
+    if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' ) {
+      rowData['Gebruikers IP-adres (gehasht)'] = row?.submittedData?.ipAddress || ' ';
+    }
+
     const keyCount: Record<string, number> = {};
     Array.from(fieldKeyToTitleMap.entries()).forEach(([key, title]) => {
       let rawValue = row.submittedData?.[key];
