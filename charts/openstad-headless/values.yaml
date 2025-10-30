@@ -630,7 +630,6 @@ secrets:
       adminEmailFrom:
       requireSsl:
 
-  ipaddress:
-    existingSecret:
+  ipAddress:
     hashIpAddresses: "false"
     hashIpSalt:

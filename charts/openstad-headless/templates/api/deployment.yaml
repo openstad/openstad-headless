@@ -97,7 +97,7 @@ spec:
                 key: msTenantId
                 name: {{ template "openstad.email.secret.fullname" . }}
 
-          - name: NEXT_PUBLIC_HASH_IP_ADDRESSES
+          - name: HASH_IP_ADDRESSES
             valueFrom:
               secretKeyRef:
                 key: hashIpAddresses
@@ -367,7 +367,7 @@ spec:
                   key: msTenantId
                   name: {{ template "openstad.email.secret.fullname" . }}
 
-            - name: NEXT_PUBLIC_HASH_IP_ADDRESSES
+            - name: HASH_IP_ADDRESSES
               valueFrom:
                 secretKeyRef:
                   key: hashIpAddresses
