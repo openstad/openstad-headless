@@ -129,12 +129,12 @@ function ChoiceGuide(props: ChoiceGuideProps) {
 
     const paginationFieldPositions: number[] = [];
     for (let i = 0; i < totalPages - 1; i++) {
-        const endIndex = (i + 1) * questionsPerPage - 1;
+        const endIndex = (i + 1) * questionsPerPage;
         paginationFieldPositions.push(endIndex);
     }
 
     // Add start and end indices for slicing
-    const pageFieldStartPositions = [0, ...paginationFieldPositions.map(idx => idx + 1)];
+    const pageFieldStartPositions = [0, ...paginationFieldPositions];
     const pageFieldEndPositions = [...paginationFieldPositions, formFields.length];
 
     return (

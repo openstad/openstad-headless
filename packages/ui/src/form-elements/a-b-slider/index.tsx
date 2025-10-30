@@ -78,12 +78,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
     skipQuestionLabel = 'Sla vraag over',
     overrideDefaultValue
 }) => {
-    const [skipSelected, setSkipSelected] = useState(false);
-    const [fieldDisabled, setFieldDisabled] = useState(false);
-
     const initialValue = overrideDefaultValue && typeof overrideDefaultValue === 'object' && 'value' in overrideDefaultValue
       ? overrideDefaultValue
       : { value: '50', skipQuestion: false, skipQuestionExplanation: '' };
+
+    const [skipSelected, setSkipSelected] = useState(initialValue.skipQuestion || false);
+    const [fieldDisabled, setFieldDisabled] = useState(initialValue.skipQuestion || false);
 
     const [value, setValue] = useState<valueObject>(initialValue);
     const [rangeValue, setRangeValue] = useState<number>(parseInt(initialValue.value) || 50);
@@ -265,6 +265,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                                 disabled={disabled}
                                 variant="textarea"
                                 rows={4}
+                                overrideDefaultValue={value.skipQuestionExplanation || ''}
                             />
                         </div>
                     )}

@@ -172,6 +172,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                         onChange={() => handleRadioChange(choice.value, index)}
                                         disabled={disabled}
                                         value={choice && choice.value}
+                                        checked={selectedOption === choice.value}
                                     />
                                     <span>{choice && choice.label}</span>
                                 </FormLabel>
