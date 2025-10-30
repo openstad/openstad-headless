@@ -6,6 +6,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const pagination = require("../../middleware/pagination");
 const searchInResults = require("../../middleware/search-in-results");
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const crypto = require("crypto");
 
 const router = express.Router({ mergeParams: true });
 
@@ -181,6 +182,17 @@ router.route('/')
 			projectId: req.params.projectId,
 			createdAt: new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Amsterdam' })),
     };
+
+	  if ( process.env.HASH_IP_ADDRESSES === 'true' && process.env.HASH_IP_SALT) {
+		  const ipSalt = process.env.HASH_IP_SALT;
+
+		  const hash = crypto.createHash('md5');
+
+		  hash.update(req.ip + ipSalt);
+		  const hashedIp = hash.digest('hex');
+
+		  data.result.ipAddress = hashedIp;
+	  }
 
 		db.ChoicesGuideResult
 		.authorizeData(data, 'create', req.user, null, req.project)

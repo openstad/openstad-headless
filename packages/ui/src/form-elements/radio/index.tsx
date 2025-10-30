@@ -15,6 +15,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type RadioboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -49,8 +50,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue,
 }) => {
-    const [selectedOption, setSelectedOption] = useState<string>("");
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
+    const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
 
     class HtmlContent extends React.Component<{ html: any }> {
@@ -122,9 +125,9 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                 aria-invalid={fieldInvalid}
                 aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend>
-                    {title}
-                </FieldsetLegend>
+                {title && (
+                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                )}
 
                 {description &&
                     <>
@@ -169,6 +172,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                         onChange={() => handleRadioChange(choice.value, index)}
                                         disabled={disabled}
                                         value={choice && choice.value}
+                                        checked={selectedOption === choice.value}
                                     />
                                     <span>{choice && choice.label}</span>
                                 </FormLabel>

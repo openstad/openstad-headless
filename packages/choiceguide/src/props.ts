@@ -28,6 +28,7 @@ export type ChoiceGuide = {
     maxCharactersError?: string;
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
+    showBackButtonInTopOfPage?: boolean;
 };
 
 type ExtraProjectSettings = {
@@ -121,6 +122,7 @@ export type Item = {
     routingSelectedQuestion?: string;
     routingSelectedAnswer?: string;
     imageOptionUpload?: string;
+    placeholder?: string;
 };
 
 export type Option = {

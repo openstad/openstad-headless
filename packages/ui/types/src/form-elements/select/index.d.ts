@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
 export type SelectFieldProps = {
+    overrideDefaultValue?: FormValue;
     title?: string;
     description?: string;
     choices?: string[] | [{
