@@ -23,11 +23,14 @@ import { Separator } from '@/components/ui/separator';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
 import {Textarea} from "@/components/ui/textarea";
-import { ChoiceGuide } from '@openstad-headless/choiceguide/src/props';
+import {ChoiceGuide, ChoiceGuideProps} from '@openstad-headless/choiceguide/src/props';
+import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
+import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   noOfQuestionsToShow: z.string().optional(),
   showPageCountAndCurrentPageInButton: z.boolean(),
+  showBackButtonInTopOfPage: z.boolean().optional(),
   choicesType: z.enum(['default', 'minus-to-plus-100', 'plane', 'hidden']),
   imageAspectRatio: z.enum(['16x9', '1x1']),
   choicesPreferenceMinColor: z.string().optional(),
@@ -45,7 +48,9 @@ const formSchema = z.object({
   maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
 });
 
-export default function ChoicesSelectorForm(props: ChoiceGuide) {
+export default function ChoicesSelectorForm(
+  props: ChoiceGuideProps & EditFieldProps<ChoiceGuideProps>
+)  {
   const category = 'choiceGuide';
 
   const {
@@ -58,6 +63,7 @@ export default function ChoicesSelectorForm(props: ChoiceGuide) {
     () => ({
       noOfQuestionsToShow: widget?.config?.[category]?.noOfQuestionsToShow || "100",
       showPageCountAndCurrentPageInButton: undefinedToTrueOrProp(widget?.config?.[category]?.showPageCountAndCurrentPageInButton),
+      showBackButtonInTopOfPage: widget?.config?.[category]?.showBackButtonInTopOfPage || false,
       choicesType: widget?.config?.[category]?.choicesType || 'default',
       imageAspectRatio: widget?.config?.[category]?.imageAspectRatio || '16x9',
       choicesPreferenceMinColor: widget?.config?.[category]?.choicesPreferenceMinColor || '#ff9100',
@@ -94,6 +100,8 @@ export default function ChoicesSelectorForm(props: ChoiceGuide) {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const watchChoicesType = form.watch('choicesType');
 
@@ -366,6 +374,19 @@ export default function ChoicesSelectorForm(props: ChoiceGuide) {
                   {...field}
                 />
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showBackButtonInTopOfPage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de &apos;Vorige&apos; knop bovenaan de pagina?
+                </FormLabel>
+                {YesNoSelect(field, props)}
               </FormItem>
             )}
           />
