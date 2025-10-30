@@ -8,8 +8,8 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     });
 
     const fieldTitle = 'title' in field && field.title
-      ? ` '${field.title.replace(/<[^>]*>?/gm, '')}'`
-      : '';
+      ? ` '${field.title.replace(/<[^>]*>?/gm, '')}' `
+      : ' ';
 
     switch (field.type) {
         case 'text':
@@ -18,7 +18,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
             if (field.fieldRequired && min == 0) {
                 min = 1;
-                minWarning = field.requiredWarning || `Het veld${fieldTitle} is verplicht`;
+                minWarning = field.requiredWarning || "Het veld" + fieldTitle + "is verplicht";
             } else {
                 minWarning = minWarning.replace('{minCharacters}', min.toString());
             }
@@ -35,14 +35,14 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
         case 'checkbox':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
-                return z.string().min(3, field.requiredWarning || `Het veld${fieldTitle} is verplicht`);
+                return z.string().min(3, field.requiredWarning || "Het veld" + fieldTitle + "is verplicht");
             } else {
                 return undefined;
             }
         case 'documentUpload':
         case 'imageUpload':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
-                return z.array(fileSchema).min(1, field.requiredWarning || `Het veld${fieldTitle} is verplicht`);
+                return z.array(fileSchema).min(1, field.requiredWarning || "Het veld" + fieldTitle + "is verplicht");
             } else {
                 return undefined;
             }
@@ -53,7 +53,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             });
 
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
-                return mapSchema.refine((value) => Object.keys(value).length > 0, { message: (field.requiredWarning || `Het veld${fieldTitle} is verplicht`) });
+                return mapSchema.refine((value) => Object.keys(value).length > 0, { message: (field.requiredWarning || "Het veld" + fieldTitle + "is verplicht") });
             }
 
             return mapSchema.optional();
@@ -63,7 +63,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         case 'tickmark-slider':
         case 'imageChoice':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
-                const warning : string = ('customWarning' in field) ? field.customWarning as string : `Het veld${fieldTitle} is verplicht`;
+                const warning : string = ('customWarning' in field) ? field.customWarning as string : "Het veld" + fieldTitle + "is verplicht";
                 return z.string().nonempty(warning);
             } else {
                 return undefined;
@@ -73,7 +73,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
         case 'matrix':
             if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
-                const warning: string = ('customWarning' in field) ? field.customWarning as string : `Het veld${fieldTitle} is verplicht`;
+                const warning: string = ('customWarning' in field) ? field.customWarning as string : "Het veld" + fieldTitle + "is verplicht";
                 const triggers = field?.matrix?.rows?.map(row => row?.trigger).filter(Boolean) || [];
                 const uniqueTriggers = Array.from(new Set(triggers));
 
