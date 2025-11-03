@@ -98,7 +98,7 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace, tlsSecret
 
 const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tlsExtraDomains, useClusterIssuer) => {
   
-  const prodIssuerName = useClusterIssuer ? (process.env.KUBERNETES_INGRESS_PROD_ISSUER_NAME || 'openstad-letsencrypt-prod') : null;
+  const prodIssuerName = useClusterIssuer ? (process.env.KUBERNETES_INGRESS_ISSUER_NAME || 'openstad-letsencrypt-prod') : null;
   
   const defaultAnnotations = process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS ? JSON.parse(process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS) :
     {

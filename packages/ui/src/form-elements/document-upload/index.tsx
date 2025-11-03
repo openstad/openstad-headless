@@ -20,6 +20,7 @@ import DataStore from '@openstad-headless/data-store/src';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 const filePondSettings = {
     labelIdle: "Sleep document(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
@@ -57,6 +58,7 @@ const filePondSettings = {
 
 export type DocumentUploadProps = {
     title: string;
+    overrideDefaultValue?: FormValue | { name: string; url: string }[];
     description?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;
@@ -188,9 +190,13 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
     return (
         <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomId}>{title}</FormLabel>
-            </Paragraph>
+
+            {title && (
+                <Paragraph className="utrecht-form-field__label">
+                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                </Paragraph>
+            )}
+
             {description &&
               <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
             }

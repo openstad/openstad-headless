@@ -2,8 +2,10 @@ import { FC } from "react";
 import 'filepond/dist/filepond.min.css';
 import './image-upload.css';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 export type ImageUploadProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;

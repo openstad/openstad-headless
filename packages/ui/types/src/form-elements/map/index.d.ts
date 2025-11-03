@@ -6,6 +6,7 @@ import { ProjectSettingProps } from "@openstad-headless/types/project-setting-pr
 import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
 import { FormValue } from "@openstad-headless/form/src/form";
 export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
+    overrideDefaultValue?: FormValue;
     title: string;
     description: string;
     fieldKey: string;

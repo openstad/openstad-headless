@@ -37,6 +37,7 @@ const keyMap: Record<string, string> = {
   images: 'Afbeeldingen',
   tags: 'Tags',
   documents: 'Documenten',
+  extraData: 'Extra gegevens',
   'user.id': 'Gebruiker ID',
   'user.role': 'Gebruiker rol',
   'user.name': 'Gebruiker naam',

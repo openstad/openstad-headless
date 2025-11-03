@@ -14,6 +14,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type ImageChoiceFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices: ChoiceItem[];
     fieldRequired?: boolean;
@@ -61,9 +62,16 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     randomId = '',
     fieldInvalid = false,
     multiple = false,
+    overrideDefaultValue
     infoField,
 }) => {
-    const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
+    let initialValue = [];
+
+    try {
+        initialValue = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : [];
+    } catch (e) {}
+
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [isInfoVisible, setIsInfoVisible] = useState(false);
 
     const handleChoiceChange = (choiceValue: string) => {
@@ -102,8 +110,9 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }}>
-                </FieldsetLegend>
+                {title && (
+                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                )}
 
                 {description &&
                     <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
@@ -150,6 +159,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                                     required={fieldRequired}
                                                     onChange={() => { handleChoiceChange(choice.value), setCheckInvalid(false) }}
                                                     disabled={disabled}
+                                                checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
                                                 />
                                                 {(choice.label && !choice.hideLabel && !choice.description) && (
                                                     choice.label

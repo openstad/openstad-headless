@@ -48,6 +48,7 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 routingSelectedQuestion: item?.routingSelectedQuestion || '',
                 routingSelectedAnswer: item?.routingSelectedAnswer || '',
                 trigger: item.trigger || '',
+                placeholder: item.placeholder || '',
             };
 
             switch (item.type) {

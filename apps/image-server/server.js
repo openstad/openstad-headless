@@ -43,9 +43,6 @@ if (s3.isEnabled()) {
       destination: function (req, file, cb) {
         cb(null, 'images/');
       },
-      key: function (req, file, cb) {
-        cb(null, 'images/' + createFilename(file.originalname));
-      },
     });
   } catch (error) {
     throw new Error(`S3 Multer storage error: ${error.message}`);

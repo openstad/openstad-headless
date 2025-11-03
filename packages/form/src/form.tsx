@@ -22,7 +22,7 @@ import SortField from "@openstad-headless/ui/src/form-elements/sort";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | string[] | Record<number, never> | Record<string, any> | [] | number | boolean;
+export type FormValue = string | string[] | Record<number, never> | Record<string, any> | [] | number | boolean | { name: string; url: string }[];
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -44,6 +44,7 @@ function Form({
     pageFieldStartPositions,
     pageFieldEndPositions,
     totalPages,
+    showBackButtonInTopOfPage = false,
     totalFieldCount = 0,
     formStyle = 'default',
     ...props
@@ -199,6 +200,7 @@ function Form({
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     randomId={randomId}
                     fieldInvalid={fieldInvalid}
+                    overrideDefaultValue={field.fieldKey && formValues[field.fieldKey]}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     {...field}
@@ -211,6 +213,24 @@ function Form({
         <div className="form-widget">
             <div className="form-widget-container">
                 {title && <h5 className="form-widget-title">{title}</h5>}
+
+                { (!!showBackButtonInTopOfPage && currentPage > 0 ) && (
+                  <div className="button-group --flex">
+                      {currentPage > 0 && (
+                        <Button
+                          appearance='secondary-action-button'
+                          type="button"
+                          className="osc-prev-button"
+                          onClick={() => {
+                              setCurrentPage && setCurrentPage(currentPage - 1);
+                              scrollTop();
+                          }}
+                        >
+                            {prevPageText || 'vorige'}
+                        </Button>
+                      )}
+                  </div>
+                )}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
                     {formStyle === 'youth' && totalFieldCount > 0 && (

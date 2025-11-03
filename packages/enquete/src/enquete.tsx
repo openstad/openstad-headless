@@ -405,17 +405,7 @@ function Enquete(props: EnqueteWidgetProps) {
     }
     const totalFieldCount = props.items?.filter(item => item.questionType !== 'pagination').length || 0;
 
-    const defaultAnswers = formFields.reduce((acc, item) => {
-        if (typeof item.fieldKey !== 'undefined') {
-            acc[item.fieldKey] = typeof item.defaultValue !== 'undefined' ? item.defaultValue : '';
-        }
-        return acc;
-    }, {} as { [key: string]: FormValue });
-
-    const [answers, setAnswers] = useState<{ [key: string]: FormValue }>(defaultAnswers);
-    const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
     const [currentPage, setCurrentPage] = useState<number>(0);
-    const [currentAnswers, setCurrentAnswers] = useState<{ [key: string]: string }>({});
 
     const totalPages = formFields.filter(field => field.type === 'pagination').length + 1 || 1;
     // Find indices of all pagination fields
@@ -426,11 +416,6 @@ function Enquete(props: EnqueteWidgetProps) {
     // Add start and end indices for slicing
     const pageFieldStartPositions = [0, ...paginationFieldPositions.map(idx => idx + 1)];
     const pageFieldEndPositions = [...paginationFieldPositions, formFields.length];
-
-    useEffect(() => {
-        const updatedAnswers = { ...answers, ...currentAnswers };
-        setAnswers(updatedAnswers);
-    }, [currentAnswers]);
 
     const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageText || 'Vorige';
     const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageText || 'Volgende';

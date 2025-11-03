@@ -7,6 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-react";
 
 import "./sort.css";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 type OptionTitle = {
     key: string;
@@ -28,6 +29,7 @@ export type SortFieldProps = {
     onChange?: (e: { name: string; value: any }, triggerSetLastKey?: boolean) => void;
     prevPageText?: string;
     nextPageText?: string;
+    overrideDefaultValue?: FormValue;
 };
 
 type SortableItemProps = {
@@ -56,8 +58,17 @@ const SortField: FC<SortFieldProps> = ({
     description,
     onChange,
     onSort,
-    fieldKey
+    fieldKey,
+    overrideDefaultValue
 }) => {
+    try {
+        const defaultOrder = overrideDefaultValue ?
+          (JSON.parse(overrideDefaultValue as string) as string[]) :
+          options.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key);
+
+        options = defaultOrder.map(key => options.find(opt => opt.titles?.[0]?.key === key)).filter(opt => opt) as Option[];
+    } catch(e) {}
+
     const [items, setItems] = useState(options);
 
     const handleDragEnd = (event: any) => {
@@ -84,7 +95,7 @@ const SortField: FC<SortFieldProps> = ({
             <div className="sortable-intro">
                 {title && (
                     <Paragraph className="utrecht-form-field__label">
-                        <strong>{title}</strong>
+                        <strong dangerouslySetInnerHTML={{ __html: title }} />
                     </Paragraph>
                 )}
                 {description &&
