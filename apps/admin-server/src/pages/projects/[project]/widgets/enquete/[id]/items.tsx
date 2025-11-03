@@ -96,6 +96,7 @@ const formSchema = z.object({
   infoBlockStyle: z.string().optional(),
   infoBlockShareButton: z.boolean().optional(),
   infoBlockExtraButton: z.string().optional(),
+  infoBlockExtraButtonTitle: z.string().optional(),
   infoField: z.string().optional(),
   infofieldExplanation: z.boolean().optional(),
 
@@ -316,6 +317,7 @@ export default function WidgetEnqueteItems(
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
     infoBlockExtraButton: '',
+    infoBlockExtraButtonTitle: '',
     fieldRequired: false,
     maxChoices: '',
     maxChoicesMessage: '',
@@ -376,6 +378,7 @@ export default function WidgetEnqueteItems(
         infoBlockStyle: selectedItem.infoBlockStyle || 'default',
         infoBlockShareButton: selectedItem.infoBlockShareButton || false,
         infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
+        infoBlockExtraButtonTitle: selectedItem.infoBlockExtraButtonTitle || '',
         fieldRequired: selectedItem.fieldRequired || false,
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
@@ -1324,46 +1327,48 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                        {props.formStyle === 'youth' && (
 
-                        <FormField
-                          control={form.control}
-                          name="infoBlockStyle"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Informatie blok stijl</FormLabel>
-                              <Select
-                                value={field.value}
-                                onValueChange={field.onChange}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
+                          <FormField
+                            control={form.control}
+                            name="infoBlockStyle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Informatie blok stijl</FormLabel>
+                                <Select
+                                  value={field.value}
+                                  onValueChange={field.onChange}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kies type" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
 
-                                  <SelectItem value="default">
-                                    Standaard uiterlijk
-                                  </SelectItem>
-                                  <SelectGroup>
-                                    <SelectLabel>Jongeren widgets</SelectLabel>
-                                    <SelectItem value="youth-intro">
-                                      - Introductie
+                                    <SelectItem value="default">
+                                      Standaard uiterlijk
                                     </SelectItem>
-                                    <SelectItem value="youth-page">
-                                      - Tussenpagina
-                                    </SelectItem>
-                                    <SelectItem value="youth-outro">
-                                      - Afsluiting
-                                    </SelectItem>
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                    <SelectGroup>
+                                      <SelectLabel>Jongeren widgets</SelectLabel>
+                                      <SelectItem value="youth-intro">
+                                        - Introductie
+                                      </SelectItem>
+                                      <SelectItem value="youth-page">
+                                        - Tussenpagina
+                                      </SelectItem>
+                                      <SelectItem value="youth-outro">
+                                        - Afsluiting
+                                      </SelectItem>
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
 
-                        {form.watch('infoBlockStyle') === 'youth-outro' && (
+                            )}
+                          />
+                        )}
+                        {(form.watch('infoBlockStyle') === 'youth-outro' && props.formStyle === 'youth') && (
                           <div className="border border-secondary p-6 rounded-md bg-secondary/60">
                             <FormField
                               control={form.control}
@@ -1383,18 +1388,30 @@ export default function WidgetEnqueteItems(
                             <br />
                             <hr />
                             <br />
-
-                            <FormField
-                              control={form.control}
-                              name="infoBlockExtraButton"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Extra knop (Blijf op de hoogte)</FormLabel>
-                                  <Input {...field} />
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                            <div className="flex gap-4">
+                              <FormField
+                                control={form.control}
+                                name="infoBlockExtraButtonTitle"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Titel</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="infoBlockExtraButton"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Link</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
                           </div>
                         )}
 
