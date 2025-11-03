@@ -4,7 +4,7 @@ import { Spacer } from "../../spacer";
 import { FormValue } from "@openstad-headless/form/src/form";
 
 export type InfoFieldProps = {
-    overrideDefaultValue?: FormValue;
+  overrideDefaultValue?: FormValue;
   title?: string;
   description?: string;
   fieldKey?: string;
@@ -15,6 +15,7 @@ export type InfoFieldProps = {
   infoBlockStyle?: string;
   infoBlockShareButton?: boolean;
   infoBlockExtraButton?: string;
+  infoBlockExtraButtonTitle?: string;
   showMoreInfo?: boolean;
   moreInfoButton?: string;
   moreInfoContent?: string;
@@ -45,26 +46,26 @@ const InfoField: FC<InfoFieldProps> = ({
 
   return (
     <div className="info-field-container">
-        {title && <Paragraph className="info-field-title"><Strong dangerouslySetInnerHTML={{ __html: title }}></Strong></Paragraph>}
-        {description &&
-          <Paragraph className="info-field-description" dangerouslySetInnerHTML={{ __html: description }} />
-        }
+      {title && <Paragraph className="info-field-title"><Strong dangerouslySetInnerHTML={{ __html: title }}></Strong></Paragraph>}
+      {description &&
+        <Paragraph className="info-field-description" dangerouslySetInnerHTML={{ __html: description }} />
+      }
 
-        {showMoreInfo && (
-          <>
-            <AccordionProvider
-              sections={[
-                {
-                  headingLevel: 3,
-                  body: <HtmlContent html={moreInfoContent} />,
-                  expanded: undefined,
-                  label: moreInfoButton,
-                }
-              ]}
-            />
-            <Spacer size={1.5} />
-          </>
-        )}
+      {showMoreInfo && (
+        <>
+          <AccordionProvider
+            sections={[
+              {
+                headingLevel: 3,
+                body: <HtmlContent html={moreInfoContent} />,
+                expanded: undefined,
+                label: moreInfoButton,
+              }
+            ]}
+          />
+          <Spacer size={1.5} />
+        </>
+      )}
 
       {infoImage && (
         <figure className="info-image-container">

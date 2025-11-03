@@ -838,6 +838,8 @@ label.utrecht-form-label {
 
     .question-type-swipe {
       padding-bottom: 32px;
+      height: 100%;
+      display: flex;
 
       // &:not(:has(.swipe-finished)):has([data-required="true"]) {
       &:not(:has(.swipe-finished)) {
@@ -867,6 +869,9 @@ label.utrecht-form-label {
     }
 
     .question-type-dilemma {
+      height: 100%;
+      display: flex;
+
       .dilemma-field>.utrecht-button--primary-action {
         @include utrecht-button-appearance;
         position: fixed;
@@ -1024,7 +1029,6 @@ label.utrecht-form-label {
   }
 
   &.--fullscreen {
-    container-type: inline-size;
     position: fixed;
     inset: 0;
     background: #f7f7f7;
@@ -1034,6 +1038,10 @@ label.utrecht-form-label {
 
     .form-container {
       border: none;
+    }
+
+    .form-widget-container {
+      container-type: size;
     }
 
     .form-widget,
@@ -1089,6 +1097,14 @@ label.utrecht-form-label {
 
       .question {
         justify-content: start;
+
+        @container (min-height: 900px) and (min-width: 768px) {
+            justify-content: center;
+
+            &:has(.swipe-finished) {
+              justify-content: start;
+            }
+        }
 
         .question {
           height: unset;

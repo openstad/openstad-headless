@@ -81,7 +81,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <div className="explanation-dialog-content">
             <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
             <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
-            <textarea placeholder='Toelichting...' rows={5} />
+            <textarea autoFocus placeholder='Toelichting...' rows={5} />
             <Button appearance="primary-action-button" onClick={() => {
               setShowExplanationDialog(false);
               setCurrentPage(currentPage + 1)

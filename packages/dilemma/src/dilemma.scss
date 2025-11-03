@@ -12,7 +12,7 @@
     --dilemmaImageBorderRadius: var(--set-dilemma-image-border-radius, 12px);
     --dilemmaIntroHighLight: var(--set-dilemma-intro-highlight, var(--utrecht-button-primary-action-background-color, #11B886));
 
-    height: 100%;
+    height: auto;
     align-content: center;
 
     .dilemma-intro {

@@ -43,6 +43,7 @@ export type Item = {
   infoBlockStyle?: string;
   infoBlockShareButton?: boolean;
   infoBlockExtraButton?: string;
+  infoBlockExtraButtonTitle?: string;
   fieldRequired?: boolean;
   maxChoices?: string,
   maxChoicesMessage?: string,

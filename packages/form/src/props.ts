@@ -68,7 +68,9 @@ type CombinedFieldPropsWithType =
 
 type ComponentFieldProps = (
     {
-        index?: number,
+        index?: number;
+        infoBlockExtraButtonTitle?: string;
+        infoBlockExtraButton?: string;
     }
     & CombinedFieldProps
 )
@@ -89,7 +91,12 @@ type CombinedFieldProps = (
     MatrixFieldProps |
     InfoFieldProps |
     SortFieldProps
-    & {infoBlockStyle?: string;}
+    & {
+        infoBlockStyle?: string;
+        infoBlockExtraButtonTitle?: string;
+        infoBlockExtraButton?: string;
+
+    }
 );
 
 // These fields have no use outside the form component itself, so we make them optional here to avoid having to define them in every form field
