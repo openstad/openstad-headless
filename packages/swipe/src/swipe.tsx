@@ -1,5 +1,5 @@
 import './swipe.scss';
-import React, { useState, useEffect, useMemo, FC, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, FC, useCallback, useRef } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
 import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
 import { FormValue } from '@openstad-headless/form/src/form';
@@ -84,8 +84,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   
-  // Drag state
-  const [dragState, setDragState] = useState({
+  // Drag state using ref for better performance
+  const dragStateRef = useRef({
     isDragging: false,
     startX: 0,
     startY: 0,
@@ -94,6 +94,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaX: 0,
     deltaY: 0,
   });
+
+  const [dragTransform, setDragTransform] = useState<string>('');
+  const animationFrameRef = useRef<number | null>(null);
 
   // UI state
   const [isInfoVisible, setIsInfoVisible] = useState(false);
@@ -150,6 +153,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsFinished(false);
   }, [swipeCards]);
 
+  // Cleanup animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
   // Keyboard handling
   useEffect(() => {
     if (!enableKeyboard) return;
@@ -166,7 +178,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [enableKeyboard, getUnansweredCards, isAnimating]);
 
-  const handleSwipeLeft = () => {
+  const handleSwipeLeft = useCallback(() => {
     const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
@@ -183,9 +195,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         completeSwipe(currentCard, 'left');
       }
     }
-  };
+  }, [getUnansweredCards, isAnimating, onSwipeLeft, completeSwipe]);
 
-  const handleSwipeRight = () => {
+  const handleSwipeRight = useCallback(() => {
     const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
@@ -202,7 +214,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         completeSwipe(currentCard, 'right');
       }
     }
-  };
+  }, [getUnansweredCards, isAnimating, onSwipeRight, completeSwipe]);
 
   const removeCurrentCard = () => {
     setIsInfoVisible(false);
@@ -226,7 +238,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   // Function to clean up drag state and release pointer capture
   const cleanupDragState = useCallback((element: Element | null, pointerId?: number) => {
-    setDragState({
+    dragStateRef.current = {
       isDragging: false,
       startX: 0,
       startY: 0,
@@ -234,7 +246,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       currentY: 0,
       deltaX: 0,
       deltaY: 0,
-    });
+    };
+
+    // Cancel any pending animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    setDragTransform('');
+    setSwipeDirection(null);
 
     // Force release pointer capture if element and pointerId are available
     if (element && pointerId !== undefined) {
@@ -246,14 +267,34 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }
   }, []);
 
+  // Optimized function to update transform with requestAnimationFrame
+  const updateDragTransform = useCallback((deltaX: number, deltaY: number) => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
+    animationFrameRef.current = requestAnimationFrame(() => {
+      const rotation = deltaX * 0.1;
+      const transform = `translate(${deltaX}px, ${deltaY * 0.5}px) rotate(${rotation}deg)`;
+      setDragTransform(transform);
+      
+      // Set swipe direction for visual feedback
+      if (Math.abs(deltaX) > 50) {
+        setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+      } else {
+        setSwipeDirection(null);
+      }
+    });
+  }, []);
+
   // Touch/Mouse event handlers
-  const handlePointerDown = (event: React.PointerEvent) => {
+  const handlePointerDown = useCallback((event: React.PointerEvent) => {
     if (isAnimating || getUnansweredCards().length === 0) return;
 
     const clientX = event.clientX;
     const clientY = event.clientY;
 
-    setDragState({
+    dragStateRef.current = {
       isDragging: true,
       startX: clientX,
       startY: clientY,
@@ -261,12 +302,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       currentY: clientY,
       deltaX: 0,
       deltaY: 0,
-    });
+    };
 
     event.currentTarget.setPointerCapture(event.pointerId);
-  };
+    event.preventDefault();
+  }, [isAnimating, getUnansweredCards]);
 
-  const handlePointerMove = (event: React.PointerEvent) => {
+  const handlePointerMove = useCallback((event: React.PointerEvent) => {
+    const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
 
     // If animation starts during drag, immediately stop dragging
@@ -280,29 +323,30 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     const deltaX = clientX - dragState.startX;
     const deltaY = clientY - dragState.startY;
 
-    setDragState(prev => ({
-      ...prev,
+    // Update drag state without triggering re-render
+    dragStateRef.current = {
+      ...dragState,
       currentX: clientX,
       currentY: clientY,
       deltaX,
       deltaY,
-    }));
+    };
 
-    // Set swipe direction for visual feedback
-    if (Math.abs(deltaX) > 50) {
-      setSwipeDirection(deltaX > 0 ? 'right' : 'left');
-    } else {
-      setSwipeDirection(null);
-    }
-  };
+    // Use requestAnimationFrame for smooth visual updates
+    updateDragTransform(deltaX, deltaY);
+    
+    event.preventDefault();
+  }, [isAnimating, cleanupDragState, updateDragTransform]);
 
-  const handlePointerUp = (event: React.PointerEvent) => {
+  const handlePointerUp = useCallback((event: React.PointerEvent) => {
+    const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
 
     const swipeThreshold = 100;
     const velocityThreshold = 0.5;
 
     const velocity = Math.abs(dragState.deltaX) / 100;
+    const deltaX = dragState.deltaX;
 
     // Clean up drag state first
     cleanupDragState(event.currentTarget, event.pointerId);
@@ -311,10 +355,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     if (isAnimating) return;
 
     // Determine if swipe should trigger action
-    const shouldSwipe = Math.abs(dragState.deltaX) > swipeThreshold || velocity > velocityThreshold;
+    const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
 
     if (shouldSwipe) {
-      if (dragState.deltaX > 0) {
+      if (deltaX > 0) {
         handleSwipeRight();
       } else {
         handleSwipeLeft();
@@ -323,21 +367,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       // Snap back
       setSwipeDirection(null);
     }
-  };
+  }, [isAnimating, cleanupDragState, handleSwipeRight, handleSwipeLeft]);
 
-  const handlePointerCancel = (event: React.PointerEvent) => {
+  const handlePointerCancel = useCallback((event: React.PointerEvent) => {
     // Handle cases where pointer is cancelled (e.g., browser takes over)
     cleanupDragState(event.currentTarget, event.pointerId);
-    setSwipeDirection(null);
-  };
+  }, [cleanupDragState]);
 
-  const handlePointerLeave = (event: React.PointerEvent) => {
+  const handlePointerLeave = useCallback((event: React.PointerEvent) => {
     // Handle cases where pointer leaves the element
-    if (dragState.isDragging) {
+    if (dragStateRef.current.isDragging) {
       cleanupDragState(event.currentTarget, event.pointerId);
-      setSwipeDirection(null);
     }
-  };
+  }, [cleanupDragState]);
 
 
   const handleAnswerChange = (cardId: string, newAnswer: 'left' | 'right') => {
@@ -433,9 +475,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             const isTop = index === 0;
             const zIndex = unansweredCards.length - index;
             let transform = '';
-            if (isTop && dragState.isDragging) {
-              const rotation = dragState.deltaX * 0.1;
-              transform = `translate(${dragState.deltaX}px, ${dragState.deltaY * 0.5}px) rotate(${rotation}deg)`;
+            if (isTop && dragStateRef.current.isDragging) {
+              transform = dragTransform;
             } else if (isTop && swipeDirection && isAnimating) {
               const direction = swipeDirection === 'right' ? 1 : -1;
               transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
@@ -446,76 +487,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   key={card.id}
                   className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
                   style={{ zIndex, transform }}
-                  {...(isTop && /iPad|iPhone|iPod|Android/i.test(navigator.userAgent)
+                  {...(isTop 
                     ? {
-                      onTouchStart: (e) => {
-                        e.preventDefault();
-                        const touch = e.touches[0];
-                        setDragState({
-                          isDragging: true,
-                          startX: touch.clientX,
-                          startY: touch.clientY,
-                          currentX: touch.clientX,
-                          currentY: touch.clientY,
-                          deltaX: 0,
-                          deltaY: 0,
-                        });
-                      },
-                      onTouchMove: (e) => {
-                        e.preventDefault();
-                        if (!dragState.isDragging) return;
-                        const touch = e.touches[0];
-                        const deltaX = touch.clientX - dragState.startX;
-                        const deltaY = touch.clientY - dragState.startY;
-                        setDragState(prev => ({
-                          ...prev,
-                          currentX: touch.clientX,
-                          currentY: touch.clientY,
-                          deltaX,
-                          deltaY,
-                        }));
-                        if (Math.abs(deltaX) > 50) {
-                          setSwipeDirection(deltaX > 0 ? 'right' : 'left');
-                        } else {
-                          setSwipeDirection(null);
-                        }
-                      },
-                      onTouchEnd: (e) => {
-                        e.preventDefault();
-                        if (!dragState.isDragging) return;
-                        const swipeThreshold = 100;
-                        const velocityThreshold = 0.5;
-                        const deltaX = dragState.deltaX;
-                        const velocity = Math.abs(deltaX) / 100;
-                        setDragState({
-                          isDragging: false,
-                          startX: 0,
-                          startY: 0,
-                          currentX: 0,
-                          currentY: 0,
-                          deltaX: 0,
-                          deltaY: 0,
-                        });
-                        if (isAnimating) return;
-                        const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
-                        if (shouldSwipe) {
-                          if (deltaX > 0) {
-                            handleSwipeRight();
-                          } else {
-                            handleSwipeLeft();
-                          }
-                        } else {
-                          setSwipeDirection(null);
-                        }
-                      }
-                    }
-                    : {
                       onPointerDown: handlePointerDown,
                       onPointerMove: handlePointerMove,
                       onPointerUp: handlePointerUp,
                       onPointerCancel: handlePointerCancel,
                       onPointerLeave: handlePointerLeave
-                    })}
+                    }
+                    : {})}
                   role="listitem"
                   aria-label={card.title}
                   tabIndex={isTop ? 0 : -1}

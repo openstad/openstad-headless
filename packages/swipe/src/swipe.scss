@@ -71,9 +71,9 @@
     user-select: none;
     transform-origin: center;
     transition:
-      transform 0.3s cubic-bezier(.33, .05, .58, .98),
       opacity 0.3s cubic-bezier(.33, .05, .58, .98),
       box-shadow 0.3s cubic-bezier(.33, .05, .58, .98);
+    will-change: transform;
 
     border: solid 1px #BFBFBF;
 
@@ -99,6 +99,11 @@
 
       &:active {
         cursor: grabbing;
+      }
+
+      // Remove transitions when dragging for smoother performance
+      &[style*="translate"] {
+        transition: none !important;
       }
     }
 
