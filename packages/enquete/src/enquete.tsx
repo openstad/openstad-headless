@@ -363,6 +363,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['imageDescription'] = item?.imageDescription || '';
                     fieldData['infoBlockStyle'] = item?.infoBlockStyle || 'default';
                     fieldData['infoBlockShareButton'] = item?.infoBlockShareButton || false;
+                    fieldData['infoBlockExtraButtonTitle'] = item?.infoBlockExtraButtonTitle || '';
                     fieldData['infoBlockExtraButton'] = item?.infoBlockExtraButton || '';
                     break;
                 case 'swipe':

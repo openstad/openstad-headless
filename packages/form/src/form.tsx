@@ -269,11 +269,9 @@ function Form({
                                 {/* @ts-ignore */}
                                 {field.infoBlockStyle === "youth-outro" && (
                                     <div className="info-block-buttons">
-                                        {/* @ts-ignore */}
                                         {field.infoBlockExtraButton && (
-                                            /* @ts-ignore */
                                             <a className="update-button" href={field.infoBlockExtraButton} rel="noreferrer">
-                                                <span>Blijf op de hoogte</span>
+                                                <span>{field.infoBlockExtraButtonTitle ? field.infoBlockExtraButtonTitle : 'Blijf op de hoogte'}</span>
                                             </a>
                                         )}
                                         {/* @ts-ignore */}

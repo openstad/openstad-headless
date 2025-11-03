@@ -12,6 +12,7 @@ export type InfoFieldProps = {
     infoBlockStyle?: string;
     infoBlockShareButton?: boolean;
     infoBlockExtraButton?: string;
+    infoBlockExtraButtonTitle?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
