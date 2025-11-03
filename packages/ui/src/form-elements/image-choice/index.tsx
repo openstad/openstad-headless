@@ -62,7 +62,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     randomId = '',
     fieldInvalid = false,
     multiple = false,
-    overrideDefaultValue
+    overrideDefaultValue,
     infoField,
 }) => {
     let initialValue = [];
