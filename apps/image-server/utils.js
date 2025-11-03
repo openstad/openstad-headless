@@ -1,6 +1,9 @@
 const crypto = require('crypto')
 
 const sanitizeFileName = (fileName) => {
+  if (!fileName) {
+    return fileName;
+  }
   let sanitizedFileName = fileName.replace(/[^a-z0-9_\-]/gi, '_');
   return sanitizedFileName.replace(/_+/g, '_');
 }

@@ -151,3 +151,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+.osc-resource-overview-resource-collection .osc-loading-results-text,
+.osc-resource-overview-resource-collection .osc-no-results-text {
+  position: relative;
+  width: 100%;
+  text-align: center;
+}

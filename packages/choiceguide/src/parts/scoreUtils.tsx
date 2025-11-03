@@ -1,5 +1,6 @@
 // @ts-nocheck
 import {ChoiceOptions, Score} from "../props";
+import {Item} from "../props";
 
 export const calculateColor = (score: number, minColor = '#ff9100', maxColor = '#bed200') => {
     const maxColorMatch = maxColor.match(/#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i);
@@ -18,7 +19,8 @@ export const calculateScoreForItem = (
   answers: Record<string, string>,
   weights: Record<string, Record<string, Record<string, any>>>,
   choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden',
-  hiddenFields: string[]
+  hiddenFields: string[],
+  items: Item[]
 ): Score => {
     const results: Score = { x: 0, y: 0, z: 0 };
     let totalScores = { x: 0, y: 0, z: 0 };
@@ -46,12 +48,15 @@ export const calculateScoreForItem = (
                 const secondOptionWeights = optionWeights[optionId];
 
                 const isRadioBox = answerKey.startsWith('radiobox');
+                const isImageChoice = answerKey.startsWith('images');
+                const imageChoiceTrigger = answerKey.replace('images-', '');
+                const isImageChoiceMultiple = isImageChoice && items?.find(item => item?.trigger === imageChoiceTrigger && item?.multiple === true);
 
                 ['x', 'y', 'z'].forEach((secondDimension) => {
                     const optionValue = secondOptionWeights[secondDimension];
 
                     if (typeof optionValue === 'number' && optionValue !== 0) {
-                        if (isRadioBox) {
+                        if ( isRadioBox || (isImageChoice && !isImageChoiceMultiple) ) {
                             tempScores[secondDimension] = Math.max(tempScores[secondDimension], optionValue);
                         } else {
                             tempScores[secondDimension] += optionValue;
@@ -79,11 +84,12 @@ export const calculateScoreForItem = (
             }
 
             answerArray.forEach((userAnswer) => {
+                const safeUserAnswer = typeof userAnswer === 'string' ? userAnswer?.replace(/\./g, '_DOT_') : userAnswer;
                 const optionWeights = weights[option.id]?.[answerKey];
 
                 if (optionWeights) {
-                    if (typeof userAnswer === 'string' && optionWeights[userAnswer]) {
-                        const dimensions = optionWeights[userAnswer];
+                    if (typeof safeUserAnswer === 'string' && optionWeights[safeUserAnswer]) {
+                        const dimensions = optionWeights[safeUserAnswer];
                         Object.keys(dimensions).forEach((thirdDimension) => {
                             const number = Number(dimensions[thirdDimension]);
 

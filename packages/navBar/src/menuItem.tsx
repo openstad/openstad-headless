@@ -47,9 +47,16 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
       <Link className="level-1" href={`${prefix}${item.slug}`} aria-current={getCurrentPage(item.title)}>{item.title}</Link>
       {item._children.length > 0 && (
         <>
-          <button className="toggle-submenu" onClick={() => setOpenIndex(index)}>
+          <button
+            className="toggle-submenu"
+            onClick={() => {
+              console.log('Submenu toggle clicked', { index, open });
+              setOpenIndex(index);
+            }}
+            aria-expanded={open}
+          >
             <i className="ri-arrow-down-s-line"></i>
-            <span className="sr-only">Toon onderliggende pagina's</span>
+            <span className="sr-only">{open ? "Verberg onderliggende pagina's" : "Toon onderliggende pagina's"}</span>
           </button>
           {open && (
             <div className="submenu" onMouseLeave={() => setOpenIndex(null)} onBlur={handleBlur} tabIndex={-1} ref={ref}>

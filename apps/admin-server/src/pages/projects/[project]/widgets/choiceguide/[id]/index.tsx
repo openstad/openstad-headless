@@ -62,7 +62,24 @@ export default function WidgetChoiceGuide({
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
-              <ChoicesSelectorForm />
+              {previewConfig && (
+                // @ts-ignore
+                <ChoicesSelectorForm
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    // @ts-ignore
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key: string, value: any) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
               {previewConfig && (

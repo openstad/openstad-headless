@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { fetchMatrixData } from "./fetch-matrix-data";
+import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
 
 export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWidget: any) => {
   function transformString() {
@@ -64,7 +65,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       const title = item.title || item.fieldKey;
       if (item.questionType === 'matrix') {
         item.matrix?.rows?.forEach((row: any) => {
-          const matrixKey = `${item.fieldKey}_${row.trigger}`;
+          const matrixKey = `matrix_${item.fieldKey}_${row.trigger}`;
           fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
         });
       } else if (title) {
@@ -111,6 +112,10 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       'Gebruikers postcode': row.user?.postcode || ' ',
     };
 
+    if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' ) {
+      rowData['Gebruikers IP-adres (gehasht)'] = row?.submittedData?.ipAddress || ' ';
+    }
+
     const keyCount: Record<string, number> = {};
     Array.from(fieldKeyToTitleMap.entries()).forEach(([key, title]) => {
       let rawValue = row.submittedData?.[key];
@@ -120,9 +125,11 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       }
 
       const baseKey = title;
-      const keyHeader = keyCount[baseKey]
+      let keyHeader = keyCount[baseKey]
         ? `${baseKey} (${keyCount[baseKey]++})`
         : (keyCount[baseKey] = 1, baseKey);
+
+      keyHeader = keyHeader && stripHtmlTags(keyHeader);
 
       rowData[keyHeader] = normalizeData(rawValue);
     });

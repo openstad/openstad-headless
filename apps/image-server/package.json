@@ -21,12 +21,16 @@
     "init-images": "node ./scripts/init-images.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.901.0",
     "@openstad-headless/lib": "*",
     "dotenv": "^6.0.0",
     "express": "^4.17.1",
     "hat": "0.0.3",
     "image-steam": "https://github.com/asilvas/node-image-steam#336cf2fd39463a24965707e6d92c3dce01d3ba40",
+    "image-steam-s3": "^1.1.0",
+    "mime-types": "^2.1.35",
     "multer": "^2.0.2",
+    "multer-s3": "^3.0.1",
     "yargs": "^17.5.1"
   },
   "author": "Gemeente Amsterdam",

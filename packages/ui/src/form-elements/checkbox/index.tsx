@@ -13,6 +13,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 
 export type CheckboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -52,11 +53,15 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        maxChoicesMessage = '',
        randomId= '',
        fieldInvalid= false,
-       value,
+       overrideDefaultValue,
 }) => {
-    const parsedValue: string[] = typeof value === 'string' ? JSON.parse(value) : Array.isArray(value) ? value : [];
-    const initialSelectedChoices = parsedValue.length > 0 ? parsedValue : choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
-    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialSelectedChoices);
+    let initialValue = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
+
+    try {
+        initialValue = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : initialValue;
+    } catch (e) {}
+
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;
@@ -137,8 +142,9 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
               aria-invalid={fieldInvalid}
               aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }}>
-                </FieldsetLegend>
+                {title && (
+                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                )}
 
                 {description &&
                 <>

@@ -1,15 +1,15 @@
 import './resource-overview.css';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {Carousel, Icon, Paginator, Pill} from '@openstad-headless/ui/src';
+import { Carousel, Icon, Paginator, Pill } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import {Filters, PostcodeAutoFillLocation} from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
+import { Filters, PostcodeAutoFillLocation } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import {elipsizeHTML} from '../../lib/ui-helpers';
+import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
@@ -17,18 +17,18 @@ import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
+  Heading,
   Heading4,
   Paragraph,
   Button,
 } from '@utrecht/component-library-react';
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
-import {TabsContent, TabsList, TabsTrigger, Tabs} from "@openstad-headless/admin-server/src/components/ui/tabs";
+import { TabsContent, TabsList, TabsTrigger, Tabs } from "@openstad-headless/admin-server/src/components/ui/tabs";
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
-function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLocation)
-{
+function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLocation) {
   if (!coords1 || !coords2) {
     return 0;
   }
@@ -37,14 +37,14 @@ function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLo
   const toRad = (Value: number) => { return Value * Math.PI / 180; };
 
   var R = 6371;
-  var dLat = toRad(coords2Lat-coords1Lat);
-  var dLon = toRad(coords2Lng-coords1Lng);
+  var dLat = toRad(coords2Lat - coords1Lat);
+  var dLon = toRad(coords2Lng - coords1Lng);
   var lat1 = toRad(coords1Lat);
   var lat2 = toRad(coords2Lat);
 
-  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c;
   return d;
 }
@@ -65,6 +65,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       displayMap?: boolean,
       selectedProjects?: any[],
       location?: PostcodeAutoFillLocation,
+      headingLevel?: string,
       displayAsTabs?: boolean,
     ) => React.JSX.Element; renderItem?: (
       resource: any,
@@ -76,6 +77,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
+    headingLevel?: string;
     displayStatusLabel?: boolean;
     titleMaxLength?: number;
     displayRanking?: boolean;
@@ -166,6 +168,7 @@ const defaultHeaderRenderer = (
   displayMap?: boolean,
   selectedProjects?: any[],
   location?: PostcodeAutoFillLocation,
+  headingLevel?: string,
 ) => {
   return (
     <>
@@ -180,7 +183,7 @@ const defaultHeaderRenderer = (
       }
       {displayHeader &&
         <section className="osc-resource-overview-title-container">
-          <Heading4>{title}</Heading4>
+            <Heading level={Number(headingLevel) || 4} appearance="utrecht-heading-4">{title}</Heading>
         </section>
       }
     </>
@@ -233,12 +236,12 @@ const defaultItemRenderer = (
 
     let urlToUse = props?.itemLink;
 
-    if ( !!props.selectedProjects && props.selectedProjects.length > 0 ) {
+    if (!!props.selectedProjects && props.selectedProjects.length > 0) {
       const project = props.selectedProjects.find(project => project.id === resource.projectId);
 
       if (resource?.id && project) {
         urlToUse = project.detailPageLink;
-      } else if ( !resource?.id && project?.overviewUrl) {
+      } else if (!resource?.id && project?.overviewUrl) {
         urlToUse = project.overviewUrl;
       }
     }
@@ -259,8 +262,8 @@ const defaultItemRenderer = (
 
   const firstStatus = resource.statuses
     ? resource.statuses
-    .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+      .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
+      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
     : false;
 
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
@@ -269,8 +272,8 @@ const defaultItemRenderer = (
   const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
   const multiProjectLabel = props.selectedProjects && props.selectedProjects.length > 1
-                                              ? props.selectedProjects.find(project => project.id === resource.projectId)?.label
-                                              : '';
+    ? props.selectedProjects.find(project => project.id === resource.projectId)?.label
+    : '';
 
   const isProjectCard = !resource?.id ? 'project-card' : '';
 
@@ -283,8 +286,8 @@ const defaultItemRenderer = (
 
   const firstTag = resource?.tags
     ? resource.tags
-    .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
-    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
+      .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
+      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
     : false;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
 
@@ -292,14 +295,14 @@ const defaultItemRenderer = (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' } >
+          className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={resource.projectId || ''} >
 
           <div>
-            <Spacer size={1}/>
+            <Spacer size={1} />
             {props.displayTitle ? (
-               <Heading4>
-                 <a href={getUrl()} className="resource-card--link_trigger" dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.title, props.titleMaxLength || 20)}}/>
-              </Heading4>
+              <Heading level={Number(props.headingLevel) || 4} appearance="utrecht-heading-4">
+                <a href={getUrl()} className="resource-card--link_trigger" dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.title, props.titleMaxLength || 20) }} />
+              </Heading>
             ) : null}
 
             {(displayOverviewTagGroups && resourceFilteredTags.length > 0) && (
@@ -314,13 +317,13 @@ const defaultItemRenderer = (
             )}
 
             {props.displaySummary ? (
-              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20)}}/>
+              <Paragraph dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20) }} />
             ) : null}
 
             {props.displayDescription ? (
               <Paragraph
                 className="osc-resource-overview-content-item-description"
-                dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, props.descriptionMaxLength || 30)}}
+                dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.description, props.descriptionMaxLength || 30) }}
               />
             ) : null}
           </div>
@@ -328,8 +331,8 @@ const defaultItemRenderer = (
           <div className="osc-resource-overview-content-item-footer">
             {props.displayVote ? (
               <>
-                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor'/>
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen'/>
+                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' />
+                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />
               </>
             ) : null}
 
@@ -371,11 +374,11 @@ const defaultItemRenderer = (
             )}
           />
 
-          { props.displayTagIcon && firstTag && MapIconImage && (
+          {props.displayTagIcon && firstTag && MapIconImage && (
             <div className="resource-card--link_tagicon">
               <Image
                 src={MapIconImage}
-                alt={ firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon' }
+                alt={firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'}
               />
             </div>
           )}
@@ -383,14 +386,14 @@ const defaultItemRenderer = (
         </div>
 
       ) : (
-        <div className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={ resource.projectId || '' }>
+        <div className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={resource.projectId || ''}>
 
           <div>
             <Spacer size={1} />
             {props.displayTitle ? (
-              <Heading4>
-                <button className="resource-card--link_trigger" onClick={() => onItemClick && onItemClick()} dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.title, props.titleMaxLength || 20)}}></button>
-              </Heading4>
+              <Heading level={Number(props.headingLevel) || 4} appearance="utrecht-heading-4">
+                <button className="resource-card--link_trigger" onClick={() => onItemClick && onItemClick()} dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.title, props.titleMaxLength || 20) }}></button>
+              </Heading>
             ) : null}
 
             {(displayOverviewTagGroups && resourceFilteredTags.length > 0) && (
@@ -405,11 +408,11 @@ const defaultItemRenderer = (
             )}
 
             {props.displaySummary ? (
-              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20)}}/>
+              <Paragraph dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20) }} />
             ) : null}
 
             {props.displayDescription ? (
-              <Paragraph className="osc-resource-overview-content-item-description" dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, props.descriptionMaxLength || 30)}}/>
+              <Paragraph className="osc-resource-overview-content-item-description" dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.description, props.descriptionMaxLength || 30) }} />
             ) : null}
           </div>
 
@@ -458,11 +461,11 @@ const defaultItemRenderer = (
             )}
           />
 
-          { props.displayTagIcon && firstTag && MapIconImage && (
+          {props.displayTagIcon && firstTag && MapIconImage && (
             <div className="resource-card--link_tagicon">
               <Image
                 src={MapIconImage}
-                alt={ firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon' }
+                alt={firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'}
               />
             </div>
           )}
@@ -490,7 +493,7 @@ function ResourceOverviewInner({
   showActiveTags = false,
   displayLikeButton = false,
   clickableImage = false,
-  displayBudget= true,
+  displayBudget = true,
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
@@ -526,7 +529,7 @@ function ResourceOverviewInner({
 
   const statusIdsToLimitResourcesTo = stringToArray(onlyIncludeStatusIds);
 
-  const {data: allTags} = datastore.useTags({
+  const { data: allTags } = datastore.useTags({
     projectId: props.projectId,
     type: ''
   });
@@ -568,7 +571,7 @@ function ResourceOverviewInner({
     setTagIdsToLimitResourcesTo(filteredTagIdsArray);
   }, [allTags]);
 
-  const [tagIdsToLimitResourcesTo, setTagIdsToLimitResourcesTo] = useState< Array<number> >([]);
+  const [tagIdsToLimitResourcesTo, setTagIdsToLimitResourcesTo] = useState<Array<number>>([]);
 
   const urlParams = new URLSearchParams(window.location.search);
   const urlTagIds = urlParams.get('tagIds');
@@ -581,7 +584,7 @@ function ResourceOverviewInner({
   const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
 
   useEffect(() => {
-    const initTags = Array.from(new Set([...(urlTagIdsArray || []), ...tagIdsToLimitResourcesTo]) )
+    const initTags = Array.from(new Set([...(urlTagIdsArray || []), ...tagIdsToLimitResourcesTo]))
 
     const includeTags = includeOrExcludeTagIds === 'include'
       ? initTags
@@ -610,14 +613,14 @@ function ResourceOverviewInner({
   );
   const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
 
-  const [resources, setResources] = useState< Array<any> >([]);
-  const [filteredResources, setFilteredResources] = useState< Array<any> >([]);
+  const [resources, setResources] = useState<Array<any>>([]);
+  const [filteredResources, setFilteredResources] = useState<Array<any>>([]);
 
   const projectIds = selectedProjects
     ?.filter(project => !project?.excludeResourcesInOverview)
     .map(project => project.id) || [];
 
-  const { data: resourcesWithPagination } = datastore.useResources({
+  const { data: resourcesWithPagination, isLoading } = datastore.useResources({
     pageSize: 999999,
     ...props,
     search,
@@ -628,8 +631,8 @@ function ResourceOverviewInner({
   });
 
   useEffect(() => {
-    if ( JSON.stringify(tags) !== JSON.stringify(includeTags) ) {
-      const tagsForIncluding = tags.map((tag) => typeof(tag) === 'string' ? parseInt(tag, 10) : tag)
+    if (JSON.stringify(tags) !== JSON.stringify(includeTags)) {
+      const tagsForIncluding = tags.map((tag) => typeof (tag) === 'string' ? parseInt(tag, 10) : tag)
       setIncludeTags(tagsForIncluding)
     }
   }, [tags])
@@ -637,7 +640,7 @@ function ResourceOverviewInner({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (resourcesWithPagination && !( selectedProjects.length > 0 && projectIds.length === 0 )) {
+    if (resourcesWithPagination && !(selectedProjects.length > 0 && projectIds.length === 0)) {
       setResources(resourcesWithPagination.records || []);
     }
   }, [resourcesWithPagination, pageSize]);
@@ -662,16 +665,16 @@ function ResourceOverviewInner({
 
     const allResources: any = [];
 
-    if ( selectedProjects && selectedProjects.length > 0 ) {
+    if (selectedProjects && selectedProjects.length > 0) {
       selectedProjects.forEach((project) => {
-        if ( project.includeProjectsInOverview === false ) return;
+        if (project.includeProjectsInOverview === false) return;
 
         const tagsArray = project?.tags ? project.tags.split(',').map(tag => tag.trim()) : [];
         const tags = tagsArray.map(tag => {
-          const foundTag = allTags.find((t: {id: number}) => t.id === parseInt(tag));
+          const foundTag = allTags.find((t: { id: number }) => t.id === parseInt(tag));
           return foundTag ? foundTag : null;
         })
-        .filter(tag => tag !== null);
+          .filter(tag => tag !== null);
 
         const projectObject = {
           title: project?.overviewTitle || '',
@@ -715,25 +718,25 @@ function ResourceOverviewInner({
 
     const filtered = combinedResources && (
       combinedResources.filter((resource: any) => {
-          const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
-            excludeTags.includes(tag.id)
-          );
-          if (hasExcludedTag) return false;
+        const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
+          excludeTags.includes(tag.id)
+        );
+        if (hasExcludedTag) return false;
 
-          if (includeTags.length > 0) {
-            if (filterBehavior === 'and') {
-              return includeTags.every(tagId =>
-                resource.tags?.some((tag: { id: number }) => tag.id === tagId)
-              );
-            } else {
-              return resource.tags?.some((tag: { id: number }) =>
-                includeTags.includes(tag.id)
-              );
-            }
+        if (includeTags.length > 0) {
+          if (filterBehavior === 'and') {
+            return includeTags.every(tagId =>
+              resource.tags?.some((tag: { id: number }) => tag.id === tagId)
+            );
+          } else {
+            return resource.tags?.some((tag: { id: number }) =>
+              includeTags.includes(tag.id)
+            );
           }
+        }
 
-          return true;
-        })
+        return true;
+      })
     )
       ?.filter((resource: any) => {
         if (!location) return true;
@@ -746,37 +749,37 @@ function ResourceOverviewInner({
         const distance = calcCrow(location, resourceLocation);
         return distance <= (location?.proximity || 999);
       })
-        ?.filter((resource: any) => {
-          if (!statusIdsToLimitResourcesTo?.length) return true;
+      ?.filter((resource: any) => {
+        if (!statusIdsToLimitResourcesTo?.length) return true;
 
-          const hasMatchingStatus = resource.statuses?.some((o: { id: number }) =>
-            statusIdsToLimitResourcesTo.includes(o.id)
-          );
+        const hasMatchingStatus = resource.statuses?.some((o: { id: number }) =>
+          statusIdsToLimitResourcesTo.includes(o.id)
+        );
 
-          return includeOrExcludeStatusIds === 'include' === hasMatchingStatus;
-        })
-        ?.sort((a: any, b: any) => {
-          if (sort === 'createdAt_desc') {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          }
-          if (sort === 'createdAt_asc') {
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          }
-          if (sort === 'title') {
-            return a.title.localeCompare(b.title);
-          }
-          if (sort === 'votes_desc') {
-            return b.yes - a.yes;
-          }
-          if (sort === 'votes_asc' || sort === 'ranking') {
-            return a.yes - b.yes;
-          }
-          if (sort === 'random') {
-            return Math.random() - 0.5;
-          }
+        return includeOrExcludeStatusIds === 'include' === hasMatchingStatus;
+      })
+      ?.sort((a: any, b: any) => {
+        if (sort === 'createdAt_desc') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (sort === 'createdAt_asc') {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        if (sort === 'title') {
+          return a.title.localeCompare(b.title);
+        }
+        if (sort === 'votes_desc') {
+          return b.yes - a.yes;
+        }
+        if (sort === 'votes_asc' || sort === 'ranking') {
+          return a.yes - b.yes;
+        }
+        if (sort === 'random') {
+          return Math.random() - 0.5;
+        }
 
-          return 0;
-        });
+        return 0;
+      });
 
     setFilteredResources(filtered);
   }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location]);
@@ -800,7 +803,7 @@ function ResourceOverviewInner({
         onLocationChange(location);
       }
     }
-  }, [filteredResources]);
+  }, [ JSON.stringify(filteredResources) ]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
@@ -809,12 +812,12 @@ function ResourceOverviewInner({
       if (displayType === 'cardrow') {
         let urlToUse = props.itemLink;
 
-        if ( selectedProjects.length > 0 ) {
+        if (selectedProjects.length > 0) {
           const project = selectedProjects.find(project => project.id === resource.projectId);
 
-          if ( resource?.id && project) {
+          if (resource?.id && project) {
             urlToUse = project.detailPageLink;
-          } else if ( !resource?.id && project?.overviewUrl) {
+          } else if (!resource?.id && project?.overviewUrl) {
             urlToUse = project.overviewUrl;
           }
         }
@@ -869,7 +872,15 @@ function ResourceOverviewInner({
 
   const overviewSection = (
     <section className="osc-resource-overview-resource-collection" id={randomId}>
-      {filteredResources &&
+      {filteredResources?.length === 0 ? (
+        isLoading ? (
+          <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
+        ) : (
+          <Paragraph className="osc-no-results-text">
+            {search ? `Er zijn geen resultaten gevonden voor "${search}".` : 'Geen resultaten gevonden.'}
+          </Paragraph>
+        )
+      ) :
         filteredResources
           ?.slice(page * pageSize, (page + 1) * pageSize)
           ?.map((resource: any, index: number) => {
@@ -926,8 +937,7 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel || '4') : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -979,7 +989,7 @@ function ResourceOverviewInner({
             />
           ) : null}
 
-          { displayAsTabs ? (
+          {displayAsTabs ? (
             <div className="osc-resource-overview-tabs-container">
               <TabsList>
                 <TabsTrigger value="list"><Icon icon="ri-list-unordered" />{listTabTitle}</TabsTrigger>
@@ -989,7 +999,7 @@ function ResourceOverviewInner({
                 {overviewSection}
               </TabsContent>
               <TabsContent value="map">
-                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location)}
+                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location, props.headingLevel || '4')}
               </TabsContent>
             </div>
           ) : (
@@ -1024,7 +1034,7 @@ function ResourceOverview(props: ResourceOverviewWidgetProps) {
     <Tabs defaultValue="list">
       <ResourceOverviewInner {...props} />
     </Tabs>
-    ) : (
+  ) : (
     <ResourceOverviewInner {...props} />
   );
 }

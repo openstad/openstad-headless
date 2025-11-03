@@ -20,6 +20,7 @@ import DataStore from '@openstad-headless/data-store/src';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 const filePondSettings = {
     labelIdle: "Sleep document(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
@@ -57,6 +58,7 @@ const filePondSettings = {
 
 export type DocumentUploadProps = {
     title: string;
+    overrideDefaultValue?: FormValue | { name: string; url: string }[];
     description?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;
@@ -126,7 +128,10 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             for (let i = 0; i < documents.length; i++) {
                 const file = documents[i].file;
                 if (file && file.name) {
-                    const sanitizedFileName = file.name.replace(/\./g, '_');
+                    let sanitizedFileName = file.name.replace(/\./g, '_'); // Replace all dots with underscores
+                    sanitizedFileName = sanitizedFileName.replace(/ /g, '_'); // Replace spaces with underscores
+                    sanitizedFileName = sanitizedFileName.replace(/[^a-zA-Z0-9_\-]/g, '_'); // Replace special characters with underscores
+                    sanitizedFileName = sanitizedFileName.replace(/_+/g, '_'); // Replace multiple underscores with a single underscore
 
                     let fileInUploadedDocuments = uploadedDocuments.find(o => o.name === sanitizedFileName);
 
@@ -185,9 +190,13 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
     return (
         <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomId}>{title}</FormLabel>
-            </Paragraph>
+
+            {title && (
+                <Paragraph className="utrecht-form-field__label">
+                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                </Paragraph>
+            )}
+
             {description &&
               <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
             }
@@ -248,7 +257,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
                             if (forbiddenChar) {
                                 const forbiddenCharName = forbiddenChar[0];
-                                const errorMessage = `Bestandsnaam mag het teken "${forbiddenCharName}" niet bevatten.`;
+                                const forbiddenCharIndex = fileName.indexOf(forbiddenCharName) + 1;
+
+                                // We don't use forbiddenCharName, because the character might not be rendered correctly in the notification
+                                // For example: '//' will be rendered as ':', which is confusing for the user
+                                const errorMessage = `Bestandsnaam mag het teken op positie ${forbiddenCharIndex} niet bevatten.`;
                                 reject(errorMessage);
                             } else {
                                 resolve(true);

@@ -56,6 +56,7 @@ export type Item = {
   routingSelectedQuestion?: string;
   routingSelectedAnswer?: string;
   infoField?: string;
+  infofieldExplanation?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;

@@ -48,6 +48,7 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 routingSelectedQuestion: item?.routingSelectedQuestion || '',
                 routingSelectedAnswer: item?.routingSelectedAnswer || '',
                 trigger: item.trigger || '',
+                placeholder: item.placeholder || '',
             };
 
             switch (item.type) {
@@ -84,6 +85,37 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                     }
                     if (item.maxChoicesMessage) {
                         fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
+                    break;
+                case 'images':
+                    fieldData['type'] = 'imageChoice';
+                    fieldData['multiple'] = item.multiple || false;
+
+                    if (item.options && item.options.length > 0) {
+                        fieldData['choices'] = item.options.map((option) => {
+                            return {
+                                value: option.titles[0].key,
+                                label: option.titles[0].key,
+                                imageSrc: option.titles[0].image,
+                                imageAlt: option.titles[0].key,
+                                hideLabel: option.titles[0].hideLabel,
+                                trigger: option.trigger || ''
+                            };
+                        });
+                    } else {
+                        fieldData['choices'] = [
+                            {
+                                label: item?.text1 || '',
+                                value: item?.key1 || '',
+                                imageSrc: item?.image1 || ''
+                            },
+                            {
+                                label: item?.text2 || '',
+                                value: item?.key2 || '',
+                                imageSrc: item?.image2 || ''
+                            }
+                        ];
                     }
 
                     break;

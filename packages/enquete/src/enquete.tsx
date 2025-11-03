@@ -133,7 +133,7 @@ function Enquete(props: EnqueteWidgetProps) {
     );
 
     async function onSubmit(formData: any) {
-
+        console.log('submit?')
         // Filter out pagination fields
         const nonPaginationFields = formFields.filter(field => field.type !== 'pagination');
 
@@ -350,6 +350,12 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['prevPageText'] = item?.prevPageText || '1';
                     fieldData['nextPageText'] = item?.nextPageText || '2';
                     break;
+                case 'sort':
+                    fieldData['options'] = item?.options || [];
+                    fieldData['type'] = 'sort';
+                    fieldData['title'] = item?.title || '';
+                    fieldData['description'] = item?.description || '';
+                    break;
                 case 'none':
                     fieldData['type'] = 'none';
                     fieldData['image'] = item?.image || '';
@@ -372,6 +378,20 @@ function Enquete(props: EnqueteWidgetProps) {
                         };
                     });
                     break;
+                case 'dilemma':
+                    fieldData['type'] = 'dilemma';
+                    fieldData['title'] = item?.title || '';
+                    fieldData['infoField'] = item?.infoField || '';
+                    fieldData['infofieldExplanation'] = item?.infofieldExplanation || false;
+                    fieldData['options'] = item?.options?.map((dilemmaOption) => {
+                        return {
+                            id: dilemmaOption.trigger,
+                            title: dilemmaOption.titles[0].key,
+                            description: dilemmaOption.titles[0].description || '',
+                            image: dilemmaOption.titles[0].image || ''
+                        };
+                    });
+                    break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';
                     fieldData['matrix'] = item?.matrix || undefined;
@@ -385,35 +405,17 @@ function Enquete(props: EnqueteWidgetProps) {
     }
     const totalFieldCount = props.items?.filter(item => item.questionType !== 'pagination').length || 0;
 
-    const defaultAnswers = formFields.reduce((acc, item) => {
-        if (typeof item.fieldKey !== 'undefined') {
-            acc[item.fieldKey] = typeof item.defaultValue !== 'undefined' ? item.defaultValue : '';
-        }
-        return acc;
-    }, {} as { [key: string]: FormValue });
-
-    const [answers, setAnswers] = useState<{ [key: string]: FormValue }>(defaultAnswers);
-    const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
     const [currentPage, setCurrentPage] = useState<number>(0);
-    const [currentAnswers, setCurrentAnswers] = useState<{ [key: string]: string }>({});
 
     const totalPages = formFields.filter(field => field.type === 'pagination').length + 1 || 1;
     // Find indices of all pagination fields
-    const paginationIndices = formFields
+    const paginationFieldPositions = formFields
         .map((field, idx) => field.type === 'pagination' ? idx : -1)
         .filter(idx => idx !== -1);
 
     // Add start and end indices for slicing
-    const pageStartIndices = [0, ...paginationIndices.map(idx => idx + 1)];
-    const pageEndIndices = [...paginationIndices, formFields.length];
-
-    // Get fields for the current page
-    const currentFields = formFields.slice(pageStartIndices[currentPage], pageEndIndices[currentPage]);
-
-    useEffect(() => {
-        const updatedAnswers = { ...answers, ...currentAnswers };
-        setAnswers(updatedAnswers);
-    }, [currentAnswers]);
+    const pageFieldStartPositions = [0, ...paginationFieldPositions.map(idx => idx + 1)];
+    const pageFieldEndPositions = [...paginationFieldPositions, formFields.length];
 
     const getPrevPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.prevPageText || 'Vorige';
     const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageText || 'Volgende';
@@ -469,26 +471,26 @@ function Enquete(props: EnqueteWidgetProps) {
                         <button
                             type="button"
                             className="youth-fullscreen-btn"
-onClick={() => {
-    // Detecteer iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-        setIsFullscreen(!isFullscreen);
-        // Alleen styling togglen, geen native fullscreen API
-    } else {
-        if (document.fullscreenElement) {
-            setIsFullscreen(false);
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
-        } else {
-            setIsFullscreen(true);
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            }
-        }
-    }
-}}
+                            onClick={() => {
+                                // Detecteer iOS
+                                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                                if (isIOS) {
+                                    setIsFullscreen(!isFullscreen);
+                                    // Alleen styling togglen, geen native fullscreen API
+                                } else {
+                                    if (document.fullscreenElement) {
+                                        setIsFullscreen(false);
+                                        if (document.exitFullscreen) {
+                                            document.exitFullscreen();
+                                        }
+                                    } else {
+                                        setIsFullscreen(true);
+                                        if (document.documentElement.requestFullscreen) {
+                                            document.documentElement.requestFullscreen();
+                                        }
+                                    }
+                                }
+                            }}
                         >
                             {isFullscreen ? <i className="ri-close-line"></i> : <i className="ri-fullscreen-line"></i>}
                             <span>{isFullscreen ? 'Verlaat volledig scherm' : 'Bekijk in volledig scherm'}</span>
@@ -504,15 +506,18 @@ onClick={() => {
                         )}
                     </div>
                     <Form
-                        fields={currentFields}
+                        fields={formFields}
                         submitHandler={onSubmit}
                         title=""
                         submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
                         submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
+                        totalPages={totalPages}
                         prevPage={currentPage > 0 ? currentPage - 1 : null}
                         prevPageText={getPrevPageTitle}
+                        pageFieldStartPositions={pageFieldStartPositions}
+                        pageFieldEndPositions={pageFieldEndPositions}
                         totalFieldCount={totalFieldCount}
                         formStyle={props.formStyle || 'default'}
                         {...props}

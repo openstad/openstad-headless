@@ -1,13 +1,15 @@
 .swipe-widget {
-  --swipe-active-background: var(--setSwipeActiveBackground, #238641);
-  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, #238641);
+  --swipe-active-background: var(--setSwipeActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886));
+  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, var(--utrecht-button-primary-action-background-color, #11B886));
   --swipe-progress-bar-color: var(--setSwipeProgressBarColor, var(--utrecht-button-disabled-color, #d5e7d4));
 
-  --swipe-like-color: var(--setSwipeLikeColor, #248641);
+  --swipe-like-color: var(--setSwipeLikeColor, var(--utrecht-button-primary-action-background-color, #11B886));
   --swipe-dislike-color: var(--setSwipeDislikeColor, #CF1C08);
 
   --swipe-like-fill: var(--setSwipeLikeFill, white);
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
+
+  --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, #1260A1);
 
   max-width: 500px;
   width: 100%;
@@ -36,8 +38,14 @@
     position: relative;
     // perspective: 1000px;
     width: 100%;
-    max-height: 700px;
-    height: 100%;
+    aspect-ratio: 2 / 3;
+    max-height: 517px;
+
+    @media screen and (max-width: 400px) {
+      max-width: 290px;
+      max-height: unset;
+      margin: 0 auto;
+    }
   }
 
   .swipe-stack {
@@ -179,10 +187,12 @@
     }
 
     .swipe-card-description {
-      font-size: 16px;
       margin: 0;
       opacity: 0.9;
       line-height: 1.4;
+      color: #fff;
+      font-family: "TheSans C4s";
+      font-weight: 530;
     }
   }
 
@@ -235,6 +245,9 @@
     justify-content: center;
     gap: 30px;
     padding: 0px 20px 20px 20px;
+    flex-shrink: 0;
+    color: #000;
+
   }
 
   .swipe-info-btn {
@@ -248,6 +261,12 @@
     margin-top: 4px;
     transition: all 0.2s ease;
     line-height: 49px;
+    flex-shrink: 0;
+    color: #000;
+
+    &:disabled {
+      opacity: 0.5;
+    }
 
     &:hover:not(:disabled) {
       cursor: pointer;
@@ -302,7 +321,6 @@
         transform: scale(1.1);
       }
 
-      &:hover i {}
 
       i {
         color: var(--swipe-like-fill);
@@ -316,7 +334,6 @@
         transform: scale(1.1);
       }
 
-      &:hover i {}
 
       i {
         color: var(--swipe-dislike-fill);
@@ -380,19 +397,43 @@
   }
 
   .swipe-summary-item {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+
+
+  }
+
+  .swipe-summary-content {
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding: 16px;
     background: white;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     @media (min-width: 768px) {
       flex-direction: row;
       align-items: center;
       gap: 20px;
+    }
+  }
+
+  .swipe-summary-explanation {
+    background: #f0f0f0;
+    padding: 16px;
+
+    textarea {
+      width: 100%;
+      border: none;
+      background: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+      padding: 8px;
+      border-radius: 6px;
+      display: block;
+      height: 60px;
     }
   }
 
@@ -457,14 +498,9 @@
     }
 
     &.active {
-      border-color: var(--swipe-active-background);
-      background: var(--swipe-active-background);
+      border-color: var(--swipe-answer-active-background);
+      background: var(--swipe-answer-active-background);
       color: white;
-
-      &:hover {
-        border-color: rgba(35, 134, 65, 0.8);
-        background: rgba(35, 134, 65, 0.8);
-      }
     }
 
     i {
@@ -531,15 +567,15 @@
 }
 
 
-.explanation-dialog{
+.explanation-dialog {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
   z-index: 999999;
   opacity: 0;
   animation: dialogFadeIn 0.3s ease-out forwards;
 
-  .explanation-dialog-content{
+  .explanation-dialog-content {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -553,7 +589,7 @@
     transform: translateY(20px) scale(0.95);
     animation: dialogSlideUp 0.3s ease-out forwards;
 
-    textarea{
+    textarea {
       width: 100%;
       margin: 20px 0;
       padding: 20px;
@@ -563,18 +599,18 @@
       resize: vertical;
       min-height: 100px;
 
-      &:focus{
+      &:focus {
         outline: none;
         border-color: var(--swipe-active-background);
         box-shadow: 0 0 0 2px rgba(35, 134, 65, 0.1);
       }
     }
 
-    button{
+    button {
       max-width: none;
       width: 100%;
 
-      & + button{
+      &+button {
         margin-top: 16px;
       }
     }
@@ -593,6 +629,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -602,6 +639,7 @@
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -611,6 +649,7 @@
   from {
     transform: translateY(20px) scale(0.95);
   }
+
   to {
     transform: translateY(0) scale(1);
   }
@@ -620,6 +659,7 @@
   from {
     transform: translateY(0) scale(1);
   }
+
   to {
     transform: translateY(20px) scale(0.95);
   }

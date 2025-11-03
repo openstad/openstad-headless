@@ -28,6 +28,7 @@ export type ChoiceGuide = {
     maxCharactersError?: string;
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
+    showBackButtonInTopOfPage?: boolean;
 };
 
 type ExtraProjectSettings = {
@@ -64,6 +65,7 @@ export type ChoiceGuideSidebarProps = {
     weights?: WeightOverview;
     widgetId?: string;
     hiddenFields?: string[];
+    items?: Array<Item>;
 }
 
 export type Score = {
@@ -119,6 +121,8 @@ export type Item = {
     routingInitiallyHide?: boolean;
     routingSelectedQuestion?: string;
     routingSelectedAnswer?: string;
+    imageOptionUpload?: string;
+    placeholder?: string;
 };
 
 export type Option = {
@@ -132,6 +136,8 @@ export type Title = {
     weights?: Record<string, Weight>;
     isOtherOption?: boolean;
     defaultValue?: boolean;
+    image?: string;
+    hideLabel?: boolean;
 };
 
 export type Weight = {

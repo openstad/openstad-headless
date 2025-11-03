@@ -11,6 +11,7 @@ import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-element
 import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
 import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
 import type {NumberInputProps} from "@openstad-headless/ui/src/form-elements/number";
+import type {SortFieldProps} from "@openstad-headless/ui/src/form-elements/sort";
 import {MatrixFieldProps} from "@openstad-headless/ui/src/form-elements/matrix";
 import { FormValue } from "@openstad-headless/form/src/form";
 
@@ -30,6 +31,10 @@ export type FormProps = {
     setCurrentPage?: (page: number) => void;
     prevPage?: any;
     prevPageText?: string;
+    pageFieldStartPositions?: number[];
+    pageFieldEndPositions?: number[];
+    totalPages?: number;
+    showBackButtonInTopOfPage?: boolean;
     totalFieldCount?: number;
     formStyle?: string;
 }
@@ -58,8 +63,8 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'map' } & MapProps)
     | ({ type?: 'matrix' } & MatrixFieldProps)
     | ({ type?: 'pagination' } & PaginationFieldProps)
+    | ({ type?: 'sort' } & SortFieldProps)
     | ({ type?: 'none' } & InfoFieldProps);
-
 
 type ComponentFieldProps = (
     {
@@ -82,7 +87,8 @@ type CombinedFieldProps = (
     ImageChoiceFieldProps |
     NumberInputProps |
     MatrixFieldProps |
-    InfoFieldProps
+    InfoFieldProps |
+    SortFieldProps
     & {infoBlockStyle?: string;}
 );
 

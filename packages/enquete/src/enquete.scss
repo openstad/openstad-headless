@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem 1rem;
-  height: 100%;
+  // height: 100%;
 }
 
 .form-container .utrecht-form-field .utrecht-form-field-description:empty {
@@ -143,12 +143,49 @@ label.utrecht-form-label {
 
 // Youth widgets
 
+@mixin utrecht-button-appearance {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  left: 24px;
+
+  margin: 0;
+  padding: 0;
+  max-width: unset;
+  border: unset;
+  outline: unset;
+  background: unset;
+  scale: unset;
+  pointer-events: none;
+  height: 64px;
+
+  &:after {
+    content: '';
+    position: absolute;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--%3E%3Cpath d='M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z'/%3E%3C/svg%3E");
+    background-size: 26px;
+    background-repeat: no-repeat;
+    background-color: var(--youth-next-button-background-color);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    right: 0;
+    background-position: 20px 20px;
+    animation: nextPagePulse .8s infinite ease-in-out;
+    pointer-events: all;
+  }
+
+  span {
+    display: none;
+  }
+}
+
 .osc:has(.--youth) {
   max-width: 500px;
   margin: 0 auto;
   word-break: auto-phrase;
 
-  --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, #248641);
+  --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
   --youth-intro-card-title-color: var(--setYouthIntroCardTitleColor, #ffffff);
   --youth-intro-card-description-color: var(--setYouthIntroCardDescriptionColor, #ffffff);
 
@@ -159,7 +196,7 @@ label.utrecht-form-label {
   --youth-page-card-title-font-size: var(--setYouthPageCardTitleFontSize, 32px);
   --youth-page-card-description-font-size: var(--setYouthPageCardDescriptionFontSize, 14px);
 
-  --youth-outro-card-background-color: var(--setYouthOutroCardBackgroundColor, #248641);
+  --youth-outro-card-background-color: var(--setYouthOutroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
   --youth-outro-card-title-color: var(--setYouthOutroCardTitleColor, #ffffff);
   --youth-outro-card-description-color: var(--setYouthOutroCardDescriptionColor, #ffffff);
 
@@ -174,7 +211,7 @@ label.utrecht-form-label {
 
   &.--youth {
     height: 100%;
-    min-height: 800px;
+    // min-height: 500px;
     position: relative;
     display: grid;
     transform: translate(0, 0);
@@ -343,6 +380,11 @@ label.utrecht-form-label {
         border: none;
         height: 42px;
         border-radius: 3px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
       }
 
       .utrecht-button--primary-action {
@@ -367,7 +409,7 @@ label.utrecht-form-label {
         cursor: pointer;
         transition: all .2s ease-in-out;
 
-        &:hover{
+        &:hover {
           background: #fff;
           color: #000;
         }
@@ -405,6 +447,8 @@ label.utrecht-form-label {
         position: absolute;
         top: 36px;
         left: 24px;
+        color: var(--setBackColor, #094B81);
+        z-index: 3;
 
         &:before {
           content: '';
@@ -413,26 +457,14 @@ label.utrecht-form-label {
           height: 20px;
           mask-size: contain;
           mask-repeat: no-repeat;
-          background-color: var(--_utrecht-button-color);
+          background-color: var(--setBackColor, #094B81);
+
         }
       }
 
 
       .utrecht-button--primary-action {
-        position: absolute;
-        bottom: 24px;
-        right: 24px;
-        left: 24px;
-
-        margin: 0;
-        padding: 0;
-        max-width: unset;
-        border: unset;
-        outline: unset;
-        background: unset;
-        scale: unset;
-        pointer-events: none;
-        height: 64px;
+        @include utrecht-button-appearance;
 
         &:before {
           content: attr(data-label);
@@ -452,35 +484,39 @@ label.utrecht-form-label {
           text-underline-offset: 4px;
 
         }
-
-        &:after {
-          content: '';
-          position: absolute;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--%3E%3Cpath d='M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z'/%3E%3C/svg%3E");
-          background-size: 26px;
-          background-repeat: no-repeat;
-          background-color: var(--youth-next-button-background-color);
-          width: 64px;
-          height: 64px;
-          border-radius: 50%;
-          right: 0;
-          background-position: 20px 20px;
-          animation: nextPagePulse .8s infinite ease-in-out;
-          pointer-events: all;
-        }
-
-        span {
-          display: none;
-        }
       }
     }
 
     .question {
-      padding: 90px 30px;
+      padding: 95px 30px 119px 30px;
       background: unset;
+      min-height: 750px;
+      position: relative;
+
+      &:before {
+        content: "";
+        background-color: inherit;
+        mask-image: linear-gradient(180deg, #ffffff 50%, rgba(255, 255, 255, 0) 100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      @media screen and (max-width: 400px) {
+        min-height: unset;
+      }
 
       .question {
         padding: 0;
+        min-height: unset;
+
+        &:before {
+          display: none;
+        }
       }
     }
 
@@ -560,11 +596,12 @@ label.utrecht-form-label {
       }
 
       .image-choice-container {
-        display: flex;
+        display: grid;
         gap: 10px;
         margin-top: 140px;
         position: relative;
         justify-content: center;
+        grid-template-columns: 1fr 1fr;
 
         &:before {
           content: "OF";
@@ -681,6 +718,7 @@ label.utrecht-form-label {
           position: relative;
           z-index: 2;
           margin-bottom: 50px;
+          text-align: center;
         }
 
         .range-slider-labels {
@@ -799,8 +837,17 @@ label.utrecht-form-label {
     }
 
     .question-type-swipe {
+      padding-bottom: 32px;
+
+      // &:not(:has(.swipe-finished)):has([data-required="true"]) {
+      &:not(:has(.swipe-finished)) {
+        +.button-group .utrecht-button--submit.utrecht-button--primary-action {
+          display: none;
+        }
+      }
+
       .swipe-widget:not(.swipe-finished) {
-        justify-content: center;
+        justify-content: start;
       }
 
       .swipe-finished-content {
@@ -816,6 +863,16 @@ label.utrecht-form-label {
 
       .utrecht-form-field__input.help-text-active {
         margin-top: 30px;
+      }
+    }
+
+    .question-type-dilemma {
+      .dilemma-field>.utrecht-button--primary-action {
+        @include utrecht-button-appearance;
+        position: fixed;
+        left: unset;
+        width: 64px;
+        z-index: 99;
       }
     }
 
@@ -898,7 +955,7 @@ label.utrecht-form-label {
   }
 
 
-  &[aria-hidden='false']:nth-of-type(2) {
+  &[aria-hidden='false'] {
     opacity: 1;
     pointer-events: all;
 
@@ -1031,7 +1088,7 @@ label.utrecht-form-label {
       }
 
       .question {
-        justify-content: center;
+        justify-content: start;
 
         .question {
           height: unset;

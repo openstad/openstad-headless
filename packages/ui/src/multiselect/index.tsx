@@ -46,17 +46,26 @@ export function MultiSelect({
           setOpen(!isOpen);
         }}
         test-id="multi-select-button"
-        id={ id }
+        aria-labelledby={id}
+        aria-expanded={isOpen}
+        role="combobox"
+        aria-haspopup="listbox"
       >
         {label}
         <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
       </Button>
 
       {isOpen &&
-        <section className="multiselect-container">
+        <section
+          className="multiselect-container"
+          role="listbox"
+          aria-multiselectable="true"
+        >
           {options.map((option, index) => {
             return (
               <div
+                role="option"
+                aria-selected={option.checked}
                 onClick={() => {
                   const value = option.value;
                   const label = option.label;

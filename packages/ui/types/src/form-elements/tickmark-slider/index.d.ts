@@ -2,6 +2,7 @@ import { FC } from 'react';
 import './style.css';
 import { FormValue } from '@openstad-headless/form/src/form';
 export type TickmarkSliderProps = {
+    overrideDefaultValue?: FormValue;
     index: number;
     title: string;
     fieldOptions?: {

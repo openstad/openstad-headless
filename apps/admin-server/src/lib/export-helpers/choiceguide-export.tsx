@@ -3,6 +3,7 @@ import {InitializeWeights} from "../../../../../packages/choiceguide/src/parts/i
 import {useEffect, useState} from "react";
 import * as XLSX from "xlsx";
 import { fetchMatrixData } from "./fetch-matrix-data";
+import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
 
 export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string, limit: number) => {
   const fetchResults = async () => {
@@ -121,7 +122,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
         choiceOptions.forEach((choiceOption: any) => {
           try {
-            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType, hiddenFields);
+            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType, hiddenFields, items);
             scores[choiceOption.title] = calculatedScores.x ? (calculatedScores.x).toFixed(0) : 0;
           } catch (error) {
             scores[choiceOption.title] = 0;
@@ -147,6 +148,11 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
           const index = rowMap.size;
           rowMap.set(index, {'result': scores[key], 'value': `Score: ${key}` });
         });
+
+        if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' && row?.result?.ipAddress ) {
+          const index = rowMap.size;
+          rowMap.set(index, {'result': row?.result?.ipAddress, 'value': 'Gebruikers IP-adres (gehasht)' });
+        }
 
         return {
           ...row,
@@ -221,12 +227,19 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         'Gebruikers postcode': row.user?.postcode || ' ',
       };
 
+      if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' ) {
+        rowObj['Gebruikers IP-adres (gehasht)'] = row?.result?.ipAddress || ' ';
+      }
+
       const keyCount: Record<string, number> = {};
       Object.values(row.result || {}).forEach((item: any) => {
         const baseKey = item.value;
-        const key = keyCount[baseKey]
+        let key = keyCount[baseKey]
           ? `${baseKey} (${keyCount[baseKey]++})`
           : (keyCount[baseKey] = 1, baseKey);
+
+        key = key && stripHtmlTags(key);
+
         rowObj[key] = normalizeData(item.result);
       });
 

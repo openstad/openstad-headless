@@ -1,8 +1,10 @@
 import { FC } from "react";
 import { Matrix } from "@openstad-headless/enquete/src/types/enquete-props";
 import './matrix.css';
+import { FormValue } from "@openstad-headless/form/src/form";
 export type MatrixFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;

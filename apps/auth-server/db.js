@@ -8,7 +8,12 @@ const ssl = {
 }
 
 if (process.env.MYSQL_CA_CERT) {
-  ssl.ca = process.env.MYSQL_CA_CERT;
+  
+  const caCert = process.env.MYSQL_CA_CERT.trim()
+  // support for base64 encoded certs (no newlines)
+  // if it starts with -----BEGIN CERTIFICATE----- we assume it's a raw cert
+  // otherwise we assume it's base64 encoded
+  ssl.ca = caCert.indexOf('-----BEGIN CERTIFICATE-----') === 0 ? caCert : Buffer.from(caCert, 'base64').toString('utf8');
   ssl.rejectUnauthorized = true;
 }
 

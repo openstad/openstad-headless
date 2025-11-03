@@ -15,12 +15,14 @@ import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice";
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import SwipeField from "@openstad-headless/swipe/src/swipe";
+import DilemmaField from '@openstad-headless/dilemma/src/dilemma';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
+import SortField from "@openstad-headless/ui/src/form-elements/sort";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | string[] | Record<number, never> | Record<string, any> | [] | number | boolean;
+export type FormValue = string | string[] | Record<number, never> | Record<string, any> | [] | number | boolean | { name: string; url: string }[];
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -39,6 +41,10 @@ function Form({
     setCurrentPage,
     prevPage,
     prevPageText,
+    pageFieldStartPositions,
+    pageFieldEndPositions,
+    totalPages,
+    showBackButtonInTopOfPage = false,
     totalFieldCount = 0,
     formStyle = 'default',
     ...props
@@ -75,14 +81,31 @@ function Form({
     const [routingHiddenFields, setRoutingHiddenFields] = useState<Array<string>>(initialHiddenFields);
     const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
 
+    let fieldsToRender = fields;
+    if (typeof currentPage === 'number' && typeof pageFieldStartPositions !== 'undefined' && typeof pageFieldEndPositions !== 'undefined') {
+        const start = pageFieldStartPositions[currentPage];
+        const end = pageFieldEndPositions[currentPage];
+
+        fieldsToRender = fields.slice(start, end);
+    }
+
     const handleFormSubmit = (event: React.FormEvent) => {
+        const nonPaginationFields = fields.filter(field => field.type !== 'pagination');
+
+        let pageHandler = undefined;
+        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && setCurrentPage && typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && !(currentPage === totalPages - 2 && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro')) {
+            allowResetAfterSubmit = false;
+            pageHandler = () => setCurrentPage(currentPage + 1);
+        }
+
         event.preventDefault();
         const firstErrorKey = handleSubmit(
-            fields as unknown as Array<CombinedFieldPropsWithType>,
+            fieldsToRender as unknown as Array<CombinedFieldPropsWithType>,
             formValues,
             setFormErrors,
             routingHiddenFields,
-            submitHandler
+            submitHandler,
+            pageHandler,
         );
 
         if (firstErrorKey && formRef.current) {
@@ -100,11 +123,13 @@ function Form({
         }
     };
 
-    const handleInputChange = (event: { name: string, value: FormValue }, triggerSetLastKey: boolean = true) => {
+    const handleInputChange = (event: { name: string, value: any }, triggerSetLastKey?: boolean) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
 
-        if (triggerSetLastKey) {
+        console.log(formValues)
+
+        if (triggerSetLastKey !== false) {
             setLastUpdatedKey(name);
         }
     };
@@ -159,6 +184,8 @@ function Form({
         number: NumberInput as React.ComponentType<ComponentFieldProps>,
         matrix: MatrixField as React.ComponentType<ComponentFieldProps>,
         none: InfoField as React.ComponentType<ComponentFieldProps>,
+        sort: SortField as React.ComponentType<ComponentFieldProps>,
+        dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     };
 
     const renderField = (field: ComponentFieldProps, index: number, randomId: string, fieldInvalid: boolean) => {
@@ -169,14 +196,16 @@ function Form({
         if (Component) {
             return (
                 <Component
-                    {...props}
+                    {...(props as any)}
                     index={index}
-                    onChange={handleInputChange}
+                    onChange={handleInputChange as any}
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     randomId={randomId}
                     fieldInvalid={fieldInvalid}
-                    value={field.fieldKey && formValues[field.fieldKey]}
-                    {...field}
+                    overrideDefaultValue={field.fieldKey && formValues[field.fieldKey]}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    {...(field as any)}
                 />
             );
         }
@@ -186,6 +215,24 @@ function Form({
         <div className="form-widget">
             <div className="form-widget-container">
                 {title && <h5 className="form-widget-title">{title}</h5>}
+
+                { (!!showBackButtonInTopOfPage && currentPage > 0 ) && (
+                  <div className="button-group --flex">
+                      {currentPage > 0 && (
+                        <Button
+                          appearance='secondary-action-button'
+                          type="button"
+                          className="osc-prev-button"
+                          onClick={() => {
+                              setCurrentPage && setCurrentPage(currentPage - 1);
+                              scrollTop();
+                          }}
+                        >
+                            {prevPageText || 'vorige'}
+                        </Button>
+                      )}
+                  </div>
+                )}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
                     {formStyle === 'youth' && totalFieldCount > 0 && (
@@ -197,7 +244,7 @@ function Form({
                     )}
 
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
-                    {fields.map((field: ComponentFieldProps, index: number) => {
+                    {fieldsToRender.map((field: ComponentFieldProps, index: number) => {
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
@@ -224,9 +271,10 @@ function Form({
                                     <div className="info-block-buttons">
                                         {/* @ts-ignore */}
                                         {field.infoBlockExtraButton && (
-                                            <button className="update-button">
+                                            /* @ts-ignore */
+                                            <a className="update-button" href={field.infoBlockExtraButton} rel="noreferrer">
                                                 <span>Blijf op de hoogte</span>
-                                            </button>
+                                            </a>
                                         )}
                                         {/* @ts-ignore */}
                                         {field.infoBlockShareButton && (
