@@ -1096,6 +1096,7 @@ label.utrecht-form-label {
       }
 
       .question {
+        height: 100%;
         justify-content: start;
 
         @container (min-height: 900px) and (min-width: 768px) {
