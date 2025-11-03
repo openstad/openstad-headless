@@ -1,6 +1,5 @@
 import './swipe.scss';
 import React, { useState, useEffect, useMemo, FC, useCallback } from 'react';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps } from '@openstad-headless/types';
 import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
 import { FormValue } from '@openstad-headless/form/src/form';
@@ -63,27 +62,29 @@ const defaultCards: SwipeCard[] = [
 
 const SwipeField: FC<SwipeWidgetProps> = ({
   cards = defaultCards,
-  onSwipeLeft = () => { console.log('Swiped LEFT'); },
-  onSwipeRight = () => { console.log('Swiped RIGHT'); },
+  onSwipeLeft,
+  onSwipeRight,
   showButtons = true,
   enableKeyboard = true,
   required = false,
   onChange,
   fieldKey,
   overrideDefaultValue,
-  ...props
 }) => {
-  const swipeCards = useMemo(() => {
-    return cards.length > 0 ? cards : defaultCards;
-  }, [cards]);
+  // Initialize data
+  const swipeCards = useMemo(() => cards.length > 0 ? cards : defaultCards, [cards]);
+  const initialAnswers = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
 
-  const initialValue = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
-
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
+  // Core swipe state
   const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(swipeCards);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialAnswers);
+  const [isFinished, setIsFinished] = useState(false);
+
+  // Animation state
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  
+  // Drag state
   const [dragState, setDragState] = useState({
     isDragging: false,
     startX: 0,
@@ -93,18 +94,59 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaX: 0,
     deltaY: 0,
   });
+
+  // UI state
   const [isInfoVisible, setIsInfoVisible] = useState(false);
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialValue);
-  const [explanations, setExplanations] = useState<Record<string, string>>({});
-  const [showSummary, setShowSummary] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
+  const [explanations, setExplanations] = useState<Record<string, string>>({});
+  
+  // Pending swipe for explanation dialogs
   const [pendingSwipe, setPendingSwipe] = useState<{card: SwipeCard, direction: 'left' | 'right'} | null>(null);
+
+  // Helper function to get unanswered cards
+  const getUnansweredCards = useCallback(() => 
+    remainingCards.filter(card => !initialAnswers[card.id]), 
+    [remainingCards, initialAnswers]
+  );
+
+  // Helper function to complete a swipe animation
+  const completeSwipe = useCallback((card: SwipeCard, direction: 'left' | 'right') => {
+    setTimeout(() => {
+      setSwipeAnswers(prev => ({
+        ...prev,
+        [card.id]: direction
+      }));
+      removeCurrentCard();
+      setSwipeDirection(null);
+      setIsAnimating(false);
+    }, 200);
+  }, []);
+
+  // Helper function to close explanation dialog and complete swipe
+  const closeExplanationDialog = useCallback(() => {
+    setIsDialogClosing(true);
+    setTimeout(() => {
+      setShowExplanationDialog(false);
+      setIsDialogClosing(false);
+      setTimeout(() => {
+        if (pendingSwipe) {
+          setSwipeAnswers(prev => ({
+            ...prev,
+            [pendingSwipe.card.id]: pendingSwipe.direction
+          }));
+          setPendingSwipe(null);
+        }
+        removeCurrentCard();
+        setSwipeDirection(null);
+        setIsAnimating(false);
+      }, 200);
+    }, 200);
+  }, [pendingSwipe]);
 
   // Initialize remaining cards when cards prop changes
   useEffect(() => {
     setRemainingCards(swipeCards);
-    setCurrentCardIndex(0);
     setIsFinished(false);
   }, [swipeCards]);
 
@@ -122,10 +164,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [enableKeyboard, remainingCards, initialValue, isAnimating]);
+  }, [enableKeyboard, getUnansweredCards, isAnimating]);
 
   const handleSwipeLeft = () => {
-    const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+    const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
 
@@ -134,29 +176,17 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
       onSwipeLeft?.(currentCard);
 
-      // If explanation is required, show dialog and wait for it to close
       if (currentCard.explanationRequired) {
         setPendingSwipe({card: currentCard, direction: 'left'});
         setShowExplanationDialog(true);
-        // Animation will continue when dialog is closed - handled in the dialog close handlers
       } else {
-        // No explanation required, proceed immediately with animation
-        setTimeout(() => {
-          // Store the answer after animation
-          setSwipeAnswers(prev => ({
-            ...prev,
-            [currentCard.id]: 'left'
-          }));
-          removeCurrentCard();
-          setSwipeDirection(null);
-          setIsAnimating(false);
-        }, 200);
+        completeSwipe(currentCard, 'left');
       }
     }
   };
 
   const handleSwipeRight = () => {
-    const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+    const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
 
@@ -165,23 +195,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
       onSwipeRight?.(currentCard);
 
-      // If explanation is required, show dialog and wait for it to close
       if (currentCard.explanationRequired) {
         setPendingSwipe({card: currentCard, direction: 'right'});
         setShowExplanationDialog(true);
-        // Animation will continue when dialog is closed - handled in the dialog close handlers
       } else {
-        // No explanation required, proceed immediately with animation
-        setTimeout(() => {
-          // Store the answer after animation
-          setSwipeAnswers(prev => ({
-            ...prev,
-            [currentCard.id]: 'right'
-          }));
-          removeCurrentCard();
-          setSwipeDirection(null);
-          setIsAnimating(false);
-        }, 200);
+        completeSwipe(currentCard, 'right');
       }
     }
   };
@@ -190,15 +208,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsInfoVisible(false);
 
     setRemainingCards(prev => {
-      const unansweredCards = prev.filter(card => !initialValue[card.id]);
-      if (unansweredCards.length === 0) return prev;
+      const currentUnanswered = prev.filter(card => !initialAnswers[card.id]);
+      if (currentUnanswered.length === 0) return prev;
       
       // Find and remove the current card that was swiped
-      const currentCard = unansweredCards[0];
+      const currentCard = currentUnanswered[0];
       const newCards = prev.filter(card => card.id !== currentCard.id);
       
       // Check if there are any unanswered cards left
-      const remainingUnanswered = newCards.filter(card => !initialValue[card.id] && !swipeAnswers[card.id]);
+      const remainingUnanswered = newCards.filter(card => !initialAnswers[card.id] && !swipeAnswers[card.id]);
       if (remainingUnanswered.length === 0) {
         setIsFinished(true);
       }
@@ -230,7 +248,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   // Touch/Mouse event handlers
   const handlePointerDown = (event: React.PointerEvent) => {
-    if (isAnimating || unansweredCards.length === 0) return;
+    if (isAnimating || getUnansweredCards().length === 0) return;
 
     const clientX = event.clientX;
     const clientY = event.clientY;
@@ -343,7 +361,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }, [swipeAnswers]);
 
   // Get cards that haven't been answered yet
-  const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+  const unansweredCards = getUnansweredCards();
 
   // If no unanswered cards remain, show finished state
   if (isFinished || unansweredCards.length === 0) {
@@ -371,7 +389,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                       <div className="swipe-summary-buttons">
                         <button
                           className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
-                          onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'left'); }}
+                          onClick={(e) => ( e.preventDefault(), handleAnswerChange(card.id, 'left'))}
                           aria-label={`Oneens met: ${card.title}`}
                         >
                           <i className="ri-thumb-down-fill"></i>
@@ -379,7 +397,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                         </button>
                         <button
                           className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
-                          onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'right'); }}
+                          onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'right'))}
                           aria-label={`Eens met: ${card.title}`}
                         >
                           <i className="ri-thumb-up-fill"></i>
@@ -544,17 +562,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         <div className="swipe-actions" role="group" aria-label="Acties">
           <button
             className="swipe-btn swipe-btn-pass"
-            onClick={(e) => { handleSwipeLeft(); e.preventDefault(); }}
+            onClick={(e) => (e.preventDefault(), handleSwipeLeft())}
             disabled={unansweredCards.length === 0}
             aria-label="Afwijzen"
-            tabIndex={0}
           >
             <i className="ri-thumb-down-fill"></i>
             <span>Oneens</span>
           </button>
           <button
             className="swipe-info-btn"
-            onClick={(e) => { setIsInfoVisible(!isInfoVisible); e.preventDefault(); }}
+            onClick={(e) => (e.preventDefault(), setIsInfoVisible(!isInfoVisible))}
             disabled={!unansweredCards[0]?.infoField}
             aria-label="Toon info"
           >
@@ -562,10 +579,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           </button>
           <button
             className="swipe-btn swipe-btn-like"
-            onClick={(e) => { handleSwipeRight(); e.preventDefault(); }}
+            onClick={(e) => (e.preventDefault(), handleSwipeRight())}
             disabled={unansweredCards.length === 0}
             aria-label="Goedkeuren"
-            tabIndex={0}
           >
             <i className="ri-thumb-up-fill"></i>
             <span>Eens</span>
@@ -579,50 +595,12 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
             <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
             <textarea placeholder='Toelichting...' rows={5} />
-            <Button appearance="primary-action-button" onClick={() => {
-              setIsDialogClosing(true);
-              // Start closing animation, then continue with card removal
-              setTimeout(() => {
-                setShowExplanationDialog(false);
-                setIsDialogClosing(false);
-                // Continue with the card removal animation after dialog closes
-                setTimeout(() => {
-                  // Store the pending swipe answer
-                  if (pendingSwipe) {
-                    setSwipeAnswers(prev => ({
-                      ...prev,
-                      [pendingSwipe.card.id]: pendingSwipe.direction
-                    }));
-                    setPendingSwipe(null);
-                  }
-                  removeCurrentCard();
-                  setSwipeDirection(null);
-                  setIsAnimating(false);
-                }, 200);
-              }, 200); // Wait for closing animation
-            }}>Antwoord verzenden</Button>
-            <Button appearance="secondary-action-button" onClick={() => {
-              setIsDialogClosing(true);
-              // Start closing animation, then continue with card removal
-              setTimeout(() => {
-                setShowExplanationDialog(false);
-                setIsDialogClosing(false);
-                // Continue with the card removal animation after dialog closes
-                setTimeout(() => {
-                  // Store the pending swipe answer
-                  if (pendingSwipe) {
-                    setSwipeAnswers(prev => ({
-                      ...prev,
-                      [pendingSwipe.card.id]: pendingSwipe.direction
-                    }));
-                    setPendingSwipe(null);
-                  }
-                  removeCurrentCard();
-                  setSwipeDirection(null);
-                  setIsAnimating(false);
-                }, 200);
-              }, 200); // Wait for closing animation
-            }}>Sluiten zonder toelichting</Button>
+            <Button appearance="primary-action-button" onClick={closeExplanationDialog}>
+              Antwoord verzenden
+            </Button>
+            <Button appearance="secondary-action-button" onClick={closeExplanationDialog}>
+              Sluiten zonder toelichting
+            </Button>
           </div>
         </div>
       )}
