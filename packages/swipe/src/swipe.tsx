@@ -28,6 +28,7 @@ export type SwipeProps = {
   fieldKey: string;
   type?: string;
   required?: boolean;
+  overrideDefaultValue?: FormValue;
   onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
 };
 
@@ -69,43 +70,18 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   required = false,
   onChange,
   fieldKey,
+  overrideDefaultValue,
   ...props
 }) => {
   const swipeCards = useMemo(() => {
     return cards.length > 0 ? cards : defaultCards;
   }, [cards]);
 
-  // Generate a unique key for this widget instance based on cards
-  const storageKey = useMemo(() => {
-    const cardIds = swipeCards.map(card => card.id).join('-');
-    return `swipe-widget-state-${cardIds}`;
-  }, [swipeCards]);
+  const initialValue = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
 
-  // Load persisted state or use defaults (only from sessionStorage, not on page refresh)
-  const loadPersistedState = useCallback(() => {
-    try {
-      // Only load from sessionStorage (persists during tab session, not page refresh)
-      const saved = sessionStorage.getItem(storageKey);
-      if (saved) {
-        const parsedState = JSON.parse(saved);
-        // Validate that the saved state matches current cards
-        if (parsedState.cardIds && JSON.stringify(parsedState.cardIds) === JSON.stringify(swipeCards.map(c => c.id))) {
-          return parsedState;
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to load persisted swipe state:', error);
-    }
-    return null;
-  }, [storageKey, swipeCards]);
-
-  const persistedState = loadPersistedState();
-
-  const [currentCardIndex, setCurrentCardIndex] = useState(persistedState?.currentCardIndex ?? 0);
-  const [isFinished, setIsFinished] = useState(persistedState?.isFinished ?? false);
-  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(
-    persistedState?.remainingCards ?? swipeCards
-  );
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
+  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(swipeCards);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [dragState, setDragState] = useState({
@@ -118,67 +94,18 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaY: 0,
   });
   const [isInfoVisible, setIsInfoVisible] = useState(false);
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(
-    persistedState?.swipeAnswers ?? {}
-  );
-  const [explanations, setExplanations] = useState<Record<string, string>>(
-    persistedState?.explanations ?? {}
-  );
-  const [showSummary, setShowSummary] = useState(persistedState?.showSummary ?? false);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialValue);
+  const [explanations, setExplanations] = useState<Record<string, string>>({});
+  const [showSummary, setShowSummary] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
 
-  // Persist state to sessionStorage (only during tab session, not across page refreshes)
-  const persistState = useCallback(() => {
-    try {
-      const stateToSave = {
-        currentCardIndex,
-        isFinished,
-        remainingCards,
-        swipeAnswers,
-        explanations,
-        showSummary,
-        cardIds: swipeCards.map(card => card.id),
-        timestamp: Date.now()
-      };
-      sessionStorage.setItem(storageKey, JSON.stringify(stateToSave));
-    } catch (error) {
-      console.warn('Failed to persist swipe state:', error);
-    }
-  }, [currentCardIndex, isFinished, remainingCards, swipeAnswers, explanations, showSummary, swipeCards, storageKey]);
-
-  // Handle browser visibility changes to persist/restore state
+  // Initialize remaining cards when cards prop changes
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Browser tab becomes hidden - save state
-        persistState();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Also save state before page unload (but not on refresh since sessionStorage will be cleared)
-    const handleBeforeUnload = () => {
-      persistState();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [persistState]);
-
-  // Initialize remaining cards when cards prop changes (only if no persisted state)
-  useEffect(() => {
-    if (!persistedState) {
-      setRemainingCards(swipeCards);
-      setCurrentCardIndex(0);
-      setIsFinished(false);
-    }
-  }, [swipeCards, persistedState]);
+    setRemainingCards(swipeCards);
+    setCurrentCardIndex(0);
+    setIsFinished(false);
+  }, [swipeCards]);
 
   // Keyboard handling
   useEffect(() => {
@@ -261,7 +188,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     setRemainingCards(prev => {
       const newCards = prev.slice(1);
-      if (newCards.length === 0) {
+      // Check if there are any unanswered cards left (including newly answered ones in swipeAnswers)
+      const unansweredCards = newCards.filter(card => !initialValue[card.id] && !swipeAnswers[card.id]);
+      if (unansweredCards.length === 0) {
         setIsFinished(true);
       }
       return newCards;
@@ -292,7 +221,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   // Touch/Mouse event handlers
   const handlePointerDown = (event: React.PointerEvent) => {
-    if (isAnimating || remainingCards.length === 0) return;
+    if (isAnimating || unansweredCards.length === 0) return;
 
     const clientX = event.clientX;
     const clientY = event.clientY;
@@ -404,7 +333,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }
   }, [swipeAnswers]);
 
-  if (isFinished) {
+  // Get cards that haven't been answered yet
+  const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+
+  // If no unanswered cards remain, show finished state
+  if (isFinished || unansweredCards.length === 0) {
     return (
       <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
         <div className="swipe-finished-content">
@@ -469,9 +402,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'} data-required={required}>
       <div className="swipe-container" role="list" aria-label="Stellingen">
         <div className="swipe-stack">
-          {remainingCards.slice(0, 3).map((card, index) => {
+          {unansweredCards.slice(0, 3).map((card, index) => {
             const isTop = index === 0;
-            const zIndex = remainingCards.length - index;
+            const zIndex = unansweredCards.length - index;
             let transform = '';
             if (isTop && dragState.isDragging) {
               const rotation = dragState.deltaX * 0.1;
@@ -603,7 +536,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           <button
             className="swipe-btn swipe-btn-pass"
             onClick={(e) => { handleSwipeLeft(); e.preventDefault(); }}
-            disabled={remainingCards.length === 0}
+            disabled={unansweredCards.length === 0}
             aria-label="Afwijzen"
             tabIndex={0}
           >
@@ -621,7 +554,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           <button
             className="swipe-btn swipe-btn-like"
             onClick={(e) => { handleSwipeRight(); e.preventDefault(); }}
-            disabled={remainingCards.length === 0}
+            disabled={unansweredCards.length === 0}
             aria-label="Goedkeuren"
             tabIndex={0}
           >
