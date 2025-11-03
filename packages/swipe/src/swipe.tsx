@@ -99,6 +99,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [showSummary, setShowSummary] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
+  const [pendingSwipe, setPendingSwipe] = useState<{card: SwipeCard, direction: 'left' | 'right'} | null>(null);
 
   // Initialize remaining cards when cards prop changes
   useEffect(() => {
@@ -121,30 +122,31 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [enableKeyboard, remainingCards.length, isAnimating]);
+  }, [enableKeyboard, remainingCards, initialValue, isAnimating]);
 
   const handleSwipeLeft = () => {
-    if (remainingCards.length > 0 && !isAnimating) {
-      const currentCard = remainingCards[0];
+    const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+    if (unansweredCards.length > 0 && !isAnimating) {
+      const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
       setSwipeDirection('left');
-
-      // Store the answer
-      setSwipeAnswers(prev => ({
-        ...prev,
-        [currentCard.id]: 'left'
-      }));
 
       onSwipeLeft?.(currentCard);
 
       // If explanation is required, show dialog and wait for it to close
       if (currentCard.explanationRequired) {
+        setPendingSwipe({card: currentCard, direction: 'left'});
         setShowExplanationDialog(true);
         // Animation will continue when dialog is closed - handled in the dialog close handlers
       } else {
         // No explanation required, proceed immediately with animation
         setTimeout(() => {
+          // Store the answer after animation
+          setSwipeAnswers(prev => ({
+            ...prev,
+            [currentCard.id]: 'left'
+          }));
           removeCurrentCard();
           setSwipeDirection(null);
           setIsAnimating(false);
@@ -154,27 +156,28 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
   const handleSwipeRight = () => {
-    if (remainingCards.length > 0 && !isAnimating) {
-      const currentCard = remainingCards[0];
+    const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+    if (unansweredCards.length > 0 && !isAnimating) {
+      const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
       setSwipeDirection('right');
-
-      // Store the answer
-      setSwipeAnswers(prev => ({
-        ...prev,
-        [currentCard.id]: 'right'
-      }));
 
       onSwipeRight?.(currentCard);
 
       // If explanation is required, show dialog and wait for it to close
       if (currentCard.explanationRequired) {
+        setPendingSwipe({card: currentCard, direction: 'right'});
         setShowExplanationDialog(true);
         // Animation will continue when dialog is closed - handled in the dialog close handlers
       } else {
         // No explanation required, proceed immediately with animation
         setTimeout(() => {
+          // Store the answer after animation
+          setSwipeAnswers(prev => ({
+            ...prev,
+            [currentCard.id]: 'right'
+          }));
           removeCurrentCard();
           setSwipeDirection(null);
           setIsAnimating(false);
@@ -187,10 +190,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsInfoVisible(false);
 
     setRemainingCards(prev => {
-      const newCards = prev.slice(1);
-      // Check if there are any unanswered cards left (including newly answered ones in swipeAnswers)
-      const unansweredCards = newCards.filter(card => !initialValue[card.id] && !swipeAnswers[card.id]);
-      if (unansweredCards.length === 0) {
+      const unansweredCards = prev.filter(card => !initialValue[card.id]);
+      if (unansweredCards.length === 0) return prev;
+      
+      // Find and remove the current card that was swiped
+      const currentCard = unansweredCards[0];
+      const newCards = prev.filter(card => card.id !== currentCard.id);
+      
+      // Check if there are any unanswered cards left
+      const remainingUnanswered = newCards.filter(card => !initialValue[card.id] && !swipeAnswers[card.id]);
+      if (remainingUnanswered.length === 0) {
         setIsFinished(true);
       }
       return newCards;
@@ -546,7 +555,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           <button
             className="swipe-info-btn"
             onClick={(e) => { setIsInfoVisible(!isInfoVisible); e.preventDefault(); }}
-            disabled={!remainingCards[0]?.infoField}
+            disabled={!unansweredCards[0]?.infoField}
             aria-label="Toon info"
           >
             <span>Info</span>
@@ -578,6 +587,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 setIsDialogClosing(false);
                 // Continue with the card removal animation after dialog closes
                 setTimeout(() => {
+                  // Store the pending swipe answer
+                  if (pendingSwipe) {
+                    setSwipeAnswers(prev => ({
+                      ...prev,
+                      [pendingSwipe.card.id]: pendingSwipe.direction
+                    }));
+                    setPendingSwipe(null);
+                  }
                   removeCurrentCard();
                   setSwipeDirection(null);
                   setIsAnimating(false);
@@ -592,6 +609,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 setIsDialogClosing(false);
                 // Continue with the card removal animation after dialog closes
                 setTimeout(() => {
+                  // Store the pending swipe answer
+                  if (pendingSwipe) {
+                    setSwipeAnswers(prev => ({
+                      ...prev,
+                      [pendingSwipe.card.id]: pendingSwipe.direction
+                    }));
+                    setPendingSwipe(null);
+                  }
                   removeCurrentCard();
                   setSwipeDirection(null);
                   setIsAnimating(false);
