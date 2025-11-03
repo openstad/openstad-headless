@@ -123,11 +123,13 @@ function Form({
         }
     };
 
-    const handleInputChange = (event: { name: string, value: FormValue }, triggerSetLastKey: boolean = true) => {
+    const handleInputChange = (event: { name: string, value: any }, triggerSetLastKey?: boolean) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
 
-        if (triggerSetLastKey) {
+        console.log(formValues)
+
+        if (triggerSetLastKey !== false) {
             setLastUpdatedKey(name);
         }
     };
@@ -194,16 +196,16 @@ function Form({
         if (Component) {
             return (
                 <Component
-                    {...props}
+                    {...(props as any)}
                     index={index}
-                    onChange={handleInputChange}
+                    onChange={handleInputChange as any}
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     randomId={randomId}
                     fieldInvalid={fieldInvalid}
                     overrideDefaultValue={field.fieldKey && formValues[field.fieldKey]}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
-                    {...field}
+                    {...(field as any)}
                 />
             );
         }
