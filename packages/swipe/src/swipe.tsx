@@ -15,9 +15,9 @@ export type SwipeCard = {
 
 export type SwipeWidgetProps = BaseProps &
   SwipeProps & {
-    resourceId?: string;
-    resourceIdRelativePath?: string;
-  };
+  resourceId?: string;
+  resourceIdRelativePath?: string;
+};
 
 export type SwipeProps = {
   cards?: SwipeCard[];
@@ -28,9 +28,8 @@ export type SwipeProps = {
   fieldKey: string;
   type?: string;
   required?: boolean;
+  overrideDefaultValue?: FormValue;
   onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
-  agreeText?: string;
-  disagreeText?: string;
 };
 
 // Default demo cards - moved outside component to prevent recreation
@@ -63,54 +62,27 @@ const defaultCards: SwipeCard[] = [
 ];
 
 const SwipeField: FC<SwipeWidgetProps> = ({
-  cards = defaultCards,
-  onSwipeLeft = () => { console.log('Swiped LEFT'); },
-  onSwipeRight = () => { console.log('Swiped RIGHT'); },
-  showButtons = true,
-  enableKeyboard = true,
-  required = false,
-  agreeText = 'Eens',
-  disagreeText = 'Oneens',
-  onChange,
-  fieldKey,
-  ...props
-}) => {
+                                            cards = defaultCards,
+                                            onSwipeLeft = () => { console.log('Swiped LEFT'); },
+                                            onSwipeRight = () => { console.log('Swiped RIGHT'); },
+                                            showButtons = true,
+                                            enableKeyboard = true,
+                                            required = false,
+                                            onChange,
+                                            fieldKey,
+                                            overrideDefaultValue,
+                                            ...props
+                                          }) => {
   const swipeCards = useMemo(() => {
     return cards.length > 0 ? cards : defaultCards;
   }, [cards]);
 
-  // Generate a unique key for this widget instance based on cards
-  const storageKey = useMemo(() => {
-    const cardIds = swipeCards.map(card => card.id).join('-');
-    return `swipe-widget-state-${cardIds}`;
-  }, [swipeCards]);
+  const initialValue = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
 
-  // Load persisted state or use defaults (only from sessionStorage, not on page refresh)
-  const loadPersistedState = useCallback(() => {
-    try {
-      // Only load from sessionStorage (persists during tab session, not page refresh)
-      const saved = sessionStorage.getItem(storageKey);
-      if (saved) {
-        const parsedState = JSON.parse(saved);
-        // Validate that the saved state matches current cards
-        if (parsedState.cardIds && JSON.stringify(parsedState.cardIds) === JSON.stringify(swipeCards.map(c => c.id))) {
-          return parsedState;
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to load persisted swipe state:', error);
-    }
-    return null;
-  }, [storageKey, swipeCards]);
-
-  const persistedState = loadPersistedState();
-
-  const [currentCardIndex, setCurrentCardIndex] = useState(persistedState?.currentCardIndex ?? 0);
-  const [isFinished, setIsFinished] = useState(persistedState?.isFinished ?? false);
-  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(
-    persistedState?.remainingCards ?? swipeCards
-  );
-  const [swipeDirection, setSwipeDirection] = useState<string>('');
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
+  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(swipeCards);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [dragState, setDragState] = useState({
     isDragging: false,
@@ -122,67 +94,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaY: 0,
   });
   const [isInfoVisible, setIsInfoVisible] = useState(false);
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, string>>(
-    persistedState?.swipeAnswers ?? {}
-  );
-  const [explanations, setExplanations] = useState<Record<string, string>>(
-    persistedState?.explanations ?? {}
-  );
-  const [showSummary, setShowSummary] = useState(persistedState?.showSummary ?? false);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialValue);
+  const [explanations, setExplanations] = useState<Record<string, string>>({});
+  const [showSummary, setShowSummary] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
+  const [pendingSwipe, setPendingSwipe] = useState<{card: SwipeCard, direction: 'left' | 'right'} | null>(null);
 
-  // Persist state to sessionStorage (only during tab session, not across page refreshes)
-  const persistState = useCallback(() => {
-    try {
-      const stateToSave = {
-        currentCardIndex,
-        isFinished,
-        remainingCards,
-        swipeAnswers,
-        explanations,
-        showSummary,
-        cardIds: swipeCards.map(card => (card.title || card.id)),
-        timestamp: Date.now()
-      };
-      sessionStorage.setItem(storageKey, JSON.stringify(stateToSave));
-    } catch (error) {
-      console.warn('Failed to persist swipe state:', error);
-    }
-  }, [currentCardIndex, isFinished, remainingCards, swipeAnswers, explanations, showSummary, swipeCards, storageKey]);
-
-  // Handle browser visibility changes to persist/restore state
+  // Initialize remaining cards when cards prop changes
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Browser tab becomes hidden - save state
-        persistState();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Also save state before page unload (but not on refresh since sessionStorage will be cleared)
-    const handleBeforeUnload = () => {
-      persistState();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [persistState]);
-
-  // Initialize remaining cards when cards prop changes (only if no persisted state)
-  useEffect(() => {
-    if (!persistedState) {
-      setRemainingCards(swipeCards);
-      setCurrentCardIndex(0);
-      setIsFinished(false);
-    }
-  }, [swipeCards, persistedState]);
+    setRemainingCards(swipeCards);
+    setCurrentCardIndex(0);
+    setIsFinished(false);
+  }, [swipeCards]);
 
   // Keyboard handling
   useEffect(() => {
@@ -198,31 +122,31 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [enableKeyboard, remainingCards.length, isAnimating]);
+  }, [enableKeyboard, remainingCards, initialValue, isAnimating]);
 
   const handleSwipeLeft = () => {
-    if (remainingCards.length > 0 && !isAnimating) {
-      const currentCard = remainingCards[0];
+    const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+    if (unansweredCards.length > 0 && !isAnimating) {
+      const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
-      setSwipeDirection(disagreeText);
-      const cardKey = currentCard.title || currentCard.id;
-
-      // Store the answer
-      setSwipeAnswers(prev => ({
-        ...prev,
-        [cardKey]: disagreeText
-      }));
+      setSwipeDirection('left');
 
       onSwipeLeft?.(currentCard);
 
       // If explanation is required, show dialog and wait for it to close
       if (currentCard.explanationRequired) {
+        setPendingSwipe({card: currentCard, direction: 'left'});
         setShowExplanationDialog(true);
         // Animation will continue when dialog is closed - handled in the dialog close handlers
       } else {
         // No explanation required, proceed immediately with animation
         setTimeout(() => {
+          // Store the answer after animation
+          setSwipeAnswers(prev => ({
+            ...prev,
+            [currentCard.id]: 'left'
+          }));
           removeCurrentCard();
           setSwipeDirection(null);
           setIsAnimating(false);
@@ -232,28 +156,28 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
   const handleSwipeRight = () => {
-    if (remainingCards.length > 0 && !isAnimating) {
-      const currentCard = remainingCards[0];
+    const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+    if (unansweredCards.length > 0 && !isAnimating) {
+      const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
-      setSwipeDirection(agreeText);
-      const cardKey = currentCard.title || currentCard.id;
-
-      // Store the answer
-      setSwipeAnswers(prev => ({
-        ...prev,
-        [cardKey]: agreeText
-      }));
+      setSwipeDirection('right');
 
       onSwipeRight?.(currentCard);
 
       // If explanation is required, show dialog and wait for it to close
       if (currentCard.explanationRequired) {
+        setPendingSwipe({card: currentCard, direction: 'right'});
         setShowExplanationDialog(true);
         // Animation will continue when dialog is closed - handled in the dialog close handlers
       } else {
         // No explanation required, proceed immediately with animation
         setTimeout(() => {
+          // Store the answer after animation
+          setSwipeAnswers(prev => ({
+            ...prev,
+            [currentCard.id]: 'right'
+          }));
           removeCurrentCard();
           setSwipeDirection(null);
           setIsAnimating(false);
@@ -266,8 +190,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsInfoVisible(false);
 
     setRemainingCards(prev => {
-      const newCards = prev.slice(1);
-      if (newCards.length === 0) {
+      const unansweredCards = prev.filter(card => !initialValue[card.id]);
+      if (unansweredCards.length === 0) return prev;
+
+      // Find and remove the current card that was swiped
+      const currentCard = unansweredCards[0];
+      const newCards = prev.filter(card => card.id !== currentCard.id);
+
+      // Check if there are any unanswered cards left
+      const remainingUnanswered = newCards.filter(card => !initialValue[card.id] && !swipeAnswers[card.id]);
+      if (remainingUnanswered.length === 0) {
         setIsFinished(true);
       }
       return newCards;
@@ -298,7 +230,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   // Touch/Mouse event handlers
   const handlePointerDown = (event: React.PointerEvent) => {
-    if (isAnimating || remainingCards.length === 0) return;
+    if (isAnimating || unansweredCards.length === 0) return;
 
     const clientX = event.clientX;
     const clientY = event.clientY;
@@ -340,7 +272,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     // Set swipe direction for visual feedback
     if (Math.abs(deltaX) > 50) {
-      setSwipeDirection(deltaX > 0 ? agreeText : disagreeText);
+      setSwipeDirection(deltaX > 0 ? 'right' : 'left');
     } else {
       setSwipeDirection(null);
     }
@@ -390,7 +322,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
 
-  const handleAnswerChange = (cardId: string, newAnswer: string) => {
+  const handleAnswerChange = (cardId: string, newAnswer: 'left' | 'right') => {
     setSwipeAnswers(prev => ({
       ...prev,
       [cardId]: newAnswer
@@ -410,7 +342,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }
   }, [swipeAnswers]);
 
-  if (isFinished) {
+  // Get cards that haven't been answered yet
+  const unansweredCards = remainingCards.filter(card => !initialValue[card.id]);
+
+  // If no unanswered cards remain, show finished state
+  if (isFinished || unansweredCards.length === 0) {
     return (
       <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
         <div className="swipe-finished-content">
@@ -419,42 +355,39 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
           <div className="swipe-summary">
             {swipeCards.map((card) => {
-              const cardKey = card.title || card.id;
-              const answer = swipeAnswers[cardKey];
+              const answer = swipeAnswers[card.id];
               return (
-                <div key={cardKey} className="swipe-summary-item">
-                  <div className="swipe-summary-question">
-                    {card.image && (
-                      <div className="swipe-summary-image">
-                        <img src={card.image} alt="" />
-                      </div>
-                    )}
-                    <p>{card.title}</p>
-                  </div>
-                  <div className="swipe-summary-answer">
-                    <div className="swipe-summary-buttons">
-                      <button
-                        className={`swipe-summary-btn ${answer === disagreeText ? 'active' : ''}`}
-                        onClick={(e) => { e.preventDefault(); handleAnswerChange(cardKey, disagreeText); }}
-                        aria-label={`${disagreeText} met: ${card.title}`}
-                      >
-                        <i className="ri-thumb-down-fill"></i>
-                        <span>
-                          {disagreeText}
-                        </span>
-                      </button>
-                      <button
-                        className={`swipe-summary-btn ${answer === agreeText ? 'active' : ''}`}
-                        onClick={(e) => { e.preventDefault(); handleAnswerChange(cardKey, agreeText); }}
-                        aria-label={`${agreeText} met: ${card.title}`}
-                      >
-                        <i className="ri-thumb-up-fill"></i>
-                        <span>
-                          {agreeText}
-                        </span>
-                      </button>
+                <div key={card.id} className="swipe-summary-item">
+                  <div className="swipe-summary-content">
+                    <div className="swipe-summary-question">
+                      {card.image && (
+                        <div className="swipe-summary-image">
+                          <img src={card.image} alt="" />
+                        </div>
+                      )}
+                      <p>{card.title}</p>
+                    </div>
+                    <div className="swipe-summary-answer">
+                      <div className="swipe-summary-buttons">
+                        <button
+                          className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
+                          onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'left'); }}
+                          aria-label={`Oneens met: ${card.title}`}
+                        >
+                          <i className="ri-thumb-down-fill"></i>
+                          <span>Oneens</span>
+                        </button>
+                        <button
+                          className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
+                          onClick={(e) => { e.preventDefault(); handleAnswerChange(card.id, 'right'); }}
+                          aria-label={`Eens met: ${card.title}`}
+                        >
+                          <i className="ri-thumb-up-fill"></i>
+                          <span>Eens</span>
+                        </button>
                       </div>
                     </div>
+                  </div>
                   <div className="swipe-summary-explanation">
                     <textarea
                       id={`explanation-${card.id}`}
@@ -478,58 +411,25 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'} data-required={required}>
       <div className="swipe-container" role="list" aria-label="Stellingen">
         <div className="swipe-stack">
-          {remainingCards.slice(0, 3).map((card, index) => {
+          {unansweredCards.slice(0, 3).map((card, index) => {
             const isTop = index === 0;
-            const zIndex = remainingCards.length - index;
+            const zIndex = unansweredCards.length - index;
             let transform = '';
             if (isTop && dragState.isDragging) {
               const rotation = dragState.deltaX * 0.1;
               transform = `translate(${dragState.deltaX}px, ${dragState.deltaY * 0.5}px) rotate(${rotation}deg)`;
             } else if (isTop && swipeDirection && isAnimating) {
-              const direction = swipeDirection === agreeText ? 1 : -1;
+              const direction = swipeDirection === 'right' ? 1 : -1;
               transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
             }
-
-            const cardKey = card.title || card.id;
-
             return (
               <>
                 <div
-                  key={cardKey}
+                  key={card.id}
                   className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
                   style={{ zIndex, transform }}
                   {...(isTop && /iPad|iPhone|iPod|Android/i.test(navigator.userAgent)
                     ? {
-<<<<<<< HEAD
-                        onTouchStart: (e) => {
-                          e.preventDefault();
-                          const touch = e.touches[0];
-                          setDragState({
-                            isDragging: true,
-                            startX: touch.clientX,
-                            startY: touch.clientY,
-                            currentX: touch.clientX,
-                            currentY: touch.clientY,
-                            deltaX: 0,
-                            deltaY: 0,
-                          });
-                        },
-                        onTouchMove: (e) => {
-                          e.preventDefault();
-                          if (!dragState.isDragging) return;
-                          const touch = e.touches[0];
-                          const deltaX = touch.clientX - dragState.startX;
-                          const deltaY = touch.clientY - dragState.startY;
-                          setDragState(prev => ({
-                            ...prev,
-                            currentX: touch.clientX,
-                            currentY: touch.clientY,
-                            deltaX,
-                            deltaY,
-                          }));
-                          if (Math.abs(deltaX) > 50) {
-                            setSwipeDirection(deltaX > 0 ? agreeText : disagreeText);
-=======
                       onTouchStart: (e) => {
                         e.preventDefault();
                         const touch = e.touches[0];
@@ -583,7 +483,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                         if (shouldSwipe) {
                           if (deltaX > 0) {
                             handleSwipeRight();
->>>>>>> 728a7c8d910505242337bb4675a962dc1324e0ff
                           } else {
                             handleSwipeLeft();
                           }
@@ -602,7 +501,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   role="listitem"
                   aria-label={card.title}
                   tabIndex={isTop ? 0 : -1}
-                  aria-describedby={`swipe-card-desc-${cardKey}`}
+                  aria-describedby={`swipe-card-desc-${card.id}`}
                 >
                   {card.image && (
                     <div className="swipe-card-image">
@@ -610,17 +509,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     </div>
                   )}
                   <div className="swipe-card-content">
-<<<<<<< HEAD
-                    <p className="swipe-card-description" id={`swipe-card-desc-${cardKey}`}>{card.title}</p>
-=======
                     <Paragraph className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</Paragraph>
->>>>>>> 728a7c8d910505242337bb4675a962dc1324e0ff
                   </div>
 
 
                   {isTop && swipeDirection && (
-                    <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === disagreeText ? 'Afwijzen' : 'Goedkeuren'}>
-                      {swipeDirection === disagreeText ? (
+                    <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
+                      {swipeDirection === 'left' ? (
                         <i className="ri-thumb-down-fill"></i>
 
                       ) : (
@@ -650,19 +545,17 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           <button
             className="swipe-btn swipe-btn-pass"
             onClick={(e) => { handleSwipeLeft(); e.preventDefault(); }}
-            disabled={remainingCards.length === 0}
-            aria-label={`Kies voor: ${disagreeText}`}
+            disabled={unansweredCards.length === 0}
+            aria-label="Afwijzen"
             tabIndex={0}
           >
             <i className="ri-thumb-down-fill"></i>
-            <span>
-              {disagreeText}
-            </span>
+            <span>Oneens</span>
           </button>
           <button
             className="swipe-info-btn"
             onClick={(e) => { setIsInfoVisible(!isInfoVisible); e.preventDefault(); }}
-            disabled={!remainingCards[0]?.infoField}
+            disabled={!unansweredCards[0]?.infoField}
             aria-label="Toon info"
           >
             <span>Info</span>
@@ -670,14 +563,12 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           <button
             className="swipe-btn swipe-btn-like"
             onClick={(e) => { handleSwipeRight(); e.preventDefault(); }}
-            disabled={remainingCards.length === 0}
-            aria-label={`Kies voor: ${agreeText}`}
+            disabled={unansweredCards.length === 0}
+            aria-label="Goedkeuren"
             tabIndex={0}
           >
             <i className="ri-thumb-up-fill"></i>
-            <span>
-              {agreeText}
-            </span>
+            <span>Eens</span>
           </button>
         </div>
       )}
@@ -696,6 +587,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 setIsDialogClosing(false);
                 // Continue with the card removal animation after dialog closes
                 setTimeout(() => {
+                  // Store the pending swipe answer
+                  if (pendingSwipe) {
+                    setSwipeAnswers(prev => ({
+                      ...prev,
+                      [pendingSwipe.card.id]: pendingSwipe.direction
+                    }));
+                    setPendingSwipe(null);
+                  }
                   removeCurrentCard();
                   setSwipeDirection(null);
                   setIsAnimating(false);
@@ -710,6 +609,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 setIsDialogClosing(false);
                 // Continue with the card removal animation after dialog closes
                 setTimeout(() => {
+                  // Store the pending swipe answer
+                  if (pendingSwipe) {
+                    setSwipeAnswers(prev => ({
+                      ...prev,
+                      [pendingSwipe.card.id]: pendingSwipe.direction
+                    }));
+                    setPendingSwipe(null);
+                  }
                   removeCurrentCard();
                   setSwipeDirection(null);
                   setIsAnimating(false);
