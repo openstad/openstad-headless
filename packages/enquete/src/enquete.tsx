@@ -384,13 +384,16 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['title'] = item?.title || '';
                     fieldData['infoField'] = item?.infoField || '';
                     fieldData['infofieldExplanation'] = item?.infofieldExplanation || false;
-                    fieldData['options'] = item?.options?.map((dilemmaOption) => {
+                    fieldData['dilemmas'] = item?.options?.map((dilemmaOption) => {
                         return {
                             id: dilemmaOption.trigger,
+                            infoField: dilemmaOption.titles[0].infoField || '',
+                            infofieldExplanation: dilemmaOption.titles[0].infofieldExplanation || false,
                             a: {
                                 title: dilemmaOption.titles[0].key,
                                 description: dilemmaOption.titles[0].description || '',
-                                image: dilemmaOption.titles[0].image || ''
+                                image: dilemmaOption.titles[0].image || '',
+
                             },
                             b: {
                                 title: dilemmaOption.titles[0].key_b || '',

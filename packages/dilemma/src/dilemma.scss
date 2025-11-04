@@ -39,7 +39,8 @@
         pointer-events: none;
         display: flex;
         justify-content: center;
-        span{
+
+        span {
             align-self: center;
             text-align: center;
             width: 35px;
@@ -149,9 +150,97 @@
 
 // Make sure the 'next' button is not shown when explanation asked for.
 .question-type-dilemma:has(.--explanation) {
-    ~ .button-group{
-        .utrecht-button::after{
+    ~.button-group {
+        .utrecht-button::after {
             display: none;
+        }
+    }
+}
+
+// styling for the finished state
+.dilemma-field {
+    .dilemma-finished-content {
+        .dilemma-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+
+            &-item {
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
+                box-shadow: 0 2px 4px #0000001a;
+                overflow: hidden;
+            }
+
+            &-content {
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            &-option {
+                border-radius: 8px;
+                padding: 8px;
+
+                &:has(.active) {
+                    background: #1160A1;
+
+                    .utrecht-heading-4,
+                    .utrecht-paragraph {
+                        color: #fff;
+                    }
+                }
+
+                .dilemma-summary-btn {
+                    padding: 0;
+                    margin: 0;
+                    border: none;
+                    background-color: unset;
+                    text-align: left;
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+
+                    .utrecht-heading-4,
+                    .utrecht-paragraph {
+                        font-size: 14px;
+                    }
+
+                    .dilemma-option-image {
+                        width: 60px;
+                        height: 60px;
+                        border-radius: var(--dilemmaImageBorderRadius);
+                        overflow: hidden;
+                        margin-right: 12px;
+
+                        img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            display: block;
+                        }
+                    }
+                }
+            }
+
+            &-explanation {
+                background: #f0f0f0;
+                padding: 16px;
+
+                textarea {
+                    width: 100%;
+                    border: none;
+                    background: #fff;
+                    font-family: inherit;
+                    font-size: 14px;
+                    resize: none;
+                    padding: 8px;
+                    border-radius: 6px;
+                    display: block;
+                    height: 60px;
+                }
+            }
         }
     }
 }

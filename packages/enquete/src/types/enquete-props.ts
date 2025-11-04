@@ -80,6 +80,7 @@ export type Title = {
   text?: string;
   key: string;
   infoField?: string;
+  infofieldExplanation?: boolean;
   isOtherOption?: boolean;
   defaultValue?: boolean;
   image?: string;
