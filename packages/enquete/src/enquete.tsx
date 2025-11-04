@@ -382,6 +382,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'dilemma':
                     fieldData['type'] = 'dilemma';
                     fieldData['title'] = item?.title || '';
+                    fieldData['required'] = item?.fieldRequired || false;
                     fieldData['infoField'] = item?.infoField || '';
                     fieldData['infofieldExplanation'] = item?.infofieldExplanation || false;
                     fieldData['dilemmas'] = item?.options?.map((dilemmaOption) => {
