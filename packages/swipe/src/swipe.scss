@@ -133,6 +133,14 @@
       transition:
         transform 0.2s cubic-bezier(.33, .05, .58, .98),
         opacity 0.2s cubic-bezier(.33, .05, .58, .98) !important;
+
+      &.swipe-card--left {
+        transform: translateX(-150px) rotate(-10deg) !important;
+      }
+
+      &.swipe-card--right {
+        transform: translateX(150px) rotate(10deg) !important;
+      }
     }
 
     &--top {

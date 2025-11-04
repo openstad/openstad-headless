@@ -51,6 +51,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [animationType, setAnimationType] = useState<'drag' | 'button' | null>(null);
 
   const dragStateRef = useRef({
     isDragging: false,
@@ -102,6 +103,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     setIsAnimating(false);
     setSwipeDirection(null);
+    setAnimationType(null);
     setPendingSwipe(null);
     setShowExplanationDialog(false);
 
@@ -123,6 +125,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       removeCurrentCard();
       setSwipeDirection(null);
       setIsAnimating(false);
+      setAnimationType(null);
     }, 200);
   }, []);
 
@@ -142,6 +145,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         removeCurrentCard();
         setSwipeDirection(null);
         setIsAnimating(false);
+        setAnimationType(null);
       }, 200);
     }, 200);
   }, [pendingSwipe]);
@@ -174,13 +178,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [enableKeyboard, getUnansweredCards, isAnimating]);
 
-  const handleSwipeLeft = useCallback(() => {
+  const handleSwipeLeft = useCallback((fromButton = false) => {
     const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
       setSwipeDirection('left');
+      setAnimationType(fromButton ? 'button' : 'drag');
 
       onSwipeLeft?.(currentCard);
 
@@ -193,13 +198,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }
   }, [getUnansweredCards, isAnimating, onSwipeLeft, completeSwipe]);
 
-  const handleSwipeRight = useCallback(() => {
+  const handleSwipeRight = useCallback((fromButton = false) => {
     const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
       setSwipeDirection('right');
+      setAnimationType(fromButton ? 'button' : 'drag');
 
       onSwipeRight?.(currentCard);
 
@@ -333,9 +339,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     if (shouldSwipe) {
       if (deltaX > 0) {
-        handleSwipeRight();
+        handleSwipeRight(false);
       } else {
-        handleSwipeLeft();
+        handleSwipeLeft(false);
       }
     } else {
       setSwipeDirection(null);
@@ -390,6 +396,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsFinished(false);
     setIsAnimating(false);
     setSwipeDirection(null);
+    setAnimationType(null);
     setPendingSwipe(null);
     setShowExplanationDialog(false);
   }, [swipeCards, initialAnswers, swipeAnswers, onChange, fieldKey]);
@@ -489,18 +496,22 @@ const SwipeField: FC<SwipeWidgetProps> = ({
               const isTop = index === 0;
               const zIndex = unansweredCards.length - index;
               let transform = '';
+              
               if (isTop && dragStateRef.current.isDragging) {
+                // During drag, use the drag transform
                 transform = dragTransform;
-              } else if (isTop && swipeDirection && isAnimating) {
+              } else if (isTop && swipeDirection && isAnimating && animationType === 'drag') {
+                // Swipe release animation - use inline transform
                 const direction = swipeDirection === 'right' ? 1 : -1;
                 transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
               }
+              // For button clicks, we'll use CSS classes instead of inline transform
               return (
                 <>
                   <div
                     key={card.id}
                     className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
-                    style={{ zIndex, transform }}
+                    style={{ zIndex, ...(transform ? { transform } : {}) }}
                     {...(isTop
                       ? {
                         onPointerDown: handlePointerDown,
@@ -556,7 +567,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           <div className="swipe-actions" role="group" aria-label="Acties">
             <button
               className="swipe-btn swipe-btn-pass"
-              onClick={(e) => (e.preventDefault(), handleSwipeLeft())}
+              onClick={(e) => (e.preventDefault(), handleSwipeLeft(true))}
               disabled={unansweredCards.length === 0}
               aria-label="Afwijzen"
             >
@@ -573,7 +584,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             </button>
             <button
               className="swipe-btn swipe-btn-like"
-              onClick={(e) => (e.preventDefault(), handleSwipeRight())}
+              onClick={(e) => (e.preventDefault(), handleSwipeRight(true))}
               disabled={unansweredCards.length === 0}
               aria-label="Goedkeuren"
             >
