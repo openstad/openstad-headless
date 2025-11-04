@@ -160,10 +160,21 @@
 // styling for the finished state
 .dilemma-field {
     .dilemma-finished-content {
+
+        .dilemma-intro {
+            text-align: left;
+            margin-bottom: 16px;
+
+            h2 {
+                text-align: left;
+            }
+        }
+
         .dilemma-summary {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 16px;
+            width: 100%;
 
             &-item {
                 border-radius: 8px;
@@ -181,10 +192,13 @@
 
             &-option {
                 border-radius: 8px;
-                padding: 8px;
+                border: 2px solid #e0e0e0;
+                background: #fff;
+                transition: all .2s ease-in-out;
 
                 &:has(.active) {
                     background: #1160A1;
+                    border: 2px solid #1160A1;
 
                     .utrecht-heading-4,
                     .utrecht-paragraph {
@@ -193,7 +207,8 @@
                 }
 
                 .dilemma-summary-btn {
-                    padding: 0;
+                    width: 100%;
+                    padding: 8px;
                     margin: 0;
                     border: none;
                     background-color: unset;
@@ -205,6 +220,7 @@
                     .utrecht-heading-4,
                     .utrecht-paragraph {
                         font-size: 14px;
+                        transition: color .2s ease-in-out;
                     }
 
                     .dilemma-option-image {

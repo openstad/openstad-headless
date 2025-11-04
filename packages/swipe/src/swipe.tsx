@@ -83,7 +83,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   // Animation state
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  
+
   // Drag state using ref for better performance
   const dragStateRef = useRef({
     isDragging: false,
@@ -103,13 +103,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
   const [explanations, setExplanations] = useState<Record<string, string>>({});
-  
+
   // Pending swipe for explanation dialogs
-  const [pendingSwipe, setPendingSwipe] = useState<{card: SwipeCard, direction: 'left' | 'right'} | null>(null);
+  const [pendingSwipe, setPendingSwipe] = useState<{ card: SwipeCard, direction: 'left' | 'right' } | null>(null);
 
   // Helper function to get unanswered cards
-  const getUnansweredCards = useCallback(() => 
-    remainingCards.filter(card => !initialAnswers[card.id]), 
+  const getUnansweredCards = useCallback(() =>
+    remainingCards.filter(card => !initialAnswers[card.id]),
     [remainingCards, initialAnswers]
   );
 
@@ -189,7 +189,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       onSwipeLeft?.(currentCard);
 
       if (currentCard.explanationRequired) {
-        setPendingSwipe({card: currentCard, direction: 'left'});
+        setPendingSwipe({ card: currentCard, direction: 'left' });
         setShowExplanationDialog(true);
       } else {
         completeSwipe(currentCard, 'left');
@@ -208,7 +208,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       onSwipeRight?.(currentCard);
 
       if (currentCard.explanationRequired) {
-        setPendingSwipe({card: currentCard, direction: 'right'});
+        setPendingSwipe({ card: currentCard, direction: 'right' });
         setShowExplanationDialog(true);
       } else {
         completeSwipe(currentCard, 'right');
@@ -222,11 +222,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setRemainingCards(prev => {
       const currentUnanswered = prev.filter(card => !initialAnswers[card.id]);
       if (currentUnanswered.length === 0) return prev;
-      
+
       // Find and remove the current card that was swiped
       const currentCard = currentUnanswered[0];
       const newCards = prev.filter(card => card.id !== currentCard.id);
-      
+
       // Check if there are any unanswered cards left
       const remainingUnanswered = newCards.filter(card => !initialAnswers[card.id] && !swipeAnswers[card.id]);
       if (remainingUnanswered.length === 0) {
@@ -272,12 +272,12 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
-    
+
     animationFrameRef.current = requestAnimationFrame(() => {
       const rotation = deltaX * 0.1;
       const transform = `translate(${deltaX}px, ${deltaY * 0.5}px) rotate(${rotation}deg)`;
       setDragTransform(transform);
-      
+
       // Set swipe direction for visual feedback
       if (Math.abs(deltaX) > 50) {
         setSwipeDirection(deltaX > 0 ? 'right' : 'left');
@@ -334,7 +334,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     // Use requestAnimationFrame for smooth visual updates
     updateDragTransform(deltaX, deltaY);
-    
+
     event.preventDefault();
   }, [isAnimating, cleanupDragState, updateDragTransform]);
 
@@ -410,8 +410,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     return (
       <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
         <div className="swipe-finished-content">
-          <h2>Jouw antwoorden</h2>
-          <p>Bekijk en wijzig eventueel je antwoorden op de stellingen:</p>
+          <Heading level={2}>Jouw antwoorden</Heading>
+          <Paragraph>Bekijk en wijzig eventueel je antwoorden op de stellingen:</Paragraph>
 
           <div className="swipe-summary">
             {swipeCards.map((card) => {
@@ -431,7 +431,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                       <div className="swipe-summary-buttons">
                         <button
                           className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
-                          onClick={(e) => ( e.preventDefault(), handleAnswerChange(card.id, 'left'))}
+                          onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'left'))}
                           aria-label={`Oneens met: ${card.title}`}
                         >
                           <i className="ri-thumb-down-fill"></i>
@@ -487,7 +487,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   key={card.id}
                   className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
                   style={{ zIndex, transform }}
-                  {...(isTop 
+                  {...(isTop
                     ? {
                       onPointerDown: handlePointerDown,
                       onPointerMove: handlePointerMove,
