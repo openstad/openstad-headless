@@ -328,7 +328,6 @@ app.get('/document/*',
         return;
       }
       
-      const path = require('path');
       const documentsDir = path.resolve('documents/');
 
       const requestedPath = req.path.replace(/^\/document\//, '');

@@ -1,7 +1,7 @@
 import './swipe.scss';
-import React, { useState, useEffect, useMemo, FC, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, FC, useCallback, useRef } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
-import {Heading, Paragraph, Button, Textarea} from '@utrecht/component-library-react';
+import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
 import { FormValue } from '@openstad-headless/form/src/form';
 
 export type SwipeCard = {
@@ -29,43 +29,11 @@ export type SwipeProps = {
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
-  agreeText?: string;
-  disagreeText?: string;
 };
 
-// Default demo cards - moved outside component to prevent recreation
-const defaultCards: SwipeCard[] = [
-  {
-    id: '1',
-    title: 'Iedere wijk in Den Haag moet evenveel sportmogelijkheden hebben.',
-    image: 'https://picsum.photos/seed/1752819645426/400/600'
-  },
-  {
-    id: '2',
-    title: 'Lorem ipsum dolor sit amet, consecdidunt ut labore et dolore magna aliqua.',
-    image: 'https://picsum.photos/seed/17528196455426/400/600'
-  },
-  {
-    id: '3',
-    title: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    image: 'https://picsum.photos/seed/17528139645426/400/600'
-  },
-  {
-    id: '4',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
-    image: 'https://picsum.photos/seed/17528119645426/400/600'
-  },
-  {
-    id: '5',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    image: 'https://picsum.photos/seed/175281679645426/400/600'
-  },
-];
-
-type defaultValueObject = Array< { cardId: string; answer: string; explanation?: string } >;
 
 const SwipeField: FC<SwipeWidgetProps> = ({
-                                            cards = defaultCards,
+                                            cards = [],
                                             onSwipeLeft,
                                             onSwipeRight,
                                             showButtons = true,
@@ -73,38 +41,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                                             required = false,
                                             onChange,
                                             fieldKey,
-                                            agreeText = 'Eens',
-                                            disagreeText = 'Oneens',
                                             overrideDefaultValue,
                                           }) => {
-  // Initialize data
-  const swipeCards = useMemo(() => cards.length > 0 ? cards : defaultCards, [cards]);
+  const swipeCards = useMemo(() => cards.length > 0 ? cards : [], [cards]);
+  const initialAnswers = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
 
-  let initialAnswers: Record<string, string> = {};
-  let initialAnswersExplanation: Record<string, string> = {};
-
-  if (overrideDefaultValue && typeof overrideDefaultValue === 'object') {
-    const overrideArray = overrideDefaultValue as defaultValueObject;
-    overrideArray.forEach(item => {
-      initialAnswers[item.cardId as string] = item.answer;
-      if (item.explanation) {
-        initialAnswersExplanation[item.cardId as string] = item.explanation;
-      }
-    });
-  }
-
-  // Core swipe state
-  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(swipeCards);
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, string>>(initialAnswers);
-  const [swipeAnswersExplanation, setSwipeAnswersExplanation] = useState<Record<string, string>>(initialAnswersExplanation);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialAnswers);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Animation state
-  const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [animationType, setAnimationType] = useState<'drag' | 'button' | null>(null);
 
-  // Drag state
-  const [dragState, setDragState] = useState({
+  const dragStateRef = useRef({
     isDragging: false,
     startX: 0,
     startY: 0,
@@ -114,23 +63,60 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     deltaY: 0,
   });
 
-  // UI state
+  const [dragTransform, setDragTransform] = useState<string>('');
+  const animationFrameRef = useRef<number | null>(null);
+
   const [isInfoVisible, setIsInfoVisible] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
-  const [explanationCardId, setExplanationCardId] = useState('');
   const [isDialogClosing, setIsDialogClosing] = useState(false);
+  const [explanations, setExplanations] = useState<Record<string, string>>({});
 
-  // Pending swipe for explanation dialogs
-  const [pendingSwipe, setPendingSwipe] = useState<{card: SwipeCard, direction: string} | null>(null);
+  const [pendingSwipe, setPendingSwipe] = useState<{ card: SwipeCard, direction: 'left' | 'right' } | null>(null);
 
-  // Helper function to get unanswered cards
-  const getUnansweredCards = useCallback(() =>
-      remainingCards.filter(card => !initialAnswers[card.id]),
-    [remainingCards, initialAnswers]
-  );
+  const getUnansweredCards = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+    return swipeCards.filter(card => !combinedAnswers[card.id]);
+  }, [swipeCards, initialAnswers, swipeAnswers]);
 
-  // Helper function to complete a swipe animation
-  const completeSwipe = useCallback((card: SwipeCard, direction: string) => {
+  const moveToPrevious = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+
+    const answeredCards = swipeCards.filter(card => combinedAnswers[card.id]);
+
+    if (answeredCards.length === 0) {
+      return;
+    }
+
+    const lastAnsweredCard = answeredCards[answeredCards.length - 1];
+
+    const newSwipeAnswers = { ...swipeAnswers };
+    delete newSwipeAnswers[lastAnsweredCard.id];
+
+    const newCombinedAnswers = { ...initialAnswers, ...newSwipeAnswers };
+    delete newCombinedAnswers[lastAnsweredCard.id];
+
+    setSwipeAnswers(newSwipeAnswers);
+
+    if (onChange) {
+      onChange({ name: fieldKey, value: newCombinedAnswers }, false);
+    }
+
+    setIsAnimating(false);
+    setSwipeDirection(null);
+    setAnimationType(null);
+    setPendingSwipe(null);
+    setShowExplanationDialog(false);
+
+    setIsFinished(false);
+  }, [swipeCards, initialAnswers, swipeAnswers, onChange, fieldKey]);
+
+  const canGoBack = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+    const answeredCardIds = Object.keys(combinedAnswers);
+    return answeredCardIds.length > 0;
+  }, [initialAnswers, swipeAnswers]);
+
+  const completeSwipe = useCallback((card: SwipeCard, direction: 'left' | 'right') => {
     setTimeout(() => {
       setSwipeAnswers(prev => ({
         ...prev,
@@ -139,10 +125,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       removeCurrentCard();
       setSwipeDirection(null);
       setIsAnimating(false);
+      setAnimationType(null);
     }, 200);
   }, []);
 
-  // Helper function to close explanation dialog and complete swipe
   const closeExplanationDialog = useCallback(() => {
     setIsDialogClosing(true);
     setTimeout(() => {
@@ -159,17 +145,24 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         removeCurrentCard();
         setSwipeDirection(null);
         setIsAnimating(false);
+        setAnimationType(null);
       }, 200);
     }, 200);
   }, [pendingSwipe]);
 
-  // Initialize remaining cards when cards prop changes
   useEffect(() => {
-    setRemainingCards(swipeCards);
-    setIsFinished(false);
-  }, [swipeCards]);
+    const unanswered = getUnansweredCards();
+    setIsFinished(unanswered.length === 0);
+  }, [swipeCards, getUnansweredCards]);
 
-  // Keyboard handling
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (!enableKeyboard) return;
 
@@ -185,68 +178,59 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [enableKeyboard, getUnansweredCards, isAnimating]);
 
-  const handleSwipeLeft = () => {
+  const handleSwipeLeft = useCallback((fromButton = false) => {
     const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
-      setSwipeDirection(disagreeText);
+      setSwipeDirection('left');
+      setAnimationType(fromButton ? 'button' : 'drag');
 
       onSwipeLeft?.(currentCard);
 
       if (currentCard.explanationRequired) {
-        setPendingSwipe({card: currentCard, direction: disagreeText});
+        setPendingSwipe({ card: currentCard, direction: 'left' });
         setShowExplanationDialog(true);
       } else {
-        completeSwipe(currentCard, disagreeText);
+        completeSwipe(currentCard, 'left');
       }
     }
-  };
+  }, [getUnansweredCards, isAnimating, onSwipeLeft, completeSwipe]);
 
-  const handleSwipeRight = () => {
+  const handleSwipeRight = useCallback((fromButton = false) => {
     const unansweredCards = getUnansweredCards();
     if (unansweredCards.length > 0 && !isAnimating) {
       const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
-      setSwipeDirection(agreeText);
+      setSwipeDirection('right');
+      setAnimationType(fromButton ? 'button' : 'drag');
 
       onSwipeRight?.(currentCard);
 
       if (currentCard.explanationRequired) {
-        setPendingSwipe({card: currentCard, direction: agreeText});
+        setPendingSwipe({ card: currentCard, direction: 'right' });
         setShowExplanationDialog(true);
-        setExplanationCardId( currentCard.id );
       } else {
-        completeSwipe(currentCard, agreeText);
+        completeSwipe(currentCard, 'right');
       }
     }
-  };
+  }, [getUnansweredCards, isAnimating, onSwipeRight, completeSwipe]);
 
   const removeCurrentCard = () => {
     setIsInfoVisible(false);
 
-    setRemainingCards(prev => {
-      const currentUnanswered = prev.filter(card => !initialAnswers[card.id]);
-      if (currentUnanswered.length === 0) return prev;
-
-      // Find and remove the current card that was swiped
-      const currentCard = currentUnanswered[0];
-      const newCards = prev.filter(card => card.id !== currentCard.id);
-
-      // Check if there are any unanswered cards left
-      const remainingUnanswered = newCards.filter(card => !initialAnswers[card.id] && !swipeAnswers[card.id]);
+    setTimeout(() => {
+      const remainingUnanswered = getUnansweredCards();
       if (remainingUnanswered.length === 0) {
         setIsFinished(true);
       }
-      return newCards;
-    });
+    }, 0);
   };
 
-  // Function to clean up drag state and release pointer capture
   const cleanupDragState = useCallback((element: Element | null, pointerId?: number) => {
-    setDragState({
+    dragStateRef.current = {
       isDragging: false,
       startX: 0,
       startY: 0,
@@ -254,26 +238,49 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       currentY: 0,
       deltaX: 0,
       deltaY: 0,
-    });
+    };
 
-    // Force release pointer capture if element and pointerId are available
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    setDragTransform('');
+    setSwipeDirection(null);
+
     if (element && pointerId !== undefined) {
       try {
         (element as any).releasePointerCapture(pointerId);
       } catch (error) {
-        // Ignore errors when releasing capture
       }
     }
   }, []);
 
-  // Touch/Mouse event handlers
-  const handlePointerDown = (event: React.PointerEvent) => {
+  const updateDragTransform = useCallback((deltaX: number, deltaY: number) => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    animationFrameRef.current = requestAnimationFrame(() => {
+      const rotation = deltaX * 0.1;
+      const transform = `translate(${deltaX}px, ${deltaY * 0.5}px) rotate(${rotation}deg)`;
+      setDragTransform(transform);
+
+      if (Math.abs(deltaX) > 50) {
+        setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+      } else {
+        setSwipeDirection(null);
+      }
+    });
+  }, []);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent) => {
     if (isAnimating || getUnansweredCards().length === 0) return;
 
     const clientX = event.clientX;
     const clientY = event.clientY;
 
-    setDragState({
+    dragStateRef.current = {
       isDragging: true,
       startX: clientX,
       startY: clientY,
@@ -281,15 +288,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       currentY: clientY,
       deltaX: 0,
       deltaY: 0,
-    });
+    };
 
     event.currentTarget.setPointerCapture(event.pointerId);
-  };
+    event.preventDefault();
+  }, [isAnimating, getUnansweredCards]);
 
-  const handlePointerMove = (event: React.PointerEvent) => {
+  const handlePointerMove = useCallback((event: React.PointerEvent) => {
+    const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
 
-    // If animation starts during drag, immediately stop dragging
     if (isAnimating) {
       cleanupDragState(event.currentTarget, event.pointerId);
       return;
@@ -300,347 +308,320 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     const deltaX = clientX - dragState.startX;
     const deltaY = clientY - dragState.startY;
 
-    setDragState(prev => ({
-      ...prev,
+    dragStateRef.current = {
+      ...dragState,
       currentX: clientX,
       currentY: clientY,
       deltaX,
       deltaY,
-    }));
+    };
 
-    // Set swipe direction for visual feedback
-    if (Math.abs(deltaX) > 50) {
-      setSwipeDirection(deltaX > 0 ? agreeText : disagreeText);
-    } else {
-      setSwipeDirection(null);
-    }
-  };
+    updateDragTransform(deltaX, deltaY);
 
-  const handlePointerUp = (event: React.PointerEvent) => {
+    event.preventDefault();
+  }, [isAnimating, cleanupDragState, updateDragTransform]);
+
+  const handlePointerUp = useCallback((event: React.PointerEvent) => {
+    const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
 
     const swipeThreshold = 100;
     const velocityThreshold = 0.5;
 
     const velocity = Math.abs(dragState.deltaX) / 100;
+    const deltaX = dragState.deltaX;
 
-    // Clean up drag state first
     cleanupDragState(event.currentTarget, event.pointerId);
 
-    // Don't trigger swipe if already animating
     if (isAnimating) return;
 
-    // Determine if swipe should trigger action
-    const shouldSwipe = Math.abs(dragState.deltaX) > swipeThreshold || velocity > velocityThreshold;
+    const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
 
     if (shouldSwipe) {
-      if (dragState.deltaX > 0) {
-        handleSwipeRight();
+      if (deltaX > 0) {
+        handleSwipeRight(false);
       } else {
-        handleSwipeLeft();
+        handleSwipeLeft(false);
       }
     } else {
-      // Snap back
       setSwipeDirection(null);
     }
-  };
+  }, [isAnimating, cleanupDragState, handleSwipeRight, handleSwipeLeft]);
 
-  const handlePointerCancel = (event: React.PointerEvent) => {
-    // Handle cases where pointer is cancelled (e.g., browser takes over)
+  const handlePointerCancel = useCallback((event: React.PointerEvent) => {
     cleanupDragState(event.currentTarget, event.pointerId);
-    setSwipeDirection(null);
-  };
+  }, [cleanupDragState]);
 
-  const handlePointerLeave = (event: React.PointerEvent) => {
-    // Handle cases where pointer leaves the element
-    if (dragState.isDragging) {
+  const handlePointerLeave = useCallback((event: React.PointerEvent) => {
+    if (dragStateRef.current.isDragging) {
       cleanupDragState(event.currentTarget, event.pointerId);
-      setSwipeDirection(null);
     }
-  };
+  }, [cleanupDragState]);
 
 
-  const handleAnswerChange = (cardId: string, newAnswer: string) => {
+  const handleAnswerChange = (cardId: string, newAnswer: 'left' | 'right') => {
     setSwipeAnswers(prev => ({
       ...prev,
       [cardId]: newAnswer
     }));
   };
 
-  const handleAnswerExplanationChange = (cardId: string, newAnswer: string) => {
-    setSwipeAnswersExplanation(prev => ({
+  const handleExplanationChange = (cardId: string, explanation: string) => {
+    setExplanations(prev => ({
       ...prev,
-      [cardId]: newAnswer
+      [cardId]: explanation
     }));
   };
 
+  const goBackToSwipe = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+    const answeredCards = swipeCards.filter(card => combinedAnswers[card.id]);
+
+    if (answeredCards.length > 0) {
+      // Ga terug naar de laatste beantwoorde kaart en maak het onbeantwoord
+      const lastAnsweredCard = answeredCards[answeredCards.length - 1];
+      const newSwipeAnswers = { ...swipeAnswers };
+      delete newSwipeAnswers[lastAnsweredCard.id];
+
+      const newCombinedAnswers = { ...initialAnswers, ...newSwipeAnswers };
+      delete newCombinedAnswers[lastAnsweredCard.id];
+
+      setSwipeAnswers(newSwipeAnswers);
+
+      if (onChange) {
+        onChange({ name: fieldKey, value: newCombinedAnswers }, false);
+      }
+    }
+
+    setIsFinished(false);
+    setIsAnimating(false);
+    setSwipeDirection(null);
+    setAnimationType(null);
+    setPendingSwipe(null);
+    setShowExplanationDialog(false);
+  }, [swipeCards, initialAnswers, swipeAnswers, onChange, fieldKey]);
+
   useEffect(() => {
     if (onChange) {
-      const combinedAnswers: defaultValueObject = swipeCards.map(card => ({
-        cardId: card.id,
-        answer: swipeAnswers[card.id],
-        title: card.title || '',
-        explanation: swipeAnswersExplanation[card.id] || '',
-      })).filter(item => item.answer !== undefined);
-
-      onChange({ name: fieldKey, value: combinedAnswers });
+      onChange({ name: fieldKey, value: swipeAnswers });
     }
-  }, [swipeAnswers, swipeAnswersExplanation]);
+  }, [swipeAnswers]);
 
-  // Get cards that haven't been answered yet
   const unansweredCards = getUnansweredCards();
 
-  // If no unanswered cards remain, show finished state
+  const currentIndex = swipeCards.length - unansweredCards.length;
+
   if (isFinished || unansweredCards.length === 0) {
     return (
-      <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
-        <div className="swipe-finished-content">
-          <h2>Jouw antwoorden</h2>
-          <p>Bekijk en wijzig eventueel je antwoorden op de stellingen:</p>
+      <>
+        <button
+          className="swipe-back-button"
+          onClick={(e) => (e.preventDefault(), goBackToSwipe())}
+          type="button"
+          aria-label="Ga terug naar swipe"
+        >
+          Terug
+        </button>
+        <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
+          <div className="swipe-finished-content">
+            <Heading level={2}>Jouw antwoorden</Heading>
+            <Paragraph>Bekijk en wijzig eventueel je antwoorden op de stellingen:</Paragraph>
 
-          <div className="swipe-summary">
-            {swipeCards.map((card) => {
-              const answer = swipeAnswers[card.id];
-              return (
-                <div key={card.id} className="swipe-summary-item">
-                  <div className="swipe-summary-content">
-                    <div className="swipe-summary-question">
-                      {card.image && (
-                        <div className="swipe-summary-image">
-                          <img src={card.image} alt="" />
+
+            <div className="swipe-summary">
+              {swipeCards.map((card) => {
+                const answer = swipeAnswers[card.id];
+                return (
+                  <div key={card.id} className="swipe-summary-item">
+                    <div className="swipe-summary-content">
+                      <div className="swipe-summary-question">
+                        {card.image && (
+                          <div className="swipe-summary-image">
+                            <img src={card.image} alt="" />
+                          </div>
+                        )}
+                        <p>{card.title}</p>
+                      </div>
+                      <div className="swipe-summary-answer">
+                        <div className="swipe-summary-buttons">
+                          <button
+                            className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
+                            onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'left'))}
+                            aria-label={`Oneens met: ${card.title}`}
+                          >
+                            <i className="ri-thumb-down-fill"></i>
+                            <span>Oneens</span>
+                          </button>
+                          <button
+                            className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
+                            onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'right'))}
+                            aria-label={`Eens met: ${card.title}`}
+                          >
+                            <i className="ri-thumb-up-fill"></i>
+                            <span>Eens</span>
+                          </button>
                         </div>
-                      )}
-                      <p>{card.title}</p>
-                    </div>
-                    <div className="swipe-summary-answer">
-                      <div className="swipe-summary-buttons">
-                        <button
-                          className={`swipe-summary-btn ${answer === disagreeText ? 'active' : ''}`}
-                          onClick={(e) => ( e.preventDefault(), handleAnswerChange(card.id, disagreeText))}
-                          aria-label={`Oneens met: ${card.title}`}
-                        >
-                          <i className="ri-thumb-down-fill"></i>
-                          <span>Oneens</span>
-                        </button>
-                        <button
-                          className={`swipe-summary-btn ${answer === agreeText ? 'active' : ''}`}
-                          onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, agreeText))}
-                          aria-label={`Eens met: ${card.title}`}
-                        >
-                          <i className="ri-thumb-up-fill"></i>
-                          <span>Eens</span>
-                        </button>
                       </div>
                     </div>
+                    <div className="swipe-summary-explanation">
+                      <textarea
+                        id={`explanation-${card.id}`}
+                        placeholder="Voeg hier een toelichting (optioneel) toe..."
+                        value={explanations[card.id] || ''}
+                        onChange={(e) => handleExplanationChange(card.id, e.target.value)}
+                        rows={3}
+                      />
+                    </div>
                   </div>
-                  <div className="swipe-summary-explanation">
-                    <Textarea
-                      id={`explanation-${card.id}`}
-                      placeholder="Voeg hier een toelichting (optioneel) toe..."
-                      value={swipeAnswersExplanation[card.id] || ''}
-                      onChange={(e) => handleAnswerExplanationChange(card.id, e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
 
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'} data-required={required}>
-      <div className="swipe-container" role="list" aria-label="Stellingen">
-        <div className="swipe-stack">
-          {unansweredCards.slice(0, 3).map((card, index) => {
-            const isTop = index === 0;
-            const zIndex = unansweredCards.length - index;
-            let transform = '';
-            if (isTop && dragState.isDragging) {
-              const rotation = dragState.deltaX * 0.1;
-              transform = `translate(${dragState.deltaX}px, ${dragState.deltaY * 0.5}px) rotate(${rotation}deg)`;
-            } else if (isTop && swipeDirection && isAnimating) {
-              const direction = swipeDirection === agreeText ? 1 : -1;
-              transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
-            }
-            return (
-              <>
-                <div
-                  key={card.id}
-                  className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
-                  style={{ zIndex, transform }}
-                  {...(isTop && /iPad|iPhone|iPod|Android/i.test(navigator.userAgent)
-                    ? {
-                      onTouchStart: (e) => {
-                        e.preventDefault();
-                        const touch = e.touches[0];
-                        setDragState({
-                          isDragging: true,
-                          startX: touch.clientX,
-                          startY: touch.clientY,
-                          currentX: touch.clientX,
-                          currentY: touch.clientY,
-                          deltaX: 0,
-                          deltaY: 0,
-                        });
-                      },
-                      onTouchMove: (e) => {
-                        e.preventDefault();
-                        if (!dragState.isDragging) return;
-                        const touch = e.touches[0];
-                        const deltaX = touch.clientX - dragState.startX;
-                        const deltaY = touch.clientY - dragState.startY;
-                        setDragState(prev => ({
-                          ...prev,
-                          currentX: touch.clientX,
-                          currentY: touch.clientY,
-                          deltaX,
-                          deltaY,
-                        }));
-                        if (Math.abs(deltaX) > 50) {
-                          setSwipeDirection(deltaX > 0 ? agreeText : disagreeText);
-                        } else {
-                          setSwipeDirection(null);
-                        }
-                      },
-                      onTouchEnd: (e) => {
-                        e.preventDefault();
-                        if (!dragState.isDragging) return;
-                        const swipeThreshold = 100;
-                        const velocityThreshold = 0.5;
-                        const deltaX = dragState.deltaX;
-                        const velocity = Math.abs(deltaX) / 100;
-                        setDragState({
-                          isDragging: false,
-                          startX: 0,
-                          startY: 0,
-                          currentX: 0,
-                          currentY: 0,
-                          deltaX: 0,
-                          deltaY: 0,
-                        });
-                        if (isAnimating) return;
-                        const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
-                        if (shouldSwipe) {
-                          if (deltaX > 0) {
-                            handleSwipeRight();
-                          } else {
-                            handleSwipeLeft();
-                          }
-                        } else {
-                          setSwipeDirection(null);
-                        }
-                      }
-                    }
-                    : {
-                      onPointerDown: handlePointerDown,
-                      onPointerMove: handlePointerMove,
-                      onPointerUp: handlePointerUp,
-                      onPointerCancel: handlePointerCancel,
-                      onPointerLeave: handlePointerLeave
-                    })}
-                  role="listitem"
-                  aria-label={card.title}
-                  tabIndex={isTop ? 0 : -1}
-                  aria-describedby={`swipe-card-desc-${card.id}`}
-                >
-                  {card.image && (
-                    <div className="swipe-card-image">
-                      <img src={card.image} alt={card.title || `afbeelding voor: ${card.title}`} />
-                    </div>
-                  )}
-                  <div className="swipe-card-content">
-                    <Paragraph className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</Paragraph>
-                  </div>
-
-
-                  {isTop && swipeDirection && (
-                    <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === disagreeText ? 'Afwijzen' : 'Goedkeuren'}>
-                      {swipeDirection === disagreeText ? (
-                        <i className="ri-thumb-down-fill"></i>
-
-                      ) : (
-                        <i className="ri-thumb-up-fill"></i>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {card.infoField && (
-                  <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
-                    <div className="info-card-container">
-                      <Paragraph>
-                        {card.infoField}
-                      </Paragraph>
-
-                      <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
-                    </div>
-                  </div>
-                )}
-              </>
-            );
-          })}
-        </div>
+    <>
+      <div className="swipe-progress">
+        <span>{currentIndex + 1} van {swipeCards.length}</span>
       </div>
-      {showButtons && (
-        <div className="swipe-actions" role="group" aria-label="Acties">
-          <button
-            className="swipe-btn swipe-btn-pass"
-            onClick={(e) => (e.preventDefault(), handleSwipeLeft())}
-            disabled={unansweredCards.length === 0}
-            aria-label="Afwijzen"
-          >
-            <i className="ri-thumb-down-fill"></i>
-            <span>Oneens</span>
-          </button>
-          <button
-            className="swipe-info-btn"
-            onClick={(e) => (e.preventDefault(), setIsInfoVisible(!isInfoVisible))}
-            disabled={!unansweredCards[0]?.infoField}
-            aria-label="Toon info"
-          >
-            <span>Info</span>
-          </button>
-          <button
-            className="swipe-btn swipe-btn-like"
-            onClick={(e) => (e.preventDefault(), handleSwipeRight())}
-            disabled={unansweredCards.length === 0}
-            aria-label="Goedkeuren"
-          >
-            <i className="ri-thumb-up-fill"></i>
-            <span>Eens</span>
-          </button>
-        </div>
-      )}
+      <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'} data-required={required}>
 
-      {(showExplanationDialog && explanationCardId) && (
-        <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
-          <div className="explanation-dialog-content">
-            <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
-            <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
+        <div className="swipe-container" role="list" aria-label="Stellingen">
+          <div className="swipe-stack">
+            {unansweredCards.slice(0, 3).map((card, index) => {
+              const isTop = index === 0;
+              const zIndex = unansweredCards.length - index;
+              let transform = '';
 
-            <Textarea
-              autoFocus
-              placeholder='Toelichting...'
-              rows={5}
-              name={ 'dilemma-explanation' }
-              value={ swipeAnswersExplanation[explanationCardId] || '' }
-              onChange={(e) => { handleAnswerExplanationChange(explanationCardId, e.target.value); }}
-            />
+              if (isTop && dragStateRef.current.isDragging) {
+                // During drag, use the drag transform
+                transform = dragTransform;
+              } else if (isTop && swipeDirection && isAnimating && animationType === 'drag') {
+                // Swipe release animation - use inline transform
+                const direction = swipeDirection === 'right' ? 1 : -1;
+                transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
+              }
+              // For button clicks, we'll use CSS classes instead of inline transform
+              return (
+                <>
+                  <div
+                    key={card.id}
+                    className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
+                    style={{ zIndex, ...(transform ? { transform } : {}) }}
+                    {...(isTop
+                      ? {
+                        onPointerDown: handlePointerDown,
+                        onPointerMove: handlePointerMove,
+                        onPointerUp: handlePointerUp,
+                        onPointerCancel: handlePointerCancel,
+                        onPointerLeave: handlePointerLeave
+                      }
+                      : {})}
+                    role="listitem"
+                    aria-label={card.title}
+                    tabIndex={isTop ? 0 : -1}
+                    aria-describedby={`swipe-card-desc-${card.id}`}
+                  >
+                    {card.image && (
+                      <div className="swipe-card-image">
+                        <img src={card.image} alt={card.title || `afbeelding voor: ${card.title}`} />
+                      </div>
+                    )}
+                    <div className="swipe-card-content">
+                      <Paragraph className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</Paragraph>
+                    </div>
 
-            <Button appearance="primary-action-button" onClick={closeExplanationDialog}>
-              Antwoord verzenden
-            </Button>
-            <Button appearance="secondary-action-button" onClick={closeExplanationDialog}>
-              Sluiten zonder toelichting
-            </Button>
+
+                    {isTop && swipeDirection && (
+                      <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
+                        {swipeDirection === 'left' ? (
+                          <i className="ri-thumb-down-fill"></i>
+
+                        ) : (
+                          <i className="ri-thumb-up-fill"></i>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {card.infoField && (
+                    <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
+                      <div className="info-card-container">
+                        <Paragraph>
+                          {card.infoField}
+                        </Paragraph>
+
+                        <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })}
           </div>
         </div>
-      )}
-    </div >
+        {showButtons && (
+          <div className="swipe-actions" role="group" aria-label="Acties">
+            <button
+              className="swipe-btn swipe-btn-pass"
+              onClick={(e) => (e.preventDefault(), handleSwipeLeft(true))}
+              disabled={unansweredCards.length === 0}
+              aria-label="Afwijzen"
+            >
+              <i className="ri-thumb-down-fill"></i>
+              <span>Oneens</span>
+            </button>
+            <button
+              className="swipe-info-btn"
+              onClick={(e) => (e.preventDefault(), setIsInfoVisible(!isInfoVisible))}
+              disabled={!unansweredCards[0]?.infoField}
+              aria-label="Toon info"
+            >
+              <span>Info</span>
+            </button>
+            <button
+              className="swipe-btn swipe-btn-like"
+              onClick={(e) => (e.preventDefault(), handleSwipeRight(true))}
+              disabled={unansweredCards.length === 0}
+              aria-label="Goedkeuren"
+            >
+              <i className="ri-thumb-up-fill"></i>
+              <span>Eens</span>
+            </button>
+          </div>
+        )}
+
+
+
+        {showExplanationDialog && (
+          <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
+            <div className="explanation-dialog-content">
+              <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
+              <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
+              <textarea autoFocus placeholder='Toelichting...' rows={5} />
+              <Button appearance="primary-action-button" onClick={closeExplanationDialog}>
+                Antwoord verzenden
+              </Button>
+              <Button appearance="secondary-action-button" onClick={closeExplanationDialog}>
+                Sluiten zonder toelichting
+              </Button>
+            </div>
+          </div>
+        )}
+      </div >
+      <button
+        className="swipe-back-button"
+        onClick={(e) => (e.preventDefault(), moveToPrevious())}
+        disabled={!canGoBack()}
+        type="button"
+        aria-label="Ga terug naar vorige kaart"
+      >
+        Terug
+      </button>
+    </>
   );
 }
 export { SwipeField };

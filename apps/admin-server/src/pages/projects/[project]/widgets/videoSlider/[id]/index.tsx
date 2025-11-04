@@ -123,7 +123,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
           </Tabs>
 
-          <div className="container py-6 mt-6 bg-white rounded-md">
+          {/* <div className="container py-6 mt-6 bg-white rounded-md">
             {previewConfig && (
               <WidgetPreview
                 type="videoSlider"
@@ -131,7 +131,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             )}
-          </div>
+          </div> */}
         </div>
       </PageLayout>
     </div>

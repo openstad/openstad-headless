@@ -370,14 +370,25 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'dilemma':
                     fieldData['type'] = 'dilemma';
                     fieldData['title'] = item?.title || '';
+                    fieldData['required'] = item?.fieldRequired || false;
                     fieldData['infoField'] = item?.infoField || '';
                     fieldData['infofieldExplanation'] = item?.infofieldExplanation || false;
-                    fieldData['options'] = item?.options?.map((dilemmaOption) => {
+                    fieldData['dilemmas'] = item?.options?.map((dilemmaOption) => {
                         return {
                             id: dilemmaOption.trigger,
-                            title: dilemmaOption.titles[0].key,
-                            description: dilemmaOption.titles[0].description || '',
-                            image: dilemmaOption.titles[0].image || ''
+                            infoField: dilemmaOption.titles[0].infoField || '',
+                            infofieldExplanation: dilemmaOption.titles[0].infofieldExplanation || false,
+                            a: {
+                                title: dilemmaOption.titles[0].key,
+                                description: dilemmaOption.titles[0].description || '',
+                                image: dilemmaOption.titles[0].image || '',
+
+                            },
+                            b: {
+                                title: dilemmaOption.titles[0].key_b || '',
+                                description: dilemmaOption.titles[0].description_b || '',
+                                image: dilemmaOption.titles[0].image_b || ''
+                            }
                         };
                     });
                     break;
