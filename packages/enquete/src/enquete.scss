@@ -1036,6 +1036,12 @@ label.utrecht-form-label {
     max-width: unset;
     overflow: auto;
 
+    .swipe-progress,
+    .dilemma-progress {
+      z-index: 99;
+      margin-right: 60px;
+    }
+
     .form-container {
       border: none;
     }
@@ -1100,12 +1106,12 @@ label.utrecht-form-label {
         justify-content: start;
 
         @container (min-height: 900px) and (min-width: 768px) {
-            justify-content: center;
+          justify-content: center;
 
-            &:has(.dilemma-finished),
-            &:has(.swipe-finished) {
-              justify-content: start;
-            }
+          &:has(.dilemma-finished),
+          &:has(.swipe-finished) {
+            justify-content: start;
+          }
         }
 
         .question {

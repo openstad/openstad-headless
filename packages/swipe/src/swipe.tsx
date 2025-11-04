@@ -76,7 +76,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const initialAnswers = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
 
   // Core swipe state
-  const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(swipeCards);
   const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialAnswers);
   const [isFinished, setIsFinished] = useState(false);
 
@@ -107,11 +106,59 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   // Pending swipe for explanation dialogs
   const [pendingSwipe, setPendingSwipe] = useState<{ card: SwipeCard, direction: 'left' | 'right' } | null>(null);
 
-  // Helper function to get unanswered cards
-  const getUnansweredCards = useCallback(() =>
-    remainingCards.filter(card => !initialAnswers[card.id]),
-    [remainingCards, initialAnswers]
-  );
+  // Helper function to get unanswered cards (including any that were made unanswered by going back)
+  const getUnansweredCards = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+    return swipeCards.filter(card => !combinedAnswers[card.id]);
+  }, [swipeCards, initialAnswers, swipeAnswers]);
+
+  // Function to go back to previous card
+  const moveToPrevious = useCallback(() => {
+    // Strategy: Find the last answered card and "unanswer" it
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+
+    // Get all cards that currently have answers, in the original order
+    const answeredCards = swipeCards.filter(card => combinedAnswers[card.id]);
+
+    if (answeredCards.length === 0) {
+      return;
+    }
+
+    // Take the last answered card (in original card order)
+    const lastAnsweredCard = answeredCards[answeredCards.length - 1];
+
+    // Create new combined answers WITHOUT the answer we want to remove
+    const newSwipeAnswers = { ...swipeAnswers };
+    delete newSwipeAnswers[lastAnsweredCard.id];
+
+    // Create the new combined answers that will be used for filtering
+    const newCombinedAnswers = { ...initialAnswers, ...newSwipeAnswers };
+    // Remove from the combined answers too (this handles the case where it was in initialAnswers)
+    delete newCombinedAnswers[lastAnsweredCard.id];
+
+    setSwipeAnswers(newSwipeAnswers);
+
+    // Update onChange with the new answers (without the removed answer)
+    if (onChange) {
+      onChange({ name: fieldKey, value: newCombinedAnswers }, false);
+    }
+
+    // Reset UI state
+    setIsAnimating(false);
+    setSwipeDirection(null);
+    setPendingSwipe(null);
+    setShowExplanationDialog(false);
+
+    // Make sure we're not in finished state
+    setIsFinished(false);
+  }, [swipeCards, initialAnswers, swipeAnswers, onChange, fieldKey]);
+
+  // Check if there's a previous card to go back to
+  const canGoBack = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+    const answeredCardIds = Object.keys(combinedAnswers);
+    return answeredCardIds.length > 0;
+  }, [initialAnswers, swipeAnswers]);
 
   // Helper function to complete a swipe animation
   const completeSwipe = useCallback((card: SwipeCard, direction: 'left' | 'right') => {
@@ -147,11 +194,12 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }, 200);
   }, [pendingSwipe]);
 
-  // Initialize remaining cards when cards prop changes
+  // Initialize when cards prop changes
   useEffect(() => {
-    setRemainingCards(swipeCards);
-    setIsFinished(false);
-  }, [swipeCards]);
+    // Check if all cards are already answered using the dynamic function
+    const unanswered = getUnansweredCards();
+    setIsFinished(unanswered.length === 0);
+  }, [swipeCards, getUnansweredCards]);
 
   // Cleanup animation frame on unmount
   useEffect(() => {
@@ -219,21 +267,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const removeCurrentCard = () => {
     setIsInfoVisible(false);
 
-    setRemainingCards(prev => {
-      const currentUnanswered = prev.filter(card => !initialAnswers[card.id]);
-      if (currentUnanswered.length === 0) return prev;
-
-      // Find and remove the current card that was swiped
-      const currentCard = currentUnanswered[0];
-      const newCards = prev.filter(card => card.id !== currentCard.id);
-
-      // Check if there are any unanswered cards left
-      const remainingUnanswered = newCards.filter(card => !initialAnswers[card.id] && !swipeAnswers[card.id]);
+    // Check if there are any unanswered cards left using the dynamic function
+    setTimeout(() => {
+      const remainingUnanswered = getUnansweredCards();
       if (remainingUnanswered.length === 0) {
         setIsFinished(true);
       }
-      return newCards;
-    });
+    }, 0);
   };
 
   // Function to clean up drag state and release pointer capture
@@ -402,7 +442,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }
   }, [swipeAnswers]);
 
-  // Get cards that haven't been answered yet
+  // Get cards that haven't been answered yet (dynamic list that updates when going back)
   const unansweredCards = getUnansweredCards();
 
   // Calculate current index (how many cards have been answered)
@@ -577,6 +617,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           </div>
         )}
 
+
+
         {showExplanationDialog && (
           <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
             <div className="explanation-dialog-content">
@@ -593,6 +635,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           </div>
         )}
       </div >
+      <button
+        className="swipe-back-button"
+        onClick={(e) => (e.preventDefault(), moveToPrevious())}
+        disabled={!canGoBack()}
+        type="button"
+        aria-label="Ga terug naar vorige kaart"
+      >
+        Terug
+      </button>
     </>
   );
 }

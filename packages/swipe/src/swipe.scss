@@ -6,6 +6,41 @@
   opacity: .5;
 }
 
+.swipe-back-button {
+  padding: 0;
+  border: unset;
+  background: unset;
+  position: absolute;
+  top: 47px;
+  left: 23px;
+  color: var(--setBackColor, #094B81);
+  display: flex;
+  z-index: 99;
+  gap: 4px;
+  line-height: 21px;
+  background: #fff;
+  padding-right: 10px;
+
+  &[disabled] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:before {
+    content: "";
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
+    width: 20px;
+    height: 20px;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    background-color: var(--setBackColor, #094B81);
+    display: block;
+  }
+}
+
 .swipe-widget {
   --swipe-active-background: var(--setSwipeActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886));
   --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, var(--utrecht-button-primary-action-background-color, #11B886));
