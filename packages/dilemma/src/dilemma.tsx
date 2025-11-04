@@ -237,6 +237,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     );
   }
 
+  // Calculate current index (how many dilemmas have been answered)
+  const currentIndex = dilemmaCards.length - unansweredDilemmas.length;
+
+
   // Show current dilemma
   if (!currentDilemma) return null;
 
@@ -251,7 +255,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       <div className="dilemma-intro">
         <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
         <div className="dilemma-progress">
-          <span>{currentDilemmaIndex + 1} van {unansweredDilemmas.length}</span>
+          <span>{currentIndex + 1} van {dilemmas.length}</span>
         </div>
       </div>
 
@@ -312,15 +316,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <span>Info</span>
         </button>
 
-        <Button
-          appearance="primary-action-button"
+        <button
           className="dilemma-next-button"
           onClick={(e) => (e.preventDefault(), handleNextClick())}
           disabled={!selectedOption}
           type="button"
         >
-          Volgende
-        </Button>
+          <span className="sr-only">Volgende</span>
+        </button>
       </div>
 
       {showExplanationDialog && (

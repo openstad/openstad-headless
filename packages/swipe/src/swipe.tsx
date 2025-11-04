@@ -405,6 +405,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   // Get cards that haven't been answered yet
   const unansweredCards = getUnansweredCards();
 
+  // Calculate current index (how many cards have been answered)
+  const currentIndex = swipeCards.length - unansweredCards.length;
+
   // If no unanswered cards remain, show finished state
   if (isFinished || unansweredCards.length === 0) {
     return (
@@ -468,123 +471,129 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }
 
   return (
-    <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'} data-required={required}>
-      <div className="swipe-container" role="list" aria-label="Stellingen">
-        <div className="swipe-stack">
-          {unansweredCards.slice(0, 3).map((card, index) => {
-            const isTop = index === 0;
-            const zIndex = unansweredCards.length - index;
-            let transform = '';
-            if (isTop && dragStateRef.current.isDragging) {
-              transform = dragTransform;
-            } else if (isTop && swipeDirection && isAnimating) {
-              const direction = swipeDirection === 'right' ? 1 : -1;
-              transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
-            }
-            return (
-              <>
-                <div
-                  key={card.id}
-                  className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
-                  style={{ zIndex, transform }}
-                  {...(isTop
-                    ? {
-                      onPointerDown: handlePointerDown,
-                      onPointerMove: handlePointerMove,
-                      onPointerUp: handlePointerUp,
-                      onPointerCancel: handlePointerCancel,
-                      onPointerLeave: handlePointerLeave
-                    }
-                    : {})}
-                  role="listitem"
-                  aria-label={card.title}
-                  tabIndex={isTop ? 0 : -1}
-                  aria-describedby={`swipe-card-desc-${card.id}`}
-                >
-                  {card.image && (
-                    <div className="swipe-card-image">
-                      <img src={card.image} alt={card.title || `afbeelding voor: ${card.title}`} />
-                    </div>
-                  )}
-                  <div className="swipe-card-content">
-                    <Paragraph className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</Paragraph>
-                  </div>
-
-
-                  {isTop && swipeDirection && (
-                    <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
-                      {swipeDirection === 'left' ? (
-                        <i className="ri-thumb-down-fill"></i>
-
-                      ) : (
-                        <i className="ri-thumb-up-fill"></i>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {card.infoField && (
-                  <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
-                    <div className="info-card-container">
-                      <Paragraph>
-                        {card.infoField}
-                      </Paragraph>
-
-                      <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
-                    </div>
-                  </div>
-                )}
-              </>
-            );
-          })}
-        </div>
+    <>
+      <div className="swipe-progress">
+        <span>{currentIndex + 1} van {swipeCards.length}</span>
       </div>
-      {showButtons && (
-        <div className="swipe-actions" role="group" aria-label="Acties">
-          <button
-            className="swipe-btn swipe-btn-pass"
-            onClick={(e) => (e.preventDefault(), handleSwipeLeft())}
-            disabled={unansweredCards.length === 0}
-            aria-label="Afwijzen"
-          >
-            <i className="ri-thumb-down-fill"></i>
-            <span>Oneens</span>
-          </button>
-          <button
-            className="swipe-info-btn"
-            onClick={(e) => (e.preventDefault(), setIsInfoVisible(!isInfoVisible))}
-            disabled={!unansweredCards[0]?.infoField}
-            aria-label="Toon info"
-          >
-            <span>Info</span>
-          </button>
-          <button
-            className="swipe-btn swipe-btn-like"
-            onClick={(e) => (e.preventDefault(), handleSwipeRight())}
-            disabled={unansweredCards.length === 0}
-            aria-label="Goedkeuren"
-          >
-            <i className="ri-thumb-up-fill"></i>
-            <span>Eens</span>
-          </button>
-        </div>
-      )}
+      <div className="swipe-widget" role="region" aria-label="Swipe widget" tabIndex={0} aria-invalid={!required && Object.keys(swipeAnswers).length === 0 ? 'false' : 'true'} data-required={required}>
 
-      {showExplanationDialog && (
-        <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
-          <div className="explanation-dialog-content">
-            <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
-            <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
-            <textarea autoFocus placeholder='Toelichting...' rows={5} />
-            <Button appearance="primary-action-button" onClick={closeExplanationDialog}>
-              Antwoord verzenden
-            </Button>
-            <Button appearance="secondary-action-button" onClick={closeExplanationDialog}>
-              Sluiten zonder toelichting
-            </Button>
+        <div className="swipe-container" role="list" aria-label="Stellingen">
+          <div className="swipe-stack">
+            {unansweredCards.slice(0, 3).map((card, index) => {
+              const isTop = index === 0;
+              const zIndex = unansweredCards.length - index;
+              let transform = '';
+              if (isTop && dragStateRef.current.isDragging) {
+                transform = dragTransform;
+              } else if (isTop && swipeDirection && isAnimating) {
+                const direction = swipeDirection === 'right' ? 1 : -1;
+                transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
+              }
+              return (
+                <>
+                  <div
+                    key={card.id}
+                    className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
+                    style={{ zIndex, transform }}
+                    {...(isTop
+                      ? {
+                        onPointerDown: handlePointerDown,
+                        onPointerMove: handlePointerMove,
+                        onPointerUp: handlePointerUp,
+                        onPointerCancel: handlePointerCancel,
+                        onPointerLeave: handlePointerLeave
+                      }
+                      : {})}
+                    role="listitem"
+                    aria-label={card.title}
+                    tabIndex={isTop ? 0 : -1}
+                    aria-describedby={`swipe-card-desc-${card.id}`}
+                  >
+                    {card.image && (
+                      <div className="swipe-card-image">
+                        <img src={card.image} alt={card.title || `afbeelding voor: ${card.title}`} />
+                      </div>
+                    )}
+                    <div className="swipe-card-content">
+                      <Paragraph className="swipe-card-description" id={`swipe-card-desc-${card.id}`}>{card.title}</Paragraph>
+                    </div>
+
+
+                    {isTop && swipeDirection && (
+                      <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
+                        {swipeDirection === 'left' ? (
+                          <i className="ri-thumb-down-fill"></i>
+
+                        ) : (
+                          <i className="ri-thumb-up-fill"></i>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {card.infoField && (
+                    <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
+                      <div className="info-card-container">
+                        <Paragraph>
+                          {card.infoField}
+                        </Paragraph>
+
+                        <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })}
           </div>
         </div>
-      )}
-    </div >
+        {showButtons && (
+          <div className="swipe-actions" role="group" aria-label="Acties">
+            <button
+              className="swipe-btn swipe-btn-pass"
+              onClick={(e) => (e.preventDefault(), handleSwipeLeft())}
+              disabled={unansweredCards.length === 0}
+              aria-label="Afwijzen"
+            >
+              <i className="ri-thumb-down-fill"></i>
+              <span>Oneens</span>
+            </button>
+            <button
+              className="swipe-info-btn"
+              onClick={(e) => (e.preventDefault(), setIsInfoVisible(!isInfoVisible))}
+              disabled={!unansweredCards[0]?.infoField}
+              aria-label="Toon info"
+            >
+              <span>Info</span>
+            </button>
+            <button
+              className="swipe-btn swipe-btn-like"
+              onClick={(e) => (e.preventDefault(), handleSwipeRight())}
+              disabled={unansweredCards.length === 0}
+              aria-label="Goedkeuren"
+            >
+              <i className="ri-thumb-up-fill"></i>
+              <span>Eens</span>
+            </button>
+          </div>
+        )}
+
+        {showExplanationDialog && (
+          <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
+            <div className="explanation-dialog-content">
+              <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
+              <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
+              <textarea autoFocus placeholder='Toelichting...' rows={5} />
+              <Button appearance="primary-action-button" onClick={closeExplanationDialog}>
+                Antwoord verzenden
+              </Button>
+              <Button appearance="secondary-action-button" onClick={closeExplanationDialog}>
+                Sluiten zonder toelichting
+              </Button>
+            </div>
+          </div>
+        )}
+      </div >
+    </>
   );
 }
 export { SwipeField };

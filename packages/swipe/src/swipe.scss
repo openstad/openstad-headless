@@ -1,3 +1,11 @@
+.swipe-progress {
+  position: absolute;
+  top: 36px;
+  right: 24px;
+  font-style: italic;
+  opacity: .5;
+}
+
 .swipe-widget {
   --swipe-active-background: var(--setSwipeActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886));
   --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, var(--utrecht-button-primary-action-background-color, #11B886));
@@ -520,41 +528,6 @@
   .swipe-summary-actions {
     margin-top: 24px;
     text-align: center;
-  }
-
-  .swipe-progress {
-    width: 100%;
-    height: 5px;
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 5px;
-
-    progress {
-      width: 100%;
-      height: 100%;
-      appearance: none;
-      position: absolute;
-      inset: 0;
-
-      &::-webkit-progress-bar {
-        background-color: var(--swipe-progress-bar-color);
-      }
-
-      &::-moz-progress-bar {
-        background-color: var(--swipe-progress-bar-color);
-        transition: width 0.5s;
-      }
-
-      &::-ms-fill {
-        background-color: var(--swipe-progress-bar-color);
-        transition: width 0.5s;
-      }
-
-      &::-webkit-progress-value {
-        background: var(--swipe-progress-bar-background);
-      }
-    }
   }
 }
 
