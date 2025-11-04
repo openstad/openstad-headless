@@ -178,6 +178,38 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }));
   };
 
+  const goBackToDilemmas = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
+    const answeredDilemmas = dilemmaCards.filter(dilemma => combinedAnswers[dilemma.id]);
+    
+    if (answeredDilemmas.length > 0) {
+      // Ga terug naar het laatste beantwoorde dilemma en maak het onbeantwoord
+      const lastAnsweredDilemma = answeredDilemmas[answeredDilemmas.length - 1];
+      const newDilemmaAnswers = { ...dilemmaAnswers };
+      delete newDilemmaAnswers[lastAnsweredDilemma.id];
+
+      const newCombinedAnswers = { ...initialAnswers, ...newDilemmaAnswers };
+      delete newCombinedAnswers[lastAnsweredDilemma.id];
+
+      setDilemmaAnswers(newDilemmaAnswers);
+
+      if (onChange) {
+        onChange({ name: fieldKey, value: newCombinedAnswers }, false);
+      }
+
+      // Bereken welke dilemma's nog niet beantwoord zijn na deze wijziging
+      const futureUnanswered = dilemmaCards.filter(dilemma => !newCombinedAnswers[dilemma.id]);
+      const targetIndex = futureUnanswered.findIndex(d => d.id === lastAnsweredDilemma.id);
+
+      setCurrentDilemmaIndex(targetIndex !== -1 ? targetIndex : 0);
+    } else {
+      setCurrentDilemmaIndex(0);
+    }
+    
+    setIsFinished(false);
+    setSelectedOption(null);
+  }, [dilemmaCards, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
+
   useEffect(() => {
     setCurrentDilemmaIndex(0);
     setSelectedOption(null);
@@ -193,6 +225,17 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <div className="dilemma-intro">
             <Heading level={2}>Jouw keuzes</Heading>
             <Paragraph>Bekijk en wijzig eventueel je antwoorden op de dilemma's:</Paragraph>
+          </div>
+
+          <div className="dilemma-actions">
+            <button
+              className="dilemma-back-button"
+              onClick={(e) => (e.preventDefault(), goBackToDilemmas())}
+              type="button"
+              aria-label="Ga terug naar dilemma's"
+            >
+              Terug
+            </button>
           </div>
 
           <div className="dilemma-summary">

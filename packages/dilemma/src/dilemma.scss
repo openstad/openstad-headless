@@ -203,6 +203,11 @@
         border: none;
         right: 24px;
         bottom: 24px;
+        &:disabled{
+            opacity: 0.5;
+            pointer-events: none;
+            animation: unset;
+        }
     }
 
 }

@@ -367,6 +367,33 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }));
   };
 
+  const goBackToSwipe = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
+    const answeredCards = swipeCards.filter(card => combinedAnswers[card.id]);
+
+    if (answeredCards.length > 0) {
+      // Ga terug naar de laatste beantwoorde kaart en maak het onbeantwoord
+      const lastAnsweredCard = answeredCards[answeredCards.length - 1];
+      const newSwipeAnswers = { ...swipeAnswers };
+      delete newSwipeAnswers[lastAnsweredCard.id];
+
+      const newCombinedAnswers = { ...initialAnswers, ...newSwipeAnswers };
+      delete newCombinedAnswers[lastAnsweredCard.id];
+
+      setSwipeAnswers(newSwipeAnswers);
+
+      if (onChange) {
+        onChange({ name: fieldKey, value: newCombinedAnswers }, false);
+      }
+    }
+
+    setIsFinished(false);
+    setIsAnimating(false);
+    setSwipeDirection(null);
+    setPendingSwipe(null);
+    setShowExplanationDialog(false);
+  }, [swipeCards, initialAnswers, swipeAnswers, onChange, fieldKey]);
+
   useEffect(() => {
     if (onChange) {
       onChange({ name: fieldKey, value: swipeAnswers });
@@ -379,62 +406,73 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   if (isFinished || unansweredCards.length === 0) {
     return (
-      <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
-        <div className="swipe-finished-content">
-          <Heading level={2}>Jouw antwoorden</Heading>
-          <Paragraph>Bekijk en wijzig eventueel je antwoorden op de stellingen:</Paragraph>
+      <>
+        <button
+          className="swipe-back-button"
+          onClick={(e) => (e.preventDefault(), goBackToSwipe())}
+          type="button"
+          aria-label="Ga terug naar swipe"
+        >
+          Terug
+        </button>
+        <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
+          <div className="swipe-finished-content">
+            <Heading level={2}>Jouw antwoorden</Heading>
+            <Paragraph>Bekijk en wijzig eventueel je antwoorden op de stellingen:</Paragraph>
 
-          <div className="swipe-summary">
-            {swipeCards.map((card) => {
-              const answer = swipeAnswers[card.id];
-              return (
-                <div key={card.id} className="swipe-summary-item">
-                  <div className="swipe-summary-content">
-                    <div className="swipe-summary-question">
-                      {card.image && (
-                        <div className="swipe-summary-image">
-                          <img src={card.image} alt="" />
+
+            <div className="swipe-summary">
+              {swipeCards.map((card) => {
+                const answer = swipeAnswers[card.id];
+                return (
+                  <div key={card.id} className="swipe-summary-item">
+                    <div className="swipe-summary-content">
+                      <div className="swipe-summary-question">
+                        {card.image && (
+                          <div className="swipe-summary-image">
+                            <img src={card.image} alt="" />
+                          </div>
+                        )}
+                        <p>{card.title}</p>
+                      </div>
+                      <div className="swipe-summary-answer">
+                        <div className="swipe-summary-buttons">
+                          <button
+                            className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
+                            onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'left'))}
+                            aria-label={`Oneens met: ${card.title}`}
+                          >
+                            <i className="ri-thumb-down-fill"></i>
+                            <span>Oneens</span>
+                          </button>
+                          <button
+                            className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
+                            onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'right'))}
+                            aria-label={`Eens met: ${card.title}`}
+                          >
+                            <i className="ri-thumb-up-fill"></i>
+                            <span>Eens</span>
+                          </button>
                         </div>
-                      )}
-                      <p>{card.title}</p>
-                    </div>
-                    <div className="swipe-summary-answer">
-                      <div className="swipe-summary-buttons">
-                        <button
-                          className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
-                          onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'left'))}
-                          aria-label={`Oneens met: ${card.title}`}
-                        >
-                          <i className="ri-thumb-down-fill"></i>
-                          <span>Oneens</span>
-                        </button>
-                        <button
-                          className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
-                          onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'right'))}
-                          aria-label={`Eens met: ${card.title}`}
-                        >
-                          <i className="ri-thumb-up-fill"></i>
-                          <span>Eens</span>
-                        </button>
                       </div>
                     </div>
+                    <div className="swipe-summary-explanation">
+                      <textarea
+                        id={`explanation-${card.id}`}
+                        placeholder="Voeg hier een toelichting (optioneel) toe..."
+                        value={explanations[card.id] || ''}
+                        onChange={(e) => handleExplanationChange(card.id, e.target.value)}
+                        rows={3}
+                      />
+                    </div>
                   </div>
-                  <div className="swipe-summary-explanation">
-                    <textarea
-                      id={`explanation-${card.id}`}
-                      placeholder="Voeg hier een toelichting (optioneel) toe..."
-                      value={explanations[card.id] || ''}
-                      onChange={(e) => handleExplanationChange(card.id, e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
 
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
