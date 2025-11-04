@@ -58,6 +58,9 @@ export type Item = {
   routingSelectedAnswer?: string;
   infoField?: string;
   infofieldExplanation?: boolean;
+  key_b?: string;
+  description_b?: string;
+  image_b?: string;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -83,6 +86,9 @@ export type Title = {
   hideLabel?: boolean;
   description?: string;
   explanationRequired?: boolean;
+  key_b?: string;
+  description_b?: string;
+  image_b?: string;
 };
 
 export type Confirmation = {

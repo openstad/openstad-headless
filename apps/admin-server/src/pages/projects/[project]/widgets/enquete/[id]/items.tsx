@@ -47,6 +47,9 @@ const formSchema = z.object({
   nextPageText: z.string().optional(),
   prevPageText: z.string().optional(),
   variant: z.string().optional(),
+  key_b: z.string().optional(),
+  description_b: z.string().optional(),
+  image_b: z.string().optional(),
   options: z
     .array(
       z.object({
@@ -60,7 +63,10 @@ const formSchema = z.object({
           image: z.string().optional(),
           isOtherOption: z.boolean().optional(),
           defaultValue: z.boolean().optional(),
-          hideLabel: z.boolean().optional()
+          hideLabel: z.boolean().optional(),
+          key_b: z.string().optional(),
+          description_b: z.string().optional(),
+          image_b: z.string().optional(),
         })),
       })
     )
@@ -181,6 +187,9 @@ export default function WidgetEnqueteItems(
           options: values.options || [],
           multiple: values.multiple || false,
           image: values.image || '',
+          image_b: values.image_b || '',
+          description_b: values.description_b || '',
+          key_b: values.key_b || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
           fieldRequired: values.fieldRequired || false,
@@ -864,6 +873,7 @@ export default function WidgetEnqueteItems(
                             </>
                           ) : (
                             <>
+                              {form.watch("questionType") === "dilemma" && <b>Dilemma A</b>}
                               <ImageUploader
                                 form={form}
                                 project={project as string}
@@ -902,21 +912,82 @@ export default function WidgetEnqueteItems(
                                 )}
                               />
                               {form.watch("questionType") === "dilemma" && (
-                                <FormField
-                                  control={form.control}
-                                  name={`options.${activeOption}.titles.0.description`}
-                                  render={({ field }) => (
-                                    <FormItem
-                                      style={{
-                                        marginTop: '10px'
-                                      }}>
-                                      <FormLabel>Beschrijving</FormLabel>
-                                      <Textarea rows={6} {...field} />
-                                      <FormMessage />
-                                    </FormItem>
+                                <>
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.description`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Beschrijving</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <br />
+                                  <hr />
+                                  <br />
+
+                                  <b>Dilemma B</b>
+                                  <ImageUploader
+                                    form={form}
+                                    project={project as string}
+                                    fieldName="imageOptionUpload"
+                                    imageLabel="Afbeelding"
+                                    allowedTypes={["image/*"]}
+                                    onImageUploaded={(imageResult) => {
+                                      const image = imageResult ? imageResult.url : '';
+
+                                      form.setValue(`options.${activeOption}.titles.0.image_b`, image);
+                                      form.resetField('imageOptionUpload');
+                                    }}
+                                  />
+                                  {!!form.getValues(`options.${activeOption}.titles.0.image_b`) && (
+                                    <div style={{ position: 'relative' }}>
+                                      <img src={form.getValues(`options.${activeOption}.titles.0.image_b`)} />
+                                    </div>
                                   )}
-                                />
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.key_b`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Titel</FormLabel>
+                                        {(form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'dilemma') && (
+                                          <FormDescription>
+                                            Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                            De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                          </FormDescription>
+                                        )}
+                                        <Input {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.description_b`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Beschrijving</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </>
+
                               )}
+
+
+
                               {(form.watch("questionType") !== "swipe" && form.watch("questionType") !== "dilemma") && (
                                 <FormField
                                   control={form.control}
