@@ -1,7 +1,8 @@
 import './dilemma.scss';
 import React, { useState, useEffect, FC, } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
-import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
+import {Heading, Paragraph, Button, Textarea, RadioButton, FormLabel} from '@utrecht/component-library-react';
+import { FormValue } from "@openstad-headless/form/src/form";
 
 
 export type DilemmaFieldProps = BaseProps &
@@ -22,7 +23,12 @@ export type DilemmaProps = {
     description: string;
     image: string;
   }>;
+  overrideDefaultValue?: FormValue;
+  fieldKey?: string;
+  onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
 };
+
+type valueObject = {selectedOption: string, optionExplanation: string};
 
 const DilemmaField: FC<DilemmaFieldProps> = ({
   title,
@@ -31,13 +37,42 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   options = [],
   setCurrentPage,
   currentPage = 0,
+  overrideDefaultValue,
+  onChange,
+  fieldKey = 'dilemma',
   ...props
 }) => {
+  const initialValue =
+    overrideDefaultValue &&
+    typeof overrideDefaultValue === 'object' &&
+    'selectedOption' in overrideDefaultValue &&
+    'optionExplanation' in overrideDefaultValue
+      ? overrideDefaultValue as valueObject
+      : { selectedOption: '', optionExplanation: '' };
 
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState<boolean>(false);
 
-  console.log(infofieldExplanation)
+  const [value, setValue] = useState<valueObject>(initialValue);
+
+  const changeValue = (key: 'selectedOption' | 'optionExplanation', newValue: any) => {
+    const currValue: valueObject = {...value};
+
+    if (key === 'selectedOption') {
+      currValue.selectedOption = newValue as string;
+    } else if (key === 'optionExplanation') {
+      currValue.optionExplanation = newValue as string;
+    }
+
+    if ( onChange ) {
+      onChange({
+        name: fieldKey,
+        value: currValue,
+      });
+    }
+
+    setValue(currValue);
+  }
 
   return (
     <div className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`} {...props}>
@@ -49,20 +84,37 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         <span className="dilemma-label" aria-hidden="true">
           <span>OF</span>
         </span>
-        {options.map((option) => (
-          <div key={option.id} className="dilemma-option">
-            <input type="radio" id={`option-${option.id}`} name="dilemma-option" value={option.id} />
-            <label htmlFor={`option-${option.id}`}>
-              <figure className="dilemma-option-image">
-                <img src={option.image} alt={option.title} />
-              </figure>
-              <div className="dilemma-option-content">
-                <Heading level={3} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{ __html: option.title }} />
-                <Paragraph dangerouslySetInnerHTML={{ __html: option.description }} />
-              </div>
-            </label>
-          </div>
-        ))}
+        {options.map((option) => {
+          const optionKey = option?.title || option.id
+
+          return (
+            <div key={option.id} className="dilemma-option">
+              <FormLabel
+                htmlFor={`option-${option.id}`}
+                type="radio"
+                className="--label-grid"
+              >
+                <RadioButton
+                  id={`option-${option.id}`}
+                  name={fieldKey}
+                  onChange={() => {
+                    changeValue("selectedOption", String(optionKey))
+                  }}
+                  value={optionKey}
+                  checked={value?.selectedOption === String(optionKey)}
+                />
+                <figure className="dilemma-option-image">
+                  <img src={option.image} alt={option.title}/>
+                </figure>
+                <div className="dilemma-option-content">
+                  <Heading level={3} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: option.title}}/>
+                  <Paragraph dangerouslySetInnerHTML={{__html: option.description}}/>
+                </div>
+              </FormLabel>
+
+            </div>
+          )
+        })}
       </div>
 
 
@@ -81,7 +133,16 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <div className="explanation-dialog-content">
             <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
             <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
-            <textarea autoFocus placeholder='Toelichting...' rows={5} />
+
+            <Textarea
+              autoFocus
+              placeholder='Toelichting...'
+              rows={5}
+              name={ 'dilemma-explanation' }
+              value={ value.optionExplanation || '' }
+              onChange={(e) => { changeValue("optionExplanation", e.target.value); }}
+            />
+
             <Button appearance="primary-action-button" onClick={() => {
               setShowExplanationDialog(false);
               setCurrentPage(currentPage + 1)

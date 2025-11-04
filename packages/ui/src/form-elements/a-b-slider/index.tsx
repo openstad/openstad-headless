@@ -78,8 +78,13 @@ const RangeSlider: FC<RangeSliderProps> = ({
     skipQuestionLabel = 'Sla vraag over',
     overrideDefaultValue
 }) => {
-    const initialValue = overrideDefaultValue && typeof overrideDefaultValue === 'object' && 'value' in overrideDefaultValue
-      ? overrideDefaultValue
+    const initialValue =
+      overrideDefaultValue &&
+      typeof overrideDefaultValue === 'object' &&
+      'value' in overrideDefaultValue &&
+      'skipQuestion' in overrideDefaultValue &&
+      'skipQuestionExplanation' in overrideDefaultValue
+      ? overrideDefaultValue as valueObject
       : { value: '50', skipQuestion: false, skipQuestionExplanation: '' };
 
     const [skipSelected, setSkipSelected] = useState(initialValue.skipQuestion || false);

@@ -1,7 +1,7 @@
 import './swipe.scss';
 import React, { useState, useEffect, useMemo, FC, useCallback } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
-import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
+import {Heading, Paragraph, Button, Textarea} from '@utrecht/component-library-react';
 import { FormValue } from '@openstad-headless/form/src/form';
 
 export type SwipeCard = {
@@ -29,6 +29,8 @@ export type SwipeProps = {
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
+  agreeText?: string;
+  disagreeText?: string;
 };
 
 // Default demo cards - moved outside component to prevent recreation
@@ -60,6 +62,8 @@ const defaultCards: SwipeCard[] = [
   },
 ];
 
+type defaultValueObject = Array< { cardId: string; answer: string; explanation?: string } >;
+
 const SwipeField: FC<SwipeWidgetProps> = ({
                                             cards = defaultCards,
                                             onSwipeLeft,
@@ -69,19 +73,34 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                                             required = false,
                                             onChange,
                                             fieldKey,
+                                            agreeText = 'Eens',
+                                            disagreeText = 'Oneens',
                                             overrideDefaultValue,
                                           }) => {
   // Initialize data
   const swipeCards = useMemo(() => cards.length > 0 ? cards : defaultCards, [cards]);
-  const initialAnswers = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
+
+  let initialAnswers: Record<string, string> = {};
+  let initialAnswersExplanation: Record<string, string> = {};
+
+  if (overrideDefaultValue && typeof overrideDefaultValue === 'object') {
+    const overrideArray = overrideDefaultValue as defaultValueObject;
+    overrideArray.forEach(item => {
+      initialAnswers[item.cardId as string] = item.answer;
+      if (item.explanation) {
+        initialAnswersExplanation[item.cardId as string] = item.explanation;
+      }
+    });
+  }
 
   // Core swipe state
   const [remainingCards, setRemainingCards] = useState<SwipeCard[]>(swipeCards);
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialAnswers);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, string>>(initialAnswers);
+  const [swipeAnswersExplanation, setSwipeAnswersExplanation] = useState<Record<string, string>>(initialAnswersExplanation);
   const [isFinished, setIsFinished] = useState(false);
 
   // Animation state
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Drag state
@@ -98,11 +117,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   // UI state
   const [isInfoVisible, setIsInfoVisible] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
+  const [explanationCardId, setExplanationCardId] = useState('');
   const [isDialogClosing, setIsDialogClosing] = useState(false);
-  const [explanations, setExplanations] = useState<Record<string, string>>({});
 
   // Pending swipe for explanation dialogs
-  const [pendingSwipe, setPendingSwipe] = useState<{card: SwipeCard, direction: 'left' | 'right'} | null>(null);
+  const [pendingSwipe, setPendingSwipe] = useState<{card: SwipeCard, direction: string} | null>(null);
 
   // Helper function to get unanswered cards
   const getUnansweredCards = useCallback(() =>
@@ -111,7 +130,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   );
 
   // Helper function to complete a swipe animation
-  const completeSwipe = useCallback((card: SwipeCard, direction: 'left' | 'right') => {
+  const completeSwipe = useCallback((card: SwipeCard, direction: string) => {
     setTimeout(() => {
       setSwipeAnswers(prev => ({
         ...prev,
@@ -172,15 +191,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
-      setSwipeDirection('left');
+      setSwipeDirection(disagreeText);
 
       onSwipeLeft?.(currentCard);
 
       if (currentCard.explanationRequired) {
-        setPendingSwipe({card: currentCard, direction: 'left'});
+        setPendingSwipe({card: currentCard, direction: disagreeText});
         setShowExplanationDialog(true);
       } else {
-        completeSwipe(currentCard, 'left');
+        completeSwipe(currentCard, disagreeText);
       }
     }
   };
@@ -191,15 +210,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       const currentCard = unansweredCards[0];
 
       setIsAnimating(true);
-      setSwipeDirection('right');
+      setSwipeDirection(agreeText);
 
       onSwipeRight?.(currentCard);
 
       if (currentCard.explanationRequired) {
-        setPendingSwipe({card: currentCard, direction: 'right'});
+        setPendingSwipe({card: currentCard, direction: agreeText});
         setShowExplanationDialog(true);
+        setExplanationCardId( currentCard.id );
       } else {
-        completeSwipe(currentCard, 'right');
+        completeSwipe(currentCard, agreeText);
       }
     }
   };
@@ -290,7 +310,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
     // Set swipe direction for visual feedback
     if (Math.abs(deltaX) > 50) {
-      setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+      setSwipeDirection(deltaX > 0 ? agreeText : disagreeText);
     } else {
       setSwipeDirection(null);
     }
@@ -340,25 +360,32 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
 
-  const handleAnswerChange = (cardId: string, newAnswer: 'left' | 'right') => {
+  const handleAnswerChange = (cardId: string, newAnswer: string) => {
     setSwipeAnswers(prev => ({
       ...prev,
       [cardId]: newAnswer
     }));
   };
 
-  const handleExplanationChange = (cardId: string, explanation: string) => {
-    setExplanations(prev => ({
+  const handleAnswerExplanationChange = (cardId: string, newAnswer: string) => {
+    setSwipeAnswersExplanation(prev => ({
       ...prev,
-      [cardId]: explanation
+      [cardId]: newAnswer
     }));
   };
 
   useEffect(() => {
     if (onChange) {
-      onChange({ name: fieldKey, value: swipeAnswers });
+      const combinedAnswers: defaultValueObject = swipeCards.map(card => ({
+        cardId: card.id,
+        answer: swipeAnswers[card.id],
+        title: card.title || '',
+        explanation: swipeAnswersExplanation[card.id] || '',
+      })).filter(item => item.answer !== undefined);
+
+      onChange({ name: fieldKey, value: combinedAnswers });
     }
-  }, [swipeAnswers]);
+  }, [swipeAnswers, swipeAnswersExplanation]);
 
   // Get cards that haven't been answered yet
   const unansweredCards = getUnansweredCards();
@@ -388,16 +415,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     <div className="swipe-summary-answer">
                       <div className="swipe-summary-buttons">
                         <button
-                          className={`swipe-summary-btn ${answer === 'left' ? 'active' : ''}`}
-                          onClick={(e) => ( e.preventDefault(), handleAnswerChange(card.id, 'left'))}
+                          className={`swipe-summary-btn ${answer === disagreeText ? 'active' : ''}`}
+                          onClick={(e) => ( e.preventDefault(), handleAnswerChange(card.id, disagreeText))}
                           aria-label={`Oneens met: ${card.title}`}
                         >
                           <i className="ri-thumb-down-fill"></i>
                           <span>Oneens</span>
                         </button>
                         <button
-                          className={`swipe-summary-btn ${answer === 'right' ? 'active' : ''}`}
-                          onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, 'right'))}
+                          className={`swipe-summary-btn ${answer === agreeText ? 'active' : ''}`}
+                          onClick={(e) => (e.preventDefault(), handleAnswerChange(card.id, agreeText))}
                           aria-label={`Eens met: ${card.title}`}
                         >
                           <i className="ri-thumb-up-fill"></i>
@@ -407,11 +434,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     </div>
                   </div>
                   <div className="swipe-summary-explanation">
-                    <textarea
+                    <Textarea
                       id={`explanation-${card.id}`}
                       placeholder="Voeg hier een toelichting (optioneel) toe..."
-                      value={explanations[card.id] || ''}
-                      onChange={(e) => handleExplanationChange(card.id, e.target.value)}
+                      value={swipeAnswersExplanation[card.id] || ''}
+                      onChange={(e) => handleAnswerExplanationChange(card.id, e.target.value)}
                       rows={3}
                     />
                   </div>
@@ -437,7 +464,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
               const rotation = dragState.deltaX * 0.1;
               transform = `translate(${dragState.deltaX}px, ${dragState.deltaY * 0.5}px) rotate(${rotation}deg)`;
             } else if (isTop && swipeDirection && isAnimating) {
-              const direction = swipeDirection === 'right' ? 1 : -1;
+              const direction = swipeDirection === agreeText ? 1 : -1;
               transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
             }
             return (
@@ -475,7 +502,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                           deltaY,
                         }));
                         if (Math.abs(deltaX) > 50) {
-                          setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+                          setSwipeDirection(deltaX > 0 ? agreeText : disagreeText);
                         } else {
                           setSwipeDirection(null);
                         }
@@ -532,8 +559,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
 
                   {isTop && swipeDirection && (
-                    <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === 'left' ? 'Afwijzen' : 'Goedkeuren'}>
-                      {swipeDirection === 'left' ? (
+                    <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === disagreeText ? 'Afwijzen' : 'Goedkeuren'}>
+                      {swipeDirection === disagreeText ? (
                         <i className="ri-thumb-down-fill"></i>
 
                       ) : (
@@ -589,12 +616,21 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         </div>
       )}
 
-      {showExplanationDialog && (
+      {(showExplanationDialog && explanationCardId) && (
         <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
           <div className="explanation-dialog-content">
             <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
             <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
-            <textarea autoFocus placeholder='Toelichting...' rows={5} />
+
+            <Textarea
+              autoFocus
+              placeholder='Toelichting...'
+              rows={5}
+              name={ 'dilemma-explanation' }
+              value={ swipeAnswersExplanation[explanationCardId] || '' }
+              onChange={(e) => { handleAnswerExplanationChange(explanationCardId, e.target.value); }}
+            />
+
             <Button appearance="primary-action-button" onClick={closeExplanationDialog}>
               Antwoord verzenden
             </Button>
