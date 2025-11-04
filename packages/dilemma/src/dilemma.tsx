@@ -70,13 +70,13 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   const [showExplanationDialog, setShowExplanationDialog] = useState<boolean>(false);
   const [explanations, setExplanations] = useState<Record<string, string>>({});
 
-  // Helper function to get unanswered dilemmas (only based on initial answers)
-  const getUnansweredDilemmas = useCallback(() =>
-    dilemmaCards.filter(dilemma => !initialAnswers[dilemma.id]),
-    [dilemmaCards, initialAnswers]
-  );
+  // Helper function to get unanswered dilemmas (including any that were made unanswered by going back)
+  const getUnansweredDilemmas = useCallback(() => {
+    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
+    return dilemmaCards.filter(dilemma => !combinedAnswers[dilemma.id]);
+  }, [dilemmaCards, initialAnswers, dilemmaAnswers]);
 
-  // Get unanswered dilemmas (static list based on initial state)
+  // Get unanswered dilemmas (dynamic list that updates when going back)
   const unansweredDilemmas = getUnansweredDilemmas();
 
   // Get current dilemma - this should stay stable even when answers change
@@ -112,13 +112,80 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     setSelectedOption(null);
 
     // Check if there are more unanswered dilemmas after the current one
-    const remainingUnanswered = unansweredDilemmas.slice(currentDilemmaIndex + 1);
-    if (remainingUnanswered.length > 0) {
+    // Use fresh calculation since unansweredDilemmas will update
+    const updatedUnanswered = getUnansweredDilemmas();
+    if (currentDilemmaIndex + 1 < updatedUnanswered.length) {
       setCurrentDilemmaIndex(prev => prev + 1);
     } else {
       setIsFinished(true);
     }
-  }, [currentDilemmaIndex, unansweredDilemmas, selectedOption, currentDilemma, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
+  }, [currentDilemmaIndex, getUnansweredDilemmas, selectedOption, currentDilemma, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
+
+  // Function to go back to previous question
+  const moveToPrevious = useCallback(() => {
+    console.log('moveToPrevious called', { 
+      currentDilemmaIndex, 
+      unansweredDilemmasLength: unansweredDilemmas.length,
+      currentDilemmaId: currentDilemma?.id,
+      dilemmaAnswers,
+      initialAnswers 
+    });
+    
+    // Strategy: Find the last answered dilemma and "unanswer" it
+    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
+    
+    // Get all dilemmas that currently have answers, in the original order
+    const answeredDilemmas = dilemmaCards.filter(dilemma => combinedAnswers[dilemma.id]);
+    
+    if (answeredDilemmas.length === 0) {
+      console.log('No answered dilemmas to go back to');
+      return;
+    }
+
+    // Take the last answered dilemma (in original dilemma order)
+    const lastAnsweredDilemma = answeredDilemmas[answeredDilemmas.length - 1];
+    console.log('Going back to dilemma:', lastAnsweredDilemma.id);
+
+    // Create new combined answers WITHOUT the answer we want to remove
+    // This is the key fix - we need to exclude it from the final combined answers
+    const newDilemmaAnswers = { ...dilemmaAnswers };
+    delete newDilemmaAnswers[lastAnsweredDilemma.id];
+    
+    // Create the new combined answers that will be used for filtering
+    const newCombinedAnswers = { ...initialAnswers, ...newDilemmaAnswers };
+    // Remove from the combined answers too (this handles the case where it was in initialAnswers)
+    delete newCombinedAnswers[lastAnsweredDilemma.id];
+    
+    setDilemmaAnswers(newDilemmaAnswers);
+
+    // Update onChange with the new answers (without the removed answer)
+    if (onChange) {
+      onChange({ name: fieldKey, value: newCombinedAnswers }, false);
+    }
+
+    // Reset UI state
+    setSelectedOption(null);
+    
+    // Now we need to navigate to this dilemma
+    // Calculate what the new unanswered list will be based on newCombinedAnswers
+    const futureUnanswered = dilemmaCards.filter(dilemma => !newCombinedAnswers[dilemma.id]);
+    const targetIndex = futureUnanswered.findIndex(d => d.id === lastAnsweredDilemma.id);
+    
+    console.log('Setting currentDilemmaIndex to:', targetIndex, 'futureUnanswered:', futureUnanswered.map(d => d.id));
+    if (targetIndex !== -1) {
+      setCurrentDilemmaIndex(targetIndex);
+    }
+  }, [currentDilemmaIndex, unansweredDilemmas, currentDilemma, dilemmaCards, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
+
+  // Check if there's a previous question to go back to
+  const canGoBack = useCallback(() => {
+    // Can go back if we're not at the first unanswered dilemma, OR if there are answered dilemmas
+    if (currentDilemmaIndex > 0) return true;
+    
+    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
+    const answeredDilemmaIds = Object.keys(combinedAnswers);
+    return answeredDilemmaIds.length > 0;
+  }, [currentDilemmaIndex, initialAnswers, dilemmaAnswers]);
 
   // Handle "Volgende" button click
   const handleNextClick = useCallback(() => {
@@ -162,10 +229,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     setCurrentDilemmaIndex(0);
     setSelectedOption(null);
 
-    // Check if all dilemmas are already answered
-    const unanswered = dilemmaCards.filter(dilemma => !initialAnswers[dilemma.id]);
+    // Check if all dilemmas are already answered using the dynamic function
+    const unanswered = getUnansweredDilemmas();
     setIsFinished(unanswered.length === 0);
-  }, [dilemmas, initialAnswers, dilemmaCards]);
+  }, [dilemmas, initialAnswers, dilemmaCards, getUnansweredDilemmas]);
 
   // If finished or no unanswered dilemmas remain, show overview
   if (isFinished || unansweredDilemmas.length === 0) {
@@ -316,14 +383,26 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <span>Info</span>
         </button>
 
-        <button
-          className="dilemma-next-button"
-          onClick={(e) => (e.preventDefault(), handleNextClick())}
-          disabled={!selectedOption}
-          type="button"
-        >
-          <span className="sr-only">Volgende</span>
-        </button>
+        <div className="dilemma-navigation-buttons">
+          <button
+            className="dilemma-back-button"
+            onClick={(e) => (e.preventDefault(), moveToPrevious())}
+            disabled={!canGoBack()}
+            type="button"
+            aria-label="Ga terug naar vorige vraag"
+          >
+            Terug
+          </button>
+
+          <button
+            className="dilemma-next-button"
+            onClick={(e) => (e.preventDefault(), handleNextClick())}
+            disabled={!selectedOption}
+            type="button"
+          >
+            <span className="sr-only">Volgende</span>
+          </button>
+        </div>
       </div>
 
       {showExplanationDialog && (
