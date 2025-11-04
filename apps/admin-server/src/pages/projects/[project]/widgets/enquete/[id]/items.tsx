@@ -1110,7 +1110,6 @@ export default function WidgetEnqueteItems(
                       <Button
                         className="w-full bg-secondary text-black hover:text-white mt-4"
                         type="button"
-                        disabled={form.watch('questionType') === 'dilemma' && options.length >= 2 && !selectedOption}
                         onClick={() => handleAddOption(form.getValues())}>
                         {selectedOption
                           ? 'Sla wijzigingen op'
