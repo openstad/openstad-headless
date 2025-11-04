@@ -19,7 +19,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
 
   const fileName = transformString() + '.xlsx';
 
-  const normalizeData = (value: any) => {
+  const normalizeData = (value: any, fieldType?: string) => {
     let parsedValue;
 
     try {
@@ -30,7 +30,20 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       return [...parsedValue].join(' | ')
     }
 
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && fieldType === 'dilemma') {
+      let optionText = value?.selectedOption === '0' ? 'Links' : value?.selectedOption;
+      optionText = value?.selectedOption === '1' ? 'Rechts' : optionText;
+
+      return value?.optionExplanation ? `${optionText}, Uitleg: ${value.optionExplanation}` : optionText;
+    } else if (typeof value === 'object' && fieldType === 'swipe') {
+      return Object.values(value).map((item: any) => {
+        let returnText = '';
+        if (item.title) returnText += `${item.title}: `;
+        if (item.answer) returnText += `${item.answer} `;
+        if (item.explanation) returnText += `, Uitleg: ${item.explanation}`;
+        return returnText.trim();
+      }).join(' | ');
+    } else if (typeof value === 'object') {
       if ( Array.isArray(value) && value.length > 0 ) {
         if ( typeof(value[0]) === 'object' ) {
           return value.map((item: any) => {
@@ -68,7 +81,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
           const matrixKey = `matrix_${item.fieldKey}_${row.trigger}`;
           fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
         });
-      } else if (title) {
+      } else if (title && item.questionType !== 'pagination') {
         fieldKeyToTitleMap.set(item.fieldKey || title, title);
       }
 
@@ -124,6 +137,22 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
         rawValue = fetchMatrixData(key, selectedWidget?.config?.items, row?.submittedData || [], false) || '';
       }
 
+      const fieldType = (selectedWidget?.config?.items || []).find((item: any) => item.fieldKey === key)?.questionType;
+      if (typeof rawValue === 'object' && fieldType === 'swipe') {
+        Object.values(rawValue).map((item: any) => {
+          let returnText = item.answer;
+          if (item.explanation) returnText += `: ${item.explanation}`;
+
+          let rowKeyHeaderTitle = item.title ? item.title : `Keuze ${item.cardId}`;
+          rowKeyHeaderTitle = `${title}: ${rowKeyHeaderTitle}`;
+          rowKeyHeaderTitle = rowKeyHeaderTitle && stripHtmlTags(rowKeyHeaderTitle);
+
+          rowData[rowKeyHeaderTitle] = returnText.trim();
+        });
+
+        return;
+      }
+
       const baseKey = title;
       let keyHeader = keyCount[baseKey]
         ? `${baseKey} (${keyCount[baseKey]++})`
@@ -131,7 +160,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
 
       keyHeader = keyHeader && stripHtmlTags(keyHeader);
 
-      rowData[keyHeader] = normalizeData(rawValue);
+      rowData[keyHeader] = normalizeData(rawValue, fieldType || '');
     });
     if (selectedWidget?.type !== "distributionmodule") {
       rowData['Embedded URL'] = row?.submittedData?.embeddedUrl || '';
