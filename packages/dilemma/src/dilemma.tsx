@@ -52,49 +52,35 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   overrideDefaultValue,
   ...props
 }) => {
-  // Initialize data
   const dilemmaCards = dilemmas.length > 0 ? dilemmas : [];
   const initialAnswers = useMemo(() =>
     overrideDefaultValue ? (overrideDefaultValue as Record<string, 'a' | 'b'>) : {},
     [overrideDefaultValue]
   );
 
-  // Core navigation state
   const [currentDilemmaIndex, setCurrentDilemmaIndex] = useState(0);
   const [dilemmaAnswers, setDilemmaAnswers] = useState<Record<string, 'a' | 'b'>>(initialAnswers);
   const [isFinished, setIsFinished] = useState(false);
   const [selectedOption, setSelectedOption] = useState<'a' | 'b' | null>(null);
 
-  // UI state
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState<boolean>(false);
   const [explanations, setExplanations] = useState<Record<string, string>>({});
 
-  // Helper function to get unanswered dilemmas (including any that were made unanswered by going back)
   const getUnansweredDilemmas = useCallback(() => {
     const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
     return dilemmaCards.filter(dilemma => !combinedAnswers[dilemma.id]);
   }, [dilemmaCards, initialAnswers, dilemmaAnswers]);
 
-  // Get unanswered dilemmas (dynamic list that updates when going back)
   const unansweredDilemmas = getUnansweredDilemmas();
-
-  // Get current dilemma - this should stay stable even when answers change
   const currentDilemma = unansweredDilemmas[currentDilemmaIndex];
 
-  // Handle option selection (NO automatic navigation - user must click "Volgende")
   const handleOptionSelect = useCallback((option: 'a' | 'b') => {
     if (!currentDilemma) return;
-
-    // ONLY update the selected option - NO onChange call here to prevent parent navigation
     setSelectedOption(option);
-
-    // EXPLICITLY NO NAVIGATION HERE - user must click "Volgende" button
-    // NO onChange CALL HERE - will be called in moveToNext()
   }, [currentDilemma]);
 
   const moveToNext = useCallback(() => {
-    // Now commit the selected option to the dilemmaAnswers state AND call onChange
     if (selectedOption && currentDilemma) {
       const newAnswers = {
         ...initialAnswers,
@@ -103,7 +89,6 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       };
       setDilemmaAnswers(newAnswers);
 
-      // Call onChange here when navigation actually happens
       if (onChange) {
         onChange({ name: fieldKey, value: newAnswers }, false);
       }
@@ -111,8 +96,6 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     setSelectedOption(null);
 
-    // Check if there are more unanswered dilemmas after the current one
-    // Use fresh calculation since unansweredDilemmas will update
     const updatedUnanswered = getUnansweredDilemmas();
     if (currentDilemmaIndex + 1 < updatedUnanswered.length) {
       setCurrentDilemmaIndex(prev => prev + 1);
@@ -121,77 +104,48 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }
   }, [currentDilemmaIndex, getUnansweredDilemmas, selectedOption, currentDilemma, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
 
-  // Function to go back to previous question
   const moveToPrevious = useCallback(() => {
-    console.log('moveToPrevious called', { 
-      currentDilemmaIndex, 
-      unansweredDilemmasLength: unansweredDilemmas.length,
-      currentDilemmaId: currentDilemma?.id,
-      dilemmaAnswers,
-      initialAnswers 
-    });
-    
-    // Strategy: Find the last answered dilemma and "unanswer" it
     const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
-    
-    // Get all dilemmas that currently have answers, in the original order
     const answeredDilemmas = dilemmaCards.filter(dilemma => combinedAnswers[dilemma.id]);
-    
+
     if (answeredDilemmas.length === 0) {
-      console.log('No answered dilemmas to go back to');
       return;
     }
 
-    // Take the last answered dilemma (in original dilemma order)
     const lastAnsweredDilemma = answeredDilemmas[answeredDilemmas.length - 1];
-    console.log('Going back to dilemma:', lastAnsweredDilemma.id);
-
-    // Create new combined answers WITHOUT the answer we want to remove
-    // This is the key fix - we need to exclude it from the final combined answers
     const newDilemmaAnswers = { ...dilemmaAnswers };
     delete newDilemmaAnswers[lastAnsweredDilemma.id];
-    
-    // Create the new combined answers that will be used for filtering
+
     const newCombinedAnswers = { ...initialAnswers, ...newDilemmaAnswers };
-    // Remove from the combined answers too (this handles the case where it was in initialAnswers)
     delete newCombinedAnswers[lastAnsweredDilemma.id];
-    
+
     setDilemmaAnswers(newDilemmaAnswers);
 
-    // Update onChange with the new answers (without the removed answer)
     if (onChange) {
       onChange({ name: fieldKey, value: newCombinedAnswers }, false);
     }
 
-    // Reset UI state
     setSelectedOption(null);
-    
-    // Now we need to navigate to this dilemma
-    // Calculate what the new unanswered list will be based on newCombinedAnswers
+
     const futureUnanswered = dilemmaCards.filter(dilemma => !newCombinedAnswers[dilemma.id]);
     const targetIndex = futureUnanswered.findIndex(d => d.id === lastAnsweredDilemma.id);
-    
-    console.log('Setting currentDilemmaIndex to:', targetIndex, 'futureUnanswered:', futureUnanswered.map(d => d.id));
+
     if (targetIndex !== -1) {
       setCurrentDilemmaIndex(targetIndex);
     }
   }, [currentDilemmaIndex, unansweredDilemmas, currentDilemma, dilemmaCards, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
 
-  // Check if there's a previous question to go back to
   const canGoBack = useCallback(() => {
-    // Can go back if we're not at the first unanswered dilemma, OR if there are answered dilemmas
     if (currentDilemmaIndex > 0) return true;
-    
+
     const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
     const answeredDilemmaIds = Object.keys(combinedAnswers);
     return answeredDilemmaIds.length > 0;
   }, [currentDilemmaIndex, initialAnswers, dilemmaAnswers]);
 
-  // Handle "Volgende" button click
   const handleNextClick = useCallback(() => {
     if (!selectedOption || !currentDilemma) return;
 
-    // Show explanation dialog if required for this specific dilemma
     if (currentDilemma.infofieldExplanation) {
       setShowExplanationDialog(true);
     } else {
@@ -224,17 +178,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }));
   };
 
-  // Initialize when dilemmas change
   useEffect(() => {
     setCurrentDilemmaIndex(0);
     setSelectedOption(null);
 
-    // Check if all dilemmas are already answered using the dynamic function
     const unanswered = getUnansweredDilemmas();
     setIsFinished(unanswered.length === 0);
   }, [dilemmas, initialAnswers, dilemmaCards, getUnansweredDilemmas]);
 
-  // If finished or no unanswered dilemmas remain, show overview
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
       <div className="dilemma-field dilemma-finished" role="region" aria-live="polite" tabIndex={0}>
@@ -246,9 +197,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
           <div className="dilemma-summary">
             {dilemmaCards.map((dilemma) => {
-              // Get answer from either initial answers or current answers
               const answer = dilemmaAnswers[dilemma.id] || initialAnswers[dilemma.id];
-              const selectedOptionData = answer ? dilemma[answer] : null;
 
               return (
                 <div key={dilemma.id} className="dilemma-summary-item">
@@ -304,11 +253,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     );
   }
 
-  // Calculate current index (how many dilemmas have been answered)
   const currentIndex = dilemmaCards.length - unansweredDilemmas.length;
-
-
-  // Show current dilemma
   if (!currentDilemma) return null;
 
   return (

@@ -31,37 +31,9 @@ export type SwipeProps = {
   onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
 };
 
-// Default demo cards - moved outside component to prevent recreation
-const defaultCards: SwipeCard[] = [
-  {
-    id: '1',
-    title: 'Iedere wijk in Den Haag moet evenveel sportmogelijkheden hebben.',
-    image: 'https://picsum.photos/seed/1752819645426/400/600'
-  },
-  {
-    id: '2',
-    title: 'Lorem ipsum dolor sit amet, consecdidunt ut labore et dolore magna aliqua.',
-    image: 'https://picsum.photos/seed/17528196455426/400/600'
-  },
-  {
-    id: '3',
-    title: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    image: 'https://picsum.photos/seed/17528139645426/400/600'
-  },
-  {
-    id: '4',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
-    image: 'https://picsum.photos/seed/17528119645426/400/600'
-  },
-  {
-    id: '5',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    image: 'https://picsum.photos/seed/175281679645426/400/600'
-  },
-];
 
 const SwipeField: FC<SwipeWidgetProps> = ({
-  cards = defaultCards,
+  cards = [],
   onSwipeLeft,
   onSwipeRight,
   showButtons = true,
@@ -71,19 +43,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   fieldKey,
   overrideDefaultValue,
 }) => {
-  // Initialize data
-  const swipeCards = useMemo(() => cards.length > 0 ? cards : defaultCards, [cards]);
+  const swipeCards = useMemo(() => cards.length > 0 ? cards : [], [cards]);
   const initialAnswers = overrideDefaultValue ? (overrideDefaultValue as Record<string, 'left' | 'right'>) : {};
 
-  // Core swipe state
   const [swipeAnswers, setSwipeAnswers] = useState<Record<string, 'left' | 'right'>>(initialAnswers);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Animation state
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Drag state using ref for better performance
   const dragStateRef = useRef({
     isDragging: false,
     startX: 0,
@@ -97,70 +65,55 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [dragTransform, setDragTransform] = useState<string>('');
   const animationFrameRef = useRef<number | null>(null);
 
-  // UI state
   const [isInfoVisible, setIsInfoVisible] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
   const [explanations, setExplanations] = useState<Record<string, string>>({});
 
-  // Pending swipe for explanation dialogs
   const [pendingSwipe, setPendingSwipe] = useState<{ card: SwipeCard, direction: 'left' | 'right' } | null>(null);
 
-  // Helper function to get unanswered cards (including any that were made unanswered by going back)
   const getUnansweredCards = useCallback(() => {
     const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
     return swipeCards.filter(card => !combinedAnswers[card.id]);
   }, [swipeCards, initialAnswers, swipeAnswers]);
 
-  // Function to go back to previous card
   const moveToPrevious = useCallback(() => {
-    // Strategy: Find the last answered card and "unanswer" it
     const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
 
-    // Get all cards that currently have answers, in the original order
     const answeredCards = swipeCards.filter(card => combinedAnswers[card.id]);
 
     if (answeredCards.length === 0) {
       return;
     }
 
-    // Take the last answered card (in original card order)
     const lastAnsweredCard = answeredCards[answeredCards.length - 1];
 
-    // Create new combined answers WITHOUT the answer we want to remove
     const newSwipeAnswers = { ...swipeAnswers };
     delete newSwipeAnswers[lastAnsweredCard.id];
 
-    // Create the new combined answers that will be used for filtering
     const newCombinedAnswers = { ...initialAnswers, ...newSwipeAnswers };
-    // Remove from the combined answers too (this handles the case where it was in initialAnswers)
     delete newCombinedAnswers[lastAnsweredCard.id];
 
     setSwipeAnswers(newSwipeAnswers);
 
-    // Update onChange with the new answers (without the removed answer)
     if (onChange) {
       onChange({ name: fieldKey, value: newCombinedAnswers }, false);
     }
 
-    // Reset UI state
     setIsAnimating(false);
     setSwipeDirection(null);
     setPendingSwipe(null);
     setShowExplanationDialog(false);
 
-    // Make sure we're not in finished state
     setIsFinished(false);
   }, [swipeCards, initialAnswers, swipeAnswers, onChange, fieldKey]);
 
-  // Check if there's a previous card to go back to
   const canGoBack = useCallback(() => {
     const combinedAnswers = { ...initialAnswers, ...swipeAnswers };
     const answeredCardIds = Object.keys(combinedAnswers);
     return answeredCardIds.length > 0;
   }, [initialAnswers, swipeAnswers]);
 
-  // Helper function to complete a swipe animation
   const completeSwipe = useCallback((card: SwipeCard, direction: 'left' | 'right') => {
     setTimeout(() => {
       setSwipeAnswers(prev => ({
@@ -173,7 +126,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }, 200);
   }, []);
 
-  // Helper function to close explanation dialog and complete swipe
   const closeExplanationDialog = useCallback(() => {
     setIsDialogClosing(true);
     setTimeout(() => {
@@ -194,14 +146,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }, 200);
   }, [pendingSwipe]);
 
-  // Initialize when cards prop changes
   useEffect(() => {
-    // Check if all cards are already answered using the dynamic function
     const unanswered = getUnansweredCards();
     setIsFinished(unanswered.length === 0);
   }, [swipeCards, getUnansweredCards]);
 
-  // Cleanup animation frame on unmount
   useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
@@ -210,7 +159,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     };
   }, []);
 
-  // Keyboard handling
   useEffect(() => {
     if (!enableKeyboard) return;
 
@@ -267,7 +215,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const removeCurrentCard = () => {
     setIsInfoVisible(false);
 
-    // Check if there are any unanswered cards left using the dynamic function
     setTimeout(() => {
       const remainingUnanswered = getUnansweredCards();
       if (remainingUnanswered.length === 0) {
@@ -276,7 +223,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }, 0);
   };
 
-  // Function to clean up drag state and release pointer capture
   const cleanupDragState = useCallback((element: Element | null, pointerId?: number) => {
     dragStateRef.current = {
       isDragging: false,
@@ -288,7 +234,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       deltaY: 0,
     };
 
-    // Cancel any pending animation frame
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -297,17 +242,14 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setDragTransform('');
     setSwipeDirection(null);
 
-    // Force release pointer capture if element and pointerId are available
     if (element && pointerId !== undefined) {
       try {
         (element as any).releasePointerCapture(pointerId);
       } catch (error) {
-        // Ignore errors when releasing capture
       }
     }
   }, []);
 
-  // Optimized function to update transform with requestAnimationFrame
   const updateDragTransform = useCallback((deltaX: number, deltaY: number) => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -318,7 +260,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       const transform = `translate(${deltaX}px, ${deltaY * 0.5}px) rotate(${rotation}deg)`;
       setDragTransform(transform);
 
-      // Set swipe direction for visual feedback
       if (Math.abs(deltaX) > 50) {
         setSwipeDirection(deltaX > 0 ? 'right' : 'left');
       } else {
@@ -327,7 +268,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     });
   }, []);
 
-  // Touch/Mouse event handlers
   const handlePointerDown = useCallback((event: React.PointerEvent) => {
     if (isAnimating || getUnansweredCards().length === 0) return;
 
@@ -352,7 +292,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
 
-    // If animation starts during drag, immediately stop dragging
     if (isAnimating) {
       cleanupDragState(event.currentTarget, event.pointerId);
       return;
@@ -363,7 +302,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     const deltaX = clientX - dragState.startX;
     const deltaY = clientY - dragState.startY;
 
-    // Update drag state without triggering re-render
     dragStateRef.current = {
       ...dragState,
       currentX: clientX,
@@ -372,7 +310,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       deltaY,
     };
 
-    // Use requestAnimationFrame for smooth visual updates
     updateDragTransform(deltaX, deltaY);
 
     event.preventDefault();
@@ -388,13 +325,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     const velocity = Math.abs(dragState.deltaX) / 100;
     const deltaX = dragState.deltaX;
 
-    // Clean up drag state first
     cleanupDragState(event.currentTarget, event.pointerId);
 
-    // Don't trigger swipe if already animating
     if (isAnimating) return;
 
-    // Determine if swipe should trigger action
     const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
 
     if (shouldSwipe) {
@@ -404,18 +338,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         handleSwipeLeft();
       }
     } else {
-      // Snap back
       setSwipeDirection(null);
     }
   }, [isAnimating, cleanupDragState, handleSwipeRight, handleSwipeLeft]);
 
   const handlePointerCancel = useCallback((event: React.PointerEvent) => {
-    // Handle cases where pointer is cancelled (e.g., browser takes over)
     cleanupDragState(event.currentTarget, event.pointerId);
   }, [cleanupDragState]);
 
   const handlePointerLeave = useCallback((event: React.PointerEvent) => {
-    // Handle cases where pointer leaves the element
     if (dragStateRef.current.isDragging) {
       cleanupDragState(event.currentTarget, event.pointerId);
     }
@@ -442,13 +373,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }
   }, [swipeAnswers]);
 
-  // Get cards that haven't been answered yet (dynamic list that updates when going back)
   const unansweredCards = getUnansweredCards();
 
-  // Calculate current index (how many cards have been answered)
   const currentIndex = swipeCards.length - unansweredCards.length;
 
-  // If no unanswered cards remain, show finished state
   if (isFinished || unansweredCards.length === 0) {
     return (
       <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
