@@ -12,6 +12,7 @@
   "dependencies": {
     "@openstad-headless/data-store": "*",
     "@openstad-headless/swipe": "^0.0.0",
+    "@openstad-headless/dilemma": "^0.0.0",
     "@openstad-headless/ui": "*",
     "@utrecht/component-library-css": "^2.0.0",
     "filepond": "^4.30.6",
