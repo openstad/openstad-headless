@@ -14,9 +14,9 @@ export type SwipeCard = {
 
 export type SwipeWidgetProps = BaseProps &
   SwipeProps & {
-  resourceId?: string;
-  resourceIdRelativePath?: string;
-};
+    resourceId?: string;
+    resourceIdRelativePath?: string;
+  };
 
 export type SwipeProps = {
   cards?: SwipeCard[];
@@ -33,21 +33,21 @@ export type SwipeProps = {
   disagreeText?: string;
 };
 
-type valueObject = Array< { cardId: string; answer: string; explanation?: string } >;
+type valueObject = Array<{ cardId: string; answer: string; explanation?: string }>;
 
 const SwipeField: FC<SwipeWidgetProps> = ({
-                                            cards = [],
-                                            onSwipeLeft,
-                                            onSwipeRight,
-                                            showButtons = true,
-                                            enableKeyboard = true,
-                                            required = false,
-                                            onChange,
-                                            fieldKey,
-                                            overrideDefaultValue,
-                                            agreeText = 'Eens',
-                                            disagreeText = 'Oneens',
-                                          }) => {
+  cards = [],
+  onSwipeLeft,
+  onSwipeRight,
+  showButtons = true,
+  enableKeyboard = true,
+  required = false,
+  onChange,
+  fieldKey,
+  overrideDefaultValue,
+  agreeText = 'Eens',
+  disagreeText = 'Oneens',
+}) => {
   const swipeCards = useMemo(() => cards.length > 0 ? cards : [], [cards]);
   let initialAnswers: Record<string, string> = {};
   let initialAnswersExplanation: Record<string, string> = {};
@@ -165,23 +165,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      // Restore body scrolling on unmount
+      document.body.style.overflow = '';
     };
   }, []);
-
-  useEffect(() => {
-    if (!enableKeyboard) return;
-
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft') {
-        handleSwipeLeft();
-      } else if (event.key === 'ArrowRight') {
-        handleSwipeRight();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [enableKeyboard, getUnansweredCards, isAnimating]);
 
   const handleSwipeLeft = useCallback((fromButton = false) => {
     const unansweredCards = getUnansweredCards();
@@ -201,7 +188,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         completeSwipe(currentCard, disagreeText);
       }
     }
-  }, [getUnansweredCards, isAnimating, onSwipeLeft, completeSwipe]);
+  }, [getUnansweredCards, isAnimating, onSwipeLeft, completeSwipe, disagreeText]);
 
   const handleSwipeRight = useCallback((fromButton = false) => {
     const unansweredCards = getUnansweredCards();
@@ -221,7 +208,22 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         completeSwipe(currentCard, agreeText);
       }
     }
-  }, [getUnansweredCards, isAnimating, onSwipeRight, completeSwipe]);
+  }, [getUnansweredCards, isAnimating, onSwipeRight, completeSwipe, agreeText, disagreeText]);
+
+  useEffect(() => {
+    if (!enableKeyboard) return;
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        handleSwipeLeft();
+      } else if (event.key === 'ArrowRight') {
+        handleSwipeRight();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [enableKeyboard, handleSwipeLeft, handleSwipeRight]);
 
   const removeCurrentCard = () => {
     setIsInfoVisible(false);
@@ -253,6 +255,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setDragTransform('');
     setSwipeDirection(null);
 
+    // Restore body scrolling
+    document.body.style.overflow = '';
+
     if (element && pointerId !== undefined) {
       try {
         (element as any).releasePointerCapture(pointerId);
@@ -277,10 +282,13 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         setSwipeDirection(null);
       }
     });
-  }, []);
+  }, [agreeText, disagreeText]);
 
   const handlePointerDown = useCallback((event: React.PointerEvent) => {
     if (isAnimating || getUnansweredCards().length === 0) return;
+    
+    // Skip touch events when pointer events are from touch (iOS sends both)
+    if (event.pointerType === 'touch') return;
 
     const clientX = event.clientX;
     const clientY = event.clientY;
@@ -295,6 +303,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       deltaY: 0,
     };
 
+    // Block body scrolling during drag
+    document.body.style.overflow = 'hidden';
+
     event.currentTarget.setPointerCapture(event.pointerId);
     event.preventDefault();
   }, [isAnimating, getUnansweredCards]);
@@ -302,6 +313,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const handlePointerMove = useCallback((event: React.PointerEvent) => {
     const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
+    
+    // Skip touch events when pointer events are from touch
+    if (event.pointerType === 'touch') return;
 
     if (isAnimating) {
       cleanupDragState(event.currentTarget, event.pointerId);
@@ -329,6 +343,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const handlePointerUp = useCallback((event: React.PointerEvent) => {
     const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
+    
+    // Skip touch events when pointer events are from touch
+    if (event.pointerType === 'touch') return;
 
     const swipeThreshold = 100;
     const velocityThreshold = 0.5;
@@ -354,13 +371,105 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }, [isAnimating, cleanupDragState, handleSwipeRight, handleSwipeLeft]);
 
   const handlePointerCancel = useCallback((event: React.PointerEvent) => {
+    if (event.pointerType === 'touch') return;
     cleanupDragState(event.currentTarget, event.pointerId);
   }, [cleanupDragState]);
 
   const handlePointerLeave = useCallback((event: React.PointerEvent) => {
+    if (event.pointerType === 'touch') return;
     if (dragStateRef.current.isDragging) {
       cleanupDragState(event.currentTarget, event.pointerId);
     }
+  }, [cleanupDragState]);
+
+  // Touch event handlers for iOS compatibility
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    if (isAnimating || getUnansweredCards().length === 0) return;
+
+    const touch = event.touches[0];
+    const clientX = touch.clientX;
+    const clientY = touch.clientY;
+
+    dragStateRef.current = {
+      isDragging: true,
+      startX: clientX,
+      startY: clientY,
+      currentX: clientX,
+      currentY: clientY,
+      deltaX: 0,
+      deltaY: 0,
+    };
+
+    // Block body scrolling during drag
+    document.body.style.overflow = 'hidden';
+
+    event.preventDefault();
+    event.stopPropagation();
+  }, [isAnimating, getUnansweredCards]);
+
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    const dragState = dragStateRef.current;
+    if (!dragState.isDragging) return;
+
+    if (isAnimating) {
+      cleanupDragState(event.currentTarget);
+      return;
+    }
+
+    const touch = event.touches[0];
+    if (!touch) return;
+
+    const clientX = touch.clientX;
+    const clientY = touch.clientY;
+    const deltaX = clientX - dragState.startX;
+    const deltaY = clientY - dragState.startY;
+
+    dragStateRef.current = {
+      ...dragState,
+      currentX: clientX,
+      currentY: clientY,
+      deltaX,
+      deltaY,
+    };
+
+    updateDragTransform(deltaX, deltaY);
+
+    event.preventDefault();
+    event.stopPropagation();
+  }, [isAnimating, cleanupDragState, updateDragTransform]);
+
+  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
+    const dragState = dragStateRef.current;
+    if (!dragState.isDragging) return;
+
+    const swipeThreshold = 100;
+    const velocityThreshold = 0.5;
+
+    const velocity = Math.abs(dragState.deltaX) / 100;
+    const deltaX = dragState.deltaX;
+
+    cleanupDragState(event.currentTarget);
+
+    if (isAnimating) return;
+
+    const shouldSwipe = Math.abs(deltaX) > swipeThreshold || velocity > velocityThreshold;
+
+    if (shouldSwipe) {
+      if (deltaX > 0) {
+        handleSwipeRight(false);
+      } else {
+        handleSwipeLeft(false);
+      }
+    } else {
+      setSwipeDirection(null);
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+  }, [isAnimating, cleanupDragState, handleSwipeRight, handleSwipeLeft]);
+
+  const handleTouchCancel = useCallback((event: React.TouchEvent) => {
+    cleanupDragState(event.currentTarget);
   }, [cleanupDragState]);
 
 
@@ -507,16 +616,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 // During drag, use the drag transform
                 transform = dragTransform;
               } else if (isTop && swipeDirection && isAnimating && animationType === 'drag') {
-                // Swipe release animation - use inline transform
+                // Swipe release animation - use inline transform only for drag
                 const direction = swipeDirection === agreeText ? 1 : -1;
                 transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
               }
-              // For button clicks, we'll use CSS classes instead of inline transform
+              // For button clicks, we rely on CSS classes for smooth animation
               return (
                 <>
                   <div
                     key={card.id}
-                    className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''}`}
+                    className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection === agreeText ? 'right' : 'left'}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''} ${animationType && isTop ? `swipe-card--${animationType}` : ''}`}
                     style={{ zIndex, ...(transform ? { transform } : {}) }}
                     {...(isTop
                       ? {
@@ -524,7 +633,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                         onPointerMove: handlePointerMove,
                         onPointerUp: handlePointerUp,
                         onPointerCancel: handlePointerCancel,
-                        onPointerLeave: handlePointerLeave
+                        onPointerLeave: handlePointerLeave,
+                        onTouchStart: handleTouchStart,
+                        onTouchMove: handleTouchMove,
+                        onTouchEnd: handleTouchEnd,
+                        onTouchCancel: handleTouchCancel
                       }
                       : {})}
                     role="listitem"
@@ -543,7 +656,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
 
                     {isTop && swipeDirection && (
-                      <div className={`swipe-indicator swipe-indicator--${swipeDirection}`} aria-live="polite" aria-label={swipeDirection === disagreeText ? 'Afwijzen' : 'Goedkeuren'}>
+                      <div className={`swipe-indicator swipe-indicator--${swipeDirection === agreeText ? 'right' : 'left'}`} aria-live="polite" aria-label={swipeDirection === disagreeText ? 'Afwijzen' : 'Goedkeuren'}>
                         {swipeDirection === disagreeText ? (
                           <i className="ri-thumb-down-fill"></i>
 

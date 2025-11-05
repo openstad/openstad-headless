@@ -141,12 +141,19 @@
       &.swipe-card--right {
         transform: translateX(150px) rotate(10deg) !important;
       }
+
+      // Button-specific animation with smoother transition
+      &.swipe-card--button {
+        transition: transform 0.4s cubic-bezier(.33, .05, .58, .98), opacity 0.4s cubic-bezier(.33, .05, .58, .98) !important;
+      }
     }
 
     &--top {
       cursor: grab;
       touch-action: none;
       z-index: 9999;
+      -webkit-user-select: none;
+      user-select: none;
 
       &:active {
         cursor: grabbing;
