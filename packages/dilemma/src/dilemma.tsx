@@ -31,12 +31,14 @@ export type DilemmaProps = {
   setCurrentPage?: any;
   currentPage?: number;
   dilemmas?: DilemmaCard[];
-  fieldKey: string;
+  fieldKey?: string;
   type?: string;
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
 };
+
+type valueObject = Array< { dilemmaId: string; answer: string; explanation?: string } >;
 
 
 const DilemmaField: FC<DilemmaFieldProps> = ({
@@ -48,32 +50,40 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                                                currentPage = 0,
                                                required = false,
                                                onChange,
-                                               fieldKey,
+                                               fieldKey = 'dilemma',
                                                overrideDefaultValue,
                                                ...props
                                              }) => {
-  const dilemmaCards = dilemmas.length > 0 ? dilemmas : [];
-  const initialAnswers = useMemo(() =>
-      overrideDefaultValue ? (overrideDefaultValue as Record<string, 'a' | 'b'>) : {},
-    [overrideDefaultValue]
-  );
+  const dilemmaCards = useMemo(() => dilemmas.length > 0 ? dilemmas : [], [dilemmas]);
+
+  let initialAnswers: Record<string, string> = {};
+  let initialAnswersExplanation: Record<string, string> = {};
+
+  if (overrideDefaultValue && typeof overrideDefaultValue === 'object') {
+    const overrideArray = overrideDefaultValue as valueObject;
+    overrideArray.forEach(item => {
+      initialAnswers[item.dilemmaId as string] = item.answer;
+      if (item.explanation) {
+        initialAnswersExplanation[item.dilemmaId as string] = item.explanation;
+      }
+    });
+  }
 
   const [currentDilemmaIndex, setCurrentDilemmaIndex] = useState(0);
-  const [dilemmaAnswers, setDilemmaAnswers] = useState<Record<string, 'a' | 'b'>>(initialAnswers);
+  const [dilemmaAnswers, setDilemmaAnswers] = useState<Record<string, string>>(initialAnswers);
   const [isFinished, setIsFinished] = useState(false);
   const [selectedOption, setSelectedOption] = useState<'a' | 'b' | null>(null);
 
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState<boolean>(false);
-  const [explanations, setExplanations] = useState<Record<string, string>>({});
+  const [explanations, setExplanations] = useState<Record<string, string>>(initialAnswersExplanation);
 
   const getUnansweredDilemmas = useCallback(() => {
-    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
-    return dilemmaCards.filter(dilemma => !combinedAnswers[dilemma.id]);
-  }, [dilemmaCards, initialAnswers, dilemmaAnswers]);
+    return dilemmaCards.filter(dilemma => !dilemmaAnswers[dilemma.id]);
+  }, [dilemmaCards, dilemmaAnswers]);
 
   const unansweredDilemmas = getUnansweredDilemmas();
-  const currentDilemma = unansweredDilemmas[currentDilemmaIndex];
+  const currentDilemma = unansweredDilemmas?.find((card) => card.id === String(currentDilemmaIndex)) || null;
 
   const handleOptionSelect = useCallback((option: 'a' | 'b') => {
     if (!currentDilemma) return;
@@ -83,15 +93,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   const moveToNext = useCallback(() => {
     if (selectedOption && currentDilemma) {
       const newAnswers = {
-        ...initialAnswers,
         ...dilemmaAnswers,
         [currentDilemma.id]: selectedOption
       };
       setDilemmaAnswers(newAnswers);
-
-      if (onChange) {
-        onChange({ name: fieldKey, value: newAnswers }, false);
-      }
     }
 
     setSelectedOption(null);
@@ -102,11 +107,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     } else {
       setIsFinished(true);
     }
-  }, [currentDilemmaIndex, getUnansweredDilemmas, selectedOption, currentDilemma, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
+  }, [currentDilemmaIndex, getUnansweredDilemmas, selectedOption, currentDilemma, dilemmaAnswers, fieldKey]);
 
   const moveToPrevious = useCallback(() => {
-    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
-    const answeredDilemmas = dilemmaCards.filter(dilemma => combinedAnswers[dilemma.id]);
+    const answeredDilemmas = dilemmaCards.filter(dilemma => dilemmaAnswers[dilemma.id]);
 
     if (answeredDilemmas.length === 0) {
       return;
@@ -116,32 +120,24 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     const newDilemmaAnswers = { ...dilemmaAnswers };
     delete newDilemmaAnswers[lastAnsweredDilemma.id];
 
-    const newCombinedAnswers = { ...initialAnswers, ...newDilemmaAnswers };
-    delete newCombinedAnswers[lastAnsweredDilemma.id];
-
     setDilemmaAnswers(newDilemmaAnswers);
-
-    if (onChange) {
-      onChange({ name: fieldKey, value: newCombinedAnswers }, false);
-    }
 
     setSelectedOption(null);
 
-    const futureUnanswered = dilemmaCards.filter(dilemma => !newCombinedAnswers[dilemma.id]);
+    const futureUnanswered = dilemmaCards.filter(dilemma => !newDilemmaAnswers[dilemma.id]);
     const targetIndex = futureUnanswered.findIndex(d => d.id === lastAnsweredDilemma.id);
 
     if (targetIndex !== -1) {
       setCurrentDilemmaIndex(targetIndex);
     }
-  }, [currentDilemmaIndex, unansweredDilemmas, currentDilemma, dilemmaCards, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
+  }, [currentDilemmaIndex, unansweredDilemmas, currentDilemma, dilemmaCards, dilemmaAnswers, fieldKey]);
 
   const canGoBack = useCallback(() => {
     if (currentDilemmaIndex > 0) return true;
 
-    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
-    const answeredDilemmaIds = Object.keys(combinedAnswers);
+    const answeredDilemmaIds = Object.keys(dilemmaAnswers);
     return answeredDilemmaIds.length > 0;
-  }, [currentDilemmaIndex, initialAnswers, dilemmaAnswers]);
+  }, [currentDilemmaIndex, dilemmaAnswers]);
 
   const handleNextClick = useCallback(() => {
     if (!selectedOption || !currentDilemma) return;
@@ -160,15 +156,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   const handleAnswerChange = (dilemmaId: string, newAnswer: 'a' | 'b') => {
     const newAnswers = {
-      ...initialAnswers,
       ...dilemmaAnswers,
       [dilemmaId]: newAnswer
     };
     setDilemmaAnswers(newAnswers);
-
-    if (onChange) {
-      onChange({ name: fieldKey, value: newAnswers });
-    }
   };
 
   const handleExplanationChange = (dilemmaId: string, explanation: string) => {
@@ -179,8 +170,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   };
 
   const goBackToDilemmas = useCallback(() => {
-    const combinedAnswers = { ...initialAnswers, ...dilemmaAnswers };
-    const answeredDilemmas = dilemmaCards.filter(dilemma => combinedAnswers[dilemma.id]);
+    const answeredDilemmas = dilemmaCards.filter(dilemma => dilemmaAnswers[dilemma.id]);
 
     if (answeredDilemmas.length > 0) {
       // Ga terug naar het laatste beantwoorde dilemma en maak het onbeantwoord
@@ -188,17 +178,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       const newDilemmaAnswers = { ...dilemmaAnswers };
       delete newDilemmaAnswers[lastAnsweredDilemma.id];
 
-      const newCombinedAnswers = { ...initialAnswers, ...newDilemmaAnswers };
-      delete newCombinedAnswers[lastAnsweredDilemma.id];
-
       setDilemmaAnswers(newDilemmaAnswers);
 
-      if (onChange) {
-        onChange({ name: fieldKey, value: newCombinedAnswers }, false);
-      }
-
       // Bereken welke dilemma's nog niet beantwoord zijn na deze wijziging
-      const futureUnanswered = dilemmaCards.filter(dilemma => !newCombinedAnswers[dilemma.id]);
+      const futureUnanswered = dilemmaCards.filter(dilemma => !newDilemmaAnswers[dilemma.id]);
       const targetIndex = futureUnanswered.findIndex(d => d.id === lastAnsweredDilemma.id);
 
       setCurrentDilemmaIndex(targetIndex !== -1 ? targetIndex : 0);
@@ -208,15 +191,33 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     setIsFinished(false);
     setSelectedOption(null);
-  }, [dilemmaCards, initialAnswers, dilemmaAnswers, onChange, fieldKey]);
+  }, [dilemmaCards, dilemmaAnswers, fieldKey]);
 
   useEffect(() => {
-    setCurrentDilemmaIndex(0);
-    setSelectedOption(null);
+    if (onChange) {
+      const combinedAnswers: valueObject = dilemmaCards.map((card) => {
+        const answer = dilemmaAnswers[card.id] || '';
+        const title = card[answer as 'a' | 'b']?.title || '';
+
+        return {
+          dilemmaId: card.id,
+          answer: answer,
+          title: title,
+          explanation: explanations[card.id] || '',
+        }
+      }).filter(item => item.answer !== undefined);
+
+      onChange({ name: fieldKey, value: combinedAnswers });
+    }
+  }, [dilemmaAnswers, explanations]);
+
+  useEffect(() => {
+    // setCurrentDilemmaIndex(0);
+    // setSelectedOption(null);
 
     const unanswered = getUnansweredDilemmas();
     setIsFinished(unanswered.length === 0);
-  }, [dilemmas, initialAnswers, dilemmaCards, getUnansweredDilemmas]);
+  }, [dilemmas, dilemmaCards, getUnansweredDilemmas]);
 
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
@@ -240,7 +241,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
           <div className="dilemma-summary">
             {dilemmaCards.map((dilemma) => {
-              const answer = dilemmaAnswers[dilemma.id] || initialAnswers[dilemma.id];
+              const answer = dilemmaAnswers[dilemma.id] || '';
 
               return (
                 <div key={dilemma.id} className="dilemma-summary-item">
@@ -398,7 +399,13 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <div className="explanation-dialog-content">
             <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
             <Paragraph>Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
-            <textarea autoFocus placeholder='Toelichting...' rows={5} />
+            <textarea
+              autoFocus
+              placeholder='Toelichting...'
+              rows={5}
+              value={explanations[currentDilemma.id] || ''}
+              onChange={(e) => handleExplanationChange(currentDilemma.id, e.target.value)}
+            />
             <Button appearance="primary-action-button" onClick={handleExplanationComplete}>
               Antwoord verzenden
             </Button>
