@@ -83,7 +83,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   }, [dilemmaCards, dilemmaAnswers]);
 
   const unansweredDilemmas = getUnansweredDilemmas();
-  const currentDilemma = unansweredDilemmas?.find((card) => card.id === String(currentDilemmaIndex)) || null;
+  const currentDilemma = unansweredDilemmas[currentDilemmaIndex] || null;
 
   const handleOptionSelect = useCallback((option: 'a' | 'b') => {
     if (!currentDilemma) return;
@@ -212,8 +212,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   }, [dilemmaAnswers, explanations]);
 
   useEffect(() => {
-    // setCurrentDilemmaIndex(0);
-    // setSelectedOption(null);
+    setCurrentDilemmaIndex(0);
+    setSelectedOption(null);
 
     const unanswered = getUnansweredDilemmas();
     setIsFinished(unanswered.length === 0);
