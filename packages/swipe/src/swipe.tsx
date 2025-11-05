@@ -69,6 +69,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationType, setAnimationType] = useState<'drag' | 'button' | null>(null);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   const dragStateRef = useRef({
     isDragging: false,
@@ -110,6 +111,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsAnimating(false);
     setSwipeDirection(null);
     setAnimationType(null);
+    setIsFadingOut(false);
     setPendingSwipe(null);
     setShowExplanationDialog(false);
 
@@ -122,15 +124,24 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }, [swipeAnswers]);
 
   const completeSwipe = useCallback((card: SwipeCard, direction: string) => {
+    // First phase: swipe animation (200ms)
     setTimeout(() => {
       setSwipeAnswers(prev => ({
         ...prev,
         [card.id]: direction
       }));
-      removeCurrentCard();
+      
+      // Start fadeout animation
+      setIsFadingOut(true);
       setSwipeDirection(null);
-      setIsAnimating(false);
-      setAnimationType(null);
+      
+      // Second phase: fadeout animation (300ms)
+      setTimeout(() => {
+        removeCurrentCard();
+        setIsAnimating(false);
+        setAnimationType(null);
+        setIsFadingOut(false);
+      }, 300);
     }, 200);
   }, []);
 
@@ -147,10 +158,18 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           }));
           setPendingSwipe(null);
         }
-        removeCurrentCard();
+        
+        // Start fadeout animation
+        setIsFadingOut(true);
         setSwipeDirection(null);
-        setIsAnimating(false);
-        setAnimationType(null);
+        
+        // Fadeout animation (300ms)
+        setTimeout(() => {
+          removeCurrentCard();
+          setIsAnimating(false);
+          setAnimationType(null);
+          setIsFadingOut(false);
+        }, 300);
       }, 200);
     }, 200);
   }, [pendingSwipe]);
@@ -503,6 +522,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsAnimating(false);
     setSwipeDirection(null);
     setAnimationType(null);
+    setIsFadingOut(false);
     setPendingSwipe(null);
     setShowExplanationDialog(false);
   }, [swipeCards, swipeAnswers, fieldKey]);
@@ -610,22 +630,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             {unansweredCards.slice(0, 3).map((card, index) => {
               const isTop = index === 0;
               const zIndex = unansweredCards.length - index;
+              const positionClass = `swipe-card--position-${index}`;
               let transform = '';
 
-              if (isTop && dragStateRef.current.isDragging) {
-                // During drag, use the drag transform
+              if (isTop && dragStateRef.current.isDragging && !isFadingOut) {
+                // During active drag, use the drag transform
                 transform = dragTransform;
-              } else if (isTop && swipeDirection && isAnimating && animationType === 'drag') {
-                // Swipe release animation - use inline transform only for drag
-                const direction = swipeDirection === agreeText ? 1 : -1;
-                transform = `translateX(${direction * 150}px) rotate(${direction * 10}deg)`;
               }
-              // For button clicks, we rely on CSS classes for smooth animation
+              // For all animations (drag release and button clicks), we rely on CSS classes
               return (
                 <>
                   <div
                     key={card.id}
-                    className={`swipe-card ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection === agreeText ? 'right' : 'left'}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''} ${animationType && isTop ? `swipe-card--${animationType}` : ''}`}
+                    className={`swipe-card ${positionClass} ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection === agreeText ? 'right' : 'left'}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''} ${animationType && isTop ? `swipe-card--${animationType}` : ''} ${isFadingOut && isTop ? 'swipe-card--fadeout' : ''}`}
                     style={{ zIndex, ...(transform ? { transform } : {}) }}
                     {...(isTop
                       ? {

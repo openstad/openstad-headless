@@ -58,7 +58,6 @@
   width: 100%;
   height: auto;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -117,11 +116,10 @@
       opacity 0.3s cubic-bezier(.33, .05, .58, .98),
       box-shadow 0.3s cubic-bezier(.33, .05, .58, .98);
     will-change: transform;
-
     border: solid 1px #BFBFBF;
 
     &:not(.swipe-card--top) .swipe-card-image img {
-      opacity: 0;
+      opacity: 0.5;
     }
 
     &:not(.swipe-card--top) .swipe-card-content {
@@ -136,17 +134,25 @@
 
       &.swipe-card--left {
         transform: translateX(-150px) rotate(-10deg) !important;
+        opacity: 0 !important;
       }
 
       &.swipe-card--right {
         transform: translateX(150px) rotate(10deg) !important;
+        opacity: 0 !important;
       }
 
       // Button-specific animation with smoother transition
       &.swipe-card--button {
         transition: transform 0.4s cubic-bezier(.33, .05, .58, .98), opacity 0.4s cubic-bezier(.33, .05, .58, .98) !important;
       }
+
+      // Drag-specific animation with faster transition for swipe release
+      &.swipe-card--drag {
+        transition: transform 0.2s cubic-bezier(.33, .05, .58, .98), opacity 0.2s cubic-bezier(.33, .05, .58, .98) !important;
+      }
     }
+
 
     &--top {
       cursor: grab;
@@ -168,7 +174,6 @@
     &:nth-child(1 of .swipe-card) {
       transform: scale(1) translateY(0px);
       z-index: 3;
-      animation: cardAppear .3s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     &:nth-child(2 of .swipe-card) {
@@ -190,15 +195,15 @@
       overflow: hidden;
       position: relative;
       border-radius: 10px;
-      ;
 
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: all 0.2s ease-in-out;
         pointer-events: none;
         opacity: 1;
+        transition: all 0.2s ease-in-out;
+
       }
     }
 
@@ -274,7 +279,6 @@
     font-weight: bold;
     z-index: 10;
     pointer-events: none;
-    // animation: pulseIndicator 0.3s ease-in-out;
 
     &--left {
       background: var(--swipe-dislike-color);
@@ -350,6 +354,7 @@
     transition: all 0.2s ease;
     position: relative;
     overflow: visible;
+    color: #000;
 
     &:disabled {
       opacity: 0.5;
@@ -554,6 +559,7 @@
     font-size: 14px;
     min-width: 90px;
     justify-content: center;
+    color: #000;
 
     &:hover {
       border-color: #c0c0c0;
@@ -581,18 +587,7 @@
   }
 }
 
-@keyframes cardAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.8) translateY(50px);
-  }
 
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-
-}
 
 
 .explanation-dialog {
