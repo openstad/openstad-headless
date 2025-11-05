@@ -2,7 +2,6 @@
 
 disablePreInstallHelm: false
 disablePreInstallArgoCd: true
-
 ##
 ## In this block you can toggle all optional dependencies.
 ## If you want to use an existing database(s) or services, disable
@@ -24,22 +23,18 @@ dependencies:
     enabled: false
   mysql:
     enabled: false
-
   ## SSL
   cert-manager:
     enabled: false
-
 cert-manager:
   # Whether we want to install CRDs.
   installCRDs: false
-
 ## Settings for MongoDB
 mongodb:
   image:
     tag: 5.0.13-debian-11-r5
   auth:
     enabled: false
-
 ## Settings for MySQL
 mysql:
   db:
@@ -47,38 +42,31 @@ mysql:
     # NOTE: Also change this in secrets
     user: openstad
     password: examplePass2146
-
     # The following databases will be created additionally
     # during initialization:
     additionalDbNames:
       - api
       - auth
-
   # DB initialization scripts are put in this config map:
   initdbScriptsConfigMap: extra-db-map
-
   # Secret which can be controlled by us
   auth:
     username: openstad
     database: image
     existingSecret: mysql-secret
-
   primary:
     extraEnvVars:
       # Use the older authentication plugin
       - name: MYSQL_AUTHENTICATION_PLUGIN
         value: mysql_native_password
-
 # Internal config
 public:
   name: openstad
   environmentName:
-
 rateLimit:
   existingSecret:
   windowMs: 60000
   limit: 100
-
 # Settings
 
 ##
@@ -90,15 +78,12 @@ clusterIssuer:
   enabled: false # Whether this issuer is created
   acme: # Email used for requesting the certificates
     email: info@openstad.org
-
   ### If you want to use a production issuer set the following to true
   useProdIssuer: false
-
   ### Name of the production issuer
   prodIssuerName: openstad-letsencrypt-prod
   ### Name of the staging issuer
   stagingIssuerName: openstad-letsencrypt-staging
-
 ##
 ## All base settings can be changed in this block.
 ##
@@ -112,12 +97,9 @@ host:
   base: openstad.softwaredepartment.net
   ### publicIp is used to check if DNS is set properly
   publicIp:
-
   ### Whether we should append www to the domains
   usewww: false
-
 ## Settings for persistent volumes
-
 persistence:
   #configure the cloud-specific storageClassName, will use the clouds default if not specified
   storageClassName:
@@ -128,45 +110,36 @@ persistence:
     size: 1Gi
   cms:
     size: 1Gi
-
 admin:
   # Configure how many replicas exists of this service
   replicas: 1
-
   # Configure how the service is named and labeled
   name: 'admin'
   label: openstad-admin-service
-
   url:
   oauthUrl:
   oauthInternalUrl:
   apiUrl:
-
   # Secret values
   secrets:
     existingSecret:
     cookieSecret:
     apiKey:
-
   # Service settings:
   # Primarily port configuration
   service:
     httpPort: 31470
-
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
     name: admin
     # Docker image for this pod
-    image: ghcr.io/openstad/admin-server:latest
-
+    image: ghcr.io/openstad/admin-server:v2.0.42
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: admin
-
   # Custom domain for the service, this overrides the subdomain
   customDomain:
-
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -185,10 +158,8 @@ admin:
     tls:
       secretName: openstad-tls-admin
       hosts: []
-
   # Inject extra environment variables
   extraEnvVars: []
-
   # Resources:
   resources:
     # Max resources
@@ -198,7 +169,6 @@ admin:
     requests:
       cpu: 100m
       memory: 500M
-
   # Check whether the service is healthy:
   # First time after $(initialDelaySeconds) seconds.
   # After that every $(periodSeconds) seconds
@@ -206,24 +176,20 @@ admin:
     liveness:
       initialDelaySeconds: 30
       periodSeconds: 60
-
 auth:
   label: openstad-auth-service
   name: auth
-
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: auth
   service:
     httpPort: 31430
-
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
     name: auth
     # Docker image for this pod
-    image: ghcr.io/openstad/auth-server:latest
-
+    image: ghcr.io/openstad/auth-server:v2.0.42
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -240,13 +206,10 @@ auth:
     tls:
       secretName: openstad-tls-auth
       hosts: []
-
   # Inject extra environment variables
   extraEnvVars: []
-
   # Supply an array of e-mails to create as initial users. The admin client will be set to auth type "URL" and "admin" will be added to the twoFactorRoles.
   initialUsers: []
-
   # Resources:
   resources:
     # Max resources
@@ -256,7 +219,6 @@ auth:
     requests:
       cpu: 100m
       memory: 500M
-
   # Check whether the service is healthy:
   # First time after $(initialDelaySeconds) seconds.
   # After that every $(periodSeconds) seconds
@@ -264,32 +226,26 @@ auth:
     liveness:
       initialDelaySeconds: 30
       periodSeconds: 60
-
   # Default email settings
   fromName:
   fromEmail:
-
   # Cookie settings
   cookie:
     secureOff:
-
 api:
   name: api
   label: openstad-api-service
   service:
     httpPort: 31410
-
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
     name: api-container
     # Docker image for this pod
-    image: ghcr.io/openstad/api-server:latest
-
+    image: ghcr.io/openstad/api-server:v2.0.42
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: api
-
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -307,7 +263,6 @@ api:
     tls:
       secretName: openstad-tls-api
       hosts: []
-
   createdIngresses:
     className:
     annotations:
@@ -324,12 +279,9 @@ api:
     # You can then set the project.config.tlsSecretName of a project, and it will be set in the ingress.tls
     # Allowing you to have per-project TLS certificates, managed through secrets (e.g. externalSecret operator)
     tlsManagedByOpenstad: false
-
   # Inject extra environment variables
   extraEnvVars: []
-
   disableProjectIssueWarnings: "false"
-
   # Resources:
   resources:
     # Max resources
@@ -339,7 +291,6 @@ api:
     requests:
       cpu: 250m
       memory: 500M
-
   # Check whether the service is healthy:
   # First time after $(initialDelaySeconds) seconds.
   # After that every $(periodSeconds) seconds
@@ -347,37 +298,29 @@ api:
     liveness:
       initialDelaySeconds: 30
       periodSeconds: 60
-
 image:
   # Configure how many replicas exists of this service
   replicas: 1
-
   # Configure how the service is named and labeled
   name: 'image'
   label: openstad-image-service
-
   secrets:
     existingSecret:
     verificationToken:
-
   # Service settings:
   # Primarily port configuration
   service:
     httpPort: 31450
-
   useS3: "false"
-
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
     name: image
     # Docker image for this pod
-    image: ghcr.io/openstad/image-server:latest
-
+    image: ghcr.io/openstad/image-server:v2.0.42
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: img
-
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -395,7 +338,6 @@ image:
     tls:
       secretName: openstad-tls-image
       hosts: []
-
   # parameters to enable throttling: https://github.com/asilvas/node-image-steam?tab=readme-ov-file#throttle-options
   throttle:
     enabled: true
@@ -405,13 +347,10 @@ image:
     ccPrefetcher: 20
     # Number of concurrent http requests. Anything to exceed this value will result in a 503 (too busy), to avoid an indefinite pileup
     ccRequests: 100
-
   hqOriginalMaxPixels: 160000
   disableWebpConversion: false
-
   # Inject extra environment variables
   extraEnvVars: []
-
   # Resources:
   resources:
     # Max resources
@@ -421,7 +360,6 @@ image:
     requests:
       cpu: 100m
       memory: 500M
-
   # Check whether the service is healthy:
   # First time after $(initialDelaySeconds) seconds.
   # After that every $(periodSeconds) seconds
@@ -429,7 +367,6 @@ image:
     liveness:
       initialDelaySeconds: 30
       periodSeconds: 60
-
   # Volumes:
   # Configure the persistent volumes for this service
   volumes:
@@ -437,24 +374,20 @@ image:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/image-server/images
       documentMountPath: /opt/openstad-headless/apps/image-server/documents
-
 cms:
   name: cms
   label: openstad-cms-service
   service:
     httpPort: 31490
-
   # Deployment container is what is eventually run in the pod
   deploymentContainer:
     name: cms-container
     # Docker image for this pod
-    image: ghcr.io/openstad/cms-server:latest
-
+    image: ghcr.io/openstad/cms-server:v2.0.42
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
   subdomain: cms
-
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -472,13 +405,10 @@ cms:
     tls:
       secretName: openstad-tls-cms
       hosts: []
-
   disableWidgetPreview: "false"
   useS3: "false"
-
   # Inject extra environment variables
   extraEnvVars: []
-
   # Resources:
   resources:
     # Max resources
@@ -488,7 +418,6 @@ cms:
     requests:
       cpu: 250m
       memory: 1Gi
-
   # Check whether the service is healthy:
   # First time after $(initialDelaySeconds) seconds.
   # After that every $(periodSeconds) seconds
@@ -496,39 +425,32 @@ cms:
     liveness:
       initialDelaySeconds: 30
       periodSeconds: 60
-
   # Volumes:
   # Configure the persistent volumes for this service
   volumes:
     data:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
-
   disableRateLimiter: "false" # Whether to disable the rate limiter for this service
-
 # Overwrite Secrets
 
 ##
 ## In this block you can choose to overwrite
 ## the default values of the secrets.
 ##
-
 secrets:
   admin:
     clientId:
     clientSecret:
     cookieSecret:
     imageApiToken:
-
   api:
     jwtSecret:
     dbNameKey:
-
   auth:
     sessionSecret:
     phoneHashSalt:
     dbNameKey:
-
   cms:
     apiKey:
     mongodbUri:
@@ -538,7 +460,6 @@ secrets:
       region:
       key:
       secret:
-
   database:
     ### These values are for the MySQL db
     username:
@@ -549,7 +470,6 @@ secrets:
     hostport:
     # Max connections used in connection pool
     maxPoolSize: 30
-
     # If you want to force an SSL connection to MySQL, provide a CA cert here
     # This should be the content of the CA cert, including `-----BEGIN CERTIFICATE-----`
     # Most cloud providers will provide this CA cert in their documentation;
@@ -557,11 +477,9 @@ secrets:
     # Azure: https://docs.microsoft.com/en-us/azure/mysql/single-server/how-to-configure-ssl
     # Google Cloud Platform: https://cloud.google.com/sql/docs/mysql/configure-ssl-instance
     caCert:
-
     ### Default db passwords for when you use the dependency
     rootPassword:
     replicationPassword:
-
     ### Overwrites for auth db
     auth:
       dbName: auth
@@ -574,30 +492,25 @@ secrets:
         adminClientId:
         adminClientSecret:
         imageApiToken:
-
     ### Overwrites for API db
     api:
       dbName: api
-
   ### Local references to services:
   hosts:
     api:
     auth:
     frontend:
     image:
-
   ### Cookie secrets
   cookies:
     cookieName:
     onlySecure:
     jwtSecret:
-
   cdn:
     reactUrl: https://unpkg.com/react@18.3.1/umd/react.production.min.js
     reactDomUrl: https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
     zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
     zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
-
   ### Mail server secretes
   mail:
     # Set this to `ms-graph` to use Microsoft Graph API for mail sending
@@ -606,7 +519,6 @@ secrets:
     port: '25'
     username: user
     password: password
-
     hostKey:
     portKey:
     passwordKey:
@@ -616,11 +528,9 @@ secrets:
       clientId:
       tenantId:
       clientSecret:
-
     auth:
       emailAssetsUrl:
       secure: 'yes'
-
     api:
       host:
       port:
@@ -629,7 +539,6 @@ secrets:
       emailFrom:
       adminEmailFrom:
       requireSsl:
-
   ipAddress:
     hashIpAddresses: "false"
     hashIpSalt:
