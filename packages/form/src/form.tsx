@@ -93,7 +93,20 @@ function Form({
         const nonPaginationFields = fields.filter(field => field.type !== 'pagination');
 
         let pageHandler = undefined;
-        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && setCurrentPage && typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && !(currentPage === totalPages - 2 && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro')) {
+        
+        const isNumber = typeof currentPage === 'number';
+        const isTotalNumber = typeof totalPages === 'number';
+        const hasPages = isNumber && isTotalNumber && currentPage < totalPages - 1;
+        const hasSetCurrentPage = !!setCurrentPage;
+        const isSecondToLast = isNumber && isTotalNumber && currentPage === totalPages - 2;
+        const lastFieldIsYouthOutro = isTotalNumber && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro';
+        
+        const shouldGoToNextPage = hasPages && hasSetCurrentPage && (
+            !isSecondToLast ||
+            (isSecondToLast && lastFieldIsYouthOutro)
+        );
+        
+        if (isNumber && isTotalNumber && shouldGoToNextPage) {
             allowResetAfterSubmit = false;
             pageHandler = () => setCurrentPage(currentPage + 1);
         }
