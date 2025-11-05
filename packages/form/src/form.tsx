@@ -98,6 +98,14 @@ function Form({
             pageHandler = () => setCurrentPage(currentPage + 1);
         }
 
+        const lastField = fields[fields.length - 1];
+        const lastFieldIsOutro = lastField?.type === 'none' && lastField?.infoBlockStyle === 'youth-outro';
+
+        let submitBeforeLastPage = false;
+        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage === totalPages - 2 && lastFieldIsOutro) {
+            submitBeforeLastPage = true;
+        }
+
         event.preventDefault();
         const firstErrorKey = handleSubmit(
             fieldsToRender as unknown as Array<CombinedFieldPropsWithType>,
@@ -106,6 +114,7 @@ function Form({
             routingHiddenFields,
             submitHandler,
             pageHandler,
+            submitBeforeLastPage
         );
 
         if (firstErrorKey && formRef.current) {
@@ -126,8 +135,6 @@ function Form({
     const handleInputChange = (event: { name: string, value: any }, triggerSetLastKey?: boolean) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
-
-        console.log(formValues)
 
         if (triggerSetLastKey !== false) {
             setLastUpdatedKey(name);

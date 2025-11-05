@@ -34,6 +34,7 @@ export type CheckboxFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    value?: FormValue;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({

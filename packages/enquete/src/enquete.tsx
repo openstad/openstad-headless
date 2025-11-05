@@ -20,7 +20,6 @@ import {
 } from '@utrecht/component-library-react';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
-import { FormValue } from "@openstad-headless/form/src/form";
 
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
@@ -133,62 +132,51 @@ function Enquete(props: EnqueteWidgetProps) {
     );
 
     async function onSubmit(formData: any) {
-        console.log('submit?')
         // Filter out pagination fields
         const nonPaginationFields = formFields.filter(field => field.type !== 'pagination');
 
+        formData.confirmationUser = props?.confirmation?.confirmationUser || false;
+        formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
+        formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
 
-        if (currentPage < totalPages - 1 && !(currentPage === totalPages - 2 && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro')) {
-            setCurrentPage((prevPage) => prevPage + 1);
-        } else {
-            if ((currentPage === totalPages - 2 && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro')) {
-                setCurrentPage((prevPage) => prevPage + 1);
-            }
+        const getUserEmailFromField = formData.confirmationUser && !formOnlyVisibleForUsers;
 
-            formData.confirmationUser = props?.confirmation?.confirmationUser || false;
-            formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
-            formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
+        if (getUserEmailFromField) {
+            const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
 
-            const getUserEmailFromField = formData.confirmationUser && !formOnlyVisibleForUsers;
-
-            if (getUserEmailFromField) {
-                const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
-
-                if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
-                    formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
-                }
-            }
-
-            const embeddedUrl = window.location.href;
-
-            const cleanUrlFromEndingQuestionMarks = (url: string) => {
-                const length = url.length;
-                let returnUrl = url;
-
-                if (url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&') {
-                    returnUrl = url.slice(0, length - 1);
-                }
-
-                return returnUrl;
-            }
-
-            formData.embeddedUrl = cleanUrlFromEndingQuestionMarks(embeddedUrl);
-
-            const result = await createSubmission(formData, props.widgetId);
-
-            if (result) {
-                if (props.afterSubmitUrl) {
-                    location.href = props.afterSubmitUrl.replace("[id]", result.id)
-                } else {
-                    notifyCreate();
-                    if (((nonPaginationFields[currentPage + 1] as any)?.infoBlockStyle === 'youth-outro')) {
-                        // if the page is youth outro, fire confetti
-                        fireConfetti();
-                    }
-                }
+            if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
+                formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
             }
         }
 
+        const embeddedUrl = window.location.href;
+
+        const cleanUrlFromEndingQuestionMarks = (url: string) => {
+            const length = url.length;
+            let returnUrl = url;
+
+            if (url.charAt(length - 1) === '?' || url.charAt(length - 1) === '&') {
+                returnUrl = url.slice(0, length - 1);
+            }
+
+            return returnUrl;
+        }
+
+        formData.embeddedUrl = cleanUrlFromEndingQuestionMarks(embeddedUrl);
+
+        const result = await createSubmission(formData, props.widgetId);
+
+        if (result) {
+            if (props.afterSubmitUrl) {
+                location.href = props.afterSubmitUrl.replace("[id]", result.id)
+            } else {
+                notifyCreate();
+                if (((nonPaginationFields[currentPage + 1] as any)?.infoBlockStyle === 'youth-outro')) {
+                    // if the page is youth outro, fire confetti
+                    fireConfetti();
+                }
+            }
+        }
     }
 
     const formFields: FieldProps[] = [];

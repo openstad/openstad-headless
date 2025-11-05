@@ -13,6 +13,7 @@
     "@openstad-headless/data-store": "*",
     "@openstad-headless/lib": "*",
     "@openstad-headless/swipe": "^0.0.0",
+    "@openstad-headless/dilemma": "^0.0.0",
     "@openstad-headless/types": "*",
     "@openstad-headless/ui": "*",
     "react": "^18.2.0",
