@@ -110,8 +110,11 @@ module.exports = {
             }
             
             posts = posts.concat(showAll ? additionalPosts : additionalPosts.slice(0, maxItems ? maxItems - posts.length : undefined));
-            // Remove duplicates
             posts = posts.filter((post, index, arr) => arr.findIndex(p => p._id === post._id) === index);
+            
+            if (posts.length > 0) {
+              await blogModule.addUrls(req, posts);
+            }
             
             widget.relatedPosts = posts.map(post => {
               if (post.createdAt) {
