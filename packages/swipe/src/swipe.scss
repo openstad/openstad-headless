@@ -82,6 +82,7 @@
     width: 100%;
     aspect-ratio: 2 / 3;
     max-height: 517px;
+    z-index: 999;
 
     @media screen and (max-width: 400px) {
       max-width: 290px;
