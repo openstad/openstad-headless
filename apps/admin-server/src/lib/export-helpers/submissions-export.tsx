@@ -30,20 +30,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       return [...parsedValue].join(' | ')
     }
 
-    if (typeof value === 'object' && fieldType === 'dilemma') {
-      let optionText = value?.selectedOption === '0' ? 'Links' : value?.selectedOption;
-      optionText = value?.selectedOption === '1' ? 'Rechts' : optionText;
-
-      return value?.optionExplanation ? `${optionText}, Uitleg: ${value.optionExplanation}` : optionText;
-    } else if (typeof value === 'object' && fieldType === 'swipe') {
-      return Object.values(value).map((item: any) => {
-        let returnText = '';
-        if (item.title) returnText += `${item.title}: `;
-        if (item.answer) returnText += `${item.answer} `;
-        if (item.explanation) returnText += `, Uitleg: ${item.explanation}`;
-        return returnText.trim();
-      }).join(' | ');
-    } else if (typeof value === 'object') {
+    if (typeof value === 'object') {
       if ( Array.isArray(value) && value.length > 0 ) {
         if ( typeof(value[0]) === 'object' ) {
           return value.map((item: any) => {
@@ -138,18 +125,25 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
       }
 
       const fieldType = (selectedWidget?.config?.items || []).find((item: any) => item.fieldKey === key)?.questionType;
-      if (typeof rawValue === 'object' && fieldType === 'swipe') {
-        Object.values(rawValue).map((item: any) => {
-          let returnText = item.answer;
+      const fieldTitle = (selectedWidget?.config?.items || []).find((item: any) => item.fieldKey === key)?.title;
+
+      if (typeof rawValue === 'object' && (fieldType === 'swipe' || fieldType === 'dilemma')) {
+        Object.values(rawValue).forEach((item: any) => {
+          let returnText = fieldType === 'swipe' ? item.answer : item.title;
           if (item.explanation) returnText += `: ${item.explanation}`;
 
-          let rowKeyHeaderTitle = item.title ? item.title : `Keuze ${item.cardId}`;
-          rowKeyHeaderTitle = `${title}: ${rowKeyHeaderTitle}`;
-          rowKeyHeaderTitle = rowKeyHeaderTitle && stripHtmlTags(rowKeyHeaderTitle);
+          if (fieldType === 'dilemma') {
+            const dilemmaId = !isNaN(Number(item.dilemmaId)) ? Number(item.dilemmaId) + 1 : '';
+            const header = fieldTitle ? `${fieldTitle} ${dilemmaId}` : `Keuze ${dilemmaId || item.dilemmaId}`;
+            rowData[stripHtmlTags(header)] = returnText;
+          }
 
-          rowData[rowKeyHeaderTitle] = returnText.trim();
+          if (fieldType === 'swipe') {
+            let header = item.title ? item.title : `Keuze ${item.cardId}`;
+            header = `${title}: ${header}`;
+            rowData[stripHtmlTags(header)] = returnText;
+          }
         });
-
         return;
       }
 
