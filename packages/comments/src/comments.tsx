@@ -52,6 +52,7 @@ export type CommentsWidgetProps = BaseProps &
     defaultTags?: string;
     includeOrExclude?: string;
     onlyIncludeOrExcludeTagIds?: string;
+    overrideSort?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -74,6 +75,7 @@ function CommentsInner({
   defaultTags,
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
+  overrideSort = '',
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
@@ -372,7 +374,7 @@ function CommentsInner({
               displaySorting={true}
               defaultSorting={props.defaultSorting || 'createdAt_asc'}
               onUpdateFilter={(f) => {
-                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'].includes(f.sort)) {
                   setSort(f.sort);
                 }
               }}
@@ -390,9 +392,28 @@ function CommentsInner({
         }
         {(comments || [])
           ?.sort((a: any, b: any) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
-            return sort === 'createdAt_desc' ? dateB - dateA : dateA - dateB;
+            const sortMethod = overrideSort || sort;
+
+            if (sortMethod === 'createdAt_desc') {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }
+            if (sortMethod === 'createdAt_asc') {
+              return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            }
+            if (sortMethod === 'title_asc' && a.description && b.description) {
+              return a.description.localeCompare(b.description);
+            }
+            if (sortMethod === 'title_desc' && a.description && b.description) {
+              return b.description.localeCompare(a.description);
+            }
+            if (sortMethod === 'votes_desc') {
+              return b.yes - a.yes;
+            }
+            if (sortMethod === 'votes_asc') {
+              return a.yes - b.yes;
+            }
+
+            return 0;
           })
           .slice(page * pageSize, (page + 1) * pageSize)
           ?.map((comment: any, index: number) => {
