@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import hasRole from '../../lib/has-role';
 import type {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
@@ -9,12 +9,29 @@ import Form from "@openstad-headless/form/src/form";
 import { Heading } from '@utrecht/component-library-react';
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+
+const getExistingValue = (fieldKey, resource) => {
+    if ( !!resource ) {
+        const field = resource[fieldKey] || null;
+        const returnField = (!field && resource.extraData) ? resource.extraData[fieldKey] || null : field
+
+        if ( !!returnField ) {
+            return returnField;
+        }
+    }
+    return undefined;
+}
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton, defaultAddedTags} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
     const { confirmationUser, confirmationAdmin} = props.confirmation  || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
+
+    let resourceId: string | undefined = String(getResourceId({
+        url: document.location.href
+    }));
 
     const datastore: any = new DataStore({
         projectId: props.projectId,
@@ -32,7 +49,24 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         widgetId: props.widgetId,
     });
 
-    const formFields = InitializeFormFields(props.items, props);
+    const { data: existingResource, isLoading } = datastore.useResource({
+        projectId: props.projectId,
+        resourceId: resourceId || undefined,
+    });
+
+    const initialFormFields = InitializeFormFields(props.items, props);
+    const [formFields, setFormFields] = useState(initialFormFields);
+
+    useEffect(() => {
+        const updatedFormFields = formFields.map((field) => {
+            return {
+                ...field,
+                defaultValue: getExistingValue(field.fieldKey, existingResource),
+            };
+        });
+
+        setFormFields(updatedFormFields);
+    }, [existingResource]);
 
     const notifySuccess = () => NotificationService.addNotification("Idee indienen gelukt", "success");
     const notifyFailed = () => NotificationService.addNotification("Idee indienen mislukt", "error");
@@ -129,7 +163,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     }
 
 
-    return (
+    return ( isLoading || formFields?.some(field => field.hasOwnProperty('defaultValue') === false) ) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
                 {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}
