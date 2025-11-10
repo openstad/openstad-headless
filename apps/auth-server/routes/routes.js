@@ -298,6 +298,10 @@ module.exports = function (app) {
     // Handle 500
     app.use(async function (err, req, res, next) {
         console.log('===> err', err);
+        // Return a 404 for when no client ID has been set, this is not a server error
+        if (err && err.message && err.message.match(/^'No Client ID is set for login/)) {
+          return res.status(404).render('errors/404');
+        }
         // een deserialize error betekent een data fout; daar hoef je een gebruiker niet mee te belasten
         if (err && err.message && err.message.match(/^Error in deserializeUser/)) {
           console.log(err); // do log for debugging
