@@ -1,0 +1,41 @@
+.breadcrumbs {
+    --breadcrumbs-gap: var(--settingsBreadcrumbsGap, 6px);
+    --breadcrumbs-current-color: var(--settingsBreadcrumbsCurrentColor, #000000);
+    --breadcrumbs-current-font-weight: var(--settingsBreadcrumbsCurrentFontWeight, 600);
+    --breadcrumbs-separator: var(--settingsBreadcrumbsSeparator, '›');
+    --breadcrumbs-background-color: var(--settingsBreadcrumbsBackgroundColor, #F8F7F5);
+    --breadcrumbs-padding: var(--settingsBreadcrumbsPadding, 10px 0);
+    --breadcrumbs-max-width: var(--settingsBreadcrumbsMaxWidth, 1172px);
+
+    background-color: var(--breadcrumbs-background-color);
+    padding: var(--breadcrumbs-padding);
+
+    .breadcrumbs-container {
+        max-width: var(--breadcrumbs-max-width);
+        margin: 0 auto;
+        padding: 0 16px;
+
+        .breadcrumb-nav {
+            ol {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                gap: var(--breadcrumbs-gap);
+
+                li {
+
+                    & + li::before {
+                        content: var(--breadcrumbs-separator);
+                        margin-right: var(--breadcrumbs-gap);
+                    }
+
+                    [aria-current] {
+                        font-weight: var(--breadcrumbs-current-font-weight);
+                        color: var(--breadcrumbs-current-color);
+                    }
+                }
+            }
+        }
+    }
+}

@@ -12,6 +12,7 @@ const contentWidgets = {
   'openstad-iconSection': {},
   'openstad-carousel': {},
   'openstad-blog-post': {},
+  'openstad-breadcrumbs': {}
 };
 
 module.exports = {
