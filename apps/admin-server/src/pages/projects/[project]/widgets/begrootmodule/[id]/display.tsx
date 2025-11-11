@@ -47,6 +47,7 @@ const formSchema = z.object({
   tagTypeTagGroup: z.array(z.string()).optional(),
   tagTypeSelector: z.string().optional(),
   tagTypeTag: z.string().optional(),
+  voteAfterLoggingIn: z.boolean().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -83,6 +84,7 @@ export default function BegrootmoduleDisplay(
       tagTypeTag: props.tagTypeTag || '',
       tagTypeSelector: props.tagTypeSelector || 'tag',
       hideTagsForResources: props.hideTagsForResources || false,
+      voteAfterLoggingIn: props.voteAfterLoggingIn || false,
     },
   });
 
@@ -225,6 +227,20 @@ export default function BegrootmoduleDisplay(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Weergeef de URL van de originele inzending</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="voteAfterLoggingIn"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Automatisch stemmen na inloggen?
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

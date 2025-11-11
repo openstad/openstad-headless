@@ -97,6 +97,7 @@ export type StemBegrootWidgetProps = BaseProps &
     step1Add?: string;
     step1MaxText?: string;
     filterBehavior?: string;
+    voteAfterLoggingIn?: boolean;
   };
 
 function StemBegroot({
@@ -118,6 +119,7 @@ function StemBegroot({
   step1Add = 'Voeg toe',
   step1MaxText = '',
   filterBehavior = 'or',
+  voteAfterLoggingIn = false,
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -298,9 +300,48 @@ function StemBegroot({
         (isAllowedToVote && navAfterLogin && currentStep === 2) ||
         (isAllowedToVote && !navAfterLogin))
     ) {
-      setCurrentStep(3);
+      if (voteAfterLoggingIn) {
+        if (selectedResources.length > 0 || tagCounter.length > 0) {
+          setCurrentStep(4);
+          submitVoteAndCleanup();
+        }
+      } else {
+        setCurrentStep(3);
+      }
     }
   }, [currentUser, currentStep, selectedResources, tagCounter]);
+
+  async function submitVoteAndCleanup() {
+    try {
+      if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+        let allResourcesToVote: any[] = [];
+
+        for (const tagObj of tagCounter) {
+          const tagName = Object.keys(tagObj)[0];
+          const resourcesToVote = tagObj[tagName].selectedResources.map((resourceSelected: { id: number }) => {
+            return resources?.records?.find((resource: { id: number }) => resource.id === resourceSelected.id);
+          }).filter(Boolean);
+
+          allResourcesToVote = allResourcesToVote.concat(resourcesToVote);
+        }
+
+        const uniqueResourcesToVote = Array.from(new Set(allResourcesToVote.map((r) => r.id)))
+          .map(id => allResourcesToVote.find((r) => r.id === id));
+
+        if (uniqueResourcesToVote.length > 0) {
+          localStorage.removeItem('oscResourceVotePendingPerTag');
+          await doVote(uniqueResourcesToVote);
+        }
+      } else {
+        if (selectedResources.length > 0) {
+          localStorage.removeItem('oscResourceVotePending');
+          return await doVote(selectedResources);
+        }
+      }
+    } catch (err: any) {
+      notifyVoteMessage(err.message, true);
+    }
+  }
 
   function prepareForVote(e: React.MouseEvent<HTMLElement, MouseEvent> | null) {
     if (e) e.stopPropagation();
@@ -874,59 +915,33 @@ function StemBegroot({
                       setNavAfterLogin(true);
                     }
 
-                    if (currentStep === 3) {
-                      try {
-                        if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
-                          let allResourcesToVote: any[] = [];
+                  if (currentStep === 3) {
+                    await submitVoteAndCleanup();
+                    setCurrentStep(4);
+                  } else if (currentStep === 4) {
+                    currentUser.logout({ url: location.href });
+                  } else {
+                    setCurrentStep(currentStep + 1);
+                  }
+                }}
+                disabled={(() => {
+                  if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+                    const unmetTags = tagCounter.filter(tagObj => {
+                      const key = Object.keys(tagObj)[0];
+                      return tagObj[key].current < tagObj[key].min;
+                    });
 
-                          for (const tagObj of tagCounter) {
-                            const tagName = Object.keys(tagObj)[0];
-                            const resourcesToVote = tagObj[tagName].selectedResources.map((resourceSelected: { id: number }) => {
-                              return resources?.records?.find((resource: { id: number }) => resource.id === resourceSelected.id);
-                            }).filter(Boolean);
-
-                            allResourcesToVote = allResourcesToVote.concat(resourcesToVote);
-                          }
-
-                          const uniqueResourcesToVote = Array.from(new Set(allResourcesToVote.map((r) => r.id)))
-                            .map(id => allResourcesToVote.find((r) => r.id === id));
-
-                          if (uniqueResourcesToVote.length > 0) {
-                            await doVote(uniqueResourcesToVote);
-                            localStorage.removeItem('oscResourceVotePendingPerTag');
-                          }
-                        } else {
-                          await doVote(selectedResources);
-                          localStorage.removeItem('oscResourceVotePending');
-                        }
-                        setCurrentStep(currentStep + 1);
-                      } catch (err: any) {
-                        notifyVoteMessage(err.message, true);
-                      }
-                    } else if (currentStep === 4) {
-                      currentUser.logout({ url: location.href });
-                    } else {
-                      setCurrentStep(currentStep + 1);
-                    }
-                  }}
-                  disabled={(() => {
-                    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
-                      const unmetTags = tagCounter.filter(tagObj => {
-                        const key = Object.keys(tagObj)[0];
-                        return tagObj[key].current < tagObj[key].min;
-                      });
-
-                      if (unmetTags.length === 0) {
-                        return false;
-                      }
-
-                      if (unmetTags.length === 1 && Object.keys(unmetTags[0])[0] === activeTagTab) {
-                        return true;
-                      }
+                    if (unmetTags.length === 0) {
+                      return false;
                     }
 
-                    return (props?.votes?.voteType === 'likes' || props?.votes?.voteType === 'budgeting') && selectedResources.length === 0;
-                  })()}
+                    if (unmetTags.length === 1 && Object.keys(unmetTags[0])[0] === activeTagTab) {
+                      return true;
+                    }
+                  }
+
+                  return (props?.votes?.voteType === 'likes' || props?.votes?.voteType === 'budgeting') && selectedResources.length === 0;
+                })()}
                 >
                   {(() => {
                     if (currentStep < 3) {
