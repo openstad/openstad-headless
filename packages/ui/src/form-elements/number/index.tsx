@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useId } from "react";
 import {
     FormField,
     FormFieldDescription,
@@ -50,7 +50,7 @@ const NumberInput: FC<NumberInputProps> = ({
 }) => {
   const initialValue = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
 
-  const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  const randomID = useId();
   const [value, setValue] = useState(initialValue);
   const MAX_VALUE = 1_000_000_000_000;
 

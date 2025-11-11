@@ -1,5 +1,5 @@
 import { MultiSelect } from '@openstad-headless/ui/src';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useId} from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { FormLabel } from "@utrecht/component-library-react";
 
@@ -60,7 +60,7 @@ const MultiSelectTagFilter = ({
     }
   });
 
-  const randomId = Math.random().toString(36).substring(7);
+  const randomId = useId();
 
   function getRandomId(placeholder: string | undefined) {
     if(placeholder && placeholder.length >= 1) {

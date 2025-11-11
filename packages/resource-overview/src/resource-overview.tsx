@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useId } from 'react';
 import { Carousel, Icon, Paginator, Pill } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -857,7 +857,7 @@ function ResourceOverviewInner({
     return ` --${variant}`;
   }
 
-  const randomIdRef = useRef(Math.random().toString(36).replace('0.', 'container_'));
+  const randomIdRef = useRef(useId());
   const randomId = randomIdRef.current;
 
   const scrollToTop = (randomId: string) => {

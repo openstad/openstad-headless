@@ -3,7 +3,7 @@ import React from 'react';
 import type { LeafletMouseEvent } from 'leaflet';
 import { LatLng, latLngBounds } from 'leaflet';
 import type { PropsWithChildren } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useId } from 'react';
 // @ts-ignore
 import { MapContainer } from 'react-leaflet/MapContainer';
 // @ts-ignore
@@ -294,7 +294,7 @@ const BaseMap = ({
       opacity: number,
     }
   }>>([]);
-  let [mapId] = useState(`${parseInt((Math.random() * 1e8) as any as string)}`);
+  let [mapId] = useState(`${parseInt((useId()) as any as string)}`);
   let [mapRef] = useMapRef(mapId);
 
   const setBoundsAndCenter = useCallback(

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useId } from 'react';
 import type { CombinedFieldPropsWithType, ComponentFieldProps, FormProps } from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
@@ -225,7 +225,7 @@ function Form({
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
                     {fieldsToRender.map((field: ComponentFieldProps, index: number) => {
-                        const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                        const randomId = useId();
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
                         if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {

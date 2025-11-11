@@ -1,5 +1,5 @@
 import { Select } from '@openstad-headless/ui/src';
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState, useId } from 'react';
 import { FormLabel } from "@utrecht/component-library-react";
 
 
@@ -62,7 +62,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     if (!dataStore || !dataStore.useTags) {
       return <p>Cannot render tagfilter, missing data source</p>
     }
-    const randomId = Math.random().toString(36).substring(7);
+    const randomId = useId();
 
     function getRandomId(placeholder: string | undefined) {
       if(placeholder && placeholder.length >= 1) {

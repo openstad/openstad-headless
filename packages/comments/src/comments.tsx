@@ -1,8 +1,8 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect, createContext, useId } from 'react';
 import './index.css';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../lib/has-role';
-import {Banner, Paginator} from '@openstad-headless/ui/src';
+import { Banner, Paginator } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
@@ -13,7 +13,7 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Paragraph, Heading3, Heading } from '@utrecht/component-library-react';
 import { CommentFormProps } from './types/comment-form-props';
-import {Filters} from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
+import { Filters } from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 
@@ -55,7 +55,7 @@ export type CommentsWidgetProps = BaseProps &
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
-    (CommentsWidgetProps & {setRefreshComments: React.Dispatch<React.SetStateAction<boolean>> }) | undefined
+  (CommentsWidgetProps & { setRefreshComments: React.Dispatch<React.SetStateAction<boolean>> }) | undefined
 >(undefined);
 
 function CommentsInner({
@@ -70,7 +70,7 @@ function CommentsInner({
   onGoToLastPage,
   displayPagination = false,
   overridePage = 0,
-  setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
+  setRefreshComments: parentSetRefreshComments = () => { }, // parent setter as fallback
   defaultTags,
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
@@ -79,7 +79,7 @@ function CommentsInner({
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(displayPagination ? itemsPerPage || 9999 : 9999 );
+  const [pageSize, setPageSize] = useState<number>(displayPagination ? itemsPerPage || 9999 : 9999);
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -218,7 +218,7 @@ function CommentsInner({
   const notifySuccess = () => NotificationService.addNotification("Reactie succesvol geplaatst", "success");
   const notifyFailed = () => NotificationService.addNotification("Reactie plaatsen mislukt", "error");
 
-  const defaultSetRefreshComments = () => {};
+  const defaultSetRefreshComments = () => { };
 
   async function submitComment(formData: any) {
     setDisableSubmit(true);
@@ -242,7 +242,7 @@ function CommentsInner({
         }
       });
 
-    const allTags = Array.from(new Set([...defaultTagsArray, ...formTags]) );
+    const allTags = Array.from(new Set([...defaultTagsArray, ...formTags]));
     formDataCopy.tags = allTags;
 
     try {
@@ -291,7 +291,7 @@ function CommentsInner({
     }
   }, [comments, pageSize]);
 
-  const randomId = Math.random().toString(36).replace('0.', 'container_');
+  const randomId = useId();
 
   const scrollToTop = () => {
     const divElement = document.getElementById(randomId);
@@ -301,11 +301,11 @@ function CommentsInner({
     }
   }
 
-    return (
+  return (
     <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: refreshComments || defaultSetRefreshComments }}>
       <section className="osc" id={randomId}>
         <Heading3 className="comments-title">
-          {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString()) }
+          {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString())}
           {!comments && title}
         </Heading3>
 
@@ -325,30 +325,30 @@ function CommentsInner({
         ) : null}
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
-            <>
-              {formIntro && (
-                <>
-                  <p>{formIntro}</p>
-                  <Spacer size={1} />
-                </>
-              )}
-              <Banner className="big" role="complementary">
-                <p id="login-description">{ loginText }</p>
+          <>
+            {formIntro && (
+              <>
+                <p>{formIntro}</p>
                 <Spacer size={1} />
-                <Button
-                  appearance="primary-action-button"
-                  aria-describedby="login-description"
-                  onClick={() => {
-                    // login
-                    if (args.login?.url) {
-                      document.location.href = args.login.url;
-                    }
-                  }}
-                  type="button">
-                  Inloggen
-                </Button>
-              </Banner>
-            </>
+              </>
+            )}
+            <Banner className="big" role="complementary">
+              <p id="login-description">{loginText}</p>
+              <Spacer size={1} />
+              <Button
+                appearance="primary-action-button"
+                aria-describedby="login-description"
+                onClick={() => {
+                  // login
+                  if (args.login?.url) {
+                    document.location.href = args.login.url;
+                  }
+                }}
+                type="button">
+                Inloggen
+              </Button>
+            </Banner>
+          </>
         ) : null}
 
         {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
@@ -386,7 +386,7 @@ function CommentsInner({
 
             <Spacer size={1} />
           </>
-          ) : null
+        ) : null
         }
         {(comments || [])
           ?.sort((a: any, b: any) => {
@@ -397,9 +397,9 @@ function CommentsInner({
           .slice(page * pageSize, (page + 1) * pageSize)
           ?.map((comment: any, index: number) => {
 
-          let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
-          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
-        })}
+            let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
+            return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
+          })}
 
         {displayPagination && (
           <>
@@ -431,7 +431,7 @@ function Comments({
   formIntro = '',
   selectedComment,
   loginText = 'Inloggen om deel te nemen aan de discussie.',
-  setRefreshComments = () => {},
+  setRefreshComments = () => { },
   onGoToLastPage,
   overridePage,
   ...props

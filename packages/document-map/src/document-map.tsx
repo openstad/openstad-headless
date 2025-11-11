@@ -15,7 +15,7 @@ import {
   Link
 } from '@utrecht/component-library-react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import './document-map.css';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
@@ -461,7 +461,7 @@ function DocumentMap({
   };
 
   const generateRandomId = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return useId();
   }
   const [backUrl, setBackUrl] = useState<string>();
 

@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useEffect, useState, useId} from "react";
 import {
     AccordionProvider,
     FormField,
@@ -61,7 +61,7 @@ const MapField: FC<MapProps> = ({
     enableOnOffSwitching = false,
     ...props
 }) => {
-    const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const randomID = useId();
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {

@@ -1,6 +1,6 @@
 import '../index.css';
 import './index.css';
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState, useId } from 'react';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -14,7 +14,7 @@ type Props = React.InputHTMLAttributes<HTMLInputElement> & {
 
 
 const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
-  const inputID = Math.random().toString(36).substring(7);
+  const inputID = useId();
 
   return (
     <FormField
