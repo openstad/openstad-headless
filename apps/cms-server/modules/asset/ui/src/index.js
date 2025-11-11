@@ -78,9 +78,9 @@ function adjustMenu() {
   const menuWrapperNavbar = document.querySelector('#navbar');
 
   function closeMenu() {
-    closeButton.setAttribute('aria-expanded', 'false');
-    mainMenuContainer.setAttribute('aria-hidden', 'true');
-    navContainer.classList.remove('--show');
+    closeButton?.setAttribute('aria-expanded', 'false');
+    mainMenuContainer?.setAttribute('aria-hidden', 'true');
+    navContainer?.classList.remove('--show');
     closeButton.innerHTML = '<span>Menu openen</span>';
   }
 
@@ -93,7 +93,7 @@ function adjustMenu() {
     const lastFocusableElement =
       focusableElements[focusableElements.length - 1];
 
-    closeButton.addEventListener('keydown', (event) => {
+    closeButton?.addEventListener('keydown', (event) => {
       const isTabPressed = event.key === 'Tab' || event.keyCode === 9;
 
       if (
@@ -108,7 +108,7 @@ function adjustMenu() {
       event.preventDefault();
     });
 
-    menuContainer.addEventListener('keydown', (event) => {
+    menuContainer?.addEventListener('keydown', (event) => {
       const isTabPressed = event.key === 'Tab' || event.keyCode === 9;
 
       if (!isTabPressed) {
@@ -131,7 +131,7 @@ function adjustMenu() {
 
 
   if (navbar.getAttribute('data-mobile-menu') === 'true') {
-    navContainer.classList.add('--mobile');
+    navContainer?.classList.add('--mobile');
     isMobile = true;
   }
 
@@ -144,33 +144,33 @@ function adjustMenu() {
         navContainer.offsetWidth + logo.offsetWidth >=
         mainContainer.offsetWidth
       ) {
-        navContainer.classList.add('--mobile');
+        navContainer?.classList.add('--mobile');
         isMobile = true;
       } else if (!isMobile) {
-        navContainer.classList.remove('--mobile');
+        navContainer?.classList.remove('--mobile');
       }
     } else {
       if (mainMenuContainer.offsetWidth >= mainContainer.offsetWidth) {
-        navbar.classList.add('--hidden');
-        navContainer.classList.add('--mobile');
+        navbar?.classList.add('--hidden');
+        navContainer?.classList.add('--mobile');
         isMobile = true;
       } else if (!isMobile) {
-        navbar.classList.remove('--hidden');
-        navContainer.classList.remove('--mobile');
+        navbar?.classList.remove('--hidden');
+        navContainer?.classList.remove('--mobile');
       }
     }
   } else {
-    navContainer.classList.remove('--mobile');
-    navbar.classList.remove('--hidden');
+    navContainer?.classList.remove('--mobile');
+    navbar?.classList.remove('--hidden');
     isMobile = false;
   }
 
   if (isMobile) {
-    closeButton.setAttribute('aria-controls', 'main-menu');
-    closeButton.setAttribute('aria-expanded', 'false');
-    mainMenuContainer.setAttribute('aria-hidden', 'true');
+    closeButton?.setAttribute('aria-controls', 'main-menu');
+    closeButton?.setAttribute('aria-expanded', 'false');
+    mainMenuContainer?.setAttribute('aria-hidden', 'true');
 
-    closeButton.replaceWith(closeButton.cloneNode(true));
+    closeButton?.replaceWith(closeButton?.cloneNode(true));
     const newCloseButton = document.querySelector('.close-button');
     newCloseButton.innerHTML = '<span>Menu openen</span>';
 
@@ -180,13 +180,13 @@ function adjustMenu() {
         : '<span>Menu openen</span>';
     }
 
-    newCloseButton.addEventListener('click', () => {
+    newCloseButton?.addEventListener('click', () => {
       const isExpanded =
-        newCloseButton.getAttribute('aria-expanded') === 'true';
-      newCloseButton.setAttribute('aria-expanded', !isExpanded);
-      mainMenuContainer.setAttribute('aria-hidden', isExpanded);
+        newCloseButton?.getAttribute('aria-expanded') === 'true';
+      newCloseButton?.setAttribute('aria-expanded', !isExpanded);
+      mainMenuContainer?.setAttribute('aria-hidden', isExpanded);
 
-      navContainer.classList.toggle('--show');
+      navContainer?.classList.toggle('--show');
       setMenuButtonText(!isExpanded);
 
       if (!isExpanded) {
@@ -203,11 +203,11 @@ function adjustMenu() {
       }
     });
   } else {
-    closeButton.removeAttribute('aria-controls');
-    closeButton.removeAttribute('aria-expanded');
-    mainMenuContainer.removeAttribute('aria-hidden');
-    navContainer.classList.remove('--show');
-    closeButton.replaceWith(closeButton.cloneNode(true));
+    closeButton?.removeAttribute('aria-controls');
+    closeButton?.removeAttribute('aria-expanded');
+    mainMenuContainer?.removeAttribute('aria-hidden');
+    navContainer?.classList.remove('--show');
+    closeButton?.replaceWith(closeButton.cloneNode(true));
     closeButtonSpan.innerHTML = '<span>Menu openen</span>';
   }
 

@@ -23,6 +23,7 @@ import DocumentInclude from './include';
 import DocumentExtraFields from './extraFields';
 import DocumentFilters from './filters';
 import DocumentContent from './content';
+import DocumentSorting from './sorting';
 
 export const getServerSideProps = withApiUrl;
 
@@ -79,6 +80,7 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="include">Inclusief / exclusief</TabsTrigger>
               <TabsTrigger value="filters">Filters</TabsTrigger>
+              <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
               <TabsTrigger value="text">Content</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
@@ -101,6 +103,11 @@ export default function WidgetDateCountdownBar({
             <TabsContent value="filters" className="p-0">
               {previewConfig ?
                   <DocumentFilters {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
+                  : null}
+            </TabsContent>
+            <TabsContent value="sorting" className="p-0">
+              {previewConfig ?
+                  <DocumentSorting {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
                   : null}
             </TabsContent>
             <TabsContent value="extraFields" className="p-0">

@@ -629,3 +629,7 @@ secrets:
       emailFrom:
       adminEmailFrom:
       requireSsl:
+
+  ipAddress:
+    hashIpAddresses: "false"
+    hashIpSalt:

@@ -22,6 +22,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 
 export type CheckboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -62,9 +63,15 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        randomId= '',
        fieldInvalid= false,
        randomizeItems = false,
+       overrideDefaultValue,
 }) => {
-    const defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
-    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
+    let initialValue = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
+
+    try {
+        initialValue = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : initialValue;
+    } catch (e) {}
+
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
     const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
 
@@ -75,7 +82,6 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
 
         if (randomizeItems) {
-            console.log('Go Random!')
             const storageKey = `randomizedChoices_${fieldKey}`;
             const stored = sessionStorage.getItem(storageKey);
             if (stored) {
@@ -155,9 +161,9 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
               aria-invalid={fieldInvalid}
               aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend>
-                    {title}
-                </FieldsetLegend>
+                {title && (
+                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                )}
 
                 {description &&
                 <>

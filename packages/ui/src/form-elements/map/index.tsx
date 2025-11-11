@@ -20,6 +20,7 @@ import { FormValue } from "@openstad-headless/form/src/form";
 export type MapProps = BaseProps &
     AreaProps &
     ProjectSettingProps & {
+    overrideDefaultValue?: FormValue;
     title: string;
     description: string;
     fieldKey: string;
@@ -126,9 +127,13 @@ const MapField: FC<MapProps> = ({
 
     return (
       <FormField type="text">
-          <Paragraph className="utrecht-form-field__label">
-              <FormLabel htmlFor={randomID}>{title}</FormLabel>
-          </Paragraph>
+
+          {title && (
+              <Paragraph className="utrecht-form-field__label">
+                  <FormLabel htmlFor={randomID} dangerouslySetInnerHTML={{ __html: title }} />
+              </Paragraph>
+          )}
+
           {description &&
             <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
           }

@@ -5,6 +5,7 @@ import './style.css';
 import { FormValue } from '@openstad-headless/form/src/form';
 
 export type TickmarkSliderProps = {
+    overrideDefaultValue?: FormValue;
     index: number;
     title: string;
     fieldOptions?: { value: string; label: string }[];
@@ -48,9 +49,12 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
-    const [value, setValue] = useState<string>(defaultValue);
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
+
+    const [value, setValue] = useState<string>(initialValue);
 
     const maxCharacters = fieldOptions.length > 0 ? fieldOptions.length.toString() : "1";
 

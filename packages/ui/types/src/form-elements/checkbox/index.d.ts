@@ -2,6 +2,7 @@ import { FC } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
 export type CheckboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: {
         value: string;

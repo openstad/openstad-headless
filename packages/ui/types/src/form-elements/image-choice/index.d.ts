@@ -2,6 +2,7 @@ import { FC } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
 export type ImageChoiceFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices: ChoiceItem[];
     fieldRequired?: boolean;

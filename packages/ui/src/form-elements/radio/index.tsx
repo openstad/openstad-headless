@@ -24,6 +24,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 
 export type RadioboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -60,8 +61,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     randomId = '',
     fieldInvalid = false,
     randomizeItems = false
+    overrideDefaultValue,
 }) => {
-    const [selectedOption, setSelectedOption] = useState<string>("");
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
+    const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
     const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
 
@@ -76,7 +79,6 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
 
         if (randomizeItems) {
-            console.log('Go Random!')
             const storageKey = `randomizedChoices_${fieldKey}`;
             const stored = sessionStorage.getItem(storageKey);
             if (stored) {
@@ -143,9 +145,9 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                 aria-invalid={fieldInvalid}
                 aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend>
-                    {title}
-                </FieldsetLegend>
+                {title && (
+                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                )}
 
                 {description &&
                     <>
@@ -190,6 +192,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                         onChange={() => handleRadioChange(choice.value, index)}
                                         disabled={disabled}
                                         value={choice && choice.value}
+                                        checked={selectedOption === choice.value}
                                     />
                                     <span>{choice && choice.label}</span>
                                 </FormLabel>

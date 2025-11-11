@@ -21,7 +21,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {ArgumentWidgetTabProps} from "@/pages/projects/[project]/widgets/comments/[id]/index";
+import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
 
 // Defines the types allowed to go to the frontend
 const SortingTypes = [
@@ -58,9 +58,9 @@ const formSchema = z.object({
     .optional(),
 });
 
-export default function ArgumentsSorting(
-  props: ArgumentWidgetTabProps &
-    EditFieldProps<ArgumentWidgetTabProps>
+export default function DocumentSorting(
+  props: DocumentMapProps &
+    EditFieldProps<DocumentMapProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
 

@@ -8,7 +8,7 @@ const s3 = require('./s3');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const mime      = require('mime-types');
 
-const { createFilename, sanitizeFileName } = require('./utils')
+const { createFilename, sanitizeFileName, getFileUrl } = require('./utils')
 const fs = require('node:fs');
 const path = require('path');
 
@@ -43,9 +43,9 @@ if (s3.isEnabled()) {
       destination: function (req, file, cb) {
         cb(null, 'images/');
       },
-      key: function (req, file, cb) {
+      key: function(req, file, cb) {
         cb(null, 'images/' + createFilename(file.originalname));
-      },
+      }
     });
   } catch (error) {
     throw new Error(`S3 Multer storage error: ${error.message}`);
@@ -366,8 +366,7 @@ app.use((req, res, next) => {
  */
 app.post('/image',
   imageUpload.single('image'), (req, res, next) => {
-    const fileName = req.file.filename || req.file.key;
-    let url = `${process.env.APP_URL}/image/${sanitizeFileName(fileName)}`;
+    const url = getFileUrl(req.file, 'image');
 
     let protocol = '';
 
@@ -384,8 +383,7 @@ app.post('/image',
 app.post('/images',
   imageUpload.array('image', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-      let fileName = file.filename || file.key;
-      let url = `${process.env.APP_URL}/image/${sanitizeFileName(fileName)}`;
+      const url = getFileUrl(file, 'image');
 
       let protocol = '';
 
@@ -405,14 +403,8 @@ app.post('/images',
  */
 app.post('/document',
   documentUpload.single('document'), (req, res, next) => {
-    const fileName = req?.file?.filename || req?.file?.key || '';
-
-    // Check if the filename is not empty
-    if (!fileName) {
-      return res.status(400).send(JSON.stringify({ error: 'No file uploaded' }));
-    }
-
-    let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
+    
+    const url = getFileUrl(req.file, 'document');
 
     let protocol = '';
 
@@ -429,8 +421,7 @@ app.post('/document',
 app.post('/documents',
   documentUpload.array('document', 30), (req, res, next) => {
     res.send(JSON.stringify(req.files.map((file) => {
-      let fileName = file.filename || file.key;
-      let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
+      const url = getFileUrl(file, 'document');
       
       let protocol = '';
       

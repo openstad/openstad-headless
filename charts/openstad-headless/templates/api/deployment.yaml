@@ -97,6 +97,18 @@ spec:
                 key: msTenantId
                 name: {{ template "openstad.email.secret.fullname" . }}
 
+          - name: HASH_IP_ADDRESSES
+            valueFrom:
+              secretKeyRef:
+                key: hashIpAddresses
+                name: {{ template "openstad.ipaddress.secret.fullname" . }}
+
+          - name: HASH_IP_SALT
+            valueFrom:
+              secretKeyRef:
+                key: hashIpSalt
+                name: {{ template "openstad.ipaddress.secret.fullname" . }}
+
           - name: MAIL_TRANSPORT_SMTP_PORT
             valueFrom:
               secretKeyRef:
@@ -354,6 +366,18 @@ spec:
                 secretKeyRef:
                   key: msTenantId
                   name: {{ template "openstad.email.secret.fullname" . }}
+
+            - name: HASH_IP_ADDRESSES
+              valueFrom:
+                secretKeyRef:
+                  key: hashIpAddresses
+                  name: {{ template "openstad.ipaddress.secret.fullname" . }}
+
+            - name: HASH_IP_SALT
+              valueFrom:
+                secretKeyRef:
+                  key: hashIpSalt
+                  name: {{ template "openstad.ipaddress.secret.fullname" . }}
 
             - name: MAIL_TRANSPORT_SMTP_PORT
               valueFrom:

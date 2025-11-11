@@ -13,6 +13,7 @@ import {MultiSelect, Spacer} from '@openstad-headless/ui/src';
 import { FormValue } from "@openstad-headless/form/src/form";
 
 export type SelectFieldProps = {
+    overrideDefaultValue?: FormValue;
     title?: string;
     description?: string;
     choices?: string[] | [{value: string, label: string}];
@@ -53,6 +54,7 @@ const SelectField: FC<SelectFieldProps> = ({
       fieldInvalid = false,
       multiple = false,
       defaultValue = [],
+      overrideDefaultValue,
 }) => {
     choices = choices.map((choice) => {
       if (typeof choice === 'string') {
@@ -69,15 +71,21 @@ const SelectField: FC<SelectFieldProps> = ({
         }
     }
 
-    const initialSelected = multiple
+    let initialValue = multiple
       ? defaultValue
       : (Array.isArray(defaultValue) && defaultValue.length > 0 ? defaultValue[0] : '');
 
-    const [selected, setSelected] = useState<string | string[]>(initialSelected);
+    initialValue = overrideDefaultValue
+      ? (overrideDefaultValue as string | string[])
+      : initialValue;
+
+    const [selected, setSelected] = useState<string | string[]>(initialValue);
 
     return (
         <FormField type="select">
-            <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
+          {title && (
+            <FormLabel htmlFor={fieldKey} dangerouslySetInnerHTML={{ __html: title }} />
+          )}
             {description &&
                 <>
                     <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />

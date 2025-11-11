@@ -1,8 +1,10 @@
 import React, { FC } from "react";
 import {AccordionProvider, Paragraph, Strong} from "@utrecht/component-library-react";
 import {Spacer} from "../../spacer";
+import { FormValue } from "@openstad-headless/form/src/form";
 
 export type InfoFieldProps = {
+    overrideDefaultValue?: FormValue;
     title?: string;
     description?: string;
     fieldKey?: string;
@@ -40,7 +42,7 @@ const InfoField: FC<InfoFieldProps> = ({
 
     return (
       <div className="info-field-container">
-        {title && <Paragraph><Strong>{title}</Strong></Paragraph>}
+          {title && <Paragraph><Strong dangerouslySetInnerHTML={{ __html: title }} /></Paragraph>}
           {description &&
             <Paragraph dangerouslySetInnerHTML={{__html: description}} />
           }
