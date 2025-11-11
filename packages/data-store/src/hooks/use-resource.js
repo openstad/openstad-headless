@@ -4,7 +4,8 @@ export default function useResource(props) {
 
   const projectId = props.projectId;
   const resourceId = props.resourceId;
-  const { data, error, isLoading } = self.useSWR({ projectId, resourceId }, 'resource.fetch');
+  const checkEditPermission = props.checkEditPermission || false;
+  const { data, error, isLoading } = self.useSWR({ projectId, resourceId, checkEditPermission }, 'resource.fetch');
 
   // add functionality
   let resource = data || {};

@@ -52,12 +52,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { data: existingResource, isLoading } = datastore.useResource({
         projectId: props.projectId,
         resourceId: resourceId || undefined,
+        checkEditPermission: true,
     });
 
     const initialFormFields = InitializeFormFields(props.items, props);
     const [formFields, setFormFields] = useState(initialFormFields);
 
     useEffect(() => {
+        if (isLoading) return;
+
         const updatedFormFields = formFields.map((field) => {
             return {
                 ...field,
@@ -66,7 +69,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         });
 
         setFormFields(updatedFormFields);
-    }, [existingResource]);
+    }, [ JSON.stringify(existingResource) ]);
 
     const notifySuccess = () => NotificationService.addNotification("Idee indienen gelukt", "success");
     const notifyFailed = () => NotificationService.addNotification("Idee indienen mislukt", "error");
