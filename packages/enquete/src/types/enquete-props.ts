@@ -35,6 +35,7 @@ export type Item = {
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
+  randomizeItems?: boolean;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;

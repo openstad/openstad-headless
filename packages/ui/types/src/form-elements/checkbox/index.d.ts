@@ -34,6 +34,7 @@ export type CheckboxFieldProps = {
         value: string;
         label: string;
     }[];
+    randomizeItems?: boolean;
 };
 declare const CheckboxField: FC<CheckboxFieldProps>;
 export default CheckboxField;
