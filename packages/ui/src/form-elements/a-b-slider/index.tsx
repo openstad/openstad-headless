@@ -234,7 +234,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 </Paragraph>
             </div>
 
-            { (skipQuestion && skipQuestionAllowExplanation) && (
+            { skipQuestion && (
                 <div className="skip-question-container">
                     <Spacer size={2} />
                     <FormLabel htmlFor={`${randomId}_skip`} type="checkbox" className="--label-grid">
@@ -253,7 +253,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                         <span>{skipQuestionLabel}</span>
                     </FormLabel>
 
-                    { skipSelected && (
+                    { (skipSelected && skipQuestionAllowExplanation) && (
                         <div className="marginTop10 marginBottom15">
                             <Spacer size={2} />
                             <TextInput
