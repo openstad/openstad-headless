@@ -63,7 +63,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        randomId= '',
        fieldInvalid= false,
        randomizeItems = false,
-       overrideDefaultValue,
+       overrideDefaultValue
 }) => {
     let initialValue = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
 

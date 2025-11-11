@@ -60,8 +60,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
-    randomizeItems = false
-    overrideDefaultValue,
+    randomizeItems = false,
+    overrideDefaultValue
 }) => {
     const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
     const [selectedOption, setSelectedOption] = useState<string>(initialValue);
