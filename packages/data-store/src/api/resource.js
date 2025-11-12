@@ -1,12 +1,8 @@
 export default {
 
-  fetch: async function({ projectId, resourceId, checkEditPermission }, key) {
+  fetch: async function({ projectId, resourceId }, key) {
 
     let url = `/api/project/${projectId}/resource/${resourceId}?includeUser=1&includeVoteCount=1&includeUserVote=1&includeTags=1&includeStatus=1`;
-
-    if ( checkEditPermission ) {
-      url += `&checkEditPermission=1`;
-    }
 
     let headers = {
       'Content-Type': 'application/json'

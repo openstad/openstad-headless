@@ -411,12 +411,6 @@ router
 // --------
 router
   .route('/:resourceId(\\d+)')
-    .get( function (req, res, next) {
-      if ( req.query.checkEditPermission && ( !req.user || !db.Resource.can('edit', req.user)) ) {
-        return res.json(null);
-      }
-      return next();
-    })
   .all(function (req, res, next) {
     let resourceId = parseInt(req.params.resourceId) || 0;
 

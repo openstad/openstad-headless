@@ -19,6 +19,14 @@ const getExistingValue = (fieldKey, resource) => {
         if ( !!returnField ) {
             return returnField;
         }
+
+        if ( fieldKey.startsWith('tags[') && resource.tags ) {
+            const tagType = fieldKey.substring(5, fieldKey.length - 1);
+            const tagsOfType = resource.tags?.filter((tag) => tag.type === tagType);
+            const returnTags = tagsOfType.map((tag) => tag.id);
+
+            return returnTags;
+        }
     }
     return undefined;
 }
@@ -49,30 +57,36 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         widgetId: props.widgetId,
     });
 
-    const { data: existingResource, isLoading } = datastore.useResource({
+    const { data: existingResource, isLoading, canEdit, canDelete } = datastore.useResource({
         projectId: props.projectId,
-        resourceId: resourceId || undefined,
-        checkEditPermission: true,
+        resourceId: resourceId || undefined
     });
 
     const initialFormFields = InitializeFormFields(props.items, props);
-    const [formFields, setFormFields] = useState(initialFormFields);
+    const [formFields, setFormFields] = useState([]);
+    const [fillDefaults, setFillDefaults] = useState(false);
 
     useEffect(() => {
         if (isLoading) return;
 
-        const updatedFormFields = formFields.map((field) => {
-            return {
-                ...field,
-                defaultValue: getExistingValue(field.fieldKey, existingResource),
-            };
-        });
+        if (canEdit) {
+            const updatedFormFields = initialFormFields.map((field) => {
+                const existingValue = getExistingValue(field.fieldKey, existingResource);
 
-        setFormFields(updatedFormFields);
-    }, [ JSON.stringify(existingResource) ]);
+                return existingValue ? {...field, defaultValue: existingValue} : field;
+            });
 
-    const notifySuccess = () => NotificationService.addNotification("Idee indienen gelukt", "success");
-    const notifyFailed = () => NotificationService.addNotification("Idee indienen mislukt", "error");
+            setFormFields(updatedFormFields);
+        } else if ( JSON.stringify(formFields) !== JSON.stringify(initialFormFields) ) {
+            setFormFields(initialFormFields);
+        }
+
+        setFillDefaults(true);
+    }, [ JSON.stringify(existingResource), JSON.stringify(initialFormFields), isLoading ]);
+
+    const notifySuccess = () => NotificationService.addNotification("Inzending indienen gelukt", "success");
+    const notifySuccessEdit = () => NotificationService.addNotification("Inzending bijgewerkt", "success");
+    const notifyFailed = () => NotificationService.addNotification("Inzending indienen mislukt", "error");
 
     const addTagsToFormData = (formData) => {
         const tags = [];
@@ -81,6 +95,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             if (formData.hasOwnProperty(key)) {
                 if (key.startsWith('tags[')) {
                     try {
+                        if ( !formData[key] ) {
+                            continue;
+                        }
+
                         const tagsArray = JSON.parse(formData[key]);
 
                         if (typeof tagsArray === 'object') {
@@ -145,6 +163,13 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         const finalFormData = configureFormData(formData, true);
 
         try {
+            if (canEdit && existingResource && existingResource.id && existingResource.update) {
+                await existingResource.update(finalFormData);
+                notifySuccessEdit();
+                setDisableSubmit(false);
+                return;
+            }
+
             const result = await createResource(finalFormData, props.widgetId);
             if (result) {
                 notifySuccess();
@@ -166,7 +191,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     }
 
 
-    return ( isLoading || formFields?.some(field => field.hasOwnProperty('defaultValue') === false) ) ? null : (
+    return ( isLoading || !fillDefaults ) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
                 {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}

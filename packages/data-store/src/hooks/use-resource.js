@@ -4,8 +4,7 @@ export default function useResource(props) {
 
   const projectId = props.projectId;
   const resourceId = props.resourceId;
-  const checkEditPermission = props.checkEditPermission || false;
-  const { data, error, isLoading } = self.useSWR({ projectId, resourceId, checkEditPermission }, 'resource.fetch');
+  const { data, error, isLoading } = self.useSWR({ projectId, resourceId }, 'resource.fetch');
 
   // add functionality
   let resource = data || {};
@@ -19,7 +18,12 @@ export default function useResource(props) {
       self.mutate({ projectId, resourceId }, 'resource.submitLike', vote, { action: 'submitLike', revalidate: true, populateCache: false });
     }
 
-  return { data:resource, error, isLoading };
-
+  return {
+    data:resource,
+    error,
+    isLoading,
+    canEdit: data?.can?.edit || false,
+    canDelete: data?.can?.delete || false,
+  };
 }
 

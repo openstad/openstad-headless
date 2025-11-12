@@ -50,6 +50,7 @@ type booleanProps = {
   | 'displayDocuments'
   | 'clickableImage'
   | 'displayStatusBar'
+  | 'displayEditResourceButton'
   | 'displaySocials']: boolean | undefined;
 };
 
@@ -65,6 +66,7 @@ export type ResourceDetailWidgetProps = {
     backUrlIdRelativePath?: string;
     pageTitle?: boolean;
     backUrlText?: string;
+    urlWithResourceFormForEditing?: string;
   } & MapPropsType & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -117,6 +119,8 @@ function ResourceDetail({
   backUrlText = 'Terug naar het document',
   backUrlIdRelativePath = '',
   resourceOverviewMapWidget = {},
+  displayEditResourceButton = false,
+  urlWithResourceFormForEditing = '',
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
@@ -132,7 +136,7 @@ function ResourceDetail({
     resourceId: resourceId,
     api: props.api,
   });
-  const { data: resource } = datastore.useResource({
+  const { data: resource, canEdit, canDelete } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });
@@ -263,10 +267,6 @@ function ResourceDetail({
       imageElement
     );
   };
-
-  const { data: currentUser, isLoading: userIsLoading } = datastore.useCurrentUser({ ...props });
-  const resourceUserId = resource?.userId || null;
-  const canDelete = !userIsLoading && hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
 
   const onRemoveClick = async (resource: any) => {
     try {
@@ -491,6 +491,21 @@ function ResourceDetail({
           </Button>
         </>
       )}
+
+      { (canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
+        <>
+          <Spacer size={2} />
+          <Button
+            appearance="primary-action-button"
+            onClick={() => {
+              const hrefUrl = `${urlWithResourceFormForEditing}?openstadResourceId=${resource.id}`;
+              document.location.href = hrefUrl;
+            }}
+          >
+            Bewerk de inzending
+          </Button>
+        </>
+      ) }
 
       <Spacer size={2} />
 

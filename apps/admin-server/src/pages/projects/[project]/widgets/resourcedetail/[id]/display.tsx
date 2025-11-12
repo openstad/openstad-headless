@@ -34,9 +34,11 @@ const formSchema = z.object({
   displayStatusBar: z.boolean(),
   displayLikes: z.boolean(),
   displayDocuments: z.boolean(),
+  displayEditResourceButton: z.boolean().optional(),
   documentsTitle: z.string().optional(),
   documentsDesc: z.string().optional(),
   clickableImage: z.boolean(),
+  urlWithResourceFormForEditing: z.string().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -74,6 +76,8 @@ export default function WidgetResourceDetailDisplay(
       clickableImage: props?.clickableImage || false,
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
+      displayEditResourceButton: props?.displayEditResourceButton || false,
+      urlWithResourceFormForEditing: props?.urlWithResourceFormForEditing || '',
     },
   });
 
@@ -336,6 +340,39 @@ export default function WidgetResourceDetailDisplay(
                 )}
               />
             </>
+          )}
+
+          <FormField
+            control={form.control}
+            name="displayEditResourceButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de knop om de inzending te bewerken
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          { form.watch("displayEditResourceButton") && (
+            <FormField
+              control={form.control}
+              name="urlWithResourceFormForEditing"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Wat is de URL waar het formulier op staat?</FormLabel>
+                  <FormDescription>
+                    Vul hier de URL in waar het formulier staat waarmee de gebruiker zijn inzending kan bewerken. Er wordt automatisch ?openstadResourceId=[id] aan de URL toegevoegd.
+                  </FormDescription>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
 
           <Button className="w-fit col-span-full" type="submit">
