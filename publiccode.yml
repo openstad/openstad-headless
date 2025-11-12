@@ -218,16 +218,10 @@ dependsOn:
   open:
     - name: "NodeJS"
       versionMin: "18"
-      versionMax: ""
-      version: ""
       optional: false
     - name: "MySQL"
       versionMin: "8"
-      versionMax: ""
-      version: ""
       optional: false
     - name: "MongoDB"
       versionMin: "8"
-      versionMax: ""
-      version: ""
       optional: false
