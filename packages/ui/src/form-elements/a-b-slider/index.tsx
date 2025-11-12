@@ -86,7 +86,9 @@ const RangeSlider: FC<RangeSliderProps> = ({
     const [fieldDisabled, setFieldDisabled] = useState(initialValue.skipQuestion || false);
 
     const [value, setValue] = useState<valueObject>(initialValue);
-    const [rangeValue, setRangeValue] = useState<number>(parseInt(initialValue.value) || 50);
+
+    const parsed = parseInt(initialValue.value);
+    const [rangeValue, setRangeValue] = useState<number>( isNaN(parsed) ? 50 : parsed );
 
     class HtmlContent extends React.Component<{ html: any, bold?: boolean }> {
         render() {

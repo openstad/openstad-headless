@@ -143,7 +143,7 @@
                 </div>
               {% endif %}
 
-              {% if data.global.showLoginInCTA %}
+              {% if data.global.showLoginInCTA !== 'false' and data.global.showLoginInCTA !== false %}
               <div class="cta-buttons">
                     {% if data.global.showLoginButton and not data.loggedIn %}
                         <a href="{{data.baseUrlWithPrefix}}/login" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--account">{{data.global.loginButtonLabel}}</a>
