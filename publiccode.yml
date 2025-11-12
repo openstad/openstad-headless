@@ -216,13 +216,18 @@ localisation:
 
 dependsOn:
   open:
-    - name: "NodeJS 16+"
-      versionMin: ""
+    - name: "NodeJS"
+      versionMin: "18"
       versionMax: ""
       version: ""
       optional: false
-    - name: "Access to a Mysql server"
-      versionMin: ""
+    - name: "MySQL"
+      versionMin: "8"
+      versionMax: ""
+      version: ""
+      optional: false
+    - name: "MongoDB"
+      versionMin: "8"
       versionMax: ""
       version: ""
       optional: false
