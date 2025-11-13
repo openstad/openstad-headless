@@ -57,7 +57,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         widgetId: props.widgetId,
     });
 
-    const { data: existingResource, isLoading, canEdit, canDelete } = datastore.useResource({
+    const { data: existingResource, isLoading, canEdit } = datastore.useResource({
         projectId: props.projectId,
         resourceId: resourceId || undefined
     });
