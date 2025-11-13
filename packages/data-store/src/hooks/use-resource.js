@@ -9,7 +9,7 @@ export default function useResource(props) {
   // add functionality
   let resource = data || {};
     resource.update = function(newData) {
-      self.mutate({ projectId, resourceId }, 'resource.update', newData, { action: 'update' });
+      return self.mutate({ projectId, resourceId }, 'resource.update', newData, { action: 'update' });
     }
     resource.delete = function() {
       self.mutate({ projectId, resourceId }, 'resource.delete', resource, { action: 'delete' });

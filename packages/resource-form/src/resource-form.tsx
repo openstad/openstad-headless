@@ -85,8 +85,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     }, [ JSON.stringify(existingResource), JSON.stringify(initialFormFields), isLoading ]);
 
     const notifySuccess = () => NotificationService.addNotification("Inzending indienen gelukt", "success");
-    const notifySuccessEdit = () => NotificationService.addNotification("Inzending bijgewerkt", "success");
+    const notifySuccessEdit = () => NotificationService.addNotification("Inzending bewerken gelukt", "success");
     const notifyFailed = () => NotificationService.addNotification("Inzending indienen mislukt", "error");
+    const notifyFailedEdit = (message: string) => NotificationService.addNotification(message, "error");
 
     const addTagsToFormData = (formData) => {
         const tags = [];
@@ -164,9 +165,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
         try {
             if (canEdit && existingResource && existingResource.id && existingResource.update) {
-                await existingResource.update(finalFormData);
-                notifySuccessEdit();
-                setDisableSubmit(false);
+                try {
+                    await existingResource.update(finalFormData);
+                    notifySuccessEdit();
+                } catch (e) {
+                    notifyFailedEdit(e.message || 'Inzending bewerken mislukt');
+                } finally {
+                    setDisableSubmit(false);
+                }
+
                 return;
             }
 

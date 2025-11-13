@@ -1018,7 +1018,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
     // count comments and votes
     let canEditAfterFirstLikeOrComment =
-      (projectConfig && projectConfig.canEditAfterFirstLikeOrComment) || false;
+      (projectConfig && projectConfig.resources && projectConfig.resources.canEditAfterFirstLikeOrComment) || false;
     if (
       !canEditAfterFirstLikeOrComment &&
       !userHasRole(instance.auth && instance.auth.user, 'editor')
@@ -1030,8 +1030,8 @@ module.exports = function (db, sequelize, DataTypes) {
         where: { resourceId: instance.id },
       });
       if (firstLikeSubmitted || firstCommentSubmitted) {
-        throw Error(
-          'You cannot edit an resource after the first like or comment has been added'
+        throw new Error(
+          'Inzending kan niet meer bewerkt worden nadat er een stem of reactie is geplaatst.'
         );
       }
     }
