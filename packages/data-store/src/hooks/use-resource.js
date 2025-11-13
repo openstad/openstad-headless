@@ -9,7 +9,7 @@ export default function useResource(props) {
   // add functionality
   let resource = data || {};
     resource.update = function(newData) {
-      self.mutate({ projectId, resourceId }, 'resource.update', newData, { action: 'update' });
+      return self.mutate({ projectId, resourceId }, 'resource.update', newData, { action: 'update' });
     }
     resource.delete = function() {
       self.mutate({ projectId, resourceId }, 'resource.delete', resource, { action: 'delete' });
@@ -18,7 +18,12 @@ export default function useResource(props) {
       self.mutate({ projectId, resourceId }, 'resource.submitLike', vote, { action: 'submitLike', revalidate: true, populateCache: false });
     }
 
-  return { data:resource, error, isLoading };
-
+  return {
+    data:resource,
+    error,
+    isLoading,
+    canEdit: data?.can?.edit || false,
+    canDelete: data?.can?.delete || false,
+  };
 }
 

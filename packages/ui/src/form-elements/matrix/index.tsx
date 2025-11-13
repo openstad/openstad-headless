@@ -39,7 +39,7 @@ export type MatrixFieldProps = {
     fieldInvalid?: boolean;
     matrixMultiple?: boolean;
     matrix?: Matrix;
-    defaultValue?: string;
+    defaultValue?: FormValue;
     fieldOptions?: { value: string; label: string }[];
     nextPageText?: string;
     prevPageText?: string;
