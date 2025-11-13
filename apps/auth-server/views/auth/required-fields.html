@@ -31,9 +31,12 @@
           required
           name="{{requiredField.key}}"
           class="input-{{requiredField.key}} input-field"
-          {{'autofocus' if first}}
-		  id="input_field"
-		  autocomplete="name"
+
+		      id="input_field"
+		      autocomplete="name"
+          {% if first %}
+            autofocus
+          {% endif %}
           />
 				</div>
         {% set first = false %}

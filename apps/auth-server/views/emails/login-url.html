@@ -11,7 +11,6 @@
   </mj-column>
 </mj-section>
   <!-- Mail context -->
-</mj-raw>
 <mj-section>
   <mj-column width="400px">
     <mj-image src="{{imagePath}}/mail-header.jpg"></mj-image>
@@ -20,14 +19,14 @@
     <mj-text font-size="20px" color="#111" font-family="helvetica"
     >Inloggen vereist</mj-text
   >
-    <mj-text           
+    <mj-text
       font-size="14px"
       line-height="22px"
       color="#444"
       font-family="helvetica">
       Beste {{name or 'bezoeker'}},
-      </br>
-      Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. 
+      <br />
+      Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig.
     </mj-text>
     <mj-button background-color="#12B886" href="{{loginurl}}">Log in</mj-button>
   </mj-column>

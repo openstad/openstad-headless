@@ -36,7 +36,9 @@ Doing it with Javascript prevents the user from needing to do an extra click
 	<br />
 
 	<noscript>
-		<div style="display: none">
+    <style>
+			.show-on-load { display: none !important; }
+		</style>
 	</noscript>
 
 	<div class="show-on-load">
@@ -60,9 +62,7 @@ Doing it with Javascript prevents the user from needing to do an extra click
 		<img src="/img/loader.svg" class="loader-spinner" width="50" height="50" />
 		{% endif %}
 	</div>
-	<noscript>
-</div>
-</noscript>
+
 <script>
 	document.getElementById("auth-form").submit();
 </script>

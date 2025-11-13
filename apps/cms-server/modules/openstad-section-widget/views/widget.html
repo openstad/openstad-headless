@@ -16,7 +16,7 @@
   {% if data.widget.negativeMargin %} --negative {% endif %}
   {% if data.widget.customClass %} {{data.widget.customClass}} {% endif %}
   {% if data.widget.backgroundImage %} --background-image {% endif %}
-"
+  "
   {% if data.widget.backgroundImage %}
   data-background-image="{{ apos.attachments.url(data.widget.backgroundImage) }}"
   {% endif %}
@@ -25,11 +25,11 @@
     {{data.widget.customCSS}}
   {% endif %}
      data-openstad-section
-  ">
+  >
   {% if data.widget.sectionToggle %}
   <a class="toggle-title"
     href="javascript: (function() { var id = '#{% if data.widget.htmlId%}{{data.widget.htmlId}}{% else %}{{data.widget.containerId}}{% endif %}'; if( $(id).hasClass('open') ){ $(id).removeClass('open'); $(id).addClass('closed'); } else { $(id).removeClass('closed'); $(id).addClass('open'); }   })()"
-    title={{data.widget.toggleTitle}}">
+    title="{{data.widget.toggleTitle}}">
     {{data.widget.toggleTitle}}
     <img class="arrow"
       src="{{data.baseUrlWithPrefix}}/modules/openstad-assets/img/{% if data.widget.typeArrow %}{{data.widget.typeArrow}}{% else %}{{'arrow_down_black'}}{% endif %}.svg"
