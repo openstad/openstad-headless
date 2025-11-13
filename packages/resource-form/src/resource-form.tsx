@@ -22,10 +22,10 @@ const getExistingValue = (fieldKey, resource) => {
 
         if ( fieldKey.startsWith('tags[') && resource.tags ) {
             const tagType = fieldKey.substring(5, fieldKey.length - 1);
-            const tagsOfType = resource.tags?.filter((tag) => tag.type === tagType);
-            const returnTags = tagsOfType.map((tag) => tag.id);
 
-            return returnTags;
+            return resource.tags
+              ?.filter((tag) => tag.type === tagType)
+               .map((tag) => tag.id);
         }
     }
     return undefined;
