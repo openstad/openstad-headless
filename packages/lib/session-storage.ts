@@ -60,7 +60,6 @@ export default class SessionStorage {
   destroy() {
     window.sessionStorage.setItem('openstad', JSON.stringify({}));
   }
-
 }
 
 export { SessionStorage };

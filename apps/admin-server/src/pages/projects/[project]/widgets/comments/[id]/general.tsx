@@ -7,6 +7,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -16,24 +18,23 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useResources from '@/hooks/use-resources';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as Switch from '@radix-ui/react-switch';
+import { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
-import useResources from '@/hooks/use-resources';
-import { ReactNode } from 'react';
+
 import { ArgumentWidgetTabProps } from '.';
-import * as Switch from "@radix-ui/react-switch";
-import {Input} from "@/components/ui/input";
-import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
   sentiment: z.string(),
   useSentiments: z.string().optional(),
   itemsPerPage: z.coerce.number(),
-  displayPagination: z.boolean().optional()
+  displayPagination: z.boolean().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -65,7 +66,7 @@ export default function ArgumentsGeneral({
     defaultValues: {
       resourceId: props.resourceId,
       sentiment: props.sentiment || 'for',
-      useSentiments: JSON.stringify(props.useSentiments || ["for","against"]),
+      useSentiments: JSON.stringify(props.useSentiments || ['for', 'against']),
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
     },
@@ -75,7 +76,7 @@ export default function ArgumentsGeneral({
     let useSentiments;
     try {
       useSentiments = JSON.parse(values.useSentiments || '');
-    } catch(err) {}
+    } catch (err) {}
     props.updateConfig({ ...props, ...values, useSentiments });
   }
 
@@ -156,9 +157,13 @@ export default function ArgumentsGeneral({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='[]'>Toon geen reacties</SelectItem>
-                      <SelectItem value='["for","against"]'>Voor en tegen</SelectItem>
-                      <SelectItem value='["no sentiment"]'>Eén lijst, geen sentiment</SelectItem>
+                      <SelectItem value="[]">Toon geen reacties</SelectItem>
+                      <SelectItem value='["for","against"]'>
+                        Voor en tegen
+                      </SelectItem>
+                      <SelectItem value='["no sentiment"]'>
+                        Eén lijst, geen sentiment
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -188,7 +193,7 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
-          { !!form.watch('displayPagination') && (
+          {!!form.watch('displayPagination') && (
             <FormField
               control={form.control}
               name="itemsPerPage"
@@ -196,13 +201,16 @@ export default function ArgumentsGeneral({
                 <FormItem>
                   <FormLabel>Hoeveelheid items per pagina</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field}
-                           placeholder="9999"
-                           {...field}
-                           onChange={(e) => {
-                             onFieldChange(field.name, e.target.value);
-                             field.onChange(e);
-                           }} />
+                    <Input
+                      type="number"
+                      {...field}
+                      placeholder="9999"
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

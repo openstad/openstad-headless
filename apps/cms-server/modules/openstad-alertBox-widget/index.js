@@ -5,14 +5,14 @@
 module.exports = {
   extend: 'base-widget',
   options: {
-    label: 'Alert Box'
+    label: 'Alert Box',
   },
   fields: {
     add: {
       message: {
         type: 'string',
-        label: 'Content'
+        label: 'Content',
       },
     },
-  }
+  },
 };

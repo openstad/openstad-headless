@@ -34,19 +34,18 @@ exports.fields = [
 ];
 
 exports.validation = {
-  profile : {
-    name : {
+  profile: {
+    name: {
       errorMessage: 'Naam moet ingevuld zijn',
       isLength: {
-        options:{ min: 1, maxLength: 155 }
-      }
+        options: { min: 1, maxLength: 155 },
+      },
     },
     // E-mail is not validated, since in most re
-    email : {
+    email: {
       errorMessage: 'E-mail is niet correct',
-      isLength: { options:{ min: 1, maxLength: 155 }},
-      isEmail: true
-    }
-  }
-}
-;
+      isLength: { options: { min: 1, maxLength: 155 } },
+      isEmail: true,
+    },
+  },
+};

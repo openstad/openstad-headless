@@ -1,30 +1,35 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import * as Switch from '@radix-ui/react-switch';
+import _ from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
-import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
-
-import * as Switch from '@radix-ui/react-switch';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
@@ -50,8 +55,7 @@ type Tag = {
 };
 
 export default function WidgetStemBegrootOverviewTags(
-  props: StemBegrootWidgetProps &
-    EditFieldProps<StemBegrootWidgetProps>
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);
@@ -108,13 +112,19 @@ export default function WidgetStemBegrootOverviewTags(
                   Kies de manier waarop je de filters wilt combineren
                 </FormLabel>
                 <FormDescription>
-                  <strong>Of</strong>: Als er meerdere filters actief zijn, wordt alleen één van de filters toegepast. Bijvoorbeeld, als je zoekt op meerdere eigenschappen, wordt er een resultaat getoond als één van die eigenschappen overeenkomt.<br />
-                  <strong>En</strong>: Als er meerdere filters actief zijn, moeten alle filters tegelijkertijd van toepassing zijn. Alleen resultaten die aan alle geselecteerde criteria voldoen, worden getoond.
+                  <strong>Of</strong>: Als er meerdere filters actief zijn,
+                  wordt alleen één van de filters toegepast. Bijvoorbeeld, als
+                  je zoekt op meerdere eigenschappen, wordt er een resultaat
+                  getoond als één van die eigenschappen overeenkomt.
+                  <br />
+                  <strong>En</strong>: Als er meerdere filters actief zijn,
+                  moeten alle filters tegelijkertijd van toepassing zijn. Alleen
+                  resultaten die aan alle geselecteerde criteria voldoen, worden
+                  getoond.
                 </FormDescription>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || 'or'}
-                >
+                  value={field.value || 'or'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Of" />
@@ -137,9 +147,11 @@ export default function WidgetStemBegrootOverviewTags(
             name="tagGroups"
             render={() => (
               <FormItem className="col-span-full">
-                <div className='mb-2'>
+                <div className="mb-2">
                   <FormLabel>
-                    <Heading size="xl">Selecteer de gewenste tag groepen</Heading>
+                    <Heading size="xl">
+                      Selecteer de gewenste tag groepen
+                    </Heading>
                   </FormLabel>
                   <Separator className="my-4" />
                 </div>
@@ -162,12 +174,13 @@ export default function WidgetStemBegrootOverviewTags(
                                   <Switch.Root
                                     className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                                     onCheckedChange={(checked: any) => {
-                                      const groups = handleTagCheckboxGroupChange(
-                                        groupName,
-                                        checked,
-                                        field.value,
-                                        'type'
-                                      );
+                                      const groups =
+                                        handleTagCheckboxGroupChange(
+                                          groupName,
+                                          checked,
+                                          field.value,
+                                          'type'
+                                        );
                                       field.onChange(groups);
                                       props.onFieldChanged(field.name, groups);
                                     }}
@@ -214,7 +227,10 @@ export default function WidgetStemBegrootOverviewTags(
                                         existingGroup.label = e.target.value;
                                         groups[index] = existingGroup;
                                         field.onChange(groups);
-                                        props.onFieldChanged(field.name, groups);
+                                        props.onFieldChanged(
+                                          field.name,
+                                          groups
+                                        );
                                       }
                                     }}
                                   />
@@ -236,16 +252,20 @@ export default function WidgetStemBegrootOverviewTags(
                               className="flex flex-col items-start">
                               <FormControl>
                                 <>
-                                  <FormLabel>Meerdere tags van deze groep tegelijk filteren</FormLabel>
+                                  <FormLabel>
+                                    Meerdere tags van deze groep tegelijk
+                                    filteren
+                                  </FormLabel>
                                   <Switch.Root
                                     className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                                     onCheckedChange={(checked: any) => {
-                                      const groups = handleTagCheckboxGroupChange(
-                                        groupName,
-                                        checked,
-                                        field.value,
-                                        'multiple'
-                                      );
+                                      const groups =
+                                        handleTagCheckboxGroupChange(
+                                          groupName,
+                                          checked,
+                                          field.value,
+                                          'multiple'
+                                        );
                                       field.onChange(groups);
                                       props.onFieldChanged(field.name, groups);
                                     }}
@@ -270,7 +290,6 @@ export default function WidgetStemBegrootOverviewTags(
                       />
                       <Separator className="my-4 col-span-full" />
                     </>
-
                   ))}
                 </div>
               </FormItem>

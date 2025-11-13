@@ -6,12 +6,12 @@ const searchInResults = require('../../middleware/search-in-results');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const express = require('express');
-const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const router = express.Router({ mergeParams: true });
 
 // scopes: for all get requests
 router
-  .all('*', function(req, res, next) {
+  .all('*', function (req, res, next) {
     req.scope = ['defaultScope', 'includeResource'];
     req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
@@ -37,24 +37,22 @@ router
     }
 
     return next();
-
   })
-  .all('*', function(req, res, next) {
+  .all('*', function (req, res, next) {
     // zoek het resource
     // todo: ik denk momenteel alleen nog gebruikt door create; dus zet hem daar neer
     let resourceId = parseInt(req.params.resourceId) || 0;
     if (!resourceId) return next();
-    db.Resource
-      .scope('includeProject')
+    db.Resource.scope('includeProject')
       .findByPk(resourceId)
-      .then(resource => {
-        if (!resource || resource.projectId != req.params.projectId) return next(createError(400, 'Resource not found'));
+      .then((resource) => {
+        if (!resource || resource.projectId != req.params.projectId)
+          return next(createError(400, 'Resource not found'));
         req.resource = resource;
         return next();
       });
   })
-  .all('/:commentId(\\d+)(/vote)?', function(req, res, next) {
-
+  .all('/:commentId(\\d+)(/vote)?', function (req, res, next) {
     // include one existing comment
     // --------------------------
 
@@ -63,31 +61,35 @@ router
     let sentiment = req.query.sentiment;
     let where = { id: commentId };
 
-    if (sentiment && (sentiment == 'against' || sentiment == 'for' || sentiment == 'no sentiment')) {
+    if (
+      sentiment &&
+      (sentiment == 'against' ||
+        sentiment == 'for' ||
+        sentiment == 'no sentiment')
+    ) {
       where.sentiment = sentiment;
     }
 
-    db.Comment
-      .scope(...req.scope)
+    db.Comment.scope(...req.scope)
       .findOne({
         where,
       })
-      .then(entry => {
+      .then((entry) => {
         if (!entry) throw new Error('Comment not found');
         req.results = entry;
         return next();
       })
       .catch(next);
-
   });
 
-router.route('/')
+router
+  .route('/')
 
   // list comments
   // --------------
-.get(auth.can('Comment', 'list'))
+  .get(auth.can('Comment', 'list'))
   .get(pagination.init)
-  .get(function(req, res, next) {
+  .get(function (req, res, next) {
     let { dbQuery } = req;
 
     let resourceId = parseInt(req.params.resourceId) || 0;
@@ -96,7 +98,12 @@ router.route('/')
       where.resourceId = resourceId;
     }
     let sentiment = req.query.sentiment;
-    if (sentiment && (sentiment == 'against' || sentiment == 'for' || sentiment == 'no sentiment')) {
+    if (
+      sentiment &&
+      (sentiment == 'against' ||
+        sentiment == 'for' ||
+        sentiment == 'no sentiment')
+    ) {
       where.sentiment = sentiment;
     }
 
@@ -104,26 +111,22 @@ router.route('/')
 
     req.scope.push({ method: ['filterByTags', onlyIncludeTagIds] });
 
-    return db.Comment
-      .scope(...req.scope)
-      .findAndCountAll(
-        {
-          where,
-          ...dbQuery,
-        },
-      )
-      .then(function(result) {
+    return db.Comment.scope(...req.scope)
+      .findAndCountAll({
+        where,
+        ...dbQuery,
+      })
+      .then(function (result) {
         req.results = result.rows;
         req.dbQuery.count = result.count;
         return next();
       })
       .catch(next);
-
   })
   .get(auth.useReqUser)
   .get(searchInResults({ searchfields: ['description'] }))
   .get(pagination.paginateResults)
-  .get(function(req, res, next) {
+  .get(function (req, res, next) {
     res.json(req.results);
   })
 
@@ -131,46 +134,40 @@ router.route('/')
   // ---------------
   .post(auth.can('Comment', 'create'))
   .post(auth.useReqUser)
-  .post(function(req, res, next) {
-
+  .post(function (req, res, next) {
     if (!req.resource) return next(createError(400, 'Inzending niet gevonden'));
-    if (!req.resource.auth.canComment(req.resource)) return next(createError(400, 'Je kunt niet reageren op deze inzending'));
+    if (!req.resource.auth.canComment(req.resource))
+      return next(createError(400, 'Je kunt niet reageren op deze inzending'));
     return next();
   })
-  .post(function(req, res, next) {
+  .post(function (req, res, next) {
     if (!req.body.parentId) return next();
-    db.Comment
-      .scope(
-        'defaultScope',
-        'includeResource',
-      )
+    db.Comment.scope('defaultScope', 'includeResource')
       .findByPk(req.body.parentId)
-      .then(function(comment) {
-        if (!(comment && comment.can && comment.can('reply', req.user))) return next(new Error('You cannot reply to this comment'));
+      .then(function (comment) {
+        if (!(comment && comment.can && comment.can('reply', req.user)))
+          return next(new Error('You cannot reply to this comment'));
         return next();
       });
   })
-  .post( rateLimiter(), function(req, res, next) {
-
+  .post(rateLimiter(), function (req, res, next) {
     let userId = req.user.id;
-    if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
-    
+    if (hasRole(req.user, 'admin') && req.body.userId) userId = req.body.userId;
+
     let data = {
       ...req.body,
       resourceId: req.params.resourceId,
       userId,
     };
 
-
-    db.Comment
-      .authorizeData(data, 'create', req.user)
+    db.Comment.authorizeData(data, 'create', req.user)
       .create(data)
-      .then(async result => {
+      .then(async (result) => {
         // Handle tags
         let tags = req.body.tags || [];
         if (!Array.isArray(tags)) tags = [tags];
-        tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
-        tags = tags.map(tag => parseInt(tag));
+        tags = tags.filter((tag) => !Number.isNaN(parseInt(tag)));
+        tags = tags.map((tag) => parseInt(tag));
         tags = tags.filter((value, index) => tags.indexOf(value) === index);
         if (tags.length) {
           await result.setTags(tags);
@@ -180,48 +177,48 @@ router.route('/')
           'defaultScope',
           'includeResource',
           { method: ['includeVoteCount', 'comment'] },
-          { method: ['includeUserVote', 'comment', req.user.id] }
+          { method: ['includeUserVote', 'comment', req.user.id] },
         ];
 
-        db.Comment
-          .scope(...scopes)
+        db.Comment.scope(...scopes)
           .findByPk(result.id)
-          .then(function(comment) {
+          .then(function (comment) {
             res.json(comment);
           })
           .catch(next);
       })
       .catch(next);
-
   });
 
-router.route('/:commentId(\\d+)')
+router
+  .route('/:commentId(\\d+)')
 
   // view comment
   // -------------
   .get(auth.can('Comment', 'view'))
   .get(auth.useReqUser)
-  .get(function(req, res, next) {
+  .get(function (req, res, next) {
     res.json(req.results);
   })
 
   // update comment
   // ---------------
   .put(auth.useReqUser)
-  .put( rateLimiter(), function(req, res, next) {
+  .put(rateLimiter(), function (req, res, next) {
     var comment = req.results;
-    if (!(comment && comment.can && comment.can('update'))) return next(new Error('You cannot update this comment'));
+    if (!(comment && comment.can && comment.can('update')))
+      return next(new Error('You cannot update this comment'));
     comment
       .authorizeData(req.body, 'update')
       .update(req.body)
-      .then(async result => {
-        if ( !comment.location && !comment.parentId ) {
-            let tags = req.body.tags || [];
-            if (!Array.isArray(tags)) tags = [tags];
-            tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
-            tags = tags.map(tag => parseInt(tag));
-            tags = tags.filter((value, index) => tags.indexOf(value) === index);
-            await result.setTags(tags);
+      .then(async (result) => {
+        if (!comment.location && !comment.parentId) {
+          let tags = req.body.tags || [];
+          if (!Array.isArray(tags)) tags = [tags];
+          tags = tags.filter((tag) => !Number.isNaN(parseInt(tag)));
+          tags = tags.map((tag) => parseInt(tag));
+          tags = tags.filter((value, index) => tags.indexOf(value) === index);
+          await result.setTags(tags);
         }
 
         res.json(result);
@@ -232,56 +229,59 @@ router.route('/:commentId(\\d+)')
   // delete comment
   // --------------
   .delete(auth.useReqUser)
-  .delete(async function(req, res, next) {
+  .delete(async function (req, res, next) {
     const comment = req.results;
-    if (!( comment && comment.can && comment.can('delete') )) return next( new Error('You cannot delete this comment') );
+    if (!(comment && comment.can && comment.can('delete')))
+      return next(new Error('You cannot delete this comment'));
 
     try {
       await comment.destroy();
 
-      const childComments = await db.Comment.findAll({where: {parentId: comment.id}});
+      const childComments = await db.Comment.findAll({
+        where: { parentId: comment.id },
+      });
       for (const childComment of childComments) {
         await childComment.destroy();
       }
 
-      res.json({'comment': 'deleted', 'replies': 'deleted'});
+      res.json({ comment: 'deleted', replies: 'deleted' });
     } catch (err) {
       next(err);
     }
   });
 
-router.route('/:commentId(\\d+)/vote')
+router
+  .route('/:commentId(\\d+)/vote')
 
   // vote for comment
   // -----------------
 
   .post(auth.useReqUser)
-  .post(function(req, res, next) {
+  .post(function (req, res, next) {
     var user = req.user;
     var comment = req.results;
 
-    if (!(comment && comment.can && comment.can('vote'))) return next(new Error('You cannot vote for this comment'));
+    if (!(comment && comment.can && comment.can('vote')))
+      return next(new Error('You cannot vote for this comment'));
 
-    comment.addUserVote(user, req.ip)
-      .then(function(voteRemoved) {
-
-        db.Comment
-          .scope(
-            'defaultScope',
-            'includeResource',
-            { method: ['includeVoteCount', 'comment'] },
-            { method: ['includeUserVote', 'comment', req.user.id] },
-          )
+    comment
+      .addUserVote(user, req.ip)
+      .then(function (voteRemoved) {
+        db.Comment.scope(
+          'defaultScope',
+          'includeResource',
+          { method: ['includeVoteCount', 'comment'] },
+          { method: ['includeUserVote', 'comment', req.user.id] }
+        )
           .findByPk(comment.id)
-          .then(function(comment) {
+          .then(function (comment) {
             req.results = comment;
             return next();
           });
-
       })
       .catch(next);
   })
-  .post(function(req, res, next) {
+  .post(function (req, res, next) {
     res.json(req.results);
     // setTimeout(function() {
     //   res.json(req.results);

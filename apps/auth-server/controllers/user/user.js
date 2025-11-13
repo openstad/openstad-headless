@@ -1,7 +1,6 @@
 const login = require('connect-ensure-login');
 const db = require('../../db');
 
-
 /**
  * Simple informational end point, if you want to get information
  * about a particular user.  You would call this with an access token
@@ -41,8 +40,7 @@ exports.info = (req, res) => {
     city: req.user.city,
     scope: req.authInfo.scope,
   });
-}
-
+};
 
 /**
  * Render account.html but ensure the user is logged in before rendering
@@ -50,41 +48,51 @@ exports.info = (req, res) => {
  * @param   {Object}   res - The response
  * @returns {undefined}
  */
- exports.account = [
-   (req, res) => {
-     res.render('account/profile', {
-       user: req.user,
-       client: req.client,
-       displayLogout: true,
-     });
-   }
- ];
+exports.account = [
+  (req, res) => {
+    res.render('account/profile', {
+      user: req.user,
+      client: req.client,
+      displayLogout: true,
+    });
+  },
+];
 
- exports.postAccount = [
-   (req, res) => {
-     const keysToUpdate = ['name', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
+exports.postAccount = [
+  (req, res) => {
+    const keysToUpdate = [
+      'name',
+      'street_name',
+      'house_number',
+      'suffix',
+      'postcode',
+      'city',
+      'phone',
+    ];
 
-     db.User()
-       .findOne({ where: { id: req.user.id } })
-       .then((user) => {
-         let data = {};
-         keysToUpdate.forEach((key) => {
-           if (req.body[key]) {
-             data[key] = req.body[key];
-           }
-         });
+    db.User()
+      .findOne({ where: { id: req.user.id } })
+      .then((user) => {
+        let data = {};
+        keysToUpdate.forEach((key) => {
+          if (req.body[key]) {
+            data[key] = req.body[key];
+          }
+        });
 
-         // Save user and redirect back
-         user
-           .update(data)
-           .then(() => {
-             req.flash('success', { msg: 'Opgeslagen' });
-             res.redirect('/account?clientId=' + req.client.clientId);
-           })
-           .catch((err) => { next(err); })
-       });
-   }
- ];
+        // Save user and redirect back
+        user
+          .update(data)
+          .then(() => {
+            req.flash('success', { msg: 'Opgeslagen' });
+            res.redirect('/account?clientId=' + req.client.clientId);
+          })
+          .catch((err) => {
+            next(err);
+          });
+      });
+  },
+];
 
 exports.postPassword = (req, res, next) => {
   db.User()
@@ -93,12 +101,14 @@ exports.postPassword = (req, res, next) => {
       user
         .update({ password: bcrypt.hashSync(req.body.password, saltRounds) })
         .then(() => {
-          req.flash('success', { msg: 'Wachtwoord aangepast, je kan nu inloggen!' });
+          req.flash('success', {
+            msg: 'Wachtwoord aangepast, je kan nu inloggen!',
+          });
           //     res.redirect(authLocalConfig.loginUrl + '?clientId=');
           res.redirect('/account?clientId=' + req.client.clientId);
         })
         .catch((err) => {
           next(err);
-        })
+        });
     });
 };

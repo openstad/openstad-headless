@@ -10,6 +10,6 @@ spec:
       name: openstad-letsencrypt-prod
     server: https://acme-v02.api.letsencrypt.org/directory
     solvers:
-    - http01:
-        ingress:
-          class: nginx
+      - http01:
+          ingress:
+            class: nginx

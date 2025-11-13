@@ -3,10 +3,14 @@
   justify-content: space-between;
   flex-direction: column;
   grid-gap: 1rem;
-  border: solid 1px var(--nlds-enquete-background-color,var(--nlds-default-background-color, #F0F4F8));
+  border: solid 1px
+    var(
+      --nlds-enquete-background-color,
+      var(--nlds-default-background-color, #f0f4f8)
+    );
 }
 
-.form-container > div{
+.form-container > div {
   color: var(--osc-card-foreground);
   padding: 1.5rem;
   display: flex;
@@ -14,15 +18,18 @@
   gap: 0.3rem 1rem;
 }
 
-.form-container .utrecht-form-field .utrecht-form-field-description:empty{
+.form-container .utrecht-form-field .utrecht-form-field-description:empty {
   margin: 0;
 }
-.form-container .utrecht-form-field-error-message.error-message:empty{
+.form-container .utrecht-form-field-error-message.error-message:empty {
   display: none;
 }
 
-.form-container > div:nth-child(even){
-  background-color: var(--nlds-enquete-background-color,var(--nlds-default-background-color, #F0F4F8));
+.form-container > div:nth-child(even) {
+  background-color: var(
+    --nlds-enquete-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
 }
 
 .form-container figure img {
@@ -30,15 +37,14 @@
   object-fit: cover;
 }
 
-.osc-enquete-item-content button[type="submit"] {
+.osc-enquete-item-content button[type='submit'] {
   margin: 0 0 10px 10px;
 }
 
-.osc-enquete-item-content button[type="submit"]:disabled {
+.osc-enquete-item-content button[type='submit']:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-
 
 .range-slider-labels {
   display: flex;
@@ -47,9 +53,9 @@
   color: black;
 }
 
-.question input[type="range"] {
+.question input[type='range'] {
   -webkit-appearance: none;
-  appearance: none; 
+  appearance: none;
   width: 100%;
   cursor: pointer;
   outline: none;
@@ -61,9 +67,9 @@
 }
 
 /* Thumb: webkit */
-.question input[type="range"]::-webkit-slider-thumb {
+.question input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none; 
+  appearance: none;
   height: 30px;
   width: 30px;
   margin-top: -5px;
@@ -72,7 +78,7 @@
 }
 
 /* Thumb: Firefox */
-.question input[type="range"]::-moz-range-thumb {
+.question input[type='range']::-moz-range-thumb {
   height: 30px;
   width: 30px;
   margin-top: -5px;
@@ -80,8 +86,9 @@
   background-size: cover;
 }
 
-.question input[type="range"]:focus::-webkit-slider-thumb {
-  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
+.question input[type='range']:focus::-webkit-slider-thumb {
+  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0)
+    var(--utrecht-focus-inverse-outline-color, transparent);
   box-shadow: var(--_utrecht-focus-ring-box-shadow);
   outline-color: var(--utrecht-focus-outline-color, revert);
   outline-offset: var(--utrecht-focus-outline-offset, revert);
@@ -89,8 +96,9 @@
   outline-width: var(--utrecht-focus-outline-width, revert);
   border-radius: 50%;
 }
-.question input[type="range"]:focus::-moz-range-thumb {
-  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
+.question input[type='range']:focus::-moz-range-thumb {
+  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0)
+    var(--utrecht-focus-inverse-outline-color, transparent);
   box-shadow: var(--_utrecht-focus-ring-box-shadow);
   outline-color: var(--utrecht-focus-outline-color, revert);
   outline-offset: var(--utrecht-focus-outline-offset, revert);
@@ -117,26 +125,28 @@
   align-items: flex-start;
 }
 
-.question-type-imageChoice .image-choice-container > .utrecht-form-field--radio {
+.question-type-imageChoice
+  .image-choice-container
+  > .utrecht-form-field--radio {
   display: inline-block;
 }
 
-label.utrecht-form-label{
+label.utrecht-form-label {
   margin-block-end: 6px;
 }
 
-.--label-grid{
+.--label-grid {
   display: flex;
   flex-direction: row-reverse;
   justify-content: flex-end;
 }
 
 .question-type-text textarea,
-.question-type-text input[type="text"]{
+.question-type-text input[type='text'] {
   max-width: none;
 }
 
-.button-group.--flex{
+.button-group.--flex {
   display: flex;
   flex-direction: row;
 }

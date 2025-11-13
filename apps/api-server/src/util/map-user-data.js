@@ -1,21 +1,19 @@
 const db = require('../db');
 
 module.exports = function mapUserData({ map = {}, user = {} }) {
-  
-  if ( typeof map == 'string' ) {
+  if (typeof map == 'string') {
     try {
       map = JSON.parse(map);
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     }
   }
 
-  if ( typeof map == 'function' ) {
-    return map( user );
+  if (typeof map == 'function') {
+    return map(user);
   }
 
   let result = {
-
     idpUser: {
       identifier: mapKey('identifier'),
       accesstoken: user.accessToken,
@@ -24,42 +22,46 @@ module.exports = function mapUserData({ map = {}, user = {} }) {
 
     lastLogin: new Date(),
     isNotifiedAboutAnonymization: null,
-
-  }
+  };
 
   // role only if mapped
-  if ( map.role ) {
+  if (map.role) {
     result.role = mapKey('role');
   }
 
   // do mapping
-  let keys = [ 'email', 'nickName', 'name', 'phoneNumber', 'address', 'postcode', 'city', 'twoFactorConfigured' ];
+  let keys = [
+    'email',
+    'nickName',
+    'name',
+    'phoneNumber',
+    'address',
+    'postcode',
+    'city',
+    'twoFactorConfigured',
+  ];
   for (let key of keys) {
-    result[ key ] = mapKey( key );
+    result[key] = mapKey(key);
   }
-  
-  return result;
-  
-  function mapKey(key) {
 
+  return result;
+
+  function mapKey(key) {
     let propMap = map[key];
 
     if (!propMap) return user[key];
 
-    if ( typeof propMap == 'string' ) {
-      try { // function?
+    if (typeof propMap == 'string') {
+      try {
+        // function?
         propMap = eval(propMap);
-      } catch (err) {
-      }
+      } catch (err) {}
     }
 
-    if ( typeof propMap == 'function' ) {
-      return propMap( user, key );
+    if (typeof propMap == 'function') {
+      return propMap(user, key);
     }
 
-    return user[ propMap ];
-
+    return user[propMap];
   }
-  
-}
-
+};

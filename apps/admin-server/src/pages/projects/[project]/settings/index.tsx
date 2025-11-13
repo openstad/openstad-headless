@@ -1,9 +1,14 @@
-import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
+import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -14,18 +19,21 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
-import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import toast from 'react-hot-toast';
-import { Checkbox } from '@/components/ui/checkbox';
-import * as Switch from '@radix-ui/react-switch';
-import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import { Heading } from '@/components/ui/typography';
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as Switch from '@radix-ui/react-switch';
+import { useRouter } from 'next/router';
+import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -37,20 +45,23 @@ const formSchema = z.object({
     message: 'De datum moet nog niet geweest zijn!',
   }),
   // We don't want to restrict this URL too much
-  url: z.string().regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
-    message: 'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.'
-  }).optional(),
+  url: z
+    .string()
+    .regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
+      message:
+        'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.',
+    })
+    .optional(),
   basicAuthActive: z.coerce.boolean().optional(),
   projectToggle: z.boolean().optional(),
 });
 
-
-
 export default function ProjectSettings() {
-
   const router = useRouter();
   let { project } = router.query;
-  const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
+  const { data, isLoading, updateProject } = useProject([
+    'includeInstallationUrls',
+  ]);
 
   let projectNumber: number | undefined = validateProjectNumber(project);
 
@@ -62,24 +73,21 @@ export default function ProjectSettings() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const defaults = useCallback(
-    () => {
-      const currentDate = new Date();
+  const defaults = useCallback(() => {
+    const currentDate = new Date();
 
-      return {
-        name: data?.name || '',
-        endDate: data?.config?.project?.endDate
-          ? new Date(data?.config?.project?.endDate)
-          : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
-        url: data?.url || '',
-        basicAuthActive: data?.config?.basicAuth?.active || false,
-        username: data?.config?.basicAuth?.username || '',
-        password: data?.config?.basicAuth?.password || '',
-        projectToggle: data?.config?.project?.projectToggle || false,
-      }
-    },
-    [data]
-  );
+    return {
+      name: data?.name || '',
+      endDate: data?.config?.project?.endDate
+        ? new Date(data?.config?.project?.endDate)
+        : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
+      url: data?.url || '',
+      basicAuthActive: data?.config?.basicAuth?.active || false,
+      username: data?.config?.basicAuth?.username || '',
+      password: data?.config?.basicAuth?.password || '',
+      projectToggle: data?.config?.project?.projectToggle || false,
+    };
+  }, [data]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -104,12 +112,12 @@ export default function ProjectSettings() {
         setShowUrl(true);
         setCheckboxInitial(false);
       }
-      setProjectHasEnded(data?.config?.project?.projectHasEnded)
+      setProjectHasEnded(data?.config?.project?.projectHasEnded);
     }
 
     if (basicAuthInitial) {
-      setBasicAuthActive(data?.config?.basicAuth?.active)
-      setBasicAuthInitial(false)
+      setBasicAuthActive(data?.config?.basicAuth?.active);
+      setBasicAuthInitial(false);
     }
   }, [data, checkboxInitial]);
 
@@ -124,16 +132,16 @@ export default function ProjectSettings() {
           basicAuth: {
             active: values.basicAuthActive,
             username: values.username,
-            password: values.password
-          }
+            password: values.password,
+          },
         },
         values.name,
-        values.url,
+        values.url
       );
       if (project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('could not update', error);
@@ -142,17 +150,15 @@ export default function ProjectSettings() {
 
   async function saveProjectHasEnded(value: boolean) {
     try {
-      const project = await updateProject(
-        {
-          project: {
-            projectHasEnded: value
-          }
-        }
-      );
+      const project = await updateProject({
+        project: {
+          projectHasEnded: value,
+        },
+      });
       if (project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('could not update', error);
@@ -160,7 +166,9 @@ export default function ProjectSettings() {
   }
   async function archiveProject() {
     if (!data?.config?.project?.projectHasEnded) {
-      toast.error('Het project moet eerst beëindigd worden voordat deze actie uitgevoerd kan worden.');
+      toast.error(
+        'Het project moet eerst beëindigd worden voordat deze actie uitgevoerd kan worden.'
+      );
       return;
     }
 
@@ -208,9 +216,7 @@ export default function ProjectSettings() {
     setApiUrl(data.installationUrls?.api || '');
     setImgUrl(data.installationUrls?.img || '');
 
-    const cdns = [
-      'https://openstad-cdn.nl'
-    ];
+    const cdns = ['https://openstad-cdn.nl'];
 
     if (process.env.REACT_CDN) {
       let reactCdn = process.env.REACT_CDN;
@@ -260,10 +266,10 @@ export default function ProjectSettings() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="csp">Beveiligingsheaders</TabsTrigger>
-              <TabsTrigger value="projecthasended">Project beëindigen</TabsTrigger>
-              <TabsTrigger value="advanced">
-                Project archiveren
+              <TabsTrigger value="projecthasended">
+                Project beëindigen
               </TabsTrigger>
+              <TabsTrigger value="advanced">Project archiveren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               <div className="p-6 bg-white rounded-md">
@@ -305,7 +311,7 @@ export default function ProjectSettings() {
                             className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                             onCheckedChange={(e: boolean) => {
                               field.onChange(e);
-                              setShowUrl(!showUrl)
+                              setShowUrl(!showUrl);
                             }}
                             checked={field.value}>
                             <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -322,7 +328,10 @@ export default function ProjectSettings() {
                         render={({ field }) => (
                           <FormItem className="col-span-full md:col-span-1 flex flex-col">
                             <FormLabel>Project URL</FormLabel>
-                            <em className="text-xs">Let op: voer de URL in zonder https:// ervoor, bijv. &apos;plannen.openstad.org&apos;</em>
+                            <em className="text-xs">
+                              Let op: voer de URL in zonder https:// ervoor,
+                              bijv. &apos;plannen.openstad.org&apos;
+                            </em>
                             <FormControl>
                               <Input placeholder="Url" {...field} />
                             </FormControl>
@@ -332,28 +341,30 @@ export default function ProjectSettings() {
                       />
                     ) : null}
                     <div>
-                    <FormField
+                      <FormField
                         control={form.control}
                         name="basicAuthActive"
-                        render={ function ({ field }) {
+                        render={function ({ field }) {
                           setBasicAuthActive(field.value ?? false);
-                          return(
-                          <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                            <FormLabel>
-                              Wil je de website beveiligen met een gebruikersnaam en wachtwoord?
-                            </FormLabel>
-                            <Switch.Root
-                              className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
-                              onCheckedChange={(e: boolean) => {
-                                setBasicAuthActive(!basicAuthActive)
-                                field.onChange(e);
-                              }}
-                              checked={field.value}>
-                              <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                            </Switch.Root>
-                        </FormItem>)
-                      }}
-                    />
+                          return (
+                            <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                              <FormLabel>
+                                Wil je de website beveiligen met een
+                                gebruikersnaam en wachtwoord?
+                              </FormLabel>
+                              <Switch.Root
+                                className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
+                                onCheckedChange={(e: boolean) => {
+                                  setBasicAuthActive(!basicAuthActive);
+                                  field.onChange(e);
+                                }}
+                                checked={field.value}>
+                                <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                              </Switch.Root>
+                            </FormItem>
+                          );
+                        }}
+                      />
                     </div>
                     {basicAuthActive ? (
                       <>
@@ -364,7 +375,10 @@ export default function ProjectSettings() {
                             <FormItem className="col-span-full md:col-span-1 flex flex-col">
                               <FormLabel>Gebruikersnaam</FormLabel>
                               <FormControl>
-                                <Input placeholder="Gebruikersnaam" {...field} />
+                                <Input
+                                  placeholder="Gebruikersnaam"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -398,114 +412,142 @@ export default function ProjectSettings() {
                 <Separator className="my-4" />
                 <div className="space-y-4">
                   <div>
-                    Indien je gebruik wilt maken van de Content-Security-Policy header, dan vind je hieronder de
-                    standaardheader die je kunt gebruiken. Deze kun je naar wens aanpassen.
+                    Indien je gebruik wilt maken van de Content-Security-Policy
+                    header, dan vind je hieronder de standaardheader die je kunt
+                    gebruiken. Deze kun je naar wens aanpassen.
                   </div>
 
                   <div>
                     <p>
-                      <Textarea disabled={true} value={cspHeader} rows={14}/>
+                      <Textarea disabled={true} value={cspHeader} rows={14} />
                     </p>
                   </div>
                   <div className="flex gap-4 p-0">
-                    <Button onClick={() => onCopy(cspHeader, 'Content-Security-Policy header')}>Kopieer
-                      Content-Security-Policy header</Button>
+                    <Button
+                      onClick={() =>
+                        onCopy(cspHeader, 'Content-Security-Policy header')
+                      }>
+                      Kopieer Content-Security-Policy header
+                    </Button>
                   </div>
 
                   <div className="csp-overview">
-                    <br/>
-                    <Separator className="my-4"/>
-                    <Heading size={'xl'}>Content Security Policy (CSP) Headers voor de verschillende Kaart Tegel Varianten</Heading>
+                    <br />
+                    <Separator className="my-4" />
+                    <Heading size={'xl'}>
+                      Content Security Policy (CSP) Headers voor de
+                      verschillende Kaart Tegel Varianten
+                    </Heading>
 
                     <section>
-                      <br/>
+                      <br />
                       <Heading size={'lg'}>Nederlandse Kaart</Heading>
-                      <p>De &quot;Nederlandse Kaart&quot; variant maakt gebruik van <mark>https://service.pdok.nl</mark>.
-                        Deze bron is al opgenomen in de <code>img-src</code> in de CSP, aangezien het de standaard kaart
-                        is.</p>
+                      <p>
+                        De &quot;Nederlandse Kaart&quot; variant maakt gebruik
+                        van <mark>https://service.pdok.nl</mark>. Deze bron is
+                        al opgenomen in de <code>img-src</code> in de CSP,
+                        aangezien het de standaard kaart is.
+                      </p>
                     </section>
 
                     <section>
-                      <br/>
+                      <br />
                       <Heading size={'lg'}>Amsterdam Kaart</Heading>
-                      <p>De &quot;Amsterdam Kaart&quot; variant haalt tegels van de volgende subdomeinen van de stad
-                        Amsterdam:</p>
+                      <p>
+                        De &quot;Amsterdam Kaart&quot; variant haalt tegels van
+                        de volgende subdomeinen van de stad Amsterdam:
+                      </p>
                       <ul>
                         <mark>https://t1.data.amsterdam.nl</mark>
-                        <br/>
+                        <br />
                         <mark>https://t2.data.amsterdam.nl</mark>
-                        <br/>
+                        <br />
                         <mark>https://t3.data.amsterdam.nl</mark>
-                        <br/>
+                        <br />
                         <mark>https://t4.data.amsterdam.nl</mark>
                       </ul>
-                      <p>Zorg ervoor dat je deze subdomeinen toestaat in je CSP voor de <code>img-src</code>.</p>
-                      <p>Of sta toe door <mark>https://*.data.amsterdam.nl</mark> in de CSP voor
-                        de <code>img-src</code> op
-                        te nemen.
+                      <p>
+                        Zorg ervoor dat je deze subdomeinen toestaat in je CSP
+                        voor de <code>img-src</code>.
+                      </p>
+                      <p>
+                        Of sta toe door <mark>https://*.data.amsterdam.nl</mark>{' '}
+                        in de CSP voor de <code>img-src</code> op te nemen.
                       </p>
                     </section>
 
                     <section>
-                      <br/>
+                      <br />
                       <Heading size={'lg'}>OpenStreetMap</Heading>
-                      <p>De OpenStreetMap tegels worden geladen van de subdomeinen:</p>
+                      <p>
+                        De OpenStreetMap tegels worden geladen van de
+                        subdomeinen:
+                      </p>
                       <ul>
                         <mark>https://a.tile.openstreetmap.org</mark>
-                        <br/>
+                        <br />
                         <mark>https://b.tile.openstreetmap.org</mark>
-                        <br/>
+                        <br />
                         <mark>https://c.tile.openstreetmap.org</mark>
                       </ul>
-                      <p>Zorg ervoor dat je deze subdomeinen toestaat in je CSP voor de <code>img-src</code>.</p>
-                      <p>Of sta toe door <mark>https://*.tile.openstreetmap.org</mark> in de CSP voor
-                        de <code>img-src</code> op
-                        te nemen.
+                      <p>
+                        Zorg ervoor dat je deze subdomeinen toestaat in je CSP
+                        voor de <code>img-src</code>.
+                      </p>
+                      <p>
+                        Of sta toe door{' '}
+                        <mark>https://*.tile.openstreetmap.org</mark> in de CSP
+                        voor de <code>img-src</code> op te nemen.
                       </p>
                     </section>
 
                     <section>
-                      <br/>
+                      <br />
                       <Heading size={'lg'}>CartoDB Light</Heading>
-                      <p>De &quot;CartoDB Light&quot; variant haalt tegels op van de volgende subdomeinen:</p>
+                      <p>
+                        De &quot;CartoDB Light&quot; variant haalt tegels op van
+                        de volgende subdomeinen:
+                      </p>
                       <ul>
                         <mark>https://a.basemaps.cartocdn.com</mark>
-                        <br/>
+                        <br />
                         <mark>https://b.basemaps.cartocdn.com</mark>
-                        <br/>
+                        <br />
                         <mark>https://c.basemaps.cartocdn.com</mark>
                       </ul>
-                      <p>Zorg ervoor dat je deze subdomeinen toestaat in je CSP voor de <code>img-src</code>.</p>
-                      <p>Of sta toe door <mark>https://*.basemaps.cartocdn.com</mark> in de CSP voor
-                        de <code>img-src</code> op
-                        te nemen.
+                      <p>
+                        Zorg ervoor dat je deze subdomeinen toestaat in je CSP
+                        voor de <code>img-src</code>.
+                      </p>
+                      <p>
+                        Of sta toe door{' '}
+                        <mark>https://*.basemaps.cartocdn.com</mark> in de CSP
+                        voor de <code>img-src</code> op te nemen.
                       </p>
                     </section>
                   </div>
-
-
                 </div>
               </div>
             </TabsContent>
             <TabsContent value="projecthasended" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Heading size="xl">Project beëindigen</Heading>
-                <Separator className="my-4"/>
+                <Separator className="my-4" />
                 <div className="space-y-4">
                   <div>
-                    Wanneer je het project beëindigt, sluiten automatisch de mogelijkheden om plannen in te dienen,
-                    reacties te plaatsen en te stemmen.
+                    Wanneer je het project beëindigt, sluiten automatisch de
+                    mogelijkheden om plannen in te dienen, reacties te plaatsen
+                    en te stemmen.
                   </div>
                   <div>
                     Project beëindigen
                     <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
                       onCheckedChange={(e: boolean) => {
-                        setProjectHasEnded(!projectHasEnded)
+                        setProjectHasEnded(!projectHasEnded);
                       }}
                       checked={projectHasEnded}>
-                      <Switch.Thumb
-                        className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]"/>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                     </Switch.Root>
                   </div>
                   <Button
@@ -519,14 +561,15 @@ export default function ProjectSettings() {
             <TabsContent value="advanced" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Heading size="xl">Project archiveren</Heading>
-                <Separator className="my-4"/>
+                <Separator className="my-4" />
                 <div className="space-y-4">
                   <div>
                     Let op! Deze actie is <b>definitief</b> en
                     <b> kan niet ongedaan gemaakt worden</b>.
                   </div>
                   <div className="space-y-2">
-                    Het project moet eerst zijn beëindigd voordat deze actie uitgevoerd kan worden.
+                    Het project moet eerst zijn beëindigd voordat deze actie
+                    uitgevoerd kan worden.
                   </div>
 
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -536,10 +579,13 @@ export default function ProjectSettings() {
                     <DialogContent>
                       <DialogTitle>Bevestiging</DialogTitle>
                       <DialogDescription>
-                        Weet je zeker dat je dit project wilt archiveren? Deze actie kan niet ongedaan gemaakt worden.
+                        Weet je zeker dat je dit project wilt archiveren? Deze
+                        actie kan niet ongedaan gemaakt worden.
                       </DialogDescription>
                       <DialogFooter>
-                        <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+                        <Button
+                          variant="secondary"
+                          onClick={() => setIsDialogOpen(false)}>
                           Annuleren
                         </Button>
                         <Button
@@ -547,15 +593,13 @@ export default function ProjectSettings() {
                           onClick={() => {
                             setIsDialogOpen(false);
                             archiveProject();
-                          }}
-                        >
+                          }}>
                           Bevestigen
                         </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
                 </div>
-
               </div>
             </TabsContent>
           </Tabs>

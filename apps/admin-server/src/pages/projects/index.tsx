@@ -1,15 +1,16 @@
-import {useContext, useEffect, useState} from 'react';
-import { PageLayout } from '@/components/ui/page-layout';
+import { SessionContext } from '@/auth';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { ChevronRight, Plus } from 'lucide-react';
-import React from 'react';
+import { PageLayout } from '@/components/ui/page-layout';
+import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
-import { useRouter } from 'next/router';
-import { sortTable, searchTable } from '@/components/ui/sortTable';
-import projectListSwr from '../../hooks/use-project-list';
 import { HasAccess } from '@/lib/hasAccess';
-import {SessionContext} from "@/auth";
+import { ChevronRight, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useContext, useEffect, useState } from 'react';
+import React from 'react';
+
+import projectListSwr from '../../hooks/use-project-list';
 
 export default function Projects() {
   const { data, isLoading, error } = projectListSwr();
@@ -21,34 +22,33 @@ export default function Projects() {
 
   useEffect(() => {
     setFilterData(data);
-  }, [data])
+  }, [data]);
 
   const sessionData = useContext(SessionContext);
 
-  if (!data) return (
-    <div>
-      <PageLayout
-        pageHeader="Projecten"
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-        ]}
-        action={
-          HasAccess(sessionData) && (
-            <Link href="/projects/create">
-              <Button variant="default" className="flex w-fit">
-                <Plus size="20" className="hidden lg:flex" />
-                Project toevoegen
-              </Button>
-            </Link>
-          )
-        }>
-      </PageLayout>
-    </div>
-  );
-
+  if (!data)
+    return (
+      <div>
+        <PageLayout
+          pageHeader="Projecten"
+          breadcrumbs={[
+            {
+              name: 'Projecten',
+              url: '/projects',
+            },
+          ]}
+          action={
+            HasAccess(sessionData) && (
+              <Link href="/projects/create">
+                <Button variant="default" className="flex w-fit">
+                  <Plus size="20" className="hidden lg:flex" />
+                  Project toevoegen
+                </Button>
+              </Link>
+            )
+          }></PageLayout>
+      </div>
+    );
 
   return (
     <div>
@@ -70,15 +70,14 @@ export default function Projects() {
             </Link>
           )
         }>
-
         <div className="container py-6">
-
           <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <p className="text-xs font-medium text-muted-foreground self-center">
+              Filter op:
+            </p>
             <select
               className="p-2 rounded"
-              onChange={(e) => setFilterSearchType(e.target.value)}
-            >
+              onChange={(e) => setFilterSearchType(e.target.value)}>
               <option value="">Alles</option>
               <option value="name">Projectnaam</option>
               <option value="issues">Issues</option>
@@ -88,46 +87,76 @@ export default function Projects() {
             </select>
             <input
               type="text"
-              className='p-2 rounded'
+              className="p-2 rounded"
               placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+              onChange={(e) =>
+                debouncedSearchTable(e.target.value, filterData, data)
+              }
             />
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-2 lg:grid-cols-8 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('name', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('name', e, filterData))
+                  }>
                   Projectnaam
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('issues', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('issues', e, filterData))
+                  }>
                   Problemen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('votesIsActive', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('votesIsActive', e, filterData))
+                  }>
                   Stemmen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('commentsIsActive', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('commentsIsActive', e, filterData))
+                  }>
                   Reacties
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resources', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('resources', e, filterData))
+                  }>
                   Inzendingen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('endDate', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('endDate', e, filterData))
+                  }>
                   Einddatum
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('url', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('url', e, filterData))
+                  }>
                   url
                 </button>
               </ListHeading>
@@ -146,16 +175,24 @@ export default function Projects() {
                       Geen
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      {project?.config?.votes?.isActive === true ? 'Aan' : 'Uit'}
+                      {project?.config?.votes?.isActive === true
+                        ? 'Aan'
+                        : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      {project?.config?.comments?.canComment === true ? 'Aan' : 'Uit'}
+                      {project?.config?.comments?.canComment === true
+                        ? 'Aan'
+                        : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
                       Open
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate -mr-16">
-                      {project?.config?.project?.endDate ? new Date(project.config.project.endDate).toLocaleDateString('nl-NL') : ''}
+                      {project?.config?.project?.endDate
+                        ? new Date(
+                            project.config.project.endDate
+                          ).toLocaleDateString('nl-NL')
+                        : ''}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
                       {project.url}

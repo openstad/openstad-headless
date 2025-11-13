@@ -1,18 +1,17 @@
 const { Sequelize } = require('sequelize');
 
 module.exports = {
-
-  async up ({ context: queryInterface }) {
+  async up({ context: queryInterface }) {
     await queryInterface.dropTable('notification_recipients');
   },
 
-  async down ({ context: queryInterface }) {
+  async down({ context: queryInterface }) {
     queryInterface.createTable('notification_recipients', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       notificationRulesetId: {
         type: Sequelize.INTEGER,
@@ -31,11 +30,11 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deletedAt: {
         allowNull: true,
@@ -43,6 +42,5 @@ module.exports = {
         default: null,
       },
     });
-  }
-
+  },
 };

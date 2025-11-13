@@ -11,7 +11,6 @@ export function Image({
   imageFooter?: ReactNode;
   imageHeader?: ReactNode;
 }) {
-
   return (
     <figure
       onClick={props.onClick}

@@ -27,20 +27,23 @@ Available scopes: `withIdea`, `withVoteCount`, `withUserVote`, `withVotes`.
 Additionally the ideas enpoints have a scope `includePoll`.
 
 #### List all Polls
+
 ```
 GET :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll?withVoteCount=1
 ```
 
 #### Get one Poll
+
 ```
 GET :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll/:POLL_ID
 ```
 
 #### Update a Poll
+
 ```
 PUT :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll/:POLL_ID
 ```
-								 				
+
 ```
 {
   "question": "Poll vraag",
@@ -61,10 +64,11 @@ PUT :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll/:POLL_ID
 ```
 
 #### Create a Poll
+
 ```
 POST :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll
 ```
-								 				
+
 ```
 {
   "question": "Poll vraag 4",
@@ -82,11 +86,13 @@ POST :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll
 ```
 
 #### Delete a Poll
+
 ```
 DELETE :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll/:POLL_ID
 ```
 
 #### Vote for an Poll
+
 ```
 POST :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll/:POLL_ID/vote
 ```
@@ -101,4 +107,3 @@ POST :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID/poll/:POLL_ID/vote
 
 - Validation of choices
 - Probably make polls available in a wider context
-

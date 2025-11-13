@@ -1,39 +1,39 @@
 .form-field-map-container {
-    width: 100%;
-    position: relative;
-    z-index: 1;
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .form-field-map-container .osc-base-map-widget-container {
-    height: 100%;
+  height: 100%;
 }
 .form-field-map-container .leaflet-bottom.leaflet-right {
-    display: none;
+  display: none;
 }
-.form-field-map-container[invalid="true"] {
-    background: #fff;
+.form-field-map-container[invalid='true'] {
+  background: #fff;
 }
-.form-field-map-container[invalid="true"]:before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0px;
-    bottom: 0;
-    border-inline-start-style: solid;
+.form-field-map-container[invalid='true']:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0px;
+  bottom: 0;
+  border-inline-start-style: solid;
 }
 .form-field-map-container ~ .map-search-container {
-    left: 18px;
+  left: 18px;
 }
 .map-input-hidden {
-    height: 0;
-    width: 0;
-    position: absolute;
-    padding: 0;
-    margin-top: -10px;
+  height: 0;
+  width: 0;
+  position: absolute;
+  padding: 0;
+  margin-top: -10px;
 }
 
 .form-field-map-container .map-container {
-    width: auto !important;
-    max-height: 100%;
-    max-width: 100%;
+  width: auto !important;
+  max-height: 100%;
+  max-width: 100%;
 }

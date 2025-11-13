@@ -49,7 +49,7 @@ module.exports = {
           {
             label: 'Extra groot',
             value: '--xlarge',
-          }
+          },
         ],
         required: true,
       },
@@ -94,9 +94,9 @@ module.exports = {
           { label: 'Middelgroot (760x760)', value: 'two-thirds' },
           { label: 'Gemiddeld (570x700)', value: 'one-half' },
           { label: 'Klein (380x700)', value: 'one-third' },
-          { label: 'Zeer klein (190x350)', value: 'one-sixth' }
+          { label: 'Zeer klein (190x350)', value: 'one-sixth' },
         ],
-        def: 'full'
+        def: 'full',
       },
 
       banner: {

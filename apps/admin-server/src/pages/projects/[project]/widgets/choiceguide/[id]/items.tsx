@@ -1,7 +1,9 @@
+import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,19 +20,26 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import useTags from '@/hooks/use-tags';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {ArrowDown, ArrowUp, X} from 'lucide-react';
+import {
+  ChoiceGuideProps,
+  ChoiceOptions,
+  Item,
+  Option,
+} from '@openstad-headless/choiceguide/src/props';
+import {
+  Matrix,
+  MatrixOption,
+} from '@openstad-headless/enquete/src/types/enquete-props';
+import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import useTags from "@/hooks/use-tags";
-import { useRouter } from "next/router";
-import {ImageUploader} from "@/components/image-uploader";
-import {useWidgetConfig} from "@/hooks/use-widget-config";
-import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/choiceguide/src/props';
-import {YesNoSelect} from "@/lib/form-widget-helpers";
-import { Matrix, MatrixOption } from '@openstad-headless/enquete/src/types/enquete-props';
 
 const weightSchema: z.ZodSchema = z.object({
   weightX: z.any().optional(),
@@ -59,30 +68,36 @@ const formSchema = z.object({
     .array(
       z.object({
         trigger: z.string(),
-        titles: z.array(z.object({
-          text: z.string().optional(),
-          key: z.string(),
-          weights: z.record(weightSchema).optional(),
-          isOtherOption: z.boolean().optional(),
-          defaultValue: z.boolean().optional(),
-          image: z.string().optional(),
-          hideLabel: z.boolean().optional()
-        }))
+        titles: z.array(
+          z.object({
+            text: z.string().optional(),
+            key: z.string(),
+            weights: z.record(weightSchema).optional(),
+            isOtherOption: z.boolean().optional(),
+            defaultValue: z.boolean().optional(),
+            image: z.string().optional(),
+            hideLabel: z.boolean().optional(),
+          })
+        ),
       })
     )
     .optional(),
-  matrix:
-    z.object({
-      columns: z.array(z.object({
-        trigger: z.string(),
-        text: z.string().optional(),
-      })),
-      rows: z.array(z.object({
-        trigger: z.string(),
-        text: z.string().optional(),
-      })),
+  matrix: z
+    .object({
+      columns: z.array(
+        z.object({
+          trigger: z.string(),
+          text: z.string().optional(),
+        })
+      ),
+      rows: z.array(
+        z.object({
+          trigger: z.string(),
+          text: z.string().optional(),
+        })
+      ),
     })
-      .optional(),
+    .optional(),
   matrixMultiple: z.boolean().optional(),
   infoImage: z.string().optional(),
   uploadInfoImage: z.string().optional(),
@@ -114,18 +129,25 @@ const formSchema = z.object({
 const matrixDefault = {
   columns: [],
   rows: [],
-}
+};
 
-const matrixList: {type: 'rows' | 'columns', heading: string, description: string}[] = [
+const matrixList: {
+  type: 'rows' | 'columns';
+  heading: string;
+  description: string;
+}[] = [
   {
     type: 'rows',
     heading: 'Lijst van onderwerpen',
-    description: 'Dit zijn de onderwerpen die in de matrix worden weergegeven. Deze komen in de eerste kolom (verticaal) van de matrix.',
-  }, {
+    description:
+      'Dit zijn de onderwerpen die in de matrix worden weergegeven. Deze komen in de eerste kolom (verticaal) van de matrix.',
+  },
+  {
     type: 'columns',
     heading: 'Lijst van kopjes',
-    description: 'Dit zijn de kopjes die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
-  }
+    description:
+      'Dit zijn de kopjes die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
+  },
 ];
 
 export default function WidgetChoiceGuideItems(
@@ -140,11 +162,11 @@ export default function WidgetChoiceGuideItems(
   const [activeTab, setActiveTab] = useState<string>('1');
   const [dimensions, setDimensions] = useState<string[]>([]);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
-  const [matrixOption, setMatrixOption] = useState<MatrixOption & {type: 'rows' | 'columns'} | null>(null);
+  const [matrixOption, setMatrixOption] = useState<
+    (MatrixOption & { type: 'rows' | 'columns' }) | null
+  >(null);
 
-  const {
-    data: widget
-  } = useWidgetConfig<any>();
+  const { data: widget } = useWidgetConfig<any>();
 
   const router = useRouter();
   const { project } = router.query;
@@ -155,7 +177,6 @@ export default function WidgetChoiceGuideItems(
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
-
       // Ensure weights are defined
       const selectedItemWeights = selectedItem.weights || {};
       const valuesWeights = values.weights || {};
@@ -167,16 +188,22 @@ export default function WidgetChoiceGuideItems(
       });
 
       setItems((currentItems) =>
-          currentItems.map((item) =>
-              item.trigger === selectedItem.trigger ? { ...item, ...values, weights: selectedItemWeights } : item
-          )
+        currentItems.map((item) =>
+          item.trigger === selectedItem.trigger
+            ? { ...item, ...values, weights: selectedItemWeights }
+            : item
+        )
       );
       setItem(null);
     } else {
       setItems((currentItems) => [
         ...currentItems,
         {
-          trigger: `${currentItems.length > 0 ? parseInt(currentItems[currentItems.length - 1].trigger) + 1 : 1}`,
+          trigger: `${
+            currentItems.length > 0
+              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+              : 1
+          }`,
           title: values.title,
           description: values.description,
           type: values.type,
@@ -204,7 +231,8 @@ export default function WidgetChoiceGuideItems(
           defaultValue: values.defaultValue || '',
           weights: values.weights || {},
           skipQuestion: values.skipQuestion || false,
-          skipQuestionAllowExplanation: values.skipQuestionAllowExplanation || false,
+          skipQuestionAllowExplanation:
+            values.skipQuestionAllowExplanation || false,
           skipQuestionExplanation: values.skipQuestionExplanation || '',
           skipQuestionLabel: values.skipQuestionLabel || 'Sla vraag over',
           matrix: values.matrix || matrixDefault,
@@ -217,7 +245,7 @@ export default function WidgetChoiceGuideItems(
     }
     form.reset(defaults);
     setOptions([]);
-    setActiveTab("1");
+    setActiveTab('1');
     setMatrixOptions(matrixDefault);
   }
 
@@ -228,20 +256,21 @@ export default function WidgetChoiceGuideItems(
         currentOptions.map((option) =>
           option.trigger === selectedOption.trigger
             ? {
-              ...option,
-              titles:
-                values.options?.find((o) => o.trigger === option.trigger)
-                  ?.titles || [],
-            }
+                ...option,
+                titles:
+                  values.options?.find((o) => o.trigger === option.trigger)
+                    ?.titles || [],
+              }
             : option
         )
       );
       setOption(null);
     } else {
       const newOption = {
-        trigger: `${options.length > 0
-          ? parseInt(options[options.length - 1].trigger) + 1
-          : 0
+        trigger: `${
+          options.length > 0
+            ? parseInt(options[options.length - 1].trigger) + 1
+            : 0
         }`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
@@ -249,7 +278,10 @@ export default function WidgetChoiceGuideItems(
     }
   }
 
-  function handleAddMatrixOption(values: FormData, updatedMatrixOption: 'rows' | 'columns') {
+  function handleAddMatrixOption(
+    values: FormData,
+    updatedMatrixOption: 'rows' | 'columns'
+  ) {
     if (matrixOption) {
       setMatrixOptions((currentMatrix) => {
         const updatedMatrix = { ...currentMatrix };
@@ -257,13 +289,24 @@ export default function WidgetChoiceGuideItems(
         if (updatedMatrixOption === 'rows') {
           updatedMatrix.rows = updatedMatrix.rows.map((row) =>
             row.trigger === matrixOption.trigger
-              ? { ...row, text: values.matrix?.rows?.find((r) => r.trigger === row.trigger)?.text || '' }
+              ? {
+                  ...row,
+                  text:
+                    values.matrix?.rows?.find((r) => r.trigger === row.trigger)
+                      ?.text || '',
+                }
               : row
           );
         } else {
           updatedMatrix.columns = updatedMatrix.columns.map((column) =>
             column.trigger === matrixOption.trigger
-              ? { ...column, text: values.matrix?.columns?.find((c) => c.trigger === column.trigger)?.text || '' }
+              ? {
+                  ...column,
+                  text:
+                    values.matrix?.columns?.find(
+                      (c) => c.trigger === column.trigger
+                    )?.text || '',
+                }
               : column
           );
         }
@@ -273,26 +316,39 @@ export default function WidgetChoiceGuideItems(
 
       setMatrixOption(null);
     } else {
-      const newTrigger = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
-        ? values?.matrix?.[updatedMatrixOption].reduce((max, option) => {
-        return (parseInt(option?.trigger || '0') > max ? parseInt(option?.trigger || '0') : max);
-      }, 0) + 1
-        : '0';
+      const newTrigger =
+        values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0
+          ? values?.matrix?.[updatedMatrixOption].reduce((max, option) => {
+              return parseInt(option?.trigger || '0') > max
+                ? parseInt(option?.trigger || '0')
+                : max;
+            }, 0) + 1
+          : '0';
 
-      const newTextObj = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
-        ? values?.matrix?.[updatedMatrixOption]?.find((option: {trigger?: string}) => typeof(option?.trigger) === 'undefined')
-        : {text: ''};
+      const newTextObj =
+        values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0
+          ? values?.matrix?.[updatedMatrixOption]?.find(
+              (option: { trigger?: string }) =>
+                typeof option?.trigger === 'undefined'
+            )
+          : { text: '' };
 
       const newText = newTextObj?.text || '';
 
       const newMatrixOption: MatrixOption = {
         trigger: newTrigger.toString(),
-        text: newText
+        text: newText,
       };
 
       setMatrixOptions((currentMatrix) => ({
-        rows: updatedMatrixOption === 'rows' ? [...currentMatrix.rows, newMatrixOption] : currentMatrix.rows,
-        columns: updatedMatrixOption === 'columns' ? [...currentMatrix.columns, newMatrixOption] : currentMatrix.columns,
+        rows:
+          updatedMatrixOption === 'rows'
+            ? [...currentMatrix.rows, newMatrixOption]
+            : currentMatrix.rows,
+        columns:
+          updatedMatrixOption === 'columns'
+            ? [...currentMatrix.columns, newMatrixOption]
+            : currentMatrix.columns,
       }));
     }
   }
@@ -386,7 +442,8 @@ export default function WidgetChoiceGuideItems(
         defaultValue: selectedItem.defaultValue || '',
         weights: selectedItem.weights || {},
         skipQuestion: selectedItem.skipQuestion || false,
-        skipQuestionAllowExplanation: selectedItem.skipQuestionAllowExplanation || false,
+        skipQuestionAllowExplanation:
+          selectedItem.skipQuestionAllowExplanation || false,
         skipQuestionExplanation: selectedItem.skipQuestionExplanation || '',
         skipQuestionLabel: selectedItem.skipQuestionLabel || 'Sla vraag over',
         matrix: selectedItem.matrix || matrixDefault,
@@ -420,7 +477,7 @@ export default function WidgetChoiceGuideItems(
   useEffect(() => {
     form.reset({
       ...form.getValues(),
-      matrix: matrixOptions
+      matrix: matrixOptions,
     });
   }, [matrixOption, form, matrixOptions]);
 
@@ -442,27 +499,29 @@ export default function WidgetChoiceGuideItems(
     } else if (isMatrixAction) {
       let newMatrixOptions: Matrix;
 
-      const updatedRows = matrixType === 'rows'
-        ? handleMovementOrDeletion(
-          matrixOptions.rows,
-          actionType,
-          clickedTrigger
-        ) as MatrixOption[]
-        : matrixOptions.rows;
+      const updatedRows =
+        matrixType === 'rows'
+          ? (handleMovementOrDeletion(
+              matrixOptions.rows,
+              actionType,
+              clickedTrigger
+            ) as MatrixOption[])
+          : matrixOptions.rows;
 
-      const updatedColumns = matrixType === 'columns'
-        ? handleMovementOrDeletion(
-          matrixOptions.columns,
-          actionType,
-          clickedTrigger
-        ) as MatrixOption[]
-        : matrixOptions.columns;
+      const updatedColumns =
+        matrixType === 'columns'
+          ? (handleMovementOrDeletion(
+              matrixOptions.columns,
+              actionType,
+              clickedTrigger
+            ) as MatrixOption[])
+          : matrixOptions.columns;
 
       newMatrixOptions = {
         ...matrixOptions,
         rows: updatedRows,
         columns: updatedColumns,
-      }
+      };
       setMatrixOptions(newMatrixOptions);
 
       form.setValue('matrix', newMatrixOptions);
@@ -505,29 +564,35 @@ export default function WidgetChoiceGuideItems(
   }
 
   useEffect(() => {
-    const chosenType = form.watch('type') || "";
+    const chosenType = form.watch('type') || '';
     const chosenConfig = widget?.config?.choiceGuide?.choicesType || 'default';
 
-    let dimensions = chosenConfig === 'plane'
-      ? ['X', 'Y']
-      : ['X'];
+    let dimensions = chosenConfig === 'plane' ? ['X', 'Y'] : ['X'];
 
-    const typeWithoutDimension = ['none', 'matrix', 'map', 'imageUpload', 'documentUpload', 'text'].includes(chosenType);
+    const typeWithoutDimension = [
+      'none',
+      'matrix',
+      'map',
+      'imageUpload',
+      'documentUpload',
+      'text',
+    ].includes(chosenType);
 
-    const finalDimensions = (chosenConfig === 'hidden' || typeWithoutDimension) ? [] : dimensions;
+    const finalDimensions =
+      chosenConfig === 'hidden' || typeWithoutDimension ? [] : dimensions;
 
-    if ( finalDimensions.length > 0 ) {
-      form.setValue( 'weights', {} );
+    if (finalDimensions.length > 0) {
+      form.setValue('weights', {});
     }
 
-    setDimensions( finalDimensions )
-  }, [ form.watch('type') ])
+    setDimensions(finalDimensions);
+  }, [form.watch('type')]);
 
   function handleSaveItems() {
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith("options.")) {
+      if (key.startsWith('options.')) {
         // @ts-ignore
         delete updatedProps[key];
       }
@@ -584,146 +649,84 @@ export default function WidgetChoiceGuideItems(
   // Create component for heading dimensions
   const DimensionHeading = (version: number = 1) => (
     <div
-      className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-y-${version === 1 ? '2' : '0'} gap-x-${version === 1 ? '2' : '4'}`}
-    >
-      { version === 1 && (<Heading size="lg">Vraaggroep titel</Heading>)}
-      {dimensions.length > 0 && dimensions.map((XY, i) => (
-        <React.Fragment
-          key={i}
-        >
-          <Heading size="lg"
-            style={{
-              fontSize: version === 1 ? '18px' : '14px'
-            }}
-          >
-            Weging {XY}
-          </Heading>
-
-          {form.watch('type') === 'a-b-slider' && (
-            <Heading size="lg"
+      className={`w-full col-span-full grid-cols-${
+        dimensions.length +
+        (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)
+      } grid gap-y-${version === 1 ? '2' : '0'} gap-x-${
+        version === 1 ? '2' : '4'
+      }`}>
+      {version === 1 && <Heading size="lg">Vraaggroep titel</Heading>}
+      {dimensions.length > 0 &&
+        dimensions.map((XY, i) => (
+          <React.Fragment key={i}>
+            <Heading
+              size="lg"
               style={{
-                fontSize: version === 1 ? '18px' : '14px'
-              }}
-            >Weging A/B {XY}</Heading>
-          )}
-        </React.Fragment>
-      ))}
+                fontSize: version === 1 ? '18px' : '14px',
+              }}>
+              Weging {XY}
+            </Heading>
 
+            {form.watch('type') === 'a-b-slider' && (
+              <Heading
+                size="lg"
+                style={{
+                  fontSize: version === 1 ? '18px' : '14px',
+                }}>
+                Weging A/B {XY}
+              </Heading>
+            )}
+          </React.Fragment>
+        ))}
     </div>
   );
 
-  const weightFields = (group: {title?: string, id?: string | number}, index: number) => (
-    <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-x-${form.watch('type') === 'a-b-slider' ? 4 : 2} gap-y-${form.watch('type') === 'a-b-slider' ? 0 : 2} items-center`} key={index}>
+  const weightFields = (
+    group: { title?: string; id?: string | number },
+    index: number
+  ) => (
+    <div
+      className={`w-full col-span-full grid-cols-${
+        dimensions.length +
+        (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)
+      } grid gap-x-${form.watch('type') === 'a-b-slider' ? 4 : 2} gap-y-${
+        form.watch('type') === 'a-b-slider' ? 0 : 2
+      } items-center`}
+      key={index}>
       <p
         style={{
-          margin: form.watch('type') === 'a-b-slider' ? "20px 0 10px 0" : '0',
-        }}
-      >
+          margin: form.watch('type') === 'a-b-slider' ? '20px 0 10px 0' : '0',
+        }}>
         {group.title}
       </p>
 
-      { form.watch('type') === 'a-b-slider' && (
-        DimensionHeading( form.watch('type') === 'a-b-slider' ? 2 : 1 )
-      )}
+      {form.watch('type') === 'a-b-slider' &&
+        DimensionHeading(form.watch('type') === 'a-b-slider' ? 2 : 1)}
 
-      {dimensions.length > 0 && dimensions.map((XY, i) => {
-        const weightFieldAppend = XY === 'Y' ? 'Y' : '';
+      {dimensions.length > 0 &&
+        dimensions.map((XY, i) => {
+          const weightFieldAppend = XY === 'Y' ? 'Y' : '';
 
-        return (
-          <>
-            <FormField
-              control={form.control}
-              name={`weights.${group.id}.weight${XY}`}
-              key={`2-${i}`}
-              render={({field}) => {
-                const value = field.value ?? 0;
-                const watchValue = form.watch(`weights.${group.id}.weight${XY}`);
+          return (
+            <>
+              <FormField
+                control={form.control}
+                name={`weights.${group.id}.weight${XY}`}
+                key={`2-${i}`}
+                render={({ field }) => {
+                  const value = field.value ?? 0;
+                  const watchValue = form.watch(
+                    `weights.${group.id}.weight${XY}`
+                  );
 
-                if (value !== watchValue) {
-                  form.setValue(`weights.${group.id}.weight${XY}`, field.value ?? 0);
-                }
+                  if (value !== watchValue) {
+                    form.setValue(
+                      `weights.${group.id}.weight${XY}`,
+                      field.value ?? 0
+                    );
+                  }
 
-                return (
-                  <FormItem>
-                    <FormControl>
-                      <div className={`weight-${XY.toLowerCase()}-container`}>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          {...field}
-                          value={field.value ?? 0}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage/>
-                  </FormItem>
-                )
-              }}
-            />
-            <FormField
-              control={form.control}
-              name={`weights.${group.id}.weightAB${weightFieldAppend}`}
-              key={`3-${i}`}
-              render={({field}) => {
-                const value = field.value || 'A';
-                const watchValue = form.watch(`weights.${group.id}.weightAB${weightFieldAppend}`);
-
-                if (value !== watchValue) {
-                  form.setValue(`weights.${group.id}.weightAB${weightFieldAppend}`, field.value || 'A');
-                }
-
-                return (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={(e: string) => field.onChange(e)}
-                        value={field.value || 'A'}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Kies een optie"/>
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="A">A</SelectItem>
-                          <SelectItem value="B">B</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage/>
-                  </FormItem>
-                )
-              }}
-            />
-          </>
-        )
-      })}
-    </div>
-    );
-
-  const weightOptionsFields = (group: {title?: string, id?: string | number}, index: number) => (
-    <div key={`0-${index}`} className="w-full col-span-full grid-cols-1 grid">
-      <Heading size="lg" className="mt-3">
-        {group.title}
-      </Heading>
-      <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-2 gap-y-2 items-center`} key={index}>
-
-        {options.length > 0 && options.map((option, j) => (
-          <React.Fragment key={`1-${j}`}>
-            <p>
-              {option.titles[0].key}
-            </p>
-
-            {dimensions.length > 0 && dimensions.map((XY, i) => {
-              const safeKey = option?.titles[0]?.key?.replace(/\./g, '_DOT_');
-
-              return (
-                <FormField
-                  control={form.control}
-                  name={`weights.${group.id}.choice.${safeKey}.weight${XY}`}
-                  key={`0-${group.id}-${safeKey}`}
-                  render={({field}) => (
+                  return (
                     <FormItem>
                       <FormControl>
                         <div className={`weight-${XY.toLowerCase()}-container`}>
@@ -732,20 +735,115 @@ export default function WidgetChoiceGuideItems(
                             min={0}
                             max={100}
                             {...field}
+                            value={field.value ?? 0}
                           />
                         </div>
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
-                  )}
-                />
-              )
-            })}
-          </React.Fragment>
-        ))}
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
+                name={`weights.${group.id}.weightAB${weightFieldAppend}`}
+                key={`3-${i}`}
+                render={({ field }) => {
+                  const value = field.value || 'A';
+                  const watchValue = form.watch(
+                    `weights.${group.id}.weightAB${weightFieldAppend}`
+                  );
+
+                  if (value !== watchValue) {
+                    form.setValue(
+                      `weights.${group.id}.weightAB${weightFieldAppend}`,
+                      field.value || 'A'
+                    );
+                  }
+
+                  return (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(e: string) => field.onChange(e)}
+                          value={field.value || 'A'}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Kies een optie" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="A">A</SelectItem>
+                            <SelectItem value="B">B</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            </>
+          );
+        })}
+    </div>
+  );
+
+  const weightOptionsFields = (
+    group: { title?: string; id?: string | number },
+    index: number
+  ) => (
+    <div key={`0-${index}`} className="w-full col-span-full grid-cols-1 grid">
+      <Heading size="lg" className="mt-3">
+        {group.title}
+      </Heading>
+      <div
+        className={`w-full col-span-full grid-cols-${
+          dimensions.length +
+          (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)
+        } grid gap-2 gap-y-2 items-center`}
+        key={index}>
+        {options.length > 0 &&
+          options.map((option, j) => (
+            <React.Fragment key={`1-${j}`}>
+              <p>{option.titles[0].key}</p>
+
+              {dimensions.length > 0 &&
+                dimensions.map((XY, i) => {
+                  const safeKey = option?.titles[0]?.key?.replace(
+                    /\./g,
+                    '_DOT_'
+                  );
+
+                  return (
+                    <FormField
+                      control={form.control}
+                      name={`weights.${group.id}.choice.${safeKey}.weight${XY}`}
+                      key={`0-${group.id}-${safeKey}`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div
+                              className={`weight-${XY.toLowerCase()}-container`}>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  );
+                })}
+            </React.Fragment>
+          ))}
       </div>
     </div>
-  )
+  );
 
   return (
     <div>
@@ -762,49 +860,50 @@ export default function WidgetChoiceGuideItems(
                 <div className="flex flex-col gap-1">
                   {items.length > 0
                     ? items
-                      .sort(
-                        (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                      )
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
-                          'bg-secondary'
-                          }`}>
-                                                    <span className="flex gap-2 py-3 px-2">
-                                                        <ArrowUp
-                                                          className="cursor-pointer"
-                                                          onClick={() =>
-                                                            handleAction('moveUp', item.trigger, true)
-                                                          }
-                                                        />
-                                                        <ArrowDown
-                                                          className="cursor-pointer"
-                                                          onClick={() =>
-                                                            handleAction('moveDown', item.trigger, true)
-                                                          }
-                                                        />
-                                                    </span>
-                          <span
-                            className="gap-2 py-3 px-2 w-full"
-                            onClick={() => {
-                              setItem(item);
-                              setOptions([]);
-                              setMatrixOptions(matrixDefault);
-                              setSettingOptions(false);
-                            }}>
-                                                        {`${item.title || 'Geen titel'}`}
-                                                    </span>
-                          <span className="gap-2 py-3 px-2">
-                                                        <X
-                                                          className="cursor-pointer"
-                                                          onClick={() =>
-                                                            handleAction('delete', item.trigger, true)
-                                                          }
-                                                        />
-                                                    </span>
-                        </div>
-                      ))
+                        .sort(
+                          (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+                        )
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className={`flex cursor-pointer justify-between border border-secondary ${
+                              item.trigger == selectedItem?.trigger &&
+                              'bg-secondary'
+                            }`}>
+                            <span className="flex gap-2 py-3 px-2">
+                              <ArrowUp
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveUp', item.trigger, true)
+                                }
+                              />
+                              <ArrowDown
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveDown', item.trigger, true)
+                                }
+                              />
+                            </span>
+                            <span
+                              className="gap-2 py-3 px-2 w-full"
+                              onClick={() => {
+                                setItem(item);
+                                setOptions([]);
+                                setMatrixOptions(matrixDefault);
+                                setSettingOptions(false);
+                              }}>
+                              {`${item.title || 'Geen titel'}`}
+                            </span>
+                            <span className="gap-2 py-3 px-2">
+                              <X
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('delete', item.trigger, true)
+                                }
+                              />
+                            </span>
+                          </div>
+                        ))
                     : 'Geen items'}
                 </div>
               </div>
@@ -820,110 +919,130 @@ export default function WidgetChoiceGuideItems(
 
             {settingOptions ? (
               <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
-                { form.watch("type") === "matrix" ? (
+                {form.watch('type') === 'matrix' ? (
                   matrixList.map((matrixItem) => (
                     <>
                       <div className="flex flex-col justify-between">
                         <div className="flex flex-col gap-y-2">
                           <Heading size="xl">{matrixItem.heading}</Heading>
-                          <FormDescription>{matrixItem.description}</FormDescription>
+                          <FormDescription>
+                            {matrixItem.description}
+                          </FormDescription>
                           <Separator className="mt-2" />
 
                           <div className="flex flex-col gap-1">
                             {matrixOptions?.[matrixItem.type]?.length > 0
                               ? matrixOptions?.[matrixItem.type]
-                                .sort(
-                                  (a, b) =>
-                                    parseInt(a.trigger) - parseInt(b.trigger)
-                                )
-                                .map((option, index) => (
-                                  <div
-                                    key={index}
-                                    className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
-                                    'bg-secondary'
-                                    }`}>
-                                <span className="flex gap-2 py-3 px-2">
-                                  <ArrowUp
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveUp',
-                                        option.trigger,
-                                        false,
-                                        true,
-                                        matrixItem.type
-                                      )
-                                    }
-                                  />
-                                  <ArrowDown
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveDown',
-                                        option.trigger,
-                                        false,
-                                        true,
-                                        matrixItem.type
-                                      )
-                                    }
-                                  />
-                                </span>
-                                    <span
-                                      className="py-3 px-2 w-full"
-                                      onClick={() => setMatrixOption({
-                                        ...option,
-                                        type: matrixItem.type
-                                      })}>
-                                  {option?.text}
-                                </span>
-                                    <span className="py-3 px-2">
-                                  <X
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'delete',
-                                        option.trigger,
-                                        false,
-                                        true,
-                                        matrixItem.type
-                                      )
-                                    }
-                                  />
-                                </span>
-                                  </div>
-                                ))
+                                  .sort(
+                                    (a, b) =>
+                                      parseInt(a.trigger) - parseInt(b.trigger)
+                                  )
+                                  .map((option, index) => (
+                                    <div
+                                      key={index}
+                                      className={`flex cursor-pointer justify-between border border-secondary ${
+                                        option.trigger ==
+                                          selectedOption?.trigger &&
+                                        'bg-secondary'
+                                      }`}>
+                                      <span className="flex gap-2 py-3 px-2">
+                                        <ArrowUp
+                                          className="cursor-pointer"
+                                          onClick={() =>
+                                            handleAction(
+                                              'moveUp',
+                                              option.trigger,
+                                              false,
+                                              true,
+                                              matrixItem.type
+                                            )
+                                          }
+                                        />
+                                        <ArrowDown
+                                          className="cursor-pointer"
+                                          onClick={() =>
+                                            handleAction(
+                                              'moveDown',
+                                              option.trigger,
+                                              false,
+                                              true,
+                                              matrixItem.type
+                                            )
+                                          }
+                                        />
+                                      </span>
+                                      <span
+                                        className="py-3 px-2 w-full"
+                                        onClick={() =>
+                                          setMatrixOption({
+                                            ...option,
+                                            type: matrixItem.type,
+                                          })
+                                        }>
+                                        {option?.text}
+                                      </span>
+                                      <span className="py-3 px-2">
+                                        <X
+                                          className="cursor-pointer"
+                                          onClick={() =>
+                                            handleAction(
+                                              'delete',
+                                              option.trigger,
+                                              false,
+                                              true,
+                                              matrixItem.type
+                                            )
+                                          }
+                                        />
+                                      </span>
+                                    </div>
+                                  ))
                               : ''}
                           </div>
 
                           {(() => {
-                            const currentOption = matrixOptions?.[matrixItem.type].findIndex((option) => option.trigger === matrixOption?.trigger);
-                            const activeOption = currentOption !== -1 ? currentOption : matrixOptions?.[matrixItem.type]?.length;
+                            const currentOption = matrixOptions?.[
+                              matrixItem.type
+                            ].findIndex(
+                              (option) =>
+                                option.trigger === matrixOption?.trigger
+                            );
+                            const activeOption =
+                              currentOption !== -1
+                                ? currentOption
+                                : matrixOptions?.[matrixItem.type]?.length;
 
                             return (
                               <FormField
                                 control={form.control}
                                 name={`matrix.${matrixItem.type}.${activeOption}.text`}
-                                render={({field}) => (
+                                render={({ field }) => (
                                   <FormItem>
                                     <Input {...field} />
-                                    <FormMessage/>
+                                    <FormMessage />
                                   </FormItem>
                                 )}
                               />
-                            )
+                            );
                           })()}
 
                           <Button
                             className="w-full bg-secondary text-black hover:text-white mt-4"
                             type="button"
-                            onClick={() => handleAddMatrixOption(form.getValues(), matrixItem.type)}>
-                            {(matrixOption && matrixOption.type === matrixItem.type)
+                            onClick={() =>
+                              handleAddMatrixOption(
+                                form.getValues(),
+                                matrixItem.type
+                              )
+                            }>
+                            {matrixOption &&
+                            matrixOption.type === matrixItem.type
                               ? 'Sla wijzigingen op'
                               : 'Voeg optie toe aan lijst'}
                           </Button>
                         </div>
 
-                        { matrixItem.type === 'rows' && (
+                        {matrixItem.type === 'rows' && (
                           <div className="flex gap-2">
                             <Button
                               className="w-fit mt-4 bg-secondary text-black hover:text-white"
@@ -944,26 +1063,33 @@ export default function WidgetChoiceGuideItems(
                         )}
                       </div>
                     </>
-                  ))) : (
+                  ))
+                ) : (
                   <div className="flex flex-col justify-between">
                     <div className="flex flex-col gap-y-2">
                       <Heading size="xl">Antwoordopties</Heading>
                       <Separator className="mt-2" />
-                      {hasList() && (
+                      {hasList() &&
                         (() => {
-                          const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
-                          const activeOption = currentOption !== -1 ? currentOption : options.length;
+                          const currentOption = options.findIndex(
+                            (option) =>
+                              option.trigger === selectedOption?.trigger
+                          );
+                          const activeOption =
+                            currentOption !== -1
+                              ? currentOption
+                              : options.length;
 
-                          return form.watch("type") !== "images" ? (
+                          return form.watch('type') !== 'images' ? (
                             <>
                               <FormField
                                 control={form.control}
                                 name={`options.${activeOption}.titles.0.key`}
-                                render={({field}) => (
+                                render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>Optie tekst</FormLabel>
                                     <Input {...field} />
-                                    <FormMessage/>
+                                    <FormMessage />
                                   </FormItem>
                                 )}
                               />
@@ -972,7 +1098,7 @@ export default function WidgetChoiceGuideItems(
                                 control={form.control}
                                 // @ts-ignore
                                 name={`options.${activeOption}.titles.0.isOtherOption`}
-                                render={({field}) => (
+                                render={({ field }) => (
                                   <>
                                     <FormItem
                                       style={{
@@ -980,28 +1106,35 @@ export default function WidgetChoiceGuideItems(
                                         alignItems: 'center',
                                         justifyContent: 'flex-start',
                                         flexDirection: 'row',
-                                        marginTop: '10px'
+                                        marginTop: '10px',
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{marginTop: 0, marginLeft: '6px'}}>Is &apos;Anders, namelijk...&apos;</FormLabel>
-                                      <FormMessage/>
+                                        style={{
+                                          marginTop: 0,
+                                          marginLeft: '6px',
+                                        }}>
+                                        Is &apos;Anders, namelijk...&apos;
+                                      </FormLabel>
+                                      <FormMessage />
                                     </FormItem>
                                     <FormDescription>
-                                      Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
-                                      formulier.
-                                      Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                      Als je deze optie selecteert, wordt er
+                                      automatisch een tekstveld toegevoegd aan
+                                      het formulier. Het tekstveld wordt
+                                      zichtbaar wanneer deze optie wordt
+                                      geselecteerd.
                                     </FormDescription>
                                   </>
                                 )}
                               />
 
-                              { form.watch('type') === 'checkbox' && (
+                              {form.watch('type') === 'checkbox' && (
                                 <FormField
                                   control={form.control}
                                   // @ts-ignore
                                   name={`options.${activeOption}.titles.0.defaultValue`}
-                                  render={({field}) => (
+                                  render={({ field }) => (
                                     <>
                                       <FormItem
                                         style={{
@@ -1009,15 +1142,21 @@ export default function WidgetChoiceGuideItems(
                                           alignItems: 'center',
                                           justifyContent: 'flex-start',
                                           flexDirection: 'row',
-                                          marginTop: '10px'
+                                          marginTop: '10px',
                                         }}>
                                         {YesNoSelect(field, props)}
                                         <FormLabel
-                                          style={{marginTop: 0, marginLeft: '6px'}}>Standaard aangevinkt?</FormLabel>
-                                        <FormMessage/>
+                                          style={{
+                                            marginTop: 0,
+                                            marginLeft: '6px',
+                                          }}>
+                                          Standaard aangevinkt?
+                                        </FormLabel>
+                                        <FormMessage />
                                       </FormItem>
                                       <FormDescription>
-                                        Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                        Als je deze optie selecteert, wordt deze
+                                        optie standaard aangevinkt.
                                       </FormDescription>
                                     </>
                                   )}
@@ -1031,18 +1170,29 @@ export default function WidgetChoiceGuideItems(
                                 project={project as string}
                                 fieldName="imageOptionUpload"
                                 imageLabel="Afbeelding"
-                                allowedTypes={["image/*"]}
+                                allowedTypes={['image/*']}
                                 onImageUploaded={(imageResult) => {
-                                  const image = imageResult ? imageResult.url : '';
+                                  const image = imageResult
+                                    ? imageResult.url
+                                    : '';
 
-                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                  form.setValue(
+                                    `options.${activeOption}.titles.0.image`,
+                                    image
+                                  );
                                   form.resetField('imageOptionUpload');
                                 }}
                               />
 
-                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                              {!!form.getValues(
+                                `options.${activeOption}.titles.0.image`
+                              ) && (
                                 <div style={{ position: 'relative' }}>
-                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                  <img
+                                    src={form.getValues(
+                                      `options.${activeOption}.titles.0.image`
+                                    )}
+                                  />
                                 </div>
                               )}
 
@@ -1053,8 +1203,12 @@ export default function WidgetChoiceGuideItems(
                                   <FormItem>
                                     <FormLabel>Titel</FormLabel>
                                     <FormDescription>
-                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                      Dit veld wordt gebruikt voor de alt tekst
+                                      van de afbeelding. Dit is nodig voor
+                                      toegankelijkheid. De titel wordt ook
+                                      gebruikt als bijschrift onder de
+                                      afbeelding, behalve als je de optie
+                                      selecteert om de titel te verbergen.
                                     </FormDescription>
                                     <Input {...field} />
                                     <FormMessage />
@@ -1074,23 +1228,28 @@ export default function WidgetChoiceGuideItems(
                                         alignItems: 'center',
                                         justifyContent: 'flex-start',
                                         flexDirection: 'row',
-                                        marginTop: '10px'
+                                        marginTop: '10px',
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                        style={{
+                                          marginTop: 0,
+                                          marginLeft: '6px',
+                                        }}>
+                                        Titel verbergen?
+                                      </FormLabel>
                                       <FormMessage />
                                     </FormItem>
                                     <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                      Als je deze optie selecteert, wordt de
+                                      titel van de afbeelding verborgen.
                                     </FormDescription>
                                   </>
                                 )}
                               />
                             </>
-                          )
-                        })()
-                      )}
+                          );
+                        })()}
 
                       <Button
                         className="w-full bg-secondary text-black hover:text-white mt-4"
@@ -1128,57 +1287,58 @@ export default function WidgetChoiceGuideItems(
                     <div className="flex flex-col gap-1">
                       {options.length > 0
                         ? options
-                          .sort(
-                            (a, b) =>
-                              parseInt(a.trigger) - parseInt(b.trigger)
-                          )
-                          .map((option, index) => (
-                            <div
-                              key={index}
-                              className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
-                              'bg-secondary'
-                              }`}>
-                                                            <span className="flex gap-2 py-3 px-2">
-                                                                <ArrowUp
-                                                                  className="cursor-pointer"
-                                                                  onClick={() =>
-                                                                    handleAction(
-                                                                      'moveUp',
-                                                                      option.trigger,
-                                                                      false
-                                                                    )
-                                                                  }
-                                                                />
-                                                                <ArrowDown
-                                                                  className="cursor-pointer"
-                                                                  onClick={() =>
-                                                                    handleAction(
-                                                                      'moveDown',
-                                                                      option.trigger,
-                                                                      false
-                                                                    )
-                                                                  }
-                                                                />
-                                                            </span>
-                              <span
-                                className="py-3 px-2 w-full"
-                                onClick={() => setOption(option)}>
-                                                                {option?.titles?.[0].key}
-                                                            </span>
-                              <span className="py-3 px-2">
-                                                                <X
-                                                                  className="cursor-pointer"
-                                                                  onClick={() =>
-                                                                    handleAction(
-                                                                      'delete',
-                                                                      option.trigger,
-                                                                      false
-                                                                    )
-                                                                  }
-                                                                />
-                                                            </span>
-                            </div>
-                          ))
+                            .sort(
+                              (a, b) =>
+                                parseInt(a.trigger) - parseInt(b.trigger)
+                            )
+                            .map((option, index) => (
+                              <div
+                                key={index}
+                                className={`flex cursor-pointer justify-between border border-secondary ${
+                                  option.trigger == selectedOption?.trigger &&
+                                  'bg-secondary'
+                                }`}>
+                                <span className="flex gap-2 py-3 px-2">
+                                  <ArrowUp
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveUp',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                  <ArrowDown
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveDown',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                                <span
+                                  className="py-3 px-2 w-full"
+                                  onClick={() => setOption(option)}>
+                                  {option?.titles?.[0].key}
+                                </span>
+                                <span className="py-3 px-2">
+                                  <X
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'delete',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                              </div>
+                            ))
                         : 'Geen options'}
                     </div>
                   </div>
@@ -1192,37 +1352,40 @@ export default function WidgetChoiceGuideItems(
                     className={`
                       improvised-tabs 
                       px-2
-                      ${activeTab === '1' ? 'active' : ''}`
-                    }
+                      ${activeTab === '1' ? 'active' : ''}`}
                     onClick={() => setActiveTab('1')}
                     style={{
-                      color: (activeTab === '1') ? 'hsl(222,84%,5%)' : 'rgb(100, 116, 139)',
-                      fontSize: '14px'
-                  }}
-                  >
+                      color:
+                        activeTab === '1'
+                          ? 'hsl(222,84%,5%)'
+                          : 'rgb(100, 116, 139)',
+                      fontSize: '14px',
+                    }}>
                     Instellingen & content
                   </button>
-                  { dimensions.length > 0 && (
+                  {dimensions.length > 0 && (
                     <button
                       type="button"
                       className={`
                         improvised-tabs 
                         px-2
-                        ${activeTab === '2' ? 'active' : ''}`
-                      }
+                        ${activeTab === '2' ? 'active' : ''}`}
                       onClick={() => setActiveTab('2')}
                       style={{
-                        color: (activeTab === '2') ? 'hsl(222,84%,5%)' : 'rgb(100, 116, 139)',
-                        fontSize: '14px'
-                      }}
-                    >
+                        color:
+                          activeTab === '2'
+                            ? 'hsl(222,84%,5%)'
+                            : 'rgb(100, 116, 139)',
+                        fontSize: '14px',
+                      }}>
                       Weging
                     </button>
                   )}
                 </div>
 
                 <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
-                  <div style={{display: (activeTab === '1') ? 'block' : 'none'}}>
+                  <div
+                    style={{ display: activeTab === '1' ? 'block' : 'none' }}>
                     <Heading size="xl">Keuzewijzer items</Heading>
                     <Separator className="my-4" />
                     <div className="w-full flex flex-col gap-y-4">
@@ -1241,17 +1404,33 @@ export default function WidgetChoiceGuideItems(
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="none">Informatie blok</SelectItem>
-                                <SelectItem value="radiobox">Radio buttons</SelectItem>
+                                <SelectItem value="none">
+                                  Informatie blok
+                                </SelectItem>
+                                <SelectItem value="radiobox">
+                                  Radio buttons
+                                </SelectItem>
                                 <SelectItem value="text">Tekstveld</SelectItem>
-                                <SelectItem value="checkbox">Checkboxes</SelectItem>
+                                <SelectItem value="checkbox">
+                                  Checkboxes
+                                </SelectItem>
                                 <SelectItem value="map">Locatie</SelectItem>
-                                <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
-                                <SelectItem value="documentUpload">Document upload</SelectItem>
+                                <SelectItem value="imageUpload">
+                                  Afbeelding upload
+                                </SelectItem>
+                                <SelectItem value="documentUpload">
+                                  Document upload
+                                </SelectItem>
                                 <SelectItem value="select">Dropdown</SelectItem>
-                                <SelectItem value="a-b-slider">Van A naar B slider</SelectItem>
-                                <SelectItem value="matrix">Matrix vraag</SelectItem>
-                                <SelectItem value="images">Antwoordopties met afbeeldingen</SelectItem>
+                                <SelectItem value="a-b-slider">
+                                  Van A naar B slider
+                                </SelectItem>
+                                <SelectItem value="matrix">
+                                  Matrix vraag
+                                </SelectItem>
+                                <SelectItem value="images">
+                                  Antwoordopties met afbeeldingen
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -1297,11 +1476,14 @@ export default function WidgetChoiceGuideItems(
                           imageLabel="Upload een afbeelding voor boven de vraag"
                           fieldName="uploadInfoImage"
                           description="Let op: de afbeelding wordt afgesneden op 300px hoogte. Het is handig om de afbeelding op voorhand zelf bij te snijden tot deze hoogte."
-                          allowedTypes={["image/*"]}
+                          allowedTypes={['image/*']}
                           onImageUploaded={(imageResult) => {
-                            const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                            const result =
+                              typeof imageResult.url !== 'undefined'
+                                ? imageResult.url
+                                : '';
                             form.setValue('infoImage', result);
-                            form.resetField('uploadInfoImage')
+                            form.resetField('uploadInfoImage');
                           }}
                         />
                       </div>
@@ -1309,23 +1491,28 @@ export default function WidgetChoiceGuideItems(
                       <div className="col-span-full md:col-span-1 flex flex-col my-2">
                         {!!form.watch('infoImage') && (
                           <>
-                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeelding boven de vraag</label>
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                              Afbeelding boven de vraag
+                            </label>
                             <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                                <div style={{ position: 'relative' }}>
-                                  <img src={form.watch('infoImage')} alt={form.watch('infoImage')} />
-                                  <Button
-                                    color="red"
-                                    onClick={() => {
-                                      form.setValue('infoImage', '');
-                                    }}
-                                    style={{
-                                      position: 'absolute',
-                                      right: 0,
-                                      top: 0,
-                                    }}>
-                                    <X size={24} />
-                                  </Button>
-                                </div>
+                              <div style={{ position: 'relative' }}>
+                                <img
+                                  src={form.watch('infoImage')}
+                                  alt={form.watch('infoImage')}
+                                />
+                                <Button
+                                  color="red"
+                                  onClick={() => {
+                                    form.setValue('infoImage', '');
+                                  }}
+                                  style={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: 0,
+                                  }}>
+                                  <X size={24} />
+                                </Button>
+                              </div>
                             </section>
                           </>
                         )}
@@ -1336,16 +1523,16 @@ export default function WidgetChoiceGuideItems(
                         name="showMoreInfo"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              Extra info
-                            </FormLabel>
+                            <FormLabel>Extra info</FormLabel>
                             <FormDescription>
-                              Wil je een blok met uitklapbare tekst toevoegen? (bijvoorbeeld met extra uitleg)
+                              Wil je een blok met uitklapbare tekst toevoegen?
+                              (bijvoorbeeld met extra uitleg)
                             </FormDescription>
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
-                              value={field.value ? 'true' : 'false'}
-                            >
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Kies een optie" />
@@ -1361,16 +1548,18 @@ export default function WidgetChoiceGuideItems(
                         )}
                       />
 
-                      { form.watch("showMoreInfo") && (
+                      {form.watch('showMoreInfo') && (
                         <>
                           <FormField
                             control={form.control}
                             name="moreInfoButton"
-                            render={({field}) => (
+                            render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Meer informatie knop tekst</FormLabel>
+                                <FormLabel>
+                                  Meer informatie knop tekst
+                                </FormLabel>
                                 <Input {...field} />
-                                <FormMessage/>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -1378,11 +1567,11 @@ export default function WidgetChoiceGuideItems(
                           <FormField
                             control={form.control}
                             name="moreInfoContent"
-                            render={({field}) => (
+                            render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Meer informatie tekst</FormLabel>
                                 <Textarea rows={5} {...field} />
-                                <FormMessage/>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -1394,32 +1583,34 @@ export default function WidgetChoiceGuideItems(
                           control={form.control}
                           name="fieldRequired"
                           render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>
-                                  Is dit veld verplicht?
-                                </FormLabel>
-                                { form.watch("type") === "matrix" && (
-                                  <FormDescription>
-                                    Als je het veld <b>verplicht</b> maakt moeten gebruikers bij elke rij een antwoord selecteren.
-                                    Als je het veld <b>niet verplicht</b> maakt kunnen gebruikers elke rij overslaan en invullen wat ze willen.
-                                  </FormDescription>
-                                )}
-                                <Select
-                                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                                  value={field.value ? 'true' : 'false'}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Kies een optie" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="true">Ja</SelectItem>
-                                    <SelectItem value="false">Nee</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
+                            <FormItem>
+                              <FormLabel>Is dit veld verplicht?</FormLabel>
+                              {form.watch('type') === 'matrix' && (
+                                <FormDescription>
+                                  Als je het veld <b>verplicht</b> maakt moeten
+                                  gebruikers bij elke rij een antwoord
+                                  selecteren. Als je het veld{' '}
+                                  <b>niet verplicht</b> maakt kunnen gebruikers
+                                  elke rij overslaan en invullen wat ze willen.
+                                </FormDescription>
+                              )}
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
                           )}
                         />
                       )}
@@ -1430,7 +1621,10 @@ export default function WidgetChoiceGuideItems(
                             name="variant"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
+                                <FormLabel>
+                                  Is het veld qua grootte 1 regel of een
+                                  tekstvak?
+                                </FormLabel>
                                 <Select
                                   value={field.value || 'text input'}
                                   onValueChange={field.onChange}>
@@ -1440,8 +1634,12 @@ export default function WidgetChoiceGuideItems(
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem value="text input">1 regel</SelectItem>
-                                    <SelectItem value="textarea">Tekstvak</SelectItem>
+                                    <SelectItem value="text input">
+                                      1 regel
+                                    </SelectItem>
+                                    <SelectItem value="textarea">
+                                      Tekstvak
+                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -1487,22 +1685,24 @@ export default function WidgetChoiceGuideItems(
                         </>
                       )}
 
-                      {form.watch("type") === "matrix" && (
+                      {form.watch('type') === 'matrix' && (
                         <FormField
                           control={form.control}
                           name="matrixMultiple"
-                          render={({field}) => (
+                          render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                Mogen er meerdere antwoorden per rij worden geselecteerd?
+                                Mogen er meerdere antwoorden per rij worden
+                                geselecteerd?
                               </FormLabel>
                               <Select
-                                onValueChange={(e: string) => field.onChange(e === 'true')}
-                                value={field.value ? 'true' : 'false'}
-                              >
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie"/>
+                                    <SelectValue placeholder="Kies een optie" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -1510,25 +1710,39 @@ export default function WidgetChoiceGuideItems(
                                   <SelectItem value="true">Ja</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <FormMessage/>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />
                       )}
 
-                      { (form.watch('type') === 'imageUpload' || form.watch('type') === 'images' || form.watch('type') === 'documentUpload') && (
+                      {(form.watch('type') === 'imageUpload' ||
+                        form.watch('type') === 'images' ||
+                        form.watch('type') === 'documentUpload') && (
                         <FormField
                           control={form.control}
                           name="multiple"
                           render={({ field }) => (
                             <FormItem>
-                              {(form.watch('type') === 'imageUpload' || form.watch('type') === 'documentUpload') ? (
-                                <FormLabel>Mogen er meerdere {form.watch('type') === 'documentUpload' ? 'documenten' : 'afbeeldingen'} tegelijkertijd geüpload worden?</FormLabel>
+                              {form.watch('type') === 'imageUpload' ||
+                              form.watch('type') === 'documentUpload' ? (
+                                <FormLabel>
+                                  Mogen er meerdere{' '}
+                                  {form.watch('type') === 'documentUpload'
+                                    ? 'documenten'
+                                    : 'afbeeldingen'}{' '}
+                                  tegelijkertijd geüpload worden?
+                                </FormLabel>
                               ) : (
-                                <FormLabel>Mogen er meerdere afbeeldingen geselecteerd worden?</FormLabel>
+                                <FormLabel>
+                                  Mogen er meerdere afbeeldingen geselecteerd
+                                  worden?
+                                </FormLabel>
                               )}
                               <Select
-                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
                                 value={field.value ? 'true' : 'false'}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -1548,89 +1762,89 @@ export default function WidgetChoiceGuideItems(
 
                       {form.watch('type') === 'a-b-slider' && (
                         <div className="col-span-full grid-cols-2 grid gap-4 gap-y-4">
-                        <FormField
-                          control={form.control}
-                          name="labelA"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Label voor A</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                          <FormField
+                            control={form.control}
+                            name="labelA"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Label voor A</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                        control={form.control}
-                        name="labelB"
-                        render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Label voor B</FormLabel>
-                        <FormControl>
-                        <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                        )}
-                        />
+                          <FormField
+                            control={form.control}
+                            name="labelB"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Label voor B</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                        control={form.control}
-                        name="sliderTitleUnderA"
-                        render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Uitleg bij A</FormLabel>
-                        <FormControl>
-                        <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                        )}
-                        />
+                          <FormField
+                            control={form.control}
+                            name="sliderTitleUnderA"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Uitleg bij A</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                        control={form.control}
-                        name="sliderTitleUnderB"
-                        render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Uitleg bij B</FormLabel>
-                        <FormControl>
-                        <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                        )}
-                        />
+                          <FormField
+                            control={form.control}
+                            name="sliderTitleUnderB"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Uitleg bij B</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                        control={form.control}
-                        name="explanationA"
-                        render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Label onder slider A</FormLabel>
-                        <FormControl>
-                        <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                        )}
-                        />
+                          <FormField
+                            control={form.control}
+                            name="explanationA"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Label onder slider A</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                        control={form.control}
-                        name="explanationB"
-                        render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Label onder slider B</FormLabel>
-                        <FormControl>
-                        <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                        )}
-                        />
+                          <FormField
+                            control={form.control}
+                            name="explanationB"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Label onder slider B</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
                           <div className="col-span-full md:col-span-1 flex flex-col">
                             <ImageUploader
@@ -1638,11 +1852,14 @@ export default function WidgetChoiceGuideItems(
                               project={project as string}
                               imageLabel="Upload hier afbeelding A"
                               fieldName="imageUploadA"
-                              allowedTypes={["image/*"]}
+                              allowedTypes={['image/*']}
                               onImageUploaded={(imageResult) => {
-                                const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                                const result =
+                                  typeof imageResult.url !== 'undefined'
+                                    ? imageResult.url
+                                    : '';
                                 form.setValue('imageA', result);
-                                form.resetField('imageUploadA')
+                                form.resetField('imageUploadA');
                               }}
                             />
                           </div>
@@ -1653,11 +1870,14 @@ export default function WidgetChoiceGuideItems(
                               project={project as string}
                               imageLabel="Upload hier afbeelding B"
                               fieldName="imageUploadB"
-                              allowedTypes={["image/*"]}
+                              allowedTypes={['image/*']}
                               onImageUploaded={(imageResult) => {
-                                const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                                const result =
+                                  typeof imageResult.url !== 'undefined'
+                                    ? imageResult.url
+                                    : '';
                                 form.setValue('imageB', result);
-                                form.resetField('imageUploadB')
+                                form.resetField('imageUploadB');
                               }}
                             />
                           </div>
@@ -1665,23 +1885,28 @@ export default function WidgetChoiceGuideItems(
                           <div className="col-span-full md:col-span-1 flex flex-col my-2">
                             {!!form.watch('imageA') && (
                               <>
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeelding A</label>
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                  Afbeelding A
+                                </label>
                                 <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                                    <div style={{ position: 'relative' }}>
-                                      <img src={form.watch('imageA')} alt={form.watch('imageA')} />
-                                      <Button
-                                        color="red"
-                                        onClick={() => {
-                                          form.setValue('imageA', '');
-                                        }}
-                                        style={{
-                                          position: 'absolute',
-                                          right: 0,
-                                          top: 0,
-                                        }}>
-                                        <X size={24} />
-                                      </Button>
-                                    </div>
+                                  <div style={{ position: 'relative' }}>
+                                    <img
+                                      src={form.watch('imageA')}
+                                      alt={form.watch('imageA')}
+                                    />
+                                    <Button
+                                      color="red"
+                                      onClick={() => {
+                                        form.setValue('imageA', '');
+                                      }}
+                                      style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: 0,
+                                      }}>
+                                      <X size={24} />
+                                    </Button>
+                                  </div>
                                 </section>
                               </>
                             )}
@@ -1690,23 +1915,28 @@ export default function WidgetChoiceGuideItems(
                           <div className="col-span-full md:col-span-1 flex flex-col my-2">
                             {!!form.watch('imageB') && (
                               <>
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeelding B</label>
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                  Afbeelding B
+                                </label>
                                 <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                                    <div style={{ position: 'relative' }}>
-                                      <img src={form.watch('imageB')} alt={form.watch('imageB')} />
-                                      <Button
-                                        color="red"
-                                        onClick={() => {
-                                          form.setValue('imageB', '');
-                                        }}
-                                        style={{
-                                          position: 'absolute',
-                                          right: 0,
-                                          top: 0,
-                                        }}>
-                                        <X size={24} />
-                                      </Button>
-                                    </div>
+                                  <div style={{ position: 'relative' }}>
+                                    <img
+                                      src={form.watch('imageB')}
+                                      alt={form.watch('imageB')}
+                                    />
+                                    <Button
+                                      color="red"
+                                      onClick={() => {
+                                        form.setValue('imageB', '');
+                                      }}
+                                      style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: 0,
+                                      }}>
+                                      <X size={24} />
+                                    </Button>
+                                  </div>
                                 </section>
                               </>
                             )}
@@ -1722,12 +1952,16 @@ export default function WidgetChoiceGuideItems(
                                     Mogelijkheid om deze vraag over te slaan?
                                   </FormLabel>
                                   <FormDescription>
-                                    Als je wil dat de gebruiker de vraag kan overslaan, selecteer dan &apos;Ja&apos;. Als de gebruiker de vraag overslaat, wordt de vraag niet meegenomen in de weging.
+                                    Als je wil dat de gebruiker de vraag kan
+                                    overslaan, selecteer dan &apos;Ja&apos;. Als
+                                    de gebruiker de vraag overslaat, wordt de
+                                    vraag niet meegenomen in de weging.
                                   </FormDescription>
                                   <Select
-                                    onValueChange={(e: string) => field.onChange(e === 'true')}
-                                    value={field.value ? 'true' : 'false'}
-                                  >
+                                    onValueChange={(e: string) =>
+                                      field.onChange(e === 'true')
+                                    }
+                                    value={field.value ? 'true' : 'false'}>
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder="Nee" />
@@ -1743,14 +1977,16 @@ export default function WidgetChoiceGuideItems(
                               )}
                             />
 
-                            { form.watch("skipQuestion") && (
+                            {form.watch('skipQuestion') && (
                               <>
                                 <FormField
                                   control={form.control}
                                   name="skipQuestionLabel"
-                                  render={({field}) => (
+                                  render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>Tekst bij de checkbox voor het overslaan</FormLabel>
+                                      <FormLabel>
+                                        Tekst bij de checkbox voor het overslaan
+                                      </FormLabel>
                                       <FormControl>
                                         <Input {...field} />
                                       </FormControl>
@@ -1764,20 +2000,26 @@ export default function WidgetChoiceGuideItems(
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>
-                                        Mogelijkheid voor de gebruiker om toelichting te geven voor het overslaan?
+                                        Mogelijkheid voor de gebruiker om
+                                        toelichting te geven voor het overslaan?
                                       </FormLabel>
                                       <Select
-                                        onValueChange={(e: string) => field.onChange(e === 'true')}
-                                        value={field.value ? 'true' : 'false'}
-                                      >
+                                        onValueChange={(e: string) =>
+                                          field.onChange(e === 'true')
+                                        }
+                                        value={field.value ? 'true' : 'false'}>
                                         <FormControl>
                                           <SelectTrigger>
                                             <SelectValue placeholder="Nee" />
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                          <SelectItem value="true">Ja</SelectItem>
-                                          <SelectItem value="false">Nee</SelectItem>
+                                          <SelectItem value="true">
+                                            Ja
+                                          </SelectItem>
+                                          <SelectItem value="false">
+                                            Nee
+                                          </SelectItem>
                                         </SelectContent>
                                       </Select>
                                       <FormMessage />
@@ -1785,13 +2027,16 @@ export default function WidgetChoiceGuideItems(
                                   )}
                                 />
 
-                                { form.watch("skipQuestionAllowExplanation") && (
+                                {form.watch('skipQuestionAllowExplanation') && (
                                   <FormField
                                     control={form.control}
                                     name="skipQuestionExplanation"
-                                    render={({field}) => (
+                                    render={({ field }) => (
                                       <FormItem>
-                                        <FormLabel>Titel boven het tekstveld van de toelichting</FormLabel>
+                                        <FormLabel>
+                                          Titel boven het tekstveld van de
+                                          toelichting
+                                        </FormLabel>
                                         <FormControl>
                                           <Input {...field} />
                                         </FormControl>
@@ -1827,9 +2072,15 @@ export default function WidgetChoiceGuideItems(
                             name="maxChoices"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Maximaal te selecteren opties</FormLabel>
+                                <FormLabel>
+                                  Maximaal te selecteren opties
+                                </FormLabel>
                                 <FormDescription>
-                                  <em className='text-xs'>Als je wilt dat er maximaal een aantal opties geselecteerd kunnen worden, vul dan hier het aantal in.</em>
+                                  <em className="text-xs">
+                                    Als je wilt dat er maximaal een aantal
+                                    opties geselecteerd kunnen worden, vul dan
+                                    hier het aantal in.
+                                  </em>
                                 </FormDescription>
                                 <Input {...field} />
                                 <FormMessage />
@@ -1845,7 +2096,11 @@ export default function WidgetChoiceGuideItems(
                                   Maximaal aantal bereikt melding
                                 </FormLabel>
                                 <FormDescription>
-                                  <em className='text-xs'>Als het maximaal aantal opties is geselecteerd, geef dan een melding aan de gebruiker. Dit is optioneel.</em>
+                                  <em className="text-xs">
+                                    Als het maximaal aantal opties is
+                                    geselecteerd, geef dan een melding aan de
+                                    gebruiker. Dit is optioneel.
+                                  </em>
                                 </FormDescription>
                                 <Input {...field} />
                                 <FormMessage />
@@ -1860,9 +2115,13 @@ export default function WidgetChoiceGuideItems(
                         name="routingInitiallyHide"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Is deze vraag altijd zichtbaar?</FormLabel>
+                            <FormLabel>
+                              Is deze vraag altijd zichtbaar?
+                            </FormLabel>
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
                               value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
@@ -1880,40 +2139,45 @@ export default function WidgetChoiceGuideItems(
                         )}
                       />
 
-                      { form.watch('routingInitiallyHide') && (
+                      {form.watch('routingInitiallyHide') && (
                         <>
                           <FormField
                             control={form.control}
                             name="routingSelectedQuestion"
                             render={({ field }) => {
                               const formFields = items || [];
-                              let formMultipleChoiceFields = formFields
-                                .filter((f: any) =>
-                                  (
-                                    f.type === 'select'
-                                    || f.type === 'radiobox'
-                                    || f.type === 'images'
-                                    || f.type === 'checkbox'
-                                  )
-                                  && f.trigger !== form.watch('trigger'));
+                              let formMultipleChoiceFields = formFields.filter(
+                                (f: any) =>
+                                  (f.type === 'select' ||
+                                    f.type === 'radiobox' ||
+                                    f.type === 'images' ||
+                                    f.type === 'checkbox') &&
+                                  f.trigger !== form.watch('trigger')
+                              );
 
                               return (
                                 <FormItem>
-                                  <FormLabel>Welke vraag beïnvloedt de zichtbaarheid van deze vraag?</FormLabel>
+                                  <FormLabel>
+                                    Welke vraag beïnvloedt de zichtbaarheid van
+                                    deze vraag?
+                                  </FormLabel>
 
-                                  { formMultipleChoiceFields.length === 0 ? (
+                                  {formMultipleChoiceFields.length === 0 ? (
                                     <p
                                       className="text-sm"
                                       style={{
-                                        padding: "11px",
-                                        borderLeft: "4px solid red",
-                                        backgroundColor: "#ffdbd7",
+                                        padding: '11px',
+                                        borderLeft: '4px solid red',
+                                        backgroundColor: '#ffdbd7',
                                         borderTopRightRadius: '5px',
                                         borderBottomRightRadius: '5px',
                                         marginTop: '12px',
-                                      }}
-                                    >
-                                      Je hebt nog geen meerkeuze, multiplechoice of afbeelding keuze vragen toegevoegd. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                      }}>
+                                      Je hebt nog geen meerkeuze, multiplechoice
+                                      of afbeelding keuze vragen toegevoegd.
+                                      Voeg deze eerst toe om deze vraag te
+                                      kunnen tonen op basis van een ander
+                                      antwoord.
                                     </p>
                                   ) : (
                                     <Select
@@ -1925,44 +2189,59 @@ export default function WidgetChoiceGuideItems(
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        { formMultipleChoiceFields.map((f: any) => (
-                                          <SelectItem key={f.trigger} value={f.trigger}>{f.title || f.fieldKey}</SelectItem>
-                                        )) }
+                                        {formMultipleChoiceFields.map(
+                                          (f: any) => (
+                                            <SelectItem
+                                              key={f.trigger}
+                                              value={f.trigger}>
+                                              {f.title || f.fieldKey}
+                                            </SelectItem>
+                                          )
+                                        )}
                                       </SelectContent>
                                     </Select>
                                   )}
 
-                                  <FormMessage/>
+                                  <FormMessage />
                                 </FormItem>
-                              )
+                              );
                             }}
                           />
 
-                          { form.watch("routingSelectedQuestion") !== '' && (
+                          {form.watch('routingSelectedQuestion') !== '' && (
                             <FormField
                               control={form.control}
                               name="routingSelectedAnswer"
                               render={({ field }) => {
-                                const selectedQuestion = items?.find((i: any) => i.trigger === form.watch("routingSelectedQuestion"));
+                                const selectedQuestion = items?.find(
+                                  (i: any) =>
+                                    i.trigger ===
+                                    form.watch('routingSelectedQuestion')
+                                );
                                 const options = selectedQuestion?.options || [];
 
                                 return (
                                   <FormItem>
-                                    <FormLabel>Bij welk antwoord moet deze vraag getoond worden?</FormLabel>
+                                    <FormLabel>
+                                      Bij welk antwoord moet deze vraag getoond
+                                      worden?
+                                    </FormLabel>
 
-                                    { options.length === 0 ? (
+                                    {options.length === 0 ? (
                                       <p
                                         className="text-sm"
                                         style={{
-                                          padding: "11px",
-                                          borderLeft: "4px solid red",
-                                          backgroundColor: "#ffdbd7",
+                                          padding: '11px',
+                                          borderLeft: '4px solid red',
+                                          backgroundColor: '#ffdbd7',
                                           borderTopRightRadius: '5px',
                                           borderBottomRightRadius: '5px',
                                           marginTop: '12px',
-                                        }}
-                                      >
-                                        De geselecteerde vraag heeft nog geen antwoordopties. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                        }}>
+                                        De geselecteerde vraag heeft nog geen
+                                        antwoordopties. Voeg deze eerst toe om
+                                        deze vraag te kunnen tonen op basis van
+                                        een ander antwoord.
                                       </p>
                                     ) : (
                                       <Select
@@ -1974,16 +2253,20 @@ export default function WidgetChoiceGuideItems(
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                          { options.map((o: any) => (
-                                            <SelectItem key={o.trigger} value={o.trigger}>{o.titles?.[0]?.key || o.trigger}</SelectItem>
-                                          )) }
+                                          {options.map((o: any) => (
+                                            <SelectItem
+                                              key={o.trigger}
+                                              value={o.trigger}>
+                                              {o.titles?.[0]?.key || o.trigger}
+                                            </SelectItem>
+                                          ))}
                                         </SelectContent>
                                       </Select>
                                     )}
 
-                                    <FormMessage/>
+                                    <FormMessage />
                                   </FormItem>
-                                )
+                                );
                               }}
                             />
                           )}
@@ -1996,7 +2279,7 @@ export default function WidgetChoiceGuideItems(
                             className="w-fit mt-4 bg-secondary text-black hover:text-white"
                             type="button"
                             onClick={() => setSettingOptions(!settingOptions)}>
-                            { form.watch("type") === "matrix"
+                            {form.watch('type') === 'matrix'
                               ? `Matrix antwoordopties aanpassen`
                               : `Antwoordopties (${options.length}) aanpassen`}
                           </Button>
@@ -2004,84 +2287,113 @@ export default function WidgetChoiceGuideItems(
                         </FormItem>
                       )}
                     </div>
-                </div>
+                  </div>
 
-                <div className="p-0" style={{display: (activeTab === '2') ? 'block' : 'none'}} >
-                  <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
-                    <Heading size="xl">Bepaal de weging per vraaggroep</Heading>
+                  <div
+                    className="p-0"
+                    style={{ display: activeTab === '2' ? 'block' : 'none' }}>
+                    <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
+                      <Heading size="xl">
+                        Bepaal de weging per vraaggroep
+                      </Heading>
 
-                    { form.watch('type') === 'a-b-slider' && (
-                      <p style={{
-                        fontSize: '14px',
-                        marginTop: '10px'
-                      }}>
-                        In dit scherm vind je de keuze opties die je in het tabblad &apos;Keuze opties&apos; kunt aanmaken. Per vraag stel je hier in welke weging je meegeeft aan de antwoorden. Zo werkt dat:
-                        <ul style={{
-                          listStyleType: 'disc',
-                          paddingLeft: '20px',
-                          marginTop: '10px',
-                          marginBottom: '10px'
-                        }}>
-                          <li key="li-0">Kies of een A/B slider helemaal naar links (A) of naar rechts (B) moet worden gesleept voor de maximale weging;</li>
-                          <li key="li-1">Geef een getal mee voor hoeveel de vraag meetelt in de totale weging. 0 = geen weging, 100 = maximale weging. Als je een keuze optie niet wilt beïnvloeden met een vraag, vul dan 0 in.</li>
-                        </ul>
-                        Heb je de weergave van de voorkeuren ingesteld als &apos;In een vlak&apos;? Dan kun je ook een verticale weging meegeven. De opties &apos;Y&apos; bepalen die verticale weging.
-                      </p>
-                    )}
+                      {form.watch('type') === 'a-b-slider' && (
+                        <p
+                          style={{
+                            fontSize: '14px',
+                            marginTop: '10px',
+                          }}>
+                          In dit scherm vind je de keuze opties die je in het
+                          tabblad &apos;Keuze opties&apos; kunt aanmaken. Per
+                          vraag stel je hier in welke weging je meegeeft aan de
+                          antwoorden. Zo werkt dat:
+                          <ul
+                            style={{
+                              listStyleType: 'disc',
+                              paddingLeft: '20px',
+                              marginTop: '10px',
+                              marginBottom: '10px',
+                            }}>
+                            <li key="li-0">
+                              Kies of een A/B slider helemaal naar links (A) of
+                              naar rechts (B) moet worden gesleept voor de
+                              maximale weging;
+                            </li>
+                            <li key="li-1">
+                              Geef een getal mee voor hoeveel de vraag meetelt
+                              in de totale weging. 0 = geen weging, 100 =
+                              maximale weging. Als je een keuze optie niet wilt
+                              beïnvloeden met een vraag, vul dan 0 in.
+                            </li>
+                          </ul>
+                          Heb je de weergave van de voorkeuren ingesteld als
+                          &apos;In een vlak&apos;? Dan kun je ook een verticale
+                          weging meegeven. De opties &apos;Y&apos; bepalen die
+                          verticale weging.
+                        </p>
+                      )}
 
-                    <Separator className="my-4" />
+                      <Separator className="my-4" />
 
-                    { form.watch("type") !== 'a-b-slider' && (
-                      DimensionHeading()
-                    )}
+                      {form.watch('type') !== 'a-b-slider' &&
+                        DimensionHeading()}
 
-                    <div className="w-full mt-4 flex flex-col gap-y-4">
-                      {(() => {
-                        const isPlaneType = widget?.config?.choiceGuide?.choicesType === "plane";
-                        const isCheckboxType = ['checkbox', 'radiobox', 'select', 'images'].includes(form.watch('type') || "");
+                      <div className="w-full mt-4 flex flex-col gap-y-4">
+                        {(() => {
+                          const isPlaneType =
+                            widget?.config?.choiceGuide?.choicesType ===
+                            'plane';
+                          const isCheckboxType = [
+                            'checkbox',
+                            'radiobox',
+                            'select',
+                            'images',
+                          ].includes(form.watch('type') || '');
 
-                        if (isCheckboxType && isPlaneType) {
-                          return weightOptionsFields({ id: "plane" }, 999);
-                        }
+                          if (isCheckboxType && isPlaneType) {
+                            return weightOptionsFields({ id: 'plane' }, 999);
+                          }
 
-                        if (isCheckboxType) {
-                          return widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) =>
-                            weightOptionsFields(singleGroup, index)
+                          if (isCheckboxType) {
+                            return widget?.config?.choiceOption?.choiceOptions?.map(
+                              (singleGroup: ChoiceOptions, index: number) =>
+                                weightOptionsFields(singleGroup, index)
+                            );
+                          }
+
+                          if (isPlaneType) {
+                            return weightFields({ id: 'plane' }, 999);
+                          }
+
+                          return widget?.config?.choiceOption?.choiceOptions?.map(
+                            (singleGroup: ChoiceOptions, index: number) =>
+                              weightFields(singleGroup, index)
                           );
-                        }
-
-                        if (isPlaneType) {
-                          return weightFields({ id: "plane" }, 999);
-                        }
-
-                        return widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) =>
-                          weightFields(singleGroup, index)
-                        );
-                      })()}
+                        })()}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex gap-2">
-                  {selectedItem && (
-                    <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        resetForm();
-                        setActiveTab('1');
-                      }}>
-                      Annuleer
+                  <div className="flex gap-2">
+                    {selectedItem && (
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          resetForm();
+                          setActiveTab('1');
+                        }}>
+                        Annuleer
+                      </Button>
+                    )}
+                    <Button className="w-fit mt-4" type="submit">
+                      {selectedItem
+                        ? 'Sla wijzigingen op'
+                        : 'Voeg item toe aan lijst'}
                     </Button>
-                  )}
-                  <Button className="w-fit mt-4" type="submit">
-                    {selectedItem
-                      ? 'Sla wijzigingen op'
-                      : 'Voeg item toe aan lijst'}
-                  </Button>
+                  </div>
                 </div>
               </div>
-            </div>
             )}
           </div>
         </form>

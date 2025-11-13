@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useContext } from 'react';
-
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { WidgetDefinition } from '@/lib/widget-definitions';
+import React, { useCallback, useContext, useEffect } from 'react';
+
 import { SessionContext } from '../auth';
 
 // Can we type config better? Or should we define types for all widgetConfigs and use them as seperate props. A.k.a. likeConifg?:LikeConfig, argConfig?: ArgConfig
@@ -13,11 +13,14 @@ type Props = {
 };
 
 export default function WidgetPreview({ type, config, projectId }: Props) {
-
   const sessionData = useContext(SessionContext);
 
   useEffect(() => {
-    let userAsString = JSON.stringify({ id: sessionData.id, role: sessionData.role, jwt: sessionData.jwt });
+    let userAsString = JSON.stringify({
+      id: sessionData.id,
+      role: sessionData.role,
+      jwt: sessionData.jwt,
+    });
     const script = document.createElement('script');
     if (sessionData.id) {
       script.innerHTML = `var globalOpenStadUser = ${userAsString || ''};`;
@@ -25,7 +28,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
     document.body.appendChild(script);
     return () => {
       document.body.removeChild(script);
-    }
+    };
   }, [sessionData]);
 
   const randomId = Math.floor(Math.random() * 1000000);
@@ -40,7 +43,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         method: 'POST',
         headers: {
           'cache-control': 'no-cache',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           widgetType: type,

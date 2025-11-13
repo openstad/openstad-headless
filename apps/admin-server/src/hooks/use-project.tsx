@@ -1,19 +1,21 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useProject(scopes?: Array<string>) {
   const router = useRouter();
   let projectId = router.query.project;
 
-  let projectNumber: number | undefined = validateProjectNumber(projectId)
+  let projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig']
+  let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig'];
   if (scopes) useScopes = useScopes.concat(scopes);
 
   const projectSwr = useSWR(
     projectNumber
-      ? `/api/openstad/api/project/${projectNumber}?${ useScopes.map(s => `${s}=1`).join('&') }`
+      ? `/api/openstad/api/project/${projectNumber}?${useScopes
+          .map((s) => `${s}=1`)
+          .join('&')}`
       : null
   );
 
@@ -38,16 +40,21 @@ export function useProject(scopes?: Array<string>) {
                 adapter: 'openstad',
                 authTypes: 'Anonymous',
                 requiredUserFields: 'postcode',
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       }),
     });
     return await res.json();
   }
-  
-  async function importProject(name: string, title: string, config: object, emailConfig: object) {
+
+  async function importProject(
+    name: string,
+    title: string,
+    config: object,
+    emailConfig: object
+  ) {
     const res = await fetch('/api/openstad/api/project', {
       method: 'POST',
       headers: {
@@ -57,7 +64,7 @@ export function useProject(scopes?: Array<string>) {
         name,
         title,
         config,
-        emailConfig
+        emailConfig,
       }),
     });
     return await res.json();
@@ -70,7 +77,7 @@ export function useProject(scopes?: Array<string>) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ config, name, url}),
+        body: JSON.stringify({ config, name, url }),
       });
       const data = await res.json();
 

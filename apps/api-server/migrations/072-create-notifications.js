@@ -1,14 +1,13 @@
 const { Sequelize } = require('sequelize');
 
 module.exports = {
-
-  async up ({ context: queryInterface }) {
+  async up({ context: queryInterface }) {
     queryInterface.createTable('notifications', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       projectId: {
         type: Sequelize.INTEGER,
@@ -42,11 +41,11 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deletedAt: {
         allowNull: true,
@@ -56,8 +55,7 @@ module.exports = {
     });
   },
 
-  async down ({ context: queryInterface }) {
+  async down({ context: queryInterface }) {
     await queryInterface.dropTable('notifications');
-  }
-
+  },
 };

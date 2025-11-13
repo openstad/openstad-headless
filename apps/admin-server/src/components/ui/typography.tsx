@@ -1,18 +1,22 @@
 import { cn } from '@/lib/utils';
 import { Slot } from '@radix-ui/react-slot';
 import { VariantProps, cva } from 'class-variance-authority';
-import React, {CSSProperties, ReactNode} from 'react';
+import React, { CSSProperties, ReactNode } from 'react';
 
 export function Paragraph({
   children,
   className,
-  style
+  style,
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
 }) {
-  return <p className={cn('text-sm leading-7', className)} style={style}>{children}</p>;
+  return (
+    <p className={cn('text-sm leading-7', className)} style={style}>
+      {children}
+    </p>
+  );
 }
 
 export function ListHeading({
@@ -46,7 +50,7 @@ export interface HeadingProps
   extends React.HTMLAttributes<HTMLHeadingElement>,
     VariantProps<typeof headingVariants> {
   asChild?: boolean;
-  size: "lg" | "2xl" | "xl" | null | undefined;
+  size: 'lg' | '2xl' | 'xl' | null | undefined;
 }
 
 const Heading = React.forwardRef<HTMLButtonElement, HeadingProps>(

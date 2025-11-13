@@ -1,8 +1,9 @@
 import React from 'react';
-import '../index.css';
-import './index.css';
+
 import { Button, SecondaryButton } from '../button';
 import { IconButton } from '../iconbutton';
+import '../index.css';
+import './index.css';
 
 const Paginator = ({
   page,
@@ -30,7 +31,8 @@ const Paginator = ({
     if (page >= totalPages - visiblePages + 1) {
       pages.push(0);
       pages.push('...');
-      for (let i = totalPages - visiblePages; i < totalPages; i++) pages.push(i);
+      for (let i = totalPages - visiblePages; i < totalPages; i++)
+        pages.push(i);
       return pages;
     }
     pages.push(0);
@@ -52,12 +54,14 @@ const Paginator = ({
         disabled={page === 0}
         aria-label={`Vorige pagina${page === 0 ? ' (Niet beschikbaar)' : ''}`}
         iconOnly={true}
-        test-id={"previous-page-button"}
+        test-id={'previous-page-button'}
       />
 
       {visible.map((item, idx) =>
         item === '...' ? (
-          <span key={`ellipsis-${idx}`} className="osc-paginator-ellipsis">...</span>
+          <span key={`ellipsis-${idx}`} className="osc-paginator-ellipsis">
+            ...
+          </span>
         ) : (
           <IconButton
             key={`page-${item}`}
@@ -65,9 +69,10 @@ const Paginator = ({
             onClick={() => onPageChange(item as number)}
             disabled={item === page}
             test-id={`page-button-${item}`}
-            aria-label={`Pagina ${(item as number) + 1}${item === page ? ' (Huidige pagina)' : ''}`}
-            aria-current={item === page ? "page" : undefined}
-        >
+            aria-label={`Pagina ${(item as number) + 1}${
+              item === page ? ' (Huidige pagina)' : ''
+            }`}
+            aria-current={item === page ? 'page' : undefined}>
             {(item as number) + 1}
           </IconButton>
         )
@@ -77,10 +82,12 @@ const Paginator = ({
         icon="ri-arrow-right-s-line"
         className="secondary round"
         onClick={() => onPageChange(page + 1)}
-        disabled={page >= totalPages -  1}
-        aria-label={`Volgende pagina${page >= totalPages - 1 ? ' (Niet beschikbaar)' : ''}`}
+        disabled={page >= totalPages - 1}
+        aria-label={`Volgende pagina${
+          page >= totalPages - 1 ? ' (Niet beschikbaar)' : ''
+        }`}
         iconOnly={true}
-        test-id={"next-page-button"}
+        test-id={'next-page-button'}
       />
     </nav>
   );

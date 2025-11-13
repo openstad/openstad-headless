@@ -71,7 +71,7 @@
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 .active-tags ul li {
   background: var(
@@ -93,12 +93,12 @@
   width: 30px;
 }
 
-@media only screen and (min-width: 768px) and (max-width: 1360px){
-    .active-tags ul {
-        flex-direction: row;
-      }
+@media only screen and (min-width: 768px) and (max-width: 1360px) {
+  .active-tags ul {
+    flex-direction: row;
+  }
 }
 
 .osc.--compact #stem-begroot-filter .active-tags ul {
-    flex-direction: row;
+  flex-direction: row;
 }

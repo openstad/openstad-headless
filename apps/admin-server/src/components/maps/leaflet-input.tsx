@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import 'leaflet/dist/leaflet.css';
 import { marker } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import React, { useEffect, useState } from 'react';
 
 interface LeafletComponents {
   MapContainer: React.ComponentType<any>;
@@ -15,47 +15,55 @@ interface MapComponentProps {
   center?: { lat: number; lng: number };
 }
 
-const MapInput: React.FC<MapComponentProps> = ({ onSelectLocation, field, center = {lat: 52.129507, lng:4.670647} }) => {
+const MapInput: React.FC<MapComponentProps> = ({
+  onSelectLocation,
+  field,
+  center = { lat: 52.129507, lng: 4.670647 },
+}) => {
   const [isSSR, setIsSSR] = useState(true);
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
-  const [leafletComponents, setLeafletComponents] = useState<LeafletComponents | null>(null);
-  const [dynamicMarkerIcon, setDynamicMarkerIcon] = useState<React.ComponentType<any> | null>(null);
+  const [leafletComponents, setLeafletComponents] =
+    useState<LeafletComponents | null>(null);
+  const [dynamicMarkerIcon, setDynamicMarkerIcon] =
+    useState<React.ComponentType<any> | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsSSR(false);
       import('react-leaflet')
-        .then(leaflet => {
+        .then((leaflet) => {
           setLeafletComponents(leaflet);
         })
-        .catch(error => console.error('Failed to load react-leaflet', error));
+        .catch((error) => console.error('Failed to load react-leaflet', error));
 
-      import('@openstad-headless/leaflet-map/src/marker-icon').then((module) => {
+      import('@openstad-headless/leaflet-map/src/marker-icon').then(
+        (module) => {
           // Assuming MarkerIcon is the default export
           const MarkerIcon = module.default;
           // Create the icon with desired properties
           const icon = MarkerIcon({ icon: { className: '--defaultIcon' } });
           setDynamicMarkerIcon(icon);
-        });
+        }
+      );
     }
   }, []);
 
   useEffect(() => {
-    import ('leaflet').then((L) => {
-          if(dynamicMarkerIcon !== null && markerPosition === null) {
-            // Check if field value has saved coordinates and set marker position
-            if (field && field.value) {
-              try{
-                const { lat, lng } = JSON.parse(field.value);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                  setMarkerPosition(L.latLng(lat, lng));
-                }
-              } catch(e) {
-                console.log(e)
-              }
+    import('leaflet').then((L) => {
+      if (dynamicMarkerIcon !== null && markerPosition === null) {
+        // Check if field value has saved coordinates and set marker position
+        if (field && field.value) {
+          try {
+            const { lat, lng } = JSON.parse(field.value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+              setMarkerPosition(L.latLng(lat, lng));
             }
+          } catch (e) {
+            console.log(e);
           }
-        });
+        }
+      }
+    });
   }, [field.value, dynamicMarkerIcon]);
 
   useEffect(() => {
@@ -82,15 +90,17 @@ const MapInput: React.FC<MapComponentProps> = ({ onSelectLocation, field, center
 
   return (
     <div>
-        <MapContainer       
-            center={center}
-            zoom={7}
-            scrollWheelZoom={false}
-            style={{ height: '600px', width: '100%' }}>
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {markerPosition &&  <Marker position={markerPosition} icon={dynamicMarkerIcon} />}
-            <MapEvents />
-        </MapContainer>
+      <MapContainer
+        center={center}
+        zoom={7}
+        scrollWheelZoom={false}
+        style={{ height: '600px', width: '100%' }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {markerPosition && (
+          <Marker position={markerPosition} icon={dynamicMarkerIcon} />
+        )}
+        <MapEvents />
+      </MapContainer>
     </div>
   );
 };

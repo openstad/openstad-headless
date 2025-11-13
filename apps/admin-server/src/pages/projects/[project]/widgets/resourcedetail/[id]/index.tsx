@@ -1,4 +1,25 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { extractConfig } from '@/lib/sub-widget-helper';
+import ArgumentsExtraFields from '@/pages/projects/[project]/widgets/comments/[id]/extraFields';
+import ArgumentsInclude from '@/pages/projects/[project]/widgets/comments/[id]/include';
+import WidgetResourceDetailDocumentMap from '@/pages/projects/[project]/widgets/resourcedetail/[id]/document-map';
+import { ResourceOverviewMapWidgetTabProps } from '@/pages/projects/[project]/widgets/resourcesmap/[id]';
+import WidgetResourcesMapButtons from '@/pages/projects/[project]/widgets/resourcesmap/[id]/buttons';
+import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
+import WidgetResourcesMapMap from '@/pages/projects/[project]/widgets/resourcesmap/[id]/map';
+import WidgetResourcesMapPolygons from '@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons';
+import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
+import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,34 +27,15 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetResourceDetailGeneral from './general';
-import WidgetResourceDetailDisplay from './display';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
-import WidgetPreview from '@/components/widget-preview';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
-import ArgumentsGeneral from '../../comments/[id]/general';
-import LikesDisplay from '../../likes/[id]/weergave';
-import ArgumentsList from '../../comments/[id]/list';
 import { ArgumentWidgetTabProps } from '../../comments/[id]';
 import ArgumentsForm from '../../comments/[id]/form';
+import ArgumentsGeneral from '../../comments/[id]/general';
+import ArgumentsList from '../../comments/[id]/list';
 import { LikeWidgetTabProps } from '../../likes/[id]';
-import { extractConfig } from '@/lib/sub-widget-helper';
-import WidgetResourceDetailDocumentMap from "@/pages/projects/[project]/widgets/resourcedetail/[id]/document-map";
-import ArgumentsExtraFields from "@/pages/projects/[project]/widgets/comments/[id]/extraFields";
-import ArgumentsInclude from "@/pages/projects/[project]/widgets/comments/[id]/include";
-import WidgetResourcesMapMap from "@/pages/projects/[project]/widgets/resourcesmap/[id]/map";
-import {ResourceOverviewMapWidgetTabProps} from "@/pages/projects/[project]/widgets/resourcesmap/[id]";
-import WidgetResourcesMapButtons from "@/pages/projects/[project]/widgets/resourcesmap/[id]/buttons";
-import WidgetResourcesMapPolygons from "@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons";
-import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import LikesDisplay from '../../likes/[id]/weergave';
+import WidgetResourceDetailDisplay from './display';
+import WidgetResourceDetailGeneral from './general';
+
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -74,7 +76,9 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="comments">Reacties widget</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
-              <TabsTrigger value="document-map">Interactieve afbeelding</TabsTrigger>
+              <TabsTrigger value="document-map">
+                Interactieve afbeelding
+              </TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -189,7 +193,9 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     <TabsTrigger value="list">Lijst</TabsTrigger>
                     <TabsTrigger value="form">Formulier</TabsTrigger>
                     <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
-                    <TabsTrigger value="include">Inclusief / exclusief</TabsTrigger>
+                    <TabsTrigger value="include">
+                      Inclusief / exclusief
+                    </TabsTrigger>
                   </TabsList>
                   <TabsContent value="general" className="p-0">
                     <ArgumentsGeneral
@@ -237,7 +243,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   </TabsContent>
                   <TabsContent value="form" className="p-0">
                     <div className="grid grid-cols-2">
-
                       <ArgumentsForm
                         customTitle={'Formulier Links'}
                         {...extractConfig<
@@ -283,7 +288,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         updateConfig,
                         updatePreview,
                       })}
-                      projectId={ projectId as string }
+                      projectId={projectId as string}
                     />
                   </TabsContent>
 
@@ -298,10 +303,9 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         updateConfig,
                         updatePreview,
                       })}
-                      projectId={ projectId as string }
+                      projectId={projectId as string}
                     />
                   </TabsContent>
-
                 </Tabs>
               )}
             </TabsContent>

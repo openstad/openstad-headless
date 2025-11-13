@@ -1,89 +1,95 @@
 .sort-field-container {
-    --sort-text-color: var(--utrecht-document-color, #000);
-    --sort-font-size: var(--utrecht-form-label-font-size);
-    --sort-active-background: var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
-    --sort-border-color: var(--nlds-enquete-border-color, var(--nlds-default-border-color, #D1D9E6));
-    --sort-drag-active-background-color: var(--utrecht-button-primary-action-background-color);
-    --sort-drag-active-color: var(--utrecht-button-primary-action-color);
-    --sort-padding: 12px;
+  --sort-text-color: var(--utrecht-document-color, #000);
+  --sort-font-size: var(--utrecht-form-label-font-size);
+  --sort-active-background: var(
+    --nlds-enquete-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+  --sort-border-color: var(
+    --nlds-enquete-border-color,
+    var(--nlds-default-border-color, #d1d9e6)
+  );
+  --sort-drag-active-background-color: var(
+    --utrecht-button-primary-action-background-color
+  );
+  --sort-drag-active-color: var(--utrecht-button-primary-action-color);
+  --sort-padding: 12px;
 
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--sort-text-color);
+
+  .sortable-intro {
+    margin-bottom: 0.5rem;
+  }
+
+  .sortable-context {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
-    color: var(--sort-text-color);
+    gap: 8px;
 
-    .sortable-intro {
-        margin-bottom: .5rem;
-    }
+    > div {
+      display: flex;
+      align-items: center;
+      gap: var(--sort-padding);
+      background: #ffffff;
+      color: inherit;
+      margin: 0;
+      border: solid 1px var(--sort-border-color);
+      border-radius: 3px;
+      font-size: var(--sort-font-size);
+      cursor: default;
 
-    .sortable-context {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+      .ri-draggable {
+        font-size: 1.3rem;
+        color: inherit;
+        cursor: grab;
+        padding: var(--sort-padding);
+        display: block;
+        transition: color 0.2s ease-in-out;
+      }
 
-        >div {
-            display: flex;
-            align-items: center;
-            gap: var(--sort-padding);
-            background: #ffffff;
-            color: inherit;
-            margin: 0;
-            border: solid 1px var(--sort-border-color);
-            border-radius: 3px;
-            font-size: var(--sort-font-size);
-            cursor: default;
+      span:has(.ri-draggable) {
+        transition: background 0.2s ease-in-out;
+      }
 
-            .ri-draggable {
-                font-size: 1.3rem;
-                color: inherit;
-                cursor: grab;
-                padding: var(--sort-padding);
-                display: block;
-                transition: color .2s ease-in-out;
-            }
+      span:has(.ri-draggable:hover) {
+        background: var(--sort-drag-active-background-color);
 
-            span:has(.ri-draggable) {
-                transition: background .2s ease-in-out;
-            }
-
-            span:has(.ri-draggable:hover) {
-                background: var(--sort-drag-active-background-color);
-
-                .ri-draggable {
-                    color: var(--sort-drag-active-color);
-                }
-            }
-
-            .sortable-item-title {
-                flex-grow: 1;
-                line-height: 1;
-            }
-
-            div.sortable-item-actions {
-                display: flex;
-                gap: .5rem;
-                padding-right: var(--sort-padding);
-
-                button {
-                    background: none;
-                    border: none;
-                    color: inherit;
-                    cursor: pointer;
-                    padding: 0;
-                    font-size: 1.2rem;
-
-                    &:hover {
-                        color: var(--utrecht-link-hover-color, #005EA2);
-                    }
-
-                    &:disabled {
-                        opacity: 0.4;
-                        cursor: not-allowed;
-                    }
-                }
-            }
-
-
+        .ri-draggable {
+          color: var(--sort-drag-active-color);
         }
+      }
+
+      .sortable-item-title {
+        flex-grow: 1;
+        line-height: 1;
+      }
+
+      div.sortable-item-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding-right: var(--sort-padding);
+
+        button {
+          background: none;
+          border: none;
+          color: inherit;
+          cursor: pointer;
+          padding: 0;
+          font-size: 1.2rem;
+
+          &:hover {
+            color: var(--utrecht-link-hover-color, #005ea2);
+          }
+
+          &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+          }
+        }
+      }
     }
+  }
 }

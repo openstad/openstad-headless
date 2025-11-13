@@ -18,7 +18,10 @@ header {
       width: 100%;
       height: var(--nlds-header-compact-height, 1.5rem);
       display: block;
-      background: var(--nlds-header-compact-background-color, var(--utrecht-button-primary-action-background-color));
+      background: var(
+        --nlds-header-compact-background-color,
+        var(--utrecht-button-primary-action-background-color)
+      );
       left: 0;
       bottom: calc(var(--nlds-header-compact-height, 1.5rem) * -1);
     }
@@ -53,7 +56,6 @@ header {
     }
 
     @media screen and (max-width: 341px) {
-
       font-size: 15px;
     }
 
@@ -204,15 +206,11 @@ header {
 			padding-top: 20px;*/
     }
   }
-
 }
-
-
 
 * {
   box-sizing: border-box;
 }
-
 
 /* Create two equal columns that floats next to each other */
 .column {
@@ -244,7 +242,6 @@ header.amsterdam-header {
     padding: 0;
   }
 }
-
 
 // Mobile menu
 
@@ -305,7 +302,7 @@ body:has(.--mobile.--show) {
   }
 }
 
-header:has(.header_navbar-container.--show)~#navbar {
+header:has(.header_navbar-container.--show) ~ #navbar {
   align-self: start;
   width: 100%;
   background: transparent;
@@ -458,7 +455,7 @@ header:has(.header_navbar-container.--show)~#navbar {
     align-items: center;
     gap: 10px;
 
-    &>div {
+    & > div {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -471,7 +468,6 @@ header:has(.header_navbar-container.--show)~#navbar {
     display: inline-block;
   }
 }
-
 
 #navbar.--compact {
   margin-right: -10px !important;
@@ -486,7 +482,6 @@ header:has(.header_navbar-container.--show)~#navbar {
 }
 
 .cta-buttons {
-
   .utrecht-button-link.utrecht-button-link--account,
   .utrecht-button-link.utrecht-button-link--menu-button {
     padding: unset;
@@ -505,8 +500,14 @@ header:has(.header_navbar-container.--show)~#navbar {
     &:hover,
     &:focus-visible {
       scale: 1;
-      color: var(--nlds-main-menu-item-color--hover, var(--utrecht-link-hover-color));
-      border-color: var(--nlds-main-menu-item-border-color--hover, var(--utrecht-link-hover-color));
+      color: var(
+        --nlds-main-menu-item-color--hover,
+        var(--utrecht-link-hover-color)
+      );
+      border-color: var(
+        --nlds-main-menu-item-border-color--hover,
+        var(--utrecht-link-hover-color)
+      );
     }
   }
 }

@@ -1,50 +1,61 @@
 .utrecht-accordion__button {
- position: relative;
- padding-right: 2rem;
+  position: relative;
+  padding-right: 2rem;
 }
 
 .utrecht-accordion__button::before {
- content: '';
- position: absolute;
- right: 1rem;
- top: 50%;
- transform: translateY(-50%) rotate(135deg);
- width: 0.5rem;
- height: 0.5rem;
- border-style: solid;
- border-width: 0.15em 0.15em 0 0;
- transform-origin: center;
- display: inline-block;
- transition: transform 0.3s ease;
+  content: '';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(135deg);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-style: solid;
+  border-width: 0.15em 0.15em 0 0;
+  transform-origin: center;
+  display: inline-block;
+  transition: transform 0.3s ease;
 }
 
-.utrecht-accordion__button[aria-expanded="true"]::before {
- transform: translateY(-50%) rotate(-45deg);
+.utrecht-accordion__button[aria-expanded='true']::before {
+  transform: translateY(-50%) rotate(-45deg);
 }
 
 figure.info-image-container {
- aspect-ratio: unset;
+  aspect-ratio: unset;
 }
 
-.button-group{
-    display: flex;
-    gap: 1rem;
+.button-group {
+  display: flex;
+  gap: 1rem;
 }
 
 .question-type-radiobox .utrecht-textbox,
 .question-type-checkbox .utrecht-textbox {
- margin-top: -0.5rem;
- margin-bottom: 1rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
 }
 
-.utrecht-form-field--text>.utrecht-form-field__input {
- margin-block-start: 1rem;
+.utrecht-form-field--text > .utrecht-form-field__input {
+  margin-block-start: 1rem;
 }
 
-.utrecht-form-field.utrecht-form-field--checkbox .utrecht-form-label--checkbox .utrecht-checkbox--custom.utrecht-checkbox--html-input:disabled {
- background-color: var(--utrecht-checkbox-disabled-background-color, var(--utrecht-checkbox-background-color));
- border-color: var(--utrecht-checkbox-disabled-border-color, var(--utrecht-checkbox-border-color));
- border-width: var(--utrecht-checkbox-disabled-border-width, var(--utrecht-checkbox-border-width));
- cursor: var(--utrecht-action-disabled-cursor, not-allowed);
- background-image: var(--utrecht-checkbox-disabled-background-image, none);
+.utrecht-form-field.utrecht-form-field--checkbox
+  .utrecht-form-label--checkbox
+  .utrecht-checkbox--custom.utrecht-checkbox--html-input:disabled {
+  background-color: var(
+    --utrecht-checkbox-disabled-background-color,
+    var(--utrecht-checkbox-background-color)
+  );
+  border-color: var(
+    --utrecht-checkbox-disabled-border-color,
+    var(--utrecht-checkbox-border-color)
+  );
+  border-width: var(
+    --utrecht-checkbox-disabled-border-width,
+    var(--utrecht-checkbox-border-width)
+  );
+  cursor: var(--utrecht-action-disabled-cursor, not-allowed);
+  background-image: var(--utrecht-checkbox-disabled-background-image, none);
 }

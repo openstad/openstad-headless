@@ -8,7 +8,7 @@ exports.contructComponentsCdn = async function () {
     process.env.OPENSTAD_COMPONENTS_CDN ||
     'https://cdn.jsdelivr.net/npm/openstad-components@{version}/dist';
 
-    console.log('@@@ openstadComponentsCdn', openstadComponentsCdn);
+  console.log('@@@ openstadComponentsCdn', openstadComponentsCdn);
 
   if (openstadComponentsCdn.match('{version}')) {
     try {
@@ -22,7 +22,7 @@ exports.contructComponentsCdn = async function () {
       if (!version) {
         // fallback
         let packageFile =
-          await fs.readFile(`${__dirname}/../package.json`).toString() || '';
+          (await fs.readFile(`${__dirname}/../package.json`).toString()) || '';
         let match =
           packageFile &&
           packageFile.match(
@@ -41,7 +41,6 @@ exports.contructComponentsCdn = async function () {
   }
 
   console.log('@@@ openstadComponentsCdn', openstadComponentsCdn);
-
 
   return openstadComponentsCdn;
 };
@@ -63,7 +62,7 @@ exports.contructReactAdminCdn = async function () {
       if (!version) {
         // fallback
         let packageFile =
-          await fs.readFile(`${__dirname}/../package.json`).toString() || '';
+          (await fs.readFile(`${__dirname}/../package.json`).toString()) || '';
         let match =
           packageFile &&
           packageFile.match(

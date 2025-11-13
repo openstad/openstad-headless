@@ -38,7 +38,12 @@ function uppercase(str) {
 }
 
 function replace(str, search, replacement) {
-  if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') return '';
+  if (
+    typeof str !== 'string' ||
+    typeof search !== 'string' ||
+    typeof replacement !== 'string'
+  )
+    return '';
   return str.split(search).join(replacement);
 }
 
@@ -49,12 +54,17 @@ function tags(resource) {
 
 function tagGroup(resource, type) {
   if (!Array.isArray(resource.tags)) return '';
-  return resource.tags.filter((tag) => tag.type === type).map((tag) => tag.label || tag.name).join(', ');
+  return resource.tags
+    .filter((tag) => tag.type === type)
+    .map((tag) => tag.label || tag.name)
+    .join(', ');
 }
 
 function status(resource) {
   if (!Array.isArray(resource.statuses)) return '';
-  return resource.statuses.map((status) => status.label || status.name).join(', ');
+  return resource.statuses
+    .map((status) => status.label || status.name)
+    .join(', ');
 }
 
 // Function to apply filters to Nunjucks environment

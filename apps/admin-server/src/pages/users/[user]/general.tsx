@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
+import { ResetResourceDialog } from '@/components/dialog-resource-reset';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,19 +8,18 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ResetResourceDialog } from '@/components/dialog-resource-reset';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
 import useUser from '@/hooks/use-user';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
-  email: z
-    .string()
-    .email('Geen geldig e-mailadres')
-    .optional(),
+  email: z.string().email('Geen geldig e-mailadres').optional(),
   name: z.string().optional(),
   phoneNumber: z.string().optional(),
   address: z.string().optional(),
@@ -34,7 +31,6 @@ const formSchema = z.object({
 });
 
 export default function CreateUserGeneral() {
-
   /* edit user: users are linked through idpUdser.identifier + idpUdser.provider
    * normal fields of linked users are all updated by the API if one of them is
    * updated, so editing one of these linked users suffices
@@ -74,7 +70,9 @@ export default function CreateUserGeneral() {
   useEffect(() => {
     async function fetchTwoFactorStatus() {
       try {
-        const response = await fetch(`/api/openstad/api/project/${user.projectId}/user/${user.id}/two-factor-status`);
+        const response = await fetch(
+          `/api/openstad/api/project/${user.projectId}/user/${user.id}/two-factor-status`
+        );
         const data = await response.json();
         setIsTwoFactorEnabled(data.twoFactorEnabled);
       } catch (error) {
@@ -90,17 +88,20 @@ export default function CreateUserGeneral() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await updateUser({ ...values, id: user.id, projectId: user.projectId });
-      toast.success('User is bijgewerkt')
-    } catch(err:any) {
-      toast.error(err.message || 'User kon niet worden bijgewerkt')
+      toast.success('User is bijgewerkt');
+    } catch (err: any) {
+      toast.error(err.message || 'User kon niet worden bijgewerkt');
     }
   }
 
   async function handleResetTwoFactor() {
     try {
-      await fetch(`/api/openstad/api/project/${user.projectId}/user/${user.id}/reset-two-factor`, {
-        method: 'PUT',
-      });
+      await fetch(
+        `/api/openstad/api/project/${user.projectId}/user/${user.id}/reset-two-factor`,
+        {
+          method: 'PUT',
+        }
+      );
 
       setIsTwoFactorEnabled(false);
       toast.success('Two-factor authentication reset succesvol');
@@ -113,14 +114,12 @@ export default function CreateUserGeneral() {
 
   return (
     <div className="p-6 bg-white rounded-md">
-
       <Form {...form}>
         <Heading size="xl">Algemene instellingen</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-auto">
-
           <FormField
             control={form.control}
             name="email"

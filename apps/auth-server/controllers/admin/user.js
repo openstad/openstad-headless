@@ -5,15 +5,17 @@ const Promise = require('bluebird');
 
 exports.all = (req, res, next) => {
   res.render('admin/user/all', {
-    users: req.users
+    users: req.users,
   });
-}
+};
 
 exports.edit = (req, res) => {
   const userRoles = req.user.roles;
 
   const userClients = req.clients.map((client) => {
-    client.userRole =  userRoles ? userRoles.find(userRole => userRole.clientId === client.id) : {};
+    client.userRole = userRoles
+      ? userRoles.find((userRole) => userRole.clientId === client.id)
+      : {};
     return client;
   });
 
@@ -21,48 +23,72 @@ exports.edit = (req, res) => {
     user: req.userObject,
     roles: req.roles,
     clients: userClients,
-    userRoles: userRoles
+    userRoles: userRoles,
   });
-}
+};
 
 exports.new = (req, res) => {
-  res.render('admin/user/new',  {
+  res.render('admin/user/new', {
     roles: req.roles,
-    clients: req.clients
+    clients: req.clients,
   });
-}
+};
 
 /**
  * @TODO validation
  */
 exports.create = (req, res, next) => {
-  let { name, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+  let {
+    name,
+    email,
+    streetName,
+    houseNumber,
+    suffix,
+    postcode,
+    city,
+    phoneNumber,
+    hashedPhoneNumber,
+    password,
+  } = req.body;
 
   password = bcrypt.hashSync(password, saltRounds);
 
-  db.User
-    .create({
-      name,
-      email,
-      streetName,
-      houseNumber,
-      suffix,
-      postcode,
-      city,
-      phoneNumber,
-      password
-    })
+  db.User.create({
+    name,
+    email,
+    streetName,
+    houseNumber,
+    suffix,
+    postcode,
+    city,
+    phoneNumber,
+    password,
+  })
     .then((response) => {
-      req.flash('success', { msg: 'Succesfully created '});
-      res.redirect('/admin/user/' + response.id );
+      req.flash('success', { msg: 'Succesfully created ' });
+      res.redirect('/admin/user/' + response.id);
     })
     .catch((err) => {
       next(err);
     });
-}
+};
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
+  const keysToUpdate = [
+    'name',
+    'email',
+    'streetName',
+    'houseNumber',
+    'suffix',
+    'postcode',
+    'city',
+    'phoneNumber',
+    'hashedPhoneNumber',
+    'password',
+    'requiredFields',
+    'exposedFields',
+    'authTypes',
+  ];
 
   let data = {};
   keysToUpdate.forEach((key) => {
@@ -85,30 +111,30 @@ exports.update = (req, res, next) => {
   for (let clientId in roles) {
     let roleId = roles[clientId];
     let parsedClientId = parseInt(clientId.replace(/'/g, ''), 10);
-    saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
+    saveRoles.push(() => {
+      return createOrUpdateUserRole(parsedClientId, userId, roleId);
+    });
   }
 
   Promise.map(saveRoles, (saveRole) => {
     return saveRole();
   })
-  .then(() => {
-    return req.userObject.update(data);
-  })
-  .then(() => {
-    req.flash('success', { msg: 'Updated user!' });
-    res.redirect('/admin/user/' + req.userObject.id);
-  })
-  .catch((err) => {
-    req.flash('error', { msg: 'Error!' });
-    res.redirect('/admin/user/' + req.userObject.id);
-  })
-
-}
+    .then(() => {
+      return req.userObject.update(data);
+    })
+    .then(() => {
+      req.flash('success', { msg: 'Updated user!' });
+      res.redirect('/admin/user/' + req.userObject.id);
+    })
+    .catch((err) => {
+      req.flash('error', { msg: 'Error!' });
+      res.redirect('/admin/user/' + req.userObject.id);
+    });
+};
 
 const createOrUpdateUserRole = (clientId, userId, roleId) => {
-  return new Promise ((resolve, reject) => {
-    db.UserRole
-      .findOne({ where: {clientId, userId} })
+  return new Promise((resolve, reject) => {
+    db.UserRole.findOne({ where: { clientId, userId } })
       .then((userRole) => {
         if (userRole) {
           return userRole.update({ roleId });
@@ -116,11 +142,11 @@ const createOrUpdateUserRole = (clientId, userId, roleId) => {
           return db.UserRole.create({ clientId, roleId, userId });
         }
       })
-      .then(()=> {
-        resolve()
+      .then(() => {
+        resolve();
       })
       .catch((err) => {
-        reject(err)
+        reject(err);
       });
   });
-}
+};

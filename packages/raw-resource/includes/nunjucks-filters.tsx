@@ -50,7 +50,12 @@ function uppercase(str: string): string {
 }
 
 function replace(str: string, search: string, replacement: string): string {
-  if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') return '';
+  if (
+    typeof str !== 'string' ||
+    typeof search !== 'string' ||
+    typeof replacement !== 'string'
+  )
+    return '';
   return str.split(search).join(replacement);
 }
 
@@ -61,12 +66,17 @@ function tags(resource: any): string {
 
 function tagGroup(resource: any, type: any): string {
   if (!Array.isArray(resource.tags)) return '';
-  return resource?.tags?.filter((tag: any) => tag.type === type).map((tag: Tag) => tag.label || tag.name).join(', ');
+  return resource?.tags
+    ?.filter((tag: any) => tag.type === type)
+    .map((tag: Tag) => tag.label || tag.name)
+    .join(', ');
 }
 
 function status(resource: any): string {
   if (!Array.isArray(resource.statuses)) return '';
-  return resource.statuses.map((status: Status) => status.label || status.name).join(', ');
+  return resource.statuses
+    .map((status: Status) => status.label || status.name)
+    .join(', ');
 }
 
 function formatDate(dateStr: string, formatStr: string): string {
@@ -75,7 +85,18 @@ function formatDate(dateStr: string, formatStr: string): string {
   try {
     const date = new Date(dateStr);
     const months = [
-      'januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'
+      'januari',
+      'februari',
+      'maart',
+      'april',
+      'mei',
+      'juni',
+      'juli',
+      'augustus',
+      'september',
+      'oktober',
+      'november',
+      'december',
     ];
 
     const map: { [key: string]: string } = {
@@ -92,7 +113,10 @@ function formatDate(dateStr: string, formatStr: string): string {
     };
 
     // Vervang het formaat door de juiste waarden
-    return formatStr.replace(/DD|D|MMMM|MM|M|YYYY|YY|hh|mm|ss/g, (matched) => map[matched] || '');
+    return formatStr.replace(
+      /DD|D|MMMM|MM|M|YYYY|YY|hh|mm|ss/g,
+      (matched) => map[matched] || ''
+    );
   } catch (e) {
     // Return de originele string als het parsen mislukt
     return dateStr;
@@ -101,15 +125,15 @@ function formatDate(dateStr: string, formatStr: string): string {
 
 // Apply filters to Nunjucks environment
 export default {
-  'dump': dump,
-  'cleanArray': cleanArray,
-  'capitalize': capitalize,
-  'truncate': truncate,
-  'lowercase': lowercase,
-  'uppercase': uppercase,
-  'replace': replace,
-  'tags': tags,
-  'status': status,
-  'tagGroup': tagGroup,
-  'formatDate': formatDate
-}
+  dump: dump,
+  cleanArray: cleanArray,
+  capitalize: capitalize,
+  truncate: truncate,
+  lowercase: lowercase,
+  uppercase: uppercase,
+  replace: replace,
+  tags: tags,
+  status: status,
+  tagGroup: tagGroup,
+  formatDate: formatDate,
+};

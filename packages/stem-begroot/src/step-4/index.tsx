@@ -1,16 +1,13 @@
 import { SecondaryButton, Spacer } from '@openstad-headless/ui/src';
+import { Button, Heading3, Paragraph } from '@utrecht/component-library-react';
 import React from 'react';
-import { Heading3, Paragraph, Button } from "@utrecht/component-library-react";
 
 type Props = {
   loginUrl: string;
   voteMessage: string;
   thankMessage: string;
 };
-export const Step4 = ({
-  thankMessage,
-  voteMessage,
-}: Props) => {
+export const Step4 = ({ thankMessage, voteMessage }: Props) => {
   return (
     <>
       <Spacer size={1.5} />

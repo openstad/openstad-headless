@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+
 import { Enquete, EnqueteWidgetProps } from './enquete.js';
 
 const config: EnqueteWidgetProps = {
@@ -10,8 +11,9 @@ const config: EnqueteWidgetProps = {
   resourceId: import.meta.env.VITE_RESOURCE_ID,
   login: {
     label: import.meta.env.VITE_LOGIN_LABEL,
-    url: `${import.meta.env.VITE_API_URL}/auth/project/${import.meta.env.VITE_PROJECT_ID
-      }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
+    url: `${import.meta.env.VITE_API_URL}/auth/project/${
+      import.meta.env.VITE_PROJECT_ID
+    }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
   },
   displayTitle: true,
   title: 'Denk je met ons mee voor jouw woning en woongebouw?',
@@ -156,9 +158,9 @@ const config: EnqueteWidgetProps = {
       title: 'Kies een mooie afbeelding',
       key: 'image',
       questionType: 'imageUpload',
-    }
+    },
   ],
-  afterSubmitUrl: "http://localhost:5173/enquetes/[id]"
+  afterSubmitUrl: 'http://localhost:5173/enquetes/[id]',
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

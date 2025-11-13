@@ -1,8 +1,7 @@
 require('dotenv').config();
 const db = require('./db');
 
-( async function() {
-
+(async function () {
   // let AccessToken = await db.AccessToken.findOne();
   // console.log(JSON.stringify(AccessToken, null, 2));
 
@@ -39,10 +38,8 @@ const db = require('./db');
   let result = await db.User.findOne({ where: { id: 123 } });
   console.log(JSON.stringify(result, null, 2));
 
-  let x = await result.getRoleForClient('uniekecodes')
+  let x = await result.getRoleForClient('uniekecodes');
   console.log(x);
 
   process.exit();
-  
-})()
-
+})();

@@ -1,40 +1,59 @@
-import './resource-overview.css';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Carousel, Icon, Paginator, Pill } from '@openstad-headless/ui/src';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@openstad-headless/admin-server/src/components/ui/tabs';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
+import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
+import {
+  ResourceOverviewMapWidgetProps,
+  dataLayerArray,
+} from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { hasRole } from '@openstad-headless/lib';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { Carousel, Icon, Paginator, Pill } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Filters, PostcodeAutoFillLocation } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { elipsizeHTML } from '../../lib/ui-helpers';
-import { GridderResourceDetail } from './gridder-resource-detail';
-import { hasRole } from '@openstad-headless/lib';
-import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
-
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
+  Filters,
+  PostcodeAutoFillLocation,
+} from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
+import '@utrecht/component-library-css';
+import {
+  Button,
   Heading,
   Heading4,
   Paragraph,
-  Button,
 } from '@utrecht/component-library-react';
-import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
-import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
-import { TabsContent, TabsList, TabsTrigger, Tabs } from "@openstad-headless/admin-server/src/components/ui/tabs";
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import { elipsizeHTML } from '../../lib/ui-helpers';
+import { GridderResourceDetail } from './gridder-resource-detail';
+import './resource-overview.css';
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
-function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLocation) {
+function calcCrow(
+  coords1: PostcodeAutoFillLocation,
+  coords2: PostcodeAutoFillLocation
+) {
   if (!coords1 || !coords2) {
     return 0;
   }
 
-  const coords1Lat = parseFloat(coords1.lat), coords1Lng = parseFloat(coords1.lng), coords2Lat = parseFloat(coords2.lat), coords2Lng = parseFloat(coords2.lng);
-  const toRad = (Value: number) => { return Value * Math.PI / 180; };
+  const coords1Lat = parseFloat(coords1.lat),
+    coords1Lng = parseFloat(coords1.lng),
+    coords2Lat = parseFloat(coords2.lat),
+    coords2Lng = parseFloat(coords2.lng);
+  const toRad = (Value: number) => {
+    return (Value * Math.PI) / 180;
+  };
 
   var R = 6371;
   var dLat = toRad(coords2Lat - coords1Lat);
@@ -42,7 +61,8 @@ function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLo
   var lat1 = toRad(coords1Lat);
   var lat2 = toRad(coords2Lat);
 
-  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+  var a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c;
@@ -56,7 +76,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     resourceOverviewMapWidget?: Omit<
       ResourceOverviewMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'projectId'
-    > & dataLayerArray;
+    > &
+      dataLayerArray;
     renderHeader?: (
       widgetProps: ResourceOverviewWidgetProps,
       resources?: any,
@@ -66,8 +87,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
       selectedProjects?: any[],
       location?: PostcodeAutoFillLocation,
       headingLevel?: string,
-      displayAsTabs?: boolean,
-    ) => React.JSX.Element; renderItem?: (
+      displayAsTabs?: boolean
+    ) => React.JSX.Element;
+    renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
       onItemClick?: () => void
@@ -101,7 +123,12 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
+    tagGroups?: Array<{
+      type: string;
+      label?: string;
+      multiple: boolean;
+      projectId?: any;
+    }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
@@ -168,11 +195,11 @@ const defaultHeaderRenderer = (
   displayMap?: boolean,
   selectedProjects?: any[],
   location?: PostcodeAutoFillLocation,
-  headingLevel?: string,
+  headingLevel?: string
 ) => {
   return (
     <>
-      {displayMap &&
+      {displayMap && (
         <ResourceOverviewMap
           {...widgetProps}
           {...widgetProps.resourceOverviewMapWidget}
@@ -180,12 +207,16 @@ const defaultHeaderRenderer = (
           selectedProjects={selectedProjects}
           locationProx={location}
         />
-      }
-      {displayHeader &&
+      )}
+      {displayHeader && (
         <section className="osc-resource-overview-title-container">
-            <Heading level={Number(headingLevel) || 4} appearance="utrecht-heading-4">{title}</Heading>
+          <Heading
+            level={Number(headingLevel) || 4}
+            appearance="utrecht-heading-4">
+            {title}
+          </Heading>
         </section>
-      }
+      )}
     </>
   );
 };
@@ -225,9 +256,13 @@ const defaultItemRenderer = (
   }
 
   if (Array.isArray(resource?.tags)) {
-    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) =>
+      a.name.localeCompare(b.name)
+    );
 
-    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    const tagWithImage = sortedTags.find(
+      (tag: Tag) => tag.defaultResourceImage
+    );
     defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
@@ -237,7 +272,9 @@ const defaultItemRenderer = (
     let urlToUse = props?.itemLink;
 
     if (!!props.selectedProjects && props.selectedProjects.length > 0) {
-      const project = props.selectedProjects.find(project => project.id === resource.projectId);
+      const project = props.selectedProjects.find(
+        (project) => project.id === resource.projectId
+      );
 
       if (resource?.id && project) {
         urlToUse = project.detailPageLink;
@@ -249,45 +286,76 @@ const defaultItemRenderer = (
     let newUrl = urlToUse?.replace('[id]', resource.id);
     if (!newUrl?.startsWith('http')) {
       if (!newUrl?.startsWith('/')) {
-        newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'
-          }${newUrl}`;
+        newUrl = `${location.pathname}${
+          location.pathname.endsWith('/') ? '' : '/'
+        }${newUrl}`;
       }
       newUrl = `${location.protocol}//${location.host}${newUrl}`;
     }
-    return newUrl
-  }
+    return newUrl;
+  };
 
-  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
-  const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
+  const resourceImages =
+    Array.isArray(resource.images) && resource.images.length > 0
+      ? resource.images
+      : [{ url: defaultImage }];
+  const hasImages =
+    Array.isArray(resourceImages) &&
+    resourceImages.length > 0 &&
+    resourceImages[0].url !== ''
+      ? ''
+      : 'resource-has-no-images';
 
   const firstStatus = resource.statuses
     ? resource.statuses
-      .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+        .filter(
+          (status: { seqnr: number }) =>
+            status.seqnr !== undefined && status.seqnr !== null
+        )
+        .sort(
+          (a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr
+        )[0] || resource.statuses[0]
     : false;
 
-  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
-  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+  const colorClass =
+    firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass =
+    firstStatus && firstStatus.backgroundColor
+      ? `bgColor-${firstStatus.backgroundColor}`
+      : '';
 
   const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
-  const multiProjectLabel = props.selectedProjects && props.selectedProjects.length > 1
-    ? props.selectedProjects.find(project => project.id === resource.projectId)?.label
-    : '';
+  const multiProjectLabel =
+    props.selectedProjects && props.selectedProjects.length > 1
+      ? props.selectedProjects.find(
+          (project) => project.id === resource.projectId
+        )?.label
+      : '';
 
   const isProjectCard = !resource?.id ? 'project-card' : '';
 
   const overviewTagGroups = props.overviewTagGroups || [];
   const displayOverviewTagGroups = props.displayOverviewTagGroups || [];
 
-  const resourceFilteredTags = (overviewTagGroups && Array.isArray(overviewTagGroups) && Array.isArray(resource?.tags))
-    ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
-    : resource?.tags || [];
+  const resourceFilteredTags =
+    overviewTagGroups &&
+    Array.isArray(overviewTagGroups) &&
+    Array.isArray(resource?.tags)
+      ? resource?.tags.filter((tag: { type: string }) =>
+          overviewTagGroups.includes(tag.type)
+        )
+      : resource?.tags || [];
 
   const firstTag = resource?.tags
     ? resource.tags
-      .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
-      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
+        .filter(
+          (tag: { seqnr: number }) =>
+            tag.seqnr !== undefined && tag.seqnr !== null
+        )
+        .sort(
+          (a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr
+        )[0] || resource.tags[0]
     : false;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
 
@@ -295,21 +363,37 @@ const defaultItemRenderer = (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={resource.projectId || ''} >
-
+          className={`resource-card--link ${hasImages} ${isProjectCard}`}
+          data-projectid={resource.projectId || ''}>
           <div>
             <Spacer size={1} />
             {props.displayTitle ? (
-              <Heading level={Number(props.headingLevel) || 4} appearance="utrecht-heading-4">
-                <a href={getUrl()} className="resource-card--link_trigger" dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.title, props.titleMaxLength || 20) }} />
+              <Heading
+                level={Number(props.headingLevel) || 4}
+                appearance="utrecht-heading-4">
+                <a
+                  href={getUrl()}
+                  className="resource-card--link_trigger"
+                  dangerouslySetInnerHTML={{
+                    __html: elipsizeHTML(
+                      resource.title,
+                      props.titleMaxLength || 20
+                    ),
+                  }}
+                />
               </Heading>
             ) : null}
 
-            {(displayOverviewTagGroups && resourceFilteredTags.length > 0) && (
+            {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
-                <Spacer size={.5} />
+                <Spacer size={0.5} />
                 <div className="pill-grid">
-                  {(resourceFilteredTags as Array<{ type: string; name: string }>)
+                  {(
+                    resourceFilteredTags as Array<{
+                      type: string;
+                      name: string;
+                    }>
+                  )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => <Pill text={t.name} />)}
                 </div>
@@ -317,13 +401,25 @@ const defaultItemRenderer = (
             )}
 
             {props.displaySummary ? (
-              <Paragraph dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20) }} />
+              <Paragraph
+                dangerouslySetInnerHTML={{
+                  __html: elipsizeHTML(
+                    resource.summary,
+                    props.summaryMaxLength || 20
+                  ),
+                }}
+              />
             ) : null}
 
             {props.displayDescription ? (
               <Paragraph
                 className="osc-resource-overview-content-item-description"
-                dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.description, props.descriptionMaxLength || 30) }}
+                dangerouslySetInnerHTML={{
+                  __html: elipsizeHTML(
+                    resource.description,
+                    props.descriptionMaxLength || 30
+                  ),
+                }}
               />
             ) : null}
           </div>
@@ -331,8 +427,18 @@ const defaultItemRenderer = (
           <div className="osc-resource-overview-content-item-footer">
             {props.displayVote ? (
               <>
-                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />
+                <Icon
+                  icon="ri-thumb-up-line"
+                  variant="big"
+                  text={resource.yes}
+                  description="Stemmen voor"
+                />
+                <Icon
+                  icon="ri-thumb-down-line"
+                  variant="big"
+                  text={resource.no}
+                  description="Stemmen tegen"
+                />
               </>
             ) : null}
 
@@ -341,29 +447,36 @@ const defaultItemRenderer = (
                 icon="ri-message-line"
                 variant="big"
                 text={resource.commentCount}
-                description='Aantal reacties'
+                description="Aantal reacties"
               />
             ) : null}
           </div>
 
           <Carousel
             items={resourceImages}
-            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
+            buttonText={{
+              next: 'Volgende afbeelding',
+              previous: 'Vorige afbeelding',
+            }}
             className="osc-carousel-container"
             itemRenderer={(i) => (
               <Image
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div
-                      className={`${hasImages} ${statusClasses}`}
-                    >
+                    <div className={`${hasImages} ${statusClasses}`}>
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {!!multiProjectLabel ? (
-                          <span className="status-label">{multiProjectLabel}</span>
+                          <span className="status-label">
+                            {multiProjectLabel}
+                          </span>
                         ) : (
                           resource.statuses?.map((statusTag: any) => (
-                            <span className="status-label" key={statusTag.label}>{statusTag.label}</span>
+                            <span
+                              className="status-label"
+                              key={statusTag.label}>
+                              {statusTag.label}
+                            </span>
                           ))
                         )}
                       </Paragraph>
@@ -378,29 +491,45 @@ const defaultItemRenderer = (
             <div className="resource-card--link_tagicon">
               <Image
                 src={MapIconImage}
-                alt={firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'}
+                alt={
+                  firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'
+                }
               />
             </div>
           )}
-
         </div>
-
       ) : (
-        <div className={`resource-card--link ${hasImages} ${isProjectCard}`} data-projectid={resource.projectId || ''}>
-
+        <div
+          className={`resource-card--link ${hasImages} ${isProjectCard}`}
+          data-projectid={resource.projectId || ''}>
           <div>
             <Spacer size={1} />
             {props.displayTitle ? (
-              <Heading level={Number(props.headingLevel) || 4} appearance="utrecht-heading-4">
-                <button className="resource-card--link_trigger" onClick={() => onItemClick && onItemClick()} dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.title, props.titleMaxLength || 20) }}></button>
+              <Heading
+                level={Number(props.headingLevel) || 4}
+                appearance="utrecht-heading-4">
+                <button
+                  className="resource-card--link_trigger"
+                  onClick={() => onItemClick && onItemClick()}
+                  dangerouslySetInnerHTML={{
+                    __html: elipsizeHTML(
+                      resource.title,
+                      props.titleMaxLength || 20
+                    ),
+                  }}></button>
               </Heading>
             ) : null}
 
-            {(displayOverviewTagGroups && resourceFilteredTags.length > 0) && (
+            {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
-                <Spacer size={.5} />
+                <Spacer size={0.5} />
                 <div className="pill-grid">
-                  {(resourceFilteredTags as Array<{ type: string; name: string }>)
+                  {(
+                    resourceFilteredTags as Array<{
+                      type: string;
+                      name: string;
+                    }>
+                  )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => <Pill text={t.name} />)}
                 </div>
@@ -408,19 +537,42 @@ const defaultItemRenderer = (
             )}
 
             {props.displaySummary ? (
-              <Paragraph dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.summary, props.summaryMaxLength || 20) }} />
+              <Paragraph
+                dangerouslySetInnerHTML={{
+                  __html: elipsizeHTML(
+                    resource.summary,
+                    props.summaryMaxLength || 20
+                  ),
+                }}
+              />
             ) : null}
 
             {props.displayDescription ? (
-              <Paragraph className="osc-resource-overview-content-item-description" dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.description, props.descriptionMaxLength || 30) }} />
+              <Paragraph
+                className="osc-resource-overview-content-item-description"
+                dangerouslySetInnerHTML={{
+                  __html: elipsizeHTML(
+                    resource.description,
+                    props.descriptionMaxLength || 30
+                  ),
+                }}
+              />
             ) : null}
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
             {props.displayVote ? (
               <>
-                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
+                <Icon
+                  icon="ri-thumb-up-line"
+                  variant="big"
+                  text={resource.yes}
+                />
+                <Icon
+                  icon="ri-thumb-down-line"
+                  variant="big"
+                  text={resource.no}
+                />
               </>
             ) : null}
 
@@ -435,22 +587,27 @@ const defaultItemRenderer = (
 
           <Carousel
             items={resourceImages}
-            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
+            buttonText={{
+              next: 'Volgende afbeelding',
+              previous: 'Vorige afbeelding',
+            }}
             className="osc-carousel-container"
             itemRenderer={(i) => (
               <Image
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div
-                      className={`${hasImages} ${statusClasses}`}
-                    >
+                    <div className={`${hasImages} ${statusClasses}`}>
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {!!multiProjectLabel ? (
-                          <span className="status-label">{multiProjectLabel}</span>
+                          <span className="status-label">
+                            {multiProjectLabel}
+                          </span>
                         ) : (
                           resource.statuses?.map((statusTag: any) => (
-                            <span className="status-label">{statusTag.label}</span>
+                            <span className="status-label">
+                              {statusTag.label}
+                            </span>
                           ))
                         )}
                       </Paragraph>
@@ -465,14 +622,14 @@ const defaultItemRenderer = (
             <div className="resource-card--link_tagicon">
               <Image
                 src={MapIconImage}
-                alt={firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'}
+                alt={
+                  firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'
+                }
               />
             </div>
           )}
-
         </div>
       )}
-
     </>
   );
 };
@@ -525,21 +682,29 @@ function ResourceOverviewInner({
       .split(',')
       .filter((t) => t && !isNaN(+t.trim()))
       .map((t) => Number.parseInt(t));
-  }
+  };
 
   const statusIdsToLimitResourcesTo = stringToArray(onlyIncludeStatusIds);
 
   const { data: allTags } = datastore.useTags({
     projectId: props.projectId,
-    type: ''
+    type: '',
   });
 
-  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
+  function determineTags(
+    includeOrExclude: string,
+    allTags: any,
+    tagIdsArray: Array<number>
+  ) {
     let filteredTagIdsArray: Array<number> = [];
     try {
       if (includeOrExclude === 'exclude' && tagIdsArray.length > 0) {
-        const filteredTags = allTags.filter((tag: { id: number }) => !tagIdsArray.includes((tag.id)));
-        const filteredTagIds = filteredTags.map((tag: { id: number }) => tag.id);
+        const filteredTags = allTags.filter(
+          (tag: { id: number }) => !tagIdsArray.includes(tag.id)
+        );
+        const filteredTagIds = filteredTags.map(
+          (tag: { id: number }) => tag.id
+        );
 
         filteredTagIdsArray = filteredTagIds;
       } else if (includeOrExclude === 'include') {
@@ -550,47 +715,59 @@ function ResourceOverviewInner({
 
       return {
         tagsString: filteredTagsIdsString || '',
-        tags: filteredTagIdsArray || []
+        tags: filteredTagIdsArray || [],
       };
-
     } catch (error) {
       console.error('Error processing tags:', error);
 
       return {
         tagsString: '',
-        tags: []
+        tags: [],
       };
     }
   }
 
   useEffect(() => {
-    const {
-      tags: filteredTagIdsArray
-    } = determineTags(includeOrExcludeTagIds, allTags, stringToArray(onlyIncludeTagIds));
+    const { tags: filteredTagIdsArray } = determineTags(
+      includeOrExcludeTagIds,
+      allTags,
+      stringToArray(onlyIncludeTagIds)
+    );
 
     setTagIdsToLimitResourcesTo(filteredTagIdsArray);
   }, [allTags]);
 
-  const [tagIdsToLimitResourcesTo, setTagIdsToLimitResourcesTo] = useState<Array<number>>([]);
+  const [tagIdsToLimitResourcesTo, setTagIdsToLimitResourcesTo] = useState<
+    Array<number>
+  >([]);
 
   const urlParams = new URLSearchParams(window.location.search);
   const urlTagIds = urlParams.get('tagIds');
   const urlStatusIds = urlParams.get('statusIds');
 
   const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : undefined;
-  const urlStatusIdsArray = urlStatusIds ? stringToArray(urlStatusIds) : undefined;
+  const urlStatusIdsArray = urlStatusIds
+    ? stringToArray(urlStatusIds)
+    : undefined;
 
   const [open, setOpen] = React.useState(false);
-  const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
+  const initStatuses =
+    urlStatusIdsArray && urlStatusIdsArray.length > 0
+      ? urlStatusIdsArray
+      : statusIdsToLimitResourcesTo || [];
 
   useEffect(() => {
-    const initTags = Array.from(new Set([...(urlTagIdsArray || []), ...tagIdsToLimitResourcesTo]))
+    const initTags = Array.from(
+      new Set([...(urlTagIdsArray || []), ...tagIdsToLimitResourcesTo])
+    );
 
-    const includeTags = includeOrExcludeTagIds === 'include'
-      ? initTags
-      : urlTagIdsArray || [];
+    const includeTags =
+      includeOrExcludeTagIds === 'include' ? initTags : urlTagIdsArray || [];
 
-    const excludeTags = includeOrExcludeTagIds === 'exclude' ? stringToArray(onlyIncludeTagIds) : [];
+    const excludeTags =
+      includeOrExcludeTagIds === 'exclude'
+        ? stringToArray(onlyIncludeTagIds)
+        : [];
 
     setIncludeTags(includeTags);
     setTags(includeTags);
@@ -616,9 +793,10 @@ function ResourceOverviewInner({
   const [resources, setResources] = useState<Array<any>>([]);
   const [filteredResources, setFilteredResources] = useState<Array<any>>([]);
 
-  const projectIds = selectedProjects
-    ?.filter(project => !project?.excludeResourcesInOverview)
-    .map(project => project.id) || [];
+  const projectIds =
+    selectedProjects
+      ?.filter((project) => !project?.excludeResourcesInOverview)
+      .map((project) => project.id) || [];
 
   const { data: resourcesWithPagination, isLoading } = datastore.useResources({
     pageSize: 999999,
@@ -627,33 +805,38 @@ function ResourceOverviewInner({
     tags: [],
     sort: undefined,
     projectIds: projectIds || [],
-    allowMultipleProjects: selectedProjects && selectedProjects.length > 1
+    allowMultipleProjects: selectedProjects && selectedProjects.length > 1,
   });
 
   useEffect(() => {
     if (JSON.stringify(tags) !== JSON.stringify(includeTags)) {
-      const tagsForIncluding = tags.map((tag) => typeof (tag) === 'string' ? parseInt(tag, 10) : tag)
-      setIncludeTags(tagsForIncluding)
+      const tagsForIncluding = tags.map((tag) =>
+        typeof tag === 'string' ? parseInt(tag, 10) : tag
+      );
+      setIncludeTags(tagsForIncluding);
     }
-  }, [tags])
+  }, [tags]);
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (resourcesWithPagination && !(selectedProjects.length > 0 && projectIds.length === 0)) {
+    if (
+      resourcesWithPagination &&
+      !(selectedProjects.length > 0 && projectIds.length === 0)
+    ) {
       setResources(resourcesWithPagination.records || []);
     }
   }, [resourcesWithPagination, pageSize]);
 
   useEffect(() => {
     // @ts-ignore
-    const intTags = tags.map(tag => parseInt(tag, 10));
+    const intTags = tags.map((tag) => parseInt(tag, 10));
 
     const groupedTags: { [key: string]: number[] } = {};
 
-    intTags.forEach(tagId => {
+    intTags.forEach((tagId) => {
       // @ts-ignore
-      const tag = allTags.find(tag => tag.id === tagId);
+      const tag = allTags.find((tag) => tag.id === tagId);
       if (tag) {
         const tagType = tag.type;
         if (!groupedTags[tagType]) {
@@ -669,12 +852,17 @@ function ResourceOverviewInner({
       selectedProjects.forEach((project) => {
         if (project.includeProjectsInOverview === false) return;
 
-        const tagsArray = project?.tags ? project.tags.split(',').map(tag => tag.trim()) : [];
-        const tags = tagsArray.map(tag => {
-          const foundTag = allTags.find((t: { id: number }) => t.id === parseInt(tag));
-          return foundTag ? foundTag : null;
-        })
-          .filter(tag => tag !== null);
+        const tagsArray = project?.tags
+          ? project.tags.split(',').map((tag) => tag.trim())
+          : [];
+        const tags = tagsArray
+          .map((tag) => {
+            const foundTag = allTags.find(
+              (t: { id: number }) => t.id === parseInt(tag)
+            );
+            return foundTag ? foundTag : null;
+          })
+          .filter((tag) => tag !== null);
 
         const projectObject = {
           title: project?.overviewTitle || '',
@@ -682,15 +870,15 @@ function ResourceOverviewInner({
           description: project?.overviewDescription || '',
           images: [
             {
-              "url": project?.overviewImage || ''
-            }
+              url: project?.overviewImage || '',
+            },
           ],
           overviewUrl: project?.overviewUrl || '',
           projectId: project.id,
           createdAt: project?.createdAt || '',
           tags: tags,
           uniqueId: `project-${project.id}`,
-        }
+        };
 
         if (search) {
           const searchLower = search.toLowerCase();
@@ -707,82 +895,106 @@ function ResourceOverviewInner({
       });
     }
 
-    const uniqueResources = allResources?.filter((resource: any, index: number, self: any) => {
-      if (resource.uniqueId) {
-        return index === self.findIndex((t: any) => t.uniqueId === resource.uniqueId);
+    const uniqueResources = allResources?.filter(
+      (resource: any, index: number, self: any) => {
+        if (resource.uniqueId) {
+          return (
+            index ===
+            self.findIndex((t: any) => t.uniqueId === resource.uniqueId)
+          );
+        }
+        return true;
       }
-      return true;
-    });
+    );
 
     const combinedResources = [...uniqueResources, ...resources];
 
-    const filtered = combinedResources && (
-      combinedResources.filter((resource: any) => {
-        const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
-          excludeTags.includes(tag.id)
-        );
-        if (hasExcludedTag) return false;
+    const filtered =
+      combinedResources &&
+      combinedResources
+        .filter((resource: any) => {
+          const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
+            excludeTags.includes(tag.id)
+          );
+          if (hasExcludedTag) return false;
 
-        if (includeTags.length > 0) {
-          if (filterBehavior === 'and') {
-            return includeTags.every(tagId =>
-              resource.tags?.some((tag: { id: number }) => tag.id === tagId)
-            );
-          } else {
-            return resource.tags?.some((tag: { id: number }) =>
-              includeTags.includes(tag.id)
+          if (includeTags.length > 0) {
+            if (filterBehavior === 'and') {
+              return includeTags.every(
+                (tagId) =>
+                  resource.tags?.some((tag: { id: number }) => tag.id === tagId)
+              );
+            } else {
+              return resource.tags?.some((tag: { id: number }) =>
+                includeTags.includes(tag.id)
+              );
+            }
+          }
+
+          return true;
+        })
+        ?.filter((resource: any) => {
+          if (!location) return true;
+          if (!resource?.location?.lat || !resource?.location?.lng)
+            return false;
+
+          const resourceLocation: PostcodeAutoFillLocation = {
+            lat: resource.location.lat.toString(),
+            lng: resource.location.lng.toString(),
+          };
+          const distance = calcCrow(location, resourceLocation);
+          return distance <= (location?.proximity || 999);
+        })
+        ?.filter((resource: any) => {
+          if (!statusIdsToLimitResourcesTo?.length) return true;
+
+          const hasMatchingStatus = resource.statuses?.some(
+            (o: { id: number }) => statusIdsToLimitResourcesTo.includes(o.id)
+          );
+
+          return (
+            (includeOrExcludeStatusIds === 'include') === hasMatchingStatus
+          );
+        })
+        ?.sort((a: any, b: any) => {
+          if (sort === 'createdAt_desc') {
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
           }
-        }
+          if (sort === 'createdAt_asc') {
+            return (
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+          }
+          if (sort === 'title') {
+            return a.title.localeCompare(b.title);
+          }
+          if (sort === 'votes_desc') {
+            return b.yes - a.yes;
+          }
+          if (sort === 'votes_asc' || sort === 'ranking') {
+            return a.yes - b.yes;
+          }
+          if (sort === 'random') {
+            return Math.random() - 0.5;
+          }
 
-        return true;
-      })
-    )
-      ?.filter((resource: any) => {
-        if (!location) return true;
-        if (!resource?.location?.lat || !resource?.location?.lng) return false;
-
-        const resourceLocation: PostcodeAutoFillLocation = {
-          lat: resource.location.lat.toString(),
-          lng: resource.location.lng.toString(),
-        };
-        const distance = calcCrow(location, resourceLocation);
-        return distance <= (location?.proximity || 999);
-      })
-      ?.filter((resource: any) => {
-        if (!statusIdsToLimitResourcesTo?.length) return true;
-
-        const hasMatchingStatus = resource.statuses?.some((o: { id: number }) =>
-          statusIdsToLimitResourcesTo.includes(o.id)
-        );
-
-        return includeOrExcludeStatusIds === 'include' === hasMatchingStatus;
-      })
-      ?.sort((a: any, b: any) => {
-        if (sort === 'createdAt_desc') {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        }
-        if (sort === 'createdAt_asc') {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        }
-        if (sort === 'title') {
-          return a.title.localeCompare(b.title);
-        }
-        if (sort === 'votes_desc') {
-          return b.yes - a.yes;
-        }
-        if (sort === 'votes_asc' || sort === 'ranking') {
-          return a.yes - b.yes;
-        }
-        if (sort === 'random') {
-          return Math.random() - 0.5;
-        }
-
-        return 0;
-      });
+          return 0;
+        });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location]);
+  }, [
+    resources,
+    tags,
+    statuses,
+    search,
+    sort,
+    allTags,
+    excludeTags,
+    includeTags,
+    location,
+  ]);
 
   useEffect(() => {
     if (filteredResources) {
@@ -803,7 +1015,7 @@ function ResourceOverviewInner({
         onLocationChange(location);
       }
     }
-  }, [ JSON.stringify(filteredResources) ]);
+  }, [JSON.stringify(filteredResources)]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
@@ -813,7 +1025,9 @@ function ResourceOverviewInner({
         let urlToUse = props.itemLink;
 
         if (selectedProjects.length > 0) {
-          const project = selectedProjects.find(project => project.id === resource.projectId);
+          const project = selectedProjects.find(
+            (project) => project.id === resource.projectId
+          );
 
           if (resource?.id && project) {
             urlToUse = project.detailPageLink;
@@ -829,8 +1043,9 @@ function ResourceOverviewInner({
           let newUrl = urlToUse.replace('[id]', resource.id);
           if (!newUrl.startsWith('http')) {
             if (!newUrl.startsWith('/')) {
-              newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'
-                }${newUrl}`;
+              newUrl = `${location.pathname}${
+                location.pathname.endsWith('/') ? '' : '/'
+              }${newUrl}`;
             }
             newUrl = `${location.protocol}//${location.host}${newUrl}`;
           }
@@ -848,16 +1063,21 @@ function ResourceOverviewInner({
 
   const filterNeccesary =
     allowFiltering &&
-    (props.displaySearch || props.displaySorting || props.displayTagFilters || props.displayLocationFilter);
+    (props.displaySearch ||
+      props.displaySorting ||
+      props.displayTagFilters ||
+      props.displayLocationFilter);
 
   const getDisplayVariant = (variant: string) => {
     if (!variant) {
       return ' ';
     }
     return ` --${variant}`;
-  }
+  };
 
-  const randomIdRef = useRef(Math.random().toString(36).replace('0.', 'container_'));
+  const randomIdRef = useRef(
+    Math.random().toString(36).replace('0.', 'container_')
+  );
   const randomId = randomIdRef.current;
 
   const scrollToTop = (randomId: string) => {
@@ -865,34 +1085,49 @@ function ResourceOverviewInner({
       const divElement = document.getElementById(randomId);
 
       if (divElement) {
-        divElement.scrollIntoView({ block: "start", behavior: "auto" });
+        divElement.scrollIntoView({ block: 'start', behavior: 'auto' });
       }
     }, 200);
-  }
+  };
 
   const overviewSection = (
-    <section className="osc-resource-overview-resource-collection" id={randomId}>
+    <section
+      className="osc-resource-overview-resource-collection"
+      id={randomId}>
       {filteredResources?.length === 0 ? (
         isLoading ? (
           <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
         ) : (
           <Paragraph className="osc-no-results-text">
-            {search ? `Er zijn geen resultaten gevonden voor "${search}".` : 'Geen resultaten gevonden.'}
+            {search
+              ? `Er zijn geen resultaten gevonden voor "${search}".`
+              : 'Geen resultaten gevonden.'}
           </Paragraph>
         )
-      ) :
+      ) : (
         filteredResources
           ?.slice(page * pageSize, (page + 1) * pageSize)
           ?.map((resource: any, index: number) => {
             return (
-              <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
-                {renderItem(resource, { ...props, displayType, selectedProjects, displayOverviewTagGroups, overviewTagGroups }, () => {
-                  onResourceClick(resource, index);
-                })}
+              <React.Fragment
+                key={`resource-item-${resource?.id || resource?.uniqueId}`}>
+                {renderItem(
+                  resource,
+                  {
+                    ...props,
+                    displayType,
+                    selectedProjects,
+                    displayOverviewTagGroups,
+                    overviewTagGroups,
+                  },
+                  () => {
+                    onResourceClick(resource, index);
+                  }
+                )}
               </React.Fragment>
             );
           })
-      }
+      )}
     </section>
   );
 
@@ -904,8 +1139,15 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
-            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
+            items={
+              filteredResources && filteredResources?.length > 0
+                ? filteredResources
+                : []
+            }
+            buttonText={{
+              next: 'Volgende afbeelding',
+              previous: 'Vorige afbeelding',
+            }}
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}
@@ -937,11 +1179,23 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel || '4') : null}
+        {displayBanner || displayMap
+          ? renderHeader(
+              props,
+              filteredResources || [],
+              bannerText,
+              displayBanner,
+              displayMap && !displayAsTabs,
+              selectedProjects,
+              location,
+              props.headingLevel || '4'
+            )
+          : null}
 
         <section
-          className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
-            }`}>
+          className={`osc-resource-overview-content ${
+            !filterNeccesary ? 'full' : ''
+          }`}>
           {props.displaySearchText ? (
             <div className="osc-resourceoverview-search-container col-span-full">
               {props.textActiveSearch && search && (
@@ -975,15 +1229,29 @@ function ResourceOverviewInner({
               showActiveTags={showActiveTags}
               onUpdateFilter={(f) => {
                 if (f.tags.length === 0) {
-                  setTags(includeOrExcludeTagIds === 'include' ? tagIdsToLimitResourcesTo : []);
+                  setTags(
+                    includeOrExcludeTagIds === 'include'
+                      ? tagIdsToLimitResourcesTo
+                      : []
+                  );
                 } else {
                   setTags(f.tags);
                 }
-                if (['createdAt_desc', 'createdAt_asc', 'title', 'votes_desc', 'votes_asc', 'ranking', 'random'].includes(f.sort)) {
+                if (
+                  [
+                    'createdAt_desc',
+                    'createdAt_asc',
+                    'title',
+                    'votes_desc',
+                    'votes_asc',
+                    'ranking',
+                    'random',
+                  ].includes(f.sort)
+                ) {
                   setSort(f.sort);
                 }
                 setSearch(f.search.text);
-                setLocation(f.location)
+                setLocation(f.location);
               }}
               preFilterTags={urlTagIdsArray}
             />
@@ -992,20 +1260,32 @@ function ResourceOverviewInner({
           {displayAsTabs ? (
             <div className="osc-resource-overview-tabs-container">
               <TabsList>
-                <TabsTrigger value="list"><Icon icon="ri-list-unordered" />{listTabTitle}</TabsTrigger>
-                <TabsTrigger value="map"><Icon icon="ri-map-pin-line" />{mapTabTitle}</TabsTrigger>
+                <TabsTrigger value="list">
+                  <Icon icon="ri-list-unordered" />
+                  {listTabTitle}
+                </TabsTrigger>
+                <TabsTrigger value="map">
+                  <Icon icon="ri-map-pin-line" />
+                  {mapTabTitle}
+                </TabsTrigger>
               </TabsList>
-              <TabsContent value="list">
-                {overviewSection}
-              </TabsContent>
+              <TabsContent value="list">{overviewSection}</TabsContent>
               <TabsContent value="map">
-                {renderHeader(props, (filteredResources || []), bannerText, false, true, selectedProjects, location, props.headingLevel || '4')}
+                {renderHeader(
+                  props,
+                  filteredResources || [],
+                  bannerText,
+                  false,
+                  true,
+                  selectedProjects,
+                  location,
+                  props.headingLevel || '4'
+                )}
               </TabsContent>
             </div>
           ) : (
             overviewSection
           )}
-
         </section>
         {props.displayPagination && (
           <>

@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useStatus(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -8,13 +8,22 @@ export default function useStatus(projectId?: string) {
 
   const statusListSwr = useSWR(projectNumber ? url : null);
 
-  async function createStatus(name: string, seqnr: number, addToNewResources: boolean) {
+  async function createStatus(
+    name: string,
+    seqnr: number,
+    addToNewResources: boolean
+  ) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId: projectNumber, name, seqnr, addToNewResources }),
+      body: JSON.stringify({
+        projectId: projectNumber,
+        name,
+        seqnr,
+        addToNewResources,
+      }),
     });
 
     return await res.json();
@@ -40,5 +49,5 @@ export default function useStatus(projectId?: string) {
     }
   }
 
-  return {...statusListSwr, createStatus, removeStatus}
+  return { ...statusListSwr, createStatus, removeStatus };
 }

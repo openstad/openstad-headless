@@ -1,13 +1,19 @@
-import './agenda.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer } from '@openstad-headless/ui/src';
-import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
+import '@utrecht/component-library-css';
+import {
+  Heading3,
+  Heading4,
+  LinkList,
+  LinkListLink,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading4, Heading3, Paragraph, LinkListLink, LinkList } from "@utrecht/component-library-react";
+import './agenda.css';
 
 export type AgendaWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -43,12 +49,12 @@ function Agenda(props: AgendaWidgetProps) {
             .map((item) => (
               <div
                 key={item.trigger}
-                className={`osc-agenda-item${item.active ? ' --active-item' : ''}`}
-                aria-current={item.active ? 'true' : undefined}
-              >
+                className={`osc-agenda-item${
+                  item.active ? ' --active-item' : ''
+                }`}
+                aria-current={item.active ? 'true' : undefined}>
                 <div className="osc-date-circle"></div>
                 <div className="osc-agenda-content">
-
                   <Heading4>{item.title}</Heading4>
                   <Paragraph>{item.description}</Paragraph>
                   {item.links && item.links?.length > 0 && (

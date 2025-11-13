@@ -1,27 +1,28 @@
+import area from './area';
+import areas from './areas';
+import choiceGuideResultCount from './choiceGuideResultCount';
+import choiceGuideResults from './choiceGuideResults';
+import choicesguide from './choicesguide';
+import comments from './comments';
+import commentsByProject from './commentsByProject';
+import datalayer from './datalayer';
+import enqueteResultCount from './enqueteResultCount';
 import fetchx from './fetch';
 import resource from './resource';
-import comments from './comments';
 import resources from './resources';
-import choicesguide from "./choicesguide";
+import submissions from './submissions';
 import tags from './tags';
 import user from './user';
-import area from './area';
-import datalayer from './datalayer';
-import widget from './widget';
-import areas from './areas';
-import userVote from './user-vote';
-import submissions from './submissions';
-import commentsByProject from './commentsByProject';
-import choiceGuideResults from './choiceGuideResults';
 import userActivity from './user-activity';
-import choiceGuideResultCount from './choiceGuideResultCount';
-import enqueteResultCount from './enqueteResultCount';
+import userVote from './user-vote';
+import widget from './widget';
 
-const windowGlobal = typeof window !== "undefined" ? window : {};
+const windowGlobal = typeof window !== 'undefined' ? window : {};
 
 windowGlobal.OpenStadAPI = null;
 export default function singelton(props = { config: {} }) {
-  return (windowGlobal.OpenStadAPI = windowGlobal.OpenStadAPI || new API(props));
+  return (windowGlobal.OpenStadAPI =
+    windowGlobal.OpenStadAPI || new API(props));
 }
 
 export function getApiFetchMethodNames() {
@@ -47,16 +48,16 @@ function API(props = {}) {
   self.fetch = fetchx.bind(self);
 
   self.choiceGuideResults = {
-    fetch: choiceGuideResults.fetch.bind(self)
-  }
-  
+    fetch: choiceGuideResults.fetch.bind(self),
+  };
+
   self.choiceGuideResultCount = {
-    fetch: choiceGuideResultCount.fetch.bind(self)
-  }
+    fetch: choiceGuideResultCount.fetch.bind(self),
+  };
 
   self.enqueteResultCount = {
-    fetch: enqueteResultCount.fetch.bind(self)
-  }
+    fetch: enqueteResultCount.fetch.bind(self),
+  };
 
   self.comments = {
     fetch: comments.fetch.bind(self),
@@ -67,8 +68,8 @@ function API(props = {}) {
   };
 
   self.commentsByProject = {
-    fetch: commentsByProject.fetch.bind(self)
-  }
+    fetch: commentsByProject.fetch.bind(self),
+  };
 
   self.resource = {
     fetch: resource.fetch.bind(self),
@@ -81,18 +82,18 @@ function API(props = {}) {
     fetch: resources.fetch.bind(self),
     delete: resources.delete.bind(self),
     create: resources.create.bind(self),
-    submitLike: resources.submitLike.bind(self)
+    submitLike: resources.submitLike.bind(self),
   };
 
   self.choicesguide = {
     fetch: choicesguide.fetch.bind(self),
-    create: choicesguide.create.bind(self)
+    create: choicesguide.create.bind(self),
   };
 
   self.submissions = {
     fetch: submissions.fetch.bind(self),
-    create: submissions.create.bind(self)
-  }
+    create: submissions.create.bind(self),
+  };
 
   self.tags = {
     fetch: tags.fetch.bind(self),

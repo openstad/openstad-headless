@@ -1,12 +1,13 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import {Button} from './button.tsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+import { Button } from './button.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Button 
-        direction="row"
-        buttons={`[
+    <Button
+      direction="row"
+      buttons={`[
           {
             "label": "test label 1",
             "href": "#",
@@ -20,5 +21,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             "target": "_self"
           }
         ]`}></Button>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

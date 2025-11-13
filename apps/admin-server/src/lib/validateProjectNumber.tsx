@@ -1,4 +1,7 @@
-export function validateProjectNumber(projectNumber: string | string[] | undefined, allowZero: boolean = false): number | undefined {
+export function validateProjectNumber(
+  projectNumber: string | string[] | undefined,
+  allowZero: boolean = false
+): number | undefined {
   if (projectNumber === undefined || projectNumber === null) {
     return undefined;
   }
@@ -7,13 +10,9 @@ export function validateProjectNumber(projectNumber: string | string[] | undefin
 
   const parsedNumber = parseInt(value, 10);
 
-  if (
-    !Number.isInteger(parsedNumber)
-    || parsedNumber < (allowZero ? 0 : 1)
-  ) {
+  if (!Number.isInteger(parsedNumber) || parsedNumber < (allowZero ? 0 : 1)) {
     return undefined;
   }
 
   return parsedNumber;
 }
-

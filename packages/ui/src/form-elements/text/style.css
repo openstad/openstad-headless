@@ -25,13 +25,29 @@
   font-size: 14px;
 }
 
-.utrecht-form-field.utrecht-form-field--text:has(.utrecht-textbox[required]) .utrecht-textbox--html-input:invalid{
-    border-color: inherit;
-    border-width: 1px 1px 3px 1px;
+.utrecht-form-field.utrecht-form-field--text:has(.utrecht-textbox[required])
+  .utrecht-textbox--html-input:invalid {
+  border-color: inherit;
+  border-width: 1px 1px 3px 1px;
 }
 
-.question-type-text:has(.utrecht-form-field-error-message:not(:empty)) .utrecht-form-field .utrecht-textbox--html-input,
-.question-type-text:has(.utrecht-form-field-error-message:not(:empty)) .utrecht-form-field .utrecht-textarea--html-textarea,
-.question-type-text:has(.utrecht-form-field-error-message:not(:empty)) .utrecht-form-field .utrecht-textbox--html-input:invalid{
-    border-color: var(--utrecht-textbox-invalid-border-color, var(--utrecht-form-control-invalid-border-color, var(--utrecht-textbox-border-color, var(--utrecht-form-control-border-color))));
+.question-type-text:has(.utrecht-form-field-error-message:not(:empty))
+  .utrecht-form-field
+  .utrecht-textbox--html-input,
+.question-type-text:has(.utrecht-form-field-error-message:not(:empty))
+  .utrecht-form-field
+  .utrecht-textarea--html-textarea,
+.question-type-text:has(.utrecht-form-field-error-message:not(:empty))
+  .utrecht-form-field
+  .utrecht-textbox--html-input:invalid {
+  border-color: var(
+    --utrecht-textbox-invalid-border-color,
+    var(
+      --utrecht-form-control-invalid-border-color,
+      var(
+        --utrecht-textbox-border-color,
+        var(--utrecht-form-control-border-color)
+      )
+    )
+  );
 }

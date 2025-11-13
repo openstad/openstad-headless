@@ -1,24 +1,21 @@
-{% extends 'emails/layout.html' %}
-
-{% block body %}
+{% extends 'emails/layout.html' %} {% block body %}
 <mj-raw>
   <!-- Company Header -->
 </mj-raw>
 <mj-section>
   <mj-column width="200px">
-    <mj-image src="{{imagePath}}/logo-openstad.png">
-    </mj-image>
+    <mj-image src="{{imagePath}}/logo-openstad.png"> </mj-image>
   </mj-column>
 </mj-section>
-  <!-- Mail context -->
+<!-- Mail context -->
 <mj-section>
   <mj-column width="400px">
     <mj-image src="{{imagePath}}/mail-header.jpg"></mj-image>
   </mj-column>
   <mj-column width="400px">
     <mj-text font-size="20px" color="#111" font-family="helvetica"
-    >Inloggen vereist</mj-text
-  >
+      >Inloggen vereist</mj-text
+    >
     <mj-text
       font-size="14px"
       line-height="22px"
@@ -26,31 +23,33 @@
       font-family="helvetica">
       Beste {{name or 'bezoeker'}},
       <br />
-      Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig.
+      Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik
+      op de knop hieronder om automatisch in te loggen. De knop is 10 minuten
+      geldig.
     </mj-text>
     <mj-button background-color="#12B886" href="{{loginurl}}">Log in</mj-button>
   </mj-column>
   <mj-column width="400px">
     <mj-text
-          font-size="14px"
-          line-height="22px"
-          color="#444"
-          font-family="helvetica"
-          >Of gebruik deze link in je browser:</mj-text>
+      font-size="14px"
+      line-height="22px"
+      color="#444"
+      font-family="helvetica"
+      >Of gebruik deze link in je browser:</mj-text
+    >
   </mj-column>
-  <mj-column  width="400px">
+  <mj-column width="400px">
     <mj-text
-          font-size="14px"
-          line-height="22px"
-          color="#444"
-          font-family="helvetica"
-          >{{loginurl}}</mj-text>
+      font-size="14px"
+      line-height="22px"
+      color="#444"
+      font-family="helvetica"
+      >{{loginurl}}</mj-text
+    >
   </mj-column>
 </mj-section>
 <mj-raw>
   <!-- Alternate link -->
 </mj-raw>
-<mj-section>
-
-</mj-section>
+<mj-section> </mj-section>
 {% endblock %}

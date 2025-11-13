@@ -1,7 +1,8 @@
-import React, {useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { IconButton } from '../iconbutton';
 import '../index.css';
 import './index.css';
-import { IconButton } from '../iconbutton';
 
 type Props = {
   items: Array<any>;
@@ -12,7 +13,7 @@ type Props = {
   buttonText?: {
     next?: string;
     previous?: string;
-  }
+  };
   beforeIndexChange?: () => void;
   setIndexInParent?: (setter: (index: number) => void) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
@@ -45,11 +46,7 @@ export function Carousel({
   };
 
   return (
-    <div
-      {...props}
-      className={`osc ${props.className} osc-carousel width-100`}
-    >
-
+    <div {...props} className={`osc ${props.className} osc-carousel width-100`}>
       {items.length > 1 && (
         <div className="carousel-button-container">
           <div className="osc-carousel-navigation-button-wrapper osc-carousel-previous">
@@ -76,8 +73,6 @@ export function Carousel({
       )}
 
       <div className="carousel-items">{itemRenderer(items.at(index))}</div>
-
-
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,19 +7,18 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { useProject } from '@/hooks/use-project';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
-import {useProject} from "@/hooks/use-project";
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   step0: z.string().optional(),
@@ -48,10 +48,14 @@ export default function BegrootmoduleExplanation(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      step0: props.step0 ?? `<h4>Kies jouw favoriete inzendingen per thema!</h4>
+      step0:
+        props.step0 ??
+        `<h4>Kies jouw favoriete inzendingen per thema!</h4>
 <ol type="1">
 <li>Selecteer hieronder een thema om de inzendingen voor dat thema te bekijken</li>
-<li>Kies jouw favoriete inzendingen voor dat thema${voteType === 'budgetingPerTag' ? 'binnen het beschikbare budget' : ''}</li>
+<li>Kies jouw favoriete inzendingen voor dat thema${
+          voteType === 'budgetingPerTag' ? 'binnen het beschikbare budget' : ''
+        }</li>
 <li>Ga naar het volgende thema om hetzelfde te doen</li>
 <li>Klaar en tevreden? In stap 3 vul je ter controle de stemcode in. Tot slot verstuur je in stap 4 je stem</li>
 </ol>`,
@@ -83,14 +87,15 @@ export default function BegrootmoduleExplanation(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 gap-4">
-
-          { (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && (
+          {(voteType === 'countPerTag' || voteType === 'budgetingPerTag') && (
             <FormField
               control={form.control}
               name="step0"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Stap 0: Stemmen / budget per thema intro</FormLabel>
+                  <FormLabel>
+                    Stap 0: Stemmen / budget per thema intro
+                  </FormLabel>
                   <FormControl>
                     <Textarea
                       rows={8}

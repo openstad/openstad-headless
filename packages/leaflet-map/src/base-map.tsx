@@ -1,23 +1,31 @@
+import DataStore from '@openstad-headless/data-store/src';
+import '@openstad-headless/document-map/src/gesture';
 import 'leaflet';
-import React from 'react';
 import type { LeafletMouseEvent } from 'leaflet';
 import { LatLng, latLngBounds } from 'leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Circle, Polyline } from 'react-leaflet';
 // @ts-ignore
 import { MapContainer } from 'react-leaflet/MapContainer';
 // @ts-ignore
 import { useMapEvents } from 'react-leaflet/hooks';
+
 import { loadWidget } from '../../lib/load-widget';
 import { Area, isPointInArea } from './area';
+import './css/base-map.css';
 import parseLocation from './lib/parse-location';
 import { MapConsumer, useMapRef } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import TileLayer from './tile-layer';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props';
-
-import '@openstad-headless/document-map/src/gesture';
+import type { LocationType } from './types/location';
+import type { MarkerProps } from './types/marker-props';
+import type { DataLayer } from './types/resource-overview-map-widget-props';
 
 declare module 'leaflet' {
   function mapInteraction(map: L.Map, options?: any): any;
@@ -36,9 +44,12 @@ function generateLineStyleSVG(features: any[]): string {
     'stroke-opacity': 1,
   };
 
-  const styleMap: Record<string, { count: number, width: number, color: string, opacity: number }> = {};
+  const styleMap: Record<
+    string,
+    { count: number; width: number; color: string; opacity: number }
+  > = {};
 
-  features.forEach(feature => {
+  features.forEach((feature) => {
     if (feature.geometry?.type !== 'LineString') return;
 
     const props = feature.properties || {};
@@ -53,17 +64,20 @@ function generateLineStyleSVG(features: any[]): string {
     styleMap[key].count++;
   });
 
-  const totalWeight = Object.values(styleMap).reduce((sum, style) => sum + (style.width * style.count), 0);
+  const totalWeight = Object.values(styleMap).reduce(
+    (sum, style) => sum + style.width * style.count,
+    0
+  );
 
   let currentX = 0;
   const height = 13;
   const width = 13;
   const svgParts = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
   ];
 
-  Object.values(styleMap).forEach(style => {
-    const relativeWidth = (style.width * style.count) / totalWeight * width;
+  Object.values(styleMap).forEach((style) => {
+    const relativeWidth = ((style.width * style.count) / totalWeight) * width;
     svgParts.push(`
       <rect 
         x="${currentX}" 
@@ -86,8 +100,8 @@ const rdToWgs84 = (x: number, y: number) => {
   if (x < 1000) x *= 1000;
   if (y < 1000) y *= 1000;
 
-  const x0 = 155000.000;
-  const y0 = 463000.000;
+  const x0 = 155000.0;
+  const y0 = 463000.0;
 
   const f0 = 52.156160556;
   const l0 = 5.387638889;
@@ -107,28 +121,52 @@ const rdToWgs84 = (x: number, y: number) => {
   const a40 = 0.0052771;
   const b32 = -0.0025614;
   const a23 = -0.0003859;
-  const b14 = 0.0012770;
+  const b14 = 0.001277;
   const a41 = 0.0003314;
   const b50 = 0.0002574;
   const a04 = 0.0000371;
   const b33 = -0.0000973;
   const a42 = 0.0000143;
   const b51 = 0.0000293;
-  const a24 = -0.0000090;
+  const a24 = -0.000009;
   const b15 = 0.0000291;
 
   const dx = (x - x0) * Math.pow(10, -5);
   const dy = (y - y0) * Math.pow(10, -5);
 
-  let df = a01 * dy + a20 * Math.pow(dx, 2) + a02 * Math.pow(dy, 2) + a21 * Math.pow(dx, 2) * dy + a03 * Math.pow(dy, 3);
-  df += a40 * Math.pow(dx, 4) + a22 * Math.pow(dx, 2) * Math.pow(dy, 2) + a04 * Math.pow(dy, 4) + a41 * Math.pow(dx, 4) * dy;
-  df += a23 * Math.pow(dx, 2) * Math.pow(dy, 3) + a42 * Math.pow(dx, 4) * Math.pow(dy, 2) + a24 * Math.pow(dx, 2) * Math.pow(dy, 4);
+  let df =
+    a01 * dy +
+    a20 * Math.pow(dx, 2) +
+    a02 * Math.pow(dy, 2) +
+    a21 * Math.pow(dx, 2) * dy +
+    a03 * Math.pow(dy, 3);
+  df +=
+    a40 * Math.pow(dx, 4) +
+    a22 * Math.pow(dx, 2) * Math.pow(dy, 2) +
+    a04 * Math.pow(dy, 4) +
+    a41 * Math.pow(dx, 4) * dy;
+  df +=
+    a23 * Math.pow(dx, 2) * Math.pow(dy, 3) +
+    a42 * Math.pow(dx, 4) * Math.pow(dy, 2) +
+    a24 * Math.pow(dx, 2) * Math.pow(dy, 4);
 
   const f = f0 + df / 3600;
 
-  let dl = b10 * dx + b11 * dx * dy + b30 * Math.pow(dx, 3) + b12 * dx * Math.pow(dy, 2) + b31 * Math.pow(dx, 3) * dy;
-  dl += b13 * dx * Math.pow(dy, 3) + b50 * Math.pow(dx, 5) + b32 * Math.pow(dx, 3) * Math.pow(dy, 2) + b14 * dx * Math.pow(dy, 4);
-  dl += b51 * Math.pow(dx, 5) * dy + b33 * Math.pow(dx, 3) * Math.pow(dy, 3) + b15 * dx * Math.pow(dy, 5);
+  let dl =
+    b10 * dx +
+    b11 * dx * dy +
+    b30 * Math.pow(dx, 3) +
+    b12 * dx * Math.pow(dy, 2) +
+    b31 * Math.pow(dx, 3) * dy;
+  dl +=
+    b13 * dx * Math.pow(dy, 3) +
+    b50 * Math.pow(dx, 5) +
+    b32 * Math.pow(dx, 3) * Math.pow(dy, 2) +
+    b14 * dx * Math.pow(dy, 4);
+  dl +=
+    b51 * Math.pow(dx, 5) * dy +
+    b33 * Math.pow(dx, 3) * Math.pow(dy, 3) +
+    b15 * dx * Math.pow(dy, 5);
 
   const l = l0 + dl / 3600;
 
@@ -137,19 +175,9 @@ const rdToWgs84 = (x: number, y: number) => {
 
   return {
     lat: fWgs,
-    lon: lWgs
-  }
+    lon: lWgs,
+  };
 };
-
-
-import 'leaflet/dist/leaflet.css';
-import './css/base-map.css';
-import type { LocationType } from './types/location';
-import L from 'leaflet';
-import {Circle, Polyline} from "react-leaflet";
-import type { MarkerProps } from './types/marker-props';
-import type {DataLayer} from "./types/resource-overview-map-widget-props";
-import DataStore from "@openstad-headless/data-store/src";
 
 interface MapDataLayerFeature {
   geometry?: {
@@ -208,8 +236,14 @@ const BaseMap = ({
   },
   zoomAfterInit = true,
   ...props
-}: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
-
+}: PropsWithChildren<
+  BaseMapWidgetProps & {
+    onClick?: (
+      e: LeafletMouseEvent & { isInArea: boolean },
+      map: object
+    ) => void;
+  }
+>) => {
   const [isMapReady, setIsMapReady] = useState(false);
 
   const datastore = new DataStore({
@@ -222,83 +256,112 @@ const BaseMap = ({
     projectId: props.projectId,
   });
 
-  let mapDataLayers: { layer: any; icon?: any, name: string, id: string, activeOnInit: boolean }[] = [];
+  let mapDataLayers: {
+    layer: any;
+    icon?: any;
+    name: string;
+    id: string;
+    activeOnInit: boolean;
+  }[] = [];
   const { datalayer, enableOnOffSwitching } = dataLayerSettings;
   const selectedDataLayers = datalayer || [];
   const showOnOffButtons = enableOnOffSwitching || false;
 
-  if (selectedDataLayers && Array.isArray(selectedDataLayers) && Array.isArray(datalayers) && datalayers.length > 0) {
-    selectedDataLayers.forEach((selectedDataLayer: DataLayer, index: number) => {
-      const foundDatalayer = datalayers.find((datalayer: DataLayer) => {
-        const isMatch = datalayer.id === selectedDataLayer.id;
-        return isMatch;
-      });
-
-      if (foundDatalayer) {
-        const stableId = `layer-${index}`;
-
-        mapDataLayers.push({
-          layer: foundDatalayer.layer,
-          icon: foundDatalayer.icon,
-          name: selectedDataLayer.name,
-          activeOnInit: typeof(selectedDataLayer?.activeOnInit) === 'boolean' ? selectedDataLayer.activeOnInit : true,
-          id: stableId
+  if (
+    selectedDataLayers &&
+    Array.isArray(selectedDataLayers) &&
+    Array.isArray(datalayers) &&
+    datalayers.length > 0
+  ) {
+    selectedDataLayers.forEach(
+      (selectedDataLayer: DataLayer, index: number) => {
+        const foundDatalayer = datalayers.find((datalayer: DataLayer) => {
+          const isMatch = datalayer.id === selectedDataLayer.id;
+          return isMatch;
         });
+
+        if (foundDatalayer) {
+          const stableId = `layer-${index}`;
+
+          mapDataLayers.push({
+            layer: foundDatalayer.layer,
+            icon: foundDatalayer.icon,
+            name: selectedDataLayer.name,
+            activeOnInit:
+              typeof selectedDataLayer?.activeOnInit === 'boolean'
+                ? selectedDataLayer.activeOnInit
+                : true,
+            id: stableId,
+          });
+        }
       }
-    });
+    );
   }
-  const [activeLayers, setActiveLayers] = useState<{ [key: string]: boolean }>({});
+  const [activeLayers, setActiveLayers] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   useEffect(() => {
     if (mapDataLayers.length > 0 && Object.keys(activeLayers).length === 0) {
-      const initialLayers = mapDataLayers.reduce((acc, layer) => {
-        acc[layer.id] = layer.activeOnInit;
-        return acc;
-      }, {} as { [key: string]: boolean });
+      const initialLayers = mapDataLayers.reduce(
+        (acc, layer) => {
+          acc[layer.id] = layer.activeOnInit;
+          return acc;
+        },
+        {} as { [key: string]: boolean }
+      );
 
       setActiveLayers(initialLayers);
     }
   }, [mapDataLayers]);
 
   const toggleLayer = (id: string) => {
-    setActiveLayers(prevState => ({
+    setActiveLayers((prevState) => ({
       ...prevState,
       [id]: !prevState[id],
     }));
   };
 
-  const visibleMapDataLayers = mapDataLayers.filter(layer => activeLayers[layer.id]);
+  const visibleMapDataLayers = mapDataLayers.filter(
+    (layer) => activeLayers[layer.id]
+  );
 
   const definedCenterPoint =
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
       : { lat: 52.37104644463586, lng: 4.900402911007405 };
 
-  tilesVariant = props?.map?.tilesVariant || tilesVariant ||'nlmaps';
-  const customUrlSetting = tilesVariant === 'custom' ? props?.map?.customUrl : undefined;
-
+  tilesVariant = props?.map?.tilesVariant || tilesVariant || 'nlmaps';
+  const customUrlSetting =
+    tilesVariant === 'custom' ? props?.map?.customUrl : undefined;
 
   // clustering geeft errors; ik begrijp niet waarom: het gebeurd alleen in de gebuilde widgets, niet in de dev componenten
   // het lijkt een timing issue, waarbij niet alles in de juiste volgporde wordt geladen
   // voor nu staat het dus uit
   clustering = {
-    isActive: false
+    isActive: false,
   };
 
   let [currentMarkers, setCurrentMarkers] = useState(markers);
-  let [currentPolyLines, setPolyLines] = useState<Array<{
-    positions: [number, number][],
-    style: {
-      color: string,
-      weight: number,
-      opacity: number,
-    }
-  }>>([]);
+  let [currentPolyLines, setPolyLines] = useState<
+    Array<{
+      positions: [number, number][];
+      style: {
+        color: string;
+        weight: number;
+        opacity: number;
+      };
+    }>
+  >([]);
   let [mapId] = useState(`${parseInt((Math.random() * 1e8) as any as string)}`);
   let [mapRef] = useMapRef(mapId);
 
   const setBoundsAndCenter = useCallback(
-    (polygons: Array<Array<LocationType>>, focus: "area" | "markers", depth: number) => {
+    (
+      polygons: Array<Array<LocationType>>,
+      focus: 'area' | 'markers',
+      depth: number
+    ) => {
       if (focus === 'area') {
         let allPolygons: LocationType[][] = [];
 
@@ -326,8 +389,15 @@ const BaseMap = ({
           return;
         }
 
-        if (allPolygons.length == 1 && allPolygons[0].length == 1 && allPolygons[0][0].lat && allPolygons[0][0].lng) {
-          mapRef.panTo(new LatLng(allPolygons[0][0].lat, allPolygons[0][0].lng));
+        if (
+          allPolygons.length == 1 &&
+          allPolygons[0].length == 1 &&
+          allPolygons[0][0].lat &&
+          allPolygons[0][0].lng
+        ) {
+          mapRef.panTo(
+            new LatLng(allPolygons[0][0].lat, allPolygons[0][0].lng)
+          );
           return;
         }
 
@@ -347,7 +417,8 @@ const BaseMap = ({
 
         mapRef.fitBounds(combinedBounds);
       } else if (focus === 'markers') {
-        const markersForBounds = currentMarkers?.filter((m) => m.lat && m.lng) || [];
+        const markersForBounds =
+          currentMarkers?.filter((m) => m.lat && m.lng) || [];
 
         if (markersForBounds.length == 0) {
           if (depth < 2) {
@@ -356,7 +427,9 @@ const BaseMap = ({
           return;
         }
 
-        mapRef.fitBounds( latLngBounds(markersForBounds as [{ "lat": number, "lng": number }]) );
+        mapRef.fitBounds(
+          latLngBounds(markersForBounds as [{ lat: number; lng: number }])
+        );
       }
     },
     [center, mapRef, currentMarkers]
@@ -364,15 +437,22 @@ const BaseMap = ({
 
   // map is ready
   useEffect(() => {
-    const event = new CustomEvent('osc-map-is-ready', { detail: { id: mapId } });
+    const event = new CustomEvent('osc-map-is-ready', {
+      detail: { id: mapId },
+    });
     window.dispatchEvent(event);
   }, [mapId]);
 
-  const centerAndZoomHandler = useCallback((overwriteAutoZoomAndCenter: string = '', opts: { bounceDepth?: number } = {}) => {
-    const depth = opts.bounceDepth ?? 0;
-    const autoZoomAndCenterSetting = overwriteAutoZoomAndCenter || autoZoomAndCenter;
+  const centerAndZoomHandler = useCallback(
+    (
+      overwriteAutoZoomAndCenter: string = '',
+      opts: { bounceDepth?: number } = {}
+    ) => {
+      const depth = opts.bounceDepth ?? 0;
+      const autoZoomAndCenterSetting =
+        overwriteAutoZoomAndCenter || autoZoomAndCenter;
 
-    if (autoZoomAndCenterSetting === 'area') {
+      if (autoZoomAndCenterSetting === 'area') {
         if (area?.length) {
           const updatedArea = Array.isArray(area[0]) ? area : [area];
           setBoundsAndCenter(updatedArea as any, 'area', depth);
@@ -380,68 +460,103 @@ const BaseMap = ({
         }
 
         if (!area?.length && visibleMapDataLayers?.length) {
-          const coords = visibleMapDataLayers.reduce((acc: Array<{ lat: number, lng: number }>, layer: MapDataLayer) => {
-            const features = layer?.layer?.features ?? [];
-            features.forEach((feature: MapDataLayerFeature) => {
-              if (feature?.geometry?.type === 'LineString' && Array.isArray(feature.geometry.coordinates)) {
-                (feature.geometry.coordinates as Array<[number, number]>).forEach((coord) => {
-                  acc.push({lat: coord[1], lng: coord[0]});
-                });
-              } else if (feature?.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)) {
-                const coord = feature.geometry.coordinates as [number, number];
-                acc.push({lat: coord[1], lng: coord[0]});
-              }
-            });
-            return acc;
-          }, []);
+          const coords = visibleMapDataLayers.reduce(
+            (acc: Array<{ lat: number; lng: number }>, layer: MapDataLayer) => {
+              const features = layer?.layer?.features ?? [];
+              features.forEach((feature: MapDataLayerFeature) => {
+                if (
+                  feature?.geometry?.type === 'LineString' &&
+                  Array.isArray(feature.geometry.coordinates)
+                ) {
+                  (
+                    feature.geometry.coordinates as Array<[number, number]>
+                  ).forEach((coord) => {
+                    acc.push({ lat: coord[1], lng: coord[0] });
+                  });
+                } else if (
+                  feature?.geometry?.type === 'Point' &&
+                  Array.isArray(feature.geometry.coordinates)
+                ) {
+                  const coord = feature.geometry.coordinates as [
+                    number,
+                    number,
+                  ];
+                  acc.push({ lat: coord[1], lng: coord[0] });
+                }
+              });
+              return acc;
+            },
+            []
+          );
 
           if (coords.length > 0) {
-            const bounds = latLngBounds(coords.map((c: any) => [c.lat, c.lng] as [number, number]));
+            const bounds = latLngBounds(
+              coords.map((c: any) => [c.lat, c.lng] as [number, number])
+            );
             mapRef.fitBounds(bounds);
           }
           return;
         }
-      } else if (autoZoomAndCenterSetting === "markers" && currentMarkers?.length || isMapReady) {
+      } else if (
+        (autoZoomAndCenterSetting === 'markers' && currentMarkers?.length) ||
+        isMapReady
+      ) {
         setBoundsAndCenter([], 'markers', depth);
       }
     },
-    [autoZoomAndCenter, area, setBoundsAndCenter, mapRef, visibleMapDataLayers, currentMarkers]
-  )
+    [
+      autoZoomAndCenter,
+      area,
+      setBoundsAndCenter,
+      mapRef,
+      visibleMapDataLayers,
+      currentMarkers,
+    ]
+  );
 
   useEffect(() => {
     if (!mapRef || !autoZoomAndCenter) return;
-    if ( !zoomAfterInit && isMapReady ) return;
+    if (!zoomAfterInit && isMapReady) return;
 
     centerAndZoomHandler();
-  }, [isMapReady, mapRef, area, center, autoZoomAndCenter, mapDataLayers, currentMarkers, setBoundsAndCenter]);
+  }, [
+    isMapReady,
+    mapRef,
+    area,
+    center,
+    autoZoomAndCenter,
+    mapDataLayers,
+    currentMarkers,
+    setBoundsAndCenter,
+  ]);
 
   // Quick fix for map not being ready on first render. This will set the center and zoom settings correctly.
   useEffect(() => {
     window.setTimeout(() => {
-        setIsMapReady(true);
+      setIsMapReady(true);
     }, 500);
   }, []);
 
   // markers
   useEffect(() => {
-    if (visibleMapDataLayers.length === 0 ) {
+    if (visibleMapDataLayers.length === 0) {
       if (currentPolyLines.length > 0) {
         setPolyLines([]);
       }
       if (markers.length === 0 && currentMarkers.length === 0) {
         return;
-      };
+      }
     }
 
     const processMarkers = () => {
       const result = [...markers];
       const polyLines: {
-        positions: [number, number][],
+        positions: [number, number][];
         style: {
-          color: string,
-          weight: number,
-          opacity: number,
-        }
+          color: string;
+          weight: number;
+          opacity: number;
+        };
       }[] = [];
 
       // Process map data layers
@@ -453,7 +568,7 @@ const BaseMap = ({
           // Process records
           if (records?.length) {
             records.forEach((record: any) => {
-              const {lat, lon, titel, inhoud} = record;
+              const { lat, lon, titel, inhoud } = record;
               const long = lon || record.long;
 
               if (lat && long) {
@@ -472,7 +587,7 @@ const BaseMap = ({
                       iconSize: [30, 40],
                       iconAnchor: [15, 40],
                       className: 'custom-image-icon',
-                    })
+                    }),
                   });
                 }
               }
@@ -487,13 +602,15 @@ const BaseMap = ({
 
               if (geometryType === 'LineString') {
                 const coordinates = feature.geometry?.coordinates || [];
-                const latlngs = coordinates.map(([lng, lat]: [number, number]) => {
-                  if (isRdCoordinates(lng, lat)) {
-                    const converted = rdToWgs84(lng, lat);
-                    return [converted.lat, converted.lon];
+                const latlngs = coordinates.map(
+                  ([lng, lat]: [number, number]) => {
+                    if (isRdCoordinates(lng, lat)) {
+                      const converted = rdToWgs84(lng, lat);
+                      return [converted.lat, converted.lon];
+                    }
+                    return [lat, lng];
                   }
-                  return [lat, lng];
-                });
+                );
 
                 polyLines.push({
                   positions: latlngs,
@@ -507,7 +624,7 @@ const BaseMap = ({
                 const coordinates = feature.geometry?.coordinates;
                 let lat = coordinates?.[1];
                 let long = coordinates?.[0];
-                const {Objectnaam, Locatieaanduiding} = feature.properties;
+                const { Objectnaam, Locatieaanduiding } = feature.properties;
 
                 if (isRdCoordinates(long, lat)) {
                   const converted = rdToWgs84(long, lat);
@@ -523,7 +640,9 @@ const BaseMap = ({
                       lng: long,
                       title: Objectnaam,
                       description: Locatieaanduiding,
-                      markerId: `feature-${lat}-${long}-${Objectnaam || 'marker'}`,
+                      markerId: `feature-${lat}-${long}-${
+                        Objectnaam || 'marker'
+                      }`,
                       isVisible: true,
                       isClustered: false,
                       icon: L.icon({
@@ -531,7 +650,7 @@ const BaseMap = ({
                         iconSize: [30, 40],
                         iconAnchor: [15, 40],
                         className: 'custom-image-icon',
-                      })
+                      }),
                     });
                   }
                 }
@@ -542,24 +661,34 @@ const BaseMap = ({
       }
 
       // Process markers
-      const processedMarkers = result.map(marker => {
+      const processedMarkers = result.map((marker) => {
         parseLocation(marker);
 
         const markerData: MarkerProps = {
           ...marker,
           markerId: marker.markerId || `marker-${marker.lat}-${marker.lng}`,
           iconCreateFunction: marker.iconCreateFunction || iconCreateFunction,
-          onClick: marker.onClick ? [...marker.onClick, onMarkerClick] : [onMarkerClick],
+          onClick: marker.onClick
+            ? [...marker.onClick, onMarkerClick]
+            : [onMarkerClick],
           isVisible: true,
-          isClustered: clustering?.isActive && !marker.doNotCluster ? false : undefined
+          isClustered:
+            clustering?.isActive && !marker.doNotCluster ? false : undefined,
         };
 
         // Handle categorization
-        if (categorize?.categorizeByField && markerData.data?.[categorize.categorizeByField]) {
+        if (
+          categorize?.categorizeByField &&
+          markerData.data?.[categorize.categorizeByField]
+        ) {
           const type = markerData.data[categorize.categorizeByField];
           const category = categorize.categories?.[type];
           if (category && !markerData.icon) {
-            const icon = category.icon || (category.color ? { ...defaultIcon, color: category.color } : undefined);
+            const icon =
+              category.icon ||
+              (category.color
+                ? { ...defaultIcon, color: category.color }
+                : undefined);
             if (icon) markerData.icon = icon;
           }
         }
@@ -580,10 +709,12 @@ const BaseMap = ({
     const { markers: newMarkers, polyLines: newPolyLines } = processMarkers();
 
     // Only update state if there are actual changes
-    const markersChanged = newMarkers.length !== currentMarkers.length ||
-      newMarkers.some((marker, index) =>
-        marker.lat !== currentMarkers[index]?.lat ||
-        marker.lng !== currentMarkers[index]?.lng
+    const markersChanged =
+      newMarkers.length !== currentMarkers.length ||
+      newMarkers.some(
+        (marker, index) =>
+          marker.lat !== currentMarkers[index]?.lat ||
+          marker.lng !== currentMarkers[index]?.lng
       );
 
     if (markersChanged) {
@@ -591,18 +722,29 @@ const BaseMap = ({
     }
 
     // Only update polyLines if there are actual changes
-    const polyLinesChanged = newPolyLines.length !== currentPolyLines.length ||
-      newPolyLines.some((polyLine, index) =>
-        polyLine.positions.length !== currentPolyLines[index]?.positions.length ||
-        polyLine.style.color !== currentPolyLines[index]?.style.color ||
-        polyLine.style.weight !== currentPolyLines[index]?.style.weight ||
-        polyLine.style.opacity !== currentPolyLines[index]?.style.opacity
+    const polyLinesChanged =
+      newPolyLines.length !== currentPolyLines.length ||
+      newPolyLines.some(
+        (polyLine, index) =>
+          polyLine.positions.length !==
+            currentPolyLines[index]?.positions.length ||
+          polyLine.style.color !== currentPolyLines[index]?.style.color ||
+          polyLine.style.weight !== currentPolyLines[index]?.style.weight ||
+          polyLine.style.opacity !== currentPolyLines[index]?.style.opacity
       );
 
     if (polyLinesChanged) {
       setPolyLines(newPolyLines);
     }
-  }, [markers, visibleMapDataLayers, iconCreateFunction, defaultIcon, categorize, clustering, onMarkerClick]);
+  }, [
+    markers,
+    visibleMapDataLayers,
+    iconCreateFunction,
+    defaultIcon,
+    categorize,
+    clustering,
+    onMarkerClick,
+  ]);
 
   let clusterMarkers: MarkerProps[] = [];
 
@@ -610,7 +752,7 @@ const BaseMap = ({
   const tileLayerProps = {
     ...props,
     tilesVariant,
-    "customUrl": customUrlSetting,
+    customUrl: customUrlSetting,
     tiles,
     minZoom,
     maxZoom,
@@ -620,13 +762,19 @@ const BaseMap = ({
     document.documentElement.style.setProperty('--basemap-map-width', width);
 
     const heightValue = height
-      ? (height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
-          ? height
-          : `${height}px`)
+      ? height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
+        ? height
+        : `${height}px`
       : 'auto';
 
-    document.documentElement.style.setProperty('--basemap-map-height', heightValue);
-    document.documentElement.style.setProperty('--basemap-map-aspect-ratio', height ? 'unset' : '16 / 9');
+    document.documentElement.style.setProperty(
+      '--basemap-map-height',
+      heightValue
+    );
+    document.documentElement.style.setProperty(
+      '--basemap-map-aspect-ratio',
+      height ? 'unset' : '16 / 9'
+    );
   }, [width, height]);
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -657,9 +805,9 @@ const BaseMap = ({
 
   return (
     <>
-      { mapDataLayers.length > 0 && (
+      {mapDataLayers.length > 0 && (
         <ul className="legend osc-map-legend">
-          {mapDataLayers.map(layer => (
+          {mapDataLayers.map((layer) => (
             <li key={layer.id} className="legend-item">
               <label className="legend-label">
                 {showOnOffButtons && (
@@ -671,8 +819,14 @@ const BaseMap = ({
                 )}
                 <div className="legend-info">
                   {layer.icon && layer.icon[0] && layer.icon[0].url ? (
-                    <img src={layer.icon[0].url} alt="Layer icon" className="legend-icon" />
-                  ) : layer.layer?.features?.some((f: any) => f?.geometry?.type === 'LineString') ? (
+                    <img
+                      src={layer.icon[0].url}
+                      alt="Layer icon"
+                      className="legend-icon"
+                    />
+                  ) : layer.layer?.features?.some(
+                      (f: any) => f?.geometry?.type === 'LineString'
+                    ) ? (
                     <img
                       src={generateLineStyleSVG(layer.layer.features)}
                       alt="Layer line preview"
@@ -699,32 +853,41 @@ const BaseMap = ({
           <TileLayer {...tileLayerProps} />
 
           {area && area.length ? (
-            <Area area={area} areas={customPolygon} areaPolygonStyle={areaPolygonStyle} {...props} />
+            <Area
+              area={area}
+              areas={customPolygon}
+              areaPolygonStyle={areaPolygonStyle}
+              {...props}
+            />
           ) : null}
 
-          {currentPolyLines && currentPolyLines.length > 0 && currentPolyLines.map((polyLine, i) => {
-            return (
-              <Polyline
-                key={`polyline-${i}`}
-                positions={polyLine.positions}
-                pathOptions={polyLine.style}
-              />
-            );
-          })}
-
-          {!!currentMarkers && currentMarkers.length > 0 && currentMarkers.map((data) => {
-            if (data.isClustered) {
-              clusterMarkers.push(data);
-            } else if (data.lat && data.lng) {
+          {currentPolyLines &&
+            currentPolyLines.length > 0 &&
+            currentPolyLines.map((polyLine, i) => {
               return (
-                <Marker
-                  {...props}
-                  {...data}
-                  key={`marker-${data.markerId || data.lat + data.lng}`}
+                <Polyline
+                  key={`polyline-${i}`}
+                  positions={polyLine.positions}
+                  pathOptions={polyLine.style}
                 />
               );
-            }
-          })}
+            })}
+
+          {!!currentMarkers &&
+            currentMarkers.length > 0 &&
+            currentMarkers.map((data) => {
+              if (data.isClustered) {
+                clusterMarkers.push(data);
+              } else if (data.lat && data.lng) {
+                return (
+                  <Marker
+                    {...props}
+                    {...data}
+                    key={`marker-${data.markerId || data.lat + data.lng}`}
+                  />
+                );
+              }
+            })}
 
           {clusterMarkers.length > 0 && (
             <MarkerClusterGroup
@@ -745,8 +908,11 @@ const BaseMap = ({
 
           {locationProx && locationProx.lat && locationProx.lng && (
             <Circle
-              center={[parseFloat(locationProx.lat), parseFloat(locationProx.lng)]}
-              radius={(locationProx.proximity  || 1) * 1000}
+              center={[
+                parseFloat(locationProx.lat),
+                parseFloat(locationProx.lng),
+              ]}
+              radius={(locationProx.proximity || 1) * 1000}
               pathOptions={{
                 color: '#0077ff',
                 fillColor: '#0077ff',
@@ -756,7 +922,6 @@ const BaseMap = ({
               }}
             />
           )}
-
         </MapContainer>
       </div>
     </>
@@ -766,7 +931,7 @@ const BaseMap = ({
 type MapEventsListenerProps = {
   area?: Array<LocationType>;
   onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void;
-  onMarkerClick?: (e: LeafletMouseEvent, map: any) => void,
+  onMarkerClick?: (e: LeafletMouseEvent, map: any) => void;
 };
 
 function MapEventsListener({
@@ -776,14 +941,14 @@ function MapEventsListener({
 }: MapEventsListenerProps) {
   const map = useMapEvents({
     load: () => {
-      console.log("ONLOAD");
+      console.log('ONLOAD');
     },
     click: (e: LeafletMouseEvent) => {
       const targetElement = e.originalEvent.target as HTMLElement;
-      const isMarkerClick = targetElement.closest(".leaflet-marker-icon");
+      const isMarkerClick = targetElement.closest('.leaflet-marker-icon');
 
       if (isMarkerClick && onMarkerClick) {
-        let customEvent = new CustomEvent("osc-marker-click", { detail: e });
+        let customEvent = new CustomEvent('osc-marker-click', { detail: e });
         window.dispatchEvent(customEvent);
 
         onMarkerClick(e, map);
@@ -792,17 +957,18 @@ function MapEventsListener({
       }
 
       const areaLatLngs = area.map(parseLocation) as LatLng[];
-      let isInArea = !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
+      let isInArea =
+        !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
 
-      let customEvent = new CustomEvent("osc-map-click", {
+      let customEvent = new CustomEvent('osc-map-click', {
         detail: { ...e, isInArea },
       });
       window.dispatchEvent(customEvent);
 
       if (onClick) {
-        if (typeof onClick === "string") {
+        if (typeof onClick === 'string') {
           const resolvedFunction = globalThis[onClick];
-          if (typeof resolvedFunction === "function") {
+          if (typeof resolvedFunction === 'function') {
             onClick = resolvedFunction;
           } else {
             console.warn(`Function ${onClick} is not defined on globalThis.`);

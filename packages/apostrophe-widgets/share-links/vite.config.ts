@@ -22,7 +22,7 @@ export default defineConfig(({ command }) => {
           external: ['react', 'react-dom', 'remixicon/fonts/remixicon.css'],
           output: {
             globals: {
-              'react': 'React',
+              react: 'React',
               'react-dom': 'ReactDOM',
             },
           },

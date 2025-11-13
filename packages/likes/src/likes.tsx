@@ -1,21 +1,22 @@
+import DataStore from '@openstad-headless/data-store/src';
+import { hasRole } from '@openstad-headless/lib';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { SessionStorage } from '@openstad-headless/lib/session-storage';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { ProgressBar } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
-  Heading5,
-  Paragraph,
   Button,
   Heading4,
+  Heading5,
   Heading6,
+  Paragraph,
 } from '@utrecht/component-library-react';
-import { ProgressBar } from '@openstad-headless/ui/src';
-import { SessionStorage } from '@openstad-headless/lib/session-storage';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
-import { hasRole } from '@openstad-headless/lib';
-import DataStore from '@openstad-headless/data-store/src';
-import React, { useState, useEffect } from 'react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useState } from 'react';
+
 import './likes.css';
-import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export type LikeWidgetProps = BaseProps &
   LikeProps &
@@ -47,12 +48,13 @@ function Likes({
   disabled = false,
   ...props
 }: LikeWidgetProps) {
-
-  let resourceId = String(getResourceId({
-    resourceId: parseInt(props.resourceId || ''),
-    url: document.location.href,
-    targetUrl: props.resourceIdRelativePath,
-  })); // todo: make it a number throughout the code
+  let resourceId = String(
+    getResourceId({
+      resourceId: parseInt(props.resourceId || ''),
+      url: document.location.href,
+      targetUrl: props.resourceIdRelativePath,
+    })
+  ); // todo: make it a number throughout the code
 
   const necessaryVotes = props.resources?.minimumYesVotes || 50;
 
@@ -82,9 +84,8 @@ function Likes({
   ];
 
   if (!displayDislike) {
-      supportedLikeTypes.pop();
+    supportedLikeTypes.pop();
   }
-
 
   useEffect(() => {
     let pending = session.get('osc-resource-vote-pending');
@@ -150,10 +151,8 @@ function Likes({
                 resource?.userVote?.opinion === likeVariant.type
                   ? 'selected'
                   : ''
-                } ${hideCounters ? 'osc-no-counter' : ''}`
-              }
-              disabled={disabled}
-            >
+              } ${hideCounters ? 'osc-no-counter' : ''}`}
+              disabled={disabled}>
               <section className="like-kind">
                 <i className={likeVariant.icon}></i>
                 {variant === 'small' ? null : likeVariant.label}
@@ -184,9 +183,7 @@ function Likes({
           {props?.resources?.minimumYesVotes &&
             showProgressBar &&
             props.progressBarDescription && (
-              <Heading6>
-                {props.progressBarDescription}
-              </Heading6>
+              <Heading6>{props.progressBarDescription}</Heading6>
             )}
         </div>
       </div>

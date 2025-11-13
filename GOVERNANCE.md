@@ -17,23 +17,28 @@ Elke actieve bijdrager in de community OpenStad kan verzoeken om lid te worden v
 Idealiter heeft geen enkele organisatie een meerderheid aan leden in het Core Team.
 
 De huidige leden zijn:
+
 - Daniël Hoekzema (Gemeente Haarlemmermeer)
 - Marijn van Dam (Gemeente Zwolle)
 - May-Britt Jansen (Gemeente Amsterdam)
 
 Core Team geeft opdracht aan deze maintainer voor community management:
+
 - [Bauke Huijbers (Sniglet)](https://github.com/BaukeHuijbers)
 
 Core Team geeft opdracht aan deze maintainers voor beheer en onderhoud van code:
+
 - [Rudi van Hierden (Draad)](https://github.com/rudivanhierden)
 - [Ian Rieken (Gemeente Amsterdam)](https://github.com/IanR01)
 - [Ian de Bruin (Draad)](https://github.com/iandebruin98)
 - [Freek van der Horst (Draad)](https://github.com/freekDraad)
 
 Core Team werkt samen met deze partij voor ontwikkeling van code:
+
 - [Bart Nieuwenweg (Draad)](https://github.com/bartnieuwenweg)
 
 Core Team werkt samen met deze partij voor organisatie van OpenStad Live:
+
 - [Jasper van Laar (Democracy Agency)](mailto:jasper@democracyagency.nl)
 
 ### Verantwoordelijkheden

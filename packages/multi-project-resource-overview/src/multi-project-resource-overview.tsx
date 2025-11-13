@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { ResourceOverviewWidgetProps, ResourceOverview } from '@openstad-headless/resource-overview/src/resource-overview';
+import {
+  ResourceOverview,
+  ResourceOverviewWidgetProps,
+} from '@openstad-headless/resource-overview/src/resource-overview';
+import React, { useEffect, useState } from 'react';
+
 import '../../resource-overview/src/resource-overview.css';
 
 export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
@@ -29,7 +33,9 @@ export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
 function MultiProjectResourceOverview({
   ...props
 }: MultiProjectResourceOverviewProps) {
-  const [selectedProjectsState, setSelectedProjectsState] = useState(props.selectedProjects || []);
+  const [selectedProjectsState, setSelectedProjectsState] = useState(
+    props.selectedProjects || []
+  );
 
   const fetchResource = async (url: string) => {
     const response = await fetch(url);
@@ -38,30 +44,36 @@ function MultiProjectResourceOverview({
 
   useEffect(() => {
     if (props.selectedProjects && props.selectedProjects.length > 0) {
-      const updateSelectedProjects = async (selectedProjects: any= []) => {
+      const updateSelectedProjects = async (selectedProjects: any = []) => {
         const url = `${props?.api?.url}/api/project?includeConfig=1&getBasicInformation=1`;
         const data = await fetchResource(url);
 
-        const updatedProjects = selectedProjects?.map((selectedProject: any) => {
-          const project = Array.isArray(data) && data.find((p: any) => p.id === selectedProject.id);
-          if (project) {
-            return {
-              ...selectedProject,
-              tags: project?.tags || '',
-              createdAt: project?.createdAt,
+        const updatedProjects = selectedProjects?.map(
+          (selectedProject: any) => {
+            const project =
+              Array.isArray(data) &&
+              data.find((p: any) => p.id === selectedProject.id);
+            if (project) {
+              return {
+                ...selectedProject,
+                tags: project?.tags || '',
+                createdAt: project?.createdAt,
+              };
             }
+            return selectedProject;
           }
-          return selectedProject;
-        });
+        );
 
-        setSelectedProjectsState( updatedProjects );
-      }
+        setSelectedProjectsState(updatedProjects);
+      };
 
       updateSelectedProjects(props.selectedProjects);
     }
   }, [props.selectedProjects]);
 
-  const initFinished = selectedProjectsState.some(project => typeof project?.createdAt === 'string')
+  const initFinished = selectedProjectsState.some(
+    (project) => typeof project?.createdAt === 'string'
+  );
 
   return !initFinished ? null : (
     <ResourceOverview

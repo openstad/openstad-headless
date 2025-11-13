@@ -1,149 +1,150 @@
 import { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
 import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
-import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export type ChoiceGuideProps = ChoiceGuide &
-    ChoiceGuideGeneralSettings &
-    BaseProps &
-    ProjectSettingProps &
-    ExtraProjectSettings;
+  ChoiceGuideGeneralSettings &
+  BaseProps &
+  ProjectSettingProps &
+  ExtraProjectSettings;
 
 export type ChoiceGuide = {
-    noOfQuestionsToShow?: string;
-    showPageCountAndCurrentPageInButton?: boolean;
-    choicesType?: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
-    imageAspectRatio?: '16x9' | '1x1';
-    choicesPreferenceMinColor?: string;
-    choicesPreferenceMaxColor?: string;
-    choicesPreferenceTitle?: string;
-    choicesNoPreferenceYetTitle?: string;
-    choicesInBetweenPreferenceTitle?: string;
-    beforeUrl?: string;
-    afterUrl?: string;
-    introTitle?: string;
-    introDescription?: string;
-    minCharactersWarning?: string;
-    maxCharactersWarning?: string;
-    minCharactersError?: string;
-    maxCharactersError?: string;
-    datalayer?: DataLayer[];
-    enableOnOffSwitching?: boolean;
-    showBackButtonInTopOfPage?: boolean;
+  noOfQuestionsToShow?: string;
+  showPageCountAndCurrentPageInButton?: boolean;
+  choicesType?: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
+  imageAspectRatio?: '16x9' | '1x1';
+  choicesPreferenceMinColor?: string;
+  choicesPreferenceMaxColor?: string;
+  choicesPreferenceTitle?: string;
+  choicesNoPreferenceYetTitle?: string;
+  choicesInBetweenPreferenceTitle?: string;
+  beforeUrl?: string;
+  afterUrl?: string;
+  introTitle?: string;
+  introDescription?: string;
+  minCharactersWarning?: string;
+  maxCharactersWarning?: string;
+  minCharactersError?: string;
+  maxCharactersError?: string;
+  datalayer?: DataLayer[];
+  enableOnOffSwitching?: boolean;
+  showBackButtonInTopOfPage?: boolean;
 };
 
 type ExtraProjectSettings = {
-    choiceGuide: ChoiceGuide;
-    choiceOption?: {
-        choiceOptions: ChoiceOptions[] };
-    items?: Array<Item>;
-    widgetId?: string;
-    generalSettings?: ChoiceGuideGeneralSettings
-}
+  choiceGuide: ChoiceGuide;
+  choiceOption?: {
+    choiceOptions: ChoiceOptions[];
+  };
+  items?: Array<Item>;
+  widgetId?: string;
+  generalSettings?: ChoiceGuideGeneralSettings;
+};
 
 export type ChoiceGuideGeneralSettings = {
-    submitButtonText?: string;
-    nextButtonText?: string;
-    loginText?: string;
-    loginTextButton?: string;
-    loginRequired?: boolean;
+  submitButtonText?: string;
+  nextButtonText?: string;
+  loginText?: string;
+  loginTextButton?: string;
+  loginRequired?: boolean;
 };
 
 export type ChoiceGuideSidebarProps = {
-    choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
-    choicesPreferenceMinColor?: string;
-    choicesPreferenceMaxColor?: string;
-    choicesPreferenceTitle?: string;
-    choicesNoPreferenceYetTitle?: string;
-    choicesInBetweenPreferenceTitle?: string;
-    startWithAllQuestionsAnswered: boolean;
-    choiceOptions?: ChoiceOptions[];
-    scores?: Record<string, Score>;
-    answers?: Record<string, Record<string, number>>;
-    imageAspectRatio?: '16x9' | '1x1';
-    image?: string;
-    showPageCountAndCurrentPageInButton?: boolean;
-    weights?: WeightOverview;
-    widgetId?: string;
-    hiddenFields?: string[];
-    items?: Array<Item>;
-}
+  choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
+  choicesPreferenceMinColor?: string;
+  choicesPreferenceMaxColor?: string;
+  choicesPreferenceTitle?: string;
+  choicesNoPreferenceYetTitle?: string;
+  choicesInBetweenPreferenceTitle?: string;
+  startWithAllQuestionsAnswered: boolean;
+  choiceOptions?: ChoiceOptions[];
+  scores?: Record<string, Score>;
+  answers?: Record<string, Record<string, number>>;
+  imageAspectRatio?: '16x9' | '1x1';
+  image?: string;
+  showPageCountAndCurrentPageInButton?: boolean;
+  weights?: WeightOverview;
+  widgetId?: string;
+  hiddenFields?: string[];
+  items?: Array<Item>;
+};
 
 export type Score = {
-    x: number;
-    y?: number;
-    z?: number;
+  x: number;
+  y?: number;
+  z?: number;
 };
 
 export type ChoiceOptions = {
-    title?: string;
-    description?: string;
-    id?: string | number;
-    image?: string;
+  title?: string;
+  description?: string;
+  id?: string | number;
+  image?: string;
 };
 
 export type Item = {
-    trigger: string;
-    title?: string;
-    description?: string;
-    type?: string;
-    fieldType?: string;
-    tags?: string;
-    fieldKey?: string;
-    fieldRequired?: boolean;
-    onlyForModerator?: boolean;
-    minCharacters?: string;
-    maxCharacters?: string;
-    variant?: string;
-    multiple?: boolean;
-    options?: Array<Option>;
-    sliderTitleUnderA?: string;
-    sliderTitleUnderB?: string;
-    explanationA?: string;
-    explanationB?: string;
-    weights?: Record<string, Weight>;
-    showMoreInfo: boolean;
-    moreInfoButton?: string;
-    moreInfoContent?: string;
-    infoImage?: string;
-    labelA?: string;
-    labelB?: string;
-    imageA?: string;
-    imageB?: string;
-    defaultValue?: string;
-    maxChoices?: string,
-    maxChoicesMessage?: string,
-    skipQuestion?: boolean;
-    skipQuestionAllowExplanation?: boolean;
-    skipQuestionExplanation?: string;
-    skipQuestionLabel?: string;
-    matrix?: Matrix;
-    matrixMultiple?: boolean;
-    routingInitiallyHide?: boolean;
-    routingSelectedQuestion?: string;
-    routingSelectedAnswer?: string;
-    imageOptionUpload?: string;
-    placeholder?: string;
+  trigger: string;
+  title?: string;
+  description?: string;
+  type?: string;
+  fieldType?: string;
+  tags?: string;
+  fieldKey?: string;
+  fieldRequired?: boolean;
+  onlyForModerator?: boolean;
+  minCharacters?: string;
+  maxCharacters?: string;
+  variant?: string;
+  multiple?: boolean;
+  options?: Array<Option>;
+  sliderTitleUnderA?: string;
+  sliderTitleUnderB?: string;
+  explanationA?: string;
+  explanationB?: string;
+  weights?: Record<string, Weight>;
+  showMoreInfo: boolean;
+  moreInfoButton?: string;
+  moreInfoContent?: string;
+  infoImage?: string;
+  labelA?: string;
+  labelB?: string;
+  imageA?: string;
+  imageB?: string;
+  defaultValue?: string;
+  maxChoices?: string;
+  maxChoicesMessage?: string;
+  skipQuestion?: boolean;
+  skipQuestionAllowExplanation?: boolean;
+  skipQuestionExplanation?: string;
+  skipQuestionLabel?: string;
+  matrix?: Matrix;
+  matrixMultiple?: boolean;
+  routingInitiallyHide?: boolean;
+  routingSelectedQuestion?: string;
+  routingSelectedAnswer?: string;
+  imageOptionUpload?: string;
+  placeholder?: string;
 };
 
 export type Option = {
-    trigger: string;
-    titles: Array<Title>;
+  trigger: string;
+  titles: Array<Title>;
 };
 
 export type Title = {
-    text?: string;
-    key: string;
-    weights?: Record<string, Weight>;
-    isOtherOption?: boolean;
-    defaultValue?: boolean;
-    image?: string;
-    hideLabel?: boolean;
+  text?: string;
+  key: string;
+  weights?: Record<string, Weight>;
+  isOtherOption?: boolean;
+  defaultValue?: boolean;
+  image?: string;
+  hideLabel?: boolean;
 };
 
 export type Weight = {
-    weightX?: string | number;
-    weightY?: string | number;
-    [key: string]: string | number | Weight | undefined;
+  weightX?: string | number;
+  weightY?: string | number;
+  [key: string]: string | number | Weight | undefined;
 };
 
 export type DimensionWeights = Record<'x' | 'y', string | number>;

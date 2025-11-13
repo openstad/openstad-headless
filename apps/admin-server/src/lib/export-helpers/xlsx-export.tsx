@@ -1,5 +1,5 @@
-import flattenObject from "@/lib/export-helpers/flattenObject";
-import * as XLSX from "xlsx";
+import flattenObject from '@/lib/export-helpers/flattenObject';
+import * as XLSX from 'xlsx';
 
 export const exportToXLSX = (
   data: any[],
@@ -21,4 +21,4 @@ export const exportToXLSX = (
   const worksheet = XLSX.utils.json_to_sheet(cleanedData);
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
   XLSX.writeFile(workbook, fileName);
-}
+};

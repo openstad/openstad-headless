@@ -1,10 +1,24 @@
+import '@utrecht/component-library-css';
+import {
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Link,
+  OrderedList,
+  OrderedListItem,
+  Paragraph,
+  Strong,
+  UnorderedList,
+  UnorderedListItem,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import {
+  Parser as HtmlToReactParser,
+  ProcessNodeDefinitions,
+} from 'html-to-react';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { Parser as HtmlToReactParser, ProcessNodeDefinitions } from 'html-to-react';
-
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading1, Heading2, Heading3, Heading4, Paragraph, Link, Strong, OrderedList, OrderedListItem, UnorderedList, UnorderedListItem } from "@utrecht/component-library-react";
 
 export default function RenderContent(content) {
   const htmlInput = `<div>${content}</div>`;
@@ -22,7 +36,7 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <Heading1 key={index}>{children}</Heading1>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
@@ -30,7 +44,7 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <Heading2 key={index}>{children}</Heading2>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
@@ -38,7 +52,7 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <Heading3 key={index}>{children}</Heading3>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
@@ -46,7 +60,7 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <Heading4 key={index}>{children}</Heading4>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
@@ -54,15 +68,22 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <Paragraph key={index}>{children}</Paragraph>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
         return node && node.name && node.name === 'a';
       },
       processNode: function (node, children, index) {
-        return <Link key={index} href={node.attribs.href} target={node.attribs.target}>{children}</Link>;
-      }
+        return (
+          <Link
+            key={index}
+            href={node.attribs.href}
+            target={node.attribs.target}>
+            {children}
+          </Link>
+        );
+      },
     },
     {
       shouldProcessNode: function (node) {
@@ -70,7 +91,7 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <Strong key={index}>{children}</Strong>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
@@ -78,15 +99,17 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <OrderedList key={index}>{children}</OrderedList>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
-        return node && node.name && node.name === 'li' && node.parent.name === 'ol';
+        return (
+          node && node.name && node.name === 'li' && node.parent.name === 'ol'
+        );
       },
       processNode: function (node, children, index) {
         return <OrderedListItem key={index}>{children}</OrderedListItem>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
@@ -94,26 +117,34 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <UnorderedList key={index}>{children}</UnorderedList>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
-        return node && node.name && node.name === 'li' && node.parent.name === 'ul';
+        return (
+          node && node.name && node.name === 'li' && node.parent.name === 'ul'
+        );
       },
       processNode: function (node, children, index) {
         return <UnorderedListItem key={index}>{children}</UnorderedListItem>;
-      }
+      },
     },
     {
       shouldProcessNode: function (node) {
         return true;
       },
-      processNode: processNodeDefinitions.processDefaultNode
-    }
+      processNode: processNodeDefinitions.processDefaultNode,
+    },
   ];
   const htmlToReactParser = new HtmlToReactParser();
-  const reactComponent = htmlToReactParser.parseWithInstructions(htmlInput, isValidNode,
-    processingInstructions);
+  const reactComponent = htmlToReactParser.parseWithInstructions(
+    htmlInput,
+    isValidNode,
+    processingInstructions
+  );
 
-  return ReactDOMServer.renderToStaticMarkup(reactComponent).substring(5, ReactDOMServer.renderToStaticMarkup(reactComponent).length - 6)
+  return ReactDOMServer.renderToStaticMarkup(reactComponent).substring(
+    5,
+    ReactDOMServer.renderToStaticMarkup(reactComponent).length - 6
+  );
 }

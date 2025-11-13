@@ -18,36 +18,36 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]/index';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {ArgumentWidgetTabProps} from "@/pages/projects/[project]/widgets/comments/[id]/index";
 
 // Defines the types allowed to go to the frontend
 const SortingTypes = [
   {
-    value: "createdAt_desc",
-    label: "Nieuwste eerst"
+    value: 'createdAt_desc',
+    label: 'Nieuwste eerst',
   },
   {
-    value: "createdAt_asc",
-    label: "Oudste eerst"
+    value: 'createdAt_asc',
+    label: 'Oudste eerst',
   },
   {
-    value: "title_asc",
-    label: "Titel A-Z"
+    value: 'title_asc',
+    label: 'Titel A-Z',
   },
   {
-    value: "title_desc",
-    label: "Titel Z-A"
+    value: 'title_desc',
+    label: 'Titel Z-A',
   },
   {
-    value: "votes_desc",
-    label: "Meeste stemmen"
+    value: 'votes_desc',
+    label: 'Meeste stemmen',
   },
   {
-    value: "votes_asc",
-    label: "Minste stemmen"
+    value: 'votes_asc',
+    label: 'Minste stemmen',
   },
 ];
 
@@ -59,8 +59,7 @@ const formSchema = z.object({
 });
 
 export default function ArgumentsSorting(
-  props: ArgumentWidgetTabProps &
-    EditFieldProps<ArgumentWidgetTabProps>
+  props: ArgumentWidgetTabProps & EditFieldProps<ArgumentWidgetTabProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
 
@@ -84,7 +83,6 @@ export default function ArgumentsSorting(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
-
           <FormField
             control={form.control}
             name="defaultSorting"
@@ -137,11 +135,21 @@ export default function ArgumentsSorting(
                             className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
                               <Checkbox
-                                checked={field.value?.some((el) => el.value === item.value)}
+                                checked={field.value?.some(
+                                  (el) => el.value === item.value
+                                )}
                                 onCheckedChange={(checked: boolean) => {
                                   const newValue = checked
-                                    ? [...(field.value || []), { value: item.value, label: item.label }]
-                                    : (field.value || []).filter((val) => val.value !== item.value);
+                                    ? [
+                                        ...(field.value || []),
+                                        {
+                                          value: item.value,
+                                          label: item.label,
+                                        },
+                                      ]
+                                    : (field.value || []).filter(
+                                        (val) => val.value !== item.value
+                                      );
 
                                   field.onChange(newValue);
                                   props.onFieldChanged(field.name, newValue);

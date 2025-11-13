@@ -323,7 +323,6 @@ module.exports = function (db, sequelize, DataTypes) {
           }
         },
       },
-
     },
     {
       hooks: {
@@ -331,12 +330,9 @@ module.exports = function (db, sequelize, DataTypes) {
         beforeValidate: beforeValidateHook,
         beforeDestroy: beforeValidateHook,
 
-        afterCreate: function (instance, options) {
-        },
+        afterCreate: function (instance, options) {},
 
-        afterUpdate: function (instance, options) {
-        },
-        
+        afterUpdate: function (instance, options) {},
       },
 
       individualHooks: true,
@@ -519,7 +515,15 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
+            attributes: [
+              'id',
+              'name',
+              'label',
+              'extraFunctionality',
+              'color',
+              'backgroundColor',
+              'mapIcon',
+            ],
             through: { attributes: [] },
             required: false,
           },
@@ -647,7 +651,16 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'seqnr', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor', 'mapIcon'],
+            attributes: [
+              'id',
+              'type',
+              'seqnr',
+              'name',
+              'label',
+              'defaultResourceImage',
+              'documentMapIconColor',
+              'mapIcon',
+            ],
             through: { attributes: [] },
             required: false,
           },
@@ -659,7 +672,16 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'seqnr', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
+            attributes: [
+              'id',
+              'name',
+              'seqnr',
+              'label',
+              'extraFunctionality',
+              'color',
+              'backgroundColor',
+              'mapIcon',
+            ],
             through: { attributes: [] },
             required: false,
           },
@@ -672,7 +694,7 @@ module.exports = function (db, sequelize, DataTypes) {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_tags
-                WHERE tagId IN (${tags.map(tag => `'${tag}'`).join(', ')}))
+                WHERE tagId IN (${tags.map((tag) => `'${tag}'`).join(', ')}))
               `),
             },
           },
@@ -755,7 +777,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'phonenumber',
               'address',
               'city',
-              'postcode'
+              'postcode',
             ],
           },
         ],
@@ -828,16 +850,15 @@ module.exports = function (db, sequelize, DataTypes) {
         return {
           where: {
             [db.Sequelize.Op.or]: [
-                ...projectIds.map((projectId) => {
+              ...projectIds.map((projectId) => {
                 return {
                   projectId: projectId,
                 };
-              })
-            ]
-          }
+              }),
+            ],
+          },
         };
       },
-
     };
   };
 
@@ -850,7 +871,10 @@ module.exports = function (db, sequelize, DataTypes) {
       onDelete: 'CASCADE',
     });
     this.hasMany(models.Comment, { as: 'commentsFor', onDelete: 'CASCADE' });
-    this.hasMany(models.Comment, { as: 'commentsNoSentiment', onDelete: 'CASCADE' });
+    this.hasMany(models.Comment, {
+      as: 'commentsNoSentiment',
+      onDelete: 'CASCADE',
+    });
     this.hasOne(models.Poll, {
       as: 'poll',
       foreignKey: 'resourceId',
@@ -882,7 +906,6 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   let canMutate = function (user, self) {
-
     if (
       userHasRole(user, 'editor', self.userId) ||
       userHasRole(user, 'admin', self.userId) ||
@@ -894,7 +917,7 @@ module.exports = function (db, sequelize, DataTypes) {
     let editableByUser = true;
     let statuses = self.statuses || [];
     for (let status of statuses) {
-      if ( status.extraFunctionality?.editableByUser === false ) {
+      if (status.extraFunctionality?.editableByUser === false) {
         editableByUser = false;
       }
     }
@@ -903,7 +926,6 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
     // canEditAfterFirstLikeOrComment is handled in the validate hook
-
   };
 
   Resource.auth = Resource.prototype.auth = {
@@ -932,7 +954,7 @@ module.exports = function (db, sequelize, DataTypes) {
     },
     canComment: function canComment(self) {
       if (!self) return false;
-      if ( self.project?.config?.comments?.canComment === false ) {
+      if (self.project?.config?.comments?.canComment === false) {
         // project config: comments is closed
         return false;
       }
@@ -941,13 +963,13 @@ module.exports = function (db, sequelize, DataTypes) {
       // status
       let statuses = self.statuses || [];
       for (let status of statuses) {
-        if ( status.extraFunctionality?.canComment === false ) {
+        if (status.extraFunctionality?.canComment === false) {
           return false;
         }
       }
       return true;
     },
-    canMutateStatus: function canMutateStatus (user, self) {
+    canMutateStatus: function canMutateStatus(user, self) {
       if (!user || !self) return false;
       if (!self.auth.canUpdate(user, self)) return false;
       return userHasRole(user, 'editor');
@@ -992,7 +1014,9 @@ module.exports = function (db, sequelize, DataTypes) {
       }
 
       if (data.commentsNoSentiment) {
-        data.commentsNoSentiment = hideEmailsForNormalUsers(data.commentsNoSentiment);
+        data.commentsNoSentiment = hideEmailsForNormalUsers(
+          data.commentsNoSentiment
+        );
       }
 
       data.can = {};

@@ -13,11 +13,11 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
+import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -147,7 +147,7 @@ export default function WidgetAgendaItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-      onFieldChanged('items', items);
+    onFieldChanged('items', items);
   }, [items]);
 
   useEffect(() => {

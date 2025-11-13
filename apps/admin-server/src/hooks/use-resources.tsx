@@ -1,7 +1,10 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useResources(projectId?: string, includeGlobalTags?: boolean) {
+export default function useResources(
+  projectId?: string,
+  includeGlobalTags?: boolean
+) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
   const url = `/api/openstad/api/project/${projectNumber}/resource?includeUser=1&includeVoteCount=1&includeTags=1`;

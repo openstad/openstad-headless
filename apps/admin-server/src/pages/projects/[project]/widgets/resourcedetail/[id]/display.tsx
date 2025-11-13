@@ -1,21 +1,23 @@
 import { Button } from '@/components/ui/button';
 import {
-  Form, FormControl, FormDescription,
+  Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Input} from "@/components/ui/input";
-import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   displayImage: z.boolean(),
@@ -54,7 +56,9 @@ export default function WidgetResourceDetailDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayImage: undefinedToTrueOrProp(props?.displayImage),
-      displayImageDescription: undefinedToTrueOrProp(props?.displayImageDescription),
+      displayImageDescription: undefinedToTrueOrProp(
+        props?.displayImageDescription
+      ),
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displayDescription: undefinedToTrueOrProp(props?.displayDescription),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
@@ -226,7 +230,9 @@ export default function WidgetResourceDetailDisplay(
             name="displayStatusBar"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>De balk met statussen weergeven bij de afbeelding?</FormLabel>
+                <FormLabel>
+                  De balk met statussen weergeven bij de afbeelding?
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -262,9 +268,7 @@ export default function WidgetResourceDetailDisplay(
             name="displayDocuments"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Geüploade documenten weergeven
-                </FormLabel>
+                <FormLabel>Geüploade documenten weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -280,7 +284,8 @@ export default function WidgetResourceDetailDisplay(
                   Moet de afbeelding in de dialog klikbaar zijn?
                 </FormLabel>
                 <FormDescription>
-                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar en wordt de afbeelding geopend in een nieuw tabblad.
+                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar
+                  en wordt de afbeelding geopend in een nieuw tabblad.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
@@ -288,7 +293,7 @@ export default function WidgetResourceDetailDisplay(
             )}
           />
 
-          {form.watch("displayDocuments") && (
+          {form.watch('displayDocuments') && (
             <>
               <FormField
                 control={form.control}
@@ -319,7 +324,8 @@ export default function WidgetResourceDetailDisplay(
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Welke beschrijving moet er boven de download knop(pen) komen?
+                      Welke beschrijving moet er boven de download knop(pen)
+                      komen?
                     </FormLabel>
                     <FormControl>
                       <Input

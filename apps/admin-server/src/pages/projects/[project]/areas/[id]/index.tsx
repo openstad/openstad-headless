@@ -1,8 +1,3 @@
-import React, { useCallback, useEffect } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,13 +8,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
 import useArea from '@/hooks/use-area';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
+import React, { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -29,9 +28,7 @@ const formSchema = z.object({
 export default function ProjectAreaEdit() {
   const router = useRouter();
   const { project, id } = router.query;
-  const { data, isLoading, updateArea } = useArea(
-    id as string
-  );
+  const { data, isLoading, updateArea } = useArea(id as string);
 
   const defaults = useCallback(
     () => ({
@@ -53,7 +50,9 @@ export default function ProjectAreaEdit() {
       toast.success('Polygoon aangepast!');
       // router.push(`/projects/${project}/areas`);
     } else {
-      toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
+      toast.error(
+        'De polygoon die is meegegeven lijkt niet helemaal te kloppen.'
+      );
     }
   }
 

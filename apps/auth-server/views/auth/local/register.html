@@ -1,42 +1,60 @@
-{% extends 'layouts/main.html' %}
-
-{% block body %}
+{% extends 'layouts/main.html' %} {% block body %}
 
 <div class="card">
   <div class="upper-box card-body">
-
     <form method="POST" action="/auth/local/register" class="validate-form">
       {% include 'elements/error-flash.html' %}
-
 
       <h1>Registreren</h1>
       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
       <input type="hidden" name="clientId" value="{{clientId}}" />
 
       <div class="form-group">
-        <label for="email">
-          E-mail:
-        </label>
-        <input type="email" name="email" id="email" placeholder="E-mail" class="form-input" autofocus required>
+        <label for="email"> E-mail: </label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="E-mail"
+          class="form-input"
+          autofocus
+          required />
       </div>
       <div class="form-group">
-        <label for="name">
-          Naam:
-        </label>
-        <input type="text" name="name" id="name" placeholder="naam" class="form-input" autofocus required >
+        <label for="name"> Naam: </label>
+        <input
+          type="text"
+          name="name"
+          id="name"
+          placeholder="naam"
+          class="form-input"
+          autofocus
+          required />
       </div>
       <br />
       <div class="form-group">
-        <label for="password">
-          Wachtwoord:
-        </label>
-        <input type="password" autocomplete="off" minlength="8" name="password" id="password" placeholder="Wachtwoord" class="form-input" required>
+        <label for="password"> Wachtwoord: </label>
+        <input
+          type="password"
+          autocomplete="off"
+          minlength="8"
+          name="password"
+          id="password"
+          placeholder="Wachtwoord"
+          class="form-input"
+          required />
       </div>
       <div class="form-group">
-        <label for="password_repeat">
-          Herhaal wachtwoord:
-        </label>
-        <input type="password" autocomplete="off" minlength="8" name="password_repeat" id="password_repeat" placeholder="Herhaal wachtwoord" class="form-input" required>
+        <label for="password_repeat"> Herhaal wachtwoord: </label>
+        <input
+          type="password"
+          autocomplete="off"
+          minlength="8"
+          name="password_repeat"
+          id="password_repeat"
+          placeholder="Herhaal wachtwoord"
+          class="form-input"
+          required />
       </div>
       <!--
       <div class="form-group">
@@ -51,6 +69,7 @@
 <br />
 
 <p>
-  Heb je al een account? <a href="/auth/local/login?clientId={{clientId}}">Log hier in</a>
+  Heb je al een account?
+  <a href="/auth/local/login?clientId={{clientId}}">Log hier in</a>
 </p>
 {% endblock %}

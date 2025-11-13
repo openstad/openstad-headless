@@ -1,9 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { useProject } from '../../../../hooks/use-project';
-
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -19,8 +13,13 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
 
+import { useProject } from '../../../../hooks/use-project';
 
 const twoFactorRoles = [
   {
@@ -53,22 +52,31 @@ const formSchema = z.object({
 });
 
 export default function ProjectAuthentication2FA() {
-
-  const {
-    data,
-    updateProject,
-  } = useProject(['includeAuthConfig']);
+  const { data, updateProject } = useProject(['includeAuthConfig']);
 
   const defaults = useCallback(
     () => ({
-      twoFactorRoles: data?.config?.auth?.provider?.openstad?.twoFactorRoles || [],
-      title: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.title || '',
-      description: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.description || '',
-      buttonText: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.buttonText || '',
-      info: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.info || '',
-      configTitle: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.title || '',
-      configDescription: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.description || '',
-      configButtonText: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.buttonText || '',
+      twoFactorRoles:
+        data?.config?.auth?.provider?.openstad?.twoFactorRoles || [],
+      title:
+        data?.config?.auth?.provider?.openstad?.config?.twoFactor?.title || '',
+      description:
+        data?.config?.auth?.provider?.openstad?.config?.twoFactor
+          ?.description || '',
+      buttonText:
+        data?.config?.auth?.provider?.openstad?.config?.twoFactor?.buttonText ||
+        '',
+      info:
+        data?.config?.auth?.provider?.openstad?.config?.twoFactor?.info || '',
+      configTitle:
+        data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor
+          ?.title || '',
+      configDescription:
+        data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor
+          ?.description || '',
+      configButtonText:
+        data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor
+          ?.buttonText || '',
     }),
     [data?.config]
   );
@@ -81,7 +89,7 @@ export default function ProjectAuthentication2FA() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-  
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const project = await updateProject({
@@ -100,28 +108,30 @@ export default function ProjectAuthentication2FA() {
                   title: values.configTitle,
                   description: values.configDescription,
                   buttonText: values.configButtonText,
-                }
+                },
               },
-            }
-          }
-        }
+            },
+          },
+        },
       });
       if (project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('Could not update', error);
     }
   }
 
-  const [showPageFields, setShowPageFields] = useState(false)
+  const [showPageFields, setShowPageFields] = useState(false);
   useEffect(() => {
     // data is not available right away
-    setShowPageFields(data?.config?.auth?.provider?.openstad?.twoFactorRoles?.length > 0);
+    setShowPageFields(
+      data?.config?.auth?.provider?.openstad?.twoFactorRoles?.length > 0
+    );
   }, [data]);
-  
+
   return (
     <div>
       <PageLayout
@@ -149,7 +159,8 @@ export default function ProjectAuthentication2FA() {
               className="space-y-4 lg:w-1/2">
               <div>
                 <FormLabel>
-                  Gebruikers met de onderstaande rollen moeten inloggen met Tweestapsverificatie:
+                  Gebruikers met de onderstaande rollen moeten inloggen met
+                  Tweestapsverificatie:
                 </FormLabel>
               </div>
 
@@ -173,7 +184,9 @@ export default function ProjectAuthentication2FA() {
                                   <Checkbox
                                     checked={field.value?.includes(item.id)}
                                     onCheckedChange={(checked: any) => {
-                                      setShowPageFields(field.value.length > 1 || checked)
+                                      setShowPageFields(
+                                        field.value.length > 1 || checked
+                                      );
                                       return checked
                                         ? field.onChange([
                                             ...field.value,
@@ -201,120 +214,120 @@ export default function ProjectAuthentication2FA() {
               />
 
               {showPageFields ? (
-              <>
+                <>
+                  <Separator className="my-4" />
+                  <div>
+                    <FormLabel>
+                      Als een gebruiker Tweestapsverificatie moet invullen dan
+                      doet die dat op een pagina met deze teksten:
+                    </FormLabel>
+                  </div>
 
-              <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Als een gebruiker Tweestapsverificatie moet invullen dan doet die dat op een pagina met deze teksten:
-                </FormLabel>
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Titel</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Beschrijving</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beschrijving</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="buttonText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Knoptekst</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="buttonText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Knoptekst</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="info"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Help tekst</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="info"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Help tekst</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <Separator className="my-4" />
+                  <div>
+                    <FormLabel>
+                      Als een gebruiker Tweestapsverificatie moet configureren
+                      dan doet die dat op een pagina met deze teksten:
+                    </FormLabel>
+                  </div>
 
-              <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Als een gebruiker Tweestapsverificatie moet configureren dan doet die dat op een pagina met deze teksten:
-                </FormLabel>
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="configTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Titel</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="configTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="configDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beschrijving</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="configButtonText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Knoptekst</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              </>
+                  <FormField
+                    control={form.control}
+                    name="configDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Beschrijving</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="configButtonText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Knoptekst</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               ) : null}
 
               <Button type="submit">Opslaan</Button>
@@ -325,5 +338,3 @@ export default function ProjectAuthentication2FA() {
     </div>
   );
 }
-
-

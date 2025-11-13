@@ -1,34 +1,41 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
+import { ObjectListSelect } from '@/components/ui/object-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useProject } from '@/hooks/use-project';
+import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import * as Switch from '@radix-ui/react-switch';
+import _ from 'lodash';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import InfoDialog from '@/components/ui/info-hover';
-import { ObjectListSelect } from '@/components/ui/object-select';
-import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
-import * as Switch from "@radix-ui/react-switch";
-import {handleTagCheckboxGroupChange} from "@/lib/form-widget-helpers/TagGroupHelper";
-import {useProject} from "@/hooks/use-project";
-import useTags from "@/hooks/use-tags";
-import React, {useEffect, useState} from "react";
-import {useRouter} from "next/router";
-import _ from "lodash";
-import {Checkbox} from "@/components/ui/checkbox";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   displayRanking: z.boolean(),
@@ -79,7 +86,8 @@ export default function BegrootmoduleDisplay(
       scrollWhenMaxReached: props.scrollWhenMaxReached || false,
       originalResourceUrl: props.originalResourceUrl || '',
       resourceListColumns: props.resourceListColumns || 3,
-      showInfoMenu: props.showInfoMenu === undefined ? true : props.showInfoMenu,
+      showInfoMenu:
+        props.showInfoMenu === undefined ? true : props.showInfoMenu,
       tagTypeTagGroup: props.tagTypeTagGroup || [],
       tagTypeTag: props.tagTypeTag || '',
       tagTypeSelector: props.tagTypeSelector || 'tag',
@@ -172,7 +180,9 @@ export default function BegrootmoduleDisplay(
             name="hideReadMore"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Verberg de &apos;lees meer&apos; knop bij de inzendingen?</FormLabel>
+                <FormLabel>
+                  Verberg de &apos;lees meer&apos; knop bij de inzendingen?
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -184,9 +194,7 @@ export default function BegrootmoduleDisplay(
             name="hideTagsForResources"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>
-                  Verberg tags bij de inzendingen
-                </FormLabel>
+                <FormLabel>Verberg tags bij de inzendingen</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -200,7 +208,8 @@ export default function BegrootmoduleDisplay(
               <FormItem className="col-span-1">
                 <FormLabel>Weergeef teller met informatie</FormLabel>
                 <FormDescription>
-                  Weergeef een teller met informatie over het aantal geselecteerde inzendingen en de ruimte die nog beschikbaar is.
+                  Weergeef een teller met informatie over het aantal
+                  geselecteerde inzendingen en de ruimte die nog beschikbaar is.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
@@ -214,7 +223,10 @@ export default function BegrootmoduleDisplay(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Forceer een scroll</FormLabel>
-                <FormDescription>Forceer een scroll naar de bovenkant van het element wanneer het maximaal aantal inzendingen is geselecteerd.</FormDescription>
+                <FormDescription>
+                  Forceer een scroll naar de bovenkant van het element wanneer
+                  het maximaal aantal inzendingen is geselecteerd.
+                </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -226,7 +238,9 @@ export default function BegrootmoduleDisplay(
             name="showOriginalResource"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Weergeef de URL van de originele inzending</FormLabel>
+                <FormLabel>
+                  Weergeef de URL van de originele inzending
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -238,16 +252,14 @@ export default function BegrootmoduleDisplay(
             name="voteAfterLoggingIn"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>
-                  Automatisch stemmen na inloggen?
-                </FormLabel>
+                <FormLabel>Automatisch stemmen na inloggen?</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          { form.watch('showOriginalResource') &&(
+          {form.watch('showOriginalResource') && (
             <FormField
               control={form.control}
               name="originalResourceUrl"
@@ -283,17 +295,18 @@ export default function BegrootmoduleDisplay(
             items={[{ value: 1 }, { value: 2 }, { value: 3 }]}
           />
 
-          { (voteType === 'countPerTag' || voteType === 'budgetingPerTag') && (
+          {(voteType === 'countPerTag' || voteType === 'budgetingPerTag') && (
             <>
               <FormField
                 control={form.control}
                 name="tagTypeSelector"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Selecteer de manier waarop er geselecteerd / gebudgetteerd moet worden</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}>
+                    <FormLabel>
+                      Selecteer de manier waarop er geselecteerd / gebudgetteerd
+                      moet worden
+                    </FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Kies type" />
@@ -313,13 +326,15 @@ export default function BegrootmoduleDisplay(
                 )}
               />
 
-              { form.watch('tagTypeSelector') === 'tag' && (
+              {form.watch('tagTypeSelector') === 'tag' && (
                 <FormField
                   control={form.control}
                   name="tagTypeTag"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Selecteer meerdere taggroepen om te gebruiken</FormLabel>
+                      <FormLabel>
+                        Selecteer meerdere taggroepen om te gebruiken
+                      </FormLabel>
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}>
@@ -342,14 +357,16 @@ export default function BegrootmoduleDisplay(
                 />
               )}
 
-              { form.watch('tagTypeSelector') === 'taggroup' && (
+              {form.watch('tagTypeSelector') === 'taggroup' && (
                 <FormField
                   control={form.control}
                   name="tagTypeTagGroup"
                   render={() => (
                     <FormItem className="col-span-full">
                       <div>
-                        <FormLabel>Selecteer welke taggroepen gebruikt worden</FormLabel>
+                        <FormLabel>
+                          Selecteer welke taggroepen gebruikt worden
+                        </FormLabel>
                       </div>
                       <div className="grid grid-cols-1 gap-x-4 gap-y-2">
                         {tagGroupNames?.map((item, index) => (
@@ -357,32 +374,46 @@ export default function BegrootmoduleDisplay(
                             key={index}
                             control={form.control}
                             name="tagTypeTagGroup"
-                            render={({field}) => {
-                              const isChecked = Array.isArray(field.value) && field.value.includes(item);
+                            render={({ field }) => {
+                              const isChecked =
+                                Array.isArray(field.value) &&
+                                field.value.includes(item);
 
                               return (
                                 <FormItem
                                   key={index}
                                   className="flex flex-column items-start space-x-0 space-y-3">
-                                  <div className='flex flex-row items-start space-x-3 space-y-0'>
+                                  <div className="flex flex-row items-start space-x-3 space-y-0">
                                     <FormControl>
                                       <Checkbox
                                         checked={isChecked}
                                         onCheckedChange={(checked) => {
-                                          let values = form.getValues('tagTypeTagGroup') || [];
+                                          let values =
+                                            form.getValues('tagTypeTagGroup') ||
+                                            [];
 
                                           if (checked) {
                                             if (!values.includes(item)) {
                                               values = [...values, item];
                                             }
                                           } else {
-                                            values = values.filter(value => value !== item);
+                                            values = values.filter(
+                                              (value) => value !== item
+                                            );
                                           }
 
-                                          values = values.filter(value => tagGroupNames.includes(value));
+                                          values = values.filter((value) =>
+                                            tagGroupNames.includes(value)
+                                          );
 
-                                          form.setValue('tagTypeTagGroup', values);
-                                          props.onFieldChanged('tagTypeTagGroup', values);
+                                          form.setValue(
+                                            'tagTypeTagGroup',
+                                            values
+                                          );
+                                          props.onFieldChanged(
+                                            'tagTypeTagGroup',
+                                            values
+                                          );
                                         }}
                                       />
                                     </FormControl>
@@ -390,7 +421,7 @@ export default function BegrootmoduleDisplay(
                                       {item}
                                     </FormLabel>
                                   </div>
-                                  <FormMessage/>
+                                  <FormMessage />
                                 </FormItem>
                               );
                             }}
@@ -401,12 +432,11 @@ export default function BegrootmoduleDisplay(
                   )}
                 />
               )}
-
             </>
           )}
 
           <Button type="submit" className="w-fit col-span-full">
-          Opslaan
+            Opslaan
           </Button>
         </form>
       </Form>

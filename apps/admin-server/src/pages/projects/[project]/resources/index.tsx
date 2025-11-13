@@ -1,19 +1,20 @@
-import { PageLayout } from '../../../../components/ui/page-layout';
-import { Button } from '../../../../components/ui/button';
-import Link from 'next/link';
-import { ChevronRight, Plus } from 'lucide-react';
-import React, { use, useEffect, useState } from 'react';
-import useResources from '@/hooks/use-resources';
-import { useRouter } from 'next/router';
-import { ListHeading, Paragraph } from '@/components/ui/typography';
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
-import { toast } from 'react-hot-toast';
-import { sortTable, searchTable } from '@/components/ui/sortTable';
-import * as XLSX from 'xlsx';
-import flattenObject from "@/lib/export-helpers/flattenObject";
+import { Checkbox } from '@/components/ui/checkbox';
+import { searchTable, sortTable } from '@/components/ui/sortTable';
+import { ListHeading, Paragraph } from '@/components/ui/typography';
+import useResources from '@/hooks/use-resources';
+import flattenObject from '@/lib/export-helpers/flattenObject';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
-import {ConfirmActionDialog} from "@/components/dialog-confirm-action";
-import {Checkbox} from "@/components/ui/checkbox";
+import { ChevronRight, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { use, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import * as XLSX from 'xlsx';
+
+import { Button } from '../../../../components/ui/button';
+import { PageLayout } from '../../../../components/ui/page-layout';
 
 const keyMap: Record<string, string> = {
   id: 'Inzending ID',
@@ -53,41 +54,57 @@ const prepareDataForExport = (data: any[]) => {
 
   data.forEach((resource) => {
     for (const [key, values] of Object.entries(resource)) {
-      if ( (key.startsWith('tags') || key.startsWith('statuses')) && Array.isArray(values)) {
+      if (
+        (key.startsWith('tags') || key.startsWith('statuses')) &&
+        Array.isArray(values)
+      ) {
         try {
-          const createString = values.map((value: any) => {
-            return key.startsWith('tags')
-            ? `${value.name} (type: ${value.type})`
-            : value.name
-          }).filter(Boolean).join(' | ');
+          const createString = values
+            .map((value: any) => {
+              return key.startsWith('tags')
+                ? `${value.name} (type: ${value.type})`
+                : value.name;
+            })
+            .filter(Boolean)
+            .join(' | ');
 
           resource[key] = createString || '';
         } catch (e) {}
       }
 
-      if ( (key.startsWith('images') || key.startsWith('documents') ) && Array.isArray(values)) {
+      if (
+        (key.startsWith('images') || key.startsWith('documents')) &&
+        Array.isArray(values)
+      ) {
         try {
-          const createString = values.map((value: any) => {
-            return key.startsWith('images')
-              ? `${value.url}${ value.description ? ` (${value.description})` : '' }`
-              : `${value.url}${ value.name ? ` (${value.name})` : '' }`;
-          }).filter(Boolean).join(' | ');
+          const createString = values
+            .map((value: any) => {
+              return key.startsWith('images')
+                ? `${value.url}${
+                    value.description ? ` (${value.description})` : ''
+                  }`
+                : `${value.url}${value.name ? ` (${value.name})` : ''}`;
+            })
+            .filter(Boolean)
+            .join(' | ');
 
           resource[key] = createString || '';
         } catch (e) {}
       }
-    };
+    }
 
     allResources.push(resource);
   });
 
   return allResources;
-}
+};
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, error, isLoading, remove, duplicate } = useResources(project as string);
+  const { data, error, isLoading, remove, duplicate } = useResources(
+    project as string
+  );
 
   function transform() {
     const today = new Date();
@@ -96,7 +113,11 @@ export default function ProjectResources() {
 
     const preparedData = prepareDataForExport(data);
 
-    exportToXLSX(preparedData, `${projectId}_resources_${formattedDate}.xlsx`, keyMap);
+    exportToXLSX(
+      preparedData,
+      `${projectId}_resources_${formattedDate}.xlsx`,
+      keyMap
+    );
   }
 
   const [filterData, setFilterData] = useState(data);
@@ -107,7 +128,7 @@ export default function ProjectResources() {
 
   useEffect(() => {
     setFilterData(data);
-  }, [data])
+  }, [data]);
 
   if (!data) return null;
 
@@ -126,140 +147,168 @@ export default function ProjectResources() {
           },
         ]}
         action={
-          <div className='flex flex-row w-full md:w-auto my-auto gap-4'>
-            <Link
-              href={`/projects/${project}/resources/create`}>
-              <Button variant="default" className='text-xs p-2 w-fit'>
+          <div className="flex flex-row w-full md:w-auto my-auto gap-4">
+            <Link href={`/projects/${project}/resources/create`}>
+              <Button variant="default" className="text-xs p-2 w-fit">
                 <Plus size="20" className="hidden lg:flex" />
                 Inzending toevoegen
               </Button>
             </Link>
-            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+            <Button
+              className="text-xs p-2 w-fit"
+              type="submit"
+              onClick={transform}>
               Exporteer inzendingen
             </Button>
           </div>
         }>
-        <div className="container py-6"><div className="float-left mb-4 flex gap-4">
-          <Button
-            variant={'outline'}
-            className="flex items-center gap-2 float-left"
-            onClick={() => {
-              setSelectedWidgets([])
-              setBulkSelectActive(!bulkSelectActive)
-            }}
-          >
-            {bulkSelectActive ? 'Bulk selecteren stoppen' : 'Bulk selecteren'}
-          </Button>
+        <div className="container py-6">
+          <div className="float-left mb-4 flex gap-4">
+            <Button
+              variant={'outline'}
+              className="flex items-center gap-2 float-left"
+              onClick={() => {
+                setSelectedWidgets([]);
+                setBulkSelectActive(!bulkSelectActive);
+              }}>
+              {bulkSelectActive ? 'Bulk selecteren stoppen' : 'Bulk selecteren'}
+            </Button>
 
-          {bulkSelectActive && (
-            <>
-              <Button
-                variant={'default'}
-                className="flex items-center gap-2 float-left"
-                onClick={(e) => e.preventDefault()}
-                disabled={ selectedWidgets.length === 0 }
-              >
-                <ConfirmActionDialog
-                  buttonText="Dupliceren"
-                  header="Widgets Dupliceren"
-                  message="Weet je zeker dat je de geselecteerde widgets wilt dupliceren?"
-                  confirmButtonText="Dupliceren"
-                  cancelButtonText="Annuleren"
-                  onConfirmAccepted={() => {
-                    duplicate(selectedWidgets)
-                      .then(() => {
-                        toast.success('Widgets successvol gedupliceerd');
-                        setSelectedWidgets([]);
-                        setBulkSelectActive(false);
-                      })
-                      .catch((e) =>
-                        toast.error('Widgets konden (gedeeltelijk) niet worden gedupliceerd')
-                      )
-                  }}
-                  confirmButtonVariant="default"
-                />
-              </Button>
-              <Button
-                variant={'destructive'}
-                className="flex items-center gap-2 float-left"
-                onClick={(e) => e.preventDefault()}
-                disabled={ selectedWidgets.length === 0 }
-              >
-                <ConfirmActionDialog
-                  buttonText="Verwijderen"
-                  header="Widgets Verwijderen"
-                  message="Weet je zeker dat je de geselecteerde widgets wilt verwijderen?"
-                  confirmButtonText="Verwijderen"
-                  cancelButtonText="Annuleren"
-                  onConfirmAccepted={() => {
-                    remove(0, true, selectedWidgets)
-                      .then(() => {
-                        toast.success('Widgets successvol verwijderd');
-                        setSelectedWidgets([]);
-                        setBulkSelectActive(false);
-                      })
-                      .catch((e) =>
-                        toast.error('Widgets konden (gedeeltelijk) niet worden verwijderd')
-                      )
-                  }}
-                  confirmButtonVariant="destructive"
-                />
-              </Button>
-            </>
-          )}
-        </div>
+            {bulkSelectActive && (
+              <>
+                <Button
+                  variant={'default'}
+                  className="flex items-center gap-2 float-left"
+                  onClick={(e) => e.preventDefault()}
+                  disabled={selectedWidgets.length === 0}>
+                  <ConfirmActionDialog
+                    buttonText="Dupliceren"
+                    header="Widgets Dupliceren"
+                    message="Weet je zeker dat je de geselecteerde widgets wilt dupliceren?"
+                    confirmButtonText="Dupliceren"
+                    cancelButtonText="Annuleren"
+                    onConfirmAccepted={() => {
+                      duplicate(selectedWidgets)
+                        .then(() => {
+                          toast.success('Widgets successvol gedupliceerd');
+                          setSelectedWidgets([]);
+                          setBulkSelectActive(false);
+                        })
+                        .catch((e) =>
+                          toast.error(
+                            'Widgets konden (gedeeltelijk) niet worden gedupliceerd'
+                          )
+                        );
+                    }}
+                    confirmButtonVariant="default"
+                  />
+                </Button>
+                <Button
+                  variant={'destructive'}
+                  className="flex items-center gap-2 float-left"
+                  onClick={(e) => e.preventDefault()}
+                  disabled={selectedWidgets.length === 0}>
+                  <ConfirmActionDialog
+                    buttonText="Verwijderen"
+                    header="Widgets Verwijderen"
+                    message="Weet je zeker dat je de geselecteerde widgets wilt verwijderen?"
+                    confirmButtonText="Verwijderen"
+                    cancelButtonText="Annuleren"
+                    onConfirmAccepted={() => {
+                      remove(0, true, selectedWidgets)
+                        .then(() => {
+                          toast.success('Widgets successvol verwijderd');
+                          setSelectedWidgets([]);
+                          setBulkSelectActive(false);
+                        })
+                        .catch((e) =>
+                          toast.error(
+                            'Widgets konden (gedeeltelijk) niet worden verwijderd'
+                          )
+                        );
+                    }}
+                    confirmButtonVariant="destructive"
+                  />
+                </Button>
+              </>
+            )}
+          </div>
 
           <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <p className="text-xs font-medium text-muted-foreground self-center">
+              Filter op:
+            </p>
             <select
               className="p-2 rounded"
-              onChange={(e) => setFilterSearchType(e.target.value)}
-            >
+              onChange={(e) => setFilterSearchType(e.target.value)}>
               <option value="">Alles</option>
               <option value="id">Stem ID</option>
               <option value="title">Inzendingen</option>
               <option value="yes">Gestemd op ja</option>
               <option value="no">Gestemd op nee</option>
               <option value="createdAt">Datum aangemaakt</option>
-
-
             </select>
             <input
               type="text"
-              className='p-2 rounded'
+              className="p-2 rounded"
               placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+              onChange={(e) =>
+                debouncedSearchTable(e.target.value, filterData, data)
+              }
             />
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div
               className="grid grid-cols-2 items-center py-2 px-2 border-b border-border"
-              style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(4, 1fr) 60px` }}
-            >
-              {bulkSelectActive && (<ListHeading />)}
+              style={{
+                gridTemplateColumns: `repeat(${
+                  bulkSelectActive ? 2 : 1
+                }, 50px) 3fr repeat(4, 1fr) 60px`,
+              }}>
+              {bulkSelectActive && <ListHeading />}
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('id', e, filterData))
+                  }>
                   ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resource', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('resource', e, filterData))
+                  }>
                   Inzendingen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('voted-yes', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('voted-yes', e, filterData))
+                  }>
                   Gestemd op ja
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('voted-no', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('voted-no', e, filterData))
+                  }>
                   Gestemd op nee
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('date-added', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('date-added', e, filterData))
+                  }>
                   Datum aangemaakt
                 </button>
               </ListHeading>
@@ -269,21 +318,32 @@ export default function ProjectResources() {
               {filterData?.map((resource: any) => (
                 <Link
                   key={resource.id}
-                  href={ bulkSelectActive ? `/projects/${project}/resources/` : `/projects/${project}/resources/${resource.id}`}
-                  scroll={ !bulkSelectActive }
-                >
+                  href={
+                    bulkSelectActive
+                      ? `/projects/${project}/resources/`
+                      : `/projects/${project}/resources/${resource.id}`
+                  }
+                  scroll={!bulkSelectActive}>
                   <li
                     className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
-                    style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(4, 1fr) 60px` }}
-                  >
+                    style={{
+                      gridTemplateColumns: `repeat(${
+                        bulkSelectActive ? 2 : 1
+                      }, 50px) 3fr repeat(4, 1fr) 60px`,
+                    }}>
                     {bulkSelectActive && (
                       <Checkbox
                         className="my-auto"
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedWidgets((prev) => [...prev, resource.id]);
+                            setSelectedWidgets((prev) => [
+                              ...prev,
+                              resource.id,
+                            ]);
                           } else {
-                            setSelectedWidgets((prev) => prev.filter(id => id !== resource.id));
+                            setSelectedWidgets((prev) =>
+                              prev.filter((id) => id !== resource.id)
+                            );
                           }
                         }}
                       />
@@ -316,7 +376,9 @@ export default function ProjectResources() {
                               toast.success('Inzending successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Inzending kon niet worden verwijderd')
+                              toast.error(
+                                'Inzending kon niet worden verwijderd'
+                              )
                             )
                         }
                       />

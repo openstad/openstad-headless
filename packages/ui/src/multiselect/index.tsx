@@ -1,18 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import '@utrecht/component-library-css';
+import {
+  Button,
+  Checkbox,
+  FormField,
+  FormLabel,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useRef, useState } from 'react';
+
 // import { Checkbox } from '../checkbox';
 import { Icon } from '../icon';
 import './index.css';
-
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Button, Checkbox, FormLabel, Paragraph, FormField } from "@utrecht/component-library-react";
 
 export function MultiSelect({
   label,
   onItemSelected,
   defaultOpen,
   options,
-  id
+  id,
 }: {
   label: string;
   options: Array<{ value: string; label: string; checked?: boolean }>;
@@ -20,13 +26,15 @@ export function MultiSelect({
   id: string;
   onItemSelected: (optionValue: string, optionLabel?: string) => void;
 }) {
-
   const [isOpen, setOpen] = useState<boolean>(defaultOpen || false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setOpen(false);
       }
     }
@@ -37,11 +45,10 @@ export function MultiSelect({
     };
   }, []);
 
-
   return (
     <div className="multi-select" ref={containerRef}>
       <Button
-        appearance='default-button'
+        appearance="default-button"
         onClick={() => {
           setOpen(!isOpen);
         }}
@@ -49,18 +56,16 @@ export function MultiSelect({
         aria-labelledby={id}
         aria-expanded={isOpen}
         role="combobox"
-        aria-haspopup="listbox"
-      >
+        aria-haspopup="listbox">
         {label}
         <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
       </Button>
 
-      {isOpen &&
+      {isOpen && (
         <section
           className="multiselect-container"
           role="listbox"
-          aria-multiselectable="true"
-        >
+          aria-multiselectable="true">
           {options.map((option, index) => {
             return (
               <div
@@ -78,19 +83,14 @@ export function MultiSelect({
                       className="utrecht-form-field__input"
                       checked={option.checked}
                     />
-                    <FormLabel
-                      type="checkbox"
-                    >
-                      {option.label}
-                    </FormLabel>
-
+                    <FormLabel type="checkbox">{option.label}</FormLabel>
                   </Paragraph>
                 </FormField>
               </div>
             );
           })}
         </section>
-      }
+      )}
     </div>
   );
 }

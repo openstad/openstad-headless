@@ -1,15 +1,16 @@
-import React from 'react';
-import { PageLayout } from '../../../../../../src/components/ui/page-layout';
 import { useRouter } from 'next/router';
+import React from 'react';
+
+import { PageLayout } from '../../../../../../src/components/ui/page-layout';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '../../../../../../src/components/ui/tabs';
-import ProjectResourceCreate from "./info";
-import ProjectResourceVotes from "./votes";
-import ProjectResourceArguments from "./comments";
+import ProjectResourceArguments from './comments';
+import ProjectResourceCreate from './info';
+import ProjectResourceVotes from './votes';
 
 export default function ProjectResource() {
   const router = useRouter();
@@ -51,7 +52,6 @@ export default function ProjectResource() {
               <ProjectResourceArguments />
             </TabsContent>
           </Tabs>
-
         </div>
       </PageLayout>
     </div>

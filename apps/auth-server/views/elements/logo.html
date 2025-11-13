@@ -1,18 +1,20 @@
-{# for legacy purposes the amsterdam logo is loaded in code, should be remove at some point #}
-
-{% if logo and logo === 'amsterdam-logo.html' %}
-  {% include 'elements/amsterdam-logo.html' %}
+{# for legacy purposes the amsterdam logo is loaded in code, should be remove at
+some point #} {% if logo and logo === 'amsterdam-logo.html' %} {% include
+'elements/amsterdam-logo.html' %} {% else %} {% if logo %}
+<img
+  id="logo-image"
+  src="{{logo}}"
+  alt="Link naar hoofdpagina, afbeelding logo test"
+  style="max-width: 130px" />
 {% else %}
-  {% if logo %}
-    <img id="logo-image" src="{{logo}}"  alt="Link naar hoofdpagina, afbeelding logo test" style="max-width: 130px"/>
-  {% else %}
-    <img class="default-logo" src="/img/logo-openstad.png" alt="Link naar hoofdpagina, afbeelding logo test" style="max-width: 130px"/>
-  {% endif %}
-{% if displayClientName %}
-<span class=" {{'subsitetitle' if logo === 'amsterdam-logo.html' else 'subsitetitle subsitetitle-default' }}">
-  <a href="#">
-    {{client.name}}
-  </a>
+<img
+  class="default-logo"
+  src="/img/logo-openstad.png"
+  alt="Link naar hoofdpagina, afbeelding logo test"
+  style="max-width: 130px" />
+{% endif %} {% if displayClientName %}
+<span
+  class=" {{'subsitetitle' if logo === 'amsterdam-logo.html' else 'subsitetitle subsitetitle-default' }}">
+  <a href="#"> {{client.name}} </a>
 </span>
-{% endif %}
-{% endif %}
+{% endif %} {% endif %}

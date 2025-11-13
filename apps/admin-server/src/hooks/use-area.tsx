@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useArea(areaId?: string) {
   const areaNumber: number | undefined = validateProjectNumber(areaId);
@@ -14,7 +14,7 @@ export default function useArea(areaId?: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name: name, geoJSON: JSON.parse(geoJSON)}),
+      body: JSON.stringify({ name: name, geoJSON: JSON.parse(geoJSON) }),
     });
 
     return await res.json();

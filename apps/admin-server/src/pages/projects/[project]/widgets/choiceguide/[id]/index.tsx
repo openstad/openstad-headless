@@ -1,30 +1,32 @@
-import React, { useEffect } from 'react';
-import { PageLayout } from '../../../../../../components/ui/page-layout';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import WidgetChoiceGuideChoiceOptions from '@/pages/projects/[project]/widgets/choiceguide/[id]/choiceOptions';
+import WidgetChoiceGuideItems from '@/pages/projects/[project]/widgets/choiceguide/[id]/items';
+import WidgetChoiceGuideGeneralSettings from '@/pages/projects/[project]/widgets/choiceguide/[id]/settings';
+import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
 import { useRouter } from 'next/router';
-import ChoicesSelectorForm from './form';
+import React, { useEffect } from 'react';
+
+import { ChoiceGuideProps } from '../../../../../../../../../packages/choiceguide/src/props';
+import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import WidgetPreview from '@/components/widget-preview';
-import WidgetChoiceGuideItems from "@/pages/projects/[project]/widgets/choiceguide/[id]/items";
-import WidgetChoiceGuideChoiceOptions from "@/pages/projects/[project]/widgets/choiceguide/[id]/choiceOptions";
-import WidgetChoiceGuideGeneralSettings from "@/pages/projects/[project]/widgets/choiceguide/[id]/settings";
-import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
-import {ChoiceGuideProps} from "../../../../../../../../../packages/choiceguide/src/props";
+import ChoicesSelectorForm from './form';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetChoiceGuide({
-  apiUrl,
-}: WithApiUrlProps) {
+export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
@@ -57,7 +59,9 @@ export default function WidgetChoiceGuide({
               <TabsTrigger value="form">Formulier instellingen</TabsTrigger>
               <TabsTrigger value="items">Velden</TabsTrigger>
               <TabsTrigger value="choiceOptions">Keuze opties</TabsTrigger>
-              <TabsTrigger value="generalSettings">Algemene instellingen</TabsTrigger>
+              <TabsTrigger value="generalSettings">
+                Algemene instellingen
+              </TabsTrigger>
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
@@ -113,7 +117,8 @@ export default function WidgetChoiceGuide({
                   <Alert variant="info" className="mb-4">
                     <AlertTitle>Let op!</AlertTitle>
                     <AlertDescription>
-                      De kaartopties zijn alleen van toepassing als je een veld hebt die een kaart bevat.
+                      De kaartopties zijn alleen van toepassing als je een veld
+                      hebt die een kaart bevat.
                     </AlertDescription>
                   </Alert>
                   <WidgetResourcesMapDatalayers
@@ -138,15 +143,15 @@ export default function WidgetChoiceGuide({
             </TabsContent>
           </Tabs>
 
-          <div className='py-6 mt-6 bg-white rounded-md'>
-              {previewConfig ? (
-                <WidgetPreview
-                  type="choiceguide"
-                  config={previewConfig}
-                  projectId={projectId as string}
-                />
-              ) : null}
-            </div>
+          <div className="py-6 mt-6 bg-white rounded-md">
+            {previewConfig ? (
+              <WidgetPreview
+                type="choiceguide"
+                config={previewConfig}
+                projectId={projectId as string}
+              />
+            ) : null}
+          </div>
         </div>
       </PageLayout>
     </div>

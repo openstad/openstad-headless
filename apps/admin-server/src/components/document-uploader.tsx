@@ -1,5 +1,7 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import React, { useEffect } from 'react';
 import { FieldValues, Path, UseFormReturn, useForm } from 'react-hook-form';
+
 import {
   FormControl,
   FormField,
@@ -8,17 +10,26 @@ import {
   FormMessage,
 } from './ui/form';
 import { Input } from './ui/input';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
-  onDocumentUploaded?: (documentObject: {url: string} ) => void;
+  onDocumentUploaded?: (documentObject: { url: string }) => void;
   documentLabel?: string;
   allowedTypes?: string[];
   project?: string;
-}> = ({ form, fieldName, onDocumentUploaded, allowedTypes, documentLabel = 'Document', project }) => {
-  const [document, setDocument] = React.useState<{url: string, name: string}>();
+}> = ({
+  form,
+  fieldName,
+  onDocumentUploaded,
+  allowedTypes,
+  documentLabel = 'Document',
+  project,
+}) => {
+  const [document, setDocument] = React.useState<{
+    url: string;
+    name: string;
+  }>();
   const [documentUrl, setDocumentUrl] = React.useState<string>('');
 
   function prepareDocument(document: any) {
@@ -35,25 +46,26 @@ export const DocumentUploader: React.FC<{
 
     const projectNumber: number | undefined = validateProjectNumber(project);
 
-    const response = await fetch(`/api/openstad/api/project/${projectNumber}/upload/document`, {
-      method: 'POST',
-      body: document
-    })
+    const response = await fetch(
+      `/api/openstad/api/project/${projectNumber}/upload/document`,
+      {
+        method: 'POST',
+        body: document,
+      }
+    );
 
     setDocument(await response.json());
   }
 
   useEffect(() => {
-    if (document && documentUrl !== document.url ) {
-        setDocumentUrl(document.url);
-        form.setValue(fieldName, document.url);
+    if (document && documentUrl !== document.url) {
+      setDocumentUrl(document.url);
+      form.setValue(fieldName, document.url);
       onDocumentUploaded && onDocumentUploaded(document);
     }
   }, [document, form, fieldName, onDocumentUploaded]);
 
-  const acceptAttribute = allowedTypes
-    ? allowedTypes.join(',')
-    : "";
+  const acceptAttribute = allowedTypes ? allowedTypes.join(',') : '';
 
   return (
     <FormField
@@ -68,7 +80,7 @@ export const DocumentUploader: React.FC<{
               accept={acceptAttribute}
               {...field}
               onChange={(e) => {
-                uploadDocument(e.target.files?.[0])
+                uploadDocument(e.target.files?.[0]);
               }}
             />
           </FormControl>
@@ -77,4 +89,4 @@ export const DocumentUploader: React.FC<{
       )}
     />
   );
-}
+};

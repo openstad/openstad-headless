@@ -27,6 +27,7 @@ First a list of projects on which this users has logged in is added. Then a list
   ]
 }
 ```
+
 Types are resources, comments and votes. All of these are added to the result too, so the complete response looks like this:
 
 ```
@@ -52,22 +53,28 @@ Types are resources, comments and votes. All of these are added to the result to
 ### anonymize
 
 The following request will remove a users data on one site:
+
 ```
 PUT :HOSTNAME/api/project/:PROJECT_ID/user/8/do-anonymize
 Authorization: Bearer :ACCESSTOKEN
 ```
+
 To remove all userdata over all sites use
+
 ```
 PUT :HOSTNAME/api/project/:PROJECT_ID/user/8/do-anonymize
 Authorization: Bearer :ACCESSTOKEN
 ```
+
 Test it with
+
 ```
 PUT :HOSTNAME/api/project/:PROJECT_ID/user/8/will-anonymize
 Authorization: Bearer :ACCESSTOKEN
 ```
+
 which shows all impacted data but will make no changes.
 
-Anonymizing consists of emptying all user data fields. The user itself will be not be removed, because it is needed voor umber of votes, origin of resources and comments, etc. 
+Anonymizing consists of emptying all user data fields. The user itself will be not be removed, because it is needed voor umber of votes, origin of resources and comments, etc.
 
 Generic anonimize functions to remove all users from a project are also available, of course for admin users only. This is documented [here](todo).

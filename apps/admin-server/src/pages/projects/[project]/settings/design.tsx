@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormField,
   FormControl,
+  FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useCallback, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
-import toast from 'react-hot-toast';
 import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
 import Prism from 'prismjs';
+import React, { useState } from 'react';
+import { useCallback, useEffect } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const formSchema = z.object({
   cssUrls: z.array(z.object({ url: z.string().optional() })).optional(),
@@ -29,7 +29,6 @@ const formSchema = z.object({
 });
 
 export default function ProjectSettingsDesign() {
-
   const router = useRouter();
   const { project } = router.query;
   const { data, updateProject } = useProject();
@@ -40,7 +39,10 @@ export default function ProjectSettingsDesign() {
     let urlsArray: Array<{ url: string }> = [];
     if (Array.isArray(existingCssUrl)) {
       urlsArray = existingCssUrl.map((url) => ({ url }));
-    } else if (typeof existingCssUrl === 'string' && existingCssUrl.trim() !== '') {
+    } else if (
+      typeof existingCssUrl === 'string' &&
+      existingCssUrl.trim() !== ''
+    ) {
       urlsArray = [{ url: existingCssUrl }];
     }
 
@@ -66,7 +68,10 @@ export default function ProjectSettingsDesign() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const cssUrlsArray = values.cssUrls?.map((item) => item?.url?.trim() ?? '').filter(Boolean) || [];
+      const cssUrlsArray =
+        values.cssUrls
+          ?.map((item) => item?.url?.trim() ?? '')
+          .filter(Boolean) || [];
 
       const project = await updateProject({
         project: {
@@ -77,15 +82,12 @@ export default function ProjectSettingsDesign() {
       if (project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('could not update', error);
     }
   }
-
-
-
 
   const { watch } = form;
   const fieldValue = watch('cssCustom');
@@ -94,40 +96,46 @@ export default function ProjectSettingsDesign() {
     update(fieldValue as any);
   }, [fieldValue]);
 
-
   const update = (text: string) => {
-    let result_element = document.querySelector("#highlighting-content");
+    let result_element = document.querySelector('#highlighting-content');
     if (result_element) {
-      if (text[text.length - 1] === "\n") {
-        text += " ";
+      if (text[text.length - 1] === '\n') {
+        text += ' ';
       }
 
-      result_element.innerHTML = text.replace(new RegExp("&", "g"), "&amp;").replace(new RegExp("<", "g"), "&lt;");
+      result_element.innerHTML = text
+        .replace(new RegExp('&', 'g'), '&amp;')
+        .replace(new RegExp('<', 'g'), '&lt;');
       Prism.highlightElement(result_element);
     }
-  }
+  };
 
   const sync_scroll = (element: HTMLElement) => {
-    const result = document.querySelector("#highlighting") as HTMLElement | null;
+    const result = document.querySelector(
+      '#highlighting'
+    ) as HTMLElement | null;
     if (result) {
       result.scrollTop = element.scrollTop;
       result.scrollLeft = element.scrollLeft;
     }
-  }
+  };
 
-  const check_tab = (element: HTMLTextAreaElement, event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const check_tab = (
+    element: HTMLTextAreaElement,
+    event: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     let code = element.value;
-    if (event.key == "Tab") {
+    if (event.key == 'Tab') {
       event.preventDefault();
       let before_tab = code.slice(0, element.selectionStart);
       let after_tab = code.slice(element.selectionEnd, element.value.length);
       let cursor_pos = element.selectionStart + 1;
-      element.value = before_tab + "\t" + after_tab;
+      element.value = before_tab + '\t' + after_tab;
       element.selectionStart = cursor_pos;
       element.selectionEnd = cursor_pos;
       update(element.value);
     }
-  }
+  };
 
   return (
     <div>
@@ -154,7 +162,6 @@ export default function ProjectSettingsDesign() {
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
-
               <Heading size="lg">CSS URL&apos;s</Heading>
               {fields.map((item, index) => (
                 <div key={item.id} className="flex gap-2 items-center">
@@ -162,15 +169,26 @@ export default function ProjectSettingsDesign() {
                     control={form.control}
                     name={`cssUrls.${index}.url`}
                     render={({ field }) => (
-                      <Input {...field} placeholder="Voer een CSS URL in" className="w-full" />
+                      <Input
+                        {...field}
+                        placeholder="Voer een CSS URL in"
+                        className="w-full"
+                      />
                     )}
                   />
-                  <Button type="button" onClick={() => remove(index)} variant="secondary" className={'text-primary-foreground'}>
+                  <Button
+                    type="button"
+                    onClick={() => remove(index)}
+                    variant="secondary"
+                    className={'text-primary-foreground'}>
                     ✖
                   </Button>
                 </div>
               ))}
-              <Button type="button" onClick={() => append({ url: '' })} variant="default">
+              <Button
+                type="button"
+                onClick={() => append({ url: '' })}
+                variant="default">
                 + URL toevoegen
               </Button>
 
@@ -182,17 +200,30 @@ export default function ProjectSettingsDesign() {
                     <FormLabel>Schrijf hier je eigen css</FormLabel>
                     <FormControl>
                       <div className="editor">
-                        <Textarea id="editing" placeholder="Schrijf hier je custom css..." spellCheck="false" onInput={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                          update(e.target.value)
-                          sync_scroll(e.target)
-                        }}
+                        <Textarea
+                          id="editing"
+                          placeholder="Schrijf hier je custom css..."
+                          spellCheck="false"
+                          onInput={(
+                            e: React.ChangeEvent<HTMLTextAreaElement>
+                          ) => {
+                            update(e.target.value);
+                            sync_scroll(e.target);
+                          }}
                           onScroll={(e) => sync_scroll(e.target as HTMLElement)}
-                          onKeyDown={(event) => check_tab(event.target as HTMLTextAreaElement, event)}
-                          {...field} />
+                          onKeyDown={(event) =>
+                            check_tab(
+                              event.target as HTMLTextAreaElement,
+                              event
+                            )
+                          }
+                          {...field}
+                        />
 
                         <pre id="highlighting" aria-hidden="true">
-                          <code className="language-css" id="highlighting-content">
-                          </code>
+                          <code
+                            className="language-css"
+                            id="highlighting-content"></code>
                         </pre>
                       </div>
                     </FormControl>
@@ -200,8 +231,6 @@ export default function ProjectSettingsDesign() {
                   </FormItem>
                 )}
               />
-
-
 
               <Button type="submit" className="w-fit col-span-full">
                 Opslaan

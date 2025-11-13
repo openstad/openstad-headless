@@ -27,24 +27,24 @@ import * as z from 'zod';
 // Defines the types allowed to go to the frontend
 const SortingTypes = [
   {
-    value: "title",
-    label: "Titel"
+    value: 'title',
+    label: 'Titel',
   },
   {
-    value: "createdAt_desc",
-    label: "Nieuwste eerst"
+    value: 'createdAt_desc',
+    label: 'Nieuwste eerst',
   },
   {
-    value: "createdAt_asc",
-    label: "Oudste eerst"
+    value: 'createdAt_asc',
+    label: 'Oudste eerst',
   },
   {
-    value: "votes_desc",
-    label: "Meeste stemmen"
+    value: 'votes_desc',
+    label: 'Meeste stemmen',
   },
   {
-    value: "votes_asc",
-    label: "Minste stemmen"
+    value: 'votes_asc',
+    label: 'Minste stemmen',
   },
   // {
   //   value: "comments_desc",
@@ -55,13 +55,13 @@ const SortingTypes = [
   //   label: "Minste reacties"
   // },
   {
-    value: "ranking",
-    label: "Ranglijst"
+    value: 'ranking',
+    label: 'Ranglijst',
   },
   {
-    value: "random",
-    label: "Willekeurig"
-  }
+    value: 'random',
+    label: 'Willekeurig',
+  },
 ];
 
 const formSchema = z.object({
@@ -70,7 +70,7 @@ const formSchema = z.object({
   sorting: z
     .array(z.object({ value: z.string(), label: z.string() }))
     .optional()
-    .default([])
+    .default([]),
 });
 
 export default function WidgetResourceOverviewSorting(
@@ -169,10 +169,8 @@ export default function WidgetResourceOverviewSorting(
                                   ) > -1
                                 }
                                 onCheckedChange={(checked: any) => {
-
                                   return checked
-                                    ? (
-                                      props.onFieldChanged(field.name, [
+                                    ? (props.onFieldChanged(field.name, [
                                         ...field.value,
                                         {
                                           value: item.value,
@@ -185,19 +183,19 @@ export default function WidgetResourceOverviewSorting(
                                           value: item.value,
                                           label: item.label,
                                         },
-                                      ],
-                                      ))
-                                    : (
-                                      props.onFieldChanged(field.name, field.value?.filter(
-                                        (val) => val.value !== item.value,
-                                      )),
+                                      ]))
+                                    : (props.onFieldChanged(
+                                        field.name,
+                                        field.value?.filter(
+                                          (val) => val.value !== item.value
+                                        )
+                                      ),
                                       field.onChange(
                                         field.value?.filter(
-                                          (val) => val.value !== item.value,
+                                          (val) => val.value !== item.value
                                         )
                                       ));
                                 }}
-
                               />
                             </FormControl>
                             <FormLabel className="font-normal">

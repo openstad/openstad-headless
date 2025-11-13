@@ -1,4 +1,17 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { useRouter } from 'next/router';
 import React from 'react';
+import { boolean } from 'zod';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,31 +19,16 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetResourcesMapMap from './map';
 import WidgetResourcesMapButtons from './buttons';
-import WidgetResourcesMapPolygons from './polygons';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
-import WidgetPreview from '@/components/widget-preview';
-import WidgetPublish from '@/components/widget-publish';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import WidgetResourcesMapDatalayers from './datalayers';
-import {boolean} from "zod";
+import WidgetResourcesMapMap from './map';
+import WidgetResourcesMapPolygons from './polygons';
 
 export const getServerSideProps = withApiUrl;
 
 export type ResourceOverviewMapWidgetTabProps = {
-    hideOverviewFields?: boolean;
-  } & Omit<
-  ResourceOverviewMapWidgetProps,
-  keyof Omit<BaseProps, 'projectId'>
->;
+  hideOverviewFields?: boolean;
+} & Omit<ResourceOverviewMapWidgetProps, keyof Omit<BaseProps, 'projectId'>>;
 
 export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
@@ -55,9 +53,11 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
         let updatedConfig = {
           ...previewConfig,
           [key]: value,
-        }
-        if (key == 'categorize.categorizeByField') updatedConfig.categorize = { categorizeByField: value };
-        if (key == 'clustering.isActive') updatedConfig.clustering = { isActive: value };
+        };
+        if (key == 'categorize.categorizeByField')
+          updatedConfig.categorize = { categorizeByField: value };
+        if (key == 'clustering.isActive')
+          updatedConfig.clustering = { isActive: value };
         updatePreview(updatedConfig);
       }
     },
@@ -94,24 +94,16 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             {previewConfig ? (
               <>
                 <TabsContent value="map" className="p-0">
-                  <WidgetResourcesMapMap
-                    {...totalPropPackage}
-                  />
+                  <WidgetResourcesMapMap {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="button" className="p-0">
-                  <WidgetResourcesMapButtons
-                    {...totalPropPackage}
-                  />
+                  <WidgetResourcesMapButtons {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="polygons" className="p-0">
-                  <WidgetResourcesMapPolygons
-                    {...totalPropPackage}
-                  />
+                  <WidgetResourcesMapPolygons {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="datalayers" className="p-0">
-                  <WidgetResourcesMapDatalayers
-                    {...totalPropPackage}
-                  />
+                  <WidgetResourcesMapDatalayers {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />

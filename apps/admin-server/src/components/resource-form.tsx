@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useFieldArray, useForm } from 'react-hook-form';
-
+import MapInput from '@/components/maps/leaflet-input';
+import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
+import { CodeEditor } from '@/components/ui/code-editor';
 import {
   Form,
   FormControl,
@@ -14,22 +12,24 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { CodeEditor } from '@/components/ui/code-editor';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
-import { SimpleCalendar } from '@/components/simple-calender-popup';
-import useResource from '@/hooks/use-resource';
-import toast from 'react-hot-toast';
-import { ImageUploader } from './image-uploader';
-import { DocumentUploader } from './document-uploader';
-import useTags from '@/hooks/use-tags';
-import useStatuses from '@/hooks/use-statuses';
-import { CheckboxList } from './checkbox-list';
-import { X } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
-import MapInput from '@/components/maps/leaflet-input';
+import useResource from '@/hooks/use-resource';
+import useStatuses from '@/hooks/use-statuses';
+import useTags from '@/hooks/use-tags';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
+import { useRouter } from 'next/router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { CheckboxList } from './checkbox-list';
+import { DocumentUploader } from './document-uploader';
+import { ImageUploader } from './image-uploader';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -38,81 +38,90 @@ const maxError = (field: string, nr: number) =>
   `${field} mag maximaal ${nr} karakters bevatten`;
 
 const baseSchema = z.object({
-    userId: z.coerce
+  userId: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
+
+  title: z.string().default(''),
+  summary: z.string().default(''),
+  description: z.string().default(''),
+
+  budget: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .default(0),
+  budgetMin: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
+  budgetMax: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
+  budgetInterval: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
+
+  startDate: z.date(),
+  publishDate: z.date().optional(),
+
+  modBreak: z.coerce.string().optional(),
+  modBreakUserId: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
+  modBreakDate: z.date().optional(),
+
+  location: z.string().optional(),
+  image: z.string().optional(),
+  imageDescription: z.string().optional(),
+  images: z
+    .array(z.object({ url: z.string(), description: z.string().optional() }))
+    .optional()
+    .default([]),
+  document: z.string().optional(),
+  documents: z
+    .array(
+      z.object({ url: z.string().optional(), name: z.string().optional() })
+    )
+    .optional()
+    .default([]),
+
+  extraData: z
+    .object({
+      originalId: z.coerce
         .number({ invalid_type_error: onlyNumbersMessage })
         .optional(),
-
-    title: z.string().default(''),
-    summary: z.string().default(''),
-    description: z.string().default(''),
-
-    budget: z.coerce
-        .number({ invalid_type_error: onlyNumbersMessage })
-        .default(0),
-    budgetMin: z.coerce
-        .number({ invalid_type_error: onlyNumbersMessage })
-        .optional(),
-    budgetMax: z.coerce
-        .number({ invalid_type_error: onlyNumbersMessage })
-        .optional(),
-    budgetInterval: z.coerce
-        .number({ invalid_type_error: onlyNumbersMessage })
-        .optional(),
-
-    startDate: z.date(),
-    publishDate: z.date().optional(),
-
-    modBreak: z.coerce.string().optional(),
-    modBreakUserId: z.coerce
-        .number({ invalid_type_error: onlyNumbersMessage })
-        .optional(),
-    modBreakDate: z.date().optional(),
-
-    location: z.string().optional(),
-    image: z.string().optional(),
-    imageDescription: z.string().optional(),
-    images: z
-        .array(z.object({ url: z.string(), description: z.string().optional() }))
-        .optional()
-        .default([]),
-    document: z.string().optional(),
-    documents: z
-        .array(z.object({ url: z.string().optional(), name: z.string().optional() }))
-        .optional()
-        .default([]),
-
-    extraData: z
-        .object({
-            originalId: z.coerce
-                .number({ invalid_type_error: onlyNumbersMessage })
-                .optional(),
-        })
-        .default({}),
-    tags: z.number().array().default([]),
-    statuses: z.number().array().default([]),
+    })
+    .default({}),
+  tags: z.number().array().default([]),
+  statuses: z.number().array().default([]),
 });
 
 const formSchema = (
-    titleLimits: { min: number; max: number },
-    summaryLimits: { min: number; max: number },
-    descriptionLimits: { min: number; max: number }
-) => baseSchema.extend({
+  titleLimits: { min: number; max: number },
+  summaryLimits: { min: number; max: number },
+  descriptionLimits: { min: number; max: number }
+) =>
+  baseSchema.extend({
     title: z
-        .string()
-        .min(titleLimits.min, minError('Titel', titleLimits.min))
-        .max(titleLimits.max, maxError('Titel', titleLimits.max))
-        .default(''),
+      .string()
+      .min(titleLimits.min, minError('Titel', titleLimits.min))
+      .max(titleLimits.max, maxError('Titel', titleLimits.max))
+      .default(''),
     summary: z
-        .string()
-        .min(summaryLimits.min, minError('Samenvatting', summaryLimits.min))
-        .max(summaryLimits.max, maxError('Samenvatting', summaryLimits.max))
-        .default(''),
+      .string()
+      .min(summaryLimits.min, minError('Samenvatting', summaryLimits.min))
+      .max(summaryLimits.max, maxError('Samenvatting', summaryLimits.max))
+      .default(''),
     description: z
-        .string()
-        .min(descriptionLimits.min, minError('Beschrijving', descriptionLimits.min))
-        .max(descriptionLimits.max, maxError('Beschrijving', descriptionLimits.max))
-        .default(''),
-});
+      .string()
+      .min(
+        descriptionLimits.min,
+        minError('Beschrijving', descriptionLimits.min)
+      )
+      .max(
+        descriptionLimits.max,
+        maxError('Beschrijving', descriptionLimits.max)
+      )
+      .default(''),
+  });
 
 type FormType = z.infer<typeof baseSchema>;
 
@@ -125,10 +134,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   const { project, id } = router.query;
   const { data: projectData } = useProject();
 
-  const { data: existingData, error, mutate } = useResource(
-    project as string,
-    id as string
-  );
+  const {
+    data: existingData,
+    error,
+    mutate,
+  } = useResource(project as string, id as string);
 
   const titleLimits = {
     min: projectData?.config?.resources?.titleMinLength || 10,
@@ -159,18 +169,17 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     name: string;
   }[];
 
-  loadedTags = loadedTags
-    .sort((a, b) => {
-      const aType = a.type ?? '';
-      const bType = b.type ?? '';
+  loadedTags = loadedTags.sort((a, b) => {
+    const aType = a.type ?? '';
+    const bType = b.type ?? '';
 
-      if (aType < bType) return -1;
-      if (aType > bType) return 1;
+    if (aType < bType) return -1;
+    if (aType > bType) return 1;
 
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
-      return 0;
-    });
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
   const budgetFallback = (existingData: any, key: string = '') => {
     if (!existingData) return 0;
 
@@ -228,7 +237,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   );
   const [extraData, setExtraData] = useState(existingData?.extraData || '');
   const form = useForm<FormType>({
-    resolver: zodResolver<any>(formSchema(titleLimits, summaryLimits, descriptionLimits)),
+    resolver: zodResolver<any>(
+      formSchema(titleLimits, summaryLimits, descriptionLimits)
+    ),
     defaultValues: defaults(),
   });
 
@@ -238,8 +249,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       if (extraData !== values.extraData) {
         values.extraData = JSON.parse(extraData);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     onFormSubmit(values)
       .then(() => {
@@ -259,30 +269,44 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     if (existingData) {
       form.reset(defaults());
     } else {
-      let resetValues: { tags?: number[]; statuses?: number[]; } = {};
+      let resetValues: { tags?: number[]; statuses?: number[] } = {};
       if (projectData?.config?.resources?.defaultTagIds) {
         const selectedTags = form.getValues('tags') || [];
 
         if (selectedTags.length === 0) {
-          const projectTags = Array.isArray(projectData.config.resources.defaultTagIds)
+          const projectTags = Array.isArray(
+            projectData.config.resources.defaultTagIds
+          )
             ? projectData.config.resources.defaultTagIds
             : [];
-          resetValues.tags = Array.from(new Set([...selectedTags, ...projectTags]));
+          resetValues.tags = Array.from(
+            new Set([...selectedTags, ...projectTags])
+          );
         }
       }
       if (projectData?.config?.resources?.defaultStatusIds) {
         const selectedStatuses = form.getValues('statuses') || [];
 
         if (selectedStatuses.length === 0) {
-          const projectStatuses = Array.isArray(projectData.config.resources.defaultStatusIds)
+          const projectStatuses = Array.isArray(
+            projectData.config.resources.defaultStatusIds
+          )
             ? projectData.config.resources.defaultStatusIds
             : [];
-          resetValues.statuses = Array.from(new Set([...selectedStatuses, ...projectStatuses]));
+          resetValues.statuses = Array.from(
+            new Set([...selectedStatuses, ...projectStatuses])
+          );
         }
       }
       form.reset(resetValues);
     }
-  }, [existingData, form, defaults, projectData?.config?.resources?.defaultTagIds, projectData?.config?.resources?.defaultStatusIds]);
+  }, [
+    existingData,
+    form,
+    defaults,
+    projectData?.config?.resources?.defaultTagIds,
+    projectData?.config?.resources?.defaultStatusIds,
+  ]);
 
   const { fields: imageFields, remove: removeImage } = useFieldArray({
     control: form.control,
@@ -294,12 +318,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     name: 'documents',
   });
 
-  const handleLocationSelect = useCallback((location: string) => {
-    if (location !== '') {
-      let formatted = location.split(',');
-      form.setValue('location', JSON.stringify({ lat: parseFloat(formatted[0]), lng: parseFloat(formatted[1]) }));
-    }
-  }, [form]);
+  const handleLocationSelect = useCallback(
+    (location: string) => {
+      if (location !== '') {
+        let formatted = location.split(',');
+        form.setValue(
+          'location',
+          JSON.stringify({
+            lat: parseFloat(formatted[0]),
+            lng: parseFloat(formatted[1]),
+          })
+        );
+      }
+    },
+    [form]
+  );
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -374,7 +407,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               'application/vnd.ms-excel',
               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
               'application/vnd.ms-powerpoint',
-              'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation',
             ]}
             onDocumentUploaded={(documentResult) => {
               let array = [...(form.getValues('documents') || [])];
@@ -388,11 +421,15 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
             {imageFields.length > 0 && (
               <>
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Afbeeldingen
+                </label>
                 <section className="grid col-span-full grid-cols-1 gap-y-4">
                   {imageFields.map(({ id, url }, index) => {
                     return (
-                      <div key={id} className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
+                      <div
+                        key={id}
+                        className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
                         <img src={url} alt={url} />
                         <Button
                           color="red"
@@ -409,17 +446,17 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                           render={({ field }) => (
                             <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
                               <FormLabel>Beschrijving</FormLabel>
-                              <FormDescription>Op de detailpagina van de inzending is er een optie waarmee je deze beschrijving kunt tonen.</FormDescription>
+                              <FormDescription>
+                                Op de detailpagina van de inzending is er een
+                                optie waarmee je deze beschrijving kunt tonen.
+                              </FormDescription>
                               <FormControl>
-                                <Input
-                                  {...field}
-                                />
+                                <Input {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-
                       </div>
                     );
                   })}
@@ -431,7 +468,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
             {documentFields.length > 0 && (
               <>
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Documenten</label>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Documenten
+                </label>
                 <section className="grid col-span-full grid-cols-1 gap-x-4 gap-y-8 ">
                   {documentFields.map(({ id, url, name }, index) => {
                     return (
@@ -444,28 +483,32 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                             }}
                             className="relative right-0 top-0 p-1">
                             <X size={24} />
-                            </Button>
-                            <p>
-                            <a className="text-blue-500 underline text-base leading-5"
-                              href={url} target="_blank">
+                          </Button>
+                          <p>
+                            <a
+                              className="text-blue-500 underline text-base leading-5"
+                              href={url}
+                              target="_blank">
                               {url}
                             </a>
-                            </p>
-                          </div>
-                          <Input
-                            className="block w-full"
-                            type="text"
-                            name="name"
-                            defaultValue={name}
-                            onBlur={(e) => {
-                            let array = [...(form.getValues('documents') || [])];
+                          </p>
+                        </div>
+                        <Input
+                          className="block w-full"
+                          type="text"
+                          name="name"
+                          defaultValue={name}
+                          onBlur={(e) => {
+                            let array = [
+                              ...(form.getValues('documents') || []),
+                            ];
 
                             if (
-                              e.target.value
-                              && array.length > 0
-                              && typeof array[index] !== "undefined"
-                              && typeof array[index].name !== "undefined"
-                              && e.target.value !== array[index].name
+                              e.target.value &&
+                              array.length > 0 &&
+                              typeof array[index] !== 'undefined' &&
+                              typeof array[index].name !== 'undefined' &&
+                              e.target.value !== array[index].name
                             ) {
                               array[index].name = e.target.value;
 
@@ -504,11 +547,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   Resource ID van het originele resource (optioneel)
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="1"
-                    {...field}
-                  />
+                  <Input type="number" placeholder="1" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -519,12 +558,12 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             name="userId"
             render={({ field }) => (
               <FormItem className="col-span-full lg:col-span-1">
-                <FormLabel>ID van de gebruiker die aan deze resource is gekoppeld (optioneel)</FormLabel>
+                <FormLabel>
+                  ID van de gebruiker die aan deze resource is gekoppeld
+                  (optioneel)
+                </FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="1"
-                    {...field}
-                  />
+                  <Input placeholder="1" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -589,7 +628,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Inhoud van de Modbreak</FormLabel>
-                <FormDescription>Laat dit veld leeg om geen Modbreak bij deze resource te tonen</FormDescription>
+                <FormDescription>
+                  Laat dit veld leeg om geen Modbreak bij deze resource te tonen
+                </FormDescription>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
@@ -603,7 +644,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             name="modBreakUserId"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>ID van de gebruiker die aan de Modbreak is gekoppeld (optioneel)</FormLabel>
+                <FormLabel>
+                  ID van de gebruiker die aan de Modbreak is gekoppeld
+                  (optioneel)
+                </FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
@@ -695,15 +739,13 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               render={({ field }) => (
                 <FormItem>
                   <Textarea
-                    className='hidden'
+                    className="hidden"
                     hidden={true}
                     name={'extraData'}
                     value={extraData} // Bind the state to the Textarea value
                     readOnly // Make the Textarea read-only since it's updated programmatically
                   />
-                  <FormLabel>
-                    Extra data
-                  </FormLabel>
+                  <FormLabel>Extra data</FormLabel>
                   <FormControl>
                     <CodeEditor
                       initValue={existingData?.extraData}
@@ -712,8 +754,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                           const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
                           form.setValue('extraData', parsedValue); // Set the value of the field
                           setExtraData(JSON.stringify(parsedValue));
-                        } catch (error) {
-                        }
+                        } catch (error) {}
                       }}
                     />
                   </FormControl>

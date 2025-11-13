@@ -25,8 +25,7 @@ const formSchema = z.object({
 });
 
 export default function WidgetResourceOverviewSearch(
-  props: StemBegrootWidgetProps &
-    EditFieldProps<StemBegrootWidgetProps>
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
 

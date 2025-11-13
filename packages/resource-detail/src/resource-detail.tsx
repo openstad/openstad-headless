@@ -1,63 +1,68 @@
-import './resource-detail.css';
-//@ts-ignore D.type def missing, will disappear when datastore is ts
-import DataStore from '@openstad-headless/data-store/src';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
-import {
-  Carousel,
-  Image,
-  Spacer,
-  Pill,
-  IconButton, Icon,
-} from '@openstad-headless/ui/src';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
-import {
-  Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
-} from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
-import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
   CommentsWidgetProps,
 } from '@openstad-headless/comments/src/comments';
-import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
-
+//@ts-ignore D.type def missing, will disappear when datastore is ts
+import DataStore from '@openstad-headless/data-store/src';
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
-import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
-import { Button } from '@utrecht/component-library-react';
-import { hasRole } from '../../lib';
 import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
+import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import {
+  Carousel,
+  Icon,
+  IconButton,
+  Image,
+  Pill,
+  Spacer,
+} from '@openstad-headless/ui/src';
+import '@utrecht/component-library-css';
+import {
+  ButtonGroup,
+  ButtonLink,
+  Heading,
+  Heading2,
+  Link,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import { Button } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useState } from 'react';
+
+import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
+import { hasRole } from '../../lib';
+import './resource-detail.css';
 
 type booleanProps = {
   [K in
-  | 'displayImage'
-  | 'displayImageDescription'
-  | 'displayTitle'
-  | 'displayModBreak'
-  | 'displaySummary'
-  | 'displayDescription'
-  | 'displayUser'
-  | 'displayDate'
-  | 'displayBudget'
-  | 'displayLocation'
-  | 'displayBudgetDocuments'
-  | 'displayLikes'
-  | 'displayTags'
-  | 'displayStatus'
-  | 'displayDocuments'
-  | 'clickableImage'
-  | 'displayStatusBar'
-  | 'displaySocials']: boolean | undefined;
+    | 'displayImage'
+    | 'displayImageDescription'
+    | 'displayTitle'
+    | 'displayModBreak'
+    | 'displaySummary'
+    | 'displayDescription'
+    | 'displayUser'
+    | 'displayDate'
+    | 'displayBudget'
+    | 'displayLocation'
+    | 'displayBudgetDocuments'
+    | 'displayLikes'
+    | 'displayTags'
+    | 'displayStatus'
+    | 'displayDocuments'
+    | 'clickableImage'
+    | 'displayStatusBar'
+    | 'displaySocials']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
   documentsTitle?: string;
   documentsDesc?: string;
-} &
-  BaseProps &
+} & BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
@@ -65,7 +70,8 @@ export type ResourceDetailWidgetProps = {
     backUrlIdRelativePath?: string;
     pageTitle?: boolean;
     backUrlText?: string;
-  } & MapPropsType & booleanProps & {
+  } & MapPropsType &
+  booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -91,7 +97,7 @@ export type ResourceDetailWidgetProps = {
 type DocumentType = {
   name?: string;
   url?: string;
-}
+};
 
 function ResourceDetail({
   displayImage = true,
@@ -121,11 +127,13 @@ function ResourceDetail({
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
 
-  let resourceId: string | undefined = String(getResourceId({
-    resourceId: parseInt(props.resourceId || ''),
-    url: document.location.href,
-    targetUrl: props.resourceIdRelativePath,
-  })); // todo: make it a number throughout the code
+  let resourceId: string | undefined = String(
+    getResourceId({
+      resourceId: parseInt(props.resourceId || ''),
+      url: document.location.href,
+      targetUrl: props.resourceIdRelativePath,
+    })
+  ); // todo: make it a number throughout the code
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -138,12 +146,16 @@ function ResourceDetail({
   });
 
   const showDate = (date: string) => {
-    return date.split(' ').slice(0, -1).join(' ')
+    return date.split(' ').slice(0, -1).join(' ');
   };
 
   if (!resource) return null;
   const shouldHaveSideColumn =
-    displayLikes || displayTags || displayStatus || displaySocials || displayDocuments;
+    displayLikes ||
+    displayTags ||
+    displayStatus ||
+    displaySocials ||
+    displayDocuments;
 
   let defaultImage = '';
 
@@ -153,14 +165,26 @@ function ResourceDetail({
   }
 
   if (Array.isArray(resource?.tags)) {
-    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) =>
+      a.name.localeCompare(b.name)
+    );
 
-    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    const tagWithImage = sortedTags.find(
+      (tag: Tag) => tag.defaultResourceImage
+    );
     defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
-  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
-  const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
+  const resourceImages =
+    Array.isArray(resource.images) && resource.images.length > 0
+      ? resource.images
+      : [{ url: defaultImage }];
+  const hasImages =
+    Array.isArray(resourceImages) &&
+    resourceImages.length > 0 &&
+    resourceImages[0].url !== ''
+      ? ''
+      : 'resource-has-no-images';
 
   const getIdFromHash = () => {
     try {
@@ -196,7 +220,12 @@ function ResourceDetail({
 
   const getPageHash = () => {
     if (window.location.hash.includes('#doc')) {
-      let url = '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : '');
+      let url =
+        '/' +
+        window.location.hash.split('=')[1] +
+        (window.location.hash.split('=')[2] !== undefined
+          ? '=' + window.location.hash.split('=')[2]
+          : '');
 
       if (backUrlIdRelativePath) {
         const backUrlId = getIdFromHash();
@@ -206,7 +235,11 @@ function ResourceDetail({
         }
       }
 
-      return <div className="back-url"><Link href={url}>{backUrlText}</Link></div>
+      return (
+        <div className="back-url">
+          <Link href={url}>{backUrlText}</Link>
+        </div>
+      );
     }
   };
 
@@ -218,24 +251,40 @@ function ResourceDetail({
 
   const firstStatus = resource.statuses
     ? resource.statuses
-    .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+        .filter(
+          (status: { seqnr: number }) =>
+            status.seqnr !== undefined && status.seqnr !== null
+        )
+        .sort(
+          (a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr
+        )[0] || resource.statuses[0]
     : false;
 
-  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
-  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+  const colorClass =
+    firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass =
+    firstStatus && firstStatus.backgroundColor
+      ? `bgColor-${firstStatus.backgroundColor}`
+      : '';
 
   const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
-  const renderImage = (src: string, clickableImage: boolean, imageDescription?: string) => {
+  const renderImage = (
+    src: string,
+    clickableImage: boolean,
+    imageDescription?: string
+  ) => {
     const imageElement = (
       <>
         <Image
           src={src}
           imageFooter={
-            (displayStatusBar && resource.statuses && resource.statuses.length > 0) && (
+            displayStatusBar &&
+            resource.statuses &&
+            resource.statuses.length > 0 && (
               <div>
-                <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
+                <Paragraph
+                  className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                   {resource.statuses
                     ?.map((s: { name: string }) => s.name)
                     ?.join(', ')}
@@ -245,12 +294,8 @@ function ResourceDetail({
           }
         />
 
-        {(displayImageDescription && imageDescription) && (
-          <p
-            className="carousel-image-description"
-          >
-            {imageDescription}
-          </p>
+        {displayImageDescription && imageDescription && (
+          <p className="carousel-image-description">{imageDescription}</p>
         )}
       </>
     );
@@ -264,9 +309,12 @@ function ResourceDetail({
     );
   };
 
-  const { data: currentUser, isLoading: userIsLoading } = datastore.useCurrentUser({ ...props });
+  const { data: currentUser, isLoading: userIsLoading } =
+    datastore.useCurrentUser({ ...props });
   const resourceUserId = resource?.userId || null;
-  const canDelete = !userIsLoading && hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
+  const canDelete =
+    !userIsLoading &&
+    hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
 
   const onRemoveClick = async (resource: any) => {
     try {
@@ -283,59 +331,83 @@ function ResourceDetail({
     }
   };
 
-
   useEffect(() => {
     if (props.pageTitle === true && resource.title !== undefined) {
-      const current = document.title.includes(' - ') && document.title.split(' - ')[0].length ? ' - '+ document.title.split(' - ')[0] : '';
+      const current =
+        document.title.includes(' - ') && document.title.split(' - ')[0].length
+          ? ' - ' + document.title.split(' - ')[0]
+          : '';
       document.title = resource.title + current;
     }
   }, [resource]);
 
-  const dataLayerSettings = !!resourceOverviewMapWidget?.datalayer ? {
-    datalayer: resourceOverviewMapWidget?.datalayer || [],
-    enableOnOffSwitching: resourceOverviewMapWidget?.enableOnOffSwitching || false,
-  } : {};
+  const dataLayerSettings = !!resourceOverviewMapWidget?.datalayer
+    ? {
+        datalayer: resourceOverviewMapWidget?.datalayer || [],
+        enableOnOffSwitching:
+          resourceOverviewMapWidget?.enableOnOffSwitching || false,
+      }
+    : {};
 
   return (
     <section>
       <div
-        className={`osc ${shouldHaveSideColumn
-          ? 'osc-resource-detail-column-container'
-          : 'osc-resource-detail-container'
-          }`}>
+        className={`osc ${
+          shouldHaveSideColumn
+            ? 'osc-resource-detail-column-container'
+            : 'osc-resource-detail-container'
+        }`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {getPageHash()}
           {resource ? (
-            <article className={`osc-resource-detail-content-items ${hasImages}`}>
+            <article
+              className={`osc-resource-detail-content-items ${hasImages}`}>
               {displayImage && (
                 <Carousel
                   items={resourceImages}
-                  buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
-                  itemRenderer={(i) => (
+                  buttonText={{
+                    next: 'Volgende afbeelding',
+                    previous: 'Vorige afbeelding',
+                  }}
+                  itemRenderer={(i) =>
                     renderImage(i.url, clickableImage, i.description)
-                  )}
+                  }
                 />
               )}
 
               {displayTitle && resource.title && (
-                <Heading level={1} appearance="utrecht-heading-2" dangerouslySetInnerHTML={{ __html: resource.title }}></Heading>
+                <Heading
+                  level={1}
+                  appearance="utrecht-heading-2"
+                  dangerouslySetInnerHTML={{
+                    __html: resource.title,
+                  }}></Heading>
               )}
 
               {displayModBreak && resource.modBreak && (
                 <div className="resource-detail-modbreak-banner">
                   <section>
-                    <Heading level={2} appearance='utrecht-heading-6'>{props.resources.modbreakTitle}</Heading>
-                    <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreakDateHumanized}</Heading>
+                    <Heading level={2} appearance="utrecht-heading-6">
+                      {props.resources.modbreakTitle}
+                    </Heading>
+                    <Heading level={2} appearance="utrecht-heading-6">
+                      {resource.modBreakDateHumanized}
+                    </Heading>
                   </section>
                   <Spacer size={1} />
-                  <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreak}</Heading>
+                  <Heading level={2} appearance="utrecht-heading-6">
+                    {resource.modBreak}
+                  </Heading>
                 </div>
               )}
 
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
                   <div>
-                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading
+                      level={2}
+                      appearance="utrecht-heading-6"
+                      className="osc-resource-detail-content-item-title">
                       Ingediend door
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -345,7 +417,10 @@ function ResourceDetail({
                 )}
                 {displayDate && resource.startDateHumanized && (
                   <div>
-                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading
+                      level={2}
+                      appearance="utrecht-heading-6"
+                      className="osc-resource-detail-content-item-title">
                       Datum
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -355,7 +430,10 @@ function ResourceDetail({
                 )}
                 {displayBudget && resource.budget && (
                   <div>
-                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading
+                      level={2}
+                      appearance="utrecht-heading-6"
+                      className="osc-resource-detail-content-item-title">
                       Budget
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -365,17 +443,31 @@ function ResourceDetail({
                 )}
               </div>
               <div className="resource-detail-content">
-                {displaySummary && <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading>}
+                {displaySummary && (
+                  <Heading
+                    level={2}
+                    appearance="utrecht-heading-4"
+                    dangerouslySetInnerHTML={{
+                      __html: resource.summary,
+                    }}></Heading>
+                )}
                 {displayDescription && (
-                  <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                  <Paragraph
+                    dangerouslySetInnerHTML={{
+                      __html: resource.description,
+                    }}></Paragraph>
                 )}
               </div>
               {displayLocation && resource.location && (
                 <>
-                  <Heading level={2} appearance="utrecht-heading-2">Plaats</Heading>
+                  <Heading level={2} appearance="utrecht-heading-2">
+                    Plaats
+                  </Heading>
                   <ResourceDetailMap
                     resourceId={resource.id || resourceId || '0'}
-                    resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
+                    resourceIdRelativePath={
+                      props.resourceIdRelativePath || 'openstadResourceId'
+                    }
                     {...resourceOverviewMapWidget}
                     {...props}
                     dataLayerSettings={dataLayerSettings}
@@ -415,7 +507,9 @@ function ResourceDetail({
               {displayStatus ? (
                 <div className="resource-detail-side-section">
                   <Spacer size={1} />
-                  <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
+                  <Heading level={3} appearance="utrecht-heading-4">
+                    Status
+                  </Heading>
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
                     {resource.statuses?.map((s: { name: string }) => (
@@ -429,7 +523,9 @@ function ResourceDetail({
 
               {displayTags ? (
                 <div className="resource-detail-side-section">
-                  <Heading level={3} appearance="utrecht-heading-4">Tags</Heading>
+                  <Heading level={3} appearance="utrecht-heading-4">
+                    Tags
+                  </Heading>
 
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
@@ -447,32 +543,37 @@ function ResourceDetail({
                 </div>
               ) : null}
             </div>
-            {(!!displayDocuments && !!resource && Array.isArray(resource.documents) && resource.documents.length > 0) && (
-              <div className="aside--content">
-                <Spacer size={2} />
-                <div className='document-download-container'>
-                  {!!documentsTitle && (<Heading level={2} appearance="utrecht-heading-4">{documentsTitle}</Heading>)}
-                  {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
-                  <ButtonGroup>
-                    {resource.documents?.map((document: DocumentType, index: number) => (
-                      <ButtonLink
-                        appearance="primary-action-button"
-                        className="osc counter-container"
-                        download
-                        href={document.url}
-                        key={index}
-                      >
-                        <Icon
-                          icon="ri-download-2-fill"
-                        />
-                        {document.name}
-                      </ButtonLink>
-                    ))}
-                  </ButtonGroup>
+            {!!displayDocuments &&
+              !!resource &&
+              Array.isArray(resource.documents) &&
+              resource.documents.length > 0 && (
+                <div className="aside--content">
+                  <Spacer size={2} />
+                  <div className="document-download-container">
+                    {!!documentsTitle && (
+                      <Heading level={2} appearance="utrecht-heading-4">
+                        {documentsTitle}
+                      </Heading>
+                    )}
+                    {!!documentsDesc && <Paragraph>{documentsDesc}</Paragraph>}
+                    <ButtonGroup>
+                      {resource.documents?.map(
+                        (document: DocumentType, index: number) => (
+                          <ButtonLink
+                            appearance="primary-action-button"
+                            className="osc counter-container"
+                            download
+                            href={document.url}
+                            key={index}>
+                            <Icon icon="ri-download-2-fill" />
+                            {document.name}
+                          </ButtonLink>
+                        )
+                      )}
+                    </ButtonGroup>
+                  </div>
                 </div>
-              </div>
-            )}
-
+              )}
           </aside>
         ) : null}
       </div>
@@ -483,10 +584,9 @@ function ResourceDetail({
           <Button
             appearance="primary-action-button"
             onClick={() => {
-              if (confirm("Deze actie verwijderd de resource"))
+              if (confirm('Deze actie verwijderd de resource'))
                 onRemoveClick(resource);
-            }}
-          >
+            }}>
             Verwijder de inzending
           </Button>
         </>
@@ -494,8 +594,7 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {Array.isArray(useSentiments) &&
-        useSentiments?.length ? (
+      {Array.isArray(useSentiments) && useSentiments?.length ? (
         <section className="resource-detail-comments-container">
           <Comments
             {...props}
@@ -510,10 +609,12 @@ function ResourceDetail({
             closedText={props.commentsWidget?.closedText}
             itemsPerPage={props.commentsWidget?.itemsPerPage}
             displayPagination={props.commentsWidget?.displayPagination}
-            extraFieldsTagGroups={ props.commentsWidget?.extraFieldsTagGroups }
-            defaultTags={ props.commentsWidget?.defaultTags }
-            includeOrExclude={ props.commentsWidget?.includeOrExclude }
-            onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+            extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
+            defaultTags={props.commentsWidget?.defaultTags}
+            includeOrExclude={props.commentsWidget?.includeOrExclude}
+            onlyIncludeOrExcludeTagIds={
+              props.commentsWidget?.onlyIncludeOrExcludeTagIds
+            }
             sentiment={useSentiments[0]}
           />
           {useSentiments?.length > 1 && (
@@ -530,15 +631,15 @@ function ResourceDetail({
               closedText={props.commentsWidget_multiple?.closedText}
               itemsPerPage={props.commentsWidget?.itemsPerPage}
               displayPagination={props.commentsWidget?.displayPagination}
-              extraFieldsTagGroups={ props.commentsWidget?.extraFieldsTagGroups }
-              defaultTags={ props.commentsWidget?.defaultTags }
-              includeOrExclude={ props.commentsWidget?.includeOrExclude }
-              onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+              extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
+              defaultTags={props.commentsWidget?.defaultTags}
+              includeOrExclude={props.commentsWidget?.includeOrExclude}
+              onlyIncludeOrExcludeTagIds={
+                props.commentsWidget?.onlyIncludeOrExcludeTagIds
+              }
               sentiment={useSentiments[1]}
             />
           )}
-
-
         </section>
       ) : null}
     </section>

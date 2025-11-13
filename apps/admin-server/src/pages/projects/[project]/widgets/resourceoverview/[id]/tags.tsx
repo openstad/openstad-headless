@@ -1,30 +1,36 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
-
-import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import _ from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import InfoDialog from "@/components/ui/info-hover";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
@@ -35,7 +41,7 @@ const formSchema = z.object({
         type: z.string(),
         label: z.string().optional(),
         multiple: z.boolean(),
-        projectId: z.string().optional()
+        projectId: z.string().optional(),
       })
     )
     .refine((value) => value.some((item) => item), {
@@ -95,11 +101,11 @@ export default function WidgetResourceOverviewTags(
           <FormField
             control={form.control}
             name="displayTagFilters"
-            render={({field}) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Filteren op tags weergeven?</FormLabel>
                 {YesNoSelect(field, props)}
-                <FormMessage/>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -107,9 +113,17 @@ export default function WidgetResourceOverviewTags(
           <FormField
             control={form.control}
             name="showActiveTags"
-            render={({field}) => (
+            render={({ field }) => (
               <FormItem>
-                <FormLabel style={{display: 'flex'}}>Wil je onder de filters de actieve tags zien waar op is gefilterd? <InfoDialog content={"Dit geeft je de mogelijkheid om de actieve tags te zien waarop momenteel is gefilterd. Dit is vooral handig bij filters waar je meerdere opties kunt selecteren binnen één dropdown. Zo kun je snel een overzicht krijgen van de geselecteerde tags en eenvoudig aanpassen of verwijderen. De actieve tags worden alleen weergegeven bij filteropties die het toestaan om meerdere keuzes tegelijk te selecteren."} /></FormLabel>
+                <FormLabel style={{ display: 'flex' }}>
+                  Wil je onder de filters de actieve tags zien waar op is
+                  gefilterd?{' '}
+                  <InfoDialog
+                    content={
+                      'Dit geeft je de mogelijkheid om de actieve tags te zien waarop momenteel is gefilterd. Dit is vooral handig bij filters waar je meerdere opties kunt selecteren binnen één dropdown. Zo kun je snel een overzicht krijgen van de geselecteerde tags en eenvoudig aanpassen of verwijderen. De actieve tags worden alleen weergegeven bij filteropties die het toestaan om meerdere keuzes tegelijk te selecteren.'
+                    }
+                  />
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -125,13 +139,19 @@ export default function WidgetResourceOverviewTags(
                   Kies de manier waarop je de filters wilt combineren
                 </FormLabel>
                 <FormDescription>
-                  <strong>Of</strong>: Als er meerdere filters actief zijn, wordt alleen één van de filters toegepast. Bijvoorbeeld, als je zoekt op meerdere eigenschappen, wordt er een resultaat getoond als één van die eigenschappen overeenkomt.<br />
-                  <strong>En</strong>: Als er meerdere filters actief zijn, moeten alle filters tegelijkertijd van toepassing zijn. Alleen resultaten die aan alle geselecteerde criteria voldoen, worden getoond.
+                  <strong>Of</strong>: Als er meerdere filters actief zijn,
+                  wordt alleen één van de filters toegepast. Bijvoorbeeld, als
+                  je zoekt op meerdere eigenschappen, wordt er een resultaat
+                  getoond als één van die eigenschappen overeenkomt.
+                  <br />
+                  <strong>En</strong>: Als er meerdere filters actief zijn,
+                  moeten alle filters tegelijkertijd van toepassing zijn. Alleen
+                  resultaten die aan alle geselecteerde criteria voldoen, worden
+                  getoond.
                 </FormDescription>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || 'or'}
-                >
+                  value={field.value || 'or'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Of" />
@@ -176,7 +196,8 @@ export default function WidgetResourceOverviewTags(
                                   }
                                   onCheckedChange={(checked: any) => {
                                     const projectId = tags.find(
-                                      (tag: {type: string}) => tag.type === groupName
+                                      (tag: { type: string }) =>
+                                        tag.type === groupName
                                     )?.projectId;
 
                                     const updatedFields =

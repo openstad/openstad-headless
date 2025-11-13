@@ -1,8 +1,3 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,13 +8,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
 import useArea from '@/hooks/use-areas';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -42,7 +41,9 @@ export default function ProjectAreaCreate() {
       toast.success('Polygoon aangemaakt!');
       router.push(`/projects/${projectId}/areas`);
     } else {
-      toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
+      toast.error(
+        'De polygoon die is meegegeven lijkt niet helemaal te kloppen.'
+      );
     }
   }
 
@@ -94,7 +95,13 @@ export default function ProjectAreaCreate() {
                       Je kan hier een polygoon aanmaken om een gebied op te
                       geven waar je kaarten op zullen focussen. Voor deze
                       polygoon kan je de waarden ophalen vanaf de volgende
-                      pagina: <a href="https://geojson.io" target="_blank" style={{textDecoration: "underline"}}>https://geojson.io</a>
+                      pagina:{' '}
+                      <a
+                        href="https://geojson.io"
+                        target="_blank"
+                        style={{ textDecoration: 'underline' }}>
+                        https://geojson.io
+                      </a>
                     </p>
                     <FormControl>
                       <Textarea placeholder="" {...field} />

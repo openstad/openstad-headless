@@ -1,4 +1,4 @@
-import React from 'react';
+import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
 import {
   Carousel,
   Icon,
@@ -7,12 +7,16 @@ import {
   Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
-
-import {elipsizeHTML} from '@openstad-headless/lib/ui-helpers';
-
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Button, Paragraph, Link, Heading5, Heading } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import {
+  Button,
+  Heading,
+  Heading5,
+  Link,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React from 'react';
 
 export const StemBegrootResourceList = ({
   resources,
@@ -39,7 +43,7 @@ export const StemBegrootResourceList = ({
   currentPage = 0,
   pageSize = 999,
   filterBehavior = 'or',
-  header
+  header,
 }: {
   resourceListColumns?: number;
   resources: Array<any>;
@@ -72,13 +76,13 @@ export const StemBegrootResourceList = ({
   filterBehavior?: string;
 }) => {
   // @ts-ignore
-  const intTags = tags.map(tag => parseInt(tag, 10));
+  const intTags = tags.map((tag) => parseInt(tag, 10));
 
   const groupedTags: { [key: string]: number[] } = {};
 
   intTags.forEach((tagId: any) => {
     // @ts-ignore
-    const tag = allTags.find(tag => tag.id === tagId);
+    const tag = allTags.find((tag) => tag.id === tagId);
     if (tag) {
       const tagType = tag.type;
       if (!groupedTags[tagType]) {
@@ -88,66 +92,88 @@ export const StemBegrootResourceList = ({
     }
   });
 
-  const filtered = resources && (
-    Object.keys(groupedTags).length === 0
+  const filtered =
+    resources &&
+    (Object.keys(groupedTags).length === 0
       ? resources
       : resources.filter((resource: any) => {
-        if (tags.length > 0) {
-          if (filterBehavior === 'and') {
-            return tags.every(tagId =>
-              resource.tags?.some((tag: { id: number }) => tag.id === tagId)
+          if (tags.length > 0) {
+            if (filterBehavior === 'and') {
+              return tags.every(
+                (tagId) =>
+                  resource.tags?.some((tag: { id: number }) => tag.id === tagId)
+              );
+            } else {
+              return resource.tags?.some((tag: { id: number }) =>
+                tags.includes(tag.id)
+              );
+            }
+          }
+        })
+    )
+      ?.filter((resource: any) => {
+        if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
+          if (typeSelector === 'tag') {
+            return resource?.tags?.some(
+              (tag: { name: string }) => tag.name === activeTagTab
             );
           } else {
-            return resource.tags?.some((tag: { id: number }) =>
-              tags.includes(tag.id)
+            return resource?.tags?.some(
+              (tag: { type: string }) => tag.type === activeTagTab
             );
           }
         }
+        return true;
       })
-  )
-    ?.filter((resource: any) => {
-      if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
-        if (typeSelector === 'tag') {
-          return resource?.tags?.some((tag: { name: string }) => tag.name === activeTagTab);
-        } else {
-          return resource?.tags?.some((tag: { type: string }) => tag.type === activeTagTab);
+      ?.filter(
+        (resource: any) =>
+          !statusIdsToLimitResourcesTo ||
+          statusIdsToLimitResourcesTo.length === 0 ||
+          statusIdsToLimitResourcesTo?.some(
+            (statusId) =>
+              resource.statuses &&
+              Array.isArray(resource.statuses) &&
+              resource.statuses?.some((o: { id: number }) => o.id === statusId)
+          )
+      )
+      ?.sort((a: any, b: any) => {
+        if (sort === 'createdAt_desc') {
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         }
-      }
-      return true;
-    })
-    ?.filter((resource: any) =>
-      (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo?.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses?.some((o: { id: number }) => o.id === statusId))
-    )
-    ?.sort((a: any, b: any) => {
-      if (sort === 'createdAt_desc') {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
-      if (sort === 'createdAt_asc') {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      }
-      if (sort === 'votes_desc' || sort === 'ranking') {
-        return (b.yes || 0) - (a.yes || 0);
-      }
-      if (sort === 'votes_asc') {
-        return (a.yes || 0) - (b.yes || 0);
-      }
-      if (sort === 'title') {
-        return a.title.localeCompare(b.title);
-      }
-      return 0;
-    });
+        if (sort === 'createdAt_asc') {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        }
+        if (sort === 'votes_desc' || sort === 'ranking') {
+          return (b.yes || 0) - (a.yes || 0);
+        }
+        if (sort === 'votes_asc') {
+          return (a.yes || 0) - (b.yes || 0);
+        }
+        if (sort === 'title') {
+          return a.title.localeCompare(b.title);
+        }
+        return 0;
+      });
 
-    if ((JSON.stringify(filtered) !== JSON.stringify(filteredResources)) && setFilteredResources) {
-      setFilteredResources(filtered);
-    }
+  if (
+    JSON.stringify(filtered) !== JSON.stringify(filteredResources) &&
+    setFilteredResources
+  ) {
+    setFilteredResources(filtered);
+  }
 
   return (
     <List
-      id='stem-begroot-resource-selections-list'
+      id="stem-begroot-resource-selections-list"
       columns={resourceListColumns}
-      items={
-        (filtered || [])?.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
-      }
+      items={(filtered || [])?.slice(
+        currentPage * pageSize,
+        (currentPage + 1) * pageSize
+      )}
       renderHeader={() => header || <></>}
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);
@@ -162,29 +188,43 @@ export const StemBegrootResourceList = ({
         }
 
         if (Array.isArray(resource?.tags)) {
-          const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
-          const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+          const sortedTags = resource.tags.sort((a: Tag, b: Tag) =>
+            a.name.localeCompare(b.name)
+          );
+          const tagWithImage = sortedTags.find(
+            (tag: Tag) => tag.defaultResourceImage
+          );
           defaultImage = tagWithImage?.defaultResourceImage || '';
         }
 
-        const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
-        const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
+        const resourceImages =
+          Array.isArray(resource.images) && resource.images.length > 0
+            ? resource.images
+            : [{ url: defaultImage }];
+        const hasImages =
+          Array.isArray(resourceImages) &&
+          resourceImages.length > 0 &&
+          resourceImages[0].url !== ''
+            ? ''
+            : 'resource-has-no-images';
 
         return (
           <>
             <article className={`stem-begroot--container ${hasImages}`}>
-
               <Carousel
                 items={resourceImages}
-                buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
-                itemRenderer={(i) => (
-                  <Image src={i.url} />
-                )}
+                buttonText={{
+                  next: 'Volgende afbeelding',
+                  previous: 'Vorige afbeelding',
+                }}
+                itemRenderer={(i) => <Image src={i.url} />}
               />
               {!hideTagsForResources && (
                 <section className="stembegroot-content-item-header">
                   <div className="stembegroot-content-item-header-taglist">
-                    <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>
+                    <Heading level={2} appearance="utrecht-heading-6">
+                      Tags
+                    </Heading>
                     <div className="pill-grid stembegroot">
                       {(resource.tags as Array<{ type: string; name: string }>)
                         ?.filter((t) => t.type !== 'status')
@@ -193,29 +233,41 @@ export const StemBegrootResourceList = ({
                   </div>
                 </section>
               )}
-              <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
-              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
-              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, 200)}}/>
+              <Heading
+                level={2}
+                appearance="utrecht-heading-4"
+                dangerouslySetInnerHTML={{ __html: resource.title }}
+              />
+              <Paragraph
+                dangerouslySetInnerHTML={{
+                  __html: elipsizeHTML(resource.summary, 100),
+                }}
+              />
+              <Paragraph
+                dangerouslySetInnerHTML={{
+                  __html: elipsizeHTML(resource.description, 200),
+                }}
+              />
 
-              {
-                originalUrl ? (
-                  <>
-                    <Paragraph className="strong">
-                      Dit een vervolg op plan:&nbsp;
-                      <Link target="_blank" href={originalUrl}>
-                        {originalUrl}
-                      </Link>
-                    </Paragraph>
-                  </>
-                ) : null}
+              {originalUrl ? (
+                <>
+                  <Paragraph className="strong">
+                    Dit een vervolg op plan:&nbsp;
+                    <Link target="_blank" href={originalUrl}>
+                      {originalUrl}
+                    </Link>
+                  </Paragraph>
+                </>
+              ) : null}
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (
                   <div className="price">
-                    <Heading level={3} appearance='utrecht-heading-5'>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Heading>
+                    <Heading level={3} appearance="utrecht-heading-5">
+                      &euro;{resource.budget?.toLocaleString('nl-NL') || 0}
+                    </Heading>
                   </div>
                 ) : null}
                 {showVoteCount ? (
-
                   <div className="osc-stem-begroot-content-item-footer">
                     <>
                       <Icon
@@ -238,13 +290,13 @@ export const StemBegrootResourceList = ({
                     </>
                   </div>
                 ) : null}
-                < Spacer size={.5} />
+                <Spacer size={0.5} />
               </div>
 
               <div className="osc-stem-begroot-content-item-footer">
                 {!hideReadMore && (
                   <Button
-                    appearance='secondary-action-button'
+                    appearance="secondary-action-button"
                     className="osc-stem-begroot-item-action-btn"
                     onClick={(e) => {
                       onResourcePlainClicked(resource, index);
@@ -259,12 +311,11 @@ export const StemBegrootResourceList = ({
                   onClick={() => {
                     onResourcePrimaryClicked(resource);
                   }}
-                  appearance='primary-action-button'
-                >
+                  appearance="primary-action-button">
                   {primaryBtnText}
                 </Button>
               </div>
-            </article >
+            </article>
           </>
         );
       }}

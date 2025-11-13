@@ -1,4 +1,14 @@
+import InfoDialog from '@/components/ui/info-hover';
+import { useWidgetsHook } from '@/hooks/use-widgets';
+import { WidgetDefinitions } from '@/lib/widget-definitions';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { z } from 'zod';
+
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -9,10 +19,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
   Form,
   FormControl,
@@ -21,6 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from './ui/form';
+import { Input } from './ui/input';
 import {
   Select,
   SelectContent,
@@ -28,13 +35,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { Input } from './ui/input';
-import { useState } from 'react';
-import { useWidgetsHook } from '@/hooks/use-widgets';
-import { WidgetDefinitions } from '@/lib/widget-definitions';
-import { useRouter } from 'next/router';
-import toast from 'react-hot-toast';
-import InfoDialog from '@/components/ui/info-hover';
 
 type Props = {
   projectId?: string;
@@ -111,13 +111,15 @@ export function CreateWidgetDialog({ projectId }: Props) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Widget type</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecteer een type widget" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className='overflow-y-auto max-h-[16rem]'>
+                        <SelectContent className="overflow-y-auto max-h-[16rem]">
                           {widgetTypes.map((type) => (
                             <SelectItem key={type[0]} value={type[0]}>
                               {type[1].name}
@@ -134,7 +136,14 @@ export function CreateWidgetDialog({ projectId }: Props) {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Beschrijving/naam van de widget<InfoDialog content={'Deze beschrijving moet uniek zijn per widget.'}/></FormLabel>
+                      <FormLabel>
+                        Beschrijving/naam van de widget
+                        <InfoDialog
+                          content={
+                            'Deze beschrijving moet uniek zijn per widget.'
+                          }
+                        />
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}

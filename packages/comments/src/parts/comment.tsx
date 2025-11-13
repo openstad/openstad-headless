@@ -1,17 +1,22 @@
-import React, { useContext } from 'react';
-import '../index.css';
-import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
-import CommentForm from './comment-form.js';
 import { DropDownMenu } from '@openstad-headless/ui/src';
-import hasRole from '../../../lib/has-role';
+import '@utrecht/component-library-css';
+import {
+  Button,
+  ButtonGroup,
+  Heading,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useContext } from 'react';
+import { useState } from 'react';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Paragraph, Heading, Button, ButtonGroup } from "@utrecht/component-library-react";
-import { CommentProps } from '../types/comment-props';
+import hasRole from '../../../lib/has-role';
 import { CommentWidgetContext } from '../comments';
+import '../index.css';
+import { CommentProps } from '../types/comment-props';
+import CommentForm from './comment-form.js';
 
 function Comment({
   comment = {
@@ -85,12 +90,18 @@ function Comment({
   }
 
   const findLocation = (index: number) => () => {
+    const markerIcons = Array.from(
+      document.getElementsByClassName('leaflet-marker-icon')
+    );
+    const comments = Array.from(
+      document.getElementsByClassName('comment-item')
+    );
+    const isAlreadySelected =
+      markerIcons[index]?.classList.contains('--highlightedIcon');
 
-    const markerIcons = Array.from(document.getElementsByClassName('leaflet-marker-icon'));
-    const comments = Array.from(document.getElementsByClassName('comment-item'));
-    const isAlreadySelected = markerIcons[index]?.classList.contains('--highlightedIcon');
-
-    markerIcons.forEach((markerIcon) => markerIcon.classList.remove('--highlightedIcon'));
+    markerIcons.forEach((markerIcon) =>
+      markerIcon.classList.remove('--highlightedIcon')
+    );
     comments.forEach((comment) => comment.classList.remove('selected'));
 
     if (!isAlreadySelected) {
@@ -98,10 +109,10 @@ function Comment({
         if (markerIcon.classList.contains(`id-${index}`)) {
           markerIcon.classList.add('--highlightedIcon');
         }
-      })
+      });
       document.getElementById(`comment-${index}`)?.classList.toggle('selected');
     }
-  }
+  };
 
   async function handleLike() {
     let attempts = 0;
@@ -127,52 +138,60 @@ function Comment({
         } else {
           clearInterval(intervalId);
         }
-      }
+      };
 
       const intervalId = setInterval(tryToRefreshComments, interval);
     });
   }
 
   return (
-    <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${comment?.id}`} onClick={findLocation(comment?.id || 0)}>
+    <article
+      className={`comment-item ${selected ? 'selected' : ''}`}
+      id={`comment-${comment?.id}`}
+      onClick={findLocation(comment?.id || 0)}>
       <section className="comment-item-header">
-        <Heading level={4} appearance='utrecht-heading-6' className={`reaction-name`}>
+        <Heading
+          level={4}
+          appearance="utrecht-heading-6"
+          className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
-          {args.comment.user && args.comment.user.role === 'admin' ? <span className='--isAdmin'>{adminLabel}</span> : null}
+          {args.comment.user && args.comment.user.role === 'admin' ? (
+            <span className="--isAdmin">{adminLabel}</span>
+          ) : null}
         </Heading>
         {canEdit() || canDelete() ? (
           <div className="edit-delete-button-group">
-            <Button appearance="subtle-button" onClick={() => setIsOpen(!isOpen)}>
+            <Button
+              appearance="subtle-button"
+              onClick={() => setIsOpen(!isOpen)}>
               <div>
-                <i className={isOpen ? "ri-close-fill" : "ri-more-fill"}></i>
+                <i className={isOpen ? 'ri-close-fill' : 'ri-more-fill'}></i>
                 <span className="sr-only">Bewerken</span>
               </div>
             </Button>
 
             {isOpen && (
               <div className="DropdownMenuContent">
-                  <ButtonGroup direction='column'>
-                    <Button
-                      appearance='secondary-action-button'
-                      className="DropdownMenuItem"
-                      onClick={() => {
-                        setIsOpen(false);
-                        toggleEditForm();
-                      }}
-                    >
-                      Bewerken
-                    </Button>
-                    <Button
-                      appearance='secondary-action-button'
-                      className="DropdownMenuItem"
-                      onClick={() => {
-                        if (args.comment && confirm('Weet u het zeker?'))
-                          args.comment.delete(args.comment.id);
-                      }}
-                    >
-                      Verwijderen
-                    </Button>
-                  </ButtonGroup>
+                <ButtonGroup direction="column">
+                  <Button
+                    appearance="secondary-action-button"
+                    className="DropdownMenuItem"
+                    onClick={() => {
+                      setIsOpen(false);
+                      toggleEditForm();
+                    }}>
+                    Bewerken
+                  </Button>
+                  <Button
+                    appearance="secondary-action-button"
+                    className="DropdownMenuItem"
+                    onClick={() => {
+                      if (args.comment && confirm('Weet u het zeker?'))
+                        args.comment.delete(args.comment.id);
+                    }}>
+                    Verwijderen
+                  </Button>
+                </ButtonGroup>
               </div>
             )}
           </div>
@@ -196,7 +215,9 @@ function Comment({
       ) : (
         <>
           <Spacer size={0.25} />
-          <Paragraph className="comment-reaction-text">{args.comment.description}</Paragraph>
+          <Paragraph className="comment-reaction-text">
+            {args.comment.description}
+          </Paragraph>
           <Spacer size={0.25} />
           {showDateSeperately && (
             <Paragraph className="comment-reaction-strong-text">
@@ -211,13 +232,18 @@ function Comment({
             {args.comment.createDateHumanized}
           </Paragraph>
           <ButtonGroup>
-            {widgetContext.canLike && (
-              canLike() ? (
+            {widgetContext.canLike &&
+              (canLike() ? (
                 <Button
-                  appearance='secondary-action-button'
+                  appearance="secondary-action-button"
                   className={args.comment.hasUserVoted ? `active` : ''}
                   onClick={handleLike}>
-                  <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                  <i
+                    className={
+                      args.comment.hasUserVoted
+                        ? 'ri-thumb-up-fill'
+                        : 'ri-thumb-up-line'
+                    }></i>
                   Mee eens (<span>{args.comment.yes || 0}</span>)
                 </Button>
               ) : (
@@ -225,11 +251,10 @@ function Comment({
                   <i className="ri-thumb-up-line"></i>
                   Mee eens (<span>{args.comment.yes || 0}</span>)
                 </Button>
-              )
-            )}
+              ))}
             {canReply() ? (
               <Button
-                appearance='primary-action-button'
+                appearance="primary-action-button"
                 onClick={() => toggleReplyForm()}>
                 Reageren
               </Button>
@@ -245,13 +270,18 @@ function Comment({
               {args.comment.createDateHumanized}
             </Paragraph>
             <ButtonGroup>
-              {widgetContext.canLike && (
-                canLike() ? (
+              {widgetContext.canLike &&
+                (canLike() ? (
                   <Button
-                    appearance='secondary-action-button'
+                    appearance="secondary-action-button"
                     className={args.comment.hasUserVoted ? `active` : ''}
                     onClick={handleLike}>
-                    <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                    <i
+                      className={
+                        args.comment.hasUserVoted
+                          ? 'ri-thumb-up-fill'
+                          : 'ri-thumb-up-line'
+                      }></i>
                     Mee eens (<span>{args.comment.yes || 0}</span>)
                   </Button>
                 ) : (
@@ -259,8 +289,7 @@ function Comment({
                     <i className="ri-thumb-up-line"></i>
                     Mee eens (<span>{args.comment.yes || 0}</span>)
                   </Button>
-                )
-              )}
+                ))}
             </ButtonGroup>
           </section>
         </>
@@ -272,7 +301,12 @@ function Comment({
         args.comment.replies.map((reply, index) => {
           return (
             <div className="reaction-container" key={index}>
-              <Comment {...args} comment={reply} disableSubmit={disableSubmit} showDateSeperately={false} />
+              <Comment
+                {...args}
+                comment={reply}
+                disableSubmit={disableSubmit}
+                showDateSeperately={false}
+              />
             </div>
           );
         })}
@@ -295,8 +329,11 @@ function Comment({
                 toggleReplyForm();
               }}
             />
-            <Spacer size={.5} />
-            <Button className={'cancel-reply'} onClick={toggleReplyForm}> Annuleren </Button>
+            <Spacer size={0.5} />
+            <Button className={'cancel-reply'} onClick={toggleReplyForm}>
+              {' '}
+              Annuleren{' '}
+            </Button>
             <Spacer size={1} />
           </div>
         </div>

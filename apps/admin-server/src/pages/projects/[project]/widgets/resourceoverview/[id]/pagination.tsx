@@ -14,14 +14,13 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
+import * as Switch from '@radix-ui/react-switch';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import * as Switch from '@radix-ui/react-switch';
-
 
 const formSchema = z.object({
   itemsPerPage: z.coerce.number(),
-  displayPagination: z.boolean()
+  displayPagination: z.boolean(),
 });
 
 export default function WidgetResourceOverviewPagination(
@@ -80,13 +79,16 @@ export default function WidgetResourceOverviewPagination(
                 <FormItem>
                   <FormLabel>Hoeveelheid items per pagina</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field}
+                    <Input
+                      type="number"
+                      {...field}
                       placeholder="30"
                       {...field}
                       onChange={(e) => {
                         onFieldChange(field.name, e.target.value);
                         field.onChange(e);
-                      }} />
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -9,11 +9,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+
 import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
@@ -29,7 +30,8 @@ export default function ArgumentsForm(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       formIntro: props.formIntro || 'Typ hier de intro tekst',
-      loginText: props.loginText || 'Inloggen om deel te nemen aan de discussie.',
+      loginText:
+        props.loginText || 'Inloggen om deel te nemen aan de discussie.',
       placeholder: props?.placeholder || 'Typ hier uw reactie.',
     },
   });
@@ -45,9 +47,7 @@ export default function ArgumentsForm(
       <Form {...form}>
         <Heading size="xl">{props.customTitle || 'Formulier'}</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="formIntro"

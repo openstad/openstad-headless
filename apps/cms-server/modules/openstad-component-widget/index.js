@@ -3,7 +3,7 @@
 module.exports = {
   extend: 'base-widget',
   options: {
-    label: 'Openstad Component'
+    label: 'Openstad Component',
   },
   fields: {
     add: {
@@ -11,40 +11,40 @@ module.exports = {
         type: 'string',
         label: 'Url uit de script tag',
         help: 'Deze URL is te vinden in het tabblad "Publiceren" bij de widget in het beheergedeelte van OpenStad.',
-        required: true
+        required: true,
       },
     },
     group: {
       general: {
         label: 'General',
-        fields: ['uploadedImage']
+        fields: ['uploadedImage'],
       },
       styling: {
         label: 'Styling',
-        fields: ['imageStyles']
-      }
-    }
+        fields: ['imageStyles'],
+      },
+    },
   },
   methods(self) {
     return {
       // Extract the URL from the script tag in the sanitization process
       // This allows a user to paste the entire script tag into the input field
       // but also allows just the URL to be pasted.
-      sanitize (req, input, options) {
+      sanitize(req, input, options) {
         if (!input.componentUrl) {
           return input;
         }
-        
+
         // Extract the URL from the script tag
         const regex = /<script[^>]*\s+src=(["'])(.*?)\1[^>]*><\/script>/i;
         const match = input.componentUrl.match(regex);
-        
+
         if (match) {
           input.componentUrl = match[1];
         }
-        
+
         return input;
-      }
+      },
     };
-  }
+  },
 };

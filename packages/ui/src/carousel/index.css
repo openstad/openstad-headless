@@ -1,33 +1,33 @@
 .osc-carousel {
-    display: flex;
-    position: relative;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    /* gap: 1rem; */
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  /* gap: 1rem; */
 }
 
 .osc-carousel.width-100 {
-    width: 100%;
+  width: 100%;
 }
 
 .carousel-items {
-    flex: 1;
+  flex: 1;
 }
 
 .osc-carousel-navigation-button-wrapper {
-    flex-grow: 0;
-    flex-basis: 0;
+  flex-grow: 0;
+  flex-basis: 0;
 }
 
 .osc-carousel-previous {
-    position: absolute;
-    left: 10px;
-    z-index: 1;
+  position: absolute;
+  left: 10px;
+  z-index: 1;
 }
 
 .osc-carousel-next {
-    position: absolute;
-    right: 10px;
-    z-index: 1;
+  position: absolute;
+  right: 10px;
+  z-index: 1;
 }

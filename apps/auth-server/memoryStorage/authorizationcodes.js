@@ -65,6 +65,6 @@ exports.delete = (token) => {
  */
 exports.removeAll = () => {
   const deletedTokens = codes;
-  codes               = Object.create(null);
+  codes = Object.create(null);
   return Promise.resolve(deletedTokens);
 };

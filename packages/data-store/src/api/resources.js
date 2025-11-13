@@ -1,18 +1,29 @@
 export default {
   fetch: async function (
-    { projectId, page, pageSize, search, tags, sort, statuses, projectIds, allowMultipleProjects },
+    {
+      projectId,
+      page,
+      pageSize,
+      search,
+      tags,
+      sort,
+      statuses,
+      projectIds,
+      allowMultipleProjects,
+    },
     options
   ) {
     const params = new URLSearchParams();
 
     const getPseudoRandomSortSeed = () => {
       if (!localStorage.getItem('pseudoRandomSortSeed')) {
-        const MAX_INT_UNSIGNED = 4294967295
-        const getRandomSeed = () => Math.floor(Math.random() * MAX_INT_UNSIGNED)
-        localStorage.setItem('pseudoRandomSortSeed', getRandomSeed())
+        const MAX_INT_UNSIGNED = 4294967295;
+        const getRandomSeed = () =>
+          Math.floor(Math.random() * MAX_INT_UNSIGNED);
+        localStorage.setItem('pseudoRandomSortSeed', getRandomSeed());
       }
-      return localStorage.getItem('pseudoRandomSortSeed')
-    }
+      return localStorage.getItem('pseudoRandomSortSeed');
+    };
 
     if (Array.isArray(tags) && tags.length > 0) {
       tags.forEach((tag) => params.append('tags', tag));
@@ -29,7 +40,8 @@ export default {
     if (sort) {
       if (!Array.isArray(sort)) sort = [sort];
       sort.map((criterium) => params.append('sort', criterium));
-      if (sort.includes('random')) params.append('pseudoRandomSortSeed', getPseudoRandomSortSeed())
+      if (sort.includes('random'))
+        params.append('pseudoRandomSortSeed', getPseudoRandomSortSeed());
     }
 
     if (page >= 0 && pageSize) {
@@ -67,12 +79,13 @@ export default {
 
     let body = JSON.stringify(data);
 
-    return await this.fetch(url, {method, body});
+    return await this.fetch(url, { method, body });
   },
 
   submitLike: async function ({ projectId }, resources) {
     if (!Array.isArray(resources)) throw new Error('Resources is geen array');
-    if(resources.some(r => !'resourceId' in r || !'opinion' in r)) throw new Error("Ontbrekende velden resourceId of opinion");
+    if (resources.some((r) => !'resourceId' in r || !'opinion' in r))
+      throw new Error('Ontbrekende velden resourceId of opinion');
 
     let url = `/api/project/${projectId}/vote`;
     let headers = {

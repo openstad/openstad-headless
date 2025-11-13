@@ -1,4 +1,6 @@
-<div id="{{data.widget.containerId}}" class="section
+<div
+  id="{{data.widget.containerId}}"
+  class="section
   {% if data.widget.sectionToggle %}
   {% if data.widget.sectionOpen %}open{% else %}closed{% endif %}
   {% endif %}
@@ -17,43 +19,60 @@
   {% if data.widget.customClass %} {{data.widget.customClass}} {% endif %}
   {% if data.widget.backgroundImage %} --background-image {% endif %}
   "
-  {% if data.widget.backgroundImage %}
+  {%
+  if
+  data.widget.backgroundImage
+  %}
   data-background-image="{{ apos.attachments.url(data.widget.backgroundImage) }}"
-  {% endif %}
-
-  {% if data.widget.customCSS %}
-    {{data.widget.customCSS}}
-  {% endif %}
-     data-openstad-section
-  >
+  {%
+  endif
+  %}
+  {%
+  if
+  data.widget.customCSS
+  %}
+  {{data.widget.customCSS}}
+  {%
+  endif
+  %}
+  data-openstad-section>
   {% if data.widget.sectionToggle %}
-  <a class="toggle-title"
+  <a
+    class="toggle-title"
     href="javascript: (function() { var id = '#{% if data.widget.htmlId%}{{data.widget.htmlId}}{% else %}{{data.widget.containerId}}{% endif %}'; if( $(id).hasClass('open') ){ $(id).removeClass('open'); $(id).addClass('closed'); } else { $(id).removeClass('closed'); $(id).addClass('open'); }   })()"
     title="{{data.widget.toggleTitle}}">
     {{data.widget.toggleTitle}}
-    <img class="arrow"
+    <img
+      class="arrow"
       src="{{data.baseUrlWithPrefix}}/modules/openstad-assets/img/{% if data.widget.typeArrow %}{{data.widget.typeArrow}}{% else %}{{'arrow_down_black'}}{% endif %}.svg"
-      width="13" heigh="13" style="display: inline-block; margin-left: 12px;" />
+      width="13"
+      heigh="13"
+      style="display: inline-block; margin-left: 12px" />
   </a>
-  {% endif %}
-
-  {% if data.widget.displayType === 'full-screen' %}
-  <div class="full-screen-section" {% if data.widget.backgroundImage %} style="
+  {% endif %} {% if data.widget.displayType === 'full-screen' %}
+  <div
+    class="full-screen-section"
+    {%
+    if
+    data.widget.backgroundImage
+    %}
+    style="
       background-image:url({{ apos.attachments.url(data.widget.backgroundImage) }});
       -webkit-background-size: cover;
       -moz-background-size: cover;
       -o-background-size: cover;
       background-size: cover;
-      " {% endif %}>
-    <div class="full-screen-section-inner ">
+      "
+    {%
+    endif
+    %}>
+    <div class="full-screen-section-inner">
       {% area data.widget, 'column1' %}
     </div>
   </div>
 
   {% elseif data.widget.displayType === 'full-width' %}
-  <div class="full-width-container">
-    {% area data.widget, 'column1' %}
-  </div>
+  <div class="full-width-container">{% area data.widget, 'column1' %}</div>
   {% else %}
 
   <div class="container u-small-dropdowns">
@@ -70,107 +89,65 @@
 
     {% elseif data.widget.displayType === 'columns-four' %}
     <div class="row">
-      <div class="col-sm-3">
-        {% area data.widget, 'column1' %}
-      </div>
-      <div class="col-sm-3">
-        {% area data.widget, 'column2' %}
-      </div>
-      <div class="col-sm-3">
-        {% area data.widget, 'column3' %}
-      </div>
-      <div class="col-sm-3">
-        {% area data.widget, 'column4' %}
-      </div>
+      <div class="col-sm-3">{% area data.widget, 'column1' %}</div>
+      <div class="col-sm-3">{% area data.widget, 'column2' %}</div>
+      <div class="col-sm-3">{% area data.widget, 'column3' %}</div>
+      <div class="col-sm-3">{% area data.widget, 'column4' %}</div>
     </div>
     {% elseif data.widget.displayType === 'columns-half' %}
     <div class="row">
-      <div class="col-sm-6">
-        {% area data.widget, 'column1' %}
-      </div>
-      <div class="col-sm-6">
-        {% area data.widget, 'column2' %}
-      </div>
+      <div class="col-sm-6">{% area data.widget, 'column1' %}</div>
+      <div class="col-sm-6">{% area data.widget, 'column2' %}</div>
     </div>
     {% elseif data.widget.displayType === 'columns-one' %}
     <div class="row">
-      <div class="col-xs-12">
-        {% area data.widget, 'column1' %}
-      </div>
+      <div class="col-xs-12">{% area data.widget, 'column1' %}</div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-onefourth-half' %}
     <div class="row">
-      <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'column1' %}
-      </div>
+      <div class="col-sm-3 col-xs-12">{% area data.widget, 'column1' %}</div>
 
-      <div class="col-sm-6 col-xs-12">
-        {% area data.widget, 'column2' %}
-      </div>
+      <div class="col-sm-6 col-xs-12">{% area data.widget, 'column2' %}</div>
 
-      <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'column3' %}
-      </div>
+      <div class="col-sm-3 col-xs-12">{% area data.widget, 'column3' %}</div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-onefourth' %}
     <div class="row">
-      <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'column1' %}
-      </div>
+      <div class="col-sm-3 col-xs-12">{% area data.widget, 'column1' %}</div>
 
-      <div class="col-sm-9 col-xs-12">
-        {% area data.widget, 'column2' %}
-      </div>
+      <div class="col-sm-9 col-xs-12">{% area data.widget, 'column2' %}</div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-onethird' %}
     <div class="row">
-      <div class="col-sm-4 col-xs-12">
-        {% area data.widget, 'column1' %}
-      </div>
+      <div class="col-sm-4 col-xs-12">{% area data.widget, 'column1' %}</div>
 
-      <div class="col-sm-8 col-xs-12">
-        {% area data.widget, 'column2' %}
-      </div>
+      <div class="col-sm-8 col-xs-12">{% area data.widget, 'column2' %}</div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-three' %}
     <div class="row">
-      <div class="col-sm-4">
-        {% area data.widget, 'column1' %}
-      </div>
-      <div class="col-sm-4">
-        {% area data.widget, 'column2' %}
-      </div>
-      <div class="col-sm-4">
-        {% area data.widget, 'column3' %}
-      </div>
+      <div class="col-sm-4">{% area data.widget, 'column1' %}</div>
+      <div class="col-sm-4">{% area data.widget, 'column2' %}</div>
+      <div class="col-sm-4">{% area data.widget, 'column3' %}</div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-twothird-full' %}
     <div class="row">
-      <div class="col-sm-9 col-xs-12">
-        {% area data.widget, 'column1' %}
-      </div>
+      <div class="col-sm-9 col-xs-12">{% area data.widget, 'column1' %}</div>
 
-      <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'column2' %}
-      </div>
+      <div class="col-sm-3 col-xs-12">{% area data.widget, 'column2' %}</div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-twothird-onethird' %}
     <div class="row">
-      <div class="col-sm-8 col-xs-12">
-        {% area data.widget, 'column1' %}
-      </div>
+      <div class="col-sm-8 col-xs-12">{% area data.widget, 'column1' %}</div>
 
-      <div class="col-sm-4 col-xs-12">
-        {% area data.widget, 'column2' %}
-      </div>
+      <div class="col-sm-4 col-xs-12">{% area data.widget, 'column2' %}</div>
     </div>
     {% endif %}
   </div>
-{% endif %}
+  {% endif %}
 </div>

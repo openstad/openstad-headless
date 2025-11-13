@@ -1,15 +1,16 @@
 import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
-import React, { useState, useEffect, useRef } from 'react';
+import { IconButton } from '@openstad-headless/ui/src';
+import '@utrecht/component-library-css';
+import { Button, FormLabel } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDebounce } from 'rooks';
+
+import PostcodeAutoFill from '../../location';
+import './index.css';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
-import './index.css';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Button, FormLabel } from "@utrecht/component-library-react";
-import { IconButton } from '@openstad-headless/ui/src';
-import PostcodeAutoFill from "../../location";
 type Filter = {
   tags: Array<number>;
   search: { text: string };
@@ -19,11 +20,13 @@ type Filter = {
   location: PostcodeAutoFillLocation;
 };
 
-export type PostcodeAutoFillLocation = {
-  lat: string;
-  lng: string;
-  proximity?: number;
-} | undefined;
+export type PostcodeAutoFillLocation =
+  | {
+      lat: string;
+      lng: string;
+      proximity?: number;
+    }
+  | undefined;
 
 type Props = {
   className?: string;
@@ -36,7 +39,12 @@ type Props = {
   displaySearch: boolean;
   itemsPerPage?: number;
   displayTagFilters: boolean;
-  tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
+  tagGroups?: Array<{
+    type: string;
+    label?: string;
+    multiple: boolean;
+    projectId?: any;
+  }>;
   tagsLimitation?: Array<number>;
   searchPlaceholder: string;
   resetText: string;
@@ -70,10 +78,17 @@ export function Filters({
   const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>();
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
-  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
-  const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
-  const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
-  const [tagsReadyForParameter, setTagsReadyForParameter] = useState< Array<string | number> >([]);
+  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<
+    Array<{ type: string; id: number; label: string }>
+  >([]);
+  const [activeTags, setActiveTags] = useState<
+    Array<{ type: string; id: number; label: string }>
+  >([]);
+  const [stopUsingDefaultValue, setStopUsingDefaultValue] =
+    useState<boolean>(false);
+  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<
+    Array<string | number>
+  >([]);
 
   const search = useDebounce(setSearch, 300);
 
@@ -123,9 +138,14 @@ export function Filters({
     }
 
     window.history.replaceState(null, '', url);
-  }
+  };
 
-  const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel: string, forceSelected?: boolean) => {
+  const updateTagListMultiple = (
+    tagType: string,
+    updatedTag: number,
+    updatedLabel: string,
+    forceSelected?: boolean
+  ) => {
     setSelected((prevSelectedOptions) => {
       const existingTags = prevSelectedOptions[tagType] || [];
       const selected = [...(existingTags || [])];
@@ -145,8 +165,13 @@ export function Filters({
     });
 
     setNewActiveTagsDraft((prevSelectedOptions) => {
-      const selectedDraft: { type: string, id: number, label: string }[] = [...(prevSelectedOptions || [])];
-      const tagIndex = selectedDraft.findIndex((tag: { type: string, id: number, label: string }) => tag.id === updatedTag);
+      const selectedDraft: { type: string; id: number; label: string }[] = [
+        ...(prevSelectedOptions || []),
+      ];
+      const tagIndex = selectedDraft.findIndex(
+        (tag: { type: string; id: number; label: string }) =>
+          tag.id === updatedTag
+      );
 
       if (tagIndex !== -1) {
         if (!forceSelected) {
@@ -157,15 +182,19 @@ export function Filters({
         selectedDraft.push({ id: updatedTag, label: label, type: tagType });
       }
 
-      if ( forceSelected ) {
-        setActiveTags(selectedDraft)
+      if (forceSelected) {
+        setActiveTags(selectedDraft);
       }
 
       return selectedDraft;
     });
   };
 
-  const updateTagListSingle = (tagType: string, updatedTag: string, updatedLabel?: string) => {
+  const updateTagListSingle = (
+    tagType: string,
+    updatedTag: string,
+    updatedLabel?: string
+  ) => {
     const existingTags = selectedOptions[tagType];
     let selected = [...(existingTags || [])];
 
@@ -173,31 +202,41 @@ export function Filters({
       selected = [];
 
       setNewActiveTagsDraft((prevSelectedOptions) => {
-        return (prevSelectedOptions || []).filter(tag => tag.type !== tagType);
-      })
+        return (prevSelectedOptions || []).filter(
+          (tag) => tag.type !== tagType
+        );
+      });
     } else {
       selected = [updatedTag];
 
       setNewActiveTagsDraft((prevSelectedOptions) => {
-        const filtered = (prevSelectedOptions || []).filter(tag => tag.type !== tagType);
+        const filtered = (prevSelectedOptions || []).filter(
+          (tag) => tag.type !== tagType
+        );
         const label = updatedLabel || '';
-        return [...filtered, { id: Number(updatedTag), label: label, type: tagType }];
-      })
+        return [
+          ...filtered,
+          { id: Number(updatedTag), label: label, type: tagType },
+        ];
+      });
     }
 
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
-  }
+  };
 
   function removeActiveTag(tagType: string, tagId: number) {
-    const updatedTags = newActiveTagsDraft.filter(tag => !(tag.type === tagType && tag.id === tagId));
+    const updatedTags = newActiveTagsDraft.filter(
+      (tag) => !(tag.type === tagType && tag.id === tagId)
+    );
     setNewActiveTagsDraft(updatedTags);
 
     const updatedSelectedOptions = {
       ...selectedOptions,
       [tagType]: Array.isArray(selectedOptions[tagType])
         ? (selectedOptions[tagType] || []).filter((id: number | string) => {
-            const isMatch = (typeof id === 'number' ? id === tagId : Number(id) === tagId);
+            const isMatch =
+              typeof id === 'number' ? id === tagId : Number(id) === tagId;
             return !isMatch;
           })
         : [],
@@ -207,7 +246,7 @@ export function Filters({
 
     const updatedFilter = {
       ...filter,
-      tags: Object.values(updatedSelectedOptions).flat()
+      tags: Object.values(updatedSelectedOptions).flat(),
     };
 
     setFilter(updatedFilter);
@@ -228,12 +267,12 @@ export function Filters({
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
-    console.log( "filterToSubmit", updatedFilter, filter );
+    console.log('filterToSubmit', updatedFilter, filter);
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
 
-    console.log( "newActiveTagsDraft", newActiveTagsDraft );
-    console.log( "updatedTags", updatedTags );
+    console.log('newActiveTagsDraft', newActiveTagsDraft);
+    console.log('updatedTags', updatedTags);
 
     if (updatedTags) {
       setActiveTags(updatedTags);
@@ -244,9 +283,16 @@ export function Filters({
     updateParameter();
   };
 
-  return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
+  return !(
+    props.displayTagFilters ||
+    props.displaySearch ||
+    props.displaySorting ||
+    props.displayLocationFilter
+  ) ? null : (
     <section id="stem-begroot-filter">
-      <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>
+      <form
+        className={`osc-resources-filter ${className}`}
+        onSubmit={handleSubmit}>
         {props.displaySearch ? (
           <div className="form-element">
             <FormLabel htmlFor="search">Zoeken</FormLabel>
@@ -254,11 +300,14 @@ export function Filters({
               onChange={(e) => search(e.target.value)}
               className="osc-filter-search-bar"
               placeholder={props.searchPlaceholder}
-              id='search'
+              id="search"
             />
           </div>
         ) : null}
-        {(props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
+        {props.displayTagFilters &&
+        tagGroups &&
+        Array.isArray(tagGroups) &&
+        tagGroups.length > 0 ? (
           <>
             {tagGroups.map((tagGroup, index) => {
               if (tagGroup.multiple) {
@@ -270,8 +319,17 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onlyIncludeIds={tagsLimitation}
-                    onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
-                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
+                    onUpdateFilter={(
+                      updatedTag,
+                      updatedLabel,
+                      forceSelected
+                    ) => {
+                      updateTagListMultiple(
+                        tagGroup.type,
+                        updatedTag,
+                        updatedLabel || '',
+                        forceSelected || false
+                      );
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
                     preFilterTags={preFilterTags}
@@ -289,7 +347,11 @@ export function Filters({
                     title={`Selecteer een item`}
                     onlyIncludeIds={tagsLimitation}
                     onUpdateFilter={(updatedTag, updatedLabel) =>
-                      updateTagListSingle(tagGroup.type, updatedTag, updatedLabel)
+                      updateTagListSingle(
+                        tagGroup.type,
+                        updatedTag,
+                        updatedLabel
+                      )
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
                     preFilterTags={preFilterTags}
@@ -322,11 +384,13 @@ export function Filters({
           />
         ) : null}
 
-        <div className='button-group'>
+        <div className="button-group">
           <Button
-            appearance='secondary-action-button'
+            appearance="secondary-action-button"
             onClick={() => {
-              const filterParent = document.querySelector('#stem-begroot-filter');
+              const filterParent = document.querySelector(
+                '#stem-begroot-filter'
+              );
 
               const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
                 filterParent?.querySelectorAll(':scope select');
@@ -350,26 +414,33 @@ export function Filters({
               updateParameter();
               setLocation(undefined);
             }}
-            test-id={"filter-reset-button"}
-          >
+            test-id={'filter-reset-button'}>
             {props.resetText}
           </Button>
-          <Button type='submit' appearance='primary-action-button' test-id={"filter-apply-button"}>{props.applyText}</Button>
+          <Button
+            type="submit"
+            appearance="primary-action-button"
+            test-id={'filter-apply-button'}>
+            {props.applyText}
+          </Button>
         </div>
       </form>
 
-      {(activeTags.length > 0 && showActiveTags) && (
+      {activeTags.length > 0 && showActiveTags && (
         <div className="active-tags">
           <ul>
-            {activeTags.map(tag => (
-              <li key={`${tag.type}-${tag.id}`} className={tag.type} role="status">
+            {activeTags.map((tag) => (
+              <li
+                key={`${tag.type}-${tag.id}`}
+                className={tag.type}
+                role="status">
                 {tag.label}
                 <IconButton
                   onClick={() => removeActiveTag(tag.type, tag.id)}
                   className="subtle-button"
                   icon="ri-close-line"
                   iconOnly={true}
-                  text='Filter verwijderen'
+                  text="Filter verwijderen"
                 />
               </li>
             ))}

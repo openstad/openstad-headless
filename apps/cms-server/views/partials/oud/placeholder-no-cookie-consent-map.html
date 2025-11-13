@@ -2,15 +2,26 @@
   <div class="placeholder-content">
     <div class="placeholder-text">
       <h3>Deze kaart bekijken?</h3>
-      Dit element is uitgeschakeld omdat u <a href="{{data.baseUrlWithPrefix}}/cookies">cookies</a> van derden (nog) niet accepteert.<br>
+      Dit element is uitgeschakeld omdat u
+      <a href="{{data.baseUrlWithPrefix}}/cookies">cookies</a> van derden (nog)
+      niet accepteert.<br />
       <script>
-       function setCookieConsent(what) {
-         var d = new Date();
-         document.cookie = "cookie-consent=" + (what ? '1' : '-1') + '; path=/; expires=Thu, 31 Dec '+(d.getFullYear() + 5)+' 23:59:00 UTC;';
-         document.location.reload();
-       }
+        function setCookieConsent(what) {
+          var d = new Date();
+          document.cookie =
+            'cookie-consent=' +
+            (what ? '1' : '-1') +
+            '; path=/; expires=Thu, 31 Dec ' +
+            (d.getFullYear() + 5) +
+            ' 23:59:00 UTC;';
+          document.location.reload();
+        }
       </script>
-      <a href="javascript: void setCookieConsent(true)" class="cookie-button cookie-button-blue">Cookies van derden toestaan</a>
+      <a
+        href="javascript: void setCookieConsent(true)"
+        class="cookie-button cookie-button-blue"
+        >Cookies van derden toestaan</a
+      >
     </div>
   </div>
 </div>

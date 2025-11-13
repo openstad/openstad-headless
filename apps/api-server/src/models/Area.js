@@ -1,13 +1,12 @@
-const convertDbPolygonToLatLng = require ('../util/convert-db-polygon-to-lat-lng');
-const {formatPolygonToGeoJson} = require('../util/geo-json-formatter');
+const convertDbPolygonToLatLng = require('../util/convert-db-polygon-to-lat-lng');
+const { formatPolygonToGeoJson } = require('../util/geo-json-formatter');
 
-module.exports = function( db, sequelize, DataTypes ) {
+module.exports = function (db, sequelize, DataTypes) {
   var Area = sequelize.define('area', {
-
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
+      unique: true,
     },
 
     polygon: {
@@ -15,15 +14,19 @@ module.exports = function( db, sequelize, DataTypes ) {
       allowNull: false,
       set: function (featureCollection) {
         if (Array.isArray(featureCollection) && featureCollection.length > 0) {
-          const formattedPolygons = featureCollection.map(polygon => {
+          const formattedPolygons = featureCollection.map((polygon) => {
             return polygon.map(({ lat, lng }) => [lat, lng]);
           });
 
-          const type = formattedPolygons.length > 1 ? 'MultiPolygon' : 'Polygon';
+          const type =
+            formattedPolygons.length > 1 ? 'MultiPolygon' : 'Polygon';
 
           const formattedGeometry = {
             type: type,
-            coordinates: type === 'Polygon' ? [formattedPolygons[0]] : formattedPolygons.map(polygon => [polygon])
+            coordinates:
+              type === 'Polygon'
+                ? [formattedPolygons[0]]
+                : formattedPolygons.map((polygon) => [polygon]),
           };
 
           this.setDataValue('polygon', formattedGeometry);
@@ -31,7 +34,7 @@ module.exports = function( db, sequelize, DataTypes ) {
       },
       get: function () {
         return convertDbPolygonToLatLng(this.getDataValue('polygon'));
-      }
+      },
     },
     /*
     Virtual field would be a nice way to manage the geoJSON version of the data
@@ -44,9 +47,9 @@ module.exports = function( db, sequelize, DataTypes ) {
     */
   });
 
-  Area.associate = function( models ) {
+  Area.associate = function (models) {
     this.hasMany(models.Project);
-  }
+  };
 
   Area.auth = Area.prototype.auth = {
     listableBy: 'all',
@@ -54,12 +57,11 @@ module.exports = function( db, sequelize, DataTypes ) {
     createableBy: ['admin', 'editor'],
     updateableBy: ['admin', 'editor'],
     deleteableBy: ['admin', 'editor'],
-    toAuthorizedJSON: function(user, data) {
+    toAuthorizedJSON: function (user, data) {
       data.geoJSON = formatPolygonToGeoJson(data.polygon);
       return data;
-    }
-  }
-
+    },
+  };
 
   return Area;
-}
+};

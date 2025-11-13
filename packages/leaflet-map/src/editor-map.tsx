@@ -1,17 +1,15 @@
-import { useState, useEffect } from 'react';
-import type { PropsWithChildren } from 'react';
 import type { LeafletMouseEvent } from 'leaflet';
-import { loadWidget } from '../../lib/load-widget';
-import parseLocation from './lib/parse-location';
-
 import 'leaflet/dist/leaflet.css';
-import './css/base-map.css';
-
-import type { MarkerProps } from './types/marker-props';
-import type {EditorMapWidgetProps} from './types/editormap-widget-props';
-import { BaseMap } from './base-map';
+import { useEffect, useState } from 'react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
+import { loadWidget } from '../../lib/load-widget';
+import { BaseMap } from './base-map';
+import './css/base-map.css';
+import parseLocation from './lib/parse-location';
+import type { EditorMapWidgetProps } from './types/editormap-widget-props';
+import type { MarkerProps } from './types/marker-props';
 
 const EditorMap = ({
   fieldName = 'location',
@@ -48,7 +46,7 @@ const EditorMap = ({
     if (map && e.isInArea) {
       if (onChange) {
         const value = `{"lat":${e.latlng?.lat},"lng":${e.latlng?.lng}}`;
-        onChange({name: fieldName, value: JSON.parse(value)})
+        onChange({ name: fieldName, value: JSON.parse(value) });
       }
       setCurrentEditorMarker({
         ...currentEditorMarker,

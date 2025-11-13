@@ -1,52 +1,52 @@
 var _ = require('lodash');
 
-const rightsChoices =  [
+const rightsChoices = [
   {
     label: 'Anonymous',
-    value: 'anonymous'
+    value: 'anonymous',
   },
   {
     label: 'Registered user',
-    value: 'member'
-  }
+    value: 'member',
+  },
 ];
 
 const flagChoices = [
   {
     label: 'Groen',
-    value: 'green'
+    value: 'green',
   },
   {
     label: 'Donkergroen',
-    value: 'dark-green'
+    value: 'dark-green',
   },
   {
     label: 'Grijs',
-    value: 'gray'
+    value: 'gray',
   },
   {
     label: 'Donkergrijs',
-    value: 'dark-gray'
+    value: 'dark-gray',
   },
   {
     label: 'Geel',
-    value: 'yellow'
+    value: 'yellow',
   },
   {
     label: 'Blauw',
-    value: 'blue'
+    value: 'blue',
   },
   {
     label: 'Donkerblauw',
-    value: 'dark-blue'
+    value: 'dark-blue',
   },
   {
     label: 'Rood',
-    value: 'red'
+    value: 'red',
   },
   {
     label: 'Paars',
-    value: 'purple'
+    value: 'purple',
   },
 ];
 
@@ -56,7 +56,7 @@ const resultObject = (inputArray) => {
     acc[name] = { ...rest };
     return acc;
   }, {});
-}
+};
 
 module.exports = resultObject([
   {
@@ -68,8 +68,9 @@ module.exports = resultObject([
     name: 'fbImage',
     type: 'attachment',
     svgImages: true,
-    label: 'Default FB image when sharing pages (gets overwritten when sharing ideas)',
-    trash: true
+    label:
+      'Default FB image when sharing pages (gets overwritten when sharing ideas)',
+    trash: true,
   },
   {
     name: 'stylesheets',
@@ -81,10 +82,10 @@ module.exports = resultObject([
         url: {
           type: 'string',
           name: 'url',
-          label: 'Url'
+          label: 'Url',
         },
-      }
-    }
+      },
+    },
   },
   {
     name: 'inlineCss',
@@ -97,7 +98,7 @@ module.exports = resultObject([
     type: 'attachment',
     svgImages: true,
     label: 'Favicon',
-    trash: true
+    trash: true,
   },
   {
     type: 'boolean',
@@ -111,9 +112,9 @@ module.exports = resultObject([
       },
       {
         label: 'No',
-        value: false
-      }
-    ]
+        value: false,
+      },
+    ],
   },
   {
     name: 'ideaSlug',
@@ -122,7 +123,7 @@ module.exports = resultObject([
     label: 'Slug van idee pagina',
     help: 'Slug van de ideepagina. Let op: dit wordt in het gebruikersaccount gebruikt om gebruikers naar hun plan te verwijzen. Geef de locatie op van het plan, met daarin {ideaId} voor het plan-Id. Bijvoorbeeld: /plan/{ideaId} of /stemmen#ideaId-{ideaId}',
     apiSyncField: 'cms.ideaSlug',
-    required: false
+    required: false,
   },
   {
     name: 'ideaOverviewSlug',
@@ -130,32 +131,32 @@ module.exports = resultObject([
     permission: 'admin',
     label: 'Slug van overzichts pagina',
     apiSyncField: 'cms.ideaOverviewSlug',
-    required: false
+    required: false,
   },
   {
     name: 'editIdeaUrl',
     type: 'string',
     permission: 'admin',
     label: 'Url van de bewerk pagina',
-    required: false
+    required: false,
   },
   {
     name: 'modbreakAuthor',
     type: 'string',
     label: 'Author of the modbreaks',
-    required: false
+    required: false,
   },
   {
     type: 'string',
     name: 'captchaRefreshText',
-    label: "Text for captcha refresh",
+    label: 'Text for captcha refresh',
   },
 
   {
     type: 'boolean',
     name: 'hideProjectTitle',
     label: 'Hide the project title in the header?',
-    def: true
+    def: true,
   },
   {
     name: 'projectLogo',
@@ -163,7 +164,7 @@ module.exports = resultObject([
     svgImages: true,
     label: 'Logo',
     apiSyncField: 'styling.logo',
-    trash: true
+    trash: true,
   },
   {
     name: 'formattedLogo',
@@ -172,7 +173,9 @@ module.exports = resultObject([
     label: 'Formatted Logo',
     formatField: function (value, apos, doc, req) {
       const projectUrl = apos.settings.getOption(req, 'projectUrl');
-      return  doc.projectLogo ? projectUrl + apos.attachments.url(doc.projectLogo) : '';
+      return doc.projectLogo
+        ? projectUrl + apos.attachments.url(doc.projectLogo)
+        : '';
     },
     apiSyncField: 'styling.logo',
   },
@@ -182,10 +185,11 @@ module.exports = resultObject([
     type: 'string',
     label: 'Formatted CSS',
     formatField: function (value, apos, doc) {
-      var paletteFields = apos.modules['apostrophe-global'].options.paletteFields;
+      var paletteFields =
+        apos.modules['apostrophe-global'].options.paletteFields;
       var rules = [];
 
-      paletteFields.forEach(function(field) {
+      paletteFields.forEach(function (field) {
         var selectors = field.selector;
         var properties = field.property;
         var fieldValue = doc[field.name];
@@ -211,9 +215,22 @@ module.exports = resultObject([
             }
             if (field.valueTemplate) {
               var regex = /%VALUE%/gi;
-              rule += selector + '{ ' + property + ': ' + field.valueTemplate.replace(regex, fieldValue + fieldUnit) + '; }';
+              rule +=
+                selector +
+                '{ ' +
+                property +
+                ': ' +
+                field.valueTemplate.replace(regex, fieldValue + fieldUnit) +
+                '; }';
             } else {
-              rule += selector + ' { ' + property + ': ' + fieldValue + fieldUnit + '; }';
+              rule +=
+                selector +
+                ' { ' +
+                property +
+                ': ' +
+                fieldValue +
+                fieldUnit +
+                '; }';
             }
 
             if (field.mediaQuery) {
@@ -224,8 +241,6 @@ module.exports = resultObject([
         });
       });
 
-
-
       return rules.join('');
     },
     apiSyncField: 'styling.inlineCSS',
@@ -234,7 +249,8 @@ module.exports = resultObject([
   {
     name: 'logoLink',
     type: 'string',
-    label: 'Where do we want to link the logo towards? (leave empty for default app url)',
+    label:
+      'Where do we want to link the logo towards? (leave empty for default app url)',
     //    apiSyncField: 'logo'
   },
   {
@@ -253,7 +269,7 @@ module.exports = resultObject([
     label: 'Map zoom level',
     min: 12,
     max: 17,
-    step: 1 // optional
+    step: 1, // optional
   },
   {
     name: 'mapPolygonsKey',
@@ -265,7 +281,7 @@ module.exports = resultObject([
   {
     name: 'displayLoginTopLink',
     type: 'boolean',
-    label: 'Display login and logout link in top links?'
+    label: 'Display login and logout link in top links?',
   },
   {
     name: 'openstreetmapsServerUrl',
@@ -277,78 +293,84 @@ module.exports = resultObject([
     name: 'themes',
     type: 'array',
     titleField: 'label',
-    label: 'Thema\'s',
-    fields: {add: resultObject([
-      {
-        name: 'value',
-        type: 'text',
-        label: 'Name',
-        type: 'string',
-      },
-      {
-        name: 'flag',
-        type: 'select',
-        label: 'Welke vlag moet er getoond worden bij dit thema?',
-        choices: flagChoices,
-        def: 'blue'
-      },
-      {
-        name: 'mapUploadedFlag',
-        type: 'attachment',
-        label: 'Upload een vlag (liefst png)',
-        trash: true
-      },
-      {
-        name: 'mapFlagWidth',
-        type: 'text',
-        label: 'Map Flag Width',
-        type: 'string',
-      },
-      {
-        name: 'mapFlagHeight',
-        type: 'text',
-        label: 'Map Flag height',
-        type: 'string',
-      },
-      {
-        name: 'mapicon',
-        type: 'string',
-        label: 'Icon op de kaart (JSON, momenteel alleen Kaartapplicatie)',
-      },
-      {
-        name: 'listicon',
-        type: 'string',
-        label: 'Icon in de lijst (JSON, momenteel alleen Kaartapplicatie)',
-      },
-      {
-        name: 'color',
-        type: 'select',
-        label: 'Wat is de kleur van dit thema (momenteel alleen voor Budgeting per thema)',
-        type: 'string',
-      },
-      {
-        name: 'initialAvailableBudget',
-        type: 'select',
-        label: 'Available Budget (momenteel alleen voor Budgeting per thema)',
-        type: 'integer',
-      },
-      {
-        name: 'minimalBudgetSpent',
-        type: 'select',
-        label: 'Minimum budget that has to be selected (momenteel alleen voor Budgeting per thema)',
-        type: 'integer',
-      },
-      {
-        name: 'maxIdeas',
-        type: 'integer',
-        label: 'Maximum selectable ideas (momenteel alleen voor Budgeting - count per thema)',
-      },
-      {
-        name: 'minIdeas',
-        type: 'integer',
-        label: 'Minimum selectable ideas (momenteel alleen voor Budgeting - count per thema)',
-      },
-    ])}
+    label: "Thema's",
+    fields: {
+      add: resultObject([
+        {
+          name: 'value',
+          type: 'text',
+          label: 'Name',
+          type: 'string',
+        },
+        {
+          name: 'flag',
+          type: 'select',
+          label: 'Welke vlag moet er getoond worden bij dit thema?',
+          choices: flagChoices,
+          def: 'blue',
+        },
+        {
+          name: 'mapUploadedFlag',
+          type: 'attachment',
+          label: 'Upload een vlag (liefst png)',
+          trash: true,
+        },
+        {
+          name: 'mapFlagWidth',
+          type: 'text',
+          label: 'Map Flag Width',
+          type: 'string',
+        },
+        {
+          name: 'mapFlagHeight',
+          type: 'text',
+          label: 'Map Flag height',
+          type: 'string',
+        },
+        {
+          name: 'mapicon',
+          type: 'string',
+          label: 'Icon op de kaart (JSON, momenteel alleen Kaartapplicatie)',
+        },
+        {
+          name: 'listicon',
+          type: 'string',
+          label: 'Icon in de lijst (JSON, momenteel alleen Kaartapplicatie)',
+        },
+        {
+          name: 'color',
+          type: 'select',
+          label:
+            'Wat is de kleur van dit thema (momenteel alleen voor Budgeting per thema)',
+          type: 'string',
+        },
+        {
+          name: 'initialAvailableBudget',
+          type: 'select',
+          label: 'Available Budget (momenteel alleen voor Budgeting per thema)',
+          type: 'integer',
+        },
+        {
+          name: 'minimalBudgetSpent',
+          type: 'select',
+          label:
+            'Minimum budget that has to be selected (momenteel alleen voor Budgeting per thema)',
+          type: 'integer',
+        },
+        {
+          name: 'maxIdeas',
+          type: 'integer',
+          label:
+            'Maximum selectable ideas (momenteel alleen voor Budgeting - count per thema)',
+        },
+        {
+          name: 'minIdeas',
+          type: 'integer',
+          label:
+            'Minimum selectable ideas (momenteel alleen voor Budgeting - count per thema)',
+        },
+      ]),
+    },
   },
 
   {
@@ -356,54 +378,56 @@ module.exports = resultObject([
     name: 'ideaTypes',
     label: 'Typen ideeën',
     apiSyncField: 'ideas.types',
-    help: 'Wordt momenteel alleen gebruikt in \'Ideeen op een kaart\' widget',
-    fields: {add: resultObject([
-      {
-        name: 'name',
-        type: 'string',
-        label: 'Naam',
-      },
-      {
-        name: 'id',
-        type: 'string',
-        label: 'Waarde',
-      },
-      {
-        name: 'label',
-        type: 'string',
-        label: 'Label op detail pagina',
-      },
-      {
-        name: 'textColor',
-        type: 'string',
-        label: 'Tekst kleur, onder meer voor labels',
-      },
-      {
-        name: 'backgroundColor',
-        type: 'string',
-        label: 'Achtergrondkleur, onder meer voor labels',
-      },
-      {
-        name: 'mapicon',
-        type: 'string',
-        label: 'Icon op de kaart',
-      },
-      {
-        name: 'listicon',
-        type: 'string',
-        label: 'Icon in ideeën overzicht',
-      },
-      {
-        name: 'buttonicon',
-        type: 'string',
-        label: 'Icon op buttons',
-      },
-      {
-        name: 'buttonLabel',
-        type: 'string',
-        label: 'Tekst op buttons',
-      },
-    ])}
+    help: "Wordt momenteel alleen gebruikt in 'Ideeen op een kaart' widget",
+    fields: {
+      add: resultObject([
+        {
+          name: 'name',
+          type: 'string',
+          label: 'Naam',
+        },
+        {
+          name: 'id',
+          type: 'string',
+          label: 'Waarde',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          label: 'Label op detail pagina',
+        },
+        {
+          name: 'textColor',
+          type: 'string',
+          label: 'Tekst kleur, onder meer voor labels',
+        },
+        {
+          name: 'backgroundColor',
+          type: 'string',
+          label: 'Achtergrondkleur, onder meer voor labels',
+        },
+        {
+          name: 'mapicon',
+          type: 'string',
+          label: 'Icon op de kaart',
+        },
+        {
+          name: 'listicon',
+          type: 'string',
+          label: 'Icon in ideeën overzicht',
+        },
+        {
+          name: 'buttonicon',
+          type: 'string',
+          label: 'Icon op buttons',
+        },
+        {
+          name: 'buttonLabel',
+          type: 'string',
+          label: 'Tekst op buttons',
+        },
+      ]),
+    },
   },
 
   {
@@ -413,13 +437,13 @@ module.exports = resultObject([
     label: 'Buurten',
     fields: {
       add: {
-        value : {
+        value: {
           type: 'text',
           label: 'Name',
           type: 'string',
-        }
-      }
-    }
+        },
+      },
+    },
   },
   {
     name: 'arrangeMainMenu',
@@ -428,19 +452,19 @@ module.exports = resultObject([
     choices: [
       {
         value: 'default',
-        label: "Display pages automatically",
+        label: 'Display pages automatically',
       },
       {
         value: 'manually',
-        label: "Arrange menu items manually",
-        showFields: ['mainMenuItems']
+        label: 'Arrange menu items manually',
+        showFields: ['mainMenuItems'],
       },
       {
         value: 'hideMenu',
-        label: "Hide the menu items",
-        showFields: ['mainMenuItems']
-      }
-    ]
+        label: 'Hide the menu items',
+        showFields: ['mainMenuItems'],
+      },
+    ],
   },
   {
     name: 'mainMenuItems',
@@ -464,8 +488,8 @@ module.exports = resultObject([
           type: 'boolean',
           label: 'Open in new window',
         },
-      ])
-    }
+      ]),
+    },
   },
   {
     name: 'ctaButtonText',
@@ -506,36 +530,37 @@ module.exports = resultObject([
           choices: [
             {
               value: 'always',
-              label: "Always display",
+              label: 'Always display',
             },
             {
               value: 'loggedIn',
-              label: "Display when logged in",
+              label: 'Display when logged in',
             },
             {
               value: 'notLoggedIn',
-              label: "Display when not logged in",
-            }
-          ]
+              label: 'Display when not logged in',
+            },
+          ],
         },
-      ])
-    }
+      ]),
+    },
   },
   {
     name: 'displayMyAcount',
     type: 'boolean',
-    label: 'Display my account in main menu?'
+    label: 'Display my account in main menu?',
   },
   {
     name: 'myAccountButtonText',
     type: 'string',
-    label: 'My account button text'
+    label: 'My account button text',
   },
   {
     name: 'cacheIdeas',
     permission: 'admin',
     type: 'boolean',
-    label: 'Cache ideas? This optimises performance for projects, only works for projects where ideas are static, most voting sits'
+    label:
+      'Cache ideas? This optimises performance for projects, only works for projects where ideas are static, most voting sits',
   },
   {
     name: 'newsletterModalTitle',
@@ -556,7 +581,7 @@ module.exports = resultObject([
     type: 'string',
     label: 'Submit button',
     textarea: true,
-    def: 'Submit'
+    def: 'Submit',
   },
   {
     type: 'boolean',
@@ -568,16 +593,13 @@ module.exports = resultObject([
       {
         label: 'Yes',
         value: true,
-        showFields: [
-          'captchaLabel',
-          'captchaRefreshText'
-        ]
+        showFields: ['captchaLabel', 'captchaRefreshText'],
       },
       {
         label: 'No',
-        value: false
-      }
-    ]
+        value: false,
+      },
+    ],
   },
   {
     name: 'captchaLabel',
@@ -589,40 +611,40 @@ module.exports = resultObject([
     type: 'string',
     label: 'Cancel button',
     textarea: true,
-    def: 'Cancel'
+    def: 'Cancel',
   },
   // ----------------------------------------------------------------------------------------------------
   // form
   // TODO: dit is al de zoveelste kopie en moet dus naar een lib
   {
-    name:       'newsletterModalFormFields',
-    label:      'Newsletter form fields',
+    name: 'newsletterModalFormFields',
+    label: 'Newsletter form fields',
     help: 'The form default shows a Name and an Email field; if you would like something different you can define that here',
-    type:       'array',
+    type: 'array',
     titleField: 'title',
     fields: {
       add: resultObject([
         {
-          type:  'string',
-          name:  'name',
+          type: 'string',
+          name: 'name',
           label: 'Fieldname',
           help: 'Name of this field in the API: email, firstName, lastName, displayName or extraData.xxx',
         },
         {
-          type:  'string',
-          name:  'title',
-          label: 'Title'
+          type: 'string',
+          name: 'title',
+          label: 'Title',
         },
         {
-          type:     'string',
-          name:     'placeholder',
-          label:    'Placeholder tekst',
+          type: 'string',
+          name: 'placeholder',
+          label: 'Placeholder tekst',
           help: 'Text that is placed in an empty field',
         },
         {
-          name:    'inputType',
-          label:   'Type veld',
-          type:    'select',
+          name: 'inputType',
+          label: 'Type veld',
+          type: 'select',
           choices: [
             {
               label: 'Text',
@@ -631,8 +653,8 @@ module.exports = resultObject([
             {
               label: 'Checkbox',
               value: 'checkbox',
-            }
-          ]
+            },
+          ],
         },
         {
           type: 'select',
@@ -646,12 +668,12 @@ module.exports = resultObject([
             },
             {
               label: 'No',
-              value: false
+              value: false,
             },
-          ]
+          ],
         },
-      ])
-    }  
+      ]),
+    },
   },
   // einde form
   // ----------------------------------------------------------------------------------------------------
@@ -672,7 +694,7 @@ module.exports = resultObject([
           type: 'text',
           label: 'Description',
           type: 'string',
-          textarea: true
+          textarea: true,
         },
         {
           name: 'links',
@@ -696,11 +718,11 @@ module.exports = resultObject([
                 type: 'boolean',
                 label: 'Open in new window',
               },
-            ])
-          }
+            ]),
+          },
         },
-      ])
-    }
+      ]),
+    },
   },
   {
     name: 'roleToLike',
@@ -708,7 +730,7 @@ module.exports = resultObject([
     type: 'select',
     label: 'What role is necessary to like an idea?',
     choices: rightsChoices,
-    def: 'member'
+    def: 'member',
   },
   /*
   {

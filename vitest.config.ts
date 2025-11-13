@@ -1,11 +1,7 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    projects: [
-        "apps/*",
-        "packages/*",
-        "packages/apostrophe-widgets/*"
-    ],
+    projects: ['apps/*', 'packages/*', 'packages/apostrophe-widgets/*'],
   },
-})
+});

@@ -1,11 +1,5 @@
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-import { useState, useCallback, useEffect } from 'react';
-import { useProject } from '../../../../hooks/use-project';
-
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -14,14 +8,20 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Spacer } from "@/components/ui/spacer";
+import { Spacer } from '@/components/ui/spacer';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const requiredUserFields = [
   {
@@ -68,25 +68,35 @@ const formSchema = z.object({
 });
 
 export default function ProjectAuthenticationRequiredFields() {
+  const { data, updateProject } = useProject(['includeAuthConfig']);
 
-  const {
-    data,
-    updateProject,
-  } = useProject(['includeAuthConfig']);
-
-  const defaultLabels = requiredUserFields.reduce((acc: Record<string, string>, field) => {
-    acc[field.id] = '';
-    return acc;
-  }, {});
+  const defaultLabels = requiredUserFields.reduce(
+    (acc: Record<string, string>, field) => {
+      acc[field.id] = '';
+      return acc;
+    },
+    {}
+  );
 
   const defaults = useCallback(
     () => ({
-      requiredUserFields: data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
-      requiredUserFieldsLabels: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.requiredUserFieldsLabels || defaultLabels,
-      title: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title || '',
-      description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || '',
-      buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || '',
-      info: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.info || '',
+      requiredUserFields:
+        data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
+      requiredUserFieldsLabels:
+        data?.config?.auth?.provider?.openstad?.config?.requiredFields
+          ?.requiredUserFieldsLabels || defaultLabels,
+      title:
+        data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title ||
+        '',
+      description:
+        data?.config?.auth?.provider?.openstad?.config?.requiredFields
+          ?.description || '',
+      buttonText:
+        data?.config?.auth?.provider?.openstad?.config?.requiredFields
+          ?.buttonText || '',
+      info:
+        data?.config?.auth?.provider?.openstad?.config?.requiredFields?.info ||
+        '',
     }),
     [data?.config]
   );
@@ -99,7 +109,7 @@ export default function ProjectAuthenticationRequiredFields() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-  
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const updatedConfig = {
@@ -114,32 +124,34 @@ export default function ProjectAuthenticationRequiredFields() {
                   buttonText: values.buttonText,
                   info: values.info,
                   requiredUserFieldsLabels: values.requiredUserFieldsLabels,
-                }
+                },
               },
-            }
-          }
-        }
+            },
+          },
+        },
       };
 
       const project = await updateProject(updatedConfig);
       const doubleSave = await updateProject(updatedConfig);
 
-      if ( doubleSave && project ) {
+      if (doubleSave && project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('Could not update', error);
     }
   }
 
-  const [showPageFields, setShowPageFields] = useState(false)
+  const [showPageFields, setShowPageFields] = useState(false);
   useEffect(() => {
     // data is not available right away
-    setShowPageFields(data?.config?.auth?.provider?.openstad?.requiredUserFields?.length > 0);
+    setShowPageFields(
+      data?.config?.auth?.provider?.openstad?.requiredUserFields?.length > 0
+    );
   }, [data]);
-  
+
   return (
     <div>
       <PageLayout
@@ -191,7 +203,9 @@ export default function ProjectAuthenticationRequiredFields() {
                                   <Checkbox
                                     checked={field.value?.includes(item.id)}
                                     onCheckedChange={(checked: any) => {
-                                      setShowPageFields(field.value.length > 1 || checked)
+                                      setShowPageFields(
+                                        field.value.length > 1 || checked
+                                      );
                                       return checked
                                         ? field.onChange([
                                             ...field.value,
@@ -219,108 +233,115 @@ export default function ProjectAuthenticationRequiredFields() {
               />
 
               {showPageFields ? (
-                  <>
-                    <Spacer size={2} />
-                    <div>
-                      <FormLabel>
-                        Standaard staat de titel van de bovenstaande geselecteerde verplichte velden als de titel boven het invulveld. Hier kun je dit per verplicht veld aanpassen.
-                      </FormLabel>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {requiredUserFields.map((item) => {
-                        const fieldValue = form.getValues('requiredUserFieldsLabels')[item.id] ?? '';
-                        return form.watch('requiredUserFields').includes(item.id) ? (
-                            <FormField
-                                key={item.id}
-                                control={form.control}
-                                name={`requiredUserFieldsLabels.${item.id}`}
-                                render={({field}) => (
-                                    <FormItem>
-                                      <FormLabel>{item.label}</FormLabel>
-                                      <FormControl>
-                                        <Input
-                                            placeholder={item.label}
-                                            defaultValue={fieldValue}
-                                            onChange={(e) => {
-                                              field.onChange(e);
-                                            }}
-                                        />
-
-                                      </FormControl>
-                                      <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
-                        ) : null
-                      })}
-                    </div>
-                    <Spacer size={5} />
-                  </>
+                <>
+                  <Spacer size={2} />
+                  <div>
+                    <FormLabel>
+                      Standaard staat de titel van de bovenstaande geselecteerde
+                      verplichte velden als de titel boven het invulveld. Hier
+                      kun je dit per verplicht veld aanpassen.
+                    </FormLabel>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {requiredUserFields.map((item) => {
+                      const fieldValue =
+                        form.getValues('requiredUserFieldsLabels')[item.id] ??
+                        '';
+                      return form
+                        .watch('requiredUserFields')
+                        .includes(item.id) ? (
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name={`requiredUserFieldsLabels.${item.id}`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{item.label}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder={item.label}
+                                  defaultValue={fieldValue}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ) : null;
+                    })}
+                  </div>
+                  <Spacer size={5} />
+                </>
               ) : null}
 
               {showPageFields ? (
-              <>
-              <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Als een gebruiker één of meer van deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
-                </FormLabel>
-              </div>
+                <>
+                  <Separator className="my-4" />
+                  <div>
+                    <FormLabel>
+                      Als een gebruiker één of meer van deze verplichte velden
+                      moet invullen dan doet die dat op een pagina met deze
+                      teksten:
+                    </FormLabel>
+                  </div>
 
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Titel</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beschrijving</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="buttonText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Knoptekst</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="info"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Help tekst</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              </>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Beschrijving</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="buttonText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Knoptekst</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="info"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Help tekst</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               ) : null}
 
               <Button type="submit">Opslaan</Button>
@@ -331,5 +352,3 @@ export default function ProjectAuthenticationRequiredFields() {
     </div>
   );
 }
-
-

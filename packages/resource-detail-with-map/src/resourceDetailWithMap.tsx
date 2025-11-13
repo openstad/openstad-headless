@@ -1,43 +1,38 @@
-import './resourceDetailWithMap.css';
+import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
-import {
-  Carousel,
-  Image,
-} from '@openstad-headless/ui/src';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
-import {
-  Paragraph,
-  Heading,
-} from '@utrecht/component-library-react';
-import React from 'react';
-import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
-import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
-import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
-import { Button, ButtonLink } from '@utrecht/component-library-react';
-import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
-
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
+import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { Carousel, Image } from '@openstad-headless/ui/src';
+import '@utrecht/component-library-css';
+import { Heading, Paragraph } from '@utrecht/component-library-react';
+import { Button, ButtonLink } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React from 'react';
+
+import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
+import './resourceDetailWithMap.css';
+
 type booleanProps = {
   [K in
-  | 'displayImage'
-  | 'displayTitle'
-  | 'displaySummary'
-  | 'displayDescription'
-  | 'displayUser'
-  | 'displayDate'
-  | 'displayBudget'
-  | 'displayLocation'
-  | 'displayBudgetDocuments'
-  | 'displayLikes'
-  | 'displayTags'
-  | 'displayStatus'
-  | 'displayDocuments'
-  | 'displaySocials']: boolean | undefined;
+    | 'displayImage'
+    | 'displayTitle'
+    | 'displaySummary'
+    | 'displayDescription'
+    | 'displayUser'
+    | 'displayDate'
+    | 'displayBudget'
+    | 'displayLocation'
+    | 'displayBudgetDocuments'
+    | 'displayLikes'
+    | 'displayTags'
+    | 'displayStatus'
+    | 'displayDocuments'
+    | 'displaySocials']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -52,12 +47,12 @@ export type ResourceDetailWidgetProps = {
     countButton?: {
       show: boolean;
       label?: string;
-    }
+    };
     ctaButton?: {
       show: boolean;
       label?: string;
       href?: string;
-    }
+    };
   } & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -92,12 +87,13 @@ function ResourceDetailWithMap({
   backUrl = '/',
   ...props
 }: ResourceDetailWidgetProps) {
-
-  let resourceId: string | undefined = String(getResourceId({
-    resourceId: parseInt(props.resourceId || ''),
-    url: document.location.href,
-    targetUrl: props.resourceIdRelativePath,
-  })); // todo: make it a number throughout the code
+  let resourceId: string | undefined = String(
+    getResourceId({
+      resourceId: parseInt(props.resourceId || ''),
+      url: document.location.href,
+      targetUrl: props.resourceIdRelativePath,
+    })
+  ); // todo: make it a number throughout the code
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -110,19 +106,17 @@ function ResourceDetailWithMap({
   });
 
   const showDate = (date: string) => {
-    return date.split(' ').slice(0, -1).join(' ')
+    return date.split(' ').slice(0, -1).join(' ');
   };
 
   const { data: resources } = datastore.useResources({
     projectId: props.projectId,
   });
 
-
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
-      <div
-        className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
+      <div className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
         <section className="resource-counter">
           {resources?.metadata?.totalCount}
         </section>
@@ -139,13 +133,13 @@ function ResourceDetailWithMap({
       <ButtonLink
         appearance="primary-action-button"
         href={ctaButton.href}
-        className={`osc-resource-overview-map-button ${countButtonElement ? 'osc-second-button' : 'osc-first-button'
-          }`}>
+        className={`osc-resource-overview-map-button ${
+          countButtonElement ? 'osc-second-button' : 'osc-first-button'
+        }`}>
         <section className="resource-label">{ctaButton.label}</section>
       </ButtonLink>
     );
   }
-
 
   if (!resource) return null;
 
@@ -157,23 +151,44 @@ function ResourceDetailWithMap({
   }
 
   if (Array.isArray(resource?.tags)) {
-    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) =>
+      a.name.localeCompare(b.name)
+    );
 
-    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    const tagWithImage = sortedTags.find(
+      (tag: Tag) => tag.defaultResourceImage
+    );
     defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
-  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
-  const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
+  const resourceImages =
+    Array.isArray(resource.images) && resource.images.length > 0
+      ? resource.images
+      : [{ url: defaultImage }];
+  const hasImages =
+    Array.isArray(resourceImages) &&
+    resourceImages.length > 0 &&
+    resourceImages[0].url !== ''
+      ? ''
+      : 'resource-has-no-images';
 
   const firstStatus = resource.statuses
     ? resource.statuses
-    .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+        .filter(
+          (status: { seqnr: number }) =>
+            status.seqnr !== undefined && status.seqnr !== null
+        )
+        .sort(
+          (a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr
+        )[0] || resource.statuses[0]
     : false;
 
-  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
-  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+  const colorClass =
+    firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass =
+    firstStatus && firstStatus.backgroundColor
+      ? `bgColor-${firstStatus.backgroundColor}`
+      : '';
 
   const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
@@ -181,18 +196,24 @@ function ResourceDetailWithMap({
     <section className="osc-resource-detail-content osc-resource-detail-grid">
       {resource ? (
         <>
-          <a href={backUrl} className="back-to-overview">Terug naar overzicht</a>
+          <a href={backUrl} className="back-to-overview">
+            Terug naar overzicht
+          </a>
           <article className={`osc-resource-detail-content-items ${hasImages}`}>
             {displayImage && (
               <Carousel
                 items={resourceImages}
-                buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
+                buttonText={{
+                  next: 'Volgende afbeelding',
+                  previous: 'Vorige afbeelding',
+                }}
                 itemRenderer={(i) => (
                   <Image
                     src={i.url}
                     imageFooter={
                       <div>
-                        <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
+                        <Paragraph
+                          className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                           {resource.statuses
                             ?.map((s: { label: string }) => s.label)
                             ?.join(', ')}
@@ -205,13 +226,20 @@ function ResourceDetailWithMap({
             )}
 
             {displayTitle && resource.title && (
-              <Heading level={1} appearance="utrecht-heading-2" dangerouslySetInnerHTML={{__html: resource.title}}/>
+              <Heading
+                level={1}
+                appearance="utrecht-heading-2"
+                dangerouslySetInnerHTML={{ __html: resource.title }}
+              />
             )}
             <div className="osc-resource-detail-content-item-row">
               {displayUser && resource?.user?.displayName && (
                 <div>
-                  <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
-                  Ingediend door
+                  <Heading
+                    level={2}
+                    appearance="utrecht-heading-6"
+                    className="osc-resource-detail-content-item-title">
+                    Ingediend door
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
                     {resource.user.displayName}
@@ -220,7 +248,10 @@ function ResourceDetailWithMap({
               )}
               {displayDate && resource.startDateHumanized && (
                 <div>
-                  <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                  <Heading
+                    level={2}
+                    appearance="utrecht-heading-6"
+                    className="osc-resource-detail-content-item-title">
                     Datum
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
@@ -230,7 +261,10 @@ function ResourceDetailWithMap({
               )}
               {displayBudget && resource.budget && (
                 <div>
-                  <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                  <Heading
+                    level={2}
+                    appearance="utrecht-heading-6"
+                    className="osc-resource-detail-content-item-title">
                     Budget
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
@@ -240,27 +274,37 @@ function ResourceDetailWithMap({
               )}
             </div>
             <div className="resource-detail-content">
-              {displaySummary && <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{__html: resource.summary}} />}
+              {displaySummary && (
+                <Heading
+                  level={2}
+                  appearance="utrecht-heading-4"
+                  dangerouslySetInnerHTML={{ __html: resource.summary }}
+                />
+              )}
               {displayDescription && (
-                <Paragraph dangerouslySetInnerHTML={{__html: resource.description}}/>
+                <Paragraph
+                  dangerouslySetInnerHTML={{ __html: resource.description }}
+                />
               )}
             </div>
             {displaySocials ? (
-                <div className="resource-detail-side-section">
-                  <ShareLinks title={'Deel dit'} />
-                </div>
-              ) : null}
+              <div className="resource-detail-side-section">
+                <ShareLinks title={'Deel dit'} />
+              </div>
+            ) : null}
           </article>
           {displayLocation && resource.location && (
             <div className="map-container--buttons">
               <ResourceDetailMap
-                resourceId={props.resourceId || resourceId || resource.id || '0'}
+                resourceId={
+                  props.resourceId || resourceId || resource.id || '0'
+                }
                 {...props}
                 center={resource.location}
                 area={props.resourceDetailMap?.area}
-                resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
-              >
-              </ResourceDetailMap>
+                resourceIdRelativePath={
+                  props.resourceIdRelativePath || 'openstadResourceId'
+                }></ResourceDetailMap>
               <div className="map-buttons">
                 {ctaButtonElement}
                 {countButtonElement}

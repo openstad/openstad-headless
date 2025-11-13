@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -9,16 +8,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AccountWidgetProps } from '@openstad-headless/account/src/account';
+import { useRouter } from 'next/router';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { AccountWidgetProps } from '@openstad-headless/account/src/account';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { useRouter } from 'next/router';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
 
 const formSchema = z.object({
   allowNickname: z.boolean(),
@@ -60,7 +60,6 @@ export default function AccountDisplay(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
-
         {/* Issues when saving the form, commented for now since they are not mandatory */}
         {/* <FormField
           control={form.control}

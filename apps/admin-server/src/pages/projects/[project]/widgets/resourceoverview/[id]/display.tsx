@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -8,16 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Separator } from '@/components/ui/separator';
-import { Heading } from '@/components/ui/typography';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import {
   Select,
   SelectContent,
@@ -25,10 +17,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from "@/components/ui/checkbox";
-import React, { useEffect, useState } from "react";
-import useTags from "@/hooks/use-tags";
-import _ from "lodash";
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import useTags from '@/hooks/use-tags';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
+import _ from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   displayBanner: z.boolean(),
@@ -109,8 +109,12 @@ export default function WidgetResourceOverviewDisplay(
       displayTags: props?.displayTags !== false,
       displayTagIcon: props?.displayTagIcon || false,
       displayLocationFilter: props?.displayLocationFilter === true,
-      listTabTitle: typeof (props?.listTabTitle) === 'undefined' ? 'Lijst' : props.listTabTitle,
-      mapTabTitle: typeof (props?.mapTabTitle) === 'undefined' ? 'Kaart' : props.mapTabTitle,
+      listTabTitle:
+        typeof props?.listTabTitle === 'undefined'
+          ? 'Lijst'
+          : props.listTabTitle,
+      mapTabTitle:
+        typeof props?.mapTabTitle === 'undefined' ? 'Kaart' : props.mapTabTitle,
       displayOverviewTagGroups: props?.displayOverviewTagGroups || false,
       overviewTagGroups: props?.overviewTagGroups || [],
       dialogTagGroups: props?.dialogTagGroups || [],
@@ -159,9 +163,11 @@ export default function WidgetResourceOverviewDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
-
           <Heading size="xl">Algemeen</Heading>
-          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
+          <Separator
+            style={{ margin: '-10px 0 0' }}
+            className="my-4 col-span-full"
+          />
 
           <FormField
             control={form.control}
@@ -203,9 +209,7 @@ export default function WidgetResourceOverviewDisplay(
             name="applyText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Tekst voor het toepassen van de filters
-                </FormLabel>
+                <FormLabel>Tekst voor het toepassen van de filters</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
@@ -226,9 +230,7 @@ export default function WidgetResourceOverviewDisplay(
             name="resetText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Tekst voor het resetten van de filters
-                </FormLabel>
+                <FormLabel>Tekst voor het resetten van de filters</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
@@ -266,8 +268,9 @@ export default function WidgetResourceOverviewDisplay(
                     Moet de kaart en de lijst als tabs worden weergegeven?
                   </FormLabel>
                   <FormDescription>
-                    De huidige weergave is een lijst met de kaart erboven.
-                    Als je dit aanvinkt, worden de kaart en de lijst als tabs weergegeven.
+                    De huidige weergave is een lijst met de kaart erboven. Als
+                    je dit aanvinkt, worden de kaart en de lijst als tabs
+                    weergegeven.
                   </FormDescription>
                   {YesNoSelect(field, props)}
                   <FormMessage />
@@ -276,16 +279,14 @@ export default function WidgetResourceOverviewDisplay(
             />
           )}
 
-          {(displayMap && displayAsTabs) && (
+          {displayMap && displayAsTabs && (
             <>
               <FormField
                 control={form.control}
                 name="listTabTitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Titel van de lijst tab
-                    </FormLabel>
+                    <FormLabel>Titel van de lijst tab</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
@@ -305,9 +306,7 @@ export default function WidgetResourceOverviewDisplay(
                 name="mapTabTitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Titel van de map tab
-                    </FormLabel>
+                    <FormLabel>Titel van de map tab</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
@@ -330,9 +329,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayLocationFilter"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Locatie filter weergeven
-                </FormLabel>
+                <FormLabel>Locatie filter weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -344,9 +341,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayOverviewTagGroups"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Tags tonen in de tegels in het overzicht
-                </FormLabel>
+                <FormLabel>Tags tonen in de tegels in het overzicht</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -360,7 +355,9 @@ export default function WidgetResourceOverviewDisplay(
               render={() => (
                 <FormItem className="col-span-full">
                   <div>
-                    <FormLabel>Selecteer van welke tag groepen de tags getoond moeten worden in de tegels
+                    <FormLabel>
+                      Selecteer van welke tag groepen de tags getoond moeten
+                      worden in de tegels
                     </FormLabel>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
@@ -377,16 +374,26 @@ export default function WidgetResourceOverviewDisplay(
                                 className="flex flex-row items-start space-x-3 space-y-0">
                                 <FormControl>
                                   <Checkbox
-                                    checked={(field.value ?? []).includes(groupName)}
+                                    checked={(field.value ?? []).includes(
+                                      groupName
+                                    )}
                                     onCheckedChange={(checked: boolean) => {
                                       let updatedFields = field.value ?? [];
                                       if (checked) {
-                                        updatedFields = [...updatedFields, groupName];
+                                        updatedFields = [
+                                          ...updatedFields,
+                                          groupName,
+                                        ];
                                       } else {
-                                        updatedFields = updatedFields.filter((name) => name !== groupName);
+                                        updatedFields = updatedFields.filter(
+                                          (name) => name !== groupName
+                                        );
                                       }
                                       field.onChange(updatedFields);
-                                      props.onFieldChanged(field.name, updatedFields);
+                                      props.onFieldChanged(
+                                        field.name,
+                                        updatedFields
+                                      );
                                     }}
                                   />
                                 </FormControl>
@@ -397,7 +404,6 @@ export default function WidgetResourceOverviewDisplay(
                             );
                           }}
                         />
-
                       </>
                     ))}
                   </div>
@@ -406,9 +412,13 @@ export default function WidgetResourceOverviewDisplay(
             />
           )}
 
-
-          <Heading size="xl" className="col-span-full mt-6">Tegels</Heading>
-          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
+          <Heading size="xl" className="col-span-full mt-6">
+            Tegels
+          </Heading>
+          <Separator
+            style={{ margin: '-10px 0 0' }}
+            className="my-4 col-span-full"
+          />
 
           <FormField
             control={form.control}
@@ -443,7 +453,7 @@ export default function WidgetResourceOverviewDisplay(
                   <FormMessage />
                 </FormItem>
               )}
-            />  
+            />
 
             <br />
 
@@ -465,22 +475,10 @@ export default function WidgetResourceOverviewDisplay(
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem
-                        value={'2'}>
-                        Heading 2 (H2)
-                      </SelectItem>
-                      <SelectItem
-                        value={'3'}>
-                        Heading 3 (H3)
-                      </SelectItem>
-                      <SelectItem
-                        value={'4'}>
-                        Heading 4 (H4)
-                      </SelectItem>
-                      <SelectItem
-                        value={'5'}>
-                        Heading 5 (H5)
-                      </SelectItem>
+                      <SelectItem value={'2'}>Heading 2 (H2)</SelectItem>
+                      <SelectItem value={'3'}>Heading 3 (H3)</SelectItem>
+                      <SelectItem value={'4'}>Heading 4 (H4)</SelectItem>
+                      <SelectItem value={'5'}>Heading 5 (H5)</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -521,7 +519,6 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           /> */}
-
 
           <FormField
             control={form.control}
@@ -609,9 +606,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayVote"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Hoeveelheid stemmen weergeven
-                </FormLabel>
+                <FormLabel>Hoeveelheid stemmen weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -623,15 +618,12 @@ export default function WidgetResourceOverviewDisplay(
             name="displayStatusLabel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Status label weergeven
-                </FormLabel>
+                <FormLabel>Status label weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
-
 
           {/* <FormField
             control={form.control}
@@ -674,12 +666,8 @@ export default function WidgetResourceOverviewDisplay(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem
-                      value={'default'}>
-                      Standaard
-                    </SelectItem>
-                    <SelectItem
-                      value={'compact'}>
+                    <SelectItem value={'default'}>Standaard</SelectItem>
+                    <SelectItem value={'compact'}>
                       Compact (3 koloms)
                     </SelectItem>
                   </SelectContent>
@@ -694,11 +682,11 @@ export default function WidgetResourceOverviewDisplay(
             name="displayTagIcon"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Tag icoon weergeven in de tegels
-                </FormLabel>
+                <FormLabel>Tag icoon weergeven in de tegels</FormLabel>
                 <FormDescription>
-                  Bij de tags kun je een &apos;Icoon voor de kaart&apos; uploaden. Als je dit aanvinkt, wordt dit icoon ook in de tegels getoond.
+                  Bij de tags kun je een &apos;Icoon voor de kaart&apos;
+                  uploaden. Als je dit aanvinkt, wordt dit icoon ook in de
+                  tegels getoond.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
@@ -706,17 +694,20 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          <Heading size="xl" className="col-span-full mt-6">Dialog</Heading>
-          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
+          <Heading size="xl" className="col-span-full mt-6">
+            Dialog
+          </Heading>
+          <Separator
+            style={{ margin: '-10px 0 0' }}
+            className="my-4 col-span-full"
+          />
 
           <FormField
             control={form.control}
             name="displayLikeButton"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Like button weergeven in de dialog
-                </FormLabel>
+                <FormLabel>Like button weergeven in de dialog</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -728,9 +719,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayBudget"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Budget in dialog weergeven
-                </FormLabel>
+                <FormLabel>Budget in dialog weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -746,7 +735,8 @@ export default function WidgetResourceOverviewDisplay(
                   Moet de afbeelding in de dialog klikbaar zijn?
                 </FormLabel>
                 <FormDescription>
-                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar en wordt de afbeelding geopend in een nieuw tabblad.
+                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar
+                  en wordt de afbeelding geopend in een nieuw tabblad.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
@@ -759,9 +749,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayDocuments"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Geüploade documenten weergeven
-                </FormLabel>
+                <FormLabel>Geüploade documenten weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -799,7 +787,8 @@ export default function WidgetResourceOverviewDisplay(
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Welke beschrijving moet er boven de download knop(pen) komen?
+                      Welke beschrijving moet er boven de download knop(pen)
+                      komen?
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -823,9 +812,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayTags"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Tags in dialog weergeven
-                </FormLabel>
+                <FormLabel>Tags in dialog weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -839,7 +826,9 @@ export default function WidgetResourceOverviewDisplay(
               render={() => (
                 <FormItem className="col-span-full">
                   <div>
-                    <FormLabel>Selecteer van welke tag groepen de tags getoond moeten worden in de dialog
+                    <FormLabel>
+                      Selecteer van welke tag groepen de tags getoond moeten
+                      worden in de dialog
                     </FormLabel>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
@@ -856,16 +845,26 @@ export default function WidgetResourceOverviewDisplay(
                                 className="flex flex-row items-start space-x-3 space-y-0">
                                 <FormControl>
                                   <Checkbox
-                                    checked={(field.value ?? []).includes(groupName)}
+                                    checked={(field.value ?? []).includes(
+                                      groupName
+                                    )}
                                     onCheckedChange={(checked: boolean) => {
                                       let updatedFields = field.value ?? [];
                                       if (checked) {
-                                        updatedFields = [...updatedFields, groupName];
+                                        updatedFields = [
+                                          ...updatedFields,
+                                          groupName,
+                                        ];
                                       } else {
-                                        updatedFields = updatedFields.filter((name) => name !== groupName);
+                                        updatedFields = updatedFields.filter(
+                                          (name) => name !== groupName
+                                        );
                                       }
                                       field.onChange(updatedFields);
-                                      props.onFieldChanged(field.name, updatedFields);
+                                      props.onFieldChanged(
+                                        field.name,
+                                        updatedFields
+                                      );
                                     }}
                                   />
                                 </FormControl>
@@ -876,7 +875,6 @@ export default function WidgetResourceOverviewDisplay(
                             );
                           }}
                         />
-
                       </>
                     ))}
                   </div>

@@ -1,9 +1,8 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useUser() {
-
   const router = useRouter();
   let userId = router.query.user || '';
 
@@ -21,7 +20,9 @@ export default function useUser() {
   if (userDecode) {
     const match = userDecode.match(/^(.+)-\*-(.+)$/);
     if (match) {
-      url = `/api/openstad/api/user?byIdpUser[identifier]=${encodeURIComponent(match[2])}&byIdpUser[provider]=${encodeURIComponent(match[1])}`;
+      url = `/api/openstad/api/user?byIdpUser[identifier]=${encodeURIComponent(
+        match[2]
+      )}&byIdpUser[provider]=${encodeURIComponent(match[1])}`;
     } else {
       url = `/api/openstad/api/user/${encodeURIComponent(userDecode)}`;
     }
@@ -30,7 +31,6 @@ export default function useUser() {
   const userSwr = useSWR(url ? url : null);
 
   async function updateUser(body: any) {
-
     if (!Array.isArray(body)) {
       // update user
       let projectId = body.projectId;
@@ -45,12 +45,10 @@ export default function useUser() {
       },
       body: JSON.stringify({ ...body }),
     });
-    if (!res.ok) throw new Error('User update failed')
+    if (!res.ok) throw new Error('User update failed');
 
     return await res.json();
-
   }
 
   return { ...userSwr, updateUser };
-
 }

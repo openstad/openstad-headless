@@ -1,5 +1,6 @@
-import { SessionStorage } from '../../../lib/session-storage';
 import useSWR from 'swr';
+
+import { SessionStorage } from '../../../lib/session-storage';
 
 export default function useCurrentUser(props) {
   let self = this;
@@ -22,7 +23,7 @@ export default function useCurrentUser(props) {
     let initialUser = {};
     try {
       initialUser = globalOpenStadUser || props.openStadUser || {};
-    } catch(err) {}
+    } catch (err) {}
 
     if (initialUser.id && initialUser.projectId == self.projectId) {
       return initialUser;
@@ -44,7 +45,7 @@ export default function useCurrentUser(props) {
     let cmsUser = {};
     try {
       cmsUser = globalCmsUser || props.cmsUser || {};
-    } catch(err) {}
+    } catch (err) {}
 
     // get cmsUser from session data - this is a fix for badly written cms logouts
     let sessionCmsUser = session.get('cmsUser') || {};
@@ -74,7 +75,6 @@ export default function useCurrentUser(props) {
 
     // fetch me for this jwt
     if (jwt) {
-
       self.api.currentUserJWT = jwt; // use current user in subsequent requests
 
       // refresh already fetched data, now with the current user
@@ -94,11 +94,11 @@ export default function useCurrentUser(props) {
 
   // add functionality
   if (data) {
-    data.logout = function(params) {
+    data.logout = function (params) {
       const session = new SessionStorage(props);
       session.destroy();
       self.api.user.logout(params);
-    }
+    };
   }
 
   return {

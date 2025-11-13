@@ -1,23 +1,20 @@
-import { PageLayout } from '@/components/ui/page-layout';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { ChevronRight, Plus } from 'lucide-react';
-import React from 'react';
+import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
+import { ChevronRight, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import React from 'react';
+
 import projectListSwr from '../hooks/use-project-list';
 
 export default function Projects() {
-  const { data } = projectListSwr({projectsWithIssues: true});
+  const { data } = projectListSwr({ projectsWithIssues: true });
   const router = useRouter();
 
   if (!data) return null;
 
-  const headers = [
-    'Projectnaam',
-    'Gecreëerd',
-    'Issue',
-  ];
+  const headers = ['Projectnaam', 'Gecreëerd', 'Issue'];
 
   function addDays(date: string | number | Date, days: number) {
     let result = new Date(date);
@@ -46,9 +43,15 @@ export default function Projects() {
             </div>
             <ul>
               {data.map((project: any) => {
-                const currentDate = Date.now()
-                const anonymizationDate = addDays(project.config.project.endDate, project.config.anonymize.anonymizeUsersXDaysAfterEndDate)
-                if (currentDate > project.config.project.endDate && project.config.project.endDate != null) {
+                const currentDate = Date.now();
+                const anonymizationDate = addDays(
+                  project.config.project.endDate,
+                  project.config.anonymize.anonymizeUsersXDaysAfterEndDate
+                );
+                if (
+                  currentDate > project.config.project.endDate &&
+                  project.config.project.endDate != null
+                ) {
                   return (
                     <li
                       className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
@@ -58,7 +61,9 @@ export default function Projects() {
                       }}>
                       <Paragraph className="truncate">{project.name}</Paragraph>
                       <Paragraph className="hidden lg:flex truncate">
-                        {new Date(project.createdAt).toLocaleDateString("nl-NL")}
+                        {new Date(project.createdAt).toLocaleDateString(
+                          'nl-NL'
+                        )}
                       </Paragraph>
                       <Paragraph className="hidden lg:flex truncate -mr-16">
                         Einddatum is geweest, maar het project loopt nog.
@@ -72,7 +77,10 @@ export default function Projects() {
                     </li>
                   );
                 }
-                if (currentDate > anonymizationDate && project.config.project.endDate != null) {
+                if (
+                  currentDate > anonymizationDate &&
+                  project.config.project.endDate != null
+                ) {
                   return (
                     <li
                       className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
@@ -82,11 +90,17 @@ export default function Projects() {
                       }}>
                       <Paragraph className="truncate">{project.name}</Paragraph>
                       <Paragraph className="hidden lg:flex truncate">
-                        {new Date(project.createdAt).toLocaleDateString("nl-NL")}
+                        {new Date(project.createdAt).toLocaleDateString(
+                          'nl-NL'
+                        )}
                       </Paragraph>
                       <Paragraph className="hidden lg:flex -mr-16">
-                        { project.issue == 'Project has ended but is not yet anonymized' && 'De gebruikers van het project moeten geanonimiseerd worden.' }
-                        { project.issue == 'Project endDate is in the past but projectHasEnded is not set' && 'De einddatum van het project ligt in het verleden maar het project is nog niet beëindigd' }
+                        {project.issue ==
+                          'Project has ended but is not yet anonymized' &&
+                          'De gebruikers van het project moeten geanonimiseerd worden.'}
+                        {project.issue ==
+                          'Project endDate is in the past but projectHasEnded is not set' &&
+                          'De einddatum van het project ligt in het verleden maar het project is nog niet beëindigd'}
                       </Paragraph>
                       <Paragraph className="flex">
                         <ChevronRight

@@ -1,27 +1,28 @@
-import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormField,
   FormControl,
+  FormDescription,
+  FormField,
   FormItem,
   FormLabel,
-  FormMessage, FormDescription,
+  FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useCallback, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
-import toast from 'react-hot-toast';
+import { Heading } from '@/components/ui/typography';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
-import InfoDialog from '@/components/ui/info-hover';
+import { useRouter } from 'next/router';
+import React, { useState } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const formSchema = z.object({
   canComment: z.boolean().optional(),
@@ -31,14 +32,25 @@ const formSchema = z.object({
   descriptionMinLength: z.coerce.number().gt(0).optional(),
   descriptionMaxLength: z.coerce.number().gt(0).optional(),
   adminLabel: z.string().optional(),
-  minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
-  maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
-  minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
-  maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+  minCharactersWarning: z
+    .string()
+    .optional()
+    .default('Nog minimaal {minCharacters} tekens'),
+  maxCharactersWarning: z
+    .string()
+    .optional()
+    .default('Je hebt nog {maxCharacters} tekens over'),
+  minCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+  maxCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
 });
 
 export default function ProjectSettingsComments() {
-
   const router = useRouter();
   const { project } = router.query;
   const { data, updateProject } = useProject();
@@ -54,10 +66,18 @@ export default function ProjectSettingsComments() {
       descriptionMinLength: data?.config?.comments?.descriptionMinLength,
       descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
       adminLabel: data?.config?.comments?.adminLabel,
-      minCharactersWarning: data?.config?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
-      maxCharactersWarning: data?.config?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
-      minCharactersError: data?.config?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
-      maxCharactersError: data?.config?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      minCharactersWarning:
+        data?.config?.minCharactersWarning ||
+        'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning:
+        data?.config?.maxCharactersWarning ||
+        'Je hebt nog {maxCharacters} tekens over',
+      minCharactersError:
+        data?.config?.minCharactersError ||
+        'Tekst moet minimaal {minCharacters} karakters bevatten',
+      maxCharactersError:
+        data?.config?.maxCharactersError ||
+        'Tekst moet maximaal {maxCharacters} karakters bevatten',
     }),
     [data]
   );
@@ -69,7 +89,7 @@ export default function ProjectSettingsComments() {
 
   useEffect(() => {
     form.reset(defaults());
-    setShowCommentSettings(data?.config?.comments?.canComment)
+    setShowCommentSettings(data?.config?.comments?.canComment);
   }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -88,12 +108,11 @@ export default function ProjectSettingsComments() {
           minCharactersError: values.minCharactersError,
           maxCharactersError: values.maxCharactersError,
         },
-      },
-      );
+      });
       if (project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('could not update', error);
@@ -125,7 +144,6 @@ export default function ProjectSettingsComments() {
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
-
               <FormField
                 control={form.control}
                 name="canComment"
@@ -150,7 +168,6 @@ export default function ProjectSettingsComments() {
 
               {showCommentSettings ? (
                 <>
-
                   <FormField
                     control={form.control}
                     name="canReply"
@@ -198,7 +215,10 @@ export default function ProjectSettingsComments() {
                     name="descriptionMinLength"
                     render={({ field }) => (
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                        <FormLabel>Minimaal aantal karakters dat een bezoeker moet invoeren bij een reactie</FormLabel>
+                        <FormLabel>
+                          Minimaal aantal karakters dat een bezoeker moet
+                          invoeren bij een reactie
+                        </FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -212,7 +232,10 @@ export default function ProjectSettingsComments() {
                     name="descriptionMaxLength"
                     render={({ field }) => (
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                        <FormLabel>Maximaal aantal karakters dat een bezoeker mag invoeren bij een reactie</FormLabel>
+                        <FormLabel>
+                          Maximaal aantal karakters dat een bezoeker mag
+                          invoeren bij een reactie
+                        </FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -220,35 +243,15 @@ export default function ProjectSettingsComments() {
                       </FormItem>
                     )}
                   />
-
                 </>
               ) : (
-
                 <FormField
                   control={form.control}
                   name="closedText"
                   render={({ field }) => (
                     <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                      <FormLabel>Tekst &apos;U kunt nu niet reageren&apos;</FormLabel>
-                      <FormControl>
-                        <Input placeholder="typ een tekst" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-              )}
-
-              <FormField
-                control={form.control}
-                name="adminLabel"
-                render={({ field }) => (
-                  <FormItem className="col-span-full md:col-span-1 flex flex-col">
-
-
-                      <FormLabel>Label bij reacties van beheerders
-                        <InfoDialog content={`Dit is de beschrijving die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld 'webredactie'.`} />
+                      <FormLabel>
+                        Tekst &apos;U kunt nu niet reageren&apos;
                       </FormLabel>
                       <FormControl>
                         <Input placeholder="typ een tekst" {...field} />
@@ -257,6 +260,26 @@ export default function ProjectSettingsComments() {
                     </FormItem>
                   )}
                 />
+              )}
+
+              <FormField
+                control={form.control}
+                name="adminLabel"
+                render={({ field }) => (
+                  <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                    <FormLabel>
+                      Label bij reacties van beheerders
+                      <InfoDialog
+                        content={`Dit is de beschrijving die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld 'webredactie'.`}
+                      />
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="typ een tekst" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -269,9 +292,7 @@ export default function ProjectSettingsComments() {
                     <FormDescription>
                       {`Dit is de tekst die getoond wordt als het aantal karakters onder de minimum waarde ligt. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                     </FormDescription>
-                    <Input
-                      {...field}
-                    />
+                    <Input {...field} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -288,9 +309,7 @@ export default function ProjectSettingsComments() {
                     <FormDescription>
                       {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                     </FormDescription>
-                    <Input
-                      {...field}
-                    />
+                    <Input {...field} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -307,9 +326,7 @@ export default function ProjectSettingsComments() {
                     <FormDescription>
                       {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters onder de minimum waarde ligt na het versturen van het formulier. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                     </FormDescription>
-                    <Input
-                      {...field}
-                    />
+                    <Input {...field} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -326,9 +343,7 @@ export default function ProjectSettingsComments() {
                     <FormDescription>
                       {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters boven de maximum waarde ligt na het versturen van het formulier. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                     </FormDescription>
-                    <Input
-                      {...field}
-                    />
+                    <Input {...field} />
                     <FormMessage />
                   </FormItem>
                 )}

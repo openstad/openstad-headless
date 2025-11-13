@@ -169,7 +169,7 @@ module.exports = {
         def: 'false',
         label: 'Toon login knop',
       },
-      
+
       showLoginInCTA: {
         type: 'boolean',
         def: 'false',
@@ -391,7 +391,7 @@ module.exports = {
           'logoutButtonLabel',
           'ctaButtons',
           'topMenuButtons',
-        ,
+          ,
         ],
       },
       cookies: {

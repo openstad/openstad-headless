@@ -1,3 +1,3 @@
 module.exports = {
-  improve: 'apostrophe-assets'
+  improve: 'apostrophe-assets',
 };

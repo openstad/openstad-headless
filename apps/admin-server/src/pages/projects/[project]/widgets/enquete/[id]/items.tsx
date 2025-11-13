@@ -2,12 +2,14 @@ import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -19,18 +21,22 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
-import { Item, Matrix, MatrixOption, Option } from '@openstad-headless/enquete/src/types/enquete-props';
+import {
+  Item,
+  Matrix,
+  MatrixOption,
+  Option,
+} from '@openstad-headless/enquete/src/types/enquete-props';
+import { ProjectSettingProps } from '@openstad-headless/types';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import InfoDialog from '@/components/ui/info-hover';
-import { useRouter } from 'next/router';
-import { YesNoSelect } from "@/lib/form-widget-helpers";
-import { ProjectSettingProps } from "@openstad-headless/types";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -48,29 +54,35 @@ const formSchema = z.object({
     .array(
       z.object({
         trigger: z.string(),
-        titles: z.array(z.object({
-          text: z.string().optional(),
-          key: z.string(),
-          image: z.string().optional(),
-          isOtherOption: z.boolean().optional(),
-          defaultValue: z.boolean().optional(),
-          hideLabel: z.boolean().optional()
-        })),
+        titles: z.array(
+          z.object({
+            text: z.string().optional(),
+            key: z.string(),
+            image: z.string().optional(),
+            isOtherOption: z.boolean().optional(),
+            defaultValue: z.boolean().optional(),
+            hideLabel: z.boolean().optional(),
+          })
+        ),
       })
     )
     .optional(),
-  matrix:
-    z.object({
-      columns: z.array(z.object({
-        trigger: z.string(),
-        text: z.string().optional(),
-      })),
-      rows: z.array(z.object({
-        trigger: z.string(),
-        text: z.string().optional(),
-      })),
+  matrix: z
+    .object({
+      columns: z.array(
+        z.object({
+          trigger: z.string(),
+          text: z.string().optional(),
+        })
+      ),
+      rows: z.array(
+        z.object({
+          trigger: z.string(),
+          text: z.string().optional(),
+        })
+      ),
     })
-      .optional(),
+    .optional(),
   multiple: z.boolean().optional(),
   randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
@@ -103,18 +115,25 @@ const formSchema = z.object({
 const matrixDefault = {
   columns: [],
   rows: [],
-}
+};
 
-const matrixList: { type: 'rows' | 'columns', heading: string, description: string }[] = [
+const matrixList: {
+  type: 'rows' | 'columns';
+  heading: string;
+  description: string;
+}[] = [
   {
     type: 'rows',
     heading: 'Lijst van onderwerpen',
-    description: 'Dit zijn de onderwerpen die in de matrix worden weergegeven. Deze komen in de eerste kolom (verticaal) van de matrix.',
-  }, {
+    description:
+      'Dit zijn de onderwerpen die in de matrix worden weergegeven. Deze komen in de eerste kolom (verticaal) van de matrix.',
+  },
+  {
     type: 'columns',
     heading: 'Lijst van kopjes',
-    description: 'Dit zijn de kopjes die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
-  }
+    description:
+      'Dit zijn de kopjes die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
+  },
 ];
 
 export default function WidgetEnqueteItems(
@@ -130,7 +149,9 @@ export default function WidgetEnqueteItems(
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
 
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
-  const [matrixOption, setMatrixOption] = useState<MatrixOption & { type: 'rows' | 'columns' } | null>(null);
+  const [matrixOption, setMatrixOption] = useState<
+    (MatrixOption & { type: 'rows' | 'columns' }) | null
+  >(null);
 
   const router = useRouter();
   const { project } = router.query;
@@ -152,10 +173,11 @@ export default function WidgetEnqueteItems(
       setItems((currentItems) => [
         ...currentItems,
         {
-          trigger: `${currentItems.length > 0
-            ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-            : 1
-            }`,
+          trigger: `${
+            currentItems.length > 0
+              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+              : 1
+          }`,
           title: values.title,
           key: values.key,
           description: values.description,
@@ -204,19 +226,21 @@ export default function WidgetEnqueteItems(
   function handleAddOption(values: FormData) {
     if (selectedOption) {
       setOptions((currentOptions) => {
-        const updatedOptions = currentOptions.map((option) => {
-          if (option.trigger === selectedOption.trigger) {
-            const newTitles =
-              values.options?.find((o) => o.trigger === option.trigger)?.titles || [];
+        const updatedOptions = currentOptions
+          .map((option) => {
+            if (option.trigger === selectedOption.trigger) {
+              const newTitles =
+                values.options?.find((o) => o.trigger === option.trigger)
+                  ?.titles || [];
 
-            return {
-              ...option,
-              titles: newTitles,
-            };
-          }
+              return {
+                ...option,
+                titles: newTitles,
+              };
+            }
 
-          return typeof (option?.trigger) !== "undefined" ? option : false;
-        })
+            return typeof option?.trigger !== 'undefined' ? option : false;
+          })
           .filter((option) => option !== false);
 
         return updatedOptions;
@@ -225,17 +249,21 @@ export default function WidgetEnqueteItems(
       setOption(null);
     } else {
       const newOption = {
-        trigger: `${options.length > 0
-          ? parseInt(options[options.length - 1].trigger) + 1
-          : 0
-          }`,
+        trigger: `${
+          options.length > 0
+            ? parseInt(options[options.length - 1].trigger) + 1
+            : 0
+        }`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
     }
   }
 
-  function handleAddMatrixOption(values: FormData, updatedMatrixOption: 'rows' | 'columns') {
+  function handleAddMatrixOption(
+    values: FormData,
+    updatedMatrixOption: 'rows' | 'columns'
+  ) {
     if (matrixOption) {
       setMatrixOptions((currentMatrix) => {
         const updatedMatrix = { ...currentMatrix };
@@ -243,13 +271,24 @@ export default function WidgetEnqueteItems(
         if (updatedMatrixOption === 'rows') {
           updatedMatrix.rows = updatedMatrix.rows.map((row) =>
             row.trigger === matrixOption.trigger
-              ? { ...row, text: values.matrix?.rows?.find((r) => r.trigger === row.trigger)?.text || '' }
+              ? {
+                  ...row,
+                  text:
+                    values.matrix?.rows?.find((r) => r.trigger === row.trigger)
+                      ?.text || '',
+                }
               : row
           );
         } else {
           updatedMatrix.columns = updatedMatrix.columns.map((column) =>
             column.trigger === matrixOption.trigger
-              ? { ...column, text: values.matrix?.columns?.find((c) => c.trigger === column.trigger)?.text || '' }
+              ? {
+                  ...column,
+                  text:
+                    values.matrix?.columns?.find(
+                      (c) => c.trigger === column.trigger
+                    )?.text || '',
+                }
               : column
           );
         }
@@ -259,26 +298,39 @@ export default function WidgetEnqueteItems(
 
       setMatrixOption(null);
     } else {
-      const newTrigger = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
-        ? values?.matrix?.[updatedMatrixOption].reduce((max, option) => {
-          return (parseInt(option?.trigger || '0') > max ? parseInt(option?.trigger || '0') : max);
-        }, 0) + 1
-        : '0';
+      const newTrigger =
+        values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0
+          ? values?.matrix?.[updatedMatrixOption].reduce((max, option) => {
+              return parseInt(option?.trigger || '0') > max
+                ? parseInt(option?.trigger || '0')
+                : max;
+            }, 0) + 1
+          : '0';
 
-      const newTextObj = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
-        ? values?.matrix?.[updatedMatrixOption]?.find((option: { trigger?: string }) => typeof (option?.trigger) === 'undefined')
-        : { text: '' };
+      const newTextObj =
+        values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0
+          ? values?.matrix?.[updatedMatrixOption]?.find(
+              (option: { trigger?: string }) =>
+                typeof option?.trigger === 'undefined'
+            )
+          : { text: '' };
 
       const newText = newTextObj?.text || '';
 
       const newMatrixOption: MatrixOption = {
         trigger: newTrigger.toString(),
-        text: newText
+        text: newText,
       };
 
       setMatrixOptions((currentMatrix) => ({
-        rows: updatedMatrixOption === 'rows' ? [...currentMatrix.rows, newMatrixOption] : currentMatrix.rows,
-        columns: updatedMatrixOption === 'columns' ? [...currentMatrix.columns, newMatrixOption] : currentMatrix.columns,
+        rows:
+          updatedMatrixOption === 'rows'
+            ? [...currentMatrix.rows, newMatrixOption]
+            : currentMatrix.rows,
+        columns:
+          updatedMatrixOption === 'columns'
+            ? [...currentMatrix.columns, newMatrixOption]
+            : currentMatrix.columns,
       }));
     }
   }
@@ -404,7 +456,7 @@ export default function WidgetEnqueteItems(
   useEffect(() => {
     form.reset({
       ...form.getValues(),
-      matrix: matrixOptions
+      matrix: matrixOptions,
     });
   }, [matrixOption, form, matrixOptions]);
 
@@ -426,27 +478,29 @@ export default function WidgetEnqueteItems(
     } else if (isMatrixAction) {
       let newMatrixOptions: Matrix;
 
-      const updatedRows = matrixType === 'rows'
-        ? handleMovementOrDeletion(
-          matrixOptions.rows,
-          actionType,
-          clickedTrigger
-        ) as MatrixOption[]
-        : matrixOptions.rows;
+      const updatedRows =
+        matrixType === 'rows'
+          ? (handleMovementOrDeletion(
+              matrixOptions.rows,
+              actionType,
+              clickedTrigger
+            ) as MatrixOption[])
+          : matrixOptions.rows;
 
-      const updatedColumns = matrixType === 'columns'
-        ? handleMovementOrDeletion(
-          matrixOptions.columns,
-          actionType,
-          clickedTrigger
-        ) as MatrixOption[]
-        : matrixOptions.columns;
+      const updatedColumns =
+        matrixType === 'columns'
+          ? (handleMovementOrDeletion(
+              matrixOptions.columns,
+              actionType,
+              clickedTrigger
+            ) as MatrixOption[])
+          : matrixOptions.columns;
 
       newMatrixOptions = {
         ...matrixOptions,
         rows: updatedRows,
         columns: updatedColumns,
-      }
+      };
       setMatrixOptions(newMatrixOptions);
 
       form.setValue('matrix', newMatrixOptions);
@@ -492,7 +546,7 @@ export default function WidgetEnqueteItems(
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith("options.") || key.startsWith("matrix.")) {
+      if (key.startsWith('options.') || key.startsWith('matrix.')) {
         // @ts-ignore
         delete updatedProps[key];
       }
@@ -502,7 +556,6 @@ export default function WidgetEnqueteItems(
     setOptions([]);
     setMatrixOptions(matrixDefault);
   }
-
 
   const hasOptions = () => {
     switch (form.watch('questionType')) {
@@ -548,16 +601,18 @@ export default function WidgetEnqueteItems(
   }
 
   useEffect(() => {
-    const key = form.watch("fieldKey");
+    const key = form.watch('fieldKey');
 
     if (key) {
-      const isUnique = items.every((item) =>
-        (selectedItem && item.trigger === selectedItem.trigger) || item.fieldKey !== key
+      const isUnique = items.every(
+        (item) =>
+          (selectedItem && item.trigger === selectedItem.trigger) ||
+          item.fieldKey !== key
       );
 
       setIsFieldKeyUnique(isUnique);
     }
-  }, [form.watch("fieldKey"), selectedItem]);
+  }, [form.watch('fieldKey'), selectedItem]);
 
   return (
     <div>
@@ -573,49 +628,55 @@ export default function WidgetEnqueteItems(
                 <div className="flex flex-col gap-1">
                   {items.length > 0
                     ? items
-                      .sort(
-                        (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                      )
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
-                            'bg-secondary'
+                        .sort(
+                          (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+                        )
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className={`flex cursor-pointer justify-between border border-secondary ${
+                              item.trigger == selectedItem?.trigger &&
+                              'bg-secondary'
                             }`}>
-                          <span className="flex gap-2 py-3 px-2">
-                            <ArrowUp
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveUp', item.trigger, true)
-                              }
-                            />
-                            <ArrowDown
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveDown', item.trigger, true)
-                              }
-                            />
-                          </span>
-                          <span
-                            className="gap-2 py-3 px-2 w-full"
-                            onClick={() => {
-                              setItem(item);
-                              setOptions([]);
-                              setMatrixOptions(matrixDefault);
-                              setSettingOptions(false);
-                            }}>
-                            {`${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : 'Geen titel')}`}
-                          </span>
-                          <span className="gap-2 py-3 px-2">
-                            <X
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('delete', item.trigger, true)
-                              }
-                            />
-                          </span>
-                        </div>
-                      ))
+                            <span className="flex gap-2 py-3 px-2">
+                              <ArrowUp
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveUp', item.trigger, true)
+                                }
+                              />
+                              <ArrowDown
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveDown', item.trigger, true)
+                                }
+                              />
+                            </span>
+                            <span
+                              className="gap-2 py-3 px-2 w-full"
+                              onClick={() => {
+                                setItem(item);
+                                setOptions([]);
+                                setMatrixOptions(matrixDefault);
+                                setSettingOptions(false);
+                              }}>
+                              {`${
+                                item.title ||
+                                (item?.questionType === 'pagination'
+                                  ? '--- Nieuwe pagina ---'
+                                  : 'Geen titel')
+                              }`}
+                            </span>
+                            <span className="gap-2 py-3 px-2">
+                              <X
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('delete', item.trigger, true)
+                                }
+                              />
+                            </span>
+                          </div>
+                        ))
                     : 'Geen items'}
                 </div>
               </div>
@@ -631,84 +692,98 @@ export default function WidgetEnqueteItems(
 
             {settingOptions ? (
               <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
-                {form.watch("questionType") === "matrix" ? (
+                {form.watch('questionType') === 'matrix' ? (
                   matrixList.map((matrixItem) => (
                     <>
                       <div className="flex flex-col justify-between">
                         <div className="flex flex-col gap-y-2">
                           <Heading size="xl">{matrixItem.heading}</Heading>
-                          <FormDescription>{matrixItem.description}</FormDescription>
+                          <FormDescription>
+                            {matrixItem.description}
+                          </FormDescription>
                           <Separator className="mt-2" />
 
                           <div className="flex flex-col gap-1">
                             {matrixOptions?.[matrixItem.type]?.length > 0
                               ? matrixOptions?.[matrixItem.type]
-                                .sort(
-                                  (a, b) =>
-                                    parseInt(a.trigger) - parseInt(b.trigger)
-                                )
-                                .map((option, index) => (
-                                  <div
-                                    key={index}
-                                    className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
-                                      'bg-secondary'
+                                  .sort(
+                                    (a, b) =>
+                                      parseInt(a.trigger) - parseInt(b.trigger)
+                                  )
+                                  .map((option, index) => (
+                                    <div
+                                      key={index}
+                                      className={`flex cursor-pointer justify-between border border-secondary ${
+                                        option.trigger ==
+                                          selectedOption?.trigger &&
+                                        'bg-secondary'
                                       }`}>
-                                    <span className="flex gap-2 py-3 px-2">
-                                      <ArrowUp
-                                        className="cursor-pointer"
+                                      <span className="flex gap-2 py-3 px-2">
+                                        <ArrowUp
+                                          className="cursor-pointer"
+                                          onClick={() =>
+                                            handleAction(
+                                              'moveUp',
+                                              option.trigger,
+                                              false,
+                                              true,
+                                              matrixItem.type
+                                            )
+                                          }
+                                        />
+                                        <ArrowDown
+                                          className="cursor-pointer"
+                                          onClick={() =>
+                                            handleAction(
+                                              'moveDown',
+                                              option.trigger,
+                                              false,
+                                              true,
+                                              matrixItem.type
+                                            )
+                                          }
+                                        />
+                                      </span>
+                                      <span
+                                        className="py-3 px-2 w-full"
                                         onClick={() =>
-                                          handleAction(
-                                            'moveUp',
-                                            option.trigger,
-                                            false,
-                                            true,
-                                            matrixItem.type
-                                          )
-                                        }
-                                      />
-                                      <ArrowDown
-                                        className="cursor-pointer"
-                                        onClick={() =>
-                                          handleAction(
-                                            'moveDown',
-                                            option.trigger,
-                                            false,
-                                            true,
-                                            matrixItem.type
-                                          )
-                                        }
-                                      />
-                                    </span>
-                                    <span
-                                      className="py-3 px-2 w-full"
-                                      onClick={() => setMatrixOption({
-                                        ...option,
-                                        type: matrixItem.type
-                                      })}>
-                                      {option?.text}
-                                    </span>
-                                    <span className="py-3 px-2">
-                                      <X
-                                        className="cursor-pointer"
-                                        onClick={() =>
-                                          handleAction(
-                                            'delete',
-                                            option.trigger,
-                                            false,
-                                            true,
-                                            matrixItem.type
-                                          )
-                                        }
-                                      />
-                                    </span>
-                                  </div>
-                                ))
+                                          setMatrixOption({
+                                            ...option,
+                                            type: matrixItem.type,
+                                          })
+                                        }>
+                                        {option?.text}
+                                      </span>
+                                      <span className="py-3 px-2">
+                                        <X
+                                          className="cursor-pointer"
+                                          onClick={() =>
+                                            handleAction(
+                                              'delete',
+                                              option.trigger,
+                                              false,
+                                              true,
+                                              matrixItem.type
+                                            )
+                                          }
+                                        />
+                                      </span>
+                                    </div>
+                                  ))
                               : ''}
                           </div>
 
                           {(() => {
-                            const currentOption = matrixOptions?.[matrixItem.type].findIndex((option) => option.trigger === matrixOption?.trigger);
-                            const activeOption = currentOption !== -1 ? currentOption : matrixOptions?.[matrixItem.type]?.length;
+                            const currentOption = matrixOptions?.[
+                              matrixItem.type
+                            ].findIndex(
+                              (option) =>
+                                option.trigger === matrixOption?.trigger
+                            );
+                            const activeOption =
+                              currentOption !== -1
+                                ? currentOption
+                                : matrixOptions?.[matrixItem.type]?.length;
 
                             return (
                               <FormField
@@ -721,14 +796,20 @@ export default function WidgetEnqueteItems(
                                   </FormItem>
                                 )}
                               />
-                            )
+                            );
                           })()}
 
                           <Button
                             className="w-full bg-secondary text-black hover:text-white mt-4"
                             type="button"
-                            onClick={() => handleAddMatrixOption(form.getValues(), matrixItem.type)}>
-                            {(matrixOption && matrixOption.type === matrixItem.type)
+                            onClick={() =>
+                              handleAddMatrixOption(
+                                form.getValues(),
+                                matrixItem.type
+                              )
+                            }>
+                            {matrixOption &&
+                            matrixOption.type === matrixItem.type
                               ? 'Sla wijzigingen op'
                               : 'Voeg optie toe aan lijst'}
                           </Button>
@@ -755,16 +836,23 @@ export default function WidgetEnqueteItems(
                         )}
                       </div>
                     </>
-                  ))) : (
+                  ))
+                ) : (
                   <div className="flex flex-col justify-between">
                     <div className="flex flex-col gap-y-2">
                       <Heading size="xl">Antwoordopties</Heading>
                       <Separator className="mt-2" />
-                      {hasList() && (
+                      {hasList() &&
                         (() => {
-                          const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
-                          const activeOption = currentOption !== -1 ? currentOption : options.length;
-                          return form.watch("questionType") !== "images" ? (
+                          const currentOption = options.findIndex(
+                            (option) =>
+                              option.trigger === selectedOption?.trigger
+                          );
+                          const activeOption =
+                            currentOption !== -1
+                              ? currentOption
+                              : options.length;
+                          return form.watch('questionType') !== 'images' ? (
                             <>
                               <FormField
                                 control={form.control}
@@ -791,17 +879,24 @@ export default function WidgetEnqueteItems(
                                           alignItems: 'center',
                                           justifyContent: 'flex-start',
                                           flexDirection: 'row',
-                                          marginTop: '10px'
+                                          marginTop: '10px',
                                         }}>
                                         {YesNoSelect(field, props)}
                                         <FormLabel
-                                          style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                          style={{
+                                            marginTop: 0,
+                                            marginLeft: '6px',
+                                          }}>
+                                          Is &apos;Anders, namelijk...&apos;
+                                        </FormLabel>
                                         <FormMessage />
                                       </FormItem>
                                       <FormDescription>
-                                        Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
-                                        formulier.
-                                        Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                        Als je deze optie selecteert, wordt er
+                                        automatisch een tekstveld toegevoegd aan
+                                        het formulier. Het tekstveld wordt
+                                        zichtbaar wanneer deze optie wordt
+                                        geselecteerd.
                                       </FormDescription>
                                     </>
                                   )}
@@ -821,15 +916,21 @@ export default function WidgetEnqueteItems(
                                           alignItems: 'center',
                                           justifyContent: 'flex-start',
                                           flexDirection: 'row',
-                                          marginTop: '10px'
+                                          marginTop: '10px',
                                         }}>
                                         {YesNoSelect(field, props)}
                                         <FormLabel
-                                          style={{ marginTop: 0, marginLeft: '6px' }}>Standaard aangevinkt?</FormLabel>
+                                          style={{
+                                            marginTop: 0,
+                                            marginLeft: '6px',
+                                          }}>
+                                          Standaard aangevinkt?
+                                        </FormLabel>
                                         <FormMessage />
                                       </FormItem>
                                       <FormDescription>
-                                        Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                        Als je deze optie selecteert, wordt deze
+                                        optie standaard aangevinkt.
                                       </FormDescription>
                                     </>
                                   )}
@@ -843,18 +944,29 @@ export default function WidgetEnqueteItems(
                                 project={project as string}
                                 fieldName="imageOptionUpload"
                                 imageLabel="Afbeelding"
-                                allowedTypes={["image/*"]}
+                                allowedTypes={['image/*']}
                                 onImageUploaded={(imageResult) => {
-                                  const image = imageResult ? imageResult.url : '';
+                                  const image = imageResult
+                                    ? imageResult.url
+                                    : '';
 
-                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                  form.setValue(
+                                    `options.${activeOption}.titles.0.image`,
+                                    image
+                                  );
                                   form.resetField('imageOptionUpload');
                                 }}
                               />
 
-                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                              {!!form.getValues(
+                                `options.${activeOption}.titles.0.image`
+                              ) && (
                                 <div style={{ position: 'relative' }}>
-                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                  <img
+                                    src={form.getValues(
+                                      `options.${activeOption}.titles.0.image`
+                                    )}
+                                  />
                                 </div>
                               )}
 
@@ -865,8 +977,12 @@ export default function WidgetEnqueteItems(
                                   <FormItem>
                                     <FormLabel>Titel</FormLabel>
                                     <FormDescription>
-                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                      Dit veld wordt gebruikt voor de alt tekst
+                                      van de afbeelding. Dit is nodig voor
+                                      toegankelijkheid. De titel wordt ook
+                                      gebruikt als bijschrift onder de
+                                      afbeelding, behalve als je de optie
+                                      selecteert om de titel te verbergen.
                                     </FormDescription>
                                     <Input {...field} />
                                     <FormMessage />
@@ -886,23 +1002,28 @@ export default function WidgetEnqueteItems(
                                         alignItems: 'center',
                                         justifyContent: 'flex-start',
                                         flexDirection: 'row',
-                                        marginTop: '10px'
+                                        marginTop: '10px',
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                        style={{
+                                          marginTop: 0,
+                                          marginLeft: '6px',
+                                        }}>
+                                        Titel verbergen?
+                                      </FormLabel>
                                       <FormMessage />
                                     </FormItem>
                                     <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                      Als je deze optie selecteert, wordt de
+                                      titel van de afbeelding verborgen.
                                     </FormDescription>
                                   </>
                                 )}
                               />
                             </>
                           );
-                        })()
-                      )}
+                        })()}
 
                       <Button
                         className="w-full bg-secondary text-black hover:text-white mt-4"
@@ -939,57 +1060,58 @@ export default function WidgetEnqueteItems(
                     <div className="flex flex-col gap-1">
                       {options.length > 0
                         ? options
-                          .sort(
-                            (a, b) =>
-                              parseInt(a.trigger) - parseInt(b.trigger)
-                          )
-                          .map((option, index) => (
-                            <div
-                              key={index}
-                              className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
-                                'bg-secondary'
+                            .sort(
+                              (a, b) =>
+                                parseInt(a.trigger) - parseInt(b.trigger)
+                            )
+                            .map((option, index) => (
+                              <div
+                                key={index}
+                                className={`flex cursor-pointer justify-between border border-secondary ${
+                                  option.trigger == selectedOption?.trigger &&
+                                  'bg-secondary'
                                 }`}>
-                              <span className="flex gap-2 py-3 px-2">
-                                <ArrowUp
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'moveUp',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                                <ArrowDown
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'moveDown',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                              </span>
-                              <span
-                                className="py-3 px-2 w-full"
-                                onClick={() => setOption(option)}>
-                                {option?.titles?.[0].key}
-                              </span>
-                              <span className="py-3 px-2">
-                                <X
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'delete',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                              </span>
-                            </div>
-                          ))
+                                <span className="flex gap-2 py-3 px-2">
+                                  <ArrowUp
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveUp',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                  <ArrowDown
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveDown',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                                <span
+                                  className="py-3 px-2 w-full"
+                                  onClick={() => setOption(option)}>
+                                  {option?.titles?.[0].key}
+                                </span>
+                                <span className="py-3 px-2">
+                                  <X
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'delete',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                              </div>
+                            ))
                         : 'Geen options'}
                     </div>
                   </div>
@@ -1032,13 +1154,22 @@ export default function WidgetEnqueteItems(
                               <FormItem>
                                 <FormLabel>
                                   Key voor het opslaan
-                                  <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                                  <InfoDialog
+                                    content={
+                                      'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'
+                                    }
+                                  />
                                 </FormLabel>
-                                <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+                                <em className="text-xs">
+                                  Deze moet uniek zijn bijvoorbeeld:
+                                  ‘samenvatting’
+                                </em>
                                 <Input {...field} />
                                 {(!field.value || !isFieldKeyUnique) && (
                                   <FormMessage>
-                                    {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
+                                    {!field.value
+                                      ? 'Key is verplicht'
+                                      : 'Key moet uniek zijn'}
                                   </FormMessage>
                                 )}
                               </FormItem>
@@ -1060,7 +1191,6 @@ export default function WidgetEnqueteItems(
                     )}
 
                     {form.watch('questionType') === 'open' && (
-
                       <FormField
                         control={form.control}
                         name="placeholder"
@@ -1103,10 +1233,18 @@ export default function WidgetEnqueteItems(
                               </SelectItem>
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
-                              <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
-                              <SelectItem value="documentUpload">Document upload</SelectItem>
-                              <SelectItem value="matrix">Matrix vraag</SelectItem>
-                              <SelectItem value="pagination">Voeg pagina toe</SelectItem>
+                              <SelectItem value="imageUpload">
+                                Afbeelding upload
+                              </SelectItem>
+                              <SelectItem value="documentUpload">
+                                Document upload
+                              </SelectItem>
+                              <SelectItem value="matrix">
+                                Matrix vraag
+                              </SelectItem>
+                              <SelectItem value="pagination">
+                                Voeg pagina toe
+                              </SelectItem>
                               <SelectItem value="sort">Sorteren</SelectItem>
                             </SelectContent>
                           </Select>
@@ -1121,7 +1259,9 @@ export default function WidgetEnqueteItems(
                           name="variant"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
+                              <FormLabel>
+                                Is het veld qua grootte 1 regel of een tekstvak?
+                              </FormLabel>
                               <Select
                                 value={field.value || 'text input'}
                                 onValueChange={field.onChange}>
@@ -1131,8 +1271,12 @@ export default function WidgetEnqueteItems(
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="text input">1 regel</SelectItem>
-                                  <SelectItem value="textarea">Tekstvak</SelectItem>
+                                  <SelectItem value="text input">
+                                    1 regel
+                                  </SelectItem>
+                                  <SelectItem value="textarea">
+                                    Tekstvak
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -1198,11 +1342,11 @@ export default function WidgetEnqueteItems(
                           project={project as string}
                           fieldName="imageUpload"
                           imageLabel="Afbeelding 1"
-                          allowedTypes={["image/*"]}
+                          allowedTypes={['image/*']}
                           onImageUploaded={(imageResult) => {
                             const image = imageResult ? imageResult.url : '';
 
-                            form.setValue("image", image);
+                            form.setValue('image', image);
                             form.resetField('imageUpload');
                           }}
                         />
@@ -1218,7 +1362,9 @@ export default function WidgetEnqueteItems(
                           name="imageAlt"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                              <FormLabel>
+                                Afbeelding beschrijving voor screenreaders
+                              </FormLabel>
                               <Input {...field} />
                               <FormMessage />
                             </FormItem>
@@ -1235,23 +1381,36 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
-
                       </>
                     )}
 
-                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' || form.watch('questionType') === 'documentUpload') && (
+                    {(form.watch('questionType') === 'imageUpload' ||
+                      form.watch('questionType') === 'images' ||
+                      form.watch('questionType') === 'documentUpload') && (
                       <FormField
                         control={form.control}
                         name="multiple"
                         render={({ field }) => (
                           <FormItem>
-                            {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'documentUpload') ? (
-                              <FormLabel>Mogen er meerdere {form.watch('questionType') === 'documentUpload' ? 'documenten' : 'afbeeldingen'} tegelijkertijd geüpload worden?</FormLabel>
+                            {form.watch('questionType') === 'imageUpload' ||
+                            form.watch('questionType') === 'documentUpload' ? (
+                              <FormLabel>
+                                Mogen er meerdere{' '}
+                                {form.watch('questionType') === 'documentUpload'
+                                  ? 'documenten'
+                                  : 'afbeeldingen'}{' '}
+                                tegelijkertijd geüpload worden?
+                              </FormLabel>
                             ) : (
-                              <FormLabel>Mogen er meerdere afbeeldingen geselecteerd worden?</FormLabel>
+                              <FormLabel>
+                                Mogen er meerdere afbeeldingen geselecteerd
+                                worden?
+                              </FormLabel>
                             )}
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
                               value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
@@ -1269,54 +1428,59 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'sort' && (
-                      <FormField
-                        control={form.control}
-                        name="fieldRequired"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Is dit veld verplicht?
-                            </FormLabel>
-                            {form.watch("questionType") === "matrix" && (
-                              <FormDescription>
-                                Als je het veld <b>verplicht</b> maakt moeten gebruikers bij elke rij een antwoord selecteren.
-                                Als je het veld <b>niet verplicht</b> maakt kunnen gebruikers elke rij overslaan en invullen wat ze willen.
-                              </FormDescription>
-                            )}
-                            <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
-                              value={field.value ? 'true' : 'false'}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="false">Nee</SelectItem>
-                                <SelectItem value="true">Ja</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
+                    {form.watch('questionType') !== 'pagination' &&
+                      form.watch('questionType') !== 'sort' && (
+                        <FormField
+                          control={form.control}
+                          name="fieldRequired"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Is dit veld verplicht?</FormLabel>
+                              {form.watch('questionType') === 'matrix' && (
+                                <FormDescription>
+                                  Als je het veld <b>verplicht</b> maakt moeten
+                                  gebruikers bij elke rij een antwoord
+                                  selecteren. Als je het veld{' '}
+                                  <b>niet verplicht</b> maakt kunnen gebruikers
+                                  elke rij overslaan en invullen wat ze willen.
+                                </FormDescription>
+                              )}
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
-                    {form.watch("questionType") === "matrix" && (
+                    {form.watch('questionType') === 'matrix' && (
                       <FormField
                         control={form.control}
                         name="matrixMultiple"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              Mogen er meerdere antwoorden per rij worden geselecteerd?
+                              Mogen er meerdere antwoorden per rij worden
+                              geselecteerd?
                             </FormLabel>
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
-                              value={field.value ? 'true' : 'false'}
-                            >
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Kies een optie" />
@@ -1343,12 +1507,15 @@ export default function WidgetEnqueteItems(
                               Wil je smileys tonen in plaats van een schaal?
                             </FormLabel>
                             <FormDescription>
-                              De schaal toont normaal gesproken een getal van 1 tot 5. Als je smileys wilt tonen, kies dan voor ja.
+                              De schaal toont normaal gesproken een getal van 1
+                              tot 5. Als je smileys wilt tonen, kies dan voor
+                              ja.
                             </FormDescription>
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
-                              value={field.value ? 'true' : 'false'}
-                            >
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Kies een optie" />
@@ -1386,9 +1553,15 @@ export default function WidgetEnqueteItems(
                           name="maxChoices"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Maximaal te selecteren opties</FormLabel>
+                              <FormLabel>
+                                Maximaal te selecteren opties
+                              </FormLabel>
                               <FormDescription>
-                                <em className='text-xs'>Als je wilt dat er maximaal een aantal opties geselecteerd kunnen worden, vul dan hier het aantal in.</em>
+                                <em className="text-xs">
+                                  Als je wilt dat er maximaal een aantal opties
+                                  geselecteerd kunnen worden, vul dan hier het
+                                  aantal in.
+                                </em>
                               </FormDescription>
                               <Input {...field} />
                               <FormMessage />
@@ -1404,7 +1577,11 @@ export default function WidgetEnqueteItems(
                                 Maximaal aantal bereikt melding
                               </FormLabel>
                               <FormDescription>
-                                <em className='text-xs'>Als het maximaal aantal opties is geselecteerd, geef dan een melding aan de gebruiker. Dit is optioneel.</em>
+                                <em className="text-xs">
+                                  Als het maximaal aantal opties is
+                                  geselecteerd, geef dan een melding aan de
+                                  gebruiker. Dit is optioneel.
+                                </em>
                               </FormDescription>
                               <Input {...field} />
                               <FormMessage />
@@ -1420,9 +1597,13 @@ export default function WidgetEnqueteItems(
                         name="routingInitiallyHide"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Is deze vraag altijd zichtbaar?</FormLabel>
+                            <FormLabel>
+                              Is deze vraag altijd zichtbaar?
+                            </FormLabel>
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
                               value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
@@ -1441,7 +1622,8 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {(form.watch('questionType') === 'multiplechoice' || form.watch('questionType') === 'multiple') && (
+                    {(form.watch('questionType') === 'multiplechoice' ||
+                      form.watch('questionType') === 'multiple') && (
                       <FormField
                         control={form.control}
                         // @ts-ignore
@@ -1454,11 +1636,13 @@ export default function WidgetEnqueteItems(
                                 alignItems: 'center',
                                 justifyContent: 'flex-start',
                                 flexDirection: 'row',
-                                marginTop: '10px'
+                                marginTop: '10px',
                               }}>
                               {YesNoSelect(field, props)}
                               <FormLabel
-                                style={{ marginTop: 0, marginLeft: '6px' }}>Willekeurige volgorde</FormLabel>
+                                style={{ marginTop: 0, marginLeft: '6px' }}>
+                                Willekeurige volgorde
+                              </FormLabel>
                               <FormMessage />
                             </FormItem>
                           </>
@@ -1473,33 +1657,37 @@ export default function WidgetEnqueteItems(
                           name="routingSelectedQuestion"
                           render={({ field }) => {
                             const formFields = items || [];
-                            let formMultipleChoiceFields = formFields
-                              .filter((f: any) =>
-                                (
-                                  f.questionType === 'multiplechoice'
-                                  || f.questionType === 'multiple'
-                                  || f.questionType === 'images'
-                                  || f.questionType === 'select'
-                                )
-                                && f.trigger !== form.watch('trigger'));
+                            let formMultipleChoiceFields = formFields.filter(
+                              (f: any) =>
+                                (f.questionType === 'multiplechoice' ||
+                                  f.questionType === 'multiple' ||
+                                  f.questionType === 'images' ||
+                                  f.questionType === 'select') &&
+                                f.trigger !== form.watch('trigger')
+                            );
 
                             return (
                               <FormItem>
-                                <FormLabel>Welke vraag beïnvloedt de zichtbaarheid van deze vraag?</FormLabel>
+                                <FormLabel>
+                                  Welke vraag beïnvloedt de zichtbaarheid van
+                                  deze vraag?
+                                </FormLabel>
 
                                 {formMultipleChoiceFields.length === 0 ? (
                                   <p
                                     className="text-sm"
                                     style={{
-                                      padding: "11px",
-                                      borderLeft: "4px solid red",
-                                      backgroundColor: "#ffdbd7",
+                                      padding: '11px',
+                                      borderLeft: '4px solid red',
+                                      backgroundColor: '#ffdbd7',
                                       borderTopRightRadius: '5px',
                                       borderBottomRightRadius: '5px',
                                       marginTop: '12px',
-                                    }}
-                                  >
-                                    Je hebt nog geen meerkeuze, multiplechoice of afbeelding keuze vragen toegevoegd. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                    }}>
+                                    Je hebt nog geen meerkeuze, multiplechoice
+                                    of afbeelding keuze vragen toegevoegd. Voeg
+                                    deze eerst toe om deze vraag te kunnen tonen
+                                    op basis van een ander antwoord.
                                   </p>
                                 ) : (
                                   <Select
@@ -1511,44 +1699,59 @@ export default function WidgetEnqueteItems(
                                       </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                      {formMultipleChoiceFields.map((f: any) => (
-                                        <SelectItem key={f.trigger} value={f.trigger}>{f.title || f.fieldKey}</SelectItem>
-                                      ))}
+                                      {formMultipleChoiceFields.map(
+                                        (f: any) => (
+                                          <SelectItem
+                                            key={f.trigger}
+                                            value={f.trigger}>
+                                            {f.title || f.fieldKey}
+                                          </SelectItem>
+                                        )
+                                      )}
                                     </SelectContent>
                                   </Select>
                                 )}
 
                                 <FormMessage />
                               </FormItem>
-                            )
+                            );
                           }}
                         />
 
-                        {form.watch("routingSelectedQuestion") !== '' && (
+                        {form.watch('routingSelectedQuestion') !== '' && (
                           <FormField
                             control={form.control}
                             name="routingSelectedAnswer"
                             render={({ field }) => {
-                              const selectedQuestion = items?.find((i: any) => i.trigger === form.watch("routingSelectedQuestion"));
+                              const selectedQuestion = items?.find(
+                                (i: any) =>
+                                  i.trigger ===
+                                  form.watch('routingSelectedQuestion')
+                              );
                               const options = selectedQuestion?.options || [];
 
                               return (
                                 <FormItem>
-                                  <FormLabel>Bij welk antwoord moet deze vraag getoond worden?</FormLabel>
+                                  <FormLabel>
+                                    Bij welk antwoord moet deze vraag getoond
+                                    worden?
+                                  </FormLabel>
 
                                   {options.length === 0 ? (
                                     <p
                                       className="text-sm"
                                       style={{
-                                        padding: "11px",
-                                        borderLeft: "4px solid red",
-                                        backgroundColor: "#ffdbd7",
+                                        padding: '11px',
+                                        borderLeft: '4px solid red',
+                                        backgroundColor: '#ffdbd7',
                                         borderTopRightRadius: '5px',
                                         borderBottomRightRadius: '5px',
                                         marginTop: '12px',
-                                      }}
-                                    >
-                                      De geselecteerde vraag heeft nog geen antwoordopties. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                      }}>
+                                      De geselecteerde vraag heeft nog geen
+                                      antwoordopties. Voeg deze eerst toe om
+                                      deze vraag te kunnen tonen op basis van
+                                      een ander antwoord.
                                     </p>
                                   ) : (
                                     <Select
@@ -1561,7 +1764,11 @@ export default function WidgetEnqueteItems(
                                       </FormControl>
                                       <SelectContent>
                                         {options.map((o: any) => (
-                                          <SelectItem key={o.trigger} value={o.trigger}>{o.titles?.[0]?.key || o.trigger}</SelectItem>
+                                          <SelectItem
+                                            key={o.trigger}
+                                            value={o.trigger}>
+                                            {o.titles?.[0]?.key || o.trigger}
+                                          </SelectItem>
                                         ))}
                                       </SelectContent>
                                     </Select>
@@ -1569,7 +1776,7 @@ export default function WidgetEnqueteItems(
 
                                   <FormMessage />
                                 </FormItem>
-                              )
+                              );
                             }}
                           />
                         )}
@@ -1582,7 +1789,7 @@ export default function WidgetEnqueteItems(
                           className="w-fit mt-4 bg-secondary text-black hover:text-white"
                           type="button"
                           onClick={() => setSettingOptions(!settingOptions)}>
-                          {form.watch("questionType") === "matrix"
+                          {form.watch('questionType') === 'matrix'
                             ? `Matrix antwoordopties aanpassen`
                             : `Antwoordopties (${options.length}) aanpassen`}
                         </Button>
@@ -1614,24 +1821,30 @@ export default function WidgetEnqueteItems(
                         setOptions([]);
                         setMatrixOptions(matrixDefault);
                       }}
-                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none' && form.watch('questionType') !== 'pagination'}
-                    >
+                      disabled={
+                        (!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                        form.watch('questionType') !== 'none' &&
+                        form.watch('questionType') !== 'pagination'
+                      }>
                       {selectedItem
                         ? 'Sla wijzigingen op'
                         : 'Voeg item toe aan lijst'}
                     </Button>
                   </div>
-                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'pagination' && (
-                    <FormMessage>
-                      {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
-                    </FormMessage>
-                  )}
+                  {(!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                    form.watch('questionType') !== 'pagination' && (
+                      <FormMessage>
+                        {!form.watch('fieldKey')
+                          ? 'Key is verplicht'
+                          : 'Key moet uniek zijn'}
+                      </FormMessage>
+                    )}
                 </div>
               </div>
             )}
           </div>
         </form>
       </Form>
-    </div >
+    </div>
   );
 }

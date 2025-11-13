@@ -1,11 +1,17 @@
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
-import { FormFieldTextbox, Heading, Paragraph, Button } from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
-import './account.css';
-import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import DataStore from '@openstad-headless/data-store/src';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import '@utrecht/component-library-css';
+import {
+  Button,
+  FormFieldTextbox,
+  Heading,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useState } from 'react';
+
+import './account.css';
 
 export type AccountWidgetProps = BaseProps &
   AccountProps &
@@ -56,7 +62,7 @@ type FormData = {
     label: string | undefined;
     value: string | undefined;
   };
-}
+};
 function Account({
   allowNickname = false,
   minLength = 2,
@@ -96,17 +102,23 @@ function Account({
     nickname: {
       value: '',
       label: 'Gebruikersnaam',
-    }
+    },
   },
   ...props
 }: AccountWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
-  const resourceId = urlParams.get('openstadResourceId') || props.resourceId || '';
+  const resourceId =
+    urlParams.get('openstadResourceId') || props.resourceId || '';
 
   const [canEditNickname, setCanEditNickname] = useState(false);
   const [canEditUser, setCanEditUser] = useState(false);
-  const [editButtonText] = useState([['Gegevens bewerken'], ['Gegevens opslaan']]);
-  const [userFormData, setUserFormData] = useState<FormData>(formData as FormData);
+  const [editButtonText] = useState([
+    ['Gegevens bewerken'],
+    ['Gegevens opslaan'],
+  ]);
+  const [userFormData, setUserFormData] = useState<FormData>(
+    formData as FormData
+  );
   const [fetchedUser, setFetchedUser] = useState(false);
 
   const datastore = new DataStore({
@@ -114,7 +126,10 @@ function Account({
     api: props.api,
   });
 
-  const currentUser = datastore.useCurrentUser({ ...props, projectId: props.projectId });
+  const currentUser = datastore.useCurrentUser({
+    ...props,
+    projectId: props.projectId,
+  });
 
   const saveUserData = async (data: any) => {
     if (currentUser?.data?.id === undefined) {
@@ -127,8 +142,10 @@ function Account({
       console.log(copyObj.straatnaam);
       copyObj.address = {
         label: 'Adres',
-        value: `${copyObj.straatnaam.value ?? ''} ${copyObj.huisnummer.value ?? ''}`,
-      }
+        value: `${copyObj.straatnaam.value ?? ''} ${
+          copyObj.huisnummer.value ?? ''
+        }`,
+      };
       delete copyObj.huisnummer; // Remove huisnummer from the object
       delete copyObj.straatnaam; // Remove straatnaam from the object
     }
@@ -141,7 +158,10 @@ function Account({
     // only get values and add id using the modified copyObj
     let updatedData = {
       ...Object.fromEntries(
-        Object.entries(copyObj).map(([key, value]) => [key, typeof value === 'object' && value !== null ? value.value : value])
+        Object.entries(copyObj).map(([key, value]) => [
+          key,
+          typeof value === 'object' && value !== null ? value.value : value,
+        ])
       ),
       id: currentUser?.data?.id,
     };
@@ -150,12 +170,16 @@ function Account({
       projectId: props.projectId,
       user: {
         ...updatedData,
-      }
+      },
     });
-  }
+  };
 
   useEffect(() => {
-    if (currentUser !== undefined && currentUser?.data !== undefined && fetchedUser === false) {
+    if (
+      currentUser !== undefined &&
+      currentUser?.data !== undefined &&
+      fetchedUser === false
+    ) {
       setFetchedUser(currentUser);
 
       // Assuming address is a string like "Main Street 24"
@@ -194,8 +218,8 @@ function Account({
           nickname: {
             label: prev?.nickname?.label,
             value: currentUser?.data?.nickName,
-          }
-        }
+          },
+        };
       });
     }
   }, [currentUser]);
@@ -211,102 +235,112 @@ function Account({
         {overview_title && <Heading level={2}>{overview_title}</Heading>}
         {overview_description && <Paragraph>{overview_description}</Paragraph>}
 
-        {Object.entries(formData).map((field, index) => (
-          field[0] === 'email' && (
-            <FormFieldTextbox
-              label={field[1].label}
-              name={field[1].label}
-              description="Niet aanpasbaar"
-              placeholder={field[1].label}
-              maxLength={maxLength}
-              minLength={minLength}
-              value={userFormData?.email?.value}
-              readOnly
-              key={index}
-            />
-          )
-        ))}
+        {Object.entries(formData).map(
+          (field, index) =>
+            field[0] === 'email' && (
+              <FormFieldTextbox
+                label={field[1].label}
+                name={field[1].label}
+                description="Niet aanpasbaar"
+                placeholder={field[1].label}
+                maxLength={maxLength}
+                minLength={minLength}
+                value={userFormData?.email?.value}
+                readOnly
+                key={index}
+              />
+            )
+        )}
       </div>
       <div>
         {info_title && <Heading level={2}>{info_title}</Heading>}
         {info_description && <Paragraph> {info_description} </Paragraph>}
 
-        {Object.entries(userFormData).map((field, index) => (
-          field[0] !== 'nickname' && field[0] !== 'email' && (
-            <FormFieldTextbox
-              label={field[1].label}
-              name={field[1].label}
-              placeholder={field[1].label}
-              maxLength={maxLength}
-              minLength={minLength}
-              value={field[1].value}
-              onChange={(e) => {
-                const target = e.target as HTMLInputElement; // Type assertion
-                setUserFormData((prev) => ({
-                  ...prev,
-                  [field[0]]: {
-                    label: target.name,
-                    value: target.value
-                  },
-                }));
-              }}
-              readOnly={!canEditUser}
-              key={index}
-            />
-          )
-        ))}
-
-        {allowUserEdit && (
-          <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-            if (canEditUser) {
-              saveUserData(userFormData);
-            }
-            setCanEditUser(!canEditUser);
-          }}>{canEditUser ? editButtonText[1] : editButtonText[0]}</Button>
+        {Object.entries(userFormData).map(
+          (field, index) =>
+            field[0] !== 'nickname' &&
+            field[0] !== 'email' && (
+              <FormFieldTextbox
+                label={field[1].label}
+                name={field[1].label}
+                placeholder={field[1].label}
+                maxLength={maxLength}
+                minLength={minLength}
+                value={field[1].value}
+                onChange={(e) => {
+                  const target = e.target as HTMLInputElement; // Type assertion
+                  setUserFormData((prev) => ({
+                    ...prev,
+                    [field[0]]: {
+                      label: target.name,
+                      value: target.value,
+                    },
+                  }));
+                }}
+                readOnly={!canEditUser}
+                key={index}
+              />
+            )
         )}
 
-
+        {allowUserEdit && (
+          <Button
+            className="account-edit-button"
+            appearance={'primary-action-button'}
+            onClick={() => {
+              if (canEditUser) {
+                saveUserData(userFormData);
+              }
+              setCanEditUser(!canEditUser);
+            }}>
+            {canEditUser ? editButtonText[1] : editButtonText[0]}
+          </Button>
+        )}
       </div>
       {allowNickname && (
         <div>
           {user_title && <Heading level={2}>{user_title}</Heading>}
           {user_description && <Paragraph>{user_description}</Paragraph>}
 
-          {Object.entries(formData).map((field, index) => (
-            field[0] === 'nickname' && (
-              <FormFieldTextbox
-                label={field[1].label}
-                name={field[1].label}
-                maxLength={maxLength}
-                minLength={minLength}
-                placeholder={field[1].label}
-                value={userFormData?.nickname?.value}
-                onChange={(e) => {
-                  const target = e.target as HTMLInputElement; // Type assertion
-                  setUserFormData({
-                    ...userFormData,
-                    nickname: {
-                      value: target.value,
-                      label: userFormData?.nickname?.label || '', // Use optional chaining and default to an empty string if undefined
-                    },
-                  });
-                }}
-                readOnly={!canEditNickname}
-                key={index}
-              />
-            )
-          ))}
-
-
-          {allowUserEdit && (
-            <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-              if (canEditNickname) {
-                saveUserData(userFormData);
-              }
-              setCanEditNickname(!canEditNickname)
-            }}>{canEditNickname ? editButtonText[1] : editButtonText[0]}</Button>
+          {Object.entries(formData).map(
+            (field, index) =>
+              field[0] === 'nickname' && (
+                <FormFieldTextbox
+                  label={field[1].label}
+                  name={field[1].label}
+                  maxLength={maxLength}
+                  minLength={minLength}
+                  placeholder={field[1].label}
+                  value={userFormData?.nickname?.value}
+                  onChange={(e) => {
+                    const target = e.target as HTMLInputElement; // Type assertion
+                    setUserFormData({
+                      ...userFormData,
+                      nickname: {
+                        value: target.value,
+                        label: userFormData?.nickname?.label || '', // Use optional chaining and default to an empty string if undefined
+                      },
+                    });
+                  }}
+                  readOnly={!canEditNickname}
+                  key={index}
+                />
+              )
           )}
 
+          {allowUserEdit && (
+            <Button
+              className="account-edit-button"
+              appearance={'primary-action-button'}
+              onClick={() => {
+                if (canEditNickname) {
+                  saveUserData(userFormData);
+                }
+                setCanEditNickname(!canEditNickname);
+              }}>
+              {canEditNickname ? editButtonText[1] : editButtonText[0]}
+            </Button>
+          )}
         </div>
       )}
     </section>

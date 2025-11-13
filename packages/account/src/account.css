@@ -40,9 +40,9 @@
   .account > div {
     grid-template-columns: 1fr;
   }
-  
+
   .account .account-edit-button,
-  .account > div > *{
+  .account > div > * {
     grid-column: 1;
   }
 }
