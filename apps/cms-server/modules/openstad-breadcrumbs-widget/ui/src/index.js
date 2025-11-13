@@ -50,8 +50,7 @@ function renderBreadcrumbs(container) {
   const homeUrl = removeTrailingSlash(container?.getAttribute('data-homeUrl')) || null;
 
   const homeOrigin = window.location.origin;
-  const homePageIsWithSubdomain = homeUrlData !== homeOrigin;
-  const homeUrl = homeUrlData || homeOrigin;
+  const homePageIsWithSubdomain = homeUrl !== homeOrigin;
   const currentUrl = removeTrailingSlash(window.location.origin + window.location.pathname);
 
   const isHomepage = homeUrl === currentUrl;
