@@ -4,3 +4,4 @@ nginx.config.example
 build/
 coverage/
 apps/cms-server/public/apos-frontend/
+charts/openstad-headless/
