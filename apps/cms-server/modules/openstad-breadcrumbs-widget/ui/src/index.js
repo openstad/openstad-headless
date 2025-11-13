@@ -34,6 +34,10 @@ function createBreadcrumbItem({ label, href, isCurrent }) {
   return li;
 }
 
+function removeTrailingSlash(url) {
+    return typeof url === 'string' && url.endsWith('/') ? url.slice(0, -1) : url;
+}
+
 function renderBreadcrumbs(container) {
   const pathParts = window.location.pathname.split('/').filter(Boolean);
 
@@ -43,17 +47,29 @@ function renderBreadcrumbs(container) {
 
   const ol = document.createElement('ol');
 
-  const isHomepage = pathParts.length === 0;
+  const homeUrl = removeTrailingSlash(container?.getAttribute('data-homeUrl')) || null;
+
+  const homeOrigin = window.location.origin;
+  const homePageIsWithSubdomain = homeUrlData !== homeOrigin;
+  const homeUrl = homeUrlData || homeOrigin;
+  const currentUrl = removeTrailingSlash(window.location.origin + window.location.pathname);
+
+  const isHomepage = homeUrl === currentUrl;
   ol.appendChild(
     createBreadcrumbItem({
       label: 'Homepage',
-      href: '/',
+      href: homeUrl || '/',
       isCurrent: isHomepage,
     })
   );
 
-  let cumulative = '';
+  let cumulative = homeUrl;
   pathParts.forEach((part, idx) => {
+    if (idx === 0 && homePageIsWithSubdomain) {
+      // If the homepage includes a subdomain, the first path part is already represented by the homepage link
+      return;
+    }
+
     cumulative += '/' + part;
     ol.appendChild(
       createBreadcrumbItem({
