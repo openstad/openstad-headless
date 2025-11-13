@@ -8,7 +8,7 @@ import {
 } from "@utrecht/component-library-react";
 
 import { FilePond, registerPlugin } from 'react-filepond'
-import { FilePondFile, FilePondErrorDescription } from 'filepond'
+import {FilePondFile, FilePondErrorDescription, FilePondInitialFile} from 'filepond'
 import 'filepond/dist/filepond.min.css'
 import './document-upload.css'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
@@ -81,6 +81,18 @@ export type DocumentUploadProps = {
     fieldOptions?: { value: string; label: string }[];
 }
 
+type MockDocFile = {
+    source: string,
+    options: {
+        type: string,
+        file: {
+            name: string,
+            size: number,
+            type: string
+        }
+    }
+}
+
 const DocumentUploadField: FC<DocumentUploadProps> = ({
     title,
     description,
@@ -103,11 +115,29 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue = [],
     ...props
 }) => {
     const datastore = new DataStore({ props });
 
+    const initialValue: MockDocFile[] = (overrideDefaultValue && Array.isArray(overrideDefaultValue))
+      ? (overrideDefaultValue as { url: string; name: string }[]).map((item: {url: string, name: string}) => {
+          return {
+              source: item.url,
+              options: {
+                  type: 'local',
+                  file: {
+                      name: item.name,
+                      size: 1,
+                      type: '*',
+                  },
+              },
+          }
+      })
+      : [];
+
     const [documents, setDocuments] = useState<FilePondFile[]>([]);
+    const [mockDocuments, setMockDocuments] = useState<MockDocFile[]>(initialValue);
     const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, url: string }[]>([]);
 
     const acceptAttribute = allowedTypes
@@ -142,13 +172,18 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             }
         }
 
+        for (let i = 0; i < mockDocuments.length; i++) {
+            const mockDoc = mockDocuments[i];
+            allDocuments.push({ name: mockDoc.options.file.name, url: mockDoc.source });
+        }
+
         if (onChange) {
             onChange({
                 name: fieldKey,
                 value: allDocuments,
             });
         }
-    }, [uploadedDocuments.length, setUploadedDocuments, setDocuments]);
+    }, [uploadedDocuments.length, mockDocuments.length, documents.length, setUploadedDocuments, setDocuments]);
 
     function waitForElm(selector: any) {
         return new Promise(resolve => {
@@ -187,6 +222,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     }, []);
 
     const notifyFailed = (message: string) => NotificationService.addNotification(message, "error");
+    const finalDocs = Array.from( new Set( [...mockDocuments, ...documents] ) );
 
     return (
         <FormField type="text">
@@ -221,9 +257,17 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
             <div className="utrecht-form-field__input">
                 <FilePond
-                    files={documents.map(file => file.file)}
+                    files={finalDocs as File[] | FilePondInitialFile[]}
                     onupdatefiles={(fileItems: FilePondFile[]) => {
-                        setDocuments(fileItems);
+                        const documentsExceptMockedDocuments = fileItems?.map(doc => {
+                            const isMockedDocument = mockDocuments?.find(mockDoc => mockDoc.options.file.name === doc.file.name);
+                            if (isMockedDocument) {
+                                return null;
+                            }
+                            return doc;
+                        }).filter(doc => doc !== null) as FilePondFile[];
+
+                        setDocuments(documentsExceptMockedDocuments);
                     }}
                     allowMultiple={multiple}
                     server={{
@@ -279,6 +323,14 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                         if (!!fileName) {
                            const uploadDocumentFileName = fileName.replace(/\./g, '_');
                            const fileIsInUploadedDocuments = uploadedDocuments.find(item => item.name === uploadDocumentFileName);
+
+                           const fileIsInMockDocuments = mockDocuments.find(item => item.options.file.name === fileName);
+
+                           if (fileIsInMockDocuments) {
+                               const updatedMockDocuments = mockDocuments.filter(item => item.options.file.name !== fileName);
+                               setMockDocuments(updatedMockDocuments);
+                               return;
+                           }
 
                            if (!fileIsInUploadedDocuments) return;
 
