@@ -244,6 +244,13 @@ export function Filters({
     updateParameter();
   };
 
+  const sortOptionsOrder = ['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'];
+  sorting = sorting?.sort((a, b) => {
+    const indexA = sortOptionsOrder.indexOf(a.value);
+    const indexB = sortOptionsOrder.indexOf(b.value);
+    return indexA - indexB;
+  });
+
   return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
     <section id="stem-begroot-filter">
       <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>

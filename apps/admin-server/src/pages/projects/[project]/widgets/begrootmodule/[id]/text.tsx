@@ -25,6 +25,7 @@ const formSchema = z.object({
   stemCodeTitle: z.string().optional(),
   stemCodeTitleSuccess: z.string().optional(),
   newsLetterTitle: z.string().optional(),
+  newsLetterLink: z.string().optional(),
   panelTitle: z.string().optional(),
   budgetChosenTitle: z.string().optional(),
   budgetRemainingTitle: z.string().optional(),
@@ -67,6 +68,7 @@ export default function BegrootmoduleText(
       stemCodeTitle: props.stemCodeTitle ?? 'Vul je stemcode in',
       stemCodeTitleSuccess: props.stemCodeTitleSuccess ?? 'Vul een andere stemcode in',
       newsLetterTitle: props.newsLetterTitle ?? 'Hou mij op de hoogte',
+      newsLetterLink: props.newsLetterLink ?? '/',
       panelTitle: props.panelTitle ?? '',
       budgetChosenTitle: props.budgetChosenTitle ?? "Inzendingen gekozen",
       budgetRemainingTitle: props.budgetRemainingTitle ?? "Nog te kiezen",
@@ -380,6 +382,25 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Nieuws brief titel tekst</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="newsLetterLink"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Nieuws brief link</FormLabel>
                 <FormControl>
                   <Input
                     {...field}

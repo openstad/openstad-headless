@@ -35,7 +35,7 @@ export type MapProps = BaseProps &
     infoImage?: string;
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
-    defaultValue?: string;
+    defaultValue?: FormValue;
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
@@ -59,6 +59,8 @@ const MapField: FC<MapProps> = ({
     infoImage = '',
     datalayer = [],
     enableOnOffSwitching = false,
+    defaultValue = {},
+    overrideDefaultValue = {},
     ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -178,6 +180,8 @@ const MapField: FC<MapProps> = ({
                   area={polygon}
                   {...zoom}
                   dataLayerSettings={dataLayerSettings}
+                  defaultValue={defaultValue}
+                  overrideDefaultValue={overrideDefaultValue}
               />
             )}
           </div>

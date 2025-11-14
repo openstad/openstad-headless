@@ -22,11 +22,23 @@ const EditorMap = ({
   markers = [],
   onChange,
   fieldRequired = false,
+  overrideDefaultValue = {},
+  defaultValue = {},
   ...props
 }: PropsWithChildren<EditorMapWidgetProps>) => {
+  const isValidLocation = (val: any): val is { lat: number; lng: number; icon?: string } =>
+    val && typeof val === 'object' && 'lat' in val && 'lng' in val;
+
+  const initialValue =
+    isValidLocation(overrideDefaultValue)
+      ? overrideDefaultValue
+      : isValidLocation(defaultValue)
+        ? defaultValue
+        : editorMarker;
+
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
-    ...editorMarker,
-    icon: editorMarker?.icon || markerIcon,
+    ...initialValue,
+    icon: initialValue?.icon || markerIcon,
     doNotCluster: true,
   });
   parseLocation(currentEditorMarker); // unify location format

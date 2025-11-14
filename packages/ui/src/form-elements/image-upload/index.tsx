@@ -8,7 +8,7 @@ import {
 } from "@utrecht/component-library-react";
 
 import { FilePond, registerPlugin } from 'react-filepond'
-import { FilePondFile, FilePondErrorDescription } from 'filepond'
+import { FilePondFile, FilePondErrorDescription, FilePondInitialFile } from 'filepond'
 import 'filepond/dist/filepond.min.css'
 import './image-upload.css'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
@@ -54,6 +54,18 @@ const filePondSettings = {
     maxParallelUploads: 1
 };
 
+type MockImageFile = {
+    source: string,
+    options: {
+        type: string,
+        file: {
+            name: string,
+            size: number,
+            type: string
+        }
+    }
+}
+
 export type ImageUploadProps = {
     title: string;
     overrideDefaultValue?: FormValue;
@@ -94,12 +106,29 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue = [],
     ...props
 }) => {
-
     const datastore = new DataStore({ props });
 
+    const initialValue: MockImageFile[] = (overrideDefaultValue && Array.isArray(overrideDefaultValue))
+      ? (overrideDefaultValue as { url: string; name: string }[]).map((item: {url: string, name: string}) => {
+          return {
+              source: item.url,
+              options: {
+                  type: 'local',
+                  file: {
+                      name: item.name,
+                      size: 1,
+                      type: '*',
+                  },
+              },
+          }
+      })
+      : [];
+
     const [files, setImages] = useState<FilePondFile[]>([]);
+    const [mockImages, setMockImages] = useState<MockImageFile[]>(initialValue);
     const [uploadedImages, setUploadedImages] = useState<{ name: string, url: string }[]>([]);
 
     class HtmlContent extends React.Component<{ html: any }> {
@@ -110,13 +139,19 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     }
 
     useEffect(() => {
+        const images = [...uploadedImages];
+        for (let i = 0; i < mockImages.length; i++) {
+            const mockImage = mockImages[i];
+            images.push({ name: mockImage.options.file.name, url: mockImage.source });
+        }
+        
         if (onChange) {
             onChange({
                 name: fieldKey,
-                value: uploadedImages,
+                value: images,
             });
         }
-    }, [uploadedImages.length, setImages, setUploadedImages]);
+    }, [uploadedImages.length, mockImages.length, setImages, setUploadedImages]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes
@@ -151,6 +186,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             });
         });
     }, []);
+    
+    const finalImages = Array.from( new Set( [...mockImages, ...files] ) );
 
     return (
         <FormField type="text">
@@ -190,9 +227,17 @@ const ImageUploadField: FC<ImageUploadProps> = ({
 
             <div className="utrecht-form-field__input">
                 <FilePond
-                    files={files.map(file => file.file)}
+                    files={finalImages as File[] | FilePondInitialFile[]}
                     onupdatefiles={(fileItems: FilePondFile[]) => {
-                        setImages(fileItems);
+                        const imagesExceptMockedImages = fileItems?.map(img => {
+                            const isMockedImages = mockImages?.find(mockImage => mockImage.options.file.name === img.file.name);
+                            if (isMockedImages) {
+                                return null;
+                            }
+                            return img;
+                        }).filter(img => img !== null) as FilePondFile[];
+                        
+                        setImages(imagesExceptMockedImages);
                     }}
                     allowMultiple={multiple}
                     server={{
@@ -220,6 +265,14 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                         if (!!fileName) {
                            const uploadImageFileName = fileName.replace(/\./g, '_');
                            const fileIsInUploadedImages = uploadedImages.find(item => item.name === uploadImageFileName);
+
+                           const fileIsInMockImages = mockImages.find(item => item.options.file.name === fileName);
+
+                           if (fileIsInMockImages) {
+                               const updatedMockImages = mockImages.filter(item => item.options.file.name !== fileName);
+                               setMockImages(updatedMockImages);
+                               return;
+                           }
 
                            if (!fileIsInUploadedImages) return;
 

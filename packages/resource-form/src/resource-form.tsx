@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import hasRole from '../../lib/has-role';
 import type {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
@@ -9,12 +9,37 @@ import Form from "@openstad-headless/form/src/form";
 import { Heading } from '@utrecht/component-library-react';
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+
+const getExistingValue = (fieldKey, resource) => {
+    if ( !!resource ) {
+        const field = resource[fieldKey] || null;
+        const returnField = (!field && resource.extraData) ? resource.extraData[fieldKey] || null : field
+
+        if ( !!returnField ) {
+            return returnField;
+        }
+
+        if ( fieldKey.startsWith('tags[') && resource.tags ) {
+            const tagType = fieldKey.substring(5, fieldKey.length - 1);
+
+            return resource.tags
+              ?.filter((tag) => tag.type === tagType)
+               .map((tag) => tag.id);
+        }
+    }
+    return undefined;
+}
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton, defaultAddedTags} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
     const { confirmationUser, confirmationAdmin} = props.confirmation  || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
+
+    let resourceId: string | undefined = String(getResourceId({
+        url: document.location.href
+    }));
 
     const datastore: any = new DataStore({
         projectId: props.projectId,
@@ -32,10 +57,37 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         widgetId: props.widgetId,
     });
 
-    const formFields = InitializeFormFields(props.items, props);
+    const { data: existingResource, isLoading, canEdit } = datastore.useResource({
+        projectId: props.projectId,
+        resourceId: resourceId || undefined
+    });
 
-    const notifySuccess = () => NotificationService.addNotification("Idee indienen gelukt", "success");
-    const notifyFailed = () => NotificationService.addNotification("Idee indienen mislukt", "error");
+    const initialFormFields = InitializeFormFields(props.items, props);
+    const [formFields, setFormFields] = useState([]);
+    const [fillDefaults, setFillDefaults] = useState(false);
+
+    useEffect(() => {
+        if (isLoading) return;
+
+        if (canEdit) {
+            const updatedFormFields = initialFormFields.map((field) => {
+                const existingValue = getExistingValue(field.fieldKey, existingResource);
+
+                return existingValue ? {...field, defaultValue: existingValue} : field;
+            });
+
+            setFormFields(updatedFormFields);
+        } else if ( JSON.stringify(formFields) !== JSON.stringify(initialFormFields) ) {
+            setFormFields(initialFormFields);
+        }
+
+        setFillDefaults(true);
+    }, [ JSON.stringify(existingResource), JSON.stringify(initialFormFields), isLoading ]);
+
+    const notifySuccess = () => NotificationService.addNotification("Inzending indienen gelukt", "success");
+    const notifySuccessEdit = () => NotificationService.addNotification("Inzending bewerken gelukt", "success");
+    const notifyFailed = () => NotificationService.addNotification("Inzending indienen mislukt", "error");
+    const notifyFailedEdit = (message: string) => NotificationService.addNotification(message, "error");
 
     const addTagsToFormData = (formData) => {
         const tags = [];
@@ -44,6 +96,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             if (formData.hasOwnProperty(key)) {
                 if (key.startsWith('tags[')) {
                     try {
+                        if ( !formData[key] ) {
+                            continue;
+                        }
+
                         const tagsArray = JSON.parse(formData[key]);
 
                         if (typeof tagsArray === 'object') {
@@ -108,6 +164,19 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         const finalFormData = configureFormData(formData, true);
 
         try {
+            if (canEdit && existingResource && existingResource.id && existingResource.update) {
+                try {
+                    await existingResource.update(finalFormData);
+                    notifySuccessEdit();
+                } catch (e) {
+                    notifyFailedEdit(e.message || 'Inzending bewerken mislukt');
+                } finally {
+                    setDisableSubmit(false);
+                }
+
+                return;
+            }
+
             const result = await createResource(finalFormData, props.widgetId);
             if (result) {
                 notifySuccess();
@@ -129,7 +198,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     }
 
 
-    return (
+    return ( isLoading || !fillDefaults ) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
                 {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}

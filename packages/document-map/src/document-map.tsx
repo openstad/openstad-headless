@@ -96,6 +96,8 @@ export type DocumentMapProps = BaseProps &
     minCharactersError?: string;
     maxCharactersError?: string;
     filterBehavior?: string;
+    defaultSorting?: string;
+    sorting?: Array<{ value: string; label: string }>;
   };
 
 
@@ -136,8 +138,13 @@ function DocumentMap({
   popupNotLoggedInText = 'Om een reactie te plaatsen, moet je ingelogd zijn.',
   popupNotLoggedInButton = 'Inloggen',
   filterBehavior = 'or',
+  defaultSorting,
+  sorting = [],
   ...props
 }: DocumentMapProps) {
+  const [sort, setSort] = useState<string | undefined>(
+    defaultSorting || "createdAt_asc"
+  );
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -1043,9 +1050,9 @@ function DocumentMap({
             <Filters
               className="osc-flex-columned"
               dataStore={datastore}
-              defaultSorting=""
+              defaultSorting={defaultSorting || 'createdAt_asc'}
               displaySearch={false}
-              displaySorting={false}
+              displaySorting={ (sorting || []).length > 0 }
               displayTagFilters={true}
               searchPlaceholder='Zoeken'
               applyText='Toepassen'
@@ -1056,9 +1063,12 @@ function DocumentMap({
                 } else {
                   setSelectedTags(f.tags);
                 }
+                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'].includes(f.sort)) {
+                  setSort(f.sort);
+                }
               }}
               resources={[]}
-              sorting={[]}
+              sorting={ sorting || [] }
               tagGroups={tagGroups}
               tagsLimitation={filteredTagIdsArray}
               preFilterTags={urlTagIdsArray}
@@ -1082,6 +1092,7 @@ function DocumentMap({
                 displayPagination={displayPagination}
                 onGoToLastPage={setGoToLastPage}
                 overridePage={overridePage}
+                overrideSort={sort}
               />
             </div>
           )}

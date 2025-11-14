@@ -28,7 +28,7 @@ export type ProjectSettingProps = {
     descriptionMaxLength: number;
     minimumYesVotes: number;
     showVoteButtons: boolean;
-    canEditAfterFirstLikeOrComment: boolean;
+    canEditAfterFirstLikeOrComment?: boolean;
     modbreakTitle?: string;
     types: Array<string>;
   };
