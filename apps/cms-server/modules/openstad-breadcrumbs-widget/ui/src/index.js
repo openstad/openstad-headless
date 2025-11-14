@@ -1,3 +1,5 @@
+import '../../views/widget.scss';
+
 export default () => {
   apos.util.widgetPlayers['openstad-breadcrumbs'] = {
     selector: '.breadcrumbs-container',
@@ -5,7 +7,6 @@ export default () => {
       renderBreadcrumbs(el);
     },
   };
-  import('../../views/widget.scss');
 };
 
 function formatLabel(segment) {
