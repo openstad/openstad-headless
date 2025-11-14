@@ -23,6 +23,7 @@ COPY --chown=node:node package*.json .
 # Bundle all packages during build, only the installed ones will persist
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/ ./apps
+COPY --chown=node:node vendor/ ./vendor
 
 RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
