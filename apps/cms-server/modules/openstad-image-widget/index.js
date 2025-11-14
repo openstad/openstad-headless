@@ -4,6 +4,9 @@ module.exports = {
   extend: 'base-widget',
   options: {
     label: 'Afbeelding',
+    browser: {
+      src: 'ui/src/index.js'
+    },
   },
   fields: {
     add: {
@@ -104,6 +107,25 @@ module.exports = {
         label: 'Witruimte boven weghalen',
         def: false,
       },
+
+      uploadedImageLink: {
+        type: 'string',
+        label: 'Link de afbeelding naar een URL',
+        help: 'Vul in dit veld een URL in waar naartoe gelinkt moet worden als je op de afbeelding klikt.'
+      },
+
+      uploadedImageLinkTarget: {
+        type: 'boolean',
+        label: 'Opent de link in een nieuw tabblad?',
+        def: false,
+      },
+
+      uploadedImageLinkAlt: {
+        type: 'string',
+        label: 'Screenreader tekst voor deze URL',
+        help: 'Voor de toegankelijkheid moet er een tekst zijn die beschrijft wat er gebeurt als je op de afbeelding klikt'
+      }
+
     },
   },
   methods(self) {
