@@ -20,9 +20,9 @@ export type DilemmaCard = {
 
 export type DilemmaFieldProps = BaseProps &
   DilemmaProps & {
-  resourceId?: string;
-  resourceIdRelativePath?: string;
-};
+    resourceId?: string;
+    resourceIdRelativePath?: string;
+  };
 
 export type DilemmaProps = {
   title?: string;
@@ -38,22 +38,22 @@ export type DilemmaProps = {
   onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
 };
 
-type valueObject = Array< { dilemmaId: string; answer: string; explanation?: string } >;
+type valueObject = Array<{ dilemmaId: string; answer: string; explanation?: string }>;
 
 
 const DilemmaField: FC<DilemmaFieldProps> = ({
-                                               title,
-                                               infoField,
-                                               infofieldExplanation,
-                                               dilemmas = [],
-                                               setCurrentPage,
-                                               currentPage = 0,
-                                               required = false,
-                                               onChange,
-                                               fieldKey = 'dilemma',
-                                               overrideDefaultValue,
-                                               ...props
-                                             }) => {
+  title,
+  infoField,
+  infofieldExplanation,
+  dilemmas = [],
+  setCurrentPage,
+  currentPage = 0,
+  required = false,
+  onChange,
+  fieldKey = 'dilemma',
+  overrideDefaultValue,
+  ...props
+}) => {
   const dilemmaCards = useMemo(() => dilemmas.length > 0 ? dilemmas : [], [dilemmas]);
 
   let initialAnswers: Record<string, string> = {};
@@ -221,7 +221,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
-      <div className="dilemma-field dilemma-finished" role="region" aria-live="polite" tabIndex={0}>
+      <div className="dilemma-field dilemma-finished" role="region" aria-live="polite">
         <div className="dilemma-finished-content">
           <div className="dilemma-intro">
             <Heading level={2}>Jouw keuzes</Heading>
@@ -302,11 +302,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   return (
     <div className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`}
-         role="region"
-         aria-label="Dilemma keuze"
-         tabIndex={0}
-         aria-invalid={required && !dilemmaAnswers[currentDilemma.id] ? 'true' : 'false'}
-         data-required={required}>
+      role="region"
+      aria-label="Dilemma keuze"
+      aria-invalid={required && !dilemmaAnswers[currentDilemma.id] ? 'true' : 'false'}
+      data-required={required}>
 
       <div className="dilemma-intro">
         <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
@@ -409,7 +408,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             <Button appearance="primary-action-button" onClick={handleExplanationComplete}>
               Antwoord verzenden
             </Button>
-            <Button appearance="secondary-action-button" onClick={handleExplanationComplete}>
+            <Button appearance="secondary-action-button" onClick={() => (handleExplanationComplete(), handleExplanationChange(currentDilemma.id, ''))}>
               Sluiten zonder toelichting
             </Button>
           </div>

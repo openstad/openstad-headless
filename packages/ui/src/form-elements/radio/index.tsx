@@ -119,6 +119,12 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         }) as [{ value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }];
     }
 
+    useEffect(() => {
+        if(initialValue){
+            setCheckInvalid(false);
+        }
+    }, [fieldInvalid]);
+
     return (
         <div className="question">
             <Fieldset

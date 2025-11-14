@@ -102,6 +102,13 @@
                 overflow: hidden;
                 margin: 0;
                 position: absolute;
+                &:focus{
+                    outline: none;
+                    &:focus-visible+label figure {
+                        outline: 2px dashed var(--dilemmaOptionOutlineColorActive);
+                        outline-offset: 2px;
+                    }
+                }
 
                 &:checked+label {
 

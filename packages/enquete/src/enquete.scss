@@ -159,6 +159,14 @@ label.utrecht-form-label {
   pointer-events: none;
   height: 64px;
 
+  &:focus{
+    outline: none;
+    &:after{
+      outline: 2px dashed var(--youth-next-button-background-color);
+      outline-offset: 2px;
+    }
+  }
+
   &:after {
     content: '';
     position: absolute;
@@ -670,7 +678,6 @@ label.utrecht-form-label {
     }
 
     .question-type-radiobox {
-      justify-content: center;
       align-items: center;
 
       label.utrecht-form-label {
@@ -926,6 +933,10 @@ label.utrecht-form-label {
     cursor: pointer;
     transform: scale(1.05) translate(-50%, 0);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
   }
 }
 
