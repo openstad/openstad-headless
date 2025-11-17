@@ -260,6 +260,10 @@ label.utrecht-form-label {
       display: none;
     }
 
+    fieldset.utrecht-form-fieldset__fieldset {
+      margin-bottom: 120px;
+    }
+
     .form-widget,
     .form-widget-container,
     .form-container,
@@ -317,7 +321,7 @@ label.utrecht-form-label {
           .info-field-title {
 
             i {
-              color: #1D6B34;
+              color: var(--youth-intro-card-background-color, #1D6B34);
               font-style: normal;
               font-weight: inherit;
               font-family: inherit;
@@ -340,7 +344,7 @@ label.utrecht-form-label {
 
       .info-image-container {
         max-width: 300px;
-        margin: 40px auto;
+        margin: 0 auto;
       }
 
       .question.question-type-none {
@@ -363,7 +367,7 @@ label.utrecht-form-label {
           .info-field-description {
             color: var(--youth-outro-card-description-color);
             font-size: var(--youth-outro-card-description-font-size);
-            margin-top: 32px;
+            margin-top: 0;
             text-align: center;
             order: 1;
           }
@@ -381,7 +385,7 @@ label.utrecht-form-label {
         background: #fff;
         font-family: "TheSans B4 SemiLight";
         font-weight: 500;
-        font-size: 20px;
+        font-size: 18px;
         line-height: 130%;
         text-align: center;
 
@@ -407,7 +411,7 @@ label.utrecht-form-label {
         font-family: "TheSans B4 SemiLight";
         font-weight: 500;
         font-size: 18px;
-        line-height: 150%;
+        line-height: 130%;
         text-align: center;
         height: 42px;
         border-radius: 3px;
@@ -644,7 +648,7 @@ label.utrecht-form-label {
 
           &:has(input:checked) {
             img {
-              border: solid 3px #1d6b34;
+              border: solid 3px var(--youth-intro-card-background-color, #1D6B34);
               box-shadow: 0px 7px 8px 5px rgba(0, 0, 0, 0.15);
             }
           }
@@ -654,7 +658,7 @@ label.utrecht-form-label {
             height: 100%;
             width: 100%;
             border-radius: 10px;
-            border: solid 0px #1d6b34;
+            border: solid 0px var(--youth-intro-card-background-color, #1D6B34);
 
             transition: all 0.3s ease;
           }
@@ -900,7 +904,7 @@ label.utrecht-form-label {
 
 
       i {
-        color: #1d6b34;
+        color: var(--youth-intro-card-background-color, #1D6B34);
         font-style: normal;
         font-weight: inherit;
         font-family: inherit;
@@ -1146,6 +1150,29 @@ label.utrecht-form-label {
             align-self: center;
           }
         }
+
+        &.--youth-outro {
+          display: grid;
+          grid-auto-rows: auto;
+          padding-bottom: 30px;
+
+          .info-field-container {
+            display: grid;
+            grid-template-rows: 1fr minmax(auto, 200px) 1fr;
+            height: 100%;
+            max-height: unset;
+            gap: 20px;
+            padding: 0;
+          }
+
+          .info-block-buttons {
+            align-self: end;
+          }
+
+          .utrecht-form-field-error-message.error-message {
+            display: none;
+          }
+        }
       }
     }
 
@@ -1172,6 +1199,7 @@ label.utrecht-form-label {
 
 
 .osc:has(.--youth) {
+
   &:has(.dilemma-back-button:not([disabled])),
   &:has(.swipe-back-button:not([disabled])) {
     .osc-enquete-item-content.--youth .button-group.--flex .utrecht-button--secondary-action {
