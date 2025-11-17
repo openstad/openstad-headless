@@ -285,8 +285,8 @@ app.use(async function (req, res, next) {
   }
 
   if (Object.keys(projects).length === 0) {
-    console.log('No config for projects found');
-    return res.status(500).json({ error: 'No projects found' });
+    // fallback to generic 404
+    return res.status(404).send(`Error: No projects found`);
   }
 
   next();

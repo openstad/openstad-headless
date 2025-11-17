@@ -69,7 +69,7 @@
     "mjml-browser": "^5.0.0-alpha.6",
     "next": "^14.2.30",
     "nunjucks": "^3.2.4",
-    "pino": "^8.15.1",
+    "pino": "^10.1.0",
     "postcss": "^8.4.38",
     "prismjs": "^1.29.0",
     "radix-ui": "^1.0.1",

@@ -11,6 +11,15 @@ import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
 import { FormValue } from "@openstad-headless/form/src/form";
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
+
 export type CheckboxFieldProps = {
     title: string;
     overrideDefaultValue?: FormValue;
@@ -34,6 +43,7 @@ export type CheckboxFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    randomizeItems?: boolean;
     value?: FormValue;
 }
 
@@ -53,7 +63,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        maxChoicesMessage = '',
        randomId= '',
        fieldInvalid= false,
-       overrideDefaultValue,
+       randomizeItems = false,
+       overrideDefaultValue
 }) => {
     let initialValue = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
 
@@ -63,19 +74,28 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
     const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+    const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;
     const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
 
     useEffect(() => {
-        const initialOtherOptionValues: { [key: string]: string } = {};
-        choices?.forEach((choice, index) => {
-            if (choice.isOtherOption) {
-                initialOtherOptionValues[`${fieldKey}_${index}_other`] = "";
+        let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
+
+        if (randomizeItems) {
+            const storageKey = `randomizedChoices_${fieldKey}`;
+            const stored = sessionStorage.getItem(storageKey);
+            if (stored) {
+                setDisplayChoices(JSON.parse(stored));
+            } else {
+                const shuffled = shuffleArray(normalizedChoices);
+                setDisplayChoices(shuffled);
+                sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
             }
-        });
-        setOtherOptionValues(initialOtherOptionValues);
-    }, [choices, fieldKey]);
+        } else {
+            setDisplayChoices(normalizedChoices);
+        }
+    }, [choices, fieldKey, randomizeItems]);
 
     useEffect(() => {
         if (onChange) {
@@ -176,7 +196,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     </figure>
                 )}
 
-                {choices?.map((choice, index) => (
+                {displayChoices?.map((choice, index) => (
                     <>
                         <FormField type="checkbox" key={index}>
                             <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">

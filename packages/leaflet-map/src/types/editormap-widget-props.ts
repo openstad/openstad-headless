@@ -2,6 +2,7 @@ import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import type { MapPropsType } from '../types/index';
 import { MarkerIconType } from './marker-icon';
 import { MarkerProps } from './marker-props';
+import { FormValue } from '@openstad-headless/form/src/form';
 
 export type EditorMapWidgetProps = BaseProps &
   ProjectSettingProps &
@@ -14,4 +15,6 @@ export type EditorMapWidgetProps = BaseProps &
     fieldRequired?: boolean;
     minZoom: number;
     maxZoom: number;
+    overrideDefaultValue?: FormValue;
+    defaultValue?: FormValue;
   };

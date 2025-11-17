@@ -83,8 +83,9 @@ const formSchema = z.object({
         text: z.string().optional(),
       })),
     })
-      .optional(),
+    .optional(),
   multiple: z.boolean().optional(),
+  randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
@@ -187,6 +188,7 @@ export default function WidgetEnqueteItems(
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
+          randomizeItems: values.randomizeItems || false,
           image: values.image || '',
           image_b: values.image_b || '',
           description_b: values.description_b || '',
@@ -321,6 +323,7 @@ export default function WidgetEnqueteItems(
     variant: 'text input',
     options: [],
     multiple: false,
+    randomizeItems: false,
     image: '',
     imageAlt: '',
     imageDescription: '',
@@ -382,6 +385,7 @@ export default function WidgetEnqueteItems(
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
+        randomizeItems: selectedItem.randomizeItems || false,
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
@@ -843,6 +847,35 @@ export default function WidgetEnqueteItems(
                                   )}
                                 />
                               )}
+                              {form.watch('questionType') !== 'sort' && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.isOtherOption`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
+                                        formulier.
+                                        Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
 
                               {form.watch('questionType') === 'multiple' && (
                                 <FormField
@@ -888,7 +921,16 @@ export default function WidgetEnqueteItems(
                                   form.resetField('imageOptionUpload');
                                 }}
                               />
+                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                  form.resetField('imageOptionUpload');
+                                }}
+                              />
 
+                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                                <div style={{ position: 'relative' }}>
+                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                </div>
+                              )}
                               {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
                                 <div style={{ position: 'relative' }}>
                                   <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
@@ -1733,6 +1775,31 @@ export default function WidgetEnqueteItems(
                             </Select>
                             <FormMessage />
                           </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {(form.watch('questionType') === 'multiplechoice' || form.watch('questionType') === 'multiple') && (
+                      <FormField
+                        control={form.control}
+                        // @ts-ignore
+                        name={`randomizeItems`}
+                        render={({ field }) => (
+                          <>
+                            <FormItem
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                                flexDirection: 'row',
+                                marginTop: '10px'
+                              }}>
+                              {YesNoSelect(field, props)}
+                              <FormLabel
+                                style={{ marginTop: 0, marginLeft: '6px' }}>Willekeurige volgorde</FormLabel>
+                              <FormMessage />
+                            </FormItem>
+                          </>
                         )}
                       />
                     )}

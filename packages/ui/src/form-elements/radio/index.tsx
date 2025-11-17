@@ -13,6 +13,15 @@ import TextInput from "../text";
 import { useEffect } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
+
 export type RadioboxFieldProps = {
     title: string;
     overrideDefaultValue?: FormValue;
@@ -34,6 +43,7 @@ export type RadioboxFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    randomizeItems?: boolean;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -50,11 +60,13 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
-    overrideDefaultValue,
+    randomizeItems = false,
+    overrideDefaultValue
 }) => {
     const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
     const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+    const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
     const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
 
     class HtmlContent extends React.Component<{ html: any }> {
@@ -65,14 +77,32 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     }
 
     useEffect(() => {
+        let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
+
+        if (randomizeItems) {
+            const storageKey = `randomizedChoices_${fieldKey}`;
+            const stored = sessionStorage.getItem(storageKey);
+            if (stored) {
+                setDisplayChoices(JSON.parse(stored));
+            } else {
+                const shuffled = shuffleArray(normalizedChoices);
+                setDisplayChoices(shuffled);
+                sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
+            }
+        } else {
+            setDisplayChoices(normalizedChoices);
+        }
+    }, [choices, fieldKey, randomizeItems]);
+
+    useEffect(() => {
         const initialOtherOptionValues: { [key: string]: string } = {};
-        choices?.forEach((choice, index) => {
-            if (choice.isOtherOption) {
+        displayChoices?.forEach((choice, index) => {
+            if (choice?.isOtherOption) {
                 initialOtherOptionValues[`${fieldKey}_${index}_other`] = "";
             }
         });
         setOtherOptionValues(initialOtherOptionValues);
-    }, [choices, fieldKey]);
+    }, [displayChoices, fieldKey]);
 
     const handleRadioChange = (value: string, index: number) => {
         setSelectedOption(value);
@@ -108,16 +138,6 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
             }, false);
         }
     };
-
-    if (choices) {
-        choices = choices.map((choice) => {
-            if (typeof choice === 'string') {
-                return {value: choice, label: choice}
-            } else {
-                return choice;
-            }
-        }) as [{ value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }];
-    }
 
     useEffect(() => {
         if(initialValue){
@@ -166,7 +186,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     </figure>
                 )}
 
-                {choices?.map((choice, index) => (
+                {displayChoices?.map((choice, index) => (
                     <>
                         <FormField type="radio" key={index}>
                             <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">

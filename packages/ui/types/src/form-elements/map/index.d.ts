@@ -24,7 +24,7 @@ export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
     infoImage?: string;
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
-    defaultValue?: string;
+    defaultValue?: FormValue;
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {

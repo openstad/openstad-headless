@@ -91,7 +91,9 @@ const RangeSlider: FC<RangeSliderProps> = ({
     const [fieldDisabled, setFieldDisabled] = useState(initialValue.skipQuestion || false);
 
     const [value, setValue] = useState<valueObject>(initialValue as valueObject);
-    const [rangeValue, setRangeValue] = useState<number>(parseInt(initialValue.value) || 50);
+
+    const parsed = parseInt(initialValue.value);
+    const [rangeValue, setRangeValue] = useState<number>( isNaN(parsed) ? 50 : parsed );
 
     class HtmlContent extends React.Component<{ html: any, bold?: boolean }> {
         render() {
@@ -239,7 +241,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 </Paragraph>
             </div>
 
-            { (skipQuestion && skipQuestionAllowExplanation) && (
+            { skipQuestion && (
                 <div className="skip-question-container">
                     <Spacer size={2} />
                     <FormLabel htmlFor={`${randomId}_skip`} type="checkbox" className="--label-grid">
@@ -258,7 +260,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                         <span>{skipQuestionLabel}</span>
                     </FormLabel>
 
-                    { skipSelected && (
+                    { (skipSelected && skipQuestionAllowExplanation) && (
                         <div className="marginTop10 marginBottom15">
                             <Spacer size={2} />
                             <TextInput
