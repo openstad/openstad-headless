@@ -159,9 +159,10 @@ label.utrecht-form-label {
   pointer-events: none;
   height: 64px;
 
-  &:focus{
+  &:focus {
     outline: none;
-    &:after{
+
+    &:after {
       outline: 2px dashed var(--youth-next-button-background-color);
       outline-offset: 2px;
     }
@@ -1165,6 +1166,17 @@ label.utrecht-form-label {
           transform: translate(-50%, -50%) scale(1);
         }
       }
+    }
+  }
+}
+
+
+.osc:has(.--youth) {
+  &:has(.dilemma-back-button:not([disabled])),
+  &:has(.swipe-back-button:not([disabled])) {
+    .osc-enquete-item-content.--youth .button-group.--flex .utrecht-button--secondary-action {
+      display: none;
+      pointer-events: none;
     }
   }
 }
