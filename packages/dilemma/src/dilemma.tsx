@@ -219,6 +219,9 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     setIsFinished(unanswered.length === 0);
   }, [dilemmas, dilemmaCards, getUnansweredDilemmas]);
 
+  useEffect(() => {
+    console.log('test')
+  }, []);
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
       <div className="dilemma-field dilemma-finished" role="region" aria-live="polite">
