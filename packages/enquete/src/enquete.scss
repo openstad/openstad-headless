@@ -260,10 +260,6 @@ label.utrecht-form-label {
       display: none;
     }
 
-    fieldset.utrecht-form-fieldset__fieldset {
-      margin-bottom: 120px;
-    }
-
     .form-widget,
     .form-widget-container,
     .form-container,
@@ -1059,6 +1055,11 @@ label.utrecht-form-label {
     .dilemma-progress {
       z-index: 99;
       margin-right: 60px;
+    }
+
+    .osc-enquete-item-content.--youth fieldset.utrecht-form-fieldset__fieldset,
+    .dilemma-field .dilemma-finished-content .dilemma-summary{
+      margin-bottom: 120px;
     }
 
     .form-container {
