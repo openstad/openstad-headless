@@ -83,7 +83,7 @@ const formSchema = z.object({
         text: z.string().optional(),
       })),
     })
-    .optional(),
+      .optional(),
   multiple: z.boolean().optional(),
   randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
@@ -620,7 +620,7 @@ export default function WidgetEnqueteItems(
                         <div
                           key={index}
                           className={`flex cursor-pointer justify-between border border-secondary 
-                            ${(item.questionType === 'pagination' && item.trigger !== selectedItem?.trigger ) ? 'bg-[#f8f8f8]' : ''}
+                            ${(item.questionType === 'pagination' && item.trigger !== selectedItem?.trigger) ? 'bg-[#f8f8f8]' : ''}
                             ${item.trigger == selectedItem?.trigger && 'bg-secondary'}`}>
                           <span className="flex gap-2 py-3 px-2">
                             <ArrowUp
@@ -644,8 +644,8 @@ export default function WidgetEnqueteItems(
                               setMatrixOptions(matrixDefault);
                               setSettingOptions(false);
                             }}
-                            dangerouslySetInnerHTML={{__html: `${ item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : (item?.questionType === 'swipe' ? 'Swipe' : 'Geen titel'))}`}}
-                            >
+                            dangerouslySetInnerHTML={{ __html: `${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : (item?.questionType === 'swipe' ? 'Swipe' : 'Geen titel'))}` }}
+                          >
                           </span>
                           <span className="gap-2 py-3 px-2">
                             <X
@@ -1104,6 +1104,9 @@ export default function WidgetEnqueteItems(
                                         marginTop: '10px'
                                       }}>
                                       <FormLabel>Extra informatie</FormLabel>
+                                      <FormDescription>
+                                        Deze tekst wordt getoond in het informatiescherm dat verschijnt wanneer de gebruiker op de info-knop tikt.
+                                      </FormDescription>
                                       <Textarea rows={6} {...field} />
                                       <FormMessage />
                                     </FormItem>
