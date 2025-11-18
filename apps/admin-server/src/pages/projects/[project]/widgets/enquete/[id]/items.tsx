@@ -619,9 +619,9 @@ export default function WidgetEnqueteItems(
                       .map((item, index) => (
                         <div
                           key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
-                            'bg-secondary'
-                            }`}>
+                          className={`flex cursor-pointer justify-between border border-secondary 
+                            ${(item.questionType === 'pagination' && item.trigger !== selectedItem?.trigger ) ? 'bg-[#f8f8f8]' : ''}
+                            ${item.trigger == selectedItem?.trigger && 'bg-secondary'}`}>
                           <span className="flex gap-2 py-3 px-2">
                             <ArrowUp
                               className="cursor-pointer"
@@ -643,8 +643,9 @@ export default function WidgetEnqueteItems(
                               setOptions([]);
                               setMatrixOptions(matrixDefault);
                               setSettingOptions(false);
-                            }}>
-                            {`${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : 'Geen titel')}`}
+                            }}
+                            dangerouslySetInnerHTML={{__html: `${ item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : (item?.questionType === 'swipe' ? 'Swipe' : 'Geen titel'))}`}}
+                            >
                           </span>
                           <span className="gap-2 py-3 px-2">
                             <X
@@ -921,16 +922,7 @@ export default function WidgetEnqueteItems(
                                   form.resetField('imageOptionUpload');
                                 }}
                               />
-                                  form.setValue(`options.${activeOption}.titles.0.image`, image);
-                                  form.resetField('imageOptionUpload');
-                                }}
-                              />
 
-                              {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
-                                <div style={{ position: 'relative' }}>
-                                  <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
-                                </div>
-                              )}
                               {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
                                 <div style={{ position: 'relative' }}>
                                   <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
@@ -1256,7 +1248,7 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
-                    {form.watch('questionType') !== 'pagination' && (
+                    {(form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'pagination') && (
                       <>
                         <FormField
                           control={form.control}
@@ -1290,7 +1282,7 @@ export default function WidgetEnqueteItems(
                             )}
                           />
                         )}
-                        {form.watch('questionType') !== 'dilemma' && (
+                        {(form.watch('questionType') !== 'dilemma' && form.watch('questionType') !== 'swipe') && (
                           <FormField
                             control={form.control}
                             name="description"
@@ -1952,14 +1944,14 @@ export default function WidgetEnqueteItems(
                         setOptions([]);
                         setMatrixOptions(matrixDefault);
                       }}
-                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none' && form.watch('questionType') !== 'pagination'}
+                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none' && form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'swipe'}
                     >
                       {selectedItem
                         ? 'Sla wijzigingen op'
                         : 'Voeg item toe aan lijst'}
                     </Button>
                   </div>
-                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'pagination' && (
+                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'swipe' && (
                     <FormMessage>
                       {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
                     </FormMessage>
