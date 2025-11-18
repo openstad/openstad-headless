@@ -133,7 +133,7 @@ admin:
   deploymentContainer:
     name: admin
     # Docker image for this pod
-    image: ghcr.io/openstad/admin-server:v2.0.46
+    image: ghcr.io/openstad/admin-server:v2.0.47
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
@@ -189,7 +189,7 @@ auth:
   deploymentContainer:
     name: auth
     # Docker image for this pod
-    image: ghcr.io/openstad/auth-server:v2.0.46
+    image: ghcr.io/openstad/auth-server:v2.0.47
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -241,7 +241,7 @@ api:
   deploymentContainer:
     name: api-container
     # Docker image for this pod
-    image: ghcr.io/openstad/api-server:v2.0.46
+    image: ghcr.io/openstad/api-server:v2.0.47
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
@@ -316,7 +316,7 @@ image:
   deploymentContainer:
     name: image
     # Docker image for this pod
-    image: ghcr.io/openstad/image-server:v2.0.46
+    image: ghcr.io/openstad/image-server:v2.0.47
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
@@ -383,7 +383,7 @@ cms:
   deploymentContainer:
     name: cms-container
     # Docker image for this pod
-    image: ghcr.io/openstad/cms-server:v2.0.46
+    image: ghcr.io/openstad/cms-server:v2.0.47
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
