@@ -34,9 +34,8 @@ ENV BUILD_ENV=${BUILD_ENV}
 
 # set Cypress cache to a writable temp path (avoids issues with /root/.cache)
 ENV CYPRESS_CACHE_FOLDER=/tmp/CypressCache
-ENV CYPRESS_INSTALL_BINARY=/opt/openstad-headless/vendor/cypress-15.6.0.zip
 
-RUN npm ci --legacy-peer-deps -ws
+RUN CYPRESS_INSTALL_BINARY=/opt/openstad-headless/vendor/cypress-15.6.0.zip npm ci --legacy-peer-deps -ws
 
 FROM builder AS base
 
