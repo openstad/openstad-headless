@@ -341,7 +341,8 @@ router
   .get(async function (req, res, next) {
     const projectId = req.params.projectId;
     if(req.query.redirectUri && projectId && await isRedirectAllowed(projectId, req.query.redirectUri)){
-      return res.redirect(req.query.redirectUri);
+      const redirectUri = req.query.redirectUri + (req.query.redirectUri.includes('?') ? '&' : '?') + 'openstadlogout=true';
+      return res.redirect(redirectUri);
     }else if(req.query.redirectUri){
       return next(createError(403, 'redirectUri not found in allowlist.'));
     }

@@ -12,12 +12,28 @@ export default function useCurrentUser(props) {
   );
 
   async function getCurrentUser() {
+    const session = new SessionStorage(props);
+
+    // jwt in url: use and remove from url
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.has('openstadlogout')) {
+      session.remove('cmsUser');
+      session.remove('openStadUser');
+      
+      let url = window.location.href;
+      url = url.replace(new RegExp(`[?&]openstadlogout=true`), '');
+      history.replaceState(null, '', url);
+      self.currentUser = null;
+      return {}
+    }
+    
     // console.log('GETCURRENTUSER', self.currentUser);
     if (self.currentUser && self.currentUser.id) {
       // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
       return self.currentUser;
     }
-
+    
     // get user from props
     let initialUser = {};
     try {
@@ -27,11 +43,6 @@ export default function useCurrentUser(props) {
     if (initialUser.id && initialUser.projectId == self.projectId) {
       return initialUser;
     }
-
-    const session = new SessionStorage(props);
-
-    // jwt in url: use and remove from url
-    const params = new URLSearchParams(window.location.search);
     let jwt;
     if (params.has('openstadlogintoken')) {
       jwt = params.get('openstadlogintoken');
