@@ -376,9 +376,11 @@ function getWidgetJavascriptOutput(
         const currentScript = document.currentScript;
           currentScript.insertAdjacentHTML('afterend', \`<div class="openstad" id="\${randomComponentId}"></div>\`);
 
-          const redirectUri = encodeURI(window.location.href);
+          const redirectUri = new URL(encodeURI(window.location.href));
+          redirectUri.searchParams.delete('openstadlogout');
+          redirectUri.searchParams.delete('openstadlogintoken');
           
-          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
+          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri.toString());
           
           function insertCssLinks(urls) {
             const head = document.querySelector('head');
