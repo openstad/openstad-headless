@@ -197,6 +197,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         }
     }
 
+    const submitButtonText = canEdit && existingResource && existingResource.id && existingResource.update
+        ? "Opslaan"
+        : submitButton || "Versturen";
 
     return ( isLoading || !fillDefaults ) ? null : (
         <div className="osc">
@@ -226,7 +229,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         fields={formFields}
                         secondaryLabel={saveConceptButton || ""}
                         submitHandler={onSubmit}
-                        submitText={submitButton || "Versturen"}
+                        submitText={submitButtonText}
                         title=""
                         submitDisabled={disableSubmit}
                         {...props}
