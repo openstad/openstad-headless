@@ -268,6 +268,7 @@ label.utrecht-form-label {
     .form-widget-container,
     .form-container,
     .question.question-type-none {
+      max-height: 100dvh;
       height: 100%;
     }
 
@@ -562,11 +563,11 @@ label.utrecht-form-label {
 
         .info-image-container {
           height: 100%;
+          max-height: 350px;
 
           img {
             max-height: unset;
             object-position: center;
-            height: 100%;
             object-fit: scale-down;
           }
         }
