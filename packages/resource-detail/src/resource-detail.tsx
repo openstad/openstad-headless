@@ -477,35 +477,39 @@ function ResourceDetail({
         ) : null}
       </div>
 
-      {canDelete && (
-        <>
-          <Spacer size={2} />
-          <Button
-            appearance="primary-action-button"
-            onClick={() => {
-              if (confirm("Deze actie verwijderd de resource"))
-                onRemoveClick(resource);
-            }}
-          >
-            Verwijder de inzending
-          </Button>
-        </>
-      )}
+      <ButtonGroup>
+        {canDelete && (
+          <>
+            <Spacer size={2} />
+            <Button
+              appearance="primary-action-button"
+              onClick={() => {
+                if (confirm("Deze actie verwijderd de resource"))
+                  onRemoveClick(resource);
+              }}
+            >
+              <Icon icon="ri-delete-bin-line"></Icon>
+              Verwijder de inzending
+            </Button>
+          </>
+        )}
 
-      { (canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
-        <>
-          <Spacer size={2} />
-          <Button
-            appearance="primary-action-button"
-            onClick={() => {
-              const hrefUrl = `${urlWithResourceFormForEditing}?openstadResourceId=${resource.id}`;
-              document.location.href = hrefUrl;
-            }}
-          >
-            Bewerk de inzending
-          </Button>
-        </>
-      ) }
+        { (canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
+          <>
+            <Spacer size={2} />
+            <Button
+              appearance="primary-action-button"
+              onClick={() => {
+                const hrefUrl = `${urlWithResourceFormForEditing}?openstadResourceId=${resource.id}`;
+                document.location.href = hrefUrl;
+              }}
+            >
+              <Icon icon="ri-edit-box-line"></Icon>
+              Bewerk de inzending
+            </Button>
+          </>
+        ) }
+      </ButtonGroup>
 
       <Spacer size={2} />
 

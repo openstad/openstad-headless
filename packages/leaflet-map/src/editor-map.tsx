@@ -41,6 +41,13 @@ const EditorMap = ({
     icon: initialValue?.icon || markerIcon,
     doNotCluster: true,
   });
+
+  useEffect(() => {
+    if (isValidLocation(initialValue) && onChange) {
+      onChange({ name: fieldName, value: initialValue });
+    }
+  }, [JSON.stringify(initialValue)]);
+
   parseLocation(currentEditorMarker); // unify location format
 
   let [currentCenter, setCurrentCenter] = useState(center);

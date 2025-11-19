@@ -362,9 +362,9 @@ export default function WidgetResourceDetailDisplay(
               name="urlWithResourceFormForEditing"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Wat is de URL waar het formulier op staat?</FormLabel>
+                  <FormLabel>Wat is de URL van de pagina waar het formulier staat?</FormLabel>
                   <FormDescription>
-                    Vul hier de URL in waar het formulier staat waarmee de gebruiker zijn inzending kan bewerken. Er wordt automatisch ?openstadResourceId=[id] aan de URL toegevoegd.
+                    Vul hier de URL in van de pagina waar het inzendingformulier staat. Op die pagina kan de gebruiker zijn inzending bewerken. Er wordt automatisch ?openstadResourceId=[id] aan de URL toegevoegd.
                   </FormDescription>
                   <FormControl>
                     <Input {...field} />
