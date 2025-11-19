@@ -158,16 +158,34 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         return formData;
     }
 
+    const redirectAfterSaveOrCreate = (resource: {id?: string}, reloadPageAsFallback = false) => {
+        if(props.redirectUrl && resource.id) {
+            let redirectUrl = props.redirectUrl.replace("[id]", resource.id);
+            if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+                redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
+            }
+            document.location.href = redirectUrl.replace("[id]", resource.id);
+        } else if (reloadPageAsFallback) {
+            window.location.reload();
+        }
+    }
+
+    const editMode = canEdit && existingResource && existingResource.id && existingResource.update;
+    const submitButtonText = editMode
+      ? "Opslaan"
+      : submitButton || "Versturen";
+
     async function onSubmit(formData: any) {
         setDisableSubmit(true);
 
         const finalFormData = configureFormData(formData, true);
 
         try {
-            if (canEdit && existingResource && existingResource.id && existingResource.update) {
+            if (editMode) {
                 try {
                     await existingResource.update(finalFormData);
                     notifySuccessEdit();
+                    redirectAfterSaveOrCreate(existingResource, true);
                 } catch (e) {
                     notifyFailedEdit(e.message || 'Inzending bewerken mislukt');
                 } finally {
@@ -180,23 +198,14 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             const result = await createResource(finalFormData, props.widgetId);
             if (result) {
                 notifySuccess();
-
-                if(props.redirectUrl) {
-                    let redirectUrl = props.redirectUrl.replace("[id]", result.id);
-                    if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
-                        redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
-                    }
-                    document.location.href = redirectUrl.replace("[id]", result.id);
-                } else {
-                    setDisableSubmit(false);
-                }
+                redirectAfterSaveOrCreate(result);
             }
+            setDisableSubmit(false);
         } catch (e) {
             notifyFailed();
             setDisableSubmit(false);
         }
     }
-
 
     return ( isLoading || !fillDefaults ) ? null : (
         <div className="osc">
@@ -226,9 +235,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         fields={formFields}
                         secondaryLabel={saveConceptButton || ""}
                         submitHandler={onSubmit}
-                        submitText={submitButton || "Versturen"}
+                        submitText={submitButtonText}
                         title=""
                         submitDisabled={disableSubmit}
+                        allowResetAfterSubmit={editMode}
                         {...props}
                     />
                 )}

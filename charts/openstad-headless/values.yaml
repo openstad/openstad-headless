@@ -257,6 +257,7 @@ api:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
     ingressClassName: nginx
@@ -273,6 +274,7 @@ api:
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
         more_set_headers "X-Robots-Tag: noindex, nofollow";
+        more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     # Is the TLS for this ingress managed by Openstad?
     # Set to `false` if the secrets are managed manually -- compatible with older versions of Openstad
     # Set to `true` if you want Openstad to manage the TLS in the ingress
@@ -399,6 +401,7 @@ cms:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
     ingressClassName: nginx

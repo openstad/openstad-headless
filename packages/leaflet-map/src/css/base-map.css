@@ -152,6 +152,7 @@
   color: white;
   text-shadow: 0 0 4px black;
   font-size: .9rem;
+  pointer-events: all;
 }
 
 .leaflet-overlay-pane .leaflet-interactive {

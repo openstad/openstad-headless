@@ -13,7 +13,7 @@ export default {
 
   update: async function({ projectId, resourceId }, data) {
 
-    let url = `/api/project/${projectId}/resource/${resourceId}`;
+    let url = `/api/project/${projectId}/resource/${resourceId}?includeGlobalTags=true`;
     let headers = {
       'Content-Type': 'application/json'
     };

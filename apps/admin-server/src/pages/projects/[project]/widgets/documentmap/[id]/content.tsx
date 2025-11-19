@@ -39,6 +39,8 @@ const formSchema = z.object({
     maxCharactersWarning: z.string().optional().default("Je hebt {maxCharacters} karakters teveel"),
     minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
     maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+    displayResourceTitle: z.string().optional(),
+    displayResourceSummary: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -74,6 +76,8 @@ export default function DocumentContent(
             maxCharactersWarning: props?.maxCharactersWarning || 'Je hebt {maxCharacters} karakters teveel',
             minCharactersError: props?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
             maxCharactersError: props?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+            displayResourceTitle: props?.displayResourceTitle || 'yes',
+            displayResourceSummary: props?.displayResourceSummary || 'yes',
         },
     });
 
@@ -345,19 +349,19 @@ export default function DocumentContent(
 
                     <FormField
                         control={form.control}
-                        name="displayResourceDescription"
+                        name="displayResourceTitle"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Wil je de beschrijving van de resource tonen?
+                                    Wil je de titel van de resource tonen?
                                 </FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
-                                    value={field.value || 'no'}
+                                    value={field.value || 'yes'}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="no" />
+                                            <SelectValue placeholder="yes" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -369,6 +373,60 @@ export default function DocumentContent(
                             </FormItem>
                         )}
                     />
+
+                    <FormField
+                        control={form.control}
+                        name="displayResourceSummary"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wil je de samenvatting van de resource tonen?
+                                </FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || 'yes'}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="yes" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="no">Nee</SelectItem>
+                                        <SelectItem value="yes">Ja</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                  <FormField
+                    control={form.control}
+                    name="displayResourceDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Wil je de beschrijving van de resource tonen?
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || 'no'}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="no" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="no">Nee</SelectItem>
+                            <SelectItem value="yes">Ja</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                     <Heading size="lg" className="mt-8 mb-2">Map Instellingen</Heading>
 

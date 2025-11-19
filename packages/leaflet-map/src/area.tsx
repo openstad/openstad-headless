@@ -162,7 +162,18 @@ export function Area({
                   </Popup>
                 </>
               ) : (
-                <Tooltip permanent direction="center">{item.title}</Tooltip>
+                <Tooltip
+                  permanent
+                  direction="center"
+                >
+                  <span
+                    onClick={() => {
+                      if (item.url) window.open(item.url, '_self');
+                    }}
+                  >
+                    {item.title}
+                  </span>
+                </Tooltip>
               )}
             </Polygon>
 
