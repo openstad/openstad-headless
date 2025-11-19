@@ -22,21 +22,16 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 
 const formSchema = z.object({
   allowNickname: z.boolean(),
-  minLength: z.number().optional(),
-  maxLength: z.number().optional(),
   allowUserEdit: z.boolean().optional(),
+  loginButtonText: z.string().optional(),
+  loginRequiredText: z.string().optional(),
+  showLogoutButton: z.boolean().optional(),
 });
 type Formdata = z.infer<typeof formSchema>;
 
 export default function AccountDisplay(
   props: AccountWidgetProps & EditFieldProps<AccountWidgetProps>
 ) {
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-
-  const router = useRouter();
-
-  const projectId = router.query.project as string;
-
   function onSubmit(values: Formdata) {
     props.updateConfig({ ...props, ...values });
   }
@@ -45,11 +40,14 @@ export default function AccountDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       allowNickname: props.allowNickname,
-      minLength: props.minLength,
-      maxLength: props.maxLength,
       allowUserEdit: props.allowUserEdit,
+      showLogoutButton: props.showLogoutButton || false,
+      loginButtonText: typeof(props.loginButtonText) === 'undefined' ? 'Inloggen' : props.loginButtonText,
+      loginRequiredText: typeof(props.loginRequiredText) === 'undefined' ? 'Je moet ingelogd zijn om verder te gaan.' : props.loginRequiredText,
     },
   });
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -60,43 +58,6 @@ export default function AccountDisplay(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
-
-        {/* Issues when saving the form, commented for now since they are not mandatory */}
-        {/* <FormField
-          control={form.control}
-          name="minLength"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Minimum aantal tekens</FormLabel>
-              <FormControl>
-                <Input
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="maxLength"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Maximum aantal tekens</FormLabel>
-              <FormControl>
-                <Input
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        /> */}
 
         <FormField
           control={form.control}
@@ -117,6 +78,63 @@ export default function AccountDisplay(
             <FormItem className="col-span-1">
               <FormLabel>Bewerken toestaan</FormLabel>
               {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="showLogoutButton"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>Toon uitlogknop</FormLabel>
+              {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="loginButtonText"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Tekst voor de inlogknop
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
+        <FormField
+          control={form.control}
+          name="loginRequiredText"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Tekst die getoond wordt boven de inlogknop
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

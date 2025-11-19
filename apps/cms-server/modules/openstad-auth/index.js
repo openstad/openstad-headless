@@ -47,6 +47,8 @@ module.exports = {
         }
         
         if (req.query.openstadlogout) {
+          if (!req.session) return next();
+
           req.session.destroy(() => {});
           return next();
         }
