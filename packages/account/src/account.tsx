@@ -6,6 +6,8 @@ import React, { useEffect, useState } from 'react';
 import './account.css';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import DataStore from '@openstad-headless/data-store/src';
+import hasRole from "../../lib/has-role";
+import { Banner, Spacer } from '@openstad-headless/ui/src';
 
 export type AccountWidgetProps = BaseProps &
   AccountProps &
@@ -25,6 +27,9 @@ export type AccountProps = {
   info_description?: string;
   user_title?: string;
   user_description?: string;
+  loginButtonText?: string;
+  loginRequiredText?: string;
+  showLogoutButton?: boolean;
 };
 
 type FormData = {
@@ -98,6 +103,9 @@ function Account({
       label: 'Gebruikersnaam',
     }
   },
+  loginButtonText = undefined,
+  loginRequiredText = undefined,
+  showLogoutButton = false,
   ...props
 }: AccountWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -206,108 +214,144 @@ function Account({
   }
 
   return (
-    <section className="account">
-      <div>
-        {overview_title && <Heading level={2}>{overview_title}</Heading>}
-        {overview_description && <Paragraph>{overview_description}</Paragraph>}
-
-        {Object.entries(formData).map((field, index) => (
-          field[0] === 'email' && (
-            <FormFieldTextbox
-              label={field[1].label}
-              name={field[1].label}
-              description="Niet aanpasbaar"
-              placeholder={field[1].label}
-              maxLength={maxLength}
-              minLength={minLength}
-              value={userFormData?.email?.value}
-              readOnly
-              key={index}
-            />
-          )
-        ))}
-      </div>
-      <div>
-        {info_title && <Heading level={2}>{info_title}</Heading>}
-        {info_description && <Paragraph> {info_description} </Paragraph>}
-
-        {Object.entries(userFormData).map((field, index) => (
-          field[0] !== 'nickname' && field[0] !== 'email' && (
-            <FormFieldTextbox
-              label={field[1].label}
-              name={field[1].label}
-              placeholder={field[1].label}
-              maxLength={maxLength}
-              minLength={minLength}
-              value={field[1].value}
-              onChange={(e) => {
-                const target = e.target as HTMLInputElement; // Type assertion
-                setUserFormData((prev) => ({
-                  ...prev,
-                  [field[0]]: {
-                    label: target.name,
-                    value: target.value
-                  },
-                }));
+    <section className="account osc">
+      {!hasRole(currentUser?.data, 'member') ? (
+        <>
+          <Banner className="big">
+            <Heading level={4} appearance='utrecht-heading-6'>{loginRequiredText || 'Je moet ingelogd zijn om verder te gaan.'}</Heading>
+            <Spacer size={1} />
+            <Button
+              type="button"
+              onClick={() => {
+                document.location.href = props.login?.url || '';
               }}
-              readOnly={!canEditUser}
-              key={index}
-            />
-          )
-        ))}
+              appearance="primary-action-button"
+            >
+              {loginButtonText || 'Inloggen'}
+            </Button>
+          </Banner>
+          <Spacer size={2} />
+        </>
+      ) : (
+        <>
+          <div>
+            {overview_title && <Heading level={2}>{overview_title}</Heading>}
+            {overview_description && <Paragraph>{overview_description}</Paragraph>}
 
-        {allowUserEdit && (
-          <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-            if (canEditUser) {
-              saveUserData(userFormData);
-            }
-            setCanEditUser(!canEditUser);
-          }}>{canEditUser ? editButtonText[1] : editButtonText[0]}</Button>
-        )}
+            {Object.entries(formData).map((field, index) => (
+              field[0] === 'email' && (
+                <FormFieldTextbox
+                  label={field[1].label}
+                  name={field[1].label}
+                  description="Niet aanpasbaar"
+                  placeholder={field[1].label}
+                  maxLength={maxLength}
+                  minLength={minLength}
+                  value={userFormData?.email?.value}
+                  readOnly
+                  key={index}
+                />
+              )
+            ))}
+          </div>
+          <div>
+            {info_title && <Heading level={2}>{info_title}</Heading>}
+            {info_description && <Paragraph> {info_description} </Paragraph>}
+
+            {Object.entries(userFormData).map((field, index) => (
+              field[0] !== 'nickname' && field[0] !== 'email' && (
+                <FormFieldTextbox
+                  label={field[1].label}
+                  name={field[1].label}
+                  placeholder={field[1].label}
+                  maxLength={maxLength}
+                  minLength={minLength}
+                  value={field[1].value}
+                  onChange={(e) => {
+                    const target = e.target as HTMLInputElement; // Type assertion
+                    setUserFormData((prev) => ({
+                      ...prev,
+                      [field[0]]: {
+                        label: target.name,
+                        value: target.value
+                      },
+                    }));
+                  }}
+                  readOnly={!canEditUser}
+                  key={index}
+                />
+              )
+            ))}
+
+            {allowUserEdit && (
+              <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
+                if (canEditUser) {
+                  saveUserData(userFormData);
+                }
+                setCanEditUser(!canEditUser);
+              }}>{canEditUser ? editButtonText[1] : editButtonText[0]}</Button>
+            )}
 
 
-      </div>
-      {allowNickname && (
-        <div>
-          {user_title && <Heading level={2}>{user_title}</Heading>}
-          {user_description && <Paragraph>{user_description}</Paragraph>}
+          </div>
+          {allowNickname && (
+            <div>
+              {user_title && <Heading level={2}>{user_title}</Heading>}
+              {user_description && <Paragraph>{user_description}</Paragraph>}
 
-          {Object.entries(formData).map((field, index) => (
-            field[0] === 'nickname' && (
-              <FormFieldTextbox
-                label={field[1].label}
-                name={field[1].label}
-                maxLength={maxLength}
-                minLength={minLength}
-                placeholder={field[1].label}
-                value={userFormData?.nickname?.value}
-                onChange={(e) => {
-                  const target = e.target as HTMLInputElement; // Type assertion
-                  setUserFormData({
-                    ...userFormData,
-                    nickname: {
-                      value: target.value,
-                      label: userFormData?.nickname?.label || '', // Use optional chaining and default to an empty string if undefined
-                    },
-                  });
-                }}
-                readOnly={!canEditNickname}
-                key={index}
-              />
-            )
-          ))}
+              {Object.entries(formData).map((field, index) => (
+                field[0] === 'nickname' && (
+                  <FormFieldTextbox
+                    label={field[1].label}
+                    name={field[1].label}
+                    maxLength={maxLength}
+                    minLength={minLength}
+                    placeholder={field[1].label}
+                    value={userFormData?.nickname?.value}
+                    onChange={(e) => {
+                      const target = e.target as HTMLInputElement; // Type assertion
+                      setUserFormData({
+                        ...userFormData,
+                        nickname: {
+                          value: target.value,
+                          label: userFormData?.nickname?.label || '', // Use optional chaining and default to an empty string if undefined
+                        },
+                      });
+                    }}
+                    readOnly={!canEditNickname}
+                    key={index}
+                  />
+                )
+              ))}
 
 
-          {allowUserEdit && (
-            <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-              if (canEditNickname) {
-                saveUserData(userFormData);
-              }
-              setCanEditNickname(!canEditNickname)
-            }}>{canEditNickname ? editButtonText[1] : editButtonText[0]}</Button>
+              {allowUserEdit && (
+                <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
+                  if (canEditNickname) {
+                    saveUserData(userFormData);
+                  }
+                  setCanEditNickname(!canEditNickname)
+                }}>{canEditNickname ? editButtonText[1] : editButtonText[0]}</Button>
+              )}
+
+            </div>
           )}
 
-        </div>
+          {showLogoutButton && (
+            <div className="account-logout-button-wrapper">
+              <Button
+                className="account-logout-button"
+                appearance="primary-action-button"
+                onClick={() => {
+                  document.location.href = props.logout?.url || '';
+                }}
+              >
+                Uitloggen
+              </Button>
+            </div>
+          )}
+
+        </>
       )}
     </section>
   );
