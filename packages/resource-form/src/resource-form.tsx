@@ -158,13 +158,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         return formData;
     }
 
-    const redirectAfterSaveOrCreate = (resource: {id?: string}) => {
+    const redirectAfterSaveOrCreate = (resource: {id?: string}, reloadPageAsFallback = false) => {
         if(props.redirectUrl && resource.id) {
             let redirectUrl = props.redirectUrl.replace("[id]", resource.id);
             if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
                 redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
             }
             document.location.href = redirectUrl.replace("[id]", resource.id);
+        } else if (reloadPageAsFallback) {
+            window.location.reload();
         }
     }
 
@@ -183,7 +185,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                 try {
                     await existingResource.update(finalFormData);
                     notifySuccessEdit();
-                    redirectAfterSaveOrCreate(existingResource);
+                    redirectAfterSaveOrCreate(existingResource, true);
                 } catch (e) {
                     notifyFailedEdit(e.message || 'Inzending bewerken mislukt');
                 } finally {
