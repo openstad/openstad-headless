@@ -28,7 +28,7 @@
         {% endif %}
         <div class="card-content">
           <div class="date">
-            {{ post.createdAt | date('MMMM D, YYYY')}}
+            {{ post.publishedAt | date('MMMM D, YYYY')}}
           </div>
           <h3 class="utrecht-heading-4">{{ post.title }}</h3>
           <p class="utrecht-paragraph">{{ post.summary | truncate(150) }}</p>
