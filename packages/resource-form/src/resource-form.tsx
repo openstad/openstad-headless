@@ -104,10 +104,12 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
                         if (typeof tagsArray === 'object') {
                             tagsArray?.map((value) => {
-                                tags.push(value);
+                                const pushValue = typeof(value) === 'string' ? Number(value) : value;
+                                tags.push(pushValue);
                             });
                         } else if (typeof tagsArray === 'string' || typeof tagsArray === 'number') {
-                            tags.push(tagsArray);
+                            const pushValue = typeof(tagsArray) === 'string' ? Number(tagsArray) : tagsArray;
+                            tags.push(pushValue);
                         }
                     } catch (error) {
                         console.error(`Error parsing tags for key ${key}:`, error);
