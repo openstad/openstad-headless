@@ -51,6 +51,8 @@ type booleanProps = {
   | 'clickableImage'
   | 'displayStatusBar'
   | 'displayEditResourceButton'
+  | 'displayDeleteButton'
+  | 'displayDeleteEditButtonOnTop'
   | 'displaySocials']: boolean | undefined;
 };
 
@@ -123,6 +125,7 @@ function ResourceDetail({
   displayEditResourceButton = false,
   urlWithResourceFormForEditing = '',
   displayDeleteButton = true,
+  displayDeleteEditButtonOnTop = false,
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
@@ -298,8 +301,45 @@ function ResourceDetail({
     enableOnOffSwitching: resourceOverviewMapWidget?.enableOnOffSwitching || false,
   } : {};
 
+  const GroupButtonDeleteEdit = () => (
+    <ButtonGroup>
+      { (displayDeleteButton && canDelete) && (
+        <>
+          <Spacer size={2} />
+          <Button
+            appearance="primary-action-button"
+            onClick={() => {
+              if (confirm("De inzending wordt verwijderd. Dit kan niet teruggedraaid worden. Doorgaan?"))
+                onRemoveClick(resource);
+            }}
+          >
+            <Icon icon="ri-delete-bin-line"></Icon>
+            Verwijder de inzending
+          </Button>
+        </>
+      )}
+
+      { (canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
+        <>
+          <Spacer size={2} />
+          <Button
+            appearance="primary-action-button"
+            onClick={() => {
+              const hrefUrl = `${urlWithResourceFormForEditing}?openstadResourceId=${resource.id}`;
+              document.location.href = hrefUrl;
+            }}
+          >
+            <Icon icon="ri-edit-box-line"></Icon>
+            Bewerk de inzending
+          </Button>
+        </>
+      ) }
+    </ButtonGroup>
+  )
+
   return (
-    <section>
+    <section className="osc-resource-detail-widget-container">
+      { displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit /> }
       <div
         className={`osc ${shouldHaveSideColumn
           ? 'osc-resource-detail-column-container'
@@ -479,39 +519,7 @@ function ResourceDetail({
         ) : null}
       </div>
 
-      <ButtonGroup>
-        { (displayDeleteButton && canDelete) && (
-          <>
-            <Spacer size={2} />
-            <Button
-              appearance="primary-action-button"
-              onClick={() => {
-                if (confirm("Deze actie verwijderd de resource"))
-                  onRemoveClick(resource);
-              }}
-            >
-              <Icon icon="ri-delete-bin-line"></Icon>
-              Verwijder de inzending
-            </Button>
-          </>
-        )}
-
-        { (canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
-          <>
-            <Spacer size={2} />
-            <Button
-              appearance="primary-action-button"
-              onClick={() => {
-                const hrefUrl = `${urlWithResourceFormForEditing}?openstadResourceId=${resource.id}`;
-                document.location.href = hrefUrl;
-              }}
-            >
-              <Icon icon="ri-edit-box-line"></Icon>
-              Bewerk de inzending
-            </Button>
-          </>
-        ) }
-      </ButtonGroup>
+      { !displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit /> }
 
       <Spacer size={2} />
 
