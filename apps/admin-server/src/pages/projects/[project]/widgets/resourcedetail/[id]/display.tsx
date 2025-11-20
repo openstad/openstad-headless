@@ -39,6 +39,7 @@ const formSchema = z.object({
   documentsDesc: z.string().optional(),
   clickableImage: z.boolean(),
   urlWithResourceFormForEditing: z.string().optional(),
+  displayDeleteButton: z.boolean().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -77,6 +78,7 @@ export default function WidgetResourceDetailDisplay(
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
       displayEditResourceButton: props?.displayEditResourceButton || false,
+      displayDeleteButton: undefinedToTrueOrProp(props?.displayDeleteButton),
       urlWithResourceFormForEditing: props?.urlWithResourceFormForEditing || '',
     },
   });
@@ -374,6 +376,20 @@ export default function WidgetResourceDetailDisplay(
               )}
             />
           )}
+
+          <FormField
+            control={form.control}
+            name="displayDeleteButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de knop om de inzending te verwijderen
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

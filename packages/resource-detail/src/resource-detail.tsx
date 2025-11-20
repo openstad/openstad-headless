@@ -67,6 +67,7 @@ export type ResourceDetailWidgetProps = {
     pageTitle?: boolean;
     backUrlText?: string;
     urlWithResourceFormForEditing?: string;
+    displayDeleteButton?: boolean;
   } & MapPropsType & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -121,6 +122,7 @@ function ResourceDetail({
   resourceOverviewMapWidget = {},
   displayEditResourceButton = false,
   urlWithResourceFormForEditing = '',
+  displayDeleteButton = true,
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
@@ -478,7 +480,7 @@ function ResourceDetail({
       </div>
 
       <ButtonGroup>
-        {canDelete && (
+        { (displayDeleteButton && canDelete) && (
           <>
             <Spacer size={2} />
             <Button
