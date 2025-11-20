@@ -729,8 +729,8 @@ function ResourceOverviewInner({
             });
 
           } else {
-            return tags?.some(tagId =>
-              tags.includes(tagId)
+            return resource.tags?.some((tag: { id: number }) =>
+              tags.includes(tag.id)
             );
           }
         }
