@@ -27,7 +27,7 @@ export type CheckboxFieldProps = {
     maxChoicesMessage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
-    defaultValue?: string;
+    defaultValue?: string | string[];
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {

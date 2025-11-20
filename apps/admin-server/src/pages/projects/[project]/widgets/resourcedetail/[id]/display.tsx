@@ -39,6 +39,8 @@ const formSchema = z.object({
   documentsDesc: z.string().optional(),
   clickableImage: z.boolean(),
   urlWithResourceFormForEditing: z.string().optional(),
+  displayDeleteButton: z.boolean().optional(),
+  displayDeleteEditButtonOnTop: z.boolean().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -77,7 +79,9 @@ export default function WidgetResourceDetailDisplay(
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
       displayEditResourceButton: props?.displayEditResourceButton || false,
+      displayDeleteButton: undefinedToTrueOrProp(props?.displayDeleteButton),
       urlWithResourceFormForEditing: props?.urlWithResourceFormForEditing || '',
+      displayDeleteEditButtonOnTop: props?.displayDeleteEditButtonOnTop || false,
     },
   });
 
@@ -374,6 +378,34 @@ export default function WidgetResourceDetailDisplay(
               )}
             />
           )}
+
+          <FormField
+            control={form.control}
+            name="displayDeleteButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de knop om de inzending te verwijderen
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayDeleteEditButtonOnTop"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de bewerk- en verwijderknoppen bovenaan in plaats van onderaan
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
