@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Carousel, Icon, Paginator, Pill } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -156,6 +156,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayLocationFilter?: boolean;
     excludeResourcesInOverview?: boolean;
     filterBehavior?: string;
+    filterBehaviorInclude?: string;
+    onlyShowTheseTagIds?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -512,6 +514,8 @@ function ResourceOverviewInner({
   displayOverviewTagGroups = false,
   overviewTagGroups = [],
   dialogTagGroups = undefined,
+  filterBehaviorInclude = 'or',
+  onlyShowTheseTagIds = '',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -528,50 +532,30 @@ function ResourceOverviewInner({
   }
 
   const statusIdsToLimitResourcesTo = stringToArray(onlyIncludeStatusIds);
+  const tagIdsToLimitResourcesTo = stringToArray(onlyIncludeTagIds);
+  const tagsLimitationArray = stringToArray(onlyShowTheseTagIds);
 
   const { data: allTags } = datastore.useTags({
     projectId: props.projectId,
     type: ''
   });
 
-  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
-    let filteredTagIdsArray: Array<number> = [];
-    try {
-      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0) {
-        const filteredTags = allTags.filter((tag: { id: number }) => !tagIdsArray.includes((tag.id)));
-        const filteredTagIds = filteredTags.map((tag: { id: number }) => tag.id);
+  // Order limitation tags by their type so it can be directly used to filter shown tags in their type
+  const groupedTagsForLimitation: { [key: string]: number[] } = useMemo(() => {
+    const tagsMap: { [key: string]: number[] } = {};
+    tagsLimitationArray.forEach((tagId: number) => {
+      const foundTag = allTags.find((t: { id: number }) => t.id === tagId);
+      if (foundTag) {
+        const tagType = foundTag.type;
+        if (!tagsMap[tagType]) {
+          tagsMap[tagType] = [];
+        }
 
-        filteredTagIdsArray = filteredTagIds;
-      } else if (includeOrExclude === 'include') {
-        filteredTagIdsArray = tagIdsArray;
+        tagsMap[tagType].push(tagId);
       }
-
-      const filteredTagsIdsString = filteredTagIdsArray.join(',');
-
-      return {
-        tagsString: filteredTagsIdsString || '',
-        tags: filteredTagIdsArray || []
-      };
-
-    } catch (error) {
-      console.error('Error processing tags:', error);
-
-      return {
-        tagsString: '',
-        tags: []
-      };
-    }
-  }
-
-  useEffect(() => {
-    const {
-      tags: filteredTagIdsArray
-    } = determineTags(includeOrExcludeTagIds, allTags, stringToArray(onlyIncludeTagIds));
-
-    setTagIdsToLimitResourcesTo(filteredTagIdsArray);
+    });
+    return tagsMap;
   }, [allTags]);
-
-  const [tagIdsToLimitResourcesTo, setTagIdsToLimitResourcesTo] = useState<Array<number>>([]);
 
   const urlParams = new URLSearchParams(window.location.search);
   const urlTagIds = urlParams.get('tagIds');
@@ -584,19 +568,13 @@ function ResourceOverviewInner({
   const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
 
   useEffect(() => {
-    const initTags = Array.from(new Set([...(urlTagIdsArray || []), ...tagIdsToLimitResourcesTo]))
-
-    const includeTags = includeOrExcludeTagIds === 'include'
-      ? initTags
-      : urlTagIdsArray || [];
-
-    const excludeTags = includeOrExcludeTagIds === 'exclude' ? stringToArray(onlyIncludeTagIds) : [];
-
-    setIncludeTags(includeTags);
-    setTags(includeTags);
+    const includeTags = includeOrExcludeTagIds === 'include' ? tagIdsToLimitResourcesTo : [];
+    const excludeTags = includeOrExcludeTagIds === 'exclude' ? tagIdsToLimitResourcesTo : [];
 
     setExcludeTags(excludeTags);
-  }, [tagIdsToLimitResourcesTo.length]);
+    setIncludeTags(includeTags);
+    setTags(urlTagIdsArray || []);
+  }, [onlyIncludeTagIds, urlTagIds]);
 
   const [includeTags, setIncludeTags] = useState<number[]>([]);
   const [excludeTags, setExcludeTags] = useState<number[]>([]);
@@ -620,6 +598,21 @@ function ResourceOverviewInner({
     ?.filter(project => !project?.excludeResourcesInOverview)
     .map(project => project.id) || [];
 
+  // Order tags by their type so it can be directly used in the resource filter
+  const groupedTags: { [key: string]: number[] } = useMemo(() => {
+    const tagsMap: { [key: string]: number[] } = {};
+    allTags.forEach((tag: { type: string; id: string | number }) => {
+      const tagType = tag.type;
+      if (!tagsMap[tagType]) {
+        tagsMap[tagType] = [];
+      }
+
+      const tagId = typeof tag.id === 'string' ? parseInt(tag.id, 10) : tag.id;
+      tagsMap[tagType].push(tagId);
+    });
+    return tagsMap;
+  }, [allTags]);
+
   const { data: resourcesWithPagination, isLoading } = datastore.useResources({
     pageSize: 999999,
     ...props,
@@ -630,13 +623,6 @@ function ResourceOverviewInner({
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1
   });
 
-  useEffect(() => {
-    if (JSON.stringify(tags) !== JSON.stringify(includeTags)) {
-      const tagsForIncluding = tags.map((tag) => typeof (tag) === 'string' ? parseInt(tag, 10) : tag)
-      setIncludeTags(tagsForIncluding)
-    }
-  }, [tags])
-
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -646,23 +632,6 @@ function ResourceOverviewInner({
   }, [resourcesWithPagination, pageSize]);
 
   useEffect(() => {
-    // @ts-ignore
-    const intTags = tags.map(tag => parseInt(tag, 10));
-
-    const groupedTags: { [key: string]: number[] } = {};
-
-    intTags.forEach(tagId => {
-      // @ts-ignore
-      const tag = allTags.find(tag => tag.id === tagId);
-      if (tag) {
-        const tagType = tag.type;
-        if (!groupedTags[tagType]) {
-          groupedTags[tagType] = [];
-        }
-        groupedTags[tagType].push(tagId);
-      }
-    });
-
     const allResources: any = [];
 
     if (selectedProjects && selectedProjects.length > 0) {
@@ -716,18 +685,27 @@ function ResourceOverviewInner({
 
     const combinedResources = [...uniqueResources, ...resources];
 
-    const filtered = combinedResources && (
-      combinedResources.filter((resource: any) => {
+    // Filtering is always 'or' inside their own types and depending on filterBehavior it's 'and' or 'or' between types
+    // This logic is for both includeTags (that sets the base resources based on widget settings) and tags (the user selected tags for filtering)
+    // excludeTags are always excluded first and have no further logic
+    const filtered = combinedResources?.filter((resource: any) => {
         const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
           excludeTags.includes(tag.id)
         );
         if (hasExcludedTag) return false;
 
         if (includeTags.length > 0) {
-          if (filterBehavior === 'and') {
-            return includeTags.every(tagId =>
-              resource.tags?.some((tag: { id: number }) => tag.id === tagId)
+          if (filterBehaviorInclude === 'and') {
+            const relevantTagTypes = Object.keys(groupedTags).filter(tagType =>
+              includeTags.some(tagId => groupedTags[tagType].includes(tagId))
             );
+
+            return relevantTagTypes.every(tagType => {
+              const tagsOfType = groupedTags[tagType];
+              const includeTagsOfType = includeTags.filter(tagId => tagsOfType.includes(tagId));
+              return resource.tags?.some((tag: { id: number }) => includeTagsOfType.includes(tag.id));
+            });
+
           } else {
             return resource.tags?.some((tag: { id: number }) =>
               includeTags.includes(tag.id)
@@ -737,7 +715,28 @@ function ResourceOverviewInner({
 
         return true;
       })
-    )
+      ?.filter((resource: any) => {
+        if (tags.length > 0) {
+          if (filterBehavior === 'and') {
+            const relevantTagTypes = Object.keys(groupedTags).filter(tagType =>
+              tags.some(tagId => groupedTags[tagType].includes(tagId))
+            );
+
+            return relevantTagTypes.every(tagType => {
+              const tagsOfType = groupedTags[tagType];
+              const includeTagsOfType = tags.filter(tagId => tagsOfType.includes(tagId));
+              return resource.tags?.some((tag: { id: number }) => includeTagsOfType.includes(tag.id));
+            });
+
+          } else {
+            return tags?.some(tagId =>
+              tags.includes(tagId)
+            );
+          }
+        }
+
+        return true;
+      })
       ?.filter((resource: any) => {
         if (!location) return true;
         if (!resource?.location?.lat || !resource?.location?.lng) return false;
@@ -782,7 +781,7 @@ function ResourceOverviewInner({
       });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location]);
+  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location, groupedTags]);
 
   useEffect(() => {
     if (filteredResources) {
@@ -958,7 +957,7 @@ function ResourceOverviewInner({
             <Filters
               {...props}
               className="osc-flex-columned"
-              tagsLimitation={tagIdsToLimitResourcesTo}
+              tagsLimitation={groupedTagsForLimitation}
               dataStore={datastore}
               sorting={props.sorting || []}
               displaySorting={props.displaySorting || false}
@@ -974,11 +973,7 @@ function ResourceOverviewInner({
               resources={resources}
               showActiveTags={showActiveTags}
               onUpdateFilter={(f) => {
-                if (f.tags.length === 0) {
-                  setTags(includeOrExcludeTagIds === 'include' ? tagIdsToLimitResourcesTo : []);
-                } else {
-                  setTags(f.tags);
-                }
+                setTags( f.tags.length > 0 ? f.tags : []);
                 if (['createdAt_desc', 'createdAt_asc', 'title', 'votes_desc', 'votes_asc', 'ranking', 'random'].includes(f.sort)) {
                   setSort(f.sort);
                 }
