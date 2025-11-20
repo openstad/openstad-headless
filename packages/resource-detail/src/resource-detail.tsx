@@ -303,7 +303,7 @@ function ResourceDetail({
 
   const GroupButtonDeleteEdit = () => (
     <ButtonGroup>
-      { (displayDeleteButton && canDelete) && (
+      { (canDelete && displayDeleteButton) && (
         <>
           <Spacer size={2} />
           <Button
