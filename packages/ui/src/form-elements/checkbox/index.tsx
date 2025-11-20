@@ -39,7 +39,7 @@ export type CheckboxFieldProps = {
     maxChoicesMessage?: string,
     randomId?: string;
     fieldInvalid?: boolean;
-    defaultValue?: string;
+    defaultValue?: string | string[];
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
@@ -63,13 +63,19 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        randomId= '',
        fieldInvalid= false,
        randomizeItems = false,
-       overrideDefaultValue
+       overrideDefaultValue,
+       defaultValue
 }) => {
-    let initialValue = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
-
+    let initialValue = defaultValue || [];
     try {
         initialValue = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : initialValue;
     } catch (e) {}
+
+    initialValue = initialValue && Array.isArray(initialValue)
+      ? initialValue.map(val => String(val))
+      : typeof initialValue === 'string' || typeof initialValue === 'number'
+        ? [ String(initialValue) ]
+        : [];
 
     const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
