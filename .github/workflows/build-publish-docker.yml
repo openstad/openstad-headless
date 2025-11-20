@@ -132,7 +132,7 @@ jobs:
           node-version: 24
 
       - name: Install dependencies
-        run: CYPRESS_INSTALL_BINARY=GITHUB_WORKSPACE/vendor/cypress-15.6.0.zip npm ci --legacy-peer-deps
+        run: CYPRESS_INSTALL_BINARY=$GITHUB_WORKSPACE/vendor/cypress-15.6.0.zip npm ci --legacy-peer-deps
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
