@@ -1,6 +1,7 @@
 {% if data.widget.uploadedImageLink %}
   <a
     href="{{ data.widget.uploadedImageLink }}"
+    class="osc-image-link"
     {% if data.widget.uploadedImageLinkTarget %}target="_blank" rel="noopener noreferrer"{% endif %}
     {% if data.widget.uploadedImageLinkAlt %}aria-label="{{ data.widget.uploadedImageLinkAlt }}"{% endif %}
   >
