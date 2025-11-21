@@ -3,7 +3,7 @@
  transition: filter 0.2s, opacity 0.2s;
 }
 
-a {
+a.osc-image-link {
  position: relative;
  display: block;
 
@@ -29,7 +29,7 @@ a {
  }
 }
 
-a:hover, a:focus {
+a.osc-image-link:hover, a.osc-image-link:focus {
  & > .image-component {
   filter: brightness(0.65);
  }
@@ -39,6 +39,6 @@ a:hover, a:focus {
  }
 }
 
-.page .apos-areas-widgets-list > [data-area-label="Afbeelding"] > .apos-area-widget-inner > .apos-area-widget-controls + div > a {
+.page .apos-areas-widgets-list > [data-area-label="Afbeelding"] > .apos-area-widget-inner > .apos-area-widget-controls + div > a.osc-image-link {
  pointer-events: none;
 }
