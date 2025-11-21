@@ -141,8 +141,8 @@ function adjustMenu() {
   ) {
     if (document.getElementsByClassName('--compact').length > 0) {
       if (
-        navContainer.offsetWidth + logo.offsetWidth >=
-        mainContainer.offsetWidth
+        navContainer?.offsetWidth + logo?.offsetWidth >=
+        mainContainer?.offsetWidth
       ) {
         navContainer?.classList.add('--mobile');
         isMobile = true;
@@ -150,7 +150,7 @@ function adjustMenu() {
         navContainer?.classList.remove('--mobile');
       }
     } else {
-      if (mainMenuContainer.offsetWidth >= mainContainer.offsetWidth) {
+      if (mainMenuContainer?.offsetWidth >= mainContainer?.offsetWidth) {
         navbar?.classList.add('--hidden');
         navContainer?.classList.add('--mobile');
         isMobile = true;

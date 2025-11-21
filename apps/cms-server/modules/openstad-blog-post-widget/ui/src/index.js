@@ -28,6 +28,7 @@ function initCarousel(container) {
   nextBtn.addEventListener('click', () => navigate(1));
 
   let startX = 0;
+  let startY = 0;
   let isDragging = false;
 
   track.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -93,12 +94,22 @@ function initCarousel(container) {
 
   function handleTouchStart(e) {
     startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
     isDragging = true;
   }
 
   function handleTouchMove(e) {
     if (!isDragging) return;
-    e.preventDefault();
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = Math.abs(currentX - startX);
+    const diffY = Math.abs(currentY - startY);
+
+    // Alleen bij duidelijke horizontale swipe blokkeren we verticaal scrollen
+    if (diffX > 10 && diffX > diffY) {
+      e.preventDefault();
+    }
+    // Bij verticale swipe geen preventDefault, zodat pagina kan scrollen
   }
 
   function handleTouchEnd(e) {
