@@ -227,14 +227,14 @@ jobs:
             echo "type=raw,value=v${{ needs.get-openstad-version.outputs.openstad_version }}",priority=900 >> $GITHUB_OUTPUT
             echo "type=ref,event=branch,suffix=-{{sha}}",priority=700 >> $GITHUB_OUTPUT
             echo "type=ref,event=tag" >> $GITHUB_OUTPUT
-            echo "type=ref,event=pr,suffix=-{{sha}}" >> $GITHUB_OUTPUT
+            echo "type=ref,event=pr" >> $GITHUB_OUTPUT
             echo "type=raw,value=latest,enable={{is_default_branch}}" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "tags<<EOF" >> $GITHUB_OUTPUT
             echo "type=ref,event=branch,suffix=-{{sha}}",priority=700 >> $GITHUB_OUTPUT
             echo "type=ref,event=tag" >> $GITHUB_OUTPUT
-            echo "type=ref,event=pr,suffix=-{{sha}}" >> $GITHUB_OUTPUT
+            echo "type=ref,event=pr" >> $GITHUB_OUTPUT
             echo "type=raw,value=latest,enable={{is_default_branch}}" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
