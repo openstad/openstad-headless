@@ -6,8 +6,7 @@ on:
       - 'operations/deployments/openstad-headless/environments/prod/images.yml'
       - 'charts/openstad-headless/values.yaml'
     branches:
-      - 'develop'
-      - 'main'
+      - '*'
   pull_request:
     branches:
       - 'develop'
