@@ -1,5 +1,19 @@
 const config = require('config');
 
+function getNestedValue(obj, path) {
+  const parts = path.split('.');
+  let current = obj;
+
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') {
+      return undefined;
+    }
+    current = current[part];
+  }
+
+  return current;
+}
+
 module.exports = function({ searchfields = ['title', 'summary', 'description'] }) {
 
   return function(req, res, next) {
@@ -31,10 +45,14 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
 
       let searchTerms = value.split(' ');
 
-      let searchResult = list.filter(item => {
-        return searchTerms.every(term => {
-          return useSearchFields.some(field => {
-            return item[field] && item[field].toLowerCase().includes(term);
+      let searchResult = list.filter((item) => {
+        return searchTerms.every((term) => {
+          return useSearchFields.some((field) => {
+            let fieldValue = getNestedValue(item, field);
+            if (typeof fieldValue === 'string') {
+              return fieldValue.toLowerCase().includes(term);
+            }
+            return false;
           });
         });
       });

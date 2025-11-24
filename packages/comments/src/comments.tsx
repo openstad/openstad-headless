@@ -47,6 +47,7 @@ export type CommentsWidgetProps = BaseProps &
     itemsPerPage?: number;
     overridePage?: number;
     displayPagination?: boolean;
+    displaySearchBar?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
     extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     defaultTags?: string;
@@ -70,6 +71,7 @@ function CommentsInner({
   itemsPerPage,
   onGoToLastPage,
   displayPagination = false,
+  displaySearchBar = false,
   overridePage = 0,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   defaultTags,
@@ -82,6 +84,7 @@ function CommentsInner({
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(displayPagination ? itemsPerPage || 9999 : 9999 );
+  const [search, setSearch] = useState<string>('');
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -186,10 +189,11 @@ function CommentsInner({
     resourceId: resourceId,
     sentiment: args.sentiment,
     onlyIncludeTagIds: props.onlyIncludeTags || filteredTagsIdsString || undefined,
+    search: search || '',
     refreshKey
   };
 
-  const { data: comments } = datastore.useComments(useCommentsData);
+  const { data: comments, isLoading } = datastore.useComments(useCommentsData);
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
@@ -363,33 +367,43 @@ function CommentsInner({
 
         <Spacer size={1} />
 
-        {Array.isArray(comments) && comments.length === 0 ? (
-          <Paragraph>{emptyListText}</Paragraph>
-        ) : ((props.sorting || []).length > 0 && datastore) ? (
+        {
+          ( ((props.sorting || []).length > 0 && datastore) || displaySearchBar) ? (
           <>
             <Filters
               className="osc-flex-columned"
               dataStore={datastore}
               sorting={props.sorting || []}
-              displaySorting={true}
+              displaySorting={ (props.sorting || []).length > 0 && datastore }
               defaultSorting={props.defaultSorting || 'createdAt_asc'}
               onUpdateFilter={(f) => {
                 if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'].includes(f.sort)) {
                   setSort(f.sort);
                 }
+                setSearch(f?.search?.text || '');
               }}
               applyText={'Toepassen'}
               resources={undefined}
-              displaySearch={false}
+              displaySearch={displaySearchBar || false}
               displayTagFilters={false}
               searchPlaceholder={''}
               resetText={'Reset'}
             />
 
-            <Spacer size={1} />
+            <Spacer size={1}/>
           </>
-          ) : null
-        }
+        ) : null}
+
+         {(Array.isArray(comments) && comments.length === 0) && (
+            isLoading ? (
+              <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
+            ) : (
+              <Paragraph className="osc-no-results-text">
+                {search ? `Er zijn geen resultaten gevonden voor "${search}".` : emptyListText}
+              </Paragraph>
+            )
+          )}
+
         {(comments || [])
           ?.sort((a: any, b: any) => {
             const sortMethod = overrideSort || sort;
