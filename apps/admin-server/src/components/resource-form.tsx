@@ -72,7 +72,7 @@ const baseSchema = z.object({
     image: z.string().optional(),
     imageDescription: z.string().optional(),
     images: z
-        .array(z.object({ url: z.string(), description: z.string().optional() }))
+        .array(z.object({ url: z.string(), name: z.string().optional(), description: z.string().optional() }))
         .optional()
         .default([]),
     document: z.string().optional(),

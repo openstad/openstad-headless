@@ -170,6 +170,14 @@
   max-width: calc(100% - 10px);
 }
 
+.osc-resource-detail-widget-container > .utrecht-button-group {
+  padding: 1rem;
+}
+
+.osc-resource-detail-widget-container > .utrecht-button-group > .spacer-2 {
+  display: none;
+}
+
 /* Text Colors */
 .color-FFFFFF { color: #FFFFFF; }
 .color-000000 { color: #000000; }

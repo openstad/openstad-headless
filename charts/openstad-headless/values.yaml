@@ -133,7 +133,7 @@ admin:
   deploymentContainer:
     name: admin
     # Docker image for this pod
-    image: ghcr.io/openstad/admin-server:v2.0.44
+    image: ghcr.io/openstad/admin-server:v2.0.46
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
@@ -189,7 +189,7 @@ auth:
   deploymentContainer:
     name: auth
     # Docker image for this pod
-    image: ghcr.io/openstad/auth-server:v2.0.44
+    image: ghcr.io/openstad/auth-server:v2.0.46
   # Ingress settings:
   # Configure how the service is accessed
   ingress:
@@ -241,7 +241,7 @@ api:
   deploymentContainer:
     name: api-container
     # Docker image for this pod
-    image: ghcr.io/openstad/api-server:v2.0.44
+    image: ghcr.io/openstad/api-server:v2.0.46
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
@@ -257,6 +257,7 @@ api:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
     ingressClassName: nginx
@@ -273,6 +274,7 @@ api:
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
         more_set_headers "X-Robots-Tag: noindex, nofollow";
+        more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     # Is the TLS for this ingress managed by Openstad?
     # Set to `false` if the secrets are managed manually -- compatible with older versions of Openstad
     # Set to `true` if you want Openstad to manage the TLS in the ingress
@@ -316,7 +318,7 @@ image:
   deploymentContainer:
     name: image
     # Docker image for this pod
-    image: ghcr.io/openstad/image-server:v2.0.44
+    image: ghcr.io/openstad/image-server:v2.0.46
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
@@ -383,7 +385,7 @@ cms:
   deploymentContainer:
     name: cms-container
     # Docker image for this pod
-    image: ghcr.io/openstad/cms-server:v2.0.44
+    image: ghcr.io/openstad/cms-server:v2.0.46
   # Subdomain for the service:
   # If filled it it will create a default url of: www.$subdomain.$baseurl
   # If not filled in the base will be used instead: www.$baseurl
@@ -399,6 +401,7 @@ cms:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
     ingressClassName: nginx

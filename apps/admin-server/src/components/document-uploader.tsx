@@ -13,7 +13,7 @@ import {UploadDocument} from "@/hooks/upload-document";
 export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
-  onDocumentUploaded?: (documentObject: {url: string} ) => void;
+  onDocumentUploaded?: (documentObject: {url: string, name?: string} ) => void;
   documentLabel?: string;
   allowedTypes?: string[];
   project?: string;
@@ -28,10 +28,24 @@ export const DocumentUploader: React.FC<{
   }
 
   useEffect(() => {
-    if (document && documentUrl !== document.url ) {
-        setDocumentUrl(document.url);
-        form.setValue(fieldName, document.url);
-      onDocumentUploaded && onDocumentUploaded(document);
+    if (document ) {
+      let uploadedDocumentUrl = document.url;
+      const lastDotIndex = uploadedDocumentUrl.lastIndexOf('.');
+      const lastUnderscoreIndex = uploadedDocumentUrl.lastIndexOf('_');
+
+      if (lastDotIndex === -1 && lastUnderscoreIndex > 1) {
+        uploadedDocumentUrl = uploadedDocumentUrl.substring(0, lastUnderscoreIndex) + '.' + uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
+      } else if (lastDotIndex > -1 && lastUnderscoreIndex > -1) {
+        if (lastDotIndex < lastUnderscoreIndex) {
+          uploadedDocumentUrl = uploadedDocumentUrl.substring(0, lastUnderscoreIndex) + '.' + uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
+        }
+      }
+
+      if (documentUrl !== uploadedDocumentUrl) {
+        setDocumentUrl(uploadedDocumentUrl);
+        form.setValue(fieldName, uploadedDocumentUrl);
+        onDocumentUploaded && onDocumentUploaded({url: uploadedDocumentUrl, name: document?.name});
+      }
     }
   }, [document, form, fieldName, onDocumentUploaded]);
 

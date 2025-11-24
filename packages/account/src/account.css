@@ -9,7 +9,7 @@
   max-width: unset;
 }
 
-.account > div {
+.account > div:not(.banner) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 1rem;

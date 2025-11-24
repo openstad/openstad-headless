@@ -276,7 +276,7 @@ export function Filters({
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
-                    onlyIncludeIds={tagsLimitation}
+                    onlyIncludeIds={[]}
                     onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
                       updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
                     }}
@@ -294,7 +294,7 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     title={`Selecteer een item`}
-                    onlyIncludeIds={tagsLimitation}
+                    onlyIncludeIds={[]}
                     onUpdateFilter={(updatedTag, updatedLabel) =>
                       updateTagListSingle(tagGroup.type, updatedTag, updatedLabel)
                     }

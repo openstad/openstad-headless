@@ -45,6 +45,11 @@ module.exports = {
         if (!req.session) {
           return next();
         }
+        
+        if (req.query.openstadlogout) {
+          req.session.destroy(() => {});
+          return next();
+        }
 
         const thisHost = req.headers['x-forwarded-host'] || req.get('host');
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;

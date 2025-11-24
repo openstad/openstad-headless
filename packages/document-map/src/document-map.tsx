@@ -71,6 +71,8 @@ export type DocumentMapProps = BaseProps &
     displayResourceInfo?: string;
     displayMapSide?: string;
     displayResourceDescription?: string;
+    displayResourceTitle?: string;
+    displayResourceSummary?: string;
     infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -123,6 +125,8 @@ function DocumentMap({
   displayResourceInfo = 'left',
   displayMapSide = 'left',
   displayResourceDescription = 'no',
+  displayResourceTitle = 'yes',
+  displayResourceSummary = 'yes',
   infoPopupContent = 'Op deze afbeelding kun je reacties plaatsen. Klik op de afbeelding om een reactie toe te voegen. Klik op een marker om de bijbehorende reacties te bekijken.',
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
@@ -808,9 +812,8 @@ function DocumentMap({
               </div>
               {displayResourceInfo === 'left' && (
                 <section className="content-intro">
-                  {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-                  {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
-
+                  {(displayResourceTitle === 'yes' && resource.title) ? <Heading level={1}>{resource.title}</Heading> : null}
+                  {(displayResourceSummary === 'yes' && resource.summary) ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
                   {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
                 </section>
               )}
@@ -820,9 +823,8 @@ function DocumentMap({
           {displayResourceInfo === 'right' && (
             <div className="content-container mobileonly">
               <section className="content-intro">
-                {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-                {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
-
+                {(displayResourceTitle === 'yes' && resource.title) ? <Heading level={1}>{resource.title}</Heading> : null}
+                {(displayResourceSummary === 'yes' && resource.summary) ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
                 {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
               </section>
             </div>
@@ -1037,12 +1039,9 @@ function DocumentMap({
 
           {displayResourceInfo === 'right' && (
             <section className="content-intro desktoponly">
-              {resource.title ? <Heading level={1} appearance='utrecht-heading-2'>{resource.title}</Heading> : null}
-              <Spacer size={1}/>
-              {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
-
+              {(displayResourceTitle === 'yes' && resource.title) ? <><Heading level={1} appearance='utrecht-heading-2'>{resource.title}</Heading><Spacer size={1}/></> : null}
+              {(displayResourceSummary === 'yes' && resource.summary) ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
               {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
-
             </section>
           )}
 
