@@ -45,6 +45,8 @@
     "vitest": "^3.2.3"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.919.0",
+    "@aws-sdk/lib-storage": "3.919.0",
     "express-rate-limit": "^7.5.1",
     "knox": "file:vendor/knox-0.9.3.tar.gz",
     "react-leaflet": "^4.2.1",
