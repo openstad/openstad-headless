@@ -1,6 +1,13 @@
 const config = require('config');
 
 function getNestedValue(obj, path) {
+  if (path === 'replies.description') {
+    if (!Array.isArray(obj.replies)) return [];
+    return obj.replies
+        .map(reply => reply && reply.description)
+        .filter(desc => typeof desc === 'string');
+  }
+
   const parts = path.split('.');
   let current = obj;
 
@@ -49,6 +56,9 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
         return searchTerms.every((term) => {
           return useSearchFields.some((field) => {
             let fieldValue = getNestedValue(item, field);
+            if (Array.isArray(fieldValue)) {
+              return fieldValue.some(val => typeof val === 'string' && val.toLowerCase().includes(term));
+            }
             if (typeof fieldValue === 'string') {
               return fieldValue.toLowerCase().includes(term);
             }

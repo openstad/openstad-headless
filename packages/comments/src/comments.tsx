@@ -54,6 +54,7 @@ export type CommentsWidgetProps = BaseProps &
     includeOrExclude?: string;
     onlyIncludeOrExcludeTagIds?: string;
     overrideSort?: string;
+    searchTerm?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -78,6 +79,7 @@ function CommentsInner({
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
   overrideSort = '',
+  searchTerm = '',
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
@@ -85,6 +87,10 @@ function CommentsInner({
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(displayPagination ? itemsPerPage || 9999 : 9999 );
   const [search, setSearch] = useState<string>('');
+
+  useEffect(() => {
+    if (searchTerm !== search) setSearch(searchTerm)
+  }, [searchTerm]);
 
   const datastore = new DataStore({
     projectId: props.projectId,
