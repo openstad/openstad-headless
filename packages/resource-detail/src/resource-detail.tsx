@@ -16,7 +16,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useId } from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
@@ -39,6 +39,7 @@ type booleanProps = {
   | 'displayModBreak'
   | 'displaySummary'
   | 'displayDescription'
+  | 'displayDescriptionExpandable'
   | 'displayUser'
   | 'displayDate'
   | 'displayBudget'
@@ -59,6 +60,8 @@ type booleanProps = {
 export type ResourceDetailWidgetProps = {
   documentsTitle?: string;
   documentsDesc?: string;
+  displayDescriptionExpandable_expandBeforeText?: string;
+  displayDescriptionExpandable_expandAfterText?: string;
 } &
   BaseProps &
   ProjectSettingProps & {
@@ -105,6 +108,9 @@ function ResourceDetail({
   displayModBreak = true,
   displaySummary = true,
   displayDescription = true,
+  displayDescriptionExpandable = false,
+  displayDescriptionExpandable_expandBeforeText = 'Lees meer',
+  displayDescriptionExpandable_expandAfterText = 'Lees minder',
   displayUser = true,
   displayDate = true,
   displayBudget = true,
@@ -129,6 +135,8 @@ function ResourceDetail({
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const id = useId();
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -227,8 +235,8 @@ function ResourceDetail({
 
   const firstStatus = resource.statuses
     ? resource.statuses
-    .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+      .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
+      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
     : false;
 
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
@@ -291,7 +299,7 @@ function ResourceDetail({
 
   useEffect(() => {
     if (props.pageTitle === true && resource.title !== undefined) {
-      const current = document.title.includes(' - ') && document.title.split(' - ')[0].length ? ' - '+ document.title.split(' - ')[0] : '';
+      const current = document.title.includes(' - ') && document.title.split(' - ')[0].length ? ' - ' + document.title.split(' - ')[0] : '';
       document.title = resource.title + current;
     }
   }, [resource]);
@@ -303,7 +311,7 @@ function ResourceDetail({
 
   const GroupButtonDeleteEdit = () => (
     <ButtonGroup>
-      { (canDelete && displayDeleteButton) && (
+      {(canDelete && displayDeleteButton) && (
         <>
           <Spacer size={2} />
           <Button
@@ -319,7 +327,7 @@ function ResourceDetail({
         </>
       )}
 
-      { (canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
+      {(canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
         <>
           <Spacer size={2} />
           <Button
@@ -333,13 +341,13 @@ function ResourceDetail({
             Bewerk de inzending
           </Button>
         </>
-      ) }
+      )}
     </ButtonGroup>
   )
 
   return (
     <section className="osc-resource-detail-widget-container">
-      { displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit /> }
+      {displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
       <div
         className={`osc ${shouldHaveSideColumn
           ? 'osc-resource-detail-column-container'
@@ -409,7 +417,35 @@ function ResourceDetail({
               <div className="resource-detail-content">
                 {displaySummary && <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading>}
                 {displayDescription && (
-                  <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                  !displayDescriptionExpandable ? (
+                    <div className="resource-detail-description">
+                      <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                    </div>
+                  ) : (
+                    <div className="resource-detail-description --expandable">
+
+                      <div className="dd-accordion ">
+
+                        <div id={id} className="dd-accordion-container" role="region" aria-hidden={!expanded}>
+                          <div className="dd-accordion-content-wrapper">
+                            <div className="dd-accordion-content">
+                              <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          appearance="primary-action-button"
+                          type="button"
+                          className="dd-accordion-trigger" 
+                          aria-expanded={expanded} 
+                          aria-controls={id} onClick={() => setExpanded(!expanded)}>
+                          <span>{expanded ? displayDescriptionExpandable_expandAfterText : displayDescriptionExpandable_expandBeforeText}</span>
+                          <i className="ri-arrow-drop-down-line icon"></i>
+                        </Button>
+                      </div>
+                    </div>
+                  )
                 )}
               </div>
               {displayLocation && resource.location && (
@@ -519,7 +555,7 @@ function ResourceDetail({
         ) : null}
       </div>
 
-      { !displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit /> }
+      {!displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
 
       <Spacer size={2} />
 
@@ -539,10 +575,10 @@ function ResourceDetail({
             closedText={props.commentsWidget?.closedText}
             itemsPerPage={props.commentsWidget?.itemsPerPage}
             displayPagination={props.commentsWidget?.displayPagination}
-            extraFieldsTagGroups={ props.commentsWidget?.extraFieldsTagGroups }
-            defaultTags={ props.commentsWidget?.defaultTags }
-            includeOrExclude={ props.commentsWidget?.includeOrExclude }
-            onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+            extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
+            defaultTags={props.commentsWidget?.defaultTags}
+            includeOrExclude={props.commentsWidget?.includeOrExclude}
+            onlyIncludeOrExcludeTagIds={props.commentsWidget?.onlyIncludeOrExcludeTagIds}
             sentiment={useSentiments[0]}
           />
           {useSentiments?.length > 1 && (
@@ -559,10 +595,10 @@ function ResourceDetail({
               closedText={props.commentsWidget_multiple?.closedText}
               itemsPerPage={props.commentsWidget?.itemsPerPage}
               displayPagination={props.commentsWidget?.displayPagination}
-              extraFieldsTagGroups={ props.commentsWidget?.extraFieldsTagGroups }
-              defaultTags={ props.commentsWidget?.defaultTags }
-              includeOrExclude={ props.commentsWidget?.includeOrExclude }
-              onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+              extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
+              defaultTags={props.commentsWidget?.defaultTags}
+              includeOrExclude={props.commentsWidget?.includeOrExclude}
+              onlyIncludeOrExcludeTagIds={props.commentsWidget?.onlyIncludeOrExcludeTagIds}
               sentiment={useSentiments[1]}
             />
           )}

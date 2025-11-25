@@ -14,14 +14,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Input} from "@/components/ui/input";
-import {useFieldDebounce} from "@/hooks/useFieldDebounce";
+import { Input } from "@/components/ui/input";
+import { useFieldDebounce } from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   displayImage: z.boolean(),
   displayImageDescription: z.boolean(),
   displayTitle: z.boolean(),
   displayDescription: z.boolean(),
+  displayDescriptionExpandable: z.boolean(),
+  displayDescriptionExpandable_expandBeforeText: z.string().optional(),
+  displayDescriptionExpandable_expandAfterText: z.string().optional(),
   displaySummary: z.boolean(),
   displayUser: z.boolean(),
   displayDate: z.boolean(),
@@ -59,8 +62,10 @@ export default function WidgetResourceDetailDisplay(
     defaultValues: {
       displayImage: undefinedToTrueOrProp(props?.displayImage),
       displayImageDescription: undefinedToTrueOrProp(props?.displayImageDescription),
+      displayDescriptionExpandable: undefinedToTrueOrProp(props?.displayDescriptionExpandable),
+      displayDescriptionExpandable_expandBeforeText: props?.displayDescriptionExpandable_expandBeforeText || 'Lees meer',
+      displayDescriptionExpandable_expandAfterText: props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
-      displayDescription: undefinedToTrueOrProp(props?.displayDescription),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
       displayUser: undefinedToTrueOrProp(props?.displayUser),
       displayDate: undefinedToTrueOrProp(props?.displayDate),
@@ -182,17 +187,65 @@ export default function WidgetResourceDetailDisplay(
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="displayDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Beschrijving weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
+          <div>
+            <FormField
+              control={form.control}
+              name="displayDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Beschrijving weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.watch("displayDescription") && (
+              <div className="bg-stone-100 p-4 mt-4 rounded-md border border-stone-200">
+                <FormField
+                  control={form.control}
+                  name="displayDescriptionExpandable"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Uitklapbaar</FormLabel>
+                      <FormDescription>
+                        Als je dit aanzet, wordt de beschrijving standaard ingeklapt weergegeven met een 'Lees meer' knop.
+                      </FormDescription>
+                      {YesNoSelect(field, props)}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className='flex gap-4 mt-4'>
+                  <FormField
+                    control={form.control}
+                    name="displayDescriptionExpandable_expandBeforeText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tekst voor de 'Lees meer' knop</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="displayDescriptionExpandable_expandAfterText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tekst voor de 'Lees minder' knop</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             )}
-          />
+          </div>
           <FormField
             control={form.control}
             name="displayLocation"
@@ -360,7 +413,7 @@ export default function WidgetResourceDetailDisplay(
             )}
           />
 
-          { form.watch("displayEditResourceButton") && (
+          {form.watch("displayEditResourceButton") && (
             <FormField
               control={form.control}
               name="urlWithResourceFormForEditing"
