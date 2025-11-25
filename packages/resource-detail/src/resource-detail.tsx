@@ -543,6 +543,7 @@ function ResourceDetail({
             defaultTags={ props.commentsWidget?.defaultTags }
             includeOrExclude={ props.commentsWidget?.includeOrExclude }
             onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+            displaySearchBar={ props.commentsWidget?.displaySearchBar }
             sentiment={useSentiments[0]}
           />
           {useSentiments?.length > 1 && (
@@ -563,6 +564,7 @@ function ResourceDetail({
               defaultTags={ props.commentsWidget?.defaultTags }
               includeOrExclude={ props.commentsWidget?.includeOrExclude }
               onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+              displaySearchBar={ props.commentsWidget?.displaySearchBar }
               sentiment={useSentiments[1]}
             />
           )}
