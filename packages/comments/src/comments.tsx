@@ -53,6 +53,9 @@ export type CommentsWidgetProps = BaseProps &
     includeOrExclude?: string;
     onlyIncludeOrExcludeTagIds?: string;
     overrideSort?: string;
+    confirmation?: boolean;
+    overwriteEmailAddress?: string;
+    confirmationReplies?: boolean;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<

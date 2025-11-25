@@ -47,7 +47,7 @@ exports.post = (req, res, next) => {
   clientRequiredUserFields.forEach((field) => {
     if (field === 'email' && !!req.user.email)  {
       //break;
-    } else if (req.body[field]) {
+    } else if (req.body[field] && field !== 'emailNotificationConsent') {
       data[field] = req.body[field];
     }
   });

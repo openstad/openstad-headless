@@ -543,6 +543,9 @@ function ResourceDetail({
             defaultTags={ props.commentsWidget?.defaultTags }
             includeOrExclude={ props.commentsWidget?.includeOrExclude }
             onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+            confirmation={ props.commentsWidget?.confirmation }
+            overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+            confirmationReplies={ props.commentsWidget?.confirmationReplies }
             sentiment={useSentiments[0]}
           />
           {useSentiments?.length > 1 && (
@@ -563,6 +566,9 @@ function ResourceDetail({
               defaultTags={ props.commentsWidget?.defaultTags }
               includeOrExclude={ props.commentsWidget?.includeOrExclude }
               onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
+              confirmation={ props.commentsWidget?.confirmation }
+              overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+              confirmationReplies={ props.commentsWidget?.confirmationReplies }
               sentiment={useSentiments[1]}
             />
           )}
