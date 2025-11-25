@@ -102,8 +102,10 @@
                 overflow: hidden;
                 margin: 0;
                 position: absolute;
-                &:focus{
+
+                &:focus {
                     outline: none;
+
                     &:focus-visible+label figure {
                         outline: 2px dashed var(--dilemmaOptionOutlineColorActive);
                         outline-offset: 2px;
@@ -160,6 +162,10 @@
         }
     }
 
+    .dilemma-actions{
+        min-height: 70px;
+    }
+
     .dilemma-back-button {
         padding: 0;
         border: unset;
@@ -211,7 +217,8 @@
         right: 24px;
         bottom: 24px;
         z-index: 10;
-        &:disabled{
+
+        &:disabled {
             opacity: 0.5;
             pointer-events: none;
             animation: unset;
