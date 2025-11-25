@@ -455,7 +455,8 @@ label.utrecht-form-label {
         height: 110px;
         bottom: 0;
         position: absolute;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, #ffffff 100%);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.0) 0%, #ffffff 100%);
+        z-index: 0;
       }
 
       >button {
@@ -942,6 +943,7 @@ label.utrecht-form-label {
   transition: all 0.2s ease;
   line-height: 49px;
   color: #000;
+  z-index: 1;
 
   position: absolute;
   bottom: 30px;
