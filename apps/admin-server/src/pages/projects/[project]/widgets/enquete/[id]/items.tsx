@@ -1251,7 +1251,7 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
-                    {(form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'pagination') && (
+                    {(form.watch('questionType') !== 'pagination') && (
                       <>
                         <FormField
                           control={form.control}
