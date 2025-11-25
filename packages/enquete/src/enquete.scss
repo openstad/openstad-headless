@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem 1rem;
-  // height: 100%;
+  position: relative;
 }
 
 .form-container .utrecht-form-field .utrecht-form-field-description:empty {
@@ -265,10 +265,14 @@ label.utrecht-form-label {
     .form-container,
     .question.question-type-none {
       height: 100%;
-    } 
+    }
 
     &:has(.--youth-intro) {
       .button-group.--flex {
+        &:before {
+          display: none;
+        }
+
         .utrecht-button--primary-action {
           opacity: 0;
           transform: translateY(20px);
@@ -333,6 +337,10 @@ label.utrecht-form-label {
 
     &:has(.--youth-outro) {
       .button-group.--flex {
+        &:before {
+          display: none;
+        }
+
         .utrecht-button--secondary-action {
           display: none;
         }
@@ -440,6 +448,15 @@ label.utrecht-form-label {
       flex-direction: column;
       justify-content: space-between;
       pointer-events: none;
+
+      &:before {
+        content: '';
+        width: 100%;
+        height: 110px;
+        bottom: 0;
+        position: absolute;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, #ffffff 100%);
+      }
 
       >button {
         pointer-events: all;
@@ -1058,7 +1075,7 @@ label.utrecht-form-label {
     }
 
     .osc-enquete-item-content.--youth fieldset.utrecht-form-fieldset__fieldset,
-    .dilemma-field .dilemma-finished-content .dilemma-summary{
+    .dilemma-field .dilemma-finished-content .dilemma-summary {
       margin-bottom: 120px;
     }
 
