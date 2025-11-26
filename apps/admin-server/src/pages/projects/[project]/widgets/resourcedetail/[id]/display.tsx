@@ -210,7 +210,7 @@ export default function WidgetResourceDetailDisplay(
                     <FormItem>
                       <FormLabel>Uitklapbaar</FormLabel>
                       <FormDescription>
-                        Als je dit aanzet, wordt de beschrijving standaard ingeklapt weergegeven met een 'Lees meer' knop.
+                        Als je dit aanzet, wordt de beschrijving standaard ingeklapt weergegeven met een &apos;Lees meer&apos; knop.
                       </FormDescription>
                       {YesNoSelect(field, props)}
                       <FormMessage />
