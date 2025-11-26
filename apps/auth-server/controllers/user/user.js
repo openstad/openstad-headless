@@ -36,6 +36,7 @@ exports.info = (req, res) => {
     phoneNumberConfirmed: req.user.phoneNumberConfirmed,
     streetName: req.user.streetName,
     houseNumber: req.user.houseNumber,
+    emailNotificationConsentSetForClientId: req.user.emailNotificationConsentSetForClientId,
     suffix: req.user.suffix,
     postcode: req.user.postcode,
     city: req.user.city,

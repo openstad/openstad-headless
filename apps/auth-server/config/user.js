@@ -32,7 +32,7 @@ exports.fields = [
     label: 'Woonplaats',
   },
   {
-    key: 'emailNotificationConsent',
+    key: 'emailNotificationConsentSetForClientId',
     label: 'E-mail notificatie toestemming',
     type: 'checkbox',
   }

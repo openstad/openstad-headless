@@ -7,7 +7,21 @@ exports.index = (req, res, next) => {
     return userFields.find(userField => userField.key === field);
   })
 
-  requiredUserFields = requiredUserFields.filter(field => !req.user[field.key]);
+  requiredUserFields = requiredUserFields.filter(field => {
+
+    // Consent field is a special case since it can contain multiple client IDs
+    if ( field?.key === 'emailNotificationConsentSetForClientId' ) {
+      const clientId = String(req?.client?.id);
+      const currentValue = req?.user?.emailNotificationConsentSetForClientId || '';
+      const consentForClient = currentValue.split(',');
+
+      if (!consentForClient.includes(clientId)) {
+        return true;
+      }
+    }
+
+    return !req.user[field.key]
+  });
 
   const config = req.client.config ? req.client.config : {};
   const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
@@ -45,9 +59,13 @@ exports.post = (req, res, next) => {
 
   let data = {};
   clientRequiredUserFields.forEach((field) => {
-    if (field === 'email' && !!req.user.email)  {
+    if ( field === 'emailNotificationConsentSetForClientId' ) {
+      const clientId = String(req?.client?.id);
+      const currentValue = req?.user?.emailNotificationConsentSetForClientId || '';
+        data[field] = !!currentValue ? currentValue + ',' + clientId : clientId;
+    } else if (field === 'email' && !!req.user.email)  {
       //break;
-    } else if (req.body[field] && field !== 'emailNotificationConsent') {
+    } else if (req.body[field]) {
       data[field] = req.body[field];
     }
   });
