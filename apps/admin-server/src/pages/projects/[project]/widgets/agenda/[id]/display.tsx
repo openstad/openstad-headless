@@ -25,7 +25,7 @@ const formSchema = z.object({
   toggleDefaultClosed: z.boolean().optional(),
   toggleShowText: z.string().optional(),
   toggleHideText: z.string().optional(),
-  defaultClosedFromBreakpoint: z.string().optional()
+  defaultClosedFromBreakpoint: z.enum(['not', '480', '640', '768', '1024']).optional()
 });
 
 export default function WidgetAgendaDisplay(
