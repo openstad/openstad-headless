@@ -62,6 +62,7 @@ export type ResourceDetailWidgetProps = {
   documentsDesc?: string;
   displayDescriptionExpandable_expandBeforeText?: string;
   displayDescriptionExpandable_expandAfterText?: string;
+  displayDescriptionExpandable_visibleLines?: string;
 } &
   BaseProps &
   ProjectSettingProps & {
@@ -111,6 +112,7 @@ function ResourceDetail({
   displayDescriptionExpandable = false,
   displayDescriptionExpandable_expandBeforeText = 'Lees meer',
   displayDescriptionExpandable_expandAfterText = 'Lees minder',
+  displayDescriptionExpandable_visibleLines = '4',
   displayUser = true,
   displayDate = true,
   displayBudget = true,
@@ -136,6 +138,8 @@ function ResourceDetail({
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [showAccordion, setShowAccordion] = useState(false);
+  const descriptionRef = React.useRef<HTMLDivElement>(null);
   const id = useId();
 
   let resourceId: string | undefined = String(getResourceId({
@@ -304,6 +308,16 @@ function ResourceDetail({
     }
   }, [resource]);
 
+  useEffect(() => {
+    if (displayDescriptionExpandable && descriptionRef.current) {
+      const lineHeight = parseFloat(getComputedStyle(descriptionRef.current).lineHeight || '1.65');
+      const visibleLines = parseInt(displayDescriptionExpandable_visibleLines, 10) || 4;
+      const maxHeight = lineHeight * visibleLines;
+      const contentHeight = descriptionRef.current.scrollHeight;
+      setShowAccordion(contentHeight > maxHeight);
+    }
+  }, [resource?.description, displayDescriptionExpandable, displayDescriptionExpandable_visibleLines, expanded]);
+
   const dataLayerSettings = !!resourceOverviewMapWidget?.datalayer ? {
     datalayer: resourceOverviewMapWidget?.datalayer || [],
     enableOnOffSwitching: resourceOverviewMapWidget?.enableOnOffSwitching || false,
@@ -422,29 +436,34 @@ function ResourceDetail({
                       <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
                     </div>
                   ) : (
-                    <div className="resource-detail-description --expandable">
-
-                      <div className="dd-accordion ">
-
-                        <div id={id} className="dd-accordion-container" role="region" aria-hidden={!expanded}>
-                          <div className="dd-accordion-content-wrapper">
-                            <div className="dd-accordion-content">
-                              <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                    showAccordion ? (
+                      <div className="resource-detail-description --expandable">
+                        <div className="dd-accordion ">
+                          <div id={id} className="dd-accordion-container" role="region" aria-hidden={!expanded}>
+                            <div className="dd-accordion-content-wrapper" data-visible-lines={displayDescriptionExpandable_visibleLines}>
+                              <div className="dd-accordion-content" ref={descriptionRef}>
+                                <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                              </div>
                             </div>
                           </div>
+                          <Button
+                            appearance="primary-action-button"
+                            type="button"
+                            className="dd-accordion-trigger"
+                            aria-expanded={expanded}
+                            aria-controls={id} onClick={() => setExpanded(!expanded)}>
+                            <span>{expanded ? displayDescriptionExpandable_expandAfterText : displayDescriptionExpandable_expandBeforeText}</span>
+                            <i className="ri-arrow-drop-down-line icon"></i>
+                          </Button>
                         </div>
-
-                        <Button
-                          appearance="primary-action-button"
-                          type="button"
-                          className="dd-accordion-trigger"
-                          aria-expanded={expanded}
-                          aria-controls={id} onClick={() => setExpanded(!expanded)}>
-                          <span>{expanded ? displayDescriptionExpandable_expandAfterText : displayDescriptionExpandable_expandBeforeText}</span>
-                          <i className="ri-arrow-drop-down-line icon"></i>
-                        </Button>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="resource-detail-description">
+                        <div ref={descriptionRef}>
+                          <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                        </div>
+                      </div>
+                    )
                   )
                 )}
               </div>

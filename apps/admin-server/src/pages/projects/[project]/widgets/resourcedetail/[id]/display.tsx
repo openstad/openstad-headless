@@ -25,6 +25,7 @@ const formSchema = z.object({
   displayDescriptionExpandable: z.boolean(),
   displayDescriptionExpandable_expandBeforeText: z.string().optional(),
   displayDescriptionExpandable_expandAfterText: z.string().optional(),
+  displayDescriptionExpandable_visibleLines: z.string().optional(),
   displaySummary: z.boolean(),
   displayUser: z.boolean(),
   displayDate: z.boolean(),
@@ -65,6 +66,7 @@ export default function WidgetResourceDetailDisplay(
       displayDescriptionExpandable: undefinedToTrueOrProp(props?.displayDescriptionExpandable),
       displayDescriptionExpandable_expandBeforeText: props?.displayDescriptionExpandable_expandBeforeText || 'Lees meer',
       displayDescriptionExpandable_expandAfterText: props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
+      displayDescriptionExpandable_visibleLines: props?.displayDescriptionExpandable_visibleLines || '4',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
       displayUser: undefinedToTrueOrProp(props?.displayUser),
@@ -215,34 +217,51 @@ export default function WidgetResourceDetailDisplay(
                     </FormItem>
                   )}
                 />
-                <div className='flex gap-4 mt-4'>
-                  <FormField
-                    control={form.control}
-                    name="displayDescriptionExpandable_expandBeforeText"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tekst voor de 'Lees meer' knop</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="displayDescriptionExpandable_expandAfterText"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tekst voor de 'Lees minder' knop</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {form.watch("displayDescriptionExpandable") && (
+                  <>
+                    <div className='flex gap-4 mt-4 mb-4'>
+                      <FormField
+                        control={form.control}
+                        name="displayDescriptionExpandable_expandBeforeText"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tekst voor de 'Lees meer' knop</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="displayDescriptionExpandable_expandAfterText"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tekst voor de 'Lees minder' knop</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="displayDescriptionExpandable_visibleLines"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Aantal zichtbare regels (0 - 10)</FormLabel>
+                          <FormControl>
+                            <Input {...field} min={0} max={10} type="number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
               </div>
             )}
           </div>

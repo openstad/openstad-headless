@@ -308,7 +308,9 @@
 
 /* Accordion component */
 .dd-accordion {
-  --accordion-minHeight: var(--set-accordion-minHeight, 100px);
+  --accordion-minHeight: var(--set-accordion-minHeight, var(--dataAccordionLines, 100px));
+  --accordion-fontSize: var(--set-accordion-fontSize, var(--utrecht-paragraph-font-size, var(--utrecht-document-font-size, 1rem)));
+  --accordion-lineHeight: var(--set-accordion-lineHeight, 1.65rem);
 }
 .dd-accordion .dd-accordion-trigger {
   width: 100%;
@@ -350,4 +352,39 @@
 .dd-accordion .dd-accordion-container .dd-accordion-content-wrapper {
   overflow: hidden;
   min-height: var(--accordion-minHeight);
+}
+
+
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='0']) {
+  --dataAccordionLines: 0px;
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='1']) {
+  --dataAccordionLines: calc(1 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='2']) {
+  --dataAccordionLines: calc(2 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='3']) {
+  --dataAccordionLines: calc(3 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='4']) {
+  --dataAccordionLines: calc(4 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='5']) {
+  --dataAccordionLines: calc(5 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='6']) {
+  --dataAccordionLines: calc(6 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='7']) {
+  --dataAccordionLines: calc(7 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='8'])  {
+  --dataAccordionLines: calc(8 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='9']) {
+  --dataAccordionLines: calc(9 * var(--accordion-lineHeight));
+}
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='10']) {
+  --dataAccordionLines: calc(10 * var(--accordion-lineHeight));
 }
