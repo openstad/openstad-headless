@@ -373,11 +373,18 @@ export function Filters({
             />
           </div>
         ) : null}
+        {(props.displaySearch && displayCollapsibleFilter) ? (
+          <button type='submit' className="apply-filters-button">
+            <span className="filter-icon"></span>
+            <span className="sr-only">Apply filters</span>
+          </button>
+        ) : null}
 
         {displayCollapsibleFilter ? (
           <>
             <Button className="toggle-filters-button" type="button" aria-expanded={filtersVisible ? 'true' : 'false'} aria-controls="filters-container" onClick={(e) => { setFiltersVisible(!filtersVisible) }}>
-              Filters uitklappen
+              <span className="filter-icon"></span>
+              <span className="sr-only">Filters uitklappen</span>
             </Button>
             <div id="filters-container" className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''}`} aria-hidden={!filtersVisible ? 'true' : 'false'}>
               <div className="filters-wrapper">
