@@ -44,6 +44,7 @@ type Props = {
   showActiveTags?: boolean;
   preFilterTags?: Array<number>;
   displayLocationFilter?: boolean;
+  displayCollapsibleFilter?: boolean;
 };
 
 export function Filters({
@@ -56,6 +57,7 @@ export function Filters({
   className = '',
   showActiveTags = false,
   preFilterTags = undefined,
+  displayCollapsibleFilter = false,
   ...props
 }: Props) {
   const defaultFilter: Filter = {
@@ -73,7 +75,8 @@ export function Filters({
   const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
   const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
-  const [tagsReadyForParameter, setTagsReadyForParameter] = useState< Array<string | number> >([]);
+  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>([]);
+  const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
 
   const search = useDebounce(setSearch, 300);
 
@@ -157,7 +160,7 @@ export function Filters({
         selectedDraft.push({ id: updatedTag, label: label, type: tagType });
       }
 
-      if ( forceSelected ) {
+      if (forceSelected) {
         setActiveTags(selectedDraft)
       }
 
@@ -197,9 +200,9 @@ export function Filters({
       ...selectedOptions,
       [tagType]: Array.isArray(selectedOptions[tagType])
         ? (selectedOptions[tagType] || []).filter((id: number | string) => {
-            const isMatch = (typeof id === 'number' ? id === tagId : Number(id) === tagId);
-            return !isMatch;
-          })
+          const isMatch = (typeof id === 'number' ? id === tagId : Number(id) === tagId);
+          return !isMatch;
+        })
         : [],
     };
     setSelected(updatedSelectedOptions);
@@ -228,12 +231,12 @@ export function Filters({
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
-    console.log( "filterToSubmit", updatedFilter, filter );
+    console.log("filterToSubmit", updatedFilter, filter);
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
 
-    console.log( "newActiveTagsDraft", newActiveTagsDraft );
-    console.log( "updatedTags", updatedTags );
+    console.log("newActiveTagsDraft", newActiveTagsDraft);
+    console.log("updatedTags", updatedTags);
 
     if (updatedTags) {
       setActiveTags(updatedTags);
@@ -251,20 +254,9 @@ export function Filters({
     return indexA - indexB;
   });
 
-  return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
-    <section id="stem-begroot-filter">
-      <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>
-        {props.displaySearch ? (
-          <div className="form-element">
-            <FormLabel htmlFor="search">Zoeken</FormLabel>
-            <Input
-              onChange={(e) => search(e.target.value)}
-              className="osc-filter-search-bar"
-              placeholder={props.searchPlaceholder}
-              id='search'
-            />
-          </div>
-        ) : null}
+  const filterGroup = () => {
+    return (
+      <>
         {(props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
           <>
             {tagGroups.map((tagGroup, index) => {
@@ -363,6 +355,48 @@ export function Filters({
           </Button>
           <Button type='submit' appearance='primary-action-button' test-id={"filter-apply-button"}>{props.applyText}</Button>
         </div>
+      </>
+    )
+  }
+
+  return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
+    <section id="stem-begroot-filter">
+      <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>
+        {props.displaySearch ? (
+          <div className="form-element">
+            <FormLabel htmlFor="search">Zoeken</FormLabel>
+            <Input
+              onChange={(e) => search(e.target.value)}
+              className="osc-filter-search-bar"
+              placeholder={props.searchPlaceholder}
+              id='search'
+            />
+          </div>
+        ) : null}
+
+        {displayCollapsibleFilter ? (
+          <>
+            <Button className="toggle-filters-button" type="button" aria-expanded={filtersVisible ? 'true' : 'false'} aria-controls="filters-container" onClick={(e) => { setFiltersVisible(!filtersVisible) }}>
+              Filters uitklappen
+            </Button>
+            <div id="filters-container" className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''}`} aria-hidden={!filtersVisible ? 'true' : 'false'}>
+              <div className="filters-wrapper">
+                <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
+                  <span className="close-icon"></span>
+                  <span className="sr-only">Sluit filters</span>
+                </button>
+                <div className="filters-content">
+                  {filterGroup()}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          filterGroup()
+        )}
+
+
+
       </form>
 
       {(activeTags.length > 0 && showActiveTags) && (
