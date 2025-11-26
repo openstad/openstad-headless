@@ -225,7 +225,7 @@ export default function WidgetResourceDetailDisplay(
                         name="displayDescriptionExpandable_expandBeforeText"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Tekst voor de 'Lees meer' knop</FormLabel>
+                            <FormLabel>Tekst voor de &apos;Lees meer&apos; knop</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -238,7 +238,7 @@ export default function WidgetResourceDetailDisplay(
                         name="displayDescriptionExpandable_expandAfterText"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Tekst voor de 'Lees minder' knop</FormLabel>
+                            <FormLabel>Tekst voor de &apos;Lees minder&apos; knop</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
