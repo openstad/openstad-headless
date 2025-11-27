@@ -292,6 +292,16 @@ module.exports = function (db, sequelize, DataTypes) {
             : undefined;
         },
       },
+      
+      // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero
+      netPositiveVotes: {
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          const yes = this.getDataValue('yes') || 0;
+          const no = this.getDataValue('no') || 0;
+          return Math.max(yes - no, 0);
+        }
+      },
 
       createDateHumanized: {
         type: DataTypes.VIRTUAL,
