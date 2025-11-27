@@ -96,6 +96,16 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}
 			}
 		},
+    
+    // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero
+    netPositiveVotes: {
+      type: DataTypes.VIRTUAL,
+      get: function () {
+        const yes = this.getDataValue('yes') || 0;
+        const no = this.getDataValue('no') || 0;
+        return Math.max(yes - no, 0);
+      }
+    },
 
 	}, {
 
@@ -163,19 +173,40 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	Comment.scopes = function scopes() {
 		// Helper function used in `includeVoteCount` scope.
-		function voteCount( tableName ) {
-			return [sequelize.literal(`
-				(SELECT
-					COUNT(*)
-				FROM
-					comment_votes av
-				WHERE
-					av.deletedAt IS NULL AND (
-						av.checked IS NULL OR
-						av.checked  = 1
-					) AND
-					av.commentId = ${tableName}.id)
-			`), 'yes'];
+		function voteCount( tableName, opinion ) {
+      if (typeof opinion == 'undefined' || opinion === 'yes') {
+        return [sequelize.literal(`
+          (SELECT
+            COUNT(*)
+          FROM
+            comment_votes av
+          WHERE
+            av.deletedAt IS NULL AND (
+              av.checked IS NULL OR
+              av.checked  = 1
+            ) AND
+            av.commentId = ${tableName}.id)
+            AND (
+              av.opinion = 'yes' OR av.opinion IS NULL
+            )
+        `), 'yes'];
+      } else {
+        return [sequelize.literal(`
+          (SELECT
+            COUNT(*)
+          FROM
+            comment_votes av
+          WHERE
+            av.deletedAt IS NULL AND (
+              av.checked IS NULL OR
+              av.checked  = 1
+            ) AND
+            av.commentId = ${tableName}.id)
+            AND (
+              av.opinion = ${sequelize.escape(opinion)}
+            )
+        `), opinion];
+      }
 		}
 
 		return {
@@ -284,7 +315,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 			includeVoteCount: function( tableName ) {
 				return {
 					attributes: Object.keys(this.rawAttributes).concat([
-						voteCount(tableName, 'yes')
+						voteCount(tableName, 'yes'),
+						voteCount(tableName, 'no')
 					])
 				};
 			},
