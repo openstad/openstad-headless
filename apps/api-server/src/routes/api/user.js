@@ -14,7 +14,7 @@ const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const filterBody = (req, res, next) => {
   const data = {};
-  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole', 'firstname', 'lastname', 'twoFactorToken', 'twoFactorConfigured'];
+  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole', 'firstname', 'lastname', 'twoFactorToken', 'twoFactorConfigured', 'emailNotificationConsent'];
 
   keys.forEach((key) => {
     if (typeof req.body[key] != 'undefined') {
@@ -515,12 +515,17 @@ router.route('/:userId(\\d+)')
         const updatedUserDataForProject = merge.recursive({}, updatedUserData);
 
         if (req.results.idpUser.provider == req.authConfig.provider && req.adapter.service.updateUser) {
-          updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
+          const authUpdateUserData = merge.recursive({}, userData);
+          if ( authUpdateUserData.hasOwnProperty("emailNotificationConsent") ) {
+            delete authUpdateUserData["emailNotificationConsent"];
+          }
+
+          updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, authUpdateUserData, { id: user.idpUser && user.idpUser.identifier }) });
         }
 
         // user updates should not be done on certain project specific fields
         let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
-        let userProjectSpecificFields = ['nickName', 'role']; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
+        let userProjectSpecificFields = ['nickName', 'role', 'emailNotificationConsent']; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
         for (let userProjectSpecificField of userProjectSpecificFields) {
           delete synchronizedUpdatedUserData[ userProjectSpecificField ];
         }
