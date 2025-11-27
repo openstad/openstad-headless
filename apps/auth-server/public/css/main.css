@@ -7755,13 +7755,13 @@ textarea:disabled {
   }
 }
 
-.form-group.emailNotificationConsentSetForClientId {
+.form-group.emailNotificationConsent {
   display: flex;
   gap: 10px;
 }
 
-.form-group.emailNotificationConsentSetForClientId label,
-.form-group.emailNotificationConsentSetForClientId input {
+.form-group.emailNotificationConsent label,
+.form-group.emailNotificationConsent input {
   font-weight: normal;
   font-size: 16px;
   margin: 0;

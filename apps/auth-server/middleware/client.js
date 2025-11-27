@@ -264,12 +264,12 @@ exports.checkRequiredUserFields = (req, res, next) => {
   if (requiredFields) {
     requiredFields.forEach((field) => {
       // Consent field is a special case since it can contain multiple client IDs
-      if ( field === 'emailNotificationConsentSetForClientId' ) {
+      if ( field === 'emailNotificationConsent' ) {
         const clientId = String(req?.client?.id);
-        const currentValue = req?.user?.emailNotificationConsentSetForClientId || '';
-        const consentForClient = currentValue.split(',');
+        const currentValue = req?.user?.emailNotificationConsent || {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
 
-        if (!consentForClient.includes(clientId)) {
+        if (!clientConsentIsSet) {
           error = true;
           return;
         }

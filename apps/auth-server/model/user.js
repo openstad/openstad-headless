@@ -80,8 +80,8 @@ module.exports = (db, sequelize, Sequelize) => {
       },
     },
 
-    emailNotificationConsentSetForClientId: {
-      type: DataTypes.STRING,
+    emailNotificationConsent: {
+      type: DataTypes.JSON,
     },
 
     password: {

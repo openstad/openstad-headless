@@ -2,14 +2,15 @@ const { Sequelize } = require('sequelize');
 
 module.exports = {
     async up({ context: queryInterface }) {
-        await queryInterface.addColumn('users', 'emailNotificationConsentSetForClientId', {
-            type: Sequelize.STRING,
+        await queryInterface.addColumn('users', 'emailNotificationConsent', {
+            type: Sequelize.JSON,
             allowNull: true,
             after: 'postcode',
+            defaultValue: {},
         });
     },
 
     async down({ context: queryInterface }) {
-        await queryInterface.removeColumn('users', 'emailNotificationConsentSetForClientId');
+        await queryInterface.removeColumn('users', 'emailNotificationConsent');
     }
 };

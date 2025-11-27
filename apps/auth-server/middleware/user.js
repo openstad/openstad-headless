@@ -142,7 +142,7 @@ exports.validateUser = async(req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  let { name, email, streetName, houseNumber, suffix, postcode, emailNotificationConsentSetForClientId, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+  let { name, email, streetName, houseNumber, suffix, postcode, emailNotificationConsent, city, phoneNumber, hashedPhoneNumber, password } = req.body;
 
   db.User
     .create({
@@ -152,7 +152,7 @@ exports.create =  (req, res, next) => {
       houseNumber,
       suffix,
       postcode,
-      emailNotificationConsentSetForClientId,
+      emailNotificationConsent,
       city,
       phoneNumber,
       password: password ? bcrypt.hashSync(password, saltRounds) : null,
@@ -168,7 +168,7 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'emailNotificationConsentSetForClientId', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
+  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'emailNotificationConsent', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
 
   let data = {};
   keysToUpdate.forEach((key) => {
