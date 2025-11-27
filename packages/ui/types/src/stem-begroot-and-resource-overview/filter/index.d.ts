@@ -44,6 +44,7 @@ type Props = {
     showActiveTags?: boolean;
     preFilterTags?: Array<number>;
     displayLocationFilter?: boolean;
+    displayCollapsibleFilter?: boolean;
 };
-export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, ...props }: Props): React.JSX.Element | null;
+export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, displayCollapsibleFilter, ...props }: Props): React.JSX.Element | null;
 export {};

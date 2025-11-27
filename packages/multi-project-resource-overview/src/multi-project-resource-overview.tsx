@@ -21,6 +21,7 @@ export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
     projectLng?: string;
     includeProjectsInOverview?: boolean;
     excludeResourcesInOverview?: boolean;
+    displayCollapsibleFilter?: boolean;
   }[];
   includeProjectsInOverview?: boolean;
   excludeResourcesInOverview?: boolean;

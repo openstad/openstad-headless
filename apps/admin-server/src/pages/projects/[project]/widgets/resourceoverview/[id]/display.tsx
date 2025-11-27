@@ -67,6 +67,7 @@ const formSchema = z.object({
   overviewTagGroups: z.array(z.string()).optional(),
   dialogTagGroups: z.array(z.string()).optional(),
   displayTagIcon: z.boolean().optional(),
+  displayCollapsibleFilter: z.boolean().optional(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -114,6 +115,7 @@ export default function WidgetResourceOverviewDisplay(
       displayOverviewTagGroups: props?.displayOverviewTagGroups || false,
       overviewTagGroups: props?.overviewTagGroups || [],
       dialogTagGroups: props?.dialogTagGroups || [],
+      displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -443,7 +445,7 @@ export default function WidgetResourceOverviewDisplay(
                   <FormMessage />
                 </FormItem>
               )}
-            />  
+            />
 
             <br />
 
@@ -884,6 +886,26 @@ export default function WidgetResourceOverviewDisplay(
               )}
             />
           )}
+
+          <Heading size="xl" className="col-span-full mt-6">Filter</Heading>
+          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
+          <FormField
+            control={form.control}
+            name="displayCollapsibleFilter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Filter inklapbaar maken
+                </FormLabel>
+                <FormDescription>
+                  Als je dit aanvinkt, worden de filters getoond in een inklapbaar menu.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
