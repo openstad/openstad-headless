@@ -18,6 +18,9 @@ RUN apt-get update && \
 
 RUN npm update -g npm
 
+# Install safe-chain to prevent installing malware through npm
+RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
+
 # Install app dependencies
 COPY --chown=node:node package*.json .
 # Bundle all packages during build, only the installed ones will persist
