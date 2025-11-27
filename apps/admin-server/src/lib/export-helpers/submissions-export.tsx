@@ -19,7 +19,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
 
   const fileName = transformString() + '.xlsx';
 
-  const normalizeData = (value: any) => {
+  const normalizeData = (value: any, fieldType?: string) => {
     let parsedValue;
 
     try {
@@ -68,7 +68,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
           const matrixKey = `matrix_${item.fieldKey}_${row.trigger}`;
           fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
         });
-      } else if (title) {
+      } else if (title && item.questionType !== 'pagination') {
         fieldKeyToTitleMap.set(item.fieldKey || title, title);
       }
 
@@ -124,6 +124,29 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
         rawValue = fetchMatrixData(key, selectedWidget?.config?.items, row?.submittedData || [], false) || '';
       }
 
+      const fieldType = (selectedWidget?.config?.items || []).find((item: any) => item.fieldKey === key)?.questionType;
+      const fieldTitle = (selectedWidget?.config?.items || []).find((item: any) => item.fieldKey === key)?.title;
+
+      if (typeof rawValue === 'object' && (fieldType === 'swipe' || fieldType === 'dilemma')) {
+        Object.values(rawValue).forEach((item: any) => {
+          let returnText = fieldType === 'swipe' ? item.answer : item.title;
+          if (item.explanation) returnText += `: ${item.explanation}`;
+
+          if (fieldType === 'dilemma') {
+            const dilemmaId = !isNaN(Number(item.dilemmaId)) ? Number(item.dilemmaId) + 1 : '';
+            const header = fieldTitle ? `${fieldTitle} ${dilemmaId}` : `Keuze ${dilemmaId || item.dilemmaId}`;
+            rowData[stripHtmlTags(header)] = returnText;
+          }
+
+          if (fieldType === 'swipe') {
+            let header = item.title ? item.title : `Keuze ${item.cardId}`;
+            header = `${title}: ${header}`;
+            rowData[stripHtmlTags(header)] = returnText;
+          }
+        });
+        return;
+      }
+
       const baseKey = title;
       let keyHeader = keyCount[baseKey]
         ? `${baseKey} (${keyCount[baseKey]++})`
@@ -131,7 +154,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
 
       keyHeader = keyHeader && stripHtmlTags(keyHeader);
 
-      rowData[keyHeader] = normalizeData(rawValue);
+      rowData[keyHeader] = normalizeData(rawValue, fieldType || '');
     });
     if (selectedWidget?.type !== "distributionmodule") {
       rowData['Embedded URL'] = row?.submittedData?.embeddedUrl || '';

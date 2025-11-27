@@ -72,8 +72,8 @@ const TextInput: FC<TextInputProps> = ({
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
-            let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            let { html } = this.props;
+            return <div dangerouslySetInnerHTML={{ __html: html }} />;
         }
     }
 
@@ -82,6 +82,7 @@ const TextInput: FC<TextInputProps> = ({
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
     const [value, setValue] = useState(initialValue);
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
 
     useEffect(() => {
         if (reset) {
@@ -149,7 +150,7 @@ const TextInput: FC<TextInputProps> = ({
             )}
             {description &&
                 <>
-                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
                     <Spacer size={.5} />
                 </>
             }
@@ -172,12 +173,12 @@ const TextInput: FC<TextInputProps> = ({
 
             {infoImage && (
                 <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
+                    <img src={infoImage} alt="" />
                     <Spacer size={.5} />
                 </figure>
             )}
 
-            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
+            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`} aria-invalid={checkInvalid}>
                 <InputComponent
                     id={randomId}
                     name={fieldKey}
@@ -187,6 +188,17 @@ const TextInput: FC<TextInputProps> = ({
                     value={value}
                     onChange={(e) => {
                         setValue(e.target.value);
+
+                        if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
+                            setCheckInvalid(false);
+                        } else {
+                            if(fieldRequired){
+                                setCheckInvalid(true);
+                            }else{
+                                setCheckInvalid(false);
+                            }
+                        }
+
                         if (onChange) {
                             onChange({
                                 name: fieldKey,
@@ -200,11 +212,11 @@ const TextInput: FC<TextInputProps> = ({
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     autoComplete={getAutocomplete(fieldKey)}
-                    aria-invalid={fieldInvalid}
+
                     aria-describedby={`${randomId}_error`}
                 />
                 {isFocused && helpText &&
-                  <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
+                    <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
                 }
             </div>
         </FormField>

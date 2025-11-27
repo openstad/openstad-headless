@@ -7,3 +7,7 @@
  padding-left: 0;
  padding-right: 0;
 }
+
+.a-b-slider-container input[type="range"] {
+  touch-action: pan-x;
+}

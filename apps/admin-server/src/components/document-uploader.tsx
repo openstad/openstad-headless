@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { FieldValues, Path, UseFormReturn, useForm } from 'react-hook-form';
+import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 import {
   FormControl,
   FormField,
@@ -8,7 +8,7 @@ import {
   FormMessage,
 } from './ui/form';
 import { Input } from './ui/input';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {UploadDocument} from "@/hooks/upload-document";
 
 export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
@@ -21,26 +21,10 @@ export const DocumentUploader: React.FC<{
   const [document, setDocument] = React.useState<{url: string, name: string}>();
   const [documentUrl, setDocumentUrl] = React.useState<string>('');
 
-  function prepareDocument(document: any) {
-    const formData = new FormData();
-    formData.append('document', document);
-    formData.append('documentname', 'testName');
-    formData.append('description', 'testDescription');
+  async function doUpload(data: any) {
+    const uploadedDocument = await UploadDocument(data, project);
 
-    return formData;
-  }
-
-  async function uploadDocument(data: any) {
-    let document = prepareDocument(data);
-
-    const projectNumber: number | undefined = validateProjectNumber(project);
-
-    const response = await fetch(`/api/openstad/api/project/${projectNumber}/upload/document`, {
-      method: 'POST',
-      body: document
-    })
-
-    setDocument(await response.json());
+    setDocument(uploadedDocument);
   }
 
   useEffect(() => {
@@ -82,7 +66,7 @@ export const DocumentUploader: React.FC<{
               accept={acceptAttribute}
               {...field}
               onChange={(e) => {
-                uploadDocument(e.target.files?.[0])
+                doUpload(e.target.files?.[0])
               }}
             />
           </FormControl>

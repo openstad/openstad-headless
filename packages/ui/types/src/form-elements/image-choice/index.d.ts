@@ -28,6 +28,7 @@ export type ImageChoiceFieldProps = {
         value: string;
         label: string;
     }[];
+    infoField?: string;
 };
 export type ChoiceItem = {
     label: string;
@@ -36,6 +37,7 @@ export type ChoiceItem = {
     imageDescription: string;
     imageAlt: string;
     hideLabel?: boolean;
+    description?: string;
 };
 declare const ImageChoiceField: FC<ImageChoiceFieldProps>;
 export default ImageChoiceField;

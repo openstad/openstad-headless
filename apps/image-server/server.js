@@ -214,6 +214,7 @@ const documentMulterConfig = {
   },
   fileFilter: function (req, file, cb) {
     const allowedTypes = [
+      'image/gif',
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -330,7 +331,6 @@ app.get('/document/*',
         return;
       }
       
-      const path = require('path');
       const documentsDir = path.resolve('documents/');
 
       const requestedPath = req.path.replace(/^\/document\//, '');

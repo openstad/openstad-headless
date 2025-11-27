@@ -44,6 +44,7 @@ export type CheckboxFieldProps = {
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
     randomizeItems?: boolean;
+    value?: FormValue;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
