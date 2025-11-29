@@ -27,7 +27,8 @@ const formSchema = z.object({
   includeOrExcludeTagIds: z.string().optional(),
   includeOrExcludeStatusIds: z.string().optional(),
   onlyIncludeTagIds: z.string().optional(),
-  onlyIncludeStatusIds: z.string().optional()
+  onlyIncludeStatusIds: z.string().optional(),
+  filterBehaviorInclude: z.string().optional(),
 });
 
 export default function WidgetResourceOverviewInclude(
@@ -62,6 +63,7 @@ export default function WidgetResourceOverviewInclude(
       includeOrExcludeStatusIds: props?.includeOrExcludeStatusIds || 'include',
       onlyIncludeTagIds: props?.onlyIncludeTagIds || '',
       onlyIncludeStatusIds: props?.onlyIncludeStatusIds || '',
+      filterBehaviorInclude: props?.filterBehaviorInclude || 'or',
     },
   });
 
@@ -87,8 +89,6 @@ export default function WidgetResourceOverviewInclude(
                   beïnvloeden:
                   <br/>
                   Maak je keuze op basis van hoe je de inzendingen wil filteren in relatie tot de geselecteerde tags.
-                  <br/>
-                  <br/>
                 </FormDescription>
                 <Select
                   onValueChange={field.onChange}
@@ -112,6 +112,41 @@ export default function WidgetResourceOverviewInclude(
               </FormItem>
             )}
           />
+
+          { form.watch("includeOrExcludeTagIds") === "include" && (
+            <FormField
+              control={form.control}
+              name="filterBehaviorInclude"
+              render={({ field }) => (
+                <FormItem>
+                  <Spacer />
+                  <FormLabel>
+                    Kies hoe de geselecteerde tags gecombineerd moeten worden met tags van andere types
+                  </FormLabel>
+                  <FormDescription>
+                    <strong>Of:</strong> De inzending wordt getoond als er <em>minstens één</em> tag overeenkomt los van het type.<br />
+                    <strong>En:</strong> De inzending wordt alleen getoond als er van <em>elk type</em> tags minstens één tag overeenkomt.
+                  </FormDescription>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || 'or'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Of" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="or">Of</SelectItem>
+                      <SelectItem value="and">En</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <Spacer />
 
           <CheckboxList
             form={form}
