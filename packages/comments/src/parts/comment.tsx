@@ -151,28 +151,28 @@ function Comment({
 
             {isOpen && (
               <div className="DropdownMenuContent">
-                  <ButtonGroup direction='column'>
-                    <Button
-                      appearance='secondary-action-button'
-                      className="DropdownMenuItem"
-                      onClick={() => {
-                        setIsOpen(false);
-                        toggleEditForm();
-                      }}
-                    >
-                      Bewerken
-                    </Button>
-                    <Button
-                      appearance='secondary-action-button'
-                      className="DropdownMenuItem"
-                      onClick={() => {
-                        if (args.comment && confirm('Weet u het zeker?'))
-                          args.comment.delete(args.comment.id);
-                      }}
-                    >
-                      Verwijderen
-                    </Button>
-                  </ButtonGroup>
+                <ButtonGroup direction='column'>
+                  <Button
+                    appearance='secondary-action-button'
+                    className="DropdownMenuItem"
+                    onClick={() => {
+                      setIsOpen(false);
+                      toggleEditForm();
+                    }}
+                  >
+                    Bewerken
+                  </Button>
+                  <Button
+                    appearance='secondary-action-button'
+                    className="DropdownMenuItem"
+                    onClick={() => {
+                      if (args.comment && confirm('Weet u het zeker?'))
+                        args.comment.delete(args.comment.id);
+                    }}
+                  >
+                    Verwijderen
+                  </Button>
+                </ButtonGroup>
               </div>
             )}
           </div>
@@ -276,6 +276,15 @@ function Comment({
             </div>
           );
         })}
+
+      {(!args.comment.parentId && args.comment.replies && args.comment.replies.length > 0 && canReply() && !isReplyFormActive) && (
+        <Button
+          appearance='secondary-action-button'
+          className="reply-container-button"
+          onClick={() => toggleReplyForm()}>
+          Reageren
+        </Button>
+      )}
 
       {isReplyFormActive ? (
         <div className="reaction-container">
