@@ -38,7 +38,7 @@
   "private": true,
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "cypress": "^15.3.0",
+    "cypress": "^15.6.0",
     "mysql2": "^3.11.3",
     "prettier": "3.0.3",
     "vitest": "^3.2.3"
