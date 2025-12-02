@@ -77,6 +77,9 @@ export function Filters({
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
   const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>([]);
   const [activeFilter, setActiveFilter] = useState<Filter>(defaultFilter);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [sortValue, setSortValue] = useState<string>(props.defaultSorting || 'createdAt_desc');
+  const [locationValue, setLocationValue] = useState<PostcodeAutoFillLocation>(undefined);
 
   const search = useDebounce(setSearch, 300);
 
@@ -93,26 +96,39 @@ export function Filters({
   }
 
   function setSearch(value: string) {
-    updateFilter({
+    const newFilter = {
       ...filter,
       search: {
         text: value,
       },
-    });
+    };
+    updateFilter(newFilter);
+
+    if(autoApply) {
+      handleSubmit(undefined, newFilter, activeTags);
+    }
   }
 
   function setSort(value: string) {
+    setSortValue(value);
     updateFilter({
       ...filter,
       sort: value,
     });
+    if (autoApply) {
+      handleSubmit(undefined, { ...filter, sort: value }, activeTags);
+    }
   }
 
   function setLocation(location: PostcodeAutoFillLocation) {
+    setLocationValue(location);
     updateFilter({
       ...filter,
       location: location,
     });
+    if (autoApply) {
+      handleSubmit(undefined, { ...filter, location }, activeTags);
+    }
   }
 
   const updateParameter = () => {
@@ -129,6 +145,7 @@ export function Filters({
   }
 
   const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel: string, forceSelected?: boolean) => {
+    let selectedTags;
     setSelected((prevSelectedOptions) => {
       const existingTags = prevSelectedOptions[tagType] || [];
       const selected = [...(existingTags || [])];
@@ -143,10 +160,12 @@ export function Filters({
       }
 
       setTags(tagType, selected);
+      selectedTags = { ...prevSelectedOptions, [tagType]: selected };
 
-      return { ...prevSelectedOptions, [tagType]: selected };
+      return selectedTags;
     });
 
+    let draftTags;
     setNewActiveTagsDraft((prevSelectedOptions) => {
       const selectedDraft: { type: string, id: number, label: string }[] = [...(prevSelectedOptions || [])];
       const tagIndex = selectedDraft.findIndex((tag: { type: string, id: number, label: string }) => tag.id === updatedTag);
@@ -164,32 +183,45 @@ export function Filters({
         setActiveTags(selectedDraft)
       }
 
-      return selectedDraft;
+      draftTags = selectedDraft;
+      return draftTags;
     });
+
+    if (autoApply) {
+      const newTags = Object.values(selectedTags || {}).flat().map(Number);
+      const newFilter = { ...filter, tags: newTags };
+      handleSubmit(undefined, newFilter, draftTags);
+    }
   };
 
   const updateTagListSingle = (tagType: string, updatedTag: string, updatedLabel?: string) => {
     const existingTags = selectedOptions[tagType];
     let selected = [...(existingTags || [])];
 
+    let draftTags;
     if (updatedTag === '') {
       selected = [];
 
-      setNewActiveTagsDraft((prevSelectedOptions) => {
-        return (prevSelectedOptions || []).filter(tag => tag.type !== tagType);
-      })
+      draftTags = (newActiveTagsDraft || []).filter(tag => tag.type !== tagType);
+      setNewActiveTagsDraft(draftTags);
     } else {
       selected = [updatedTag];
 
-      setNewActiveTagsDraft((prevSelectedOptions) => {
-        const filtered = (prevSelectedOptions || []).filter(tag => tag.type !== tagType);
-        const label = updatedLabel || '';
-        return [...filtered, { id: Number(updatedTag), label: label, type: tagType }];
-      })
+      const filtered = (newActiveTagsDraft || []).filter(tag => tag.type !== tagType);
+      const label = updatedLabel || '';
+      draftTags = [...filtered, { id: Number(updatedTag), label: label, type: tagType }];
+      setNewActiveTagsDraft(draftTags);
     }
 
-    setSelected({ ...selectedOptions, [tagType]: selected });
+    const selectedTags = { ...selectedOptions, [tagType]: selected };
+    setSelected(selectedTags);
     setTags(tagType, selected);
+
+    if (autoApply) {
+      const newTags = Object.values(selectedTags || {}).flat().map(Number);
+      const newFilter = { ...filter, tags: newTags };
+      handleSubmit(undefined, newFilter, draftTags);
+    }
   }
 
   function removeActiveTag(tagType: string, tagId: number) {
@@ -220,24 +252,22 @@ export function Filters({
   useEffect(() => {
     if (tagState) {
       const tags = Object.values(tagState).flat();
-      updateFilter({
-        ...filter,
-        tags,
-      });
+      const newFilter = { ...filter, tags };
+      updateFilter(newFilter);
+
+      if (autoApply) {
+        handleSubmit(undefined, newFilter, newActiveTagsDraft);
+      }
     }
-  }, [tagState]);
+  }, [tagState, autoApply, newActiveTagsDraft]);
 
   const handleSubmit = (e?: any, updatedFilter?: Filter, updatedTags?: any) => {
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
-    console.log("filterToSubmit", updatedFilter, filter);
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
     setActiveFilter(filterToSubmit);
-
-    console.log("newActiveTagsDraft", newActiveTagsDraft);
-    console.log("updatedTags", updatedTags);
 
     if (updatedTags) {
       setActiveTags(updatedTags);
@@ -248,6 +278,7 @@ export function Filters({
     updateParameter();
   };
 
+
   const sortOptionsOrder = ['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'];
   sorting = sorting?.sort((a, b) => {
     const indexA = sortOptionsOrder.indexOf(a.value);
@@ -257,12 +288,16 @@ export function Filters({
 
   return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
     <section id="stem-begroot-filter">
-      <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>
+      <form className={`osc-resources-filter ${className}`} onSubmit={!autoApply ? handleSubmit : undefined}>
         {props.displaySearch ? (
           <div className="form-element">
             <FormLabel htmlFor="search">Zoeken</FormLabel>
             <Input
-              onChange={(e) => search(e.target.value)}
+              value={searchValue}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                search(e.target.value);
+              }}
               className="osc-filter-search-bar"
               placeholder={props.searchPlaceholder}
               id='search'
@@ -316,6 +351,7 @@ export function Filters({
           <div className="form-element">
             <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
             <Select
+              value={sortValue}
               onValueChange={setSort}
               options={sorting}
               id="sortField"
@@ -355,11 +391,16 @@ export function Filters({
               setSelected({});
               setNewActiveTagsDraft([]);
               setActiveTags([]);
+              setSearchValue('');
+              setSearch('');
+              setSortValue(props.defaultSorting || 'createdAt_desc');
+              setLocationValue(undefined);
               updateFilter(defaultFilter);
               setTagState({});
               onUpdateFilter && onUpdateFilter(defaultFilter);
               updateParameter();
               setLocation(undefined);
+              handleSubmit(undefined, defaultFilter, []);
             }}
             test-id={"filter-reset-button"}
           >
@@ -396,9 +437,10 @@ export function Filters({
             <p>Huidige filterinstellingen:</p>
             <p>Zoekterm: {activeFilter.search.text || 'geen'}</p>
             <p>Sorteer op: {activeFilter.sort}</p>
-            {activeFilter.location ? (
+            {locationValue && locationValue.lat && locationValue.lng ? (
               <p>
-                Locatie filter: Lat {activeFilter.location.lat}, Lng {activeFilter.location.lng}
+                Locatie filter: Lat {locationValue.lat}, Lng {locationValue.lng}
+                {locationValue.proximity ? `, Straal: ${locationValue.proximity}m` : ''}
               </p>
             ) : (
               <p>Locatie filter: geen</p>
