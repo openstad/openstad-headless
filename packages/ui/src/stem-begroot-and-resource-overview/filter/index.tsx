@@ -33,6 +33,7 @@ type Props = {
   sorting: Array<{ value: string; label: string }>;
   displaySorting: boolean;
   defaultSorting: string;
+  autoApply: boolean;
   displaySearch: boolean;
   itemsPerPage?: number;
   displayTagFilters: boolean;
@@ -56,6 +57,7 @@ export function Filters({
   className = '',
   showActiveTags = false,
   preFilterTags = undefined,
+  autoApply = false,
   ...props
 }: Props) {
   const defaultFilter: Filter = {
@@ -73,7 +75,8 @@ export function Filters({
   const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
   const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
-  const [tagsReadyForParameter, setTagsReadyForParameter] = useState< Array<string | number> >([]);
+  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>([]);
+  const [activeFilter, setActiveFilter] = useState<Filter>(defaultFilter);
 
   const search = useDebounce(setSearch, 300);
 
@@ -157,7 +160,7 @@ export function Filters({
         selectedDraft.push({ id: updatedTag, label: label, type: tagType });
       }
 
-      if ( forceSelected ) {
+      if (forceSelected) {
         setActiveTags(selectedDraft)
       }
 
@@ -197,9 +200,9 @@ export function Filters({
       ...selectedOptions,
       [tagType]: Array.isArray(selectedOptions[tagType])
         ? (selectedOptions[tagType] || []).filter((id: number | string) => {
-            const isMatch = (typeof id === 'number' ? id === tagId : Number(id) === tagId);
-            return !isMatch;
-          })
+          const isMatch = (typeof id === 'number' ? id === tagId : Number(id) === tagId);
+          return !isMatch;
+        })
         : [],
     };
     setSelected(updatedSelectedOptions);
@@ -228,12 +231,13 @@ export function Filters({
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
-    console.log( "filterToSubmit", updatedFilter, filter );
+    console.log("filterToSubmit", updatedFilter, filter);
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
+    setActiveFilter(filterToSubmit);
 
-    console.log( "newActiveTagsDraft", newActiveTagsDraft );
-    console.log( "updatedTags", updatedTags );
+    console.log("newActiveTagsDraft", newActiveTagsDraft);
+    console.log("updatedTags", updatedTags);
 
     if (updatedTags) {
       setActiveTags(updatedTags);
@@ -361,7 +365,9 @@ export function Filters({
           >
             {props.resetText}
           </Button>
-          <Button type='submit' appearance='primary-action-button' test-id={"filter-apply-button"}>{props.applyText}</Button>
+          {!autoApply && (
+            <Button type='submit' appearance='primary-action-button' test-id={"filter-apply-button"}>{props.applyText}</Button>
+          )}
         </div>
       </form>
 
@@ -383,6 +389,31 @@ export function Filters({
           </ul>
         </div>
       )}
+
+      <div id="filter-status" aria-live="polite" className="--sr-only">
+        {activeFilter && (
+          <>
+            <p>Huidige filterinstellingen:</p>
+            <p>Zoekterm: {activeFilter.search.text || 'geen'}</p>
+            <p>Sorteer op: {activeFilter.sort}</p>
+            {activeFilter.location ? (
+              <p>
+                Locatie filter: Lat {activeFilter.location.lat}, Lng {activeFilter.location.lng}
+              </p>
+            ) : (
+              <p>Locatie filter: geen</p>
+            )}
+            <p>Tags: {activeFilter.tags.length > 0 ? '' : 'geen'}</p>
+            <ul>
+              {activeTags.map(tag => (
+                <li key={`${tag.type}-${tag.id}`}> {tag.label} </li>
+              ))}
+            </ul>
+          </>
+        )}
+
+      </div>
+
     </section>
   );
 }
