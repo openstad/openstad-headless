@@ -1054,7 +1054,6 @@ module.exports = function (db, sequelize, DataTypes) {
     
     // Calculate & save the score to the resource
     resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
-    console.log (`[WILSON SCORE] Calculated score for Resource ID ${resource.id}: ${resource.score} (Yes: ${yesVotes}, No: ${noVotes})`);
     await resource.save();
   }
 

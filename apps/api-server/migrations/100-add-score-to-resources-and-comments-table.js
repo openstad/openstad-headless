@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const { Resource } = require('../src/db');
 
 module.exports = {
   async up ({ context: queryInterface }) {
@@ -8,6 +9,16 @@ module.exports = {
       default: 0,
       after: 'sort',
     });
+    
+    // Fetch all resources and calculate their scores based on existing votes
+    const resources = await Resource.findAll();
+    for (const resource of resources) {
+      // Workaround for validation in Resource model
+      resource.auth.user = {
+        role: 'admin'
+      }
+      await resource.calculateAndSaveScore();
+    }
     
     await queryInterface.addColumn( 'comments', 'score', {
       type: Sequelize.DECIMAL(12,11),
