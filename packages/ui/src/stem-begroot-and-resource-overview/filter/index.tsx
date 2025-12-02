@@ -104,7 +104,7 @@ export function Filters({
     };
     updateFilter(newFilter);
 
-    if(autoApply) {
+    if (autoApply) {
       handleSubmit(undefined, newFilter, activeTags);
     }
   }
@@ -431,30 +431,41 @@ export function Filters({
         </div>
       )}
 
-      <div id="filter-status" aria-live="polite" className="--sr-only">
-        {activeFilter && (
+      {activeFilter && (
+        <div id="filter-status" aria-live="polite" className="sr-only">
           <>
             <p>Huidige filterinstellingen:</p>
-            <p>Zoekterm: {activeFilter.search.text || 'geen'}</p>
-            <p>Sorteer op: {activeFilter.sort}</p>
-            {locationValue && locationValue.lat && locationValue.lng ? (
-              <p>
-                Locatie filter: Lat {locationValue.lat}, Lng {locationValue.lng}
-                {locationValue.proximity ? `, Straal: ${locationValue.proximity}m` : ''}
-              </p>
-            ) : (
-              <p>Locatie filter: geen</p>
-            )}
-            <p>Tags: {activeFilter.tags.length > 0 ? '' : 'geen'}</p>
-            <ul>
-              {activeTags.map(tag => (
-                <li key={`${tag.type}-${tag.id}`}> {tag.label} </li>
-              ))}
-            </ul>
-          </>
-        )}
 
-      </div>
+            {props.displaySearch && (
+              <p>Zoekterm: {activeFilter.search.text || 'geen'}</p>
+            )}
+            {props.displaySorting && (
+              <p>Sorteer op: {activeFilter.sort}</p>
+            )}
+
+            {props.displayLocationFilter && (
+              locationValue && locationValue.lat && locationValue.lng ? (
+                <p>
+                  Locatie filter: Lat {locationValue.lat}, Lng {locationValue.lng}
+                  {locationValue.proximity ? `, Straal: ${locationValue.proximity}m` : ''}
+                </p>
+              ) : (
+                <p>Locatie filter: geen</p>
+              )
+            )}
+            {props.displayTagFilters && (
+              <>
+                <p>Tags: {activeFilter.tags.length > 0 ? '' : 'geen'}</p>
+                <ul>
+                  {activeTags.map(tag => (
+                    <li key={`${tag.type}-${tag.id}`}> {tag.label} </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
+        </div>
+      )}
 
     </section>
   );
