@@ -212,18 +212,18 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
     useEffect(() => {
         const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+        const url = new URL(window.location.href);
 
         if (Array.isArray(formFields)) {
             formFields.forEach(field => {
                 if (field && field.fieldKey && params.hasOwnProperty(field.fieldKey)) {
                     field.defaultValue = params[field.fieldKey];
-                    const url = new URL(window.location.href);
                     url.searchParams.delete(field.fieldKey);
-                    window.history.replaceState(null, '', url.toString());
                 }
             });
         }
-
+       
+        window.history.replaceState(null, '', url.toString());
     }, [formFields]);
 
     return (isLoading || !fillDefaults) ? null : (
