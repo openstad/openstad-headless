@@ -376,7 +376,7 @@ export function Filters({
         {(props.displaySearch && displayCollapsibleFilter) ? (
           <button type='submit' className="apply-filters-button">
             <span className="filter-icon"></span>
-            <span className="sr-only">Apply filters</span>
+            <span className="sr-only">Filters toepassen</span>
           </button>
         ) : null}
 
