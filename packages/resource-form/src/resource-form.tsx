@@ -217,9 +217,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             formFields.forEach(field => {
                 if (field && field.fieldKey && params.hasOwnProperty(field.fieldKey)) {
                     field.defaultValue = params[field.fieldKey];
-                    if (window.location.search) {
-                        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
-                    }
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete(field.fieldKey);
+                    window.history.replaceState(null, '', url.toString());
                 }
             });
         }
