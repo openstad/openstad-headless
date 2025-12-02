@@ -20,7 +20,7 @@
     "csurf": "^1.9.0",
     "dotenv": "^6.2.0",
     "ejs": "^3.1.8",
-    "express": "^4.10.x",
+    "express": "^4.22.x",
     "express-flash": "0.0.2",
     "express-mysql-session": "^3.0.0",
     "express-rate-limit": "^6.7.0",
