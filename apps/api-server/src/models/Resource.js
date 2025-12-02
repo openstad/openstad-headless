@@ -83,6 +83,15 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
 
+      score: {
+        type: DataTypes.DECIMAL(12,11),
+        auth: {
+          updateableBy: 'editor',
+        },
+        allowNull: false,
+        defaultValue: null,
+      },
+      
       sort: {
         type: DataTypes.INTEGER,
         auth: {
@@ -1014,6 +1023,40 @@ module.exports = function (db, sequelize, DataTypes) {
       return data;
     },
   };
+  
+  const wilsonScore = require('../lib/wilson-score');
+  
+  Resource.calculateAndSaveScore = Resource.prototype.calculateAndSaveScore = async function() {
+    const resource = this;
+    const votes = await db.Vote.findAll({
+      where: {
+        resourceId: resource.id,
+        deletedAt: null,
+        [Op.or]: [
+          { checked: null },
+          { checked: true }
+        ]
+      },
+      attributes: ['opinion', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      group: ['opinion']
+    });
+    
+    let yesVotes = 0;
+    let noVotes = 0;
+
+    votes.forEach(vote => {
+      if (vote.opinion === 'yes') {
+        yesVotes = parseInt(vote.get('count'), 10);
+      } else if (vote.opinion === 'no') {
+        noVotes = parseInt(vote.get('count'), 10);
+      }
+    });
+    
+    // Calculate & save the score to the resource
+    resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
+    console.log (`[WILSON SCORE] Calculated score for Resource ID ${resource.id}: ${resource.score} (Yes: ${yesVotes}, No: ${noVotes})`);
+    await resource.save();
+  }
 
   return Resource;
 

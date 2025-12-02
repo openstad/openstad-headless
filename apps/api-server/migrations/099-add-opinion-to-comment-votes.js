@@ -3,7 +3,7 @@ const { Sequelize } = require('sequelize');
 module.exports = {
   async up ({ context: queryInterface }) {
     await queryInterface.addColumn( 'comment_votes', 'opinion', {
-      type: Sequelize.VARCHAR(64),
+      type: Sequelize.STRING(64),
       allowNull: true,
       default: null,
       after: 'userId',

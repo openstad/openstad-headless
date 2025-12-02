@@ -1,6 +1,32 @@
 var config = require('config');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 
+const updateResourceScore = async (vote, options) => {
+  try {
+    const run = async () => {
+      const resource = await vote.getResource();
+      if (resource && typeof resource.calculateAndSaveScore === 'function') {
+        await resource.calculateAndSaveScore();
+      }
+    };
+
+    // If create ran inside a transaction, wait for commit so other queries see the new row
+    if (options && options.transaction && options.transaction.afterCommit) {
+      options.transaction.afterCommit(() => {
+        // fire-and-forget or await if you want to chain
+        run().catch((err) =>
+          console.error('Failed to recalc score after transaction commit:', err)
+        );
+      });
+    } else {
+      // no transaction: run immediately
+      await run();
+    }
+  } catch (err) {
+    console.error('Update resource score failed in hook for Vote:', err);
+  }
+}
+
 module.exports = function( db, sequelize, DataTypes ) {
 	var Vote = sequelize.define('vote', {
 		resourceId: {
@@ -45,6 +71,24 @@ module.exports = function( db, sequelize, DataTypes ) {
 			fields : ['resourceId', 'userId', 'deletedAt'],
 			unique : true
 		}],
+    hooks: {
+      afterCreate: async (vote, options) => {
+        await updateResourceScore(vote, options);
+      },
+
+      afterUpdate: async function (vote, options) {
+        await updateResourceScore(vote, options);
+      },
+      
+      afterDestroy: async function (vote, options) {
+        await updateResourceScore(vote, options);
+      },
+      
+      afterUpsert: async function (vote, options) {
+        await updateResourceScore(vote, options);
+      }
+      
+    },
 		// paranoid: false,
 	});
 

@@ -3,16 +3,16 @@ const { Sequelize } = require('sequelize');
 module.exports = {
   async up ({ context: queryInterface }) {
     await queryInterface.addColumn( 'resources', 'score', {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      default: null,
+      type: Sequelize.DECIMAL(12,11),
+      allowNull: false,
+      default: 0,
       after: 'sort',
     });
     
     await queryInterface.addColumn( 'comments', 'score', {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      default: null,
+      type: Sequelize.DECIMAL(12,11),
+      allowNull: false,
+      default: 0,
       after: 'sentiment',
     });
   },

@@ -408,7 +408,7 @@ router.route('/*')
 						promises.push(db.Vote.update(action.vote, { where: { id: action.vote.id }, transaction, lock: true }));
 						break;
 					case 'delete':
-						promises.push(db.Vote.destroy({ where: { id: action.vote.id }, transaction, lock: true }));
+						promises.push(db.Vote.destroy({ where: { id: action.vote.id }, transaction, lock: true, individualHooks: true }));
 						break;
 				}
     });
