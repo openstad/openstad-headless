@@ -1,3 +1,4 @@
+import React from 'react';
 import './index.css';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -46,5 +47,5 @@ type Props = {
     displayLocationFilter?: boolean;
     displayCollapsibleFilter?: boolean;
 };
-export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, displayCollapsibleFilter, ...props }: Props): void;
+export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, displayCollapsibleFilter, autoApply, ...props }: Props): React.JSX.Element | null;
 export {};
