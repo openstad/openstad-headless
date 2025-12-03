@@ -119,7 +119,7 @@ export default function WidgetResourceOverviewSorting(
               name="autoApply"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Automatisch toepassen van de filters</FormLabel>
+                  <FormLabel>Automatisch toepassen van de filters wanneer een filter wijzigt</FormLabel>
                   {YesNoSelect(field, props)}
                   <FormMessage />
                 </FormItem>
