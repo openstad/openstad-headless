@@ -456,11 +456,13 @@ export function Filters({
             {props.displayTagFilters && (
               <>
                 <p>Tags: {activeFilter.tags.length > 0 ? '' : 'geen'}</p>
-                <ul>
-                  {activeTags.map(tag => (
-                    <li key={`${tag.type}-${tag.id}`}> {tag.label} </li>
-                  ))}
-                </ul>
+                {activeFilter.tags.length > 0 && (
+                  <ul>
+                    {activeTags.map(tag => (
+                      <li key={`${tag.type}-${tag.id}`}> {tag.label} </li>
+                    ))}
+                  </ul>
+                )}
               </>
             )}
           </>
