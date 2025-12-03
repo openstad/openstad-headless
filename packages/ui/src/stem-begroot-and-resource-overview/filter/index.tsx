@@ -432,7 +432,7 @@ export function Filters({
       )}
 
       {activeFilter && (
-        <div id="filter-status" aria-live="polite" className="--sr-only">
+        <div id="filter-status" aria-live="polite" className="sr-only">
           <>
             <p>Huidige filterinstellingen:</p>
 
