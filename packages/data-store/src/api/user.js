@@ -67,6 +67,7 @@ export default {
       nickName: user.nickName,
       address: user.address,
       city: user.city,
+      emailNotificationConsent: user.emailNotificationConsent,
     }
 
     let json = await this.fetch(url, {

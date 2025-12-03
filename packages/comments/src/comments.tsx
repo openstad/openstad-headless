@@ -79,6 +79,9 @@ function CommentsInner({
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
   overrideSort = '',
+  confirmation = false,
+  overwriteEmailAddress = '',
+  confirmationReplies = false,
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
@@ -249,6 +252,10 @@ function CommentsInner({
 
     const allTags = Array.from(new Set([...defaultTagsArray, ...formTags]) );
     formDataCopy.tags = allTags;
+
+    formDataCopy.confirmation = confirmation || false;
+    formDataCopy.confirmationReplies = confirmationReplies || false;
+    formDataCopy.overwriteEmailAddress = (confirmation && overwriteEmailAddress) ? overwriteEmailAddress : '';
 
     try {
       if (formDataCopy.id) {

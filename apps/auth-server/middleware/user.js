@@ -167,8 +167,8 @@ exports.create =  (req, res, next) => {
 
 }
 
-exports.update = (req, res, next) => {
-  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'emailNotificationConsent', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
+exports.update = async(req, res, next) => {
+  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
 
   let data = {};
   keysToUpdate.forEach((key) => {
@@ -183,15 +183,43 @@ exports.update = (req, res, next) => {
     }
   });
 
-  req.userObject.update(data)
-    .then(user => {
-      req.userObject = user;
-      next();
-    })
-    .catch((err) => {
-      console.log('==> update err', err);
-      next(err);
-    });
+  const clientId = req?.body?.clientId || null;
+
+  if (clientId && req.body.hasOwnProperty('emailNotificationConsent') ) {
+    let projectId = null;
+
+    await db.Client
+      .findOne({ where: { clientId: clientId } })
+      .then((client) => {
+        if (client) {
+          projectId = String(client.id);
+
+          const currentConsent = { ...(req.userObject.emailNotificationConsent || {}) };
+          currentConsent[projectId] = req.body.emailNotificationConsent;
+          data.emailNotificationConsent = currentConsent;
+
+          req.userObject.update(data)
+            .then(user => {
+              req.userObject = user;
+              next();
+            })
+            .catch((err) => {
+              next(err);
+            });
+        }
+      })
+      .catch((err) => {}
+      );
+  } else {
+    req.userObject.update(data)
+      .then(user => {
+        req.userObject = user;
+        next();
+      })
+      .catch((err) => {
+        next(err);
+      });
+  }
 }
 
 exports.saveRoles = (req, res, next) => {

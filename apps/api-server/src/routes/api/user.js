@@ -54,6 +54,52 @@ router
   });
 
 router
+  .route('/unsubscribe/:userBase64')
+  .get(async function (req, res, next) {
+    try {
+      const userIdDecoded = Buffer.from(req.params.userBase64, 'base64').toString('utf-8');
+      const userId = parseInt(userIdDecoded);
+
+      if (!userId) return next( new Error('Users: invalid unsubscribe link') );
+
+      const user = await db.User.findOne({ where: { id: userId } });
+      if (!user) return next( new Error('Users: user not found') );
+
+      user.emailNotificationConsent = false;
+      const updatedUser = await user.save();
+
+      req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+      req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+
+      try {
+        if (user.idpUser?.identifier && user.idpUser.provider == req.authConfig.provider && req.adapter.service.updateUser) {
+          const updatedUserData = {
+            emailNotificationConsent: false,
+            id: user.idpUser.identifier
+          };
+
+          const updatedUserInAuth = await req.adapter.service.updateUser({
+            authConfig: req.authConfig,
+            userData: updatedUserData
+          });
+        }
+      } catch (e) {}
+
+      if (!process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL) {
+        res.json({ "message": 'Je hebt je succesvol uitgeschreven voor e-mails van dit project.' });
+      } else {
+        const clientId = req.authConfig?.clientId || null;
+        let redirectUrl = process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL + '/auth/unsubscribe';
+        if (clientId) redirectUrl += `?clientId=${clientId}`;
+
+        res.redirect(redirectUrl);
+      }
+    } catch (err) {
+      next(err);
+    }
+  });
+
+router
 // /user is only available for admins
   .all('*', function (req, res, next) {
     if (req.project) {
@@ -515,12 +561,7 @@ router.route('/:userId(\\d+)')
         const updatedUserDataForProject = merge.recursive({}, updatedUserData);
 
         if (req.results.idpUser.provider == req.authConfig.provider && req.adapter.service.updateUser) {
-          const authUpdateUserData = merge.recursive({}, userData);
-          if ( authUpdateUserData.hasOwnProperty("emailNotificationConsent") ) {
-            delete authUpdateUserData["emailNotificationConsent"];
-          }
-
-          updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, authUpdateUserData, { id: user.idpUser && user.idpUser.identifier }) });
+          updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
         }
 
         // user updates should not be done on certain project specific fields
