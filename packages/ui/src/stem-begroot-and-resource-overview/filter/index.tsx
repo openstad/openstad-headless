@@ -432,16 +432,17 @@ export function Filters({
       )}
 
       {activeFilter && (
-        <div id="filter-status" aria-live="polite" className="sr-only">
+        <div id="filter-status" aria-live="polite" className="--sr-only">
           <>
             <p>Huidige filterinstellingen:</p>
 
             {props.displaySearch && (
               <p>Zoekterm: {activeFilter.search.text || 'geen'}</p>
             )}
-            {props.displaySorting && (
-              <p>Sorteer op: {activeFilter.sort}</p>
-            )}
+            {props.displaySorting && (() => {
+              const sortLabel = sorting.find(sort => sort.value === activeFilter.sort)?.label || activeFilter.sort;
+              return <p>Sorteer op: {sortLabel}</p>;
+            })()}
 
             {props.displayLocationFilter && (
               locationValue && locationValue.lat && locationValue.lng ? (
