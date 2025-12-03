@@ -45,6 +45,7 @@ type Props = {
   showActiveTags?: boolean;
   preFilterTags?: Array<number>;
   displayLocationFilter?: boolean;
+  displayCollapsibleFilter?: boolean;
 };
 
 export function Filters({
@@ -57,6 +58,7 @@ export function Filters({
   className = '',
   showActiveTags = false,
   preFilterTags = undefined,
+  displayCollapsibleFilter = false,
   autoApply = false,
   ...props
 }: Props) {
@@ -80,6 +82,7 @@ export function Filters({
   const [searchValue, setSearchValue] = useState<string>('');
   const [sortValue, setSortValue] = useState<string>(props.defaultSorting || 'createdAt_desc');
   const [locationValue, setLocationValue] = useState<PostcodeAutoFillLocation>(undefined);
+  const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
 
   const search = useDebounce(setSearch, 300);
 
@@ -267,7 +270,9 @@ export function Filters({
     const filterToSubmit = updatedFilter || filter;
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
-    setActiveFilter(filterToSubmit);
+
+    console.log( "newActiveTagsDraft", newActiveTagsDraft );
+    console.log( "updatedTags", updatedTags );
 
     if (updatedTags) {
       setActiveTags(updatedTags);
@@ -286,24 +291,9 @@ export function Filters({
     return indexA - indexB;
   });
 
-  return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
-    <section id="stem-begroot-filter">
-      <form className={`osc-resources-filter ${className}`} onSubmit={!autoApply ? handleSubmit : undefined}>
-        {props.displaySearch ? (
-          <div className="form-element">
-            <FormLabel htmlFor="search">Zoeken</FormLabel>
-            <Input
-              value={searchValue}
-              onChange={(e) => {
-                setSearchValue(e.target.value);
-                search(e.target.value);
-              }}
-              className="osc-filter-search-bar"
-              placeholder={props.searchPlaceholder}
-              id='search'
-            />
-          </div>
-        ) : null}
+  const filterGroup = () => {
+    return (
+      <>
         {(props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
           <>
             {tagGroups.map((tagGroup, index) => {
@@ -410,6 +400,59 @@ export function Filters({
             <Button type='submit' appearance='primary-action-button' test-id={"filter-apply-button"}>{props.applyText}</Button>
           )}
         </div>
+      </>
+    )
+  }
+
+  return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
+    <section id="stem-begroot-filter">
+      <form className={`osc-resources-filter ${className}`} onSubmit={!autoApply ? handleSubmit : undefined}>
+        {props.displaySearch ? (
+          <div className="form-element">
+            <FormLabel htmlFor="search">Zoeken</FormLabel>
+            <Input
+              value={searchValue}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                search(e.target.value);
+              }}
+              className="osc-filter-search-bar"
+              placeholder={props.searchPlaceholder}
+              id='search'
+            />
+          </div>
+        ) : null}
+        {(props.displaySearch && displayCollapsibleFilter) ? (
+          <button type='submit' className="apply-filters-button">
+            <span className="filter-icon"></span>
+            <span className="sr-only">Filters toepassen</span>
+          </button>
+        ) : null}
+
+        {displayCollapsibleFilter ? (
+          <>
+            <Button className="toggle-filters-button" type="button" aria-expanded={filtersVisible ? 'true' : 'false'} aria-controls="filters-container" onClick={(e) => { setFiltersVisible(!filtersVisible) }}>
+              <span className="filter-icon"></span>
+              <span className="sr-only">Filters uitklappen</span>
+            </Button>
+            <div id="filters-container" className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''}`} aria-hidden={!filtersVisible ? 'true' : 'false'}>
+              <div className="filters-wrapper">
+                <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
+                  <span className="close-icon"></span>
+                  <span className="sr-only">Sluit filters</span>
+                </button>
+                <div className="filters-content">
+                  {filterGroup()}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          filterGroup()
+        )}
+
+
+
       </form>
 
       {(activeTags.length > 0 && showActiveTags) && (
