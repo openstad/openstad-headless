@@ -28,6 +28,7 @@ type Props = {
     }>;
     displaySorting: boolean;
     defaultSorting: string;
+    autoApply?: boolean;
     displaySearch: boolean;
     itemsPerPage?: number;
     displayTagFilters: boolean;
@@ -45,5 +46,5 @@ type Props = {
     preFilterTags?: Array<number>;
     displayLocationFilter?: boolean;
 };
-export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, ...props }: Props): React.JSX.Element | null;
+export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, autoApply, ...props }: Props): React.JSX.Element | null;
 export {};
