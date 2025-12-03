@@ -1,4 +1,3 @@
-import React from 'react';
 import './index.css';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -28,6 +27,7 @@ type Props = {
     }>;
     displaySorting: boolean;
     defaultSorting: string;
+    autoApply?: boolean;
     displaySearch: boolean;
     itemsPerPage?: number;
     displayTagFilters: boolean;
@@ -46,5 +46,5 @@ type Props = {
     displayLocationFilter?: boolean;
     displayCollapsibleFilter?: boolean;
 };
-export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, displayCollapsibleFilter, ...props }: Props): React.JSX.Element | null;
+export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, displayCollapsibleFilter, ...props }: Props): void;
 export {};

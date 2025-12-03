@@ -93,6 +93,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayCaption?: boolean;
     summaryCharLength?: number;
     displaySorting?: boolean;
+    autoApply?: boolean;
     defaultSorting?: string;
     displaySearch?: boolean;
     displaySearchText?: boolean;
