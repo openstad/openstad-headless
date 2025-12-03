@@ -29,6 +29,7 @@ function Comment({
   index,
   adminLabel,
   disableSubmit = false,
+  extraReplyButton = false,
   setRefreshComments,
   ...props
 }: CommentProps) {
@@ -132,6 +133,7 @@ function Comment({
       const intervalId = setInterval(tryToRefreshComments, interval);
     });
   }
+
 
   return (
     <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${comment?.id}`} onClick={findLocation(comment?.id || 0)}>
@@ -277,13 +279,17 @@ function Comment({
           );
         })}
 
-      {(!args.comment.parentId && args.comment.replies && args.comment.replies.length > 0 && canReply() && !isReplyFormActive) && (
-        <Button
-          appearance='secondary-action-button'
-          className="reply-container-button"
-          onClick={() => toggleReplyForm()}>
-          Reageren
-        </Button>
+      {extraReplyButton && (
+
+        (!args.comment.parentId && args.comment.replies && args.comment.replies.length > 0 && canReply() && !isReplyFormActive) && (
+          <Button
+            appearance='secondary-action-button'
+            className="reply-container-button"
+            onClick={() => toggleReplyForm()}>
+            Reageren
+          </Button>
+        )
+        
       )}
 
       {isReplyFormActive ? (
