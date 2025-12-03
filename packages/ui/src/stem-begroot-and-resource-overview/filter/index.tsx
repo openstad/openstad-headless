@@ -446,7 +446,7 @@ export function Filters({
             {props.displayLocationFilter && (
               locationValue && locationValue.lat && locationValue.lng ? (
                 <p>
-                  Locatie filter: Lat {locationValue.lat}, Lng {locationValue.lng}
+                  Locatie filter: Breedtegraad {locationValue.lat}, Lengtegraad {locationValue.lng}
                   {locationValue.proximity ? `, Straal: ${locationValue.proximity}m` : ''}
                 </p>
               ) : (
