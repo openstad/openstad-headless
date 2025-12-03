@@ -33,7 +33,7 @@ type Props = {
   sorting: Array<{ value: string; label: string }>;
   displaySorting: boolean;
   defaultSorting: string;
-  autoApply: boolean;
+  autoApply?: boolean;
   displaySearch: boolean;
   itemsPerPage?: number;
   displayTagFilters: boolean;

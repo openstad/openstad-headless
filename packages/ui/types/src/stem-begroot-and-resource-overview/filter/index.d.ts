@@ -28,7 +28,7 @@ type Props = {
     }>;
     displaySorting: boolean;
     defaultSorting: string;
-    autoApply: boolean;
+    autoApply?: boolean;
     displaySearch: boolean;
     itemsPerPage?: number;
     displayTagFilters: boolean;

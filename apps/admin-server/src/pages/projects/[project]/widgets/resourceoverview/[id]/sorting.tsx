@@ -66,7 +66,7 @@ const SortingTypes = [
 
 const formSchema = z.object({
   displaySorting: z.boolean(),
-  autoApply: z.boolean(),
+  autoApply: z.boolean().optional(),
   defaultSorting: z.string(),
   sorting: z
     .array(z.object({ value: z.string(), label: z.string() }))
