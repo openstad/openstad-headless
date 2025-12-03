@@ -544,6 +544,7 @@ function ResourceDetail({
             includeOrExclude={ props.commentsWidget?.includeOrExclude }
             onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
             displaySearchBar={ props.commentsWidget?.displaySearchBar }
+            extraReplyButton={ props.commentsWidget?.extraReplyButton }
             sentiment={useSentiments[0]}
           />
           {useSentiments?.length > 1 && (
@@ -565,6 +566,7 @@ function ResourceDetail({
               includeOrExclude={ props.commentsWidget?.includeOrExclude }
               onlyIncludeOrExcludeTagIds={ props.commentsWidget?.onlyIncludeOrExcludeTagIds }
               displaySearchBar={ props.commentsWidget?.displaySearchBar }
+              extraReplyButton={ props.commentsWidget?.extraReplyButton }
               sentiment={useSentiments[1]}
             />
           )}
