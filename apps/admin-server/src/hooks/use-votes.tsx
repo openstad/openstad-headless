@@ -4,12 +4,13 @@ import {validateProjectNumber} from "@/lib/validateProjectNumber";
 export default function useVotes(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const url = `/api/openstad/api/project/${projectNumber}/vote?includeResource`;
+  const baseUrl = `/api/openstad/api/project/${projectNumber}/vote`;
+  const url = baseUrl + '?includeResource';
 
   const { data, isLoading, error, mutate } = useSWR(projectNumber ? url : null);
 
   async function remove(id: string|number) {
-    const res = await fetch(`${url}/${id}`, {
+    const res = await fetch(`${baseUrl}/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
