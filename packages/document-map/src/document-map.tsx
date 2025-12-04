@@ -104,6 +104,7 @@ export type DocumentMapProps = BaseProps &
     filterBehavior?: string;
     defaultSorting?: string;
     sorting?: Array<{ value: string; label: string }>;
+    displaySearchBar?: boolean;
   };
 
 
@@ -148,11 +149,13 @@ function DocumentMap({
   filterBehavior = 'or',
   defaultSorting,
   sorting = [],
+  displaySearchBar = false,
   ...props
 }: DocumentMapProps) {
   const [sort, setSort] = useState<string | undefined>(
     defaultSorting || "createdAt_asc"
   );
+  const [search, setSearch] = useState<string>('');
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -228,6 +231,7 @@ function DocumentMap({
     resourceId: resourceId,
     sentiment: sentiment,
     onlyIncludeTagIds: filteredTagsIdsString || undefined,
+    search: search || '',
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
@@ -1054,7 +1058,7 @@ function DocumentMap({
               className="osc-flex-columned"
               dataStore={datastore}
               defaultSorting={defaultSorting || 'createdAt_asc'}
-              displaySearch={false}
+              displaySearch={ displaySearchBar || false }
               displaySorting={ (sorting || []).length > 0 }
               displayTagFilters={true}
               searchPlaceholder='Zoeken'
@@ -1069,6 +1073,7 @@ function DocumentMap({
                 if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'].includes(f.sort)) {
                   setSort(f.sort);
                 }
+                setSearch(f?.search?.text || '');
               }}
               resources={[]}
               sorting={ sorting || [] }
@@ -1096,6 +1101,7 @@ function DocumentMap({
                 onGoToLastPage={setGoToLastPage}
                 overridePage={overridePage}
                 overrideSort={sort}
+                searchTerm={search}
               />
             </div>
           )}

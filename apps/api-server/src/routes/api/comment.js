@@ -121,7 +121,7 @@ router.route('/')
 
   })
   .get(auth.useReqUser)
-  .get(searchInResults({ searchfields: ['description'] }))
+  .get(searchInResults({ searchfields: ['description', 'user.name', 'replies.description'] }))
   .get(pagination.paginateResults)
   .get(function(req, res, next) {
     res.json(req.results);

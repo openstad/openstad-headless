@@ -22,18 +22,20 @@ import * as z from 'zod';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useResources from '@/hooks/use-resources';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { ArgumentWidgetTabProps } from '.';
 import * as Switch from "@radix-ui/react-switch";
 import {Input} from "@/components/ui/input";
 import {useFieldDebounce} from "@/hooks/useFieldDebounce";
+import {YesNoSelect} from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
   sentiment: z.string(),
   useSentiments: z.string().optional(),
   itemsPerPage: z.coerce.number(),
-  displayPagination: z.boolean().optional()
+  displayPagination: z.boolean().optional(),
+  displaySearchBar: z.boolean().optional()
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -68,6 +70,7 @@ export default function ArgumentsGeneral({
       useSentiments: JSON.stringify(props.useSentiments || ["for","against"]),
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
+      displaySearchBar: props?.displaySearchBar || false,
     },
   });
 
@@ -209,6 +212,20 @@ export default function ArgumentsGeneral({
               )}
             />
           )}
+
+          <FormField
+            control={form.control}
+            name="displaySearchBar"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Zoekbalk tonen
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button type="submit">Opslaan</Button>
         </form>

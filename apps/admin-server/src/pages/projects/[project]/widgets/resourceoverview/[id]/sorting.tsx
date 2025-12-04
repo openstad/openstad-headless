@@ -66,6 +66,7 @@ const SortingTypes = [
 
 const formSchema = z.object({
   displaySorting: z.boolean(),
+  autoApply: z.boolean().optional(),
   defaultSorting: z.string(),
   sorting: z
     .array(z.object({ value: z.string(), label: z.string() }))
@@ -87,6 +88,7 @@ export default function WidgetResourceOverviewSorting(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displaySorting: props?.displaySorting || false,
+      autoApply: props?.autoApply || false,
       defaultSorting: props?.defaultSorting || 'random',
       sorting: props?.sorting || [],
     },
@@ -100,17 +102,30 @@ export default function WidgetResourceOverviewSorting(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="displaySorting"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sorteeropties weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="displaySorting"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sorteeropties weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="autoApply"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Automatisch toepassen van de filters wanneer een filter wijzigt</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name="defaultSorting"
