@@ -49,7 +49,7 @@ export default function ArgumentsConfirmation(
           <Alert variant="warning" className="mb-4">
             <AlertTitle>Let op!</AlertTitle>
             <AlertDescription>
-              Het veld <b>'E-mail notificatie toestemming'</b> is niet opgenomen in de
+              Het veld <b>&apos;E-mail notificatie toestemming&apos;</b> is niet opgenomen in de
               verplichte velden. Hierdoor kunnen inzenders geen toestemming geven
               voor het ontvangen van e-mail notificaties. Hierdoor kunnen
               bevestigingsmails niet correct worden verzonden. Voeg dit veld toe
