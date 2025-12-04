@@ -1,10 +1,13 @@
 import fetch from './fetch';
 
 export default {
-
   fetch: async function({ projectId, type }) {
-    // todo, maar voor nu ff niet relevant
-    return {};
+    let url = `/api/project/${projectId}/vote`;
+    if (type) {
+      url += `&type=${type}`;
+    }
+
+    return this.fetch(url);
   },
 
   submitVote: async function({ projectId, type }, data) {
