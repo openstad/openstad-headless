@@ -34,6 +34,8 @@ import WidgetResourcesMapButtons from "@/pages/projects/[project]/widgets/resour
 import WidgetResourcesMapPolygons from "@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons";
 import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import ArgumentsConfirmation from "@/pages/projects/[project]/widgets/comments/[id]/confirmation";
+import {useProject} from "@/hooks/use-project";
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -47,6 +49,9 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
     });
+
+  const { data: projectConfig } = useProject( ['includeConfig'] );
+  const requiredFieldsIncludesEmailNotificationConsent = projectConfig?.config?.auth?.provider?.openstad?.requiredUserFields?.includes('emailNotificationConsent');
 
   return (
     <div>
@@ -190,6 +195,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     <TabsTrigger value="form">Formulier</TabsTrigger>
                     <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
                     <TabsTrigger value="include">Inclusief / exclusief</TabsTrigger>
+                    <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
                   </TabsList>
                   <TabsContent value="general" className="p-0">
                     <ArgumentsGeneral
@@ -299,6 +305,21 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         updatePreview,
                       })}
                       projectId={ projectId as string }
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="confirmation" className="p-0">
+                    <ArgumentsConfirmation
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ArgumentWidgetTabProps
+                      >({
+                        subWidgetKey: 'commentsWidget',
+                        previewConfig: previewConfig,
+                        updateConfig,
+                        updatePreview,
+                      })}
+                      requiredFieldsIncludesEmailNotificationConsent={ requiredFieldsIncludesEmailNotificationConsent }
                     />
                   </TabsContent>
 

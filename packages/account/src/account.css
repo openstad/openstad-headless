@@ -46,3 +46,11 @@
     grid-column: 1;
   }
 }
+
+.consent-checkbox-container .utrecht-form-field__label--checkbox {
+  margin-inline-start: 0 !important;
+}
+
+.consent-checkbox-container .utrecht-form-field__label--checkbox input[type="checkbox"]:hover {
+  border-color: var(--utrecht-checkbox-disabled-border-color, var(--utrecht-checkbox-border-color));
+}

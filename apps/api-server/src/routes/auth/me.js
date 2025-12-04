@@ -50,6 +50,7 @@ router
       createdAt: req.user.createdAt,
       updatedAt: req.user.updatedAt,
       deletedAt: req.user.deletedAt,
+      emailNotificationConsent: req.user.emailNotificationConsent || false,
     };
     res.json(data);
   })

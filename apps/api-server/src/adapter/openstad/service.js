@@ -139,6 +139,8 @@ service.updateUser = async function({ authConfig, userData = {} }) {
     delete userData.role;
   }
 
+  userData.clientId = authConfig.clientId;
+
   let url = `${authConfig.serverUrlInternal}/api/admin/user/${userData.id}?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
 

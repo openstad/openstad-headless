@@ -313,6 +313,18 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: null,
     },
 
+    emailNotificationConsent: {
+      type: DataTypes.BOOLEAN,
+      auth: {
+        listableBy: ['moderator', 'owner'],
+        viewableBy: ['moderator', 'owner'],
+        createableBy: ['moderator', 'owner'],
+        updateableBy: ['moderator', 'owner'],
+      },
+      allowNull: true,
+      defaultValue: null,
+    }
+
   }, {
     charset: 'utf8',
 

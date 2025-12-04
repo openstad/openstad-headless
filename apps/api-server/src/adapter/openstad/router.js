@@ -220,6 +220,16 @@ router
     req.userData.projectId = req.project.id; // todo: ik weet nog niet waar dit moet
     let data = req.userData;
 
+    if ( !!data && !!data.emailNotificationConsent && !!data.clientId ) {
+        const clientId = String(data?.clientId);
+        const currentValue = typeof(data.emailNotificationConsent) === 'object' ? data.emailNotificationConsent : {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+        if (clientConsentIsSet) {
+            data.emailNotificationConsent = currentValue[clientId];
+        }
+    }
+
     // if user has same projectId and userId
     // rows are duplicate for a user
     let where = {

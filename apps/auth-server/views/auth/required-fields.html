@@ -24,17 +24,27 @@
         <input type="hidden" name="clientId" value="{{clientId}}" />
         {% set first = true %}
         {% for requiredField in requiredFields %}
-				<div class="form-group">
-					<label for="input_field"> {{requiredField.label}} </label>
-          <input
-          type="text"
-          required
-          name="{{requiredField.key}}"
-          class="input-{{requiredField.key}} input-field"
-          {{'autofocus' if first}}
-		  id="input_field"
-		  autocomplete="name"
-          />
+        <div class="form-group {{requiredField.key}}">
+          {% if requiredField.type and requiredField.type == 'checkbox' %}
+            <input
+              type="checkbox"
+              name="{{requiredField.key}}"
+              class="input-{{requiredField.key}} input-field"
+              id="input_field"
+            />
+            <label for="input_field"> {{requiredField.label}} </label>
+          {% else %}
+            <label for="input_field"> {{requiredField.label}} </label>
+            <input
+              type="text"
+              required
+              name="{{requiredField.key}}"
+              class="input-{{requiredField.key}} input-field"
+              {{'autofocus' if first}}
+              id="input_field"
+              autocomplete="name"
+            />
+          {% endif %}
 				</div>
         {% set first = false %}
         {% endfor %}

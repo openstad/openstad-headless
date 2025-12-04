@@ -54,6 +54,9 @@ export type CommentsWidgetProps = BaseProps &
     includeOrExclude?: string;
     onlyIncludeOrExcludeTagIds?: string;
     overrideSort?: string;
+    confirmation?: boolean;
+    overwriteEmailAddress?: string;
+    confirmationReplies?: boolean;
     searchTerm?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
@@ -79,6 +82,9 @@ function CommentsInner({
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
   overrideSort = '',
+  confirmation = false,
+  overwriteEmailAddress = '',
+  confirmationReplies = false,
   searchTerm = '',
   ...props
 }: CommentsWidgetProps) {
@@ -256,6 +262,10 @@ function CommentsInner({
 
     const allTags = Array.from(new Set([...defaultTagsArray, ...formTags]) );
     formDataCopy.tags = allTags;
+
+    formDataCopy.confirmation = confirmation || false;
+    formDataCopy.confirmationReplies = confirmationReplies || false;
+    formDataCopy.overwriteEmailAddress = (confirmation && overwriteEmailAddress) ? overwriteEmailAddress : '';
 
     try {
       if (formDataCopy.id) {

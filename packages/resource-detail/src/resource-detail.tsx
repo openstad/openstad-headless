@@ -594,6 +594,9 @@ function ResourceDetail({
             closedText={props.commentsWidget?.closedText}
             itemsPerPage={props.commentsWidget?.itemsPerPage}
             displayPagination={props.commentsWidget?.displayPagination}
+            confirmation={ props.commentsWidget?.confirmation }
+            overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+            confirmationReplies={ props.commentsWidget?.confirmationReplies }
             extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
             defaultTags={props.commentsWidget?.defaultTags}
             includeOrExclude={props.commentsWidget?.includeOrExclude}
@@ -615,6 +618,9 @@ function ResourceDetail({
               closedText={props.commentsWidget_multiple?.closedText}
               itemsPerPage={props.commentsWidget?.itemsPerPage}
               displayPagination={props.commentsWidget?.displayPagination}
+              confirmation={ props.commentsWidget?.confirmation }
+              overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+              confirmationReplies={ props.commentsWidget?.confirmationReplies }
               extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
               defaultTags={props.commentsWidget?.defaultTags}
               includeOrExclude={props.commentsWidget?.includeOrExclude}
