@@ -88,18 +88,19 @@ export const StemBegrootResourceList = ({
     }
   });
 
+  const tagIntegers = tags.map((tag: any) => parseInt(tag, 10));
   const filtered = resources && (
     Object.keys(groupedTags).length === 0
       ? resources
       : resources.filter((resource: any) => {
         if (tags.length > 0) {
           if (filterBehavior === 'and') {
-            return tags.every(tagId =>
+            return tagIntegers.every(tagId =>
               resource.tags?.some((tag: { id: number }) => tag.id === tagId)
             );
           } else {
             return resource.tags?.some((tag: { id: number }) =>
-              tags.includes(tag.id)
+              tagIntegers.includes(tag.id)
             );
           }
         }

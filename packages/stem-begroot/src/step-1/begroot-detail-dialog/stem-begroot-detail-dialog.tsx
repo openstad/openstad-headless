@@ -45,6 +45,7 @@ export const StemBegrootResourceDetailDialog = ({
   filteredResources = [],
   currentPage = 0,
   pageSize = 999,
+  filterBehavior = 'or',
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -73,6 +74,7 @@ export const StemBegrootResourceDetailDialog = ({
   filteredResources?: Array<any>;
   currentPage: number;
   pageSize: number;
+  filterBehavior?: string;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -92,15 +94,22 @@ export const StemBegrootResourceDetailDialog = ({
     }
   });
 
+  const tagIntegers = tags.map((tag: any) => parseInt(tag, 10));
   const filtered = resources && (
     Object.keys(groupedTags).length === 0
       ? resources
       : resources.filter((resource: any) => {
-        return Object.keys(groupedTags).every(tagType => {
-          return groupedTags[tagType].some(tagId =>
-            resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
-          );
-        });
+        if (tags.length > 0) {
+          if (filterBehavior === 'and') {
+            return tagIntegers.every(tagId =>
+              resource.tags?.some((tag: { id: number }) => tag.id === tagId)
+            );
+          } else {
+            return resource.tags?.some((tag: { id: number }) =>
+              tagIntegers.includes(tag.id)
+            );
+          }
+        }
       })
   )
     ?.filter((resource: any) => {
