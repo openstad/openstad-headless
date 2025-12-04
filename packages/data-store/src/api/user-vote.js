@@ -7,7 +7,7 @@ export default {
       url += `&type=${type}`;
     }
 
-    return this.fetch(url);
+    return !projectId ? [] : this.fetch(url);
   },
 
   submitVote: async function({ projectId, type }, data) {
