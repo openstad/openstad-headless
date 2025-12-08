@@ -92,24 +92,28 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     setSelectedOption(option);
   }, [currentDilemma]);
 
-  const moveToNext = useCallback(() => {
-    if (selectedOption && currentDilemma) {
-      const newAnswers = {
-        ...dilemmaAnswers,
-        [currentDilemma.id]: selectedOption
-      };
-      setDilemmaAnswers(newAnswers);
-    }
+const moveToNext = useCallback(() => {
+  let newAnswers = dilemmaAnswers;
+  if (selectedOption && currentDilemma) {
+    newAnswers = {
+      ...dilemmaAnswers,
+      [currentDilemma.id]: selectedOption
+    };
+    setDilemmaAnswers(newAnswers);
+  }
 
-    setSelectedOption(null);
+  setSelectedOption(null);
 
-    const updatedUnanswered = getUnansweredDilemmas();
-    if (currentDilemmaIndex + 1 < updatedUnanswered.length) {
-      setCurrentDilemmaIndex(prev => prev + 1);
-    } else {
-      setIsFinished(true);
-    }
-  }, [currentDilemmaIndex, getUnansweredDilemmas, selectedOption, currentDilemma, dilemmaAnswers, fieldKey]);
+  // Find next unanswered dilemma index
+  const unanswered = dilemmaCards.filter(d => !newAnswers[d.id]);
+  if (unanswered.length > 0) {
+    const nextId = unanswered[0].id;
+    const nextIndex = dilemmaCards.findIndex(d => d.id === nextId);
+    setCurrentDilemmaIndex(nextIndex);
+  } else {
+    setIsFinished(true);
+  }
+}, [currentDilemmaIndex, dilemmaCards, selectedOption, currentDilemma, dilemmaAnswers, fieldKey]);
 
   const moveToPrevious = useCallback(() => {
     const answeredDilemmas = dilemmaCards.filter(dilemma => dilemmaAnswers[dilemma.id]);
@@ -148,15 +152,26 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     return answeredDilemmaIds.length > 0;
   }, [currentDilemmaIndex, dilemmaAnswers]);
 
-  const handleNextClick = useCallback(() => {
-    if (!selectedOption || !currentDilemma) return;
+const handleNextClick = useCallback(() => {
+  let answerToUse = selectedOption;
+  if (!answerToUse && previousAnswers[currentDilemma?.id]) {
+    answerToUse = previousAnswers[currentDilemma.id] as 'a' | 'b';
+  }
+  if (!answerToUse || !currentDilemma) return;
 
-    if (currentDilemma.infofieldExplanation) {
-      setShowExplanationDialog(true);
-    } else {
-      moveToNext();
+  if (currentDilemma.infofieldExplanation) {
+    setShowExplanationDialog(true);
+  } else {
+    // Set the answer if coming from previous state
+    if (!selectedOption && answerToUse) {
+      setDilemmaAnswers(prev => ({
+        ...prev,
+        [currentDilemma.id]: answerToUse
+      }));
     }
-  }, [selectedOption, currentDilemma, moveToNext]);
+    moveToNext();
+  }
+}, [selectedOption, currentDilemma, moveToNext, previousAnswers]);
 
   const handleExplanationComplete = useCallback(() => {
     setShowExplanationDialog(false);
@@ -258,12 +273,12 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             </button>
           </div>
 
-          <div className="dilemma-summary">
-            {dilemmaCards.map((dilemma) => {
-              const answer = dilemmaAnswers[dilemma.id] || '';
+<div className="dilemma-summary">
+  {dilemmaCards.filter(dilemma => dilemmaAnswers[dilemma.id]).map((dilemma) => {
+    const answer = dilemmaAnswers[dilemma.id] || '';
 
-              return (
-                <div key={dilemma.id} className="dilemma-summary-item">
+    return (
+      <div key={dilemma.id} className="dilemma-summary-item">
                   <div className="dilemma-summary-content">
                     <div className="dilemma-summary-option">
                       <button
@@ -344,7 +359,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             id={`option-${currentDilemma.id}-a`}
             name={`dilemma-option-${currentDilemma.id}`}
             value="a"
-            checked={selectedOption === 'a'}
+            checked={selectedOption === 'a' || (!selectedOption && previousAnswers[currentDilemma.id] === 'a')}
             onChange={() => handleOptionSelect('a')}
           />
           <label htmlFor={`option-${currentDilemma.id}-a`}>
@@ -364,7 +379,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             id={`option-${currentDilemma.id}-b`}
             name={`dilemma-option-${currentDilemma.id}`}
             value="b"
-            checked={selectedOption === 'b'}
+            checked={selectedOption === 'b' || (!selectedOption && previousAnswers[currentDilemma.id] === 'b')}
             onChange={() => handleOptionSelect('b')}
           />
           <label htmlFor={`option-${currentDilemma.id}-b`}>
@@ -404,7 +419,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <button
             className="dilemma-next-button"
             onClick={(e) => (e.preventDefault(), handleNextClick())}
-            disabled={!selectedOption}
+            disabled={!(selectedOption || previousAnswers[currentDilemma.id] === 'a' || previousAnswers[currentDilemma.id] === 'b')}
             type="button"
           >
             <span className="sr-only">Volgende</span>
