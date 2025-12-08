@@ -48,6 +48,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   agreeText = 'Eens',
   disagreeText = 'Oneens',
 }) => {
+  // Track previous answers per card for visual feedback
+  const [previousAnswers, setPreviousAnswers] = useState<Record<string, string>>({});
   const swipeCards = useMemo(() => cards.length > 0 ? cards : [], [cards]);
   let initialAnswers: Record<string, string> = {};
   let initialAnswersExplanation: Record<string, string> = {};
@@ -102,11 +104,18 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     }
 
     const lastAnsweredCard = answeredCards[answeredCards.length - 1];
+    const lastAnswer = swipeAnswers[lastAnsweredCard.id];
 
     const newSwipeAnswers = { ...swipeAnswers };
     delete newSwipeAnswers[lastAnsweredCard.id];
 
     setSwipeAnswers(newSwipeAnswers);
+
+    // Set previous answer for this card
+    setPreviousAnswers(prev => ({
+      ...prev,
+      [lastAnsweredCard.id]: lastAnswer
+    }));
 
     setIsAnimating(false);
     setSwipeDirection(null);
@@ -512,10 +521,17 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     if (answeredCards.length > 0) {
       // Ga terug naar de laatste beantwoorde kaart en maak het onbeantwoord
       const lastAnsweredCard = answeredCards[answeredCards.length - 1];
+      const lastAnswer = swipeAnswers[lastAnsweredCard.id];
       const newSwipeAnswers = { ...swipeAnswers };
       delete newSwipeAnswers[lastAnsweredCard.id];
 
       setSwipeAnswers(newSwipeAnswers);
+
+      // Zet previous answer voor deze kaart
+      setPreviousAnswers(prev => ({
+        ...prev,
+        [lastAnsweredCard.id]: lastAnswer
+      }));
     }
 
     setIsFinished(false);
@@ -702,7 +718,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         {showButtons && (
           <div className="swipe-actions" role="group" aria-label="Acties">
             <button
-              className="swipe-btn swipe-btn-pass"
+              className={`swipe-btn swipe-btn-pass${
+                previousAnswers[currentCardId] === disagreeText
+                  ? ' --previous-awnser'
+                  : ''
+              }`}
               onClick={(e) => (e.preventDefault(), handleSwipeLeft(true))}
               disabled={unansweredCards.length === 0}
               aria-label="Afwijzen"
@@ -719,7 +739,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
               <span>Info</span>
             </button>
             <button
-              className="swipe-btn swipe-btn-like"
+              className={`swipe-btn swipe-btn-like${
+                previousAnswers[currentCardId] === agreeText
+                  ? ' --previous-awnser'
+                  : ''
+              }`}
               onClick={(e) => (e.preventDefault(), handleSwipeRight(true))}
               disabled={unansweredCards.length === 0}
               aria-label="Goedkeuren"
@@ -748,7 +772,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 Antwoord verzenden
               </Button>
               <Button appearance="secondary-action-button" onClick={closeExplanationDialog}>
-                Sluiten zonder toelichting
+                Overslaan
               </Button>
             </div>
           </div>
