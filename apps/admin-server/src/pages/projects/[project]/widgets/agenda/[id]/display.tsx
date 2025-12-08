@@ -25,6 +25,9 @@ const formSchema = z.object({
   toggleDefaultClosed: z.boolean().optional(),
   toggleShowText: z.string().optional(),
   toggleHideText: z.string().optional(),
+  toggleType: z.string().optional(),
+  toggleStart: z.string().optional(),
+  toggleEnd: z.string().optional(),
   defaultClosedFromBreakpoint: z.enum(['not', '480', '640', '768', '1024']).optional()
 });
 
@@ -47,6 +50,9 @@ export default function WidgetAgendaDisplay(
       toggleShowText: props?.toggleShowText || 'Lees meer',
       toggleHideText: props?.toggleHideText || 'Lees minder',
       defaultClosedFromBreakpoint: props?.defaultClosedFromBreakpoint || 'not',
+      toggleType: props?.toggleType || 'full',
+      toggleStart: props?.toggleStart || '',
+      toggleEnd: props?.toggleEnd || '',
     },
   });
 
@@ -57,7 +63,8 @@ export default function WidgetAgendaDisplay(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6"
+        >
           <FormField
             control={form.control}
             name="displayTitle"
@@ -76,7 +83,7 @@ export default function WidgetAgendaDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Toon een knop om de agenda in/uit te klappen
+                  Toon een knop om de inhoud in/uit te klappen
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
@@ -88,11 +95,40 @@ export default function WidgetAgendaDisplay(
             <>
               <FormField
                 control={form.control}
+                name="toggleType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type inklapbare inhoud</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        props.onFieldChanged(field.name, value);
+                      }}
+                      value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hele agenda" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="full">
+                          Hele agenda
+                        </SelectItem>
+                        <SelectItem value="items">
+                          Alleen agenda-items
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="toggleDefaultClosed"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Standaard de agenda ingeklapt weergeven
+                      Standaard ingeklapt weergeven?
                     </FormLabel>
                     {YesNoSelect(field, props)}
                     <FormMessage />
@@ -105,7 +141,7 @@ export default function WidgetAgendaDisplay(
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Tekst voor de knop om de agenda te tonen
+                      Tekst voor de knop om de inhoud te tonen
                     </FormLabel>
                     <Input
                       {...field}
@@ -124,7 +160,7 @@ export default function WidgetAgendaDisplay(
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Tekst voor de knop om de agenda te verbergen
+                      Tekst voor de knop om de inhoud te verbergen
                     </FormLabel>
                     <Input
                       {...field}
@@ -145,7 +181,7 @@ export default function WidgetAgendaDisplay(
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Breekpunt vanaf wanneer de agenda standaard ingeklapt wordt weergegeven
+                        Breekpunt vanaf wanneer de inhoud standaard ingeklapt wordt weergegeven
                       </FormLabel>
                       <Select
                         onValueChange={(value) => {
@@ -179,6 +215,71 @@ export default function WidgetAgendaDisplay(
                     </FormItem>
                   )}
                 />
+              )}
+
+              { form.watch('toggleType') === 'items' && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="toggleStart"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Vanaf welk agenda-item moet de accordion beginnen
+                        </FormLabel>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            props.onFieldChanged(field.name, value);
+                          }}
+                          value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecteer een optie" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            { props?.items?.map((item, index) => (
+                              <SelectItem key={item.trigger} value={item.trigger}>
+                                {index + 1}. {item.title || 'Geen titel'}
+                              </SelectItem>
+                            )) }
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="toggleEnd"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Tot welk agenda-item moet de accordion lopen
+                        </FormLabel>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            props.onFieldChanged(field.name, value);
+                          }}
+                          value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecteer een optie" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            { props?.items?.map((item, index) => (
+                              <SelectItem key={item.trigger} value={item.trigger}>
+                                {index + 1}. {item.title || 'Geen titel'}
+                              </SelectItem>
+                            )) }
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </>
               )}
 
             </>
