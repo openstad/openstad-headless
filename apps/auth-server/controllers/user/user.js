@@ -38,6 +38,7 @@ exports.info = (req, res) => {
     houseNumber: req.user.houseNumber,
     suffix: req.user.suffix,
     postcode: req.user.postcode,
+    accessCode: req.user.accessCode,
     city: req.user.city,
     scope: req.authInfo.scope,
   });

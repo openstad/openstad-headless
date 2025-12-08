@@ -45,6 +45,19 @@ exports.withOne = (req, res, next) => {
     .catch((err) => { next(err); });
 }
 
+exports.validate = (req, res, next) => {
+  const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
+
+  db.UniqueCode
+    .findOne({ where: { code: codeId } })
+    .then((codeObj) => {
+      res.json({ data: codeObj?.code });
+    })
+    .catch((err) => {
+      res.json({ data: null });
+    });
+}
+
 
 exports.create = async (req, res, next) => {
 

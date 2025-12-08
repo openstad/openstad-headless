@@ -39,6 +39,8 @@ const emailUrlBruteForce = bruteForce.userVeryRestricted;
 
 const csurf = require('csurf');
 
+const codeMw                   = require('../middleware/code');
+
 
 /**
  * In same case we want to directly submit to oAuth api from another url.
@@ -239,6 +241,7 @@ module.exports = function (app) {
     app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate]);
     app.get('/auth/code/login', csrfProtection, addCsrfGlobal, authCode.login);
     app.post('/auth/code/login',  csrfProtection, uniqueCodeBruteForce, logMw.logPostUniqueCode, authCode.postLogin);
+    app.post('/api/validation/code/', codeMw.validate);
 
     /**
      * Register extra info;
