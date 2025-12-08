@@ -74,6 +74,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   const [isFinished, setIsFinished] = useState(false);
   const [selectedOption, setSelectedOption] = useState<'a' | 'b' | null>(null);
 
+  const [previousAnswers, setPreviousAnswers] = useState<Record<string, string>>({});
+
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
   const [showExplanationDialog, setShowExplanationDialog] = useState<boolean>(false);
   const [explanations, setExplanations] = useState<Record<string, string>>(initialAnswersExplanation);
@@ -117,10 +119,17 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }
 
     const lastAnsweredDilemma = answeredDilemmas[answeredDilemmas.length - 1];
+    const lastAnswer = dilemmaAnswers[lastAnsweredDilemma.id];
     const newDilemmaAnswers = { ...dilemmaAnswers };
     delete newDilemmaAnswers[lastAnsweredDilemma.id];
 
     setDilemmaAnswers(newDilemmaAnswers);
+
+    // Set previous answer for this dilemma
+    setPreviousAnswers(prev => ({
+      ...prev,
+      [lastAnsweredDilemma.id]: lastAnswer
+    }));
 
     setSelectedOption(null);
 
@@ -175,10 +184,17 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     if (answeredDilemmas.length > 0) {
       // Ga terug naar het laatste beantwoorde dilemma en maak het onbeantwoord
       const lastAnsweredDilemma = answeredDilemmas[answeredDilemmas.length - 1];
+      const lastAnswer = dilemmaAnswers[lastAnsweredDilemma.id];
       const newDilemmaAnswers = { ...dilemmaAnswers };
       delete newDilemmaAnswers[lastAnsweredDilemma.id];
 
       setDilemmaAnswers(newDilemmaAnswers);
+
+      // Set previous answer for this dilemma
+      setPreviousAnswers(prev => ({
+        ...prev,
+        [lastAnsweredDilemma.id]: lastAnswer
+      }));
 
       // Bereken welke dilemma's nog niet beantwoord zijn na deze wijziging
       const futureUnanswered = dilemmaCards.filter(dilemma => !newDilemmaAnswers[dilemma.id]);
@@ -322,7 +338,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <span>OF</span>
         </span>
 
-        <div className="dilemma-option">
+        <div className={`dilemma-option${previousAnswers[currentDilemma.id] === 'a' ? ' --previous-awnser' : ''}`}>
           <input
             type="radio"
             id={`option-${currentDilemma.id}-a`}
@@ -342,7 +358,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           </label>
         </div>
 
-        <div className="dilemma-option">
+        <div className={`dilemma-option${previousAnswers[currentDilemma.id] === 'b' ? ' --previous-awnser' : ''}`}>
           <input
             type="radio"
             id={`option-${currentDilemma.id}-b`}

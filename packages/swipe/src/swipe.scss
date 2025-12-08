@@ -69,6 +69,10 @@
     outline: 3px solid var(--swipe-like-color);
     outline-offset: 3px;
 
+    &.swipe-btn-pass{
+      outline: 3px solid var(--swipe-dislike-color);
+    }
+
   }
 
   .swipe-counter {
