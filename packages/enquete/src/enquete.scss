@@ -908,6 +908,12 @@ label.utrecht-form-label {
       }
     }
 
+
+    .form-widget:has(.question.question-type-matrix){
+      width: 100%;
+      \overflow-x: scroll;
+    }
+
     .question-type-text .utrecht-form-field__label .utrecht-form-label,
     .a-b-slider-container .utrecht-form-field__label .utrecht-form-label,
     .utrecht-form-fieldset__legend.utrecht-form-fieldset__legend--html-legend {
