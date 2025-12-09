@@ -30,6 +30,7 @@ const keyMap: Record<string, string> = {
   deletedAt: 'Verwijderd op',
   yes: 'Aantal likes',
   no: 'Aantal dislikes',
+  score: 'Wilson score interval',
   progress: 'Voortgang',
   statuses: 'Statussen',
   modBreak: 'Moderatie bericht',
@@ -235,7 +236,7 @@ export default function ProjectResources() {
           <div className="p-6 bg-white rounded-md clear-right">
             <div
               className="grid grid-cols-2 items-center py-2 px-2 border-b border-border"
-              style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(4, 1fr) 60px` }}
+              style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
             >
               {bulkSelectActive && (<ListHeading />)}
               <ListHeading className="hidden lg:flex">
@@ -259,6 +260,11 @@ export default function ProjectResources() {
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('score', e, filterData))}>
+                  Wilson score interval
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('date-added', e, filterData))}>
                   Datum aangemaakt
                 </button>
@@ -274,7 +280,7 @@ export default function ProjectResources() {
                 >
                   <li
                     className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
-                    style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(4, 1fr) 60px` }}
+                    style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
                   >
                     {bulkSelectActive && (
                       <Checkbox
@@ -299,6 +305,9 @@ export default function ProjectResources() {
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
                       {resource.no || 0}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">
+                      {resource.score || 0}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
                       {resource.createDateHumanized}
