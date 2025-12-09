@@ -443,7 +443,7 @@ const handleNextClick = useCallback(() => {
               Antwoord verzenden
             </Button>
             <Button appearance="secondary-action-button" onClick={() => (handleExplanationComplete(), handleExplanationChange(currentDilemma.id, ''))}>
-              Sluiten zonder toelichting
+              Overslaan
             </Button>
           </div>
         </div>
