@@ -1,7 +1,7 @@
 const { Sequelize, Op } = require('sequelize');
 const log = require('debug')('app:cron');
 const config = require('config');
-const db = require('../db');
+const { Resource, Comment } = require('../db');
 const UseLock = require('../lib/use-lock');
 
 // Purpose

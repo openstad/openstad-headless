@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-const { Resource } = require('../src/db');
+const { Resource, Comment } = require('../src/db');
 
 module.exports = {
   async up ({ context: queryInterface }) {
