@@ -1054,7 +1054,7 @@ module.exports = function (db, sequelize, DataTypes) {
     
     // Calculate & save the score to the resource
     resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
-    await resource.save({ validate: false });
+    await resource.save({ validate: false, hooks: false });
   }
 
   return Resource;
