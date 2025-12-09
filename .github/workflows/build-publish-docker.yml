@@ -103,6 +103,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Setup safe-chain
+        run: |
+          npm i -g @aikidosec/safe-chain
+          safe-chain setup-ci
+
       - name: Install dependencies
         run: npm i
 
@@ -127,6 +132,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      - name: Setup safe-chain
+        run: |
+          npm i -g @aikidosec/safe-chain
+          safe-chain setup-ci
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
@@ -227,14 +237,14 @@ jobs:
             echo "type=raw,value=v${{ needs.get-openstad-version.outputs.openstad_version }}",priority=900 >> $GITHUB_OUTPUT
             echo "type=ref,event=branch,suffix=-{{sha}}",priority=700 >> $GITHUB_OUTPUT
             echo "type=ref,event=tag" >> $GITHUB_OUTPUT
-            echo "type=ref,event=pr" >> $GITHUB_OUTPUT
+            echo "type=ref,event=pr,suffix=-{{sha}}" >> $GITHUB_OUTPUT
             echo "type=raw,value=latest,enable={{is_default_branch}}" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "tags<<EOF" >> $GITHUB_OUTPUT
             echo "type=ref,event=branch,suffix=-{{sha}}",priority=700 >> $GITHUB_OUTPUT
             echo "type=ref,event=tag" >> $GITHUB_OUTPUT
-            echo "type=ref,event=pr" >> $GITHUB_OUTPUT
+            echo "type=ref,event=pr,suffix=-{{sha}}" >> $GITHUB_OUTPUT
             echo "type=raw,value=latest,enable={{is_default_branch}}" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
@@ -297,6 +307,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      - name: Setup safe-chain
+        run: |
+          npm i -g @aikidosec/safe-chain
+          safe-chain setup-ci
 
       - name: Install Cypress
         run: npm install cypress
