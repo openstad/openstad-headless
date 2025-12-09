@@ -92,8 +92,6 @@ const SortField: FC<SortFieldProps> = ({
         });
     }, [items]);
 
-    console.log(numberingStyle)
-
     return (
         <div className={`sort-field-container --${numberingStyle}`}>
             <div className="sortable-intro">

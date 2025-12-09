@@ -94,12 +94,22 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
 const moveToNext = useCallback(() => {
   let newAnswers = dilemmaAnswers;
-  if (selectedOption && currentDilemma) {
+  let answerToUse = selectedOption;
+  if (!answerToUse && previousAnswers[currentDilemma?.id]) {
+    answerToUse = previousAnswers[currentDilemma.id] as 'a' | 'b';
+  }
+  if (answerToUse && currentDilemma) {
     newAnswers = {
       ...dilemmaAnswers,
-      [currentDilemma.id]: selectedOption
+      [currentDilemma.id]: answerToUse
     };
     setDilemmaAnswers(newAnswers);
+    // Na opslaan van antwoord, verwijder uit previousAnswers
+    setPreviousAnswers(prev => {
+      const updated = { ...prev };
+      delete updated[currentDilemma.id];
+      return updated;
+    });
   }
 
   setSelectedOption(null);
@@ -113,7 +123,7 @@ const moveToNext = useCallback(() => {
   } else {
     setIsFinished(true);
   }
-}, [currentDilemmaIndex, dilemmaCards, selectedOption, currentDilemma, dilemmaAnswers, fieldKey]);
+}, [currentDilemmaIndex, dilemmaCards, selectedOption, currentDilemma, dilemmaAnswers, previousAnswers, fieldKey]);
 
   const moveToPrevious = useCallback(() => {
     const answeredDilemmas = dilemmaCards.filter(dilemma => dilemmaAnswers[dilemma.id]);
@@ -174,9 +184,15 @@ const handleNextClick = useCallback(() => {
 }, [selectedOption, currentDilemma, moveToNext, previousAnswers]);
 
   const handleExplanationComplete = useCallback(() => {
+    if (currentDilemma) {
+      setExplanations(prev => ({
+        ...prev,
+        [currentDilemma.id]: explanations[currentDilemma.id] || ''
+      }));
+    }
     setShowExplanationDialog(false);
     moveToNext();
-  }, [moveToNext]);
+  }, [moveToNext, currentDilemma, explanations]);
 
   const handleAnswerChange = (dilemmaId: string, newAnswer: 'a' | 'b') => {
     const newAnswers = {
