@@ -2,8 +2,8 @@
 export type Comment = {
   id: number;
   delete: (arg: number) => void;
-  submitLike: () => void;
-  submitDislike: () => void;
+  submitLike: () => Comment;
+  submitDislike: () => Comment;
 } & Partial<{
   parentId: number;
   resourceId: number;
@@ -12,6 +12,7 @@ export type Comment = {
   description: string;
   label: string;
   yes: number;
+  no: number;
   hasUserLiked: boolean;
   hasUserDisliked: boolean;
   createDateHumanized: string;
@@ -19,7 +20,6 @@ export type Comment = {
   replies: Array<Comment>;
 
   user?: { displayName: string, role: string};
-  submitLike: () => void;
 
   tags?: Array<{
     id: string;

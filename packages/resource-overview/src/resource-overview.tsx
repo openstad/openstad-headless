@@ -1037,10 +1037,10 @@ function ResourceOverview(props: ResourceOverviewWidgetProps) {
 
   return displayAsTabs ? (
     <Tabs defaultValue="list">
-      <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget.displayDislike}/>
+      <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false}/>
     </Tabs>
   ) : (
-    <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget.displayDislike} />
+    <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false} />
   );
 }
 

@@ -22,6 +22,9 @@ function Comment({
     submitLike() {
       throw new Error('Not implemented');
     },
+    submitDislike() {
+      throw new Error('Not implemented');
+    },
   },
   showDateSeperately = false,
   selected,
@@ -109,7 +112,8 @@ function Comment({
   }
 
   async function handleLike() {
-    const newData = await args.comment.submitLike();
+    const newData = await args.comment.submitLike() as CommentProps['comment'];
+
     setHasUserLiked(newData.hasUserLiked || false);
     setHasUserDisliked(newData.hasUserDisliked || false);
     setYesVotes(newData.yes || 0);
@@ -117,7 +121,8 @@ function Comment({
   }
 
   async function handleDislike() {
-    const newData = await args.comment.submitDislike();
+    const newData = await args.comment.submitDislike() as CommentProps['comment'];
+
     setHasUserLiked(newData.hasUserLiked || false);
     setHasUserDisliked(newData.hasUserDisliked || false);
     setYesVotes(newData.yes || 0);
@@ -311,7 +316,7 @@ function Comment({
             Reageren
           </Button>
         )
-        
+
       )}
 
       {isReplyFormActive ? (
