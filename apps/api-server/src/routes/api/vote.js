@@ -120,9 +120,21 @@ router.route('/')
 			req.scope.push('includeUser');
 		}
 
+		const { page = 0, limit = 0 } = req.query;
+		const whereExtras = {};
+		if ( !!page || !!limit ) {
+			whereExtras.page = page;
+			whereExtras.limit = limit;
+		}
+
 		db.Vote
 			.scope(req.scope)
-			.findAndCountAll({ where, order, ...dbQuery })
+			.findAndCountAll({
+				where,
+				order,
+				...whereExtras,
+				...dbQuery
+			})
 			.then(function( result ) {
         req.results = result.rows;
         req.dbQuery.count = result.count;
