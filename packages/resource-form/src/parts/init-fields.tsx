@@ -1,5 +1,5 @@
-import {FieldProps} from "@openstad-headless/form/src/props.js";
-import React from "react";
+import { FieldProps } from "@openstad-headless/form/src/props.js";
+import React, { useEffect } from "react";
 import DataStore from "@openstad-headless/data-store/src";
 
 const getMinMaxByField = (key, data) => {
@@ -17,7 +17,7 @@ export const InitializeFormFields = (items, data) => {
         });
         for (const item of items) {
 
-            if ( item.type === 'tags' ) {
+            if (item.type === 'tags') {
 
                 const { data: tags } = datastore.useTags({
                     projectId: data.projectId,
@@ -29,7 +29,7 @@ export const InitializeFormFields = (items, data) => {
                         .filter((tag: any) => tag.type === item.tags)
                         .map((tag: any, index: number) => ({
                             trigger: `${index}`,
-                            titles: [{text: tag.name, key: tag.id}],
+                            titles: [{ text: tag.name, key: tag.id }],
                             images: []
                         }))
                     : [];
@@ -58,9 +58,16 @@ export const InitializeFormFields = (items, data) => {
                 trigger: item.trigger || '',
             };
 
-            if ( item.defaultValue ) {
+            if (item.defaultValue) {
                 fieldData['defaultValue'] = item.defaultValue;
             }
+
+            const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+            if (params) {
+                fieldData['defaultValue'] = params[item.fieldKey];
+            }
+
+
 
             switch (item.type) {
                 case 'checkbox':
@@ -118,11 +125,11 @@ export const InitializeFormFields = (items, data) => {
                     break;
                 case 'map':
                 case 'location':
-                    if ( !!data?.datalayer ) {
+                    if (!!data?.datalayer) {
                         fieldData['datalayer'] = data?.datalayer;
                     }
 
-                    if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
+                    if (typeof (data?.enableOnOffSwitching) === 'boolean') {
                         fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
                     }
                     break;
@@ -137,6 +144,7 @@ export const InitializeFormFields = (items, data) => {
             formFields.push(fieldData);
         }
     }
+
 
     return formFields;
 }

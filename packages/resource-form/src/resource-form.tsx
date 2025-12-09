@@ -217,7 +217,6 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         if (Array.isArray(formFields)) {
             formFields.forEach(field => {
                 if (field && field.fieldKey && params.hasOwnProperty(field.fieldKey)) {
-                    field.defaultValue = params[field.fieldKey];
                     url.searchParams.delete(field.fieldKey);
                 }
             });
