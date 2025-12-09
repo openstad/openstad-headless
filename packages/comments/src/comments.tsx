@@ -48,6 +48,7 @@ export type CommentsWidgetProps = BaseProps &
     overridePage?: number;
     displayPagination?: boolean;
     displaySearchBar?: boolean;
+    extraReplyButton?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
     extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     defaultTags?: string;
@@ -55,6 +56,8 @@ export type CommentsWidgetProps = BaseProps &
     onlyIncludeOrExcludeTagIds?: string;
     overrideSort?: string;
     searchTerm?: string;
+    autoApply?: boolean;
+    displayCollapsibleFilter?: boolean;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -73,6 +76,7 @@ function CommentsInner({
   onGoToLastPage,
   displayPagination = false,
   displaySearchBar = false,
+  extraReplyButton = false,
   overridePage = 0,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   defaultTags,
@@ -80,6 +84,9 @@ function CommentsInner({
   onlyIncludeOrExcludeTagIds = '',
   overrideSort = '',
   searchTerm = '',
+  autoApply = false,
+  displayCollapsibleFilter = false,
+
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
@@ -394,6 +401,8 @@ function CommentsInner({
               displayTagFilters={false}
               searchPlaceholder={''}
               resetText={'Reset'}
+              displayCollapsibleFilter={displayCollapsibleFilter}
+              autoApply={autoApply}
             />
 
             <Spacer size={1}/>
@@ -439,7 +448,7 @@ function CommentsInner({
           ?.map((comment: any, index: number) => {
 
           let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
-          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
+          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} extraReplyButton={extraReplyButton} />;
         })}
 
         {displayPagination && (
