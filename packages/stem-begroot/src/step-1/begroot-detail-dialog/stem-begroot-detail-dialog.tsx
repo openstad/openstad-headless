@@ -15,7 +15,7 @@ import { Dialog } from '@openstad-headless/ui/src';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Paragraph, Strong, Link, Heading5, Heading4, Heading1 } from "@utrecht/component-library-react";
+import {Button, Paragraph, Strong, Link, Heading5, Heading4, Heading1, Heading} from "@utrecht/component-library-react";
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 
 export const StemBegrootResourceDetailDialog = ({
@@ -45,6 +45,8 @@ export const StemBegrootResourceDetailDialog = ({
   filteredResources = [],
   currentPage = 0,
   pageSize = 999,
+  displayModBreak = false,
+  modBreakTitle = '',
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -73,6 +75,8 @@ export const StemBegrootResourceDetailDialog = ({
   filteredResources?: Array<any>;
   currentPage: number;
   pageSize: number;
+  modBreakTitle?: string;
+  displayModBreak?: boolean;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -248,6 +252,17 @@ export const StemBegrootResourceDetailDialog = ({
                           <Heading1 dangerouslySetInnerHTML={{__html: resource?.title}}/>
                           <Paragraph className="strong" dangerouslySetInnerHTML={{__html: resource?.summary}}/>
                           <Paragraph dangerouslySetInnerHTML={{__html: resource?.description}}/>
+
+                          {displayModBreak && resource.modBreak && (
+                            <div className="resource-detail-modbreak-banner">
+                              <section>
+                                <Heading level={2} appearance='utrecht-heading-6'>{modBreakTitle}</Heading>
+                                <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreakDateHumanized}</Heading>
+                              </section>
+                              <Spacer size={1} />
+                              <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreak}</Heading>
+                            </div>
+                          )}
                         </div>
                       </div>
 

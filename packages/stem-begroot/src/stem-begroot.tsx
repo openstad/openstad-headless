@@ -98,6 +98,7 @@ export type StemBegrootWidgetProps = BaseProps &
     step1MaxText?: string;
     filterBehavior?: string;
     voteAfterLoggingIn?: boolean;
+    displayModBreak?: boolean;
   };
 
 function StemBegroot({
@@ -120,6 +121,7 @@ function StemBegroot({
   step1MaxText = '',
   filterBehavior = 'or',
   voteAfterLoggingIn = false,
+  displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -636,6 +638,8 @@ function StemBegroot({
         activeTagTab={activeTagTab}
         currentPage={page}
         pageSize={itemsPerPage}
+        displayModBreak={displayModBreak}
+        modBreakTitle={props?.resources?.modbreakTitle || ''}
       />
 
       <div className="osc">
