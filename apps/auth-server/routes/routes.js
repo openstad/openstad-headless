@@ -39,7 +39,7 @@ const emailUrlBruteForce = bruteForce.userVeryRestricted;
 
 const csurf = require('csurf');
 
-const codeMw                   = require('../middleware/code');
+const accessCodeMw                   = require('../middleware/access-code');
 
 
 /**
@@ -236,12 +236,16 @@ module.exports = function (app) {
     app.post('/auth/phonenumber/sms-code', csrfProtection, smsCodeBruteForce, authPhonenumber.postSmsCode);
 
     /**
+     * Auth routes for AccessCode
+     */
+    app.post('/api/validation/code/', accessCodeMw.validate);
+
+    /**
      * Auth routes for UniqueCode
      */
     app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate]);
     app.get('/auth/code/login', csrfProtection, addCsrfGlobal, authCode.login);
     app.post('/auth/code/login',  csrfProtection, uniqueCodeBruteForce, logMw.logPostUniqueCode, authCode.postLogin);
-    app.post('/api/validation/code/', codeMw.validate);
 
     /**
      * Register extra info;

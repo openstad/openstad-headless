@@ -4,6 +4,7 @@ const adminApiUserController          = require('../controllers/admin/api/user')
 const adminApiClientController        = require('../controllers/admin/api/client');
 const adminApiRoleController          = require('../controllers/admin/api/role');
 const adminApiUniqueCodeController    = require('../controllers/admin/api/uniqueCode');
+const adminApiAccessCodeController    = require('../controllers/admin/api/accessCode');
 
 //MIDDLEWARE
 const adminMiddleware          = require('../middleware/admin');
@@ -14,6 +15,7 @@ const authMw                   = require('../middleware/auth');
 const passwordResetMw          = require('../middleware/passwordReset');
 const roleMw                   = require('../middleware/role');
 const codeMw                   = require('../middleware/code');
+const accessCodeMw                   = require('../middleware/access-code');
 const logMw                    = require('../middleware/log');
 const securityHeadersMw        = require('../middleware/security-headers');
 
@@ -60,6 +62,10 @@ module.exports = (app) => {
   app.post('/api/admin/unique-code',                  clientMw.withOne,   codeMw.create,    adminApiUniqueCodeController.created);
   app.post('/api/admin/unique-code/:codeId/delete',   codeMw.deleteOne,   adminApiUniqueCodeController.delete);
   app.post('/api/admin/unique-code/:codeId/reset',    codeMw.withOne,     codeMw.reset, adminApiUniqueCodeController.reset);
+
+  app.get('/api/admin/access-code',                   clientMw.withOne,   accessCodeMw.withAll,   adminApiAccessCodeController.all);
+  app.post('/api/admin/access-code',                  clientMw.withOne,   accessCodeMw.create,    adminApiAccessCodeController.created);
+  app.post('/api/admin/access-code/:codeId/delete',   accessCodeMw.deleteOne,   adminApiAccessCodeController.delete);
 
   // only use this error handler middleware in "/api" based routes in order to output the errors as JSON instead of HTML
   app.use("/api/admin/", function(err, req, res, next){
