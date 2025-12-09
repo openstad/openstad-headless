@@ -93,6 +93,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayCaption?: boolean;
     summaryCharLength?: number;
     displaySorting?: boolean;
+    autoApply?: boolean;
     defaultSorting?: string;
     displaySearch?: boolean;
     displaySearchText?: boolean;
@@ -158,6 +159,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     filterBehavior?: string;
     filterBehaviorInclude?: string;
     onlyShowTheseTagIds?: string;
+    displayCollapsibleFilter?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -516,6 +518,7 @@ function ResourceOverviewInner({
   dialogTagGroups = undefined,
   filterBehaviorInclude = 'or',
   onlyShowTheseTagIds = '',
+  displayCollapsibleFilter = false,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -981,6 +984,7 @@ function ResourceOverviewInner({
                 setLocation(f.location)
               }}
               preFilterTags={urlTagIdsArray}
+              displayCollapsibleFilter={displayCollapsibleFilter}
             />
           ) : null}
 
