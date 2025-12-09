@@ -62,6 +62,7 @@ export type Item = {
   key_b?: string;
   description_b?: string;
   image_b?: string;
+  numberingStyle?: string;
 
   // Keeping this for backwards compatibility
   image1?: string;

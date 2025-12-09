@@ -107,6 +107,7 @@ const formSchema = z.object({
   infoBlockExtraButtonTitle: z.string().optional(),
   infoField: z.string().optional(),
   infofieldExplanation: z.boolean().optional(),
+  numberingStyle: z.string().optional(),
 
 
   // Keeping these for backwards compatibility
@@ -208,6 +209,7 @@ export default function WidgetEnqueteItems(
           routingSelectedAnswer: values.routingSelectedAnswer || '',
           infoField: values.infoField || '',
           infofieldExplanation: values.infofieldExplanation || false,
+          numberingStyle: values.numberingStyle || 'none',
           // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
@@ -340,6 +342,7 @@ export default function WidgetEnqueteItems(
     matrix: matrixDefault,
     matrixMultiple: false,
     routingInitiallyHide: false,
+    numberingStyle: 'none',
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
     infoField: '',
@@ -402,6 +405,7 @@ export default function WidgetEnqueteItems(
         matrix: selectedItem.matrix || matrixDefault,
         matrixMultiple: selectedItem.matrixMultiple || false,
         routingInitiallyHide: selectedItem.routingInitiallyHide || false,
+        numberingStyle: selectedItem.numberingStyle || 'none',
         routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
         infoField: selectedItem.infoField || '',
@@ -1737,6 +1741,37 @@ export default function WidgetEnqueteItems(
                                 {/* True and false are deliberately switched */}
                                 <SelectItem value="true">Nee</SelectItem>
                                 <SelectItem value="false">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('questionType') === 'sort' && (
+                      <FormField
+                        control={form.control}
+                        name="numberingStyle"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nummeringstijl</FormLabel>
+                            <FormDescription>
+                              Kies hoe de opsomming wordt genummerd: geen nummering, decimaal, alfabetisch of Romeins.
+                            </FormDescription>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">Geen opsomming</SelectItem>
+                                <SelectItem value="decimal">Decimale nummers</SelectItem>
+                                <SelectItem value="alphabetical">Alfabetische letters</SelectItem>
+                                <SelectItem value="roman">Romeinse cijfers</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />

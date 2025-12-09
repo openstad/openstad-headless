@@ -344,6 +344,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['type'] = 'sort';
                     fieldData['title'] = item?.title || '';
                     fieldData['description'] = item?.description || '';
+                    fieldData['numberingStyle'] = item?.numberingStyle || 'none';
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
