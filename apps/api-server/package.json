@@ -83,7 +83,7 @@
     "marked": "^4.0.14",
     "merge": "^2.1.1",
     "method-override": "^3.0.0",
-    "mjml": "^5.0.0-alpha.6",
+    "mjml": "5.0.0-alpha.6",
     "morgan": "^1.10.0",
     "mysql2": "^3.9.7",
     "nodemailer": "^7.0.11",
