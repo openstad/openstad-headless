@@ -261,6 +261,14 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Stemcodes</span>
           </Button>
         </Link>
+        <Link href={`/projects/${project}/access-codes`}>
+          <Button
+            variant={location.includes('/access-codes') ? 'secondary' : 'ghost'}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}>
+            <span className="truncate">Toegangscodes</span>
+          </Button>
+        </Link>
 
         <Link href={`/projects/${project}/votes`}>
           <Button

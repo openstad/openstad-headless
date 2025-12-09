@@ -31,6 +31,10 @@ exports.fields = [
     key: 'city',
     label: 'Woonplaats',
   },
+  {
+    key: 'accessCode',
+    label: 'Toegangscode',
+  },
 ];
 
 exports.validation = {
