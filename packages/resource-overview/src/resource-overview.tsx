@@ -125,6 +125,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
     displayLikeButton?: boolean;
+    displayDislike?: boolean;
     clickableImage?: boolean;
     displayBudget?: boolean;
     displayTags?: boolean;
@@ -496,6 +497,7 @@ function ResourceOverviewInner({
   displayDocuments = false,
   showActiveTags = false,
   displayLikeButton = false,
+  displayDislike = false,
   clickableImage = false,
   displayBudget = true,
   documentsTitle = '',
@@ -779,6 +781,9 @@ function ResourceOverviewInner({
         if (sort === 'random') {
           return Math.random() - 0.5;
         }
+        if (sort === 'score') {
+          return (b.score || 0) - (a.score || 0);
+        }
 
         return 0;
       });
@@ -919,6 +924,7 @@ function ResourceOverviewInner({
                 dialogTagGroups={dialogTagGroups}
                 displayBudget={displayBudget}
                 displayLikeButton={displayLikeButton}
+                displayDislike={displayDislike}
                 clickableImage={clickableImage}
                 onRemoveClick={(resource) => {
                   try {
@@ -977,7 +983,7 @@ function ResourceOverviewInner({
               showActiveTags={showActiveTags}
               onUpdateFilter={(f) => {
                 setTags( f.tags.length > 0 ? f.tags : []);
-                if (['createdAt_desc', 'createdAt_asc', 'title', 'votes_desc', 'votes_asc', 'ranking', 'random'].includes(f.sort)) {
+                if (['createdAt_desc', 'createdAt_asc', 'title', 'votes_desc', 'votes_asc', 'ranking', 'random', 'score'].includes(f.sort)) {
                   setSort(f.sort);
                 }
                 setSearch(f.search.text);
@@ -1031,10 +1037,10 @@ function ResourceOverview(props: ResourceOverviewWidgetProps) {
 
   return displayAsTabs ? (
     <Tabs defaultValue="list">
-      <ResourceOverviewInner {...props} />
+      <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false}/>
     </Tabs>
   ) : (
-    <ResourceOverviewInner {...props} />
+    <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false} />
   );
 }
 

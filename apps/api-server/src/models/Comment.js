@@ -79,7 +79,11 @@ module.exports = function( db, sequelize, DataTypes ) {
 			type         : DataTypes.VIRTUAL
 		},
 
-		hasUserVoted: {
+		hasUserLiked: {
+			type         : DataTypes.VIRTUAL
+		},
+    
+    hasUserDisliked: {
 			type         : DataTypes.VIRTUAL
 		},
 
@@ -96,6 +100,25 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}
 			}
 		},
+    
+    score: {
+      type: DataTypes.DECIMAL(12,11),
+      auth: {
+        updateableBy: 'editor',
+      },
+      allowNull: false,
+      defaultValue: 0,
+    },
+    
+    // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero
+    netPositiveVotes: {
+      type: DataTypes.VIRTUAL,
+      get: function () {
+        const yes = this.getDataValue('yes') || 0;
+        const no = this.getDataValue('no') || 0;
+        return Math.max(yes - no, 0);
+      }
+    },
 
 	}, {
 
@@ -163,19 +186,39 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	Comment.scopes = function scopes() {
 		// Helper function used in `includeVoteCount` scope.
-		function voteCount( tableName ) {
-			return [sequelize.literal(`
-				(SELECT
-					COUNT(*)
-				FROM
-					comment_votes av
-				WHERE
-					av.deletedAt IS NULL AND (
-						av.checked IS NULL OR
-						av.checked  = 1
-					) AND
-					av.commentId = ${tableName}.id)
-			`), 'yes'];
+		function voteCount( tableName, opinion ) {
+      if (typeof opinion == 'undefined' || opinion === 'yes') {
+        return [sequelize.literal(`
+          (SELECT
+            COUNT(*)
+          FROM
+            comment_votes av
+          WHERE
+            av.deletedAt IS NULL AND (
+              av.checked IS NULL OR
+              av.checked  = 1
+            ) AND
+            av.commentId = ${tableName}.id
+            AND (av.opinion = 'yes' OR av.opinion IS NULL)
+          )
+        `), 'yes'];
+      } else {
+        return [sequelize.literal(`
+          (SELECT
+            COUNT(*)
+          FROM
+            comment_votes av
+          WHERE
+            av.deletedAt IS NULL AND (
+              av.checked IS NULL OR
+              av.checked  = 1
+            ) AND
+            av.commentId = ${tableName}.id
+            AND av.opinion = ${sequelize.escape(opinion)}
+          )
+          
+        `), opinion];
+      }
 		}
 
 		return {
@@ -219,7 +262,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 						as         : 'replies',
 						required   : false,
             // force attribs because the automatic list is incomplete
-					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized', 'hasUserVoted', 'yes']
+					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized', 'hasUserLiked', 'hasUserDisliked', 'yes']
 					}],
 					where: {
 						parentId: null
@@ -284,7 +327,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 			includeVoteCount: function( tableName ) {
 				return {
 					attributes: Object.keys(this.rawAttributes).concat([
-						voteCount(tableName, 'yes')
+						voteCount(tableName, 'yes'),
+						voteCount(tableName, 'no')
 					])
 				};
 			},
@@ -306,8 +350,25 @@ module.exports = function( db, sequelize, DataTypes ) {
 									av.checked  = 1
 								) AND
 								av.commentId = ${tableName}.id AND
-								av.userId     = ${userId})
-						`), 'hasUserVoted']
+								av.userId     = ${userId} AND
+								(av.opinion = 'yes' OR av.opinion IS NULL)
+              )
+						`), 'hasUserLiked'],
+            [sequelize.literal(`
+							(SELECT
+								COUNT(*)
+							FROM
+								comment_votes av
+							WHERE
+								av.deletedAt IS NULL AND (
+									av.checked IS NULL OR
+									av.checked  = 1
+								) AND
+								av.commentId = ${tableName}.id AND
+								av.userId     = ${userId} AND
+								av.opinion = 'no'
+              )
+						`), 'hasUserDisliked']
 					])
 				};
 			},
@@ -362,22 +423,37 @@ module.exports = function( db, sequelize, DataTypes ) {
 		});
 	}
 
-	Comment.prototype.addUserVote = function( user, ip ) {
-		var data = {
+	Comment.prototype.addUserVote = function( user, ip, opinion ) {
+		const data = {
 			commentId : this.id,
 			userId     : user.id,
 			ip         : ip
 		};
-
+  
 		// See `Resource.addUserVote` for an explanation of the logic below.
-		return db.CommentVote.findOne({where: data})
+		return db.CommentVote.findOne({where: data, paranoid: false})
 			.then(function( vote ) {
 				if( vote ) {
-					return vote.destroy();
+          if (vote.opinion != opinion) {
+            // User is changing their vote
+            vote.setDataValue('opinion', opinion);
+            vote.setDataValue('deletedAt', null);
+            return vote.save();
+          } else {
+            if (!vote.deletedAt) {
+              return vote.destroy();
+            } else {
+              // vote.restore() doesn't seem to trigger hooks
+              vote.setDataValue('deletedAt', null);
+              vote.setDataValue('opinion', opinion);
+              return vote.save();
+            }
+          }
 				} else {
 					// HACK: See `Resource.addUserVote`.
 					data.deletedAt = null;
-					return db.CommentVote.upsert(data);
+          data.opinion = opinion;
+					return db.CommentVote.create(data);
 				}
 			})
 			.then(function( result ) {
@@ -415,6 +491,39 @@ module.exports = function( db, sequelize, DataTypes ) {
       if ( self.can('delete', user) ) result.can.delete = true;
       return result;
     }
+  }
+  
+  const wilsonScore = require('../lib/wilson-score');
+  
+  Comment.calculateAndSaveScore = Comment.prototype.calculateAndSaveScore = async function() {
+    const comment = this;
+    const votes = await db.CommentVote.findAll({
+      where: {
+        commentId: comment.id,
+        deletedAt: null,
+        [Op.or]: [
+          { checked: null },
+          { checked: true }
+        ]
+      },
+      attributes: ['opinion', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      group: ['opinion']
+    });
+    
+    let yesVotes = 0;
+    let noVotes = 0;
+
+    votes.forEach(vote => {
+      if (vote.opinion === 'yes') {
+        yesVotes = parseInt(vote.get('count'), 10);
+      } else if (vote.opinion === 'no') {
+        noVotes = parseInt(vote.get('count'), 10);
+      }
+    });
+    
+    // Calculate & save the score to the resource
+    comment.setDataValue('score', wilsonScore(yesVotes, noVotes));
+    await comment.save();
   }
 
 	return Comment;

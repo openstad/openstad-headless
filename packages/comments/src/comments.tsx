@@ -31,6 +31,7 @@ export type CommentsWidgetProps = BaseProps &
     hideReplyAsAdmin?: boolean; // todo: wat is dit?
     canComment?: boolean,
     canLike?: boolean,
+    canDislike?: boolean,
     canReply?: boolean,
     showForm?: boolean,
     closedText?: string;
@@ -183,6 +184,7 @@ function CommentsInner({
     formIntro,
     canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
     canLike: typeof props.comments?.canLike != 'undefined' ? props.comments.canLike : true,
+    canDislike: typeof props.comments?.canDislike != 'undefined' ? props.comments.canDislike : true,
     canReply: typeof props.comments?.canReply != 'undefined' ? props.comments.canReply : true,
     showForm: typeof props.showForm != 'undefined' ? props.showForm : true,
     closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
@@ -390,7 +392,7 @@ function CommentsInner({
               displaySorting={ (props.sorting || []).length > 0 && datastore }
               defaultSorting={props.defaultSorting || 'createdAt_asc'}
               onUpdateFilter={(f) => {
-                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'].includes(f.sort)) {
+                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc', 'random', 'score'].includes(f.sort)) {
                   setSort(f.sort);
                 }
                 setSearch(f?.search?.text || '');
@@ -440,6 +442,12 @@ function CommentsInner({
             }
             if (sortMethod === 'votes_asc') {
               return a.yes - b.yes;
+            }
+            if (sort === 'random') {
+              return Math.random() - 0.5;
+            }
+            if (sort === 'score') {
+              return (b.score || 0) - (a.score || 0);
             }
 
             return 0;

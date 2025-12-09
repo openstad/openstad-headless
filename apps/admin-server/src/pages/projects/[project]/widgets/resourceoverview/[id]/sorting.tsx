@@ -59,6 +59,10 @@ const SortingTypes = [
     label: "Ranglijst"
   },
   {
+    value: "score",
+    label: "Beste bijdragen"
+  },
+  {
     value: "random",
     label: "Willekeurig"
   }

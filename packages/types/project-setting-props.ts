@@ -35,6 +35,7 @@ export type ProjectSettingProps = {
   comments: {
     canComment: boolean,
     canLike: boolean,
+    canDislike: boolean,
     canReply: boolean,
     closedText: string;
     requiredUserRole: string,
