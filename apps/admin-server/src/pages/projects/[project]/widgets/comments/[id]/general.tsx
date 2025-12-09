@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,7 +36,8 @@ const formSchema = z.object({
   useSentiments: z.string().optional(),
   itemsPerPage: z.coerce.number(),
   displayPagination: z.boolean().optional(),
-  displaySearchBar: z.boolean().optional()
+  displaySearchBar: z.boolean().optional(),
+  extraReplyButton: z.boolean().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -71,6 +73,7 @@ export default function ArgumentsGeneral({
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
       displaySearchBar: props?.displaySearchBar || false,
+      extraReplyButton: props?.extraReplyButton || false,
     },
   });
 
@@ -221,6 +224,23 @@ export default function ArgumentsGeneral({
                 <FormLabel>
                   Zoekbalk tonen
                 </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+                    <FormField
+            control={form.control}
+            name="extraReplyButton"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Extra reageer knop
+                </FormLabel>
+                <FormDescription>
+                  Hiermee wordt er onder de lijst met reacties een extra knop &quot;Reageer&quot; getoond, naast de standaard knop boven de lijst.
+                </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
