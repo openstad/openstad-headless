@@ -569,7 +569,9 @@ function StemBegroot({
         setTotalPages(totalPagesCalc);
       }
 
-      setPage(0);
+      if ( page !== 0 ) {
+        setPage(0);
+      }
     }
   }, [filteredResources]);
 
@@ -638,6 +640,7 @@ function StemBegroot({
         activeTagTab={activeTagTab}
         currentPage={page}
         pageSize={itemsPerPage}
+        filterBehavior={filterBehavior}
         displayModBreak={displayModBreak}
         modBreakTitle={props?.resources?.modbreakTitle || ''}
       />
