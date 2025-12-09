@@ -26,6 +26,16 @@ module.exports = {
       default: 0,
       after: 'sentiment',
     });
+    
+    // Fetch all comments and calculate their scores based on existing votes
+    const comments = await Comment.findAll();
+    for (const comment of comments) {
+      // Workaround for validation in Comment model
+      comment.auth.user = {
+        role: 'admin'
+      }
+      await comment.calculateAndSaveScore();
+    }
   },
 
   async down ({ context: queryInterface }) {
