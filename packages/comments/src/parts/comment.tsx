@@ -29,6 +29,7 @@ function Comment({
   index,
   adminLabel,
   disableSubmit = false,
+  extraReplyButton = false,
   setRefreshComments,
   ...props
 }: CommentProps) {
@@ -123,6 +124,7 @@ function Comment({
     setNoVotes(newData.no || 0);
   }
 
+
   return (
     <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${comment?.id}`} onClick={findLocation(comment?.id || 0)}>
       <section className="comment-item-header">
@@ -141,28 +143,28 @@ function Comment({
 
             {isOpen && (
               <div className="DropdownMenuContent">
-                  <ButtonGroup direction='column'>
-                    <Button
-                      appearance='secondary-action-button'
-                      className="DropdownMenuItem"
-                      onClick={() => {
-                        setIsOpen(false);
-                        toggleEditForm();
-                      }}
-                    >
-                      Bewerken
-                    </Button>
-                    <Button
-                      appearance='secondary-action-button'
-                      className="DropdownMenuItem"
-                      onClick={() => {
-                        if (args.comment && confirm('Weet u het zeker?'))
-                          args.comment.delete(args.comment.id);
-                      }}
-                    >
-                      Verwijderen
-                    </Button>
-                  </ButtonGroup>
+                <ButtonGroup direction='column'>
+                  <Button
+                    appearance='secondary-action-button'
+                    className="DropdownMenuItem"
+                    onClick={() => {
+                      setIsOpen(false);
+                      toggleEditForm();
+                    }}
+                  >
+                    Bewerken
+                  </Button>
+                  <Button
+                    appearance='secondary-action-button'
+                    className="DropdownMenuItem"
+                    onClick={() => {
+                      if (args.comment && confirm('Weet u het zeker?'))
+                        args.comment.delete(args.comment.id);
+                    }}
+                  >
+                    Verwijderen
+                  </Button>
+                </ButtonGroup>
               </div>
             )}
           </div>
@@ -298,6 +300,19 @@ function Comment({
             </div>
           );
         })}
+
+      {extraReplyButton && (
+
+        (!args.comment.parentId && args.comment.replies && args.comment.replies.length > 0 && canReply() && !isReplyFormActive) && (
+          <Button
+            appearance='secondary-action-button'
+            className="reply-container-button"
+            onClick={() => toggleReplyForm()}>
+            Reageren
+          </Button>
+        )
+        
+      )}
 
       {isReplyFormActive ? (
         <div className="reaction-container">

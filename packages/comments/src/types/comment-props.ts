@@ -11,4 +11,5 @@ export type CommentProps = {
   setRefreshComments: () => void;
   adminLabel?: string;
   disableSubmit?: boolean;
+  extraReplyButton?: boolean;
 };

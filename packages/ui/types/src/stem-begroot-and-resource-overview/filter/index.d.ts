@@ -38,7 +38,9 @@ type Props = {
         multiple: boolean;
         projectId?: any;
     }>;
-    tagsLimitation?: Array<number>;
+    tagsLimitation?: Array<number> | {
+        [key: string]: number[];
+    };
     searchPlaceholder: string;
     resetText: string;
     applyText: string;
