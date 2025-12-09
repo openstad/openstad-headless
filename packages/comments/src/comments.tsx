@@ -56,6 +56,8 @@ export type CommentsWidgetProps = BaseProps &
     onlyIncludeOrExcludeTagIds?: string;
     overrideSort?: string;
     searchTerm?: string;
+    autoApply?: boolean;
+    displayCollapsibleFilter?: boolean;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -82,6 +84,9 @@ function CommentsInner({
   onlyIncludeOrExcludeTagIds = '',
   overrideSort = '',
   searchTerm = '',
+  autoApply = false,
+  displayCollapsibleFilter = false,
+
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
@@ -396,6 +401,8 @@ function CommentsInner({
               displayTagFilters={false}
               searchPlaceholder={''}
               resetText={'Reset'}
+              displayCollapsibleFilter={displayCollapsibleFilter}
+              autoApply={autoApply}
             />
 
             <Spacer size={1}/>
