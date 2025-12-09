@@ -523,7 +523,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     
     // Calculate & save the score to the resource
     comment.setDataValue('score', wilsonScore(yesVotes, noVotes));
-    await comment.save();
+    await comment.save({ validate: false });
   }
 
 	return Comment;
