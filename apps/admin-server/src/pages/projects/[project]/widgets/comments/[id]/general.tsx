@@ -6,6 +6,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from '@/components/ui/form';
 import {
   Select,
@@ -25,9 +26,9 @@ import useResources from '@/hooks/use-resources';
 import React, { ReactNode } from 'react';
 import { ArgumentWidgetTabProps } from '.';
 import * as Switch from "@radix-ui/react-switch";
-import {Input} from "@/components/ui/input";
-import {useFieldDebounce} from "@/hooks/useFieldDebounce";
-import {YesNoSelect} from "@/lib/form-widget-helpers";
+import { Input } from "@/components/ui/input";
+import { useFieldDebounce } from "@/hooks/useFieldDebounce";
+import { YesNoSelect } from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
@@ -35,7 +36,9 @@ const formSchema = z.object({
   useSentiments: z.string().optional(),
   itemsPerPage: z.coerce.number(),
   displayPagination: z.boolean().optional(),
-  displaySearchBar: z.boolean().optional()
+  displaySearchBar: z.boolean().optional(),
+  displayCollapsibleFilter: z.boolean().optional(),
+  autoApply: z.boolean().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -67,10 +70,12 @@ export default function ArgumentsGeneral({
     defaultValues: {
       resourceId: props.resourceId,
       sentiment: props.sentiment || 'for',
-      useSentiments: JSON.stringify(props.useSentiments || ["for","against"]),
+      useSentiments: JSON.stringify(props.useSentiments || ["for", "against"]),
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
       displaySearchBar: props?.displaySearchBar || false,
+      displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
+      autoApply: props?.autoApply || false,
     },
   });
 
@@ -78,7 +83,7 @@ export default function ArgumentsGeneral({
     let useSentiments;
     try {
       useSentiments = JSON.parse(values.useSentiments || '');
-    } catch(err) {}
+    } catch (err) { }
     props.updateConfig({ ...props, ...values, useSentiments });
   }
 
@@ -191,7 +196,7 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
-          { !!form.watch('displayPagination') && (
+          {!!form.watch('displayPagination') && (
             <FormField
               control={form.control}
               name="itemsPerPage"
@@ -200,12 +205,12 @@ export default function ArgumentsGeneral({
                   <FormLabel>Hoeveelheid items per pagina</FormLabel>
                   <FormControl>
                     <Input type="number" {...field}
-                           placeholder="9999"
-                           {...field}
-                           onChange={(e) => {
-                             onFieldChange(field.name, e.target.value);
-                             field.onChange(e);
-                           }} />
+                      placeholder="9999"
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -221,6 +226,37 @@ export default function ArgumentsGeneral({
                 <FormLabel>
                   Zoekbalk tonen
                 </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Heading size="xl" className="col-span-full mt-6">Filter</Heading>
+          <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
+          <FormField
+            control={form.control}
+            name="displayCollapsibleFilter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Filter inklapbaar maken
+                </FormLabel>
+                <FormDescription>
+                  Als je dit aanvinkt, worden de filters getoond in een inklapbaar menu.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="autoApply"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Automatisch toepassen van de filters wanneer een filter wijzigt</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
