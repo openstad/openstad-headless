@@ -4,11 +4,10 @@ const config = require('config');
 const { Resource, Comment } = require('../db');
 const UseLock = require('../lib/use-lock');
 
-// Purpose
-// -------
-// Anonymize users in projects that have ended, if the project settings allow it
-//
-// Runs every day
+// Recalculate the scores for all Resources / Comments based on existing votes
+// There are hooks in place to do this on vote creation/deletion, but if those hooks
+// fail for some reason (or are skipped), the scores can get out of sync. This cron job ensures
+// that scores are recalculated regularly to maintain data integrity.
 module.exports = {
     cronTime: '0 30 2 * * *',
     runOnInit: false,
