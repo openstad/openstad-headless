@@ -56,6 +56,10 @@ const requiredUserFields = [
     id: 'postcode',
     label: 'Postcode',
   },
+  {
+    id: 'accessCode',
+    label: 'Toegangscode',
+  },
 ];
 
 const formSchema = z.object({

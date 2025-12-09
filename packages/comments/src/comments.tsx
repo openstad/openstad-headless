@@ -31,6 +31,7 @@ export type CommentsWidgetProps = BaseProps &
     hideReplyAsAdmin?: boolean; // todo: wat is dit?
     canComment?: boolean,
     canLike?: boolean,
+    canDislike?: boolean,
     canReply?: boolean,
     showForm?: boolean,
     closedText?: string;
@@ -48,6 +49,7 @@ export type CommentsWidgetProps = BaseProps &
     overridePage?: number;
     displayPagination?: boolean;
     displaySearchBar?: boolean;
+    extraReplyButton?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
     extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     defaultTags?: string;
@@ -55,6 +57,8 @@ export type CommentsWidgetProps = BaseProps &
     onlyIncludeOrExcludeTagIds?: string;
     overrideSort?: string;
     searchTerm?: string;
+    autoApply?: boolean;
+    displayCollapsibleFilter?: boolean;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -73,6 +77,7 @@ function CommentsInner({
   onGoToLastPage,
   displayPagination = false,
   displaySearchBar = false,
+  extraReplyButton = false,
   overridePage = 0,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   defaultTags,
@@ -80,6 +85,9 @@ function CommentsInner({
   onlyIncludeOrExcludeTagIds = '',
   overrideSort = '',
   searchTerm = '',
+  autoApply = false,
+  displayCollapsibleFilter = false,
+
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
@@ -176,6 +184,7 @@ function CommentsInner({
     formIntro,
     canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
     canLike: typeof props.comments?.canLike != 'undefined' ? props.comments.canLike : true,
+    canDislike: typeof props.comments?.canDislike != 'undefined' ? props.comments.canDislike : true,
     canReply: typeof props.comments?.canReply != 'undefined' ? props.comments.canReply : true,
     showForm: typeof props.showForm != 'undefined' ? props.showForm : true,
     closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
@@ -383,7 +392,7 @@ function CommentsInner({
               displaySorting={ (props.sorting || []).length > 0 && datastore }
               defaultSorting={props.defaultSorting || 'createdAt_asc'}
               onUpdateFilter={(f) => {
-                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'].includes(f.sort)) {
+                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc', 'random', 'score'].includes(f.sort)) {
                   setSort(f.sort);
                 }
                 setSearch(f?.search?.text || '');
@@ -394,6 +403,8 @@ function CommentsInner({
               displayTagFilters={false}
               searchPlaceholder={''}
               resetText={'Reset'}
+              displayCollapsibleFilter={displayCollapsibleFilter}
+              autoApply={autoApply}
             />
 
             <Spacer size={1}/>
@@ -432,6 +443,12 @@ function CommentsInner({
             if (sortMethod === 'votes_asc') {
               return a.yes - b.yes;
             }
+            if (sort === 'random') {
+              return Math.random() - 0.5;
+            }
+            if (sort === 'score') {
+              return (b.score || 0) - (a.score || 0);
+            }
 
             return 0;
           })
@@ -439,7 +456,7 @@ function CommentsInner({
           ?.map((comment: any, index: number) => {
 
           let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
-          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
+          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} extraReplyButton={extraReplyButton} />;
         })}
 
         {displayPagination && (

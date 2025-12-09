@@ -1,5 +1,29 @@
 var config = require('config');
 
+const updateCommentScore = async (vote, options) => {
+  try {
+    const run = async () => {
+      const comment = await vote.getComment();
+      if (comment && typeof comment.calculateAndSaveScore === 'function') {
+        await comment.calculateAndSaveScore();
+      }
+    };
+
+    // If create ran inside a transaction, wait for commit so other queries see the new row
+    if (options && options.transaction && options.transaction.afterCommit) {
+      options.transaction.afterCommit(() => {
+        run().catch((err) =>
+          console.error('Failed to recalculate comment score after transaction commit:', err)
+        );
+      });
+    } else {
+      await run();
+    }
+  } catch (err) {
+    console.error('Update comment score failed in hook for CommentVote:', err);
+  }
+}
+
 module.exports = function( db, sequelize, DataTypes ) {
   var CommentVote = sequelize.define('comment_vote', {
 
@@ -14,6 +38,12 @@ module.exports = function( db, sequelize, DataTypes ) {
       defaultValue: 0,
     },
 
+    opinion: {
+      type         : DataTypes.STRING(64),
+      allowNull    : false,
+      defaultValue : "yes"
+    },
+    
     ip: {
       type         : DataTypes.STRING(64),
       allowNull    : true,
@@ -34,7 +64,24 @@ module.exports = function( db, sequelize, DataTypes ) {
       fields : ['commentId', 'userId'],
       unique : true
     }],
+    hooks: {
+      afterCreate: async (vote, options) => {
+        await updateCommentScore(vote, options);
+      },
 
+      afterUpdate: async function (vote, options) {
+        await updateCommentScore(vote, options);
+      },
+      
+      afterDestroy: async function (vote, options) {
+        await updateCommentScore(vote, options);
+      },
+      
+      afterUpsert: async function (vote, options) {
+        await updateCommentScore(vote, options);
+      }
+      
+    },
   });
 
   CommentVote.associate = function( models ) {

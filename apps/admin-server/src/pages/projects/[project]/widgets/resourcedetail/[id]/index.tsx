@@ -34,6 +34,7 @@ import WidgetResourcesMapButtons from "@/pages/projects/[project]/widgets/resour
 import WidgetResourcesMapPolygons from "@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons";
 import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import ArgumentsSorting from '@/pages/projects/[project]/widgets/comments/[id]/sorting';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -190,6 +191,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     <TabsTrigger value="form">Formulier</TabsTrigger>
                     <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
                     <TabsTrigger value="include">Inclusief / exclusief</TabsTrigger>
+                    <TabsTrigger value="sorting">Sorteren</TabsTrigger>
                   </TabsList>
                   <TabsContent value="general" className="p-0">
                     <ArgumentsGeneral
@@ -301,6 +303,20 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       projectId={ projectId as string }
                     />
                   </TabsContent>
+                  <TabsContent value="sorting" className="p-0">
+                    <ArgumentsSorting
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ArgumentWidgetTabProps
+                      >({
+                        subWidgetKey: 'commentsWidget',
+                        previewConfig: previewConfig,
+                        updateConfig,
+                        updatePreview,
+                      })}
+                      projectId={ projectId as string }
+                    />
+                </TabsContent>
 
                 </Tabs>
               )}

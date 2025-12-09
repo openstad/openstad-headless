@@ -83,6 +83,15 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
 
+      score: {
+        type: DataTypes.DECIMAL(12,11),
+        auth: {
+          updateableBy: 'editor',
+        },
+        allowNull: false,
+        defaultValue: null,
+      },
+      
       sort: {
         type: DataTypes.INTEGER,
         auth: {
@@ -291,6 +300,16 @@ module.exports = function (db, sequelize, DataTypes) {
             ? Number((Math.min(1, yes / minimumYesVotes) * 100).toFixed(2))
             : undefined;
         },
+      },
+      
+      // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero
+      netPositiveVotes: {
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          const yes = this.getDataValue('yes') || 0;
+          const no = this.getDataValue('no') || 0;
+          return Math.max(yes - no, 0);
+        }
       },
 
       createDateHumanized: {
@@ -1004,6 +1023,39 @@ module.exports = function (db, sequelize, DataTypes) {
       return data;
     },
   };
+  
+  const wilsonScore = require('../lib/wilson-score');
+  
+  Resource.calculateAndSaveScore = Resource.prototype.calculateAndSaveScore = async function() {
+    const resource = this;
+    const votes = await db.Vote.findAll({
+      where: {
+        resourceId: resource.id,
+        deletedAt: null,
+        [Op.or]: [
+          { checked: null },
+          { checked: true }
+        ]
+      },
+      attributes: ['opinion', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      group: ['opinion']
+    });
+    
+    let yesVotes = 0;
+    let noVotes = 0;
+
+    votes.forEach(vote => {
+      if (vote.opinion === 'yes') {
+        yesVotes = parseInt(vote.get('count'), 10);
+      } else if (vote.opinion === 'no') {
+        noVotes = parseInt(vote.get('count'), 10);
+      }
+    });
+    
+    // Calculate & save the score to the resource
+    resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
+    await resource.save();
+  }
 
   return Resource;
 

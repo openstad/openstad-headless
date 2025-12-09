@@ -64,6 +64,7 @@ function API(props = {}) {
     update: comments.update.bind(self),
     delete: comments.delete.bind(self),
     submitLike: comments.submitLike.bind(self),
+    submitDislike: comments.submitDislike.bind(self),
   };
 
   self.commentsByProject = {

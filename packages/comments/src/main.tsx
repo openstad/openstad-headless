@@ -21,6 +21,7 @@ const config: CommentsWidgetProps = {
   comments: {
     canComment: (import.meta.env.VITE_COMMENTS_CAN_COMMENT != 'false'),
     canLike: (import.meta.env.VITE_COMMENTS_CAN_LIKE != 'false'),
+    canDislike: (import.meta.env.VITE_COMMENTS_CAN_DISLIKE != 'false'),
     canReply: (import.meta.env.VITE_COMMENTS_CAN_REPLY != 'false'),
     closedText: import.meta.env.VITE_COMMENTS_CLOSED_TEXT,
     requiredUserRole: import.meta.env.VITE_COMMENTS_REQUIRED_USER_ROLE || 'member',

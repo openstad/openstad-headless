@@ -130,3 +130,9 @@
  right: 0;
  min-width: 170px;
 }
+
+.comment-item .reply-container-button{
+  width: 100%;
+  max-width: none;
+  margin-top: 1rem;
+}
