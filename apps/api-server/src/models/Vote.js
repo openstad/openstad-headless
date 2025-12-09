@@ -13,13 +13,11 @@ const updateResourceScore = async (vote, options) => {
     // If create ran inside a transaction, wait for commit so other queries see the new row
     if (options && options.transaction && options.transaction.afterCommit) {
       options.transaction.afterCommit(() => {
-        // fire-and-forget or await if you want to chain
         run().catch((err) =>
-          console.error('Failed to recalc score after transaction commit:', err)
+          console.error('Failed to recalc resource score after transaction commit:', err)
         );
       });
     } else {
-      // no transaction: run immediately
       await run();
     }
   } catch (err) {

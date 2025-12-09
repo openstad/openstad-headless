@@ -34,6 +34,7 @@ export type GridderResourceDetailProps =
   currentUser?: any;
   displayDocuments?: boolean;
   displayLikeButton?: boolean;
+  displayDislike?: boolean;
   clickableImage?: boolean;
   documentsTitle?: string;
   documentsDesc?: string;
@@ -51,6 +52,7 @@ export const GridderResourceDetail = ({
   onRemoveClick,
   displayDocuments = false,
   displayLikeButton = false,
+  displayDislike = false,
   documentsTitle = '',
   documentsDesc = '',
   clickableImage = false,
@@ -73,7 +75,7 @@ export const GridderResourceDetail = ({
     name?: string;
     url?: string;
   }
-  
+
   let defaultImage = '';
 
   interface Tag {
@@ -183,7 +185,7 @@ export const GridderResourceDetail = ({
                 title={props.likeWidget?.title}
                 yesLabel={props.likeWidget?.yesLabel}
                 noLabel={props.likeWidget?.noLabel}
-                displayDislike={props.likeWidget?.displayDislike}
+                displayDislike={displayDislike}
                 hideCounters={props.likeWidget?.hideCounters}
                 variant={props.likeWidget?.variant}
                 showProgressBar={props.likeWidget?.showProgressBar}

@@ -142,6 +142,10 @@ module.exports = {
         type: 'boolean',
         default: true,
       },
+      canDislike: {
+        type: 'boolean',
+        default: false,
+      },
       descriptionMinLength: {
         type: 'number',
         default: 30,

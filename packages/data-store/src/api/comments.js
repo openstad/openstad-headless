@@ -43,11 +43,18 @@ export default {
   },
 
   submitLike: async function ({ projectId, resourceId }, data) {
-    let url = `/api/project/${projectId}/resource/${resourceId}/comment/${data.id}/vote`;
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment/${data.id}/vote/yes`;
     let method = 'post';
     let body = JSON.stringify({});
 
-    let newData = await this.fetch(url, { method });
-    return newData;
+    return await this.fetch(url, { method });
+  },
+  
+  submitDislike: async function ({ projectId, resourceId }, data) {
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment/${data.id}/vote/no`;
+    let method = 'post';
+    let body = JSON.stringify({});
+
+    return await this.fetch(url, { method });
   },
 };

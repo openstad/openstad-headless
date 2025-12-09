@@ -46,6 +46,10 @@ function Comment({
   const [isReplyFormActive, setIsReplyFormActive] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [yesVotes, setYesVotes] = useState<number>(args.comment.yes || 0);
+  const [noVotes, setNoVotes] = useState<number>(args.comment.no || 0);
+  const [hasUserLiked, setHasUserLiked] = useState<boolean>(args.comment.hasUserLiked || false);
+  const [hasUserDisliked, setHasUserDisliked] = useState<boolean>(args.comment.hasUserDisliked || false);
 
   function toggleReplyForm() {
     // todo: scrollto
@@ -104,33 +108,19 @@ function Comment({
   }
 
   async function handleLike() {
-    let attempts = 0;
-    const maxAttempts = 10;
-    const interval = 100;
+    const newData = await args.comment.submitLike();
+    setHasUserLiked(newData.hasUserLiked || false);
+    setHasUserDisliked(newData.hasUserDisliked || false);
+    setYesVotes(newData.yes || 0);
+    setNoVotes(newData.no || 0);
+  }
 
-    // @ts-ignore
-    await args.comment.submitLike().then((newData) => {
-      const newVotes = newData.yes;
-      const oldVotes = args.comment.yes;
-
-      // Refreshing the likes so it gets updated eventually
-      const tryToRefreshComments = () => {
-        if (!widgetContext || !widgetContext.setRefreshComments) {
-          clearInterval(intervalId);
-        } else if (oldVotes !== newVotes && attempts < maxAttempts) {
-          attempts++;
-          if (widgetContext && widgetContext.setRefreshComments) {
-            widgetContext.setRefreshComments((prev: boolean) => !prev);
-          }
-        } else if (attempts < maxAttempts) {
-          attempts++;
-        } else {
-          clearInterval(intervalId);
-        }
-      }
-
-      const intervalId = setInterval(tryToRefreshComments, interval);
-    });
+  async function handleDislike() {
+    const newData = await args.comment.submitDislike();
+    setHasUserLiked(newData.hasUserLiked || false);
+    setHasUserDisliked(newData.hasUserDisliked || false);
+    setYesVotes(newData.yes || 0);
+    setNoVotes(newData.no || 0);
   }
 
   return (
@@ -215,15 +205,31 @@ function Comment({
               canLike() ? (
                 <Button
                   appearance='secondary-action-button'
-                  className={args.comment.hasUserVoted ? `active` : ''}
+                  className={hasUserLiked ? `active` : ''}
                   onClick={handleLike}>
-                  <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
-                  Mee eens (<span>{args.comment.yes || 0}</span>)
+                  <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                  Mee eens (<span>{yesVotes}</span>)
                 </Button>
               ) : (
                 <Button disabled>
                   <i className="ri-thumb-up-line"></i>
-                  Mee eens (<span>{args.comment.yes || 0}</span>)
+                  Mee eens (<span>{yesVotes}</span>)
+                </Button>
+              )
+            )}
+            {widgetContext.canDislike && (
+                canLike() ? (
+                <Button
+                  appearance='secondary-action-button'
+                  className={hasUserDisliked ? `active` : ''}
+                  onClick={handleDislike}>
+                  <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
+                  Mee oneens (<span>{noVotes}</span>)
+                </Button>
+              ) : (
+                <Button disabled>
+                  <i className="ri-thumb-down-line"></i>
+                  Mee oneens (<span>{noVotes}</span>)
                 </Button>
               )
             )}
@@ -249,15 +255,31 @@ function Comment({
                 canLike() ? (
                   <Button
                     appearance='secondary-action-button'
-                    className={args.comment.hasUserVoted ? `active` : ''}
+                    className={hasUserLiked ? `active` : ''}
                     onClick={handleLike}>
-                    <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
-                    Mee eens (<span>{args.comment.yes || 0}</span>)
+                    <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                    Mee eens (<span>{yesVotes}</span>)
                   </Button>
                 ) : (
                   <Button disabled>
                     <i className="ri-thumb-up-line"></i>
-                    Mee eens (<span>{args.comment.yes || 0}</span>)
+                    Mee eens (<span>{yesVotes}</span>)
+                  </Button>
+                )
+              )}
+              {widgetContext.canDislike && (
+                  canLike() ? (
+                  <Button
+                    appearance='secondary-action-button'
+                    className={hasUserDisliked ? `active` : ''}
+                    onClick={handleDislike}>
+                    <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
+                    Mee oneens (<span>{noVotes}</span>)
+                  </Button>
+                ) : (
+                  <Button disabled>
+                    <i className="ri-thumb-down-line"></i>
+                    Mee oneens (<span>{noVotes}</span>)
                   </Button>
                 )
               )}

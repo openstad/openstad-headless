@@ -28,6 +28,7 @@ const formSchema = z.object({
   closedText: z.string().optional(),
   canReply: z.boolean().optional(),
   canLike: z.boolean().optional(),
+  canDislike: z.boolean().optional(),
   descriptionMinLength: z.coerce.number().gt(0).optional(),
   descriptionMaxLength: z.coerce.number().gt(0).optional(),
   adminLabel: z.string().optional(),
@@ -51,6 +52,7 @@ export default function ProjectSettingsComments() {
       closedText: data?.config?.comments?.closedText,
       canReply: data?.config?.comments?.canReply,
       canLike: data?.config?.comments?.canLike,
+      canDislike: data?.config?.comments?.canDislike || false,
       descriptionMinLength: data?.config?.comments?.descriptionMinLength,
       descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
       adminLabel: data?.config?.comments?.adminLabel,
@@ -80,6 +82,7 @@ export default function ProjectSettingsComments() {
           closedText: values.closedText,
           canReply: values.canReply,
           canLike: values.canLike,
+          canDislike: values.canDislike,
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
           adminLabel: values.adminLabel,
@@ -178,7 +181,28 @@ export default function ProjectSettingsComments() {
                     render={({ field }) => (
                       <FormItem className="col-span-1">
                         <FormLabel>
-                          Is het mogelijk om reacties te liken?
+                          Is het mogelijk om reacties te liken? (positieve stemmen)
+                        </FormLabel>
+                        <Switch.Root
+                          className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                          onCheckedChange={(e: boolean) => {
+                            field.onChange(e);
+                          }}
+                          checked={field.value}>
+                          <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                        </Switch.Root>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="canDislike"
+                    render={({ field }) => (
+                      <FormItem className="col-span-1">
+                        <FormLabel>
+                          Is het mogelijk om reacties te disliken? (negatieve stemmen)
                         </FormLabel>
                         <Switch.Root
                           className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
