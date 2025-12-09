@@ -38,7 +38,7 @@ type Props = {
   itemsPerPage?: number;
   displayTagFilters: boolean;
   tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
-  tagsLimitation?: Array<number>;
+  tagsLimitation?: Array<number> | { [key: string]: number[] };
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
@@ -297,6 +297,12 @@ export function Filters({
         {(props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
           <>
             {tagGroups.map((tagGroup, index) => {
+              const limitedTags = Array.isArray(tagsLimitation)
+                ? tagsLimitation
+                : (tagsLimitation && tagsLimitation[tagGroup.type])
+                  ? tagsLimitation[tagGroup.type]
+                  : [];
+
               if (tagGroup.multiple) {
                 return (
                   <MultiSelectTagFilter
@@ -305,7 +311,7 @@ export function Filters({
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
-                    onlyIncludeIds={[]}
+                    onlyIncludeIds={limitedTags}
                     onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
                       updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
                     }}
@@ -323,7 +329,7 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     title={`Selecteer een item`}
-                    onlyIncludeIds={[]}
+                    onlyIncludeIds={limitedTags}
                     onUpdateFilter={(updatedTag, updatedLabel) =>
                       updateTagListSingle(tagGroup.type, updatedTag, updatedLabel)
                     }

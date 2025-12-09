@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -39,6 +40,7 @@ const formSchema = z.object({
   displaySearchBar: z.boolean().optional(),
   displayCollapsibleFilter: z.boolean().optional(),
   autoApply: z.boolean().optional(),
+  extraReplyButton: z.boolean().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -76,6 +78,7 @@ export default function ArgumentsGeneral({
       displaySearchBar: props?.displaySearchBar || false,
       displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
       autoApply: props?.autoApply || false,
+      extraReplyButton: props?.extraReplyButton || false,
     },
   });
 
@@ -250,6 +253,23 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
+               
+          <FormField
+            control={form.control}
+            name="extraReplyButton"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Extra reageer knop
+                </FormLabel>
+                <FormDescription>
+                  Hiermee wordt er onder de lijst met reacties een extra knop &quot;Reageer&quot; getoond, naast de standaard knop boven de lijst.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -262,7 +282,7 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
-
+        
           <Button type="submit">Opslaan</Button>
         </form>
       </Form>
