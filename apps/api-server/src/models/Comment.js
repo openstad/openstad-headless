@@ -107,7 +107,7 @@ module.exports = function( db, sequelize, DataTypes ) {
         updateableBy: 'editor',
       },
       allowNull: false,
-      defaultValue: 0,
+      defaultValue: '0.00000000000',
     },
     
     // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero

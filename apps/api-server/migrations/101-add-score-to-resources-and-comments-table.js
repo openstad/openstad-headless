@@ -6,7 +6,7 @@ module.exports = {
     await queryInterface.addColumn( 'resources', 'score', {
       type: Sequelize.DECIMAL(12,11),
       allowNull: false,
-      default: 0,
+      defaultValue: '0.00000000000',
       after: 'sort',
     });
     
@@ -23,7 +23,7 @@ module.exports = {
     await queryInterface.addColumn( 'comments', 'score', {
       type: Sequelize.DECIMAL(12,11),
       allowNull: false,
-      default: 0,
+      defaultValue: '0.00000000000',
       after: 'sentiment',
     });
     

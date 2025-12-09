@@ -89,7 +89,7 @@ module.exports = function (db, sequelize, DataTypes) {
           updateableBy: 'editor',
         },
         allowNull: false,
-        defaultValue: null,
+        defaultValue: '0.00000000000',
       },
       
       sort: {
