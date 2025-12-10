@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import hasRole from '../../lib/has-role';
-import type {ResourceFormWidgetProps} from "./props.js";
-import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
-import {InitializeFormFields} from "./parts/init-fields.js";
+import type { ResourceFormWidgetProps } from "./props.js";
+import { Banner, Button, Spacer } from "@openstad-headless/ui/src/index.js";
+import { InitializeFormFields } from "./parts/init-fields.js";
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
@@ -12,29 +12,29 @@ import NotificationProvider from "@openstad-headless/lib/NotificationProvider/no
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 
 const getExistingValue = (fieldKey, resource) => {
-    if ( !!resource ) {
+    if (!!resource) {
         const field = resource[fieldKey] || null;
         const returnField = (!field && resource.extraData) ? resource.extraData[fieldKey] || null : field
 
-        if ( !!returnField ) {
+        if (!!returnField) {
             return returnField;
         }
 
-        if ( fieldKey.startsWith('tags[') && resource.tags ) {
+        if (fieldKey.startsWith('tags[') && resource.tags) {
             const tagType = fieldKey.substring(5, fieldKey.length - 1);
 
             return resource.tags
-              ?.filter((tag) => tag.type === tagType)
-               .map((tag) => tag.id);
+                ?.filter((tag) => tag.type === tagType)
+                .map((tag) => tag.id);
         }
     }
     return undefined;
 }
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
-    const { submitButton, saveConceptButton, defaultAddedTags} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
-    const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
-    const { confirmationUser, confirmationAdmin} = props.confirmation  || {};
+    const { submitButton, saveConceptButton, defaultAddedTags } = props.submit || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
+    const { loginText, loginButtonText } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+    const { confirmationUser, confirmationAdmin } = props.confirmation || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
 
     let resourceId: string | undefined = String(getResourceId({
@@ -63,7 +63,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     });
 
     const initialFormFields = InitializeFormFields(props.items, props);
-    const [formFields, setFormFields] = useState([]);
+    type FormField = { fieldKey?: string; [key: string]: any };
+    const [formFields, setFormFields] = useState<FormField[]>([]);
     const [fillDefaults, setFillDefaults] = useState(false);
 
     useEffect(() => {
@@ -73,16 +74,16 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             const updatedFormFields = initialFormFields.map((field) => {
                 const existingValue = getExistingValue(field.fieldKey, existingResource);
 
-                return existingValue ? {...field, defaultValue: existingValue} : field;
+                return existingValue ? { ...field, defaultValue: existingValue } : field;
             });
 
             setFormFields(updatedFormFields);
-        } else if ( JSON.stringify(formFields) !== JSON.stringify(initialFormFields) ) {
+        } else if (JSON.stringify(formFields) !== JSON.stringify(initialFormFields)) {
             setFormFields(initialFormFields);
         }
 
         setFillDefaults(true);
-    }, [ JSON.stringify(existingResource), JSON.stringify(initialFormFields), isLoading ]);
+    }, [JSON.stringify(existingResource), JSON.stringify(initialFormFields), isLoading]);
 
     const notifySuccess = () => NotificationService.addNotification("Inzending indienen gelukt", "success");
     const notifySuccessEdit = () => NotificationService.addNotification("Inzending bewerken gelukt", "success");
@@ -96,7 +97,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             if (formData.hasOwnProperty(key)) {
                 if (key.startsWith('tags[')) {
                     try {
-                        if ( !formData[key] ) {
+                        if (!formData[key]) {
                             continue;
                         }
 
@@ -104,11 +105,11 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
                         if (typeof tagsArray === 'object') {
                             tagsArray?.map((value) => {
-                                const pushValue = typeof(value) === 'string' ? Number(value) : value;
+                                const pushValue = typeof (value) === 'string' ? Number(value) : value;
                                 tags.push(pushValue);
                             });
                         } else if (typeof tagsArray === 'string' || typeof tagsArray === 'number') {
-                            const pushValue = typeof(tagsArray) === 'string' ? Number(tagsArray) : tagsArray;
+                            const pushValue = typeof (tagsArray) === 'string' ? Number(tagsArray) : tagsArray;
                             tags.push(pushValue);
                         }
                     } catch (error) {
@@ -140,28 +141,29 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const configureFormData = (formData, publish = false) => {
         const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags', 'documents'];
         const extraData = {};
+        let configuredFormData = {...formData };
 
-        formData = addTagsToFormData(formData);
+        configuredFormData = addTagsToFormData(configuredFormData);
 
-        for (const key in formData) {
-            if (formData.hasOwnProperty(key)) {
+        for (const key in configuredFormData) {
+            if (configuredFormData.hasOwnProperty(key)) {
                 if (!dbFixedColumns.includes(key)) {
-                    extraData[key] = formData[key];
-                    delete formData[key];
+                    extraData[key] = configuredFormData[key];
+                    delete configuredFormData[key];
                 }
             }
         }
 
-        formData.extraData = extraData;
-        formData.publishDate = publish ? new Date() : '';
-        formData.confirmationUser = confirmationUser;
-        formData.confirmationAdmin = confirmationAdmin;
+        configuredFormData.extraData = extraData;
+        configuredFormData.publishDate = publish ? new Date() : '';
+        configuredFormData.confirmationUser = confirmationUser;
+        configuredFormData.confirmationAdmin = confirmationAdmin;
 
-        return formData;
+        return configuredFormData;
     }
 
-    const redirectAfterSaveOrCreate = (resource: {id?: string}, reloadPageAsFallback = false) => {
-        if(props.redirectUrl && resource.id) {
+    const redirectAfterSaveOrCreate = (resource: { id?: string }, reloadPageAsFallback = false) => {
+        if (props.redirectUrl && resource.id) {
             let redirectUrl = props.redirectUrl.replace("[id]", resource.id);
             if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
                 redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
@@ -174,8 +176,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
     const editMode = canEdit && existingResource && existingResource.id && existingResource.update;
     const submitButtonText = editMode
-      ? "Opslaan"
-      : submitButton || "Versturen";
+        ? "Opslaan"
+        : submitButton || "Versturen";
 
     async function onSubmit(formData: any) {
         setDisableSubmit(true);
@@ -209,7 +211,22 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         }
     }
 
-    return ( isLoading || !fillDefaults ) ? null : (
+    useEffect(() => {
+        const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+        const url = new URL(window.location.href);
+
+        if (Array.isArray(formFields)) {
+            formFields.forEach(field => {
+                if (field && field.fieldKey && params.hasOwnProperty(field.fieldKey)) {
+                    url.searchParams.delete(field.fieldKey);
+                }
+            });
+        }
+       
+        window.history.replaceState(null, '', url.toString());
+    }, [formFields]);
+
+    return (isLoading || !fillDefaults) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
                 {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}

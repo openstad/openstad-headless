@@ -15,6 +15,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +33,7 @@ import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import { YesNoSelect } from "@/lib/form-widget-helpers";
 import { ProjectSettingProps } from "@openstad-headless/types";
+import { info } from 'console';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -44,6 +47,9 @@ const formSchema = z.object({
   nextPageText: z.string().optional(),
   prevPageText: z.string().optional(),
   variant: z.string().optional(),
+  key_b: z.string().optional(),
+  description_b: z.string().optional(),
+  image_b: z.string().optional(),
   options: z
     .array(
       z.object({
@@ -51,10 +57,17 @@ const formSchema = z.object({
         titles: z.array(z.object({
           text: z.string().optional(),
           key: z.string(),
+          infoField: z.string().optional(),
+          infofieldExplanation: z.boolean().optional(),
+          explanationRequired: z.boolean().optional(),
+          description: z.string().optional(),
           image: z.string().optional(),
           isOtherOption: z.boolean().optional(),
           defaultValue: z.boolean().optional(),
-          hideLabel: z.boolean().optional()
+          hideLabel: z.boolean().optional(),
+          key_b: z.string().optional(),
+          description_b: z.string().optional(),
+          image_b: z.string().optional(),
         })),
       })
     )
@@ -88,6 +101,14 @@ const formSchema = z.object({
   routingInitiallyHide: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
   routingSelectedAnswer: z.string().optional(),
+  infoBlockStyle: z.string().optional(),
+  infoBlockShareButton: z.boolean().optional(),
+  infoBlockExtraButton: z.string().optional(),
+  infoBlockExtraButtonTitle: z.string().optional(),
+  infoField: z.string().optional(),
+  infofieldExplanation: z.boolean().optional(),
+  numberingStyle: z.string().optional(),
+
 
   // Keeping these for backwards compatibility
   image1Upload: z.string().optional(),
@@ -170,6 +191,9 @@ export default function WidgetEnqueteItems(
           multiple: values.multiple || false,
           randomizeItems: values.randomizeItems || false,
           image: values.image || '',
+          image_b: values.image_b || '',
+          description_b: values.description_b || '',
+          key_b: values.key_b || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
           fieldRequired: values.fieldRequired || false,
@@ -183,7 +207,9 @@ export default function WidgetEnqueteItems(
           routingInitiallyHide: values.routingInitiallyHide || false,
           routingSelectedQuestion: values.routingSelectedQuestion || '',
           routingSelectedAnswer: values.routingSelectedAnswer || '',
-
+          infoField: values.infoField || '',
+          infofieldExplanation: values.infofieldExplanation || false,
+          numberingStyle: values.numberingStyle || 'none',
           // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
@@ -303,6 +329,10 @@ export default function WidgetEnqueteItems(
     image: '',
     imageAlt: '',
     imageDescription: '',
+    infoBlockStyle: 'default',
+    infoBlockShareButton: false,
+    infoBlockExtraButton: '',
+    infoBlockExtraButtonTitle: '',
     fieldRequired: false,
     maxChoices: '',
     maxChoicesMessage: '',
@@ -312,8 +342,10 @@ export default function WidgetEnqueteItems(
     matrix: matrixDefault,
     matrixMultiple: false,
     routingInitiallyHide: false,
+    numberingStyle: 'none',
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
+    infoField: '',
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -360,6 +392,10 @@ export default function WidgetEnqueteItems(
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
+        infoBlockStyle: selectedItem.infoBlockStyle || 'default',
+        infoBlockShareButton: selectedItem.infoBlockShareButton || false,
+        infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
+        infoBlockExtraButtonTitle: selectedItem.infoBlockExtraButtonTitle || '',
         fieldRequired: selectedItem.fieldRequired || false,
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
@@ -369,8 +405,12 @@ export default function WidgetEnqueteItems(
         matrix: selectedItem.matrix || matrixDefault,
         matrixMultiple: selectedItem.matrixMultiple || false,
         routingInitiallyHide: selectedItem.routingInitiallyHide || false,
+        numberingStyle: selectedItem.numberingStyle || 'none',
         routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
+        infoField: selectedItem.infoField || '',
+        infofieldExplanation: selectedItem.infofieldExplanation || false,
+
 
         // Keeping these for backwards compatibility
         image1: selectedItem.image1 || '',
@@ -507,6 +547,8 @@ export default function WidgetEnqueteItems(
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
+      case 'swipe':
+      case 'dilemma':
       case 'multiple':
       case 'images':
       case 'matrix':
@@ -521,6 +563,8 @@ export default function WidgetEnqueteItems(
     switch (form.watch('questionType')) {
       case 'multiplechoice':
       case 'multiple':
+      case 'swipe':
+      case 'dilemma':
       case 'images':
       case 'sort':
         return true;
@@ -579,9 +623,9 @@ export default function WidgetEnqueteItems(
                       .map((item, index) => (
                         <div
                           key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
-                            'bg-secondary'
-                            }`}>
+                          className={`flex cursor-pointer justify-between border border-secondary 
+                            ${(item.questionType === 'pagination' && item.trigger !== selectedItem?.trigger) ? 'bg-[#f8f8f8]' : ''}
+                            ${item.trigger == selectedItem?.trigger && 'bg-secondary'}`}>
                           <span className="flex gap-2 py-3 px-2">
                             <ArrowUp
                               className="cursor-pointer"
@@ -603,8 +647,9 @@ export default function WidgetEnqueteItems(
                               setOptions([]);
                               setMatrixOptions(matrixDefault);
                               setSettingOptions(false);
-                            }}>
-                            {`${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : 'Geen titel')}`}
+                            }}
+                            dangerouslySetInnerHTML={{ __html: `${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : (item?.questionType === 'swipe' ? 'Swipe' : 'Geen titel'))}` }}
+                          >
                           </span>
                           <span className="gap-2 py-3 px-2">
                             <X
@@ -764,7 +809,7 @@ export default function WidgetEnqueteItems(
                         (() => {
                           const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
                           const activeOption = currentOption !== -1 ? currentOption : options.length;
-                          return form.watch("questionType") !== "images" ? (
+                          return (form.watch("questionType") !== "images" && form.watch("questionType") !== "swipe" && form.watch("questionType") !== "dilemma") ? (
                             <>
                               <FormField
                                 control={form.control}
@@ -838,6 +883,7 @@ export default function WidgetEnqueteItems(
                             </>
                           ) : (
                             <>
+                              {form.watch("questionType") === "dilemma" && <b>Dilemma A</b>}
                               <ImageUploader
                                 form={form}
                                 project={project as string}
@@ -864,46 +910,215 @@ export default function WidgetEnqueteItems(
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>Titel</FormLabel>
-                                    <FormDescription>
-                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
-                                    </FormDescription>
+                                    {(form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'dilemma') && (
+                                      <FormDescription>
+                                        Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                        De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                      </FormDescription>
+                                    )}
                                     <Input {...field} />
                                     <FormMessage />
                                   </FormItem>
                                 )}
                               />
+                              {form.watch("questionType") === "dilemma" && (
+                                <>
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.description`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Beschrijving</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
 
-                              <FormField
-                                control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.hideLabel`}
-                                render={({ field }) => (
-                                  <>
+                                  <br />
+                                  <hr />
+                                  <br />
+
+                                  <b>Dilemma B</b>
+                                  <ImageUploader
+                                    form={form}
+                                    project={project as string}
+                                    fieldName="imageOptionUpload"
+                                    imageLabel="Afbeelding"
+                                    allowedTypes={["image/*"]}
+                                    onImageUploaded={(imageResult) => {
+                                      const image = imageResult ? imageResult.url : '';
+
+                                      form.setValue(`options.${activeOption}.titles.0.image_b`, image);
+                                      form.resetField('imageOptionUpload');
+                                    }}
+                                  />
+                                  {!!form.getValues(`options.${activeOption}.titles.0.image_b`) && (
+                                    <div style={{ position: 'relative' }}>
+                                      <img src={form.getValues(`options.${activeOption}.titles.0.image_b`)} />
+                                    </div>
+                                  )}
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.key_b`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Titel</FormLabel>
+                                        {(form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'dilemma') && (
+                                          <FormDescription>
+                                            Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                            De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                          </FormDescription>
+                                        )}
+                                        <Input {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.description_b`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Beschrijving</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <br />
+                                  <hr />
+                                  <br />
+
+
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.infoField`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Extra info veld</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.infofieldExplanation`}
+                                    render={({ field }) => (
+                                      <>
+                                        <FormItem
+                                          style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'flex-start',
+                                            flexDirection: 'row',
+                                            marginTop: '10px'
+                                          }}>
+                                          {YesNoSelect(field, props)}
+                                          <FormLabel
+                                            style={{ marginTop: 0, marginLeft: '6px' }}>Toelichting vragen</FormLabel>
+                                          <FormMessage />
+                                        </FormItem>
+                                        <FormDescription>
+                                          Als je deze optie selecteert, wordt er na deze vraag om een toelichting gevraagd.
+                                        </FormDescription>
+                                      </>
+                                    )}
+                                  />
+                                </>
+
+                              )}
+
+
+
+                              {(form.watch("questionType") !== "swipe" && form.watch("questionType") !== "dilemma") && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.hideLabel`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
+                              {form.watch("questionType") === "swipe" && (
+                                <FormField
+                                  control={form.control}
+                                  name={`options.${activeOption}.titles.0.infoField`}
+                                  render={({ field }) => (
                                     <FormItem
                                       style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
                                         marginTop: '10px'
                                       }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                      <FormLabel>Extra informatie</FormLabel>
+                                      <FormDescription>
+                                        Deze tekst wordt getoond in het informatiescherm dat verschijnt wanneer de gebruiker op de info-knop tikt.
+                                      </FormDescription>
+                                      <Textarea rows={6} {...field} />
                                       <FormMessage />
                                     </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
-                                    </FormDescription>
-                                  </>
-                                )}
-                              />
+                                  )}
+                                />
+                              )}
+
+                              {form.watch("questionType") === "swipe" && (
+                                <FormField
+                                  control={form.control}
+                                  name={`options.${activeOption}.titles.0.explanationRequired`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Toelichting vragen</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt er na deze vraag om een toelichting gevraagd.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
                             </>
                           );
                         })()
                       )}
-
                       <Button
                         className="w-full bg-secondary text-black hover:text-white mt-4"
                         type="button"
@@ -1011,7 +1226,7 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
-                    {form.watch('questionType') !== 'pagination' && (
+                    {(form.watch('questionType') !== 'pagination') && (
                       <>
                         <FormField
                           control={form.control}
@@ -1045,17 +1260,19 @@ export default function WidgetEnqueteItems(
                             )}
                           />
                         )}
-                        <FormField
-                          control={form.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Beschrijving</FormLabel>
-                              <Textarea rows={6} {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        {(form.watch('questionType') !== 'dilemma' && form.watch('questionType') !== 'swipe') && (
+                          <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Beschrijving</FormLabel>
+                                <Textarea rows={6} {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </>
                     )}
 
@@ -1108,6 +1325,8 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="matrix">Matrix vraag</SelectItem>
                               <SelectItem value="pagination">Voeg pagina toe</SelectItem>
                               <SelectItem value="sort">Sorteren</SelectItem>
+                              <SelectItem value="swipe">Swipe</SelectItem>
+                              <SelectItem value="dilemma">Dilemma</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1235,6 +1454,95 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                        {props.formStyle === 'youth' && (
+
+                          <FormField
+                            control={form.control}
+                            name="infoBlockStyle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Informatie blok stijl</FormLabel>
+                                <Select
+                                  value={field.value}
+                                  onValueChange={field.onChange}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kies type" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+
+                                    <SelectItem value="default">
+                                      Standaard uiterlijk
+                                    </SelectItem>
+                                    <SelectGroup>
+                                      <SelectLabel>Jongeren widgets</SelectLabel>
+                                      <SelectItem value="youth-intro">
+                                        - Introductie
+                                      </SelectItem>
+                                      <SelectItem value="youth-page">
+                                        - Tussenpagina
+                                      </SelectItem>
+                                      <SelectItem value="youth-outro">
+                                        - Afsluiting
+                                      </SelectItem>
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+
+                            )}
+                          />
+                        )}
+                        {(form.watch('infoBlockStyle') === 'youth-outro' && props.formStyle === 'youth') && (
+                          <div className="border border-secondary p-6 rounded-md bg-secondary/60">
+                            <FormField
+                              control={form.control}
+                              name={'infoBlockShareButton'}
+
+                              render={({ field }) => (
+                                <>
+                                  <FormItem>
+                                    <FormLabel
+                                      style={{ marginTop: 0, marginLeft: '6px' }}>Toon &apos;Deel&apos; knop?</FormLabel>
+                                    <FormMessage />
+                                    {YesNoSelect(field, props)}
+                                  </FormItem>
+                                </>
+                              )}
+                            />
+                            <br />
+                            <hr />
+                            <br />
+                            <div className="flex gap-4">
+                              <FormField
+                                control={form.control}
+                                name="infoBlockExtraButtonTitle"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Titel</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="infoBlockExtraButton"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Link</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        <hr />
 
                       </>
                     )}
@@ -1441,6 +1749,37 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {form.watch('questionType') === 'sort' && (
+                      <FormField
+                        control={form.control}
+                        name="numberingStyle"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nummeringstijl</FormLabel>
+                            <FormDescription>
+                              Kies hoe de opsomming wordt genummerd: geen nummering, decimaal, alfabetisch of Romeins.
+                            </FormDescription>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">Geen opsomming</SelectItem>
+                                <SelectItem value="decimal">Decimale nummers</SelectItem>
+                                <SelectItem value="alphabetical">Alfabetische letters</SelectItem>
+                                <SelectItem value="roman">Romeinse cijfers</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {(form.watch('questionType') === 'multiplechoice' || form.watch('questionType') === 'multiple') && (
                       <FormField
                         control={form.control}
@@ -1614,14 +1953,14 @@ export default function WidgetEnqueteItems(
                         setOptions([]);
                         setMatrixOptions(matrixDefault);
                       }}
-                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none' && form.watch('questionType') !== 'pagination'}
+                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none' && form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'swipe'}
                     >
                       {selectedItem
                         ? 'Sla wijzigingen op'
                         : 'Voeg item toe aan lijst'}
                     </Button>
                   </div>
-                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'pagination' && (
+                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'swipe' && (
                     <FormMessage>
                       {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
                     </FormMessage>

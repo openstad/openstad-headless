@@ -35,6 +35,7 @@ export type ProjectSettingProps = {
   comments: {
     canComment: boolean,
     canLike: boolean,
+    canDislike: boolean,
     canReply: boolean,
     closedText: string;
     requiredUserRole: string,
@@ -45,6 +46,7 @@ export type ProjectSettingProps = {
     maxCharactersWarning?: string,
     minCharactersError?: string;
     maxCharactersError?: string;
+    variant?: 'micro-score' | 'medium';
   };
   users: {
     canCreateNewUsers: boolean;

@@ -56,6 +56,14 @@ export default function useComments(props) {
         { action: 'update' }
       );
     };
+    comment.submitDislike = function () {
+      return self.mutate(
+        { projectId, resourceId, sentiment },
+        'comments.submitDislike',
+        comment,
+        { action: 'update' }
+      );
+    };
     comment.replies?.map(async (reply) => {
       reply.update = function (newData) {
         return self.mutate(
@@ -74,6 +82,14 @@ export default function useComments(props) {
         );
       };
       reply.submitLike = function () {
+        return self.mutate(
+          { projectId, resourceId, sentiment },
+          'comments.submitLike',
+          reply,
+          { action: 'update' }
+        );
+      };
+      reply.submitDislike = function () {
         return self.mutate(
           { projectId, resourceId, sentiment },
           'comments.submitLike',

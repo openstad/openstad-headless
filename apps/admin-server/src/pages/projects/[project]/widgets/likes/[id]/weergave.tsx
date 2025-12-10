@@ -33,7 +33,7 @@ import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   title: z.string().optional(),
-  variant: z.enum(['small', 'medium', 'large']),
+  variant: z.enum(['micro-score', 'small', 'medium', 'large']),
   yesLabel: z.string(),
   noLabel: z.string(),
   hideCounters: z.boolean(),
@@ -198,6 +198,7 @@ export default function LikesDisplay({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="micro-score">Icons met score</SelectItem>
                     <SelectItem value="small">Compact</SelectItem>
                     <SelectItem value="medium">Standaard</SelectItem>
                     <SelectItem value="large">Groot</SelectItem>

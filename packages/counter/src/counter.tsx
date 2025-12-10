@@ -88,6 +88,10 @@ function Counter({
     sentiment: opinion,
   });
 
+  let { data: votes } = datastore.useUserVote({
+    projectId: props.projectId
+  });
+
   const {
     data: results,
     error,
@@ -121,7 +125,15 @@ function Counter({
   }
 
   if (counterType === 'votedUsers') {
-    amountDisplayed = (resource.yes || 0) + (resource.no || 0);
+    votes = votes || {};
+    if ( votes.submitVote ) {
+      delete votes.submitVote;
+    }
+
+    let uniqueUserIds = Object.values(votes).map((vote: any) => vote.userId);
+    uniqueUserIds = Array.from(new Set(uniqueUserIds));
+
+    amountDisplayed = uniqueUserIds.length || 0;
   }
 
   if (counterType === 'static') {

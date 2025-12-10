@@ -414,6 +414,70 @@ router
   })
 
 // ----------------------------------------------------------------------------------------------------
+// access codes
+
+router
+  .route('(/project/:projectId)?/accesscode')
+  .all(async function (req, res, next) {
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
+    return next();
+  })
+
+  // list
+  .get(async function (req, res, next) {
+    let codes = {};
+    try {
+      codes = await service.fetchAccessCode({
+        authConfig: req.authConfig,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+  // create
+  .post(async function (req, res, next) {
+    let codes = {};
+    if (!req.body.code) return next(new Error('No code provided'))
+
+    try {
+      codes = await service.createAccessCode({
+        authConfig: req.authConfig,
+        code: req.body.code,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+router
+  .route('(/project/:projectId)?/accesscode/:accessCodeId/delete')
+
+  // delete
+  .delete(async function (req, res, next) {
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
+
+    let accessCodeId= parseInt(req.params.accessCodeId);
+    if (!accessCodeId) return next(new Error('No code id found'))
+
+    let codes = {};
+    try {
+      codes = await service.deleteAccessCode({
+        authConfig: req.authConfig,
+        accessCodeId: accessCodeId,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+// ----------------------------------------------------------------------------------------------------
 // TAF
 
 module.exports = router;

@@ -45,7 +45,6 @@ exports.withOne = (req, res, next) => {
     .catch((err) => { next(err); });
 }
 
-
 exports.create = async (req, res, next) => {
 
   const promises = [];

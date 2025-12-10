@@ -17,6 +17,8 @@ const keyMap: Record<string, string> = {
   'parentId'              : 'Reactie op ID',
   'sentiment'             : 'Sentiment',
   'yes'                   : 'Reactie likes',
+  'no'                    : 'Reactie dislikes',
+  'score'                 : 'Wilson score interval',
   'description'           : 'Reactie',
   'location.lat'          : 'Locatie (lat)',
   'location.lng'          : 'Locatie (lng)',
