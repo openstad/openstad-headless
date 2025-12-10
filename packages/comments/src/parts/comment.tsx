@@ -34,6 +34,7 @@ function Comment({
   disableSubmit = false,
   extraReplyButton = false,
   setRefreshComments,
+  variant = 'medium',
   ...props
 }: CommentProps) {
   const widgetContext = useContext(CommentWidgetContext);
@@ -52,6 +53,7 @@ function Comment({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [yesVotes, setYesVotes] = useState<number>(args.comment.yes || 0);
   const [noVotes, setNoVotes] = useState<number>(args.comment.no || 0);
+  const [netPositiveVotes, setNetPositiveVotes] = useState<number>(args.comment.netPositiveVotes || 0);
   const [hasUserLiked, setHasUserLiked] = useState<boolean>(args.comment.hasUserLiked || false);
   const [hasUserDisliked, setHasUserDisliked] = useState<boolean>(args.comment.hasUserDisliked || false);
 
@@ -118,6 +120,7 @@ function Comment({
     setHasUserDisliked(newData.hasUserDisliked || false);
     setYesVotes(newData.yes || 0);
     setNoVotes(newData.no || 0);
+    setNetPositiveVotes(newData.netPositiveVotes || 0);
   }
 
   async function handleDislike() {
@@ -127,6 +130,7 @@ function Comment({
     setHasUserDisliked(newData.hasUserDisliked || false);
     setYesVotes(newData.yes || 0);
     setNoVotes(newData.no || 0);
+    setNetPositiveVotes(newData.netPositiveVotes || 0);
   }
 
 
@@ -207,7 +211,7 @@ function Comment({
           <Paragraph className="comment-reaction-strong-text">
             {args.comment.createDateHumanized}
           </Paragraph>
-          <ButtonGroup>
+          <ButtonGroup className={`variant-${variant}`}>
             {widgetContext.canLike && (
               canLike() ? (
                 <Button
@@ -215,15 +219,18 @@ function Comment({
                   className={hasUserLiked ? `active` : ''}
                   onClick={handleLike}>
                   <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
-                  Mee eens (<span>{yesVotes}</span>)
+                  {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
                 </Button>
               ) : (
                 <Button disabled>
                   <i className="ri-thumb-up-line"></i>
-                  Mee eens (<span>{yesVotes}</span>)
+                  {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
                 </Button>
               )
             )}
+            {variant == 'micro-score' && (
+                <Paragraph className="comment-reaction-score">{netPositiveVotes}</Paragraph>
+              )}
             {widgetContext.canDislike && (
                 canLike() ? (
                 <Button
@@ -231,12 +238,12 @@ function Comment({
                   className={hasUserDisliked ? `active` : ''}
                   onClick={handleDislike}>
                   <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
-                  Mee oneens (<span>{noVotes}</span>)
+                  {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
                 </Button>
               ) : (
                 <Button disabled>
                   <i className="ri-thumb-down-line"></i>
-                  Mee oneens (<span>{noVotes}</span>)
+                  {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
                 </Button>
               )
             )}
@@ -257,22 +264,25 @@ function Comment({
             <Paragraph className="comment-reaction-strong-text">
               {args.comment.createDateHumanized}
             </Paragraph>
-            <ButtonGroup>
-              {widgetContext.canLike && (
+            <ButtonGroup className={`variant-${variant}`}>
+                {widgetContext.canLike && (
                 canLike() ? (
                   <Button
                     appearance='secondary-action-button'
                     className={hasUserLiked ? `active` : ''}
                     onClick={handleLike}>
                     <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
-                    Mee eens (<span>{yesVotes}</span>)
+                    {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
                   </Button>
                 ) : (
                   <Button disabled>
                     <i className="ri-thumb-up-line"></i>
-                    Mee eens (<span>{yesVotes}</span>)
+                    {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
                   </Button>
                 )
+              )}
+              {variant == 'micro-score' && (
+                <Paragraph className="comment-reaction-score">{netPositiveVotes}</Paragraph>
               )}
               {widgetContext.canDislike && (
                   canLike() ? (
@@ -281,12 +291,12 @@ function Comment({
                     className={hasUserDisliked ? `active` : ''}
                     onClick={handleDislike}>
                     <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
-                    Mee oneens (<span>{noVotes}</span>)
+                    {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
                   </Button>
                 ) : (
                   <Button disabled>
                     <i className="ri-thumb-down-line"></i>
-                    Mee oneens (<span>{noVotes}</span>)
+                    {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
                   </Button>
                 )
               )}
