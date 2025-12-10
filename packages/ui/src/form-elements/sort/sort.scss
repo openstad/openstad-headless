@@ -12,16 +12,63 @@
     gap: .5rem;
     color: var(--sort-text-color);
 
+
+    &.--none {
+        ol {
+            list-style: none;
+            padding-left: 0;
+        }
+    }
+
+    &.--decimal {
+        ol {
+            list-style: decimal;
+            padding-left: 32px;
+
+            li {
+                padding-left: 10px;
+            }
+        }
+    }
+
+    &.--alphabetical {
+        ol {
+            list-style: lower-alpha;
+            padding-left: 32px;
+
+            li {
+                padding-left: 10px;
+            }
+        }
+    }
+
+    &.--roman {
+        ol {
+            list-style: upper-roman;
+            padding-left: 32px;
+
+            li {
+                padding-left: 10px;
+            }
+        }
+    }
+
+
     .sortable-intro {
         margin-bottom: .5rem;
     }
 
     .sortable-context {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
 
-        >div {
+        ol,
+        ul {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 0;
+        }
+
+        li>div {
             display: flex;
             align-items: center;
             gap: var(--sort-padding);

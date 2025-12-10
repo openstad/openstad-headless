@@ -78,14 +78,19 @@ const RangeSlider: FC<RangeSliderProps> = ({
     skipQuestionLabel = 'Sla vraag over',
     overrideDefaultValue
 }) => {
-    const initialValue = overrideDefaultValue && typeof overrideDefaultValue === 'object' && 'value' in overrideDefaultValue
-      ? overrideDefaultValue
+    const initialValue =
+      overrideDefaultValue &&
+      typeof overrideDefaultValue === 'object' &&
+      'value' in overrideDefaultValue &&
+      'skipQuestion' in overrideDefaultValue &&
+      'skipQuestionExplanation' in overrideDefaultValue
+      ? overrideDefaultValue as valueObject
       : { value: '50', skipQuestion: false, skipQuestionExplanation: '' };
 
     const [skipSelected, setSkipSelected] = useState(initialValue.skipQuestion || false);
     const [fieldDisabled, setFieldDisabled] = useState(initialValue.skipQuestion || false);
 
-    const [value, setValue] = useState<valueObject>(initialValue);
+    const [value, setValue] = useState<valueObject>(initialValue as valueObject);
 
     const parsed = parseInt(initialValue.value);
     const [rangeValue, setRangeValue] = useState<number>( isNaN(parsed) ? 50 : parsed );

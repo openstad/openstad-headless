@@ -26,6 +26,7 @@ export type SortFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     overrideDefaultValue?: FormValue;
+    numberingStyle?: string;
 };
 declare const SortField: FC<SortFieldProps>;
 export default SortField;

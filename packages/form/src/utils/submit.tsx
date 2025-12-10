@@ -10,6 +10,7 @@ export const handleSubmit = (
     routingHiddenFields: string[],
     submitHandler: (values: { [p: string]: FormValue }) => void,
     pageHandler: (() => void) | null = null,
+    submitBeforeLastPage?: boolean,
 ): string | null => {
     const errors: { [key: string]: string | null } = {};
     let firstErrorKey: string | null = null;
@@ -51,9 +52,9 @@ export const handleSubmit = (
     setFormErrors(errors);
 
     if (Object.values(errors).every((error) => error === null)) {
-        if (pageHandler) {
-            pageHandler();
-        } else {
+        if (pageHandler) pageHandler();
+
+        if (!pageHandler || submitBeforeLastPage) {
             submitHandler(formValues);
         }
         return null;
