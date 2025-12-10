@@ -198,7 +198,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                               MultiProjectResourceOverviewProps,
                               LikeWidgetTabProps
                           >({
-                            subWidgetKey: 'resourceOverviewMapWidget',
+                            subWidgetKey: 'likeWidget',
                             previewConfig: previewConfig,
                             updateConfig,
                             updatePreview,

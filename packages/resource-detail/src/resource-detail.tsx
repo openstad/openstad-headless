@@ -599,6 +599,7 @@ function ResourceDetail({
             includeOrExclude={props.commentsWidget?.includeOrExclude}
             onlyIncludeOrExcludeTagIds={props.commentsWidget?.onlyIncludeOrExcludeTagIds}
             displaySearchBar={props.commentsWidget?.displaySearchBar}
+            variant={props.commentsWidget?.variant}
             extraReplyButton={ props.commentsWidget?.extraReplyButton }
             defaultSorting={ props.commentsWidget?.defaultSorting }
             sorting={ props.commentsWidget?.sorting }
@@ -623,6 +624,7 @@ function ResourceDetail({
               includeOrExclude={props.commentsWidget?.includeOrExclude}
               onlyIncludeOrExcludeTagIds={props.commentsWidget?.onlyIncludeOrExcludeTagIds}
               displaySearchBar={props.commentsWidget?.displaySearchBar}
+              variant={props.commentsWidget?.variant}
               extraReplyButton={ props.commentsWidget?.extraReplyButton }
               sorting={ props.commentsWidget?.sorting }
               sentiment={useSentiments[1]}

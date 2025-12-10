@@ -13,6 +13,7 @@ export type Comment = {
   label: string;
   yes: number;
   no: number;
+  netPositiveVotes: number;
   hasUserLiked: boolean;
   hasUserDisliked: boolean;
   createDateHumanized: string;

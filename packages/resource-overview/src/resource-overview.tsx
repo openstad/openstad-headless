@@ -25,6 +25,7 @@ import {
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { TabsContent, TabsList, TabsTrigger, Tabs } from "@openstad-headless/admin-server/src/components/ui/tabs";
+import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
@@ -161,6 +162,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     filterBehaviorInclude?: string;
     onlyShowTheseTagIds?: string;
     displayCollapsibleFilter?: boolean;
+    likeWidget?: Omit<
+      LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -334,12 +339,21 @@ const defaultItemRenderer = (
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
-            {props.displayVote ? (
+            {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />
+
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />}
               </>
-            ) : null}
+            )}
+
+            {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+              <div className="micro-score-container">
+                <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' />
+                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' />}
+              </div>
+            )}
 
             {props.displayArguments ? (
               <Icon
@@ -422,12 +436,21 @@ const defaultItemRenderer = (
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
-            {props.displayVote ? (
+
+            {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />}
               </>
-            ) : null}
+            )}
+
+            {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+              <>
+                <Icon icon="ri-thumb-up-line" variant="big" />
+                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big"  />}
+              </>
+            )}
 
             {props.displayArguments ? (
               <Icon
@@ -693,6 +716,7 @@ function ResourceOverviewInner({
     // Filtering is always 'or' inside their own types and depending on filterBehavior it's 'and' or 'or' between types
     // This logic is for both includeTags (that sets the base resources based on widget settings) and tags (the user selected tags for filtering)
     // excludeTags are always excluded first and have no further logic
+    const tagIntegers = tags?.map((tag: any) => parseInt(tag, 10));
     const filtered = combinedResources?.filter((resource: any) => {
         const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
           excludeTags.includes(tag.id)
@@ -721,21 +745,21 @@ function ResourceOverviewInner({
         return true;
       })
       ?.filter((resource: any) => {
-        if (tags.length > 0) {
+        if (tagIntegers.length > 0) {
           if (filterBehavior === 'and') {
             const relevantTagTypes = Object.keys(groupedTags).filter(tagType =>
-              tags.some(tagId => groupedTags[tagType].includes(tagId))
+              tagIntegers.some(tagId => groupedTags[tagType].includes(tagId))
             );
 
             return relevantTagTypes.every(tagType => {
               const tagsOfType = groupedTags[tagType];
-              const includeTagsOfType = tags.filter(tagId => tagsOfType.includes(tagId));
+              const includeTagsOfType = tagIntegers.filter(tagId => tagsOfType.includes(tagId));
               return resource.tags?.some((tag: { id: number }) => includeTagsOfType.includes(tag.id));
             });
 
           } else {
             return resource.tags?.some((tag: { id: number }) =>
-              tags.includes(tag.id)
+              tagIntegers.includes(tag.id)
             );
           }
         }
@@ -991,6 +1015,7 @@ function ResourceOverviewInner({
               }}
               preFilterTags={urlTagIdsArray}
               displayCollapsibleFilter={displayCollapsibleFilter}
+              autoApply={props?.autoApply || false}
             />
           ) : null}
 
@@ -1037,10 +1062,10 @@ function ResourceOverview(props: ResourceOverviewWidgetProps) {
 
   return displayAsTabs ? (
     <Tabs defaultValue="list">
-      <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false}/>
+      <ResourceOverviewInner {...props} {...props.likeWidget}/>
     </Tabs>
   ) : (
-    <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false} />
+    <ResourceOverviewInner {...props} {...props.likeWidget}/>
   );
 }
 

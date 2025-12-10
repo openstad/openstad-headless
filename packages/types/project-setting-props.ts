@@ -46,6 +46,7 @@ export type ProjectSettingProps = {
     maxCharactersWarning?: string,
     minCharactersError?: string;
     maxCharactersError?: string;
+    variant?: 'micro-score' | 'medium';
   };
   users: {
     canCreateNewUsers: boolean;
