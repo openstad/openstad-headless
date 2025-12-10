@@ -461,8 +461,9 @@ export function Filters({
               id="filters-container"
               className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
+              onClick={(e) => { setFiltersVisible(false) }}
             >
-              <div className="filters-wrapper">
+              <div className="filters-wrapper" onClick={(e) => { e.stopPropagation(); }}>
                 <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
                   <span className="close-icon"></span>
                   <span className="sr-only">Sluit filters</span>
