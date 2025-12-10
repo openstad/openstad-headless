@@ -25,6 +25,7 @@ import {
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { TabsContent, TabsList, TabsTrigger, Tabs } from "@openstad-headless/admin-server/src/components/ui/tabs";
+import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
@@ -161,6 +162,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     filterBehaviorInclude?: string;
     onlyShowTheseTagIds?: string;
     displayCollapsibleFilter?: boolean;
+    likeWidget?: Omit<
+      LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -334,12 +339,20 @@ const defaultItemRenderer = (
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
-            {props.displayVote ? (
+            {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' />
                 <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />
               </>
-            ) : null}
+            )}
+
+            {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+              <>
+                <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' />
+                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' />
+              </>
+            )}
 
             {props.displayArguments ? (
               <Icon
@@ -422,12 +435,21 @@ const defaultItemRenderer = (
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
-            {props.displayVote ? (
+
+            {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
+                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no}  />
               </>
-            ) : null}
+            )}
+
+            {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+              <>
+                <Icon icon="ri-thumb-up-line" variant="big" />
+                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                <Icon icon="ri-thumb-down-line" variant="big"  />
+              </>
+            )}
 
             {props.displayArguments ? (
               <Icon
