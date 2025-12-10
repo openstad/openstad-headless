@@ -84,10 +84,17 @@ export function Filters({
   const [locationValue, setLocationValue] = useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
   const [disableTransition, setDisableTransition] = useState(true);
+  const filtersWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (filtersVisible && disableTransition) {
       setDisableTransition(false);
+    }
+    if (filtersVisible && filtersWrapperRef.current) {
+      const focusable = filtersWrapperRef.current.querySelector<HTMLElement>(
+        "input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])"
+      );
+      if (focusable) focusable.focus();
     }
   }, [filtersVisible, disableTransition]);
 
@@ -463,7 +470,10 @@ export function Filters({
               aria-hidden={!filtersVisible ? 'true' : 'false'}
               onClick={(e) => { setFiltersVisible(false) }}
             >
-              <div className="filters-wrapper" onClick={(e) => { e.stopPropagation(); }}>
+              <div
+                className="filters-wrapper"
+                ref={filtersWrapperRef}
+                onClick={(e) => { e.stopPropagation(); }}>
                 <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
                   <span className="close-icon"></span>
                   <span className="sr-only">Sluit filters</span>
