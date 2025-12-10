@@ -63,7 +63,7 @@ export default function WidgetResourceDetailDisplay(
     defaultValues: {
       displayImage: undefinedToTrueOrProp(props?.displayImage),
       displayImageDescription: undefinedToTrueOrProp(props?.displayImageDescription),
-      displayDescriptionExpandable: undefinedToTrueOrProp(props?.displayDescriptionExpandable),
+      displayDescriptionExpandable: props?.displayDescriptionExpandable || false,
       displayDescriptionExpandable_expandBeforeText: props?.displayDescriptionExpandable_expandBeforeText || 'Lees meer',
       displayDescriptionExpandable_expandAfterText: props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
       displayDescriptionExpandable_visibleLines: props?.displayDescriptionExpandable_visibleLines || '4',

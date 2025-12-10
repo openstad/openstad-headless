@@ -14,13 +14,15 @@ import { updateRouting } from "./utils/routing";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice";
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
+import SwipeField from "@openstad-headless/swipe/src/swipe";
+import DilemmaField from '@openstad-headless/dilemma/src/dilemma';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
 import SortField from "@openstad-headless/ui/src/form-elements/sort";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
-export type FormValue = string | string[] | Record<number, never> | [] | number | boolean | { name: string; url: string }[];
+export type FormValue = string | string[] | Record<number, never> | Record<string, any> | [] | number | boolean | { name: string; url: string }[];
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -43,6 +45,8 @@ function Form({
     pageFieldEndPositions,
     totalPages,
     showBackButtonInTopOfPage = false,
+    totalFieldCount = 0,
+    formStyle = 'default',
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -86,10 +90,33 @@ function Form({
     }
 
     const handleFormSubmit = (event: React.FormEvent) => {
+        const nonPaginationFields = fields.filter(field => field.type !== 'pagination');
+
         let pageHandler = undefined;
-        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage < totalPages - 1 && setCurrentPage) {
+        
+        const isNumber = typeof currentPage === 'number';
+        const isTotalNumber = typeof totalPages === 'number';
+        const hasPages = isNumber && isTotalNumber && currentPage < totalPages - 1;
+        const hasSetCurrentPage = !!setCurrentPage;
+        const isSecondToLast = isNumber && isTotalNumber && currentPage === totalPages - 2;
+        const lastFieldIsYouthOutro = isTotalNumber && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro';
+        
+        const shouldGoToNextPage = hasPages && hasSetCurrentPage && (
+            !isSecondToLast ||
+            (isSecondToLast && lastFieldIsYouthOutro)
+        );
+        
+        if (isNumber && isTotalNumber && shouldGoToNextPage) {
             allowResetAfterSubmit = false;
             pageHandler = () => setCurrentPage(currentPage + 1);
+        }
+
+        const lastField = fields[fields.length - 1];
+        const lastFieldIsOutro = lastField?.type === 'none' && lastField?.infoBlockStyle === 'youth-outro';
+
+        let submitBeforeLastPage = false;
+        if (typeof currentPage === 'number' && typeof totalPages === 'number' && currentPage === totalPages - 2 && lastFieldIsOutro) {
+            submitBeforeLastPage = true;
         }
 
         event.preventDefault();
@@ -100,6 +127,7 @@ function Form({
             routingHiddenFields,
             submitHandler,
             pageHandler,
+            submitBeforeLastPage
         );
 
         if (firstErrorKey && formRef.current) {
@@ -117,11 +145,11 @@ function Form({
         }
     };
 
-    const handleInputChange = (event: { name: string, value: FormValue }, triggerSetLastKey: boolean = true) => {
+    const handleInputChange = (event: { name: string, value: any }, triggerSetLastKey?: boolean) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
 
-        if (triggerSetLastKey) {
+        if (triggerSetLastKey !== false) {
             setLastUpdatedKey(name);
         }
     };
@@ -150,7 +178,7 @@ function Form({
     }, [formValues]);
 
     const scrollTop = () => {
-        const formWidget = document.querySelector('.form-widget');
+        const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth)');
         if (formWidget) {
             const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
             window.scrollTo({
@@ -161,6 +189,7 @@ function Form({
     }
 
     const componentMap: { [key: string]: React.ComponentType<ComponentFieldProps> } = {
+        swipe: SwipeField as React.ComponentType<ComponentFieldProps>,
         text: TextInput as React.ComponentType<ComponentFieldProps>,
         range: RangeSlider as React.ComponentType<ComponentFieldProps>,
         checkbox: CheckboxField as React.ComponentType<ComponentFieldProps>,
@@ -176,6 +205,7 @@ function Form({
         matrix: MatrixField as React.ComponentType<ComponentFieldProps>,
         none: InfoField as React.ComponentType<ComponentFieldProps>,
         sort: SortField as React.ComponentType<ComponentFieldProps>,
+        dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     };
 
     const renderField = (field: ComponentFieldProps, index: number, randomId: string, fieldInvalid: boolean) => {
@@ -186,14 +216,16 @@ function Form({
         if (Component) {
             return (
                 <Component
-                    {...props}
+                    {...(props as any)}
                     index={index}
-                    onChange={handleInputChange}
+                    onChange={handleInputChange as any}
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     randomId={randomId}
                     fieldInvalid={fieldInvalid}
                     overrideDefaultValue={field.fieldKey && formValues[field.fieldKey]}
-                    {...field}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    {...(field as any)}
                 />
             );
         }
@@ -223,38 +255,84 @@ function Form({
                 )}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
+                    {formStyle === 'youth' && totalFieldCount > 0 && (
+                        <ul className="form-fieldCounter">
+                            {Array.from({ length: totalFieldCount }, (_, index) => (
+                                <li key={index} className={`${currentPage === index ? '--active' : ''}`} aria-label={`Pagina ${index + 1}`}></li>
+                            ))}
+                        </ul>
+                    )}
+
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
                     {fieldsToRender.map((field: ComponentFieldProps, index: number) => {
                         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         const fieldInvalid = Boolean(field.fieldKey && typeof (formErrors[field.fieldKey]) !== 'undefined');
 
+
                         if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
                             return null;
                         }
-
                         return field.type === 'pagination' ? null : (
-                            <div className={`question question-type-${field.type}`} key={index}>
+                            // @ts-ignore
+                            <div className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`} key={index}>
                                 {renderField(field, index, randomId, fieldInvalid)}
                                 <FormFieldErrorMessage className="error-message">
                                     {field.fieldKey && formErrors[field.fieldKey] &&
-                                      <span
-                                        id={`${randomId}_error`}
-                                        aria-live="assertive"
-                                      >
-                                          {formErrors[field.fieldKey]}
-                                      </span>
+                                        <span
+                                            id={`${randomId}_error`}
+                                            aria-live="assertive"
+                                        >
+                                            {formErrors[field.fieldKey]}
+                                        </span>
                                     }
                                 </FormFieldErrorMessage>
+                                {/* @ts-ignore */}
+                                {field.infoBlockStyle === "youth-outro" && (
+                                    <div className="info-block-buttons">
+                                        {field.infoBlockExtraButton && (
+                                            <a className="update-button" href={field.infoBlockExtraButton} rel="noreferrer">
+                                                <span>{field.infoBlockExtraButtonTitle ? field.infoBlockExtraButtonTitle : 'Blijf op de hoogte'}</span>
+                                            </a>
+                                        )}
+                                        {/* @ts-ignore */}
+                                        {field.infoBlockShareButton && (
+                                            <div
+                                                role="button"
+                                                className="share-buttons"
+                                                onClick={async () => {
+                                                    if (navigator.share) {
+                                                        navigator.share({
+                                                            title: document.title,
+                                                            text: 'Deel deze pagina',
+                                                            url: window.location.href,
+                                                        }).catch(() => { });
+                                                    } else if (navigator.clipboard) {
+                                                        try {
+                                                            await navigator.clipboard.writeText(window.location.href);
+                                                            alert('Link gekopieerd naar klembord.');
+                                                        } catch {
+                                                            alert('Kopiëren naar klembord mislukt.');
+                                                        }
+                                                    } else {
+                                                        alert('Delen wordt niet ondersteund op dit apparaat.');
+                                                    }
+                                                }}
+                                            >
+                                                <span>Delen</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )
                     })}
                     {secondaryLabel && (
                         <Button
-                          appearance='primary-action-button'
-                          onClick={() => secondaryHandler(formValues)}
-                          type="button"
+                            appearance='primary-action-button'
+                            onClick={() => secondaryHandler(formValues)}
+                            type="button"
                         >
-                            {secondaryLabel}
+                            <span>{secondaryLabel}</span>
                         </Button>
                     )}
                     <div className="button-group --flex">
@@ -268,23 +346,24 @@ function Form({
                                     scrollTop();
                                 }}
                             >
-                                {prevPageText || 'vorige'}
+                                <span>{prevPageText || 'vorige'}</span>
                             </Button>
                         )}
                         <Button
                             appearance='primary-action-button'
                             type="submit"
                             disabled={submitDisabled}
+                            data-label="Overslaan"
                             onClick={() => {
                                 scrollTop();
                             }}
                         >
-                            {submitText}
+                            <span>{submitText}</span>
                         </Button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 

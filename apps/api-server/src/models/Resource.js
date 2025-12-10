@@ -89,7 +89,7 @@ module.exports = function (db, sequelize, DataTypes) {
           updateableBy: 'editor',
         },
         allowNull: false,
-        defaultValue: null,
+        defaultValue: '0.00000000000',
       },
       
       sort: {
@@ -1054,7 +1054,7 @@ module.exports = function (db, sequelize, DataTypes) {
     
     // Calculate & save the score to the resource
     resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
-    await resource.save();
+    await resource.save({ validate: false, hooks: false });
   }
 
   return Resource;

@@ -35,6 +35,8 @@ export type FormProps = {
     pageFieldEndPositions?: number[];
     totalPages?: number;
     showBackButtonInTopOfPage?: boolean;
+    totalFieldCount?: number;
+    formStyle?: string;
 }
 
 type PaginationFieldProps = {
@@ -43,6 +45,7 @@ type PaginationFieldProps = {
     prevPageText?: any;
     nextPageText?: any;
     defaultValue?: string;
+    infoBlockStyle?: string;
 };
 
 type CombinedFieldPropsWithType =
@@ -60,12 +63,14 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'map' } & MapProps)
     | ({ type?: 'matrix' } & MatrixFieldProps)
     | ({ type?: 'pagination' } & PaginationFieldProps)
-    | ({ type?: 'none' } & InfoFieldProps)
-    | ({ type?: 'sort' } & SortFieldProps);
+    | ({ type?: 'sort' } & SortFieldProps)
+    | ({ type?: 'none' } & InfoFieldProps);
 
 type ComponentFieldProps = (
     {
-        index?: number,
+        index?: number;
+        infoBlockExtraButtonTitle?: string;
+        infoBlockExtraButton?: string;
     }
     & CombinedFieldProps
 )
@@ -86,6 +91,12 @@ type CombinedFieldProps = (
     MatrixFieldProps |
     InfoFieldProps |
     SortFieldProps
+    & {
+        infoBlockStyle?: string;
+        infoBlockExtraButtonTitle?: string;
+        infoBlockExtraButton?: string;
+
+    }
 );
 
 // These fields have no use outside the form component itself, so we make them optional here to avoid having to define them in every form field
@@ -95,6 +106,7 @@ type FieldWithOptionalFields =
     routingInitiallyHide?: boolean;
     routingSelectedQuestion?: string;
     routingSelectedAnswer?: string;
+    infoBlockStyle?: string;
 }
 
 export type { FieldWithOptionalFields, CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};

@@ -83,6 +83,20 @@ export function Filters({
   const [sortValue, setSortValue] = useState<string>(props.defaultSorting || 'createdAt_desc');
   const [locationValue, setLocationValue] = useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
+  const [disableTransition, setDisableTransition] = useState(true);
+  const filtersWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (filtersVisible && disableTransition) {
+      setDisableTransition(false);
+    }
+    if (filtersVisible && filtersWrapperRef.current) {
+      const focusable = filtersWrapperRef.current.querySelector<HTMLElement>(
+        "input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])"
+      );
+      if (focusable) focusable.focus();
+    }
+  }, [filtersVisible, disableTransition]);
 
   const search = useDebounce(setSearch, 300);
 
@@ -437,12 +451,29 @@ export function Filters({
 
         {displayCollapsibleFilter ? (
           <>
-            <Button className="toggle-filters-button" type="button" aria-expanded={filtersVisible ? 'true' : 'false'} aria-controls="filters-container" onClick={(e) => { setFiltersVisible(!filtersVisible) }}>
+            <Button
+              className="toggle-filters-button"
+              appearance='primary-action-button'
+              type="button"
+              aria-expanded={filtersVisible ? 'true' : 'false'}
+              aria-controls="filters-container"
+              onClick={(e) => {
+                if (!filtersVisible && disableTransition) setDisableTransition(false);
+                setFiltersVisible(!filtersVisible);
+              }}>
               <span className="filter-icon"></span>
               <span className="sr-only">Filters uitklappen</span>
             </Button>
-            <div id="filters-container" className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''}`} aria-hidden={!filtersVisible ? 'true' : 'false'}>
-              <div className="filters-wrapper">
+            <div
+              id="filters-container"
+              className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
+              aria-hidden={!filtersVisible ? 'true' : 'false'}
+              onClick={(e) => { setFiltersVisible(false) }}
+            >
+              <div
+                className="filters-wrapper"
+                ref={filtersWrapperRef}
+                onClick={(e) => { e.stopPropagation(); }}>
                 <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
                   <span className="close-icon"></span>
                   <span className="sr-only">Sluit filters</span>

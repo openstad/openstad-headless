@@ -9,6 +9,7 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {UploadDocument} from "@/hooks/upload-document";
 
 export const ImageUploader: React.FC<{
   form: UseFormReturn<any>;
@@ -32,16 +33,24 @@ export const ImageUploader: React.FC<{
   }
 
   async function uploadImage(data: any) {
-    let image = prepareFile(data);
+    let response;
 
-    const projectNumber: number | undefined = validateProjectNumber(project);
+    if (data && data.type === 'image/gif') {
+      response = await UploadDocument(data, project)
+    } else {
+      let image = prepareFile(data);
 
-    const response = await fetch(`/api/openstad/api/project/${projectNumber}/upload/image`, {
-      method: 'POST',
-      body: image
-    })
+      const projectNumber: number | undefined = validateProjectNumber(project);
 
-    setFile(await response.json());
+      const uploadCall = await fetch(`/api/openstad/api/project/${projectNumber}/upload/image`, {
+        method: 'POST',
+        body: image
+      })
+
+      response = await uploadCall.json()
+    }
+
+    setFile(response);
   }
 
   useEffect(() => {

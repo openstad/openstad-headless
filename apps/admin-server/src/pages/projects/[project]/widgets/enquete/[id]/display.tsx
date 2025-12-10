@@ -21,6 +21,7 @@ const formSchema = z.object({
   displayTitle: z.boolean(),
   displayDescription: z.boolean().optional(),
   formVisibility: z.string().optional(),
+  formStyle: z.string().optional(),
 });
 
 export default function WidgetEnqueteDisplay(
@@ -37,6 +38,7 @@ export default function WidgetEnqueteDisplay(
     defaultValues: {
       displayTitle: props?.displayTitle || false,
       formVisibility: props?.formVisibility || 'always',
+      formStyle: props?.formStyle || 'default',
     },
   });
 
@@ -87,6 +89,29 @@ export default function WidgetEnqueteDisplay(
                       <SelectContent>
                         <SelectItem value="always">Iedereen</SelectItem>
                         <SelectItem value="users">Ingelogde gebruikers en admins</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+              )}></FormField>
+
+                        <FormField
+              control={form.control}
+              name="formStyle"
+              render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Visuele stijl van het formulier</FormLabel>
+                    <Select
+                        value={field.value}
+                        onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Kies een optie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="default">Standaard</SelectItem>
+                        <SelectItem value="youth">Jongeren widgets</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
