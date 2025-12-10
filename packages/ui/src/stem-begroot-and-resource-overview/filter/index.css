@@ -111,17 +111,18 @@
 
 .osc-resources-filter .apply-filters-button {
   width: 53px;
-  height: 53px;
+  height: 43px;
   padding: 0;
   margin-left: -67px;
   background: none;
   padding: 0;
   border: none;
+  position: relative;
 }
 .osc-resources-filter .apply-filters-button .filter-icon {
   display: block;
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  inset: 0;
   background-color: #000;
   mask-size: 20px;
   mask-position: center;
@@ -136,22 +137,26 @@
   );
   --toggleFilterButton-maskSize: var(--setToggleFilterButton-maskSize, 26px);
   --toggleFilterButton-maskColor: var(--setToggleFilterButton-maskColor, #fff);
-  --toggleFilterButton-size: var(--setToggleFilterButton-size, 53px);
   padding: 0;
   display: block;
-  height: var(--toggleFilterButton-size);
-  width: var(--toggleFilterButton-size);
   flex-shrink: 0;
+  position: relative;
 }
 .osc-resources-filter .toggle-filters-button .filter-icon {
   display: block;
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  inset: 0;
   background-color: var(--toggleFilterButton-maskColor);
   mask-size: var(--toggleFilterButton-maskSize);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-image: var(--toggleFilterButton-maskImage);
+}
+
+.filters-container.no-transition,
+.filters-container.--collapsable.no-transition,
+.filters-container.--collapsable.no-transition .filters-wrapper {
+  transition: none !important;
 }
 
 .filters-container.--collapsable {

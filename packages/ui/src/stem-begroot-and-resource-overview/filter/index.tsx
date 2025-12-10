@@ -83,6 +83,13 @@ export function Filters({
   const [sortValue, setSortValue] = useState<string>(props.defaultSorting || 'createdAt_desc');
   const [locationValue, setLocationValue] = useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
+  const [disableTransition, setDisableTransition] = useState(true);
+
+  useEffect(() => {
+    if (filtersVisible && disableTransition) {
+      setDisableTransition(false);
+    }
+  }, [filtersVisible, disableTransition]);
 
   const search = useDebounce(setSearch, 300);
 
@@ -437,11 +444,24 @@ export function Filters({
 
         {displayCollapsibleFilter ? (
           <>
-            <Button className="toggle-filters-button" type="button" aria-expanded={filtersVisible ? 'true' : 'false'} aria-controls="filters-container" onClick={(e) => { setFiltersVisible(!filtersVisible) }}>
+            <Button
+              className="toggle-filters-button"
+              appearance='primary-action-button'
+              type="button"
+              aria-expanded={filtersVisible ? 'true' : 'false'}
+              aria-controls="filters-container"
+              onClick={(e) => {
+                if (!filtersVisible && disableTransition) setDisableTransition(false);
+                setFiltersVisible(!filtersVisible);
+              }}>
               <span className="filter-icon"></span>
               <span className="sr-only">Filters uitklappen</span>
             </Button>
-            <div id="filters-container" className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''}`} aria-hidden={!filtersVisible ? 'true' : 'false'}>
+            <div
+              id="filters-container"
+              className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
+              aria-hidden={!filtersVisible ? 'true' : 'false'}
+            >
               <div className="filters-wrapper">
                 <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
                   <span className="close-icon"></span>
