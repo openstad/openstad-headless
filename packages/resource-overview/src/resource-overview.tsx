@@ -342,7 +342,8 @@ const defaultItemRenderer = (
             {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />
+
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />}
               </>
             )}
 
@@ -350,7 +351,7 @@ const defaultItemRenderer = (
               <div className="micro-score-container">
                 <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' />
                 <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
-                <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' />
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' />}
               </div>
             )}
 
@@ -439,7 +440,7 @@ const defaultItemRenderer = (
             {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no}  />
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />}
               </>
             )}
 
@@ -447,7 +448,7 @@ const defaultItemRenderer = (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" />
                 <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
-                <Icon icon="ri-thumb-down-line" variant="big"  />
+                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big"  />}
               </>
             )}
 
@@ -1061,10 +1062,10 @@ function ResourceOverview(props: ResourceOverviewWidgetProps) {
 
   return displayAsTabs ? (
     <Tabs defaultValue="list">
-      <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false}/>
+      <ResourceOverviewInner {...props} {...props.likeWidget}/>
     </Tabs>
   ) : (
-    <ResourceOverviewInner {...props} displayDislike={props.resourceOverviewMapWidget?.displayDislike || false} />
+    <ResourceOverviewInner {...props} {...props.likeWidget}/>
   );
 }
 
