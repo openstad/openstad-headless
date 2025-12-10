@@ -991,6 +991,7 @@ function ResourceOverviewInner({
               }}
               preFilterTags={urlTagIdsArray}
               displayCollapsibleFilter={displayCollapsibleFilter}
+              autoApply={props?.autoApply || false}
             />
           ) : null}
 
