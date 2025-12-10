@@ -215,12 +215,13 @@ function Likes({
                 >
 
                   <section className="like-kind">
-                    <i className={likeVariant.icon}></i>
+                    <i className={likeVariant.icon}></i> <span className="sr-only">{likeVariant.label}</span>
                   </section>
+
                 </Button>
                 {!hideCounters && index === 0 ? (
                   <section className="like-counter">
-                    {resource['netPositiveVotes'] ? resource['netPositiveVotes']  : '0'}
+                    <span className="sr-only">Score</span> {resource['netPositiveVotes'] ? resource['netPositiveVotes']  : '0'}
                   </section>
                 ) : null}
               </>
