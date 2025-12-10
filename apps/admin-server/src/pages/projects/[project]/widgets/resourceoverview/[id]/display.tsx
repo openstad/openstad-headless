@@ -57,6 +57,7 @@ const formSchema = z.object({
   displayLocationFilter: z.boolean(),
   listTabTitle: z.string().optional(),
   mapTabTitle: z.string().optional(),
+  autoApply: z.boolean().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -116,6 +117,7 @@ export default function WidgetResourceOverviewDisplay(
       overviewTagGroups: props?.overviewTagGroups || [],
       dialogTagGroups: props?.dialogTagGroups || [],
       displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
+      autoApply: props?.autoApply || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -900,6 +902,18 @@ export default function WidgetResourceOverviewDisplay(
                 <FormDescription>
                   Als je dit aanvinkt, worden de filters getoond in een inklapbaar menu.
                 </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="autoApply"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Automatisch toepassen van de filters wanneer een filter wijzigt</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
