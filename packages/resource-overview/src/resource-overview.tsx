@@ -693,6 +693,7 @@ function ResourceOverviewInner({
     // Filtering is always 'or' inside their own types and depending on filterBehavior it's 'and' or 'or' between types
     // This logic is for both includeTags (that sets the base resources based on widget settings) and tags (the user selected tags for filtering)
     // excludeTags are always excluded first and have no further logic
+    const tagIntegers = tags?.map((tag: any) => parseInt(tag, 10));
     const filtered = combinedResources?.filter((resource: any) => {
         const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
           excludeTags.includes(tag.id)
@@ -721,21 +722,21 @@ function ResourceOverviewInner({
         return true;
       })
       ?.filter((resource: any) => {
-        if (tags.length > 0) {
+        if (tagIntegers.length > 0) {
           if (filterBehavior === 'and') {
             const relevantTagTypes = Object.keys(groupedTags).filter(tagType =>
-              tags.some(tagId => groupedTags[tagType].includes(tagId))
+              tagIntegers.some(tagId => groupedTags[tagType].includes(tagId))
             );
 
             return relevantTagTypes.every(tagType => {
               const tagsOfType = groupedTags[tagType];
-              const includeTagsOfType = tags.filter(tagId => tagsOfType.includes(tagId));
+              const includeTagsOfType = tagIntegers.filter(tagId => tagsOfType.includes(tagId));
               return resource.tags?.some((tag: { id: number }) => includeTagsOfType.includes(tag.id));
             });
 
           } else {
             return resource.tags?.some((tag: { id: number }) =>
-              tags.includes(tag.id)
+              tagIntegers.includes(tag.id)
             );
           }
         }
