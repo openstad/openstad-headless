@@ -262,8 +262,7 @@ export default function ArgumentsGeneral({
                   Extra reageer knop
                 </FormLabel>
                 <FormDescription>
-                  Hiermee wordt er onder de lijst met reacties een extra knop &quot;Reageer&quot; getoond, naast de standaard knop boven de lijst.
-                </FormDescription>
+                  Bij een reactie staan standaard een like- en een reageerknop. Met deze optie wordt er een extra reageerknop toegevoegd onder de lijst met reacties op die reactie.                </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
