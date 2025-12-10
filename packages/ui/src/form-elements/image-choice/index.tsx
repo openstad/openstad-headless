@@ -1,11 +1,13 @@
-import React, {FC, useEffect, useState} from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
     Fieldset,
     FieldsetLegend,
     FormField,
     FormLabel,
     RadioButton,
-    Paragraph, FormFieldDescription, AccordionProvider, Checkbox
+    Paragraph, FormFieldDescription, AccordionProvider, Checkbox,
+    Heading,
+    Button
 } from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
 import { FormValue } from "@openstad-headless/form/src/form";
@@ -32,6 +34,7 @@ export type ImageChoiceFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    infoField?: string;
 }
 
 export type ChoiceItem = {
@@ -41,6 +44,7 @@ export type ChoiceItem = {
     imageDescription: string;
     imageAlt: string;
     hideLabel?: boolean;
+    description?: string;
 }
 
 const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
@@ -58,7 +62,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     randomId = '',
     fieldInvalid = false,
     multiple = false,
-    overrideDefaultValue
+    overrideDefaultValue,
+    infoField,
 }) => {
     let initialValue = [];
 
@@ -67,6 +72,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     } catch (e) {}
 
     const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
+    const [isInfoVisible, setIsInfoVisible] = useState(false);
 
     const handleChoiceChange = (choiceValue: string) => {
         if (!multiple) {
@@ -85,7 +91,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 value: JSON.stringify(selectedChoices)
             });
         }
-    } , [selectedChoices]);
+    }, [selectedChoices]);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -96,10 +102,12 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
     const ChoiceComponent = multiple ? Checkbox : RadioButton;
 
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+
     return (
         <div className={`question`}>
             <Fieldset
-                aria-invalid={fieldInvalid}
+                aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             >
                 {title && (
@@ -138,33 +146,60 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                     {choices?.map((choice, index) => {
                         const isSelected = choice && choice.label ? selectedChoices.includes(choice.label) : false;
                         return (
-                          <FormField type="radio" key={index}>
-                              <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
-                                  <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio" className={isSelected ? "selected" : ""}>
-                                      <figure>
-                                          <img src={choice.imageSrc} alt={choice.imageAlt} />
-                                          <figcaption>
-                                              <ChoiceComponent
-                                                className="radio-field-input"
-                                                id={`${fieldKey}_${index}`}
-                                                name={fieldKey}
-                                                required={fieldRequired}
-                                                onChange={() => handleChoiceChange(choice.value)}
-                                                disabled={disabled}
+                            <FormField type="radio" key={index}>
+                                <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
+                                    <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio" className={isSelected ? "selected" : ""}>
+                                        <figure>
+                                            <img src={choice.imageSrc} alt={choice.imageAlt} />
+                                            <figcaption>
+                                                <ChoiceComponent
+                                                    className="radio-field-input"
+                                                    id={`${fieldKey}_${index}`}
+                                                    name={fieldKey}
+                                                    required={fieldRequired}
+                                                    onChange={() => { handleChoiceChange(choice.value), setCheckInvalid(false) }}
+                                                    disabled={disabled}
                                                 checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
-                                              />
-                                                  {(choice.label && !choice.hideLabel) && (
-                                                      choice.label
-                                                  )}
-                                          </figcaption>
-                                      </figure>
-                                  </FormLabel>
-                              </Paragraph>
-                          </FormField>
+                                                />
+                                                {(choice.label && !choice.hideLabel && !choice.description) && (
+                                                    choice.label
+                                                )}
+                                                {(choice.description && choice.label && !choice.hideLabel) && (
+                                                    <>
+                                                        <Heading level={4}>
+                                                            {choice.label}
+                                                        </Heading>
+                                                        <Paragraph dangerouslySetInnerHTML={{ __html: choice.description }}></Paragraph>
+                                                    </>
+
+                                                )}
+                                            </figcaption>
+                                        </figure>
+                                    </FormLabel>
+                                </Paragraph>
+                            </FormField>
                         );
                     })}
+
                 </div>
             </Fieldset>
+            {infoField && (
+                <div className="extra-info-container">
+                    <button
+                        className="more-info-btn"
+                        onClick={(e) => { setIsInfoVisible(!isInfoVisible); e.preventDefault(); }}
+                    >Info</button>
+                    <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
+                        <div className="info-card-container">
+                            <Paragraph>
+                                {infoField}
+                            </Paragraph>
+
+                            <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
