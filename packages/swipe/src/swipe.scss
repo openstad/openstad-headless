@@ -272,7 +272,7 @@
       opacity: 0.9;
       line-height: 1.4;
       color: #fff;
-      font-family: "TheSans C4s";
+      font-family: var(--setSwipeFontFamily--3, inherit);
       font-weight: 530;
     }
   }

@@ -387,7 +387,7 @@ label.utrecht-form-label {
 
       .update-button {
         background: #fff;
-        font-family: "TheSans B4 SemiLight";
+        font-family: var(--setSwipeFontFamily--2, inherit);
         font-weight: 500;
         font-size: 18px;
         line-height: 130%;
@@ -412,7 +412,7 @@ label.utrecht-form-label {
         background: #0000;
         border: solid 1px #fff;
         position: relative;
-        font-family: "TheSans B4 SemiLight";
+        font-family: var(--setSwipeFontFamily--2, inherit);
         font-weight: 500;
         font-size: 18px;
         line-height: 130%;
@@ -503,7 +503,7 @@ label.utrecht-form-label {
           text-decoration: underline;
           color: rgba(75, 75, 75, 1);
           pointer-events: all;
-          font-family: "TheSans B4 SemiLight";
+          font-family: var(--setSwipeFontFamily--2, inherit);
           font-weight: 500;
           font-size: 20px;
           line-height: 130%;
@@ -557,7 +557,7 @@ label.utrecht-form-label {
         padding-bottom: 30px;
 
         .info-field-title {
-          font-family: "The Mix Bold";
+          font-family: var(--setSwipeFontFamily--1, inherit);
           font-weight: 700;
           line-height: 135%;
           font-size: var(--youth-page-card-title-font-size);
@@ -565,7 +565,7 @@ label.utrecht-form-label {
         }
 
         .info-field-description {
-          font-family: "TheSans B4 SemiLight";
+          font-family: var(--setSwipeFontFamily--2, inherit);
           font-weight: 500;
           font-style: Regular;
           line-height: 150%;
@@ -917,7 +917,7 @@ label.utrecht-form-label {
     .question-type-text .utrecht-form-field__label .utrecht-form-label,
     .a-b-slider-container .utrecht-form-field__label .utrecht-form-label,
     .utrecht-form-fieldset__legend.utrecht-form-fieldset__legend--html-legend {
-      font-family: "The Mix Bold";
+      font-family: var(--setSwipeFontFamily--1, inherit);
       font-weight: 700;
       line-height: 135%;
       font-size: var(--youth-page-card-title-font-size);
