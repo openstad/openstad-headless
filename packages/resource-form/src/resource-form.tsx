@@ -141,24 +141,25 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const configureFormData = (formData, publish = false) => {
         const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags', 'documents'];
         const extraData = {};
+        let configuredFormData = {...formData };
 
-        formData = addTagsToFormData(formData);
+        configuredFormData = addTagsToFormData(configuredFormData);
 
-        for (const key in formData) {
-            if (formData.hasOwnProperty(key)) {
+        for (const key in configuredFormData) {
+            if (configuredFormData.hasOwnProperty(key)) {
                 if (!dbFixedColumns.includes(key)) {
-                    extraData[key] = formData[key];
-                    delete formData[key];
+                    extraData[key] = configuredFormData[key];
+                    delete configuredFormData[key];
                 }
             }
         }
 
-        formData.extraData = extraData;
-        formData.publishDate = publish ? new Date() : '';
-        formData.confirmationUser = confirmationUser;
-        formData.confirmationAdmin = confirmationAdmin;
+        configuredFormData.extraData = extraData;
+        configuredFormData.publishDate = publish ? new Date() : '';
+        configuredFormData.confirmationUser = confirmationUser;
+        configuredFormData.confirmationAdmin = confirmationAdmin;
 
-        return formData;
+        return configuredFormData;
     }
 
     const redirectAfterSaveOrCreate = (resource: { id?: string }, reloadPageAsFallback = false) => {
