@@ -91,3 +91,46 @@
 .osc .like-widget-container div h6 {
   text-align: start;
 }
+
+
+/* Micro like widget */
+.like-widget-container.micro-score .like-option-container,
+.utrecht-button-group.variant-micro-score > div{
+  --microLikeBackground: var(--setMicroLikeBackground, var(--utrecht-button-primary-action-background-color));
+  --microLikeColor: var(--setMicroLikeColor, var(--utrecht-button-primary-action-color));
+  --microLikeBorderRadius: var(--setMicroLikeBorderRadius, var(--utrecht-button-border-radius, 0px));
+
+  --microLikeBackgroundHover: var(--setMicroLikeBackgroundHover, var(--utrecht-button-primary-action-background-color-hover));
+  --microLikeColorHover: var(--setMicroLikeColorHover, var(--utrecht-button-primary-action-hover-color));
+  
+
+  background: var(--microLikeBackground);
+  display: grid;
+  flex-wrap: nowrap;
+  align-items: center;
+  grid-template-columns: auto 1fr auto;
+  overflow: hidden;
+  border-radius: var(--microLikeBorderRadius);
+}
+
+.like-widget-container.micro-score .like-option-container .like-counter,
+.utrecht-button-group.variant-micro-score > div .comment-reaction-score{
+  text-align: center;
+  padding: 0 16px;
+  color: var(--microLikeColor);
+}
+
+.like-widget-container.micro-score .like-option-container button,
+.utrecht-button-group.variant-micro-score > div button{
+  background: unset;
+  border: unset;
+  color: var(--microLikeColor);
+}
+.like-widget-container.micro-score .like-option-container button:focus-within,
+.utrecht-button-group.variant-micro-score > div button:focus-within,
+.like-widget-container.micro-score .like-option-container button:hover,
+.utrecht-button-group.variant-micro-score > div button:hover{
+  background: var(--microLikeBackgroundHover);
+  border: unset;
+  color: var(--microLikeColorHover);
+}

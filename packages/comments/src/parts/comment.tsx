@@ -212,63 +212,8 @@ function Comment({
             {args.comment.createDateHumanized}
           </Paragraph>
           <ButtonGroup className={`variant-${variant}`}>
-            {widgetContext.canLike && (
-              canLike() ? (
-                <Button
-                  appearance='secondary-action-button'
-                  className={hasUserLiked ? `active` : ''}
-                  onClick={handleLike}>
-                  <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
-                  {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
-                  {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
-                </Button>
-              ) : (
-                <Button disabled>
-                  <i className="ri-thumb-up-line"></i>
-                  {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
-                  {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
-                </Button>
-              )
-            )}
-            {variant == 'micro-score' && (
-                <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netPositiveVotes}</Paragraph>
-              )}
-            {widgetContext.canDislike && (
-                canLike() ? (
-                <Button
-                  appearance='secondary-action-button'
-                  className={hasUserDisliked ? `active` : ''}
-                  onClick={handleDislike}>
-                  <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
-                  {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
-                  {variant == 'micro-score' && (<span className='sr-only'>Mee oneens</span>)}
-                </Button>
-              ) : (
-                <Button disabled>
-                  <i className="ri-thumb-down-line"></i>
-                  {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
-                </Button>
-              )
-            )}
-            {canReply() ? (
-              <Button
-                appearance='primary-action-button'
-                onClick={() => toggleReplyForm()}>
-                Reageren
-              </Button>
-            ) : null}
-          </ButtonGroup>
-        </section>
-      )}
-
-      {args.comment.parentId && (
-        <>
-          <section className="comment-item-footer">
-            <Paragraph className="comment-reaction-strong-text">
-              {args.comment.createDateHumanized}
-            </Paragraph>
-            <ButtonGroup className={`variant-${variant}`}>
-                {widgetContext.canLike && (
+            <div>
+              {widgetContext.canLike && (
                 canLike() ? (
                   <Button
                     appearance='secondary-action-button'
@@ -290,7 +235,7 @@ function Comment({
                 <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netPositiveVotes}</Paragraph>
               )}
               {widgetContext.canDislike && (
-                  canLike() ? (
+                canLike() ? (
                   <Button
                     appearance='secondary-action-button'
                     className={hasUserDisliked ? `active` : ''}
@@ -303,10 +248,69 @@ function Comment({
                   <Button disabled>
                     <i className="ri-thumb-down-line"></i>
                     {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
-                    {variant == 'micro-score' && (<span className='sr-only'>Mee oneens</span>)}
                   </Button>
                 )
               )}
+            </div>
+            {canReply() ? (
+              <Button
+                appearance='primary-action-button'
+                onClick={() => toggleReplyForm()}>
+                Reageren
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </section>
+      )}
+
+      {args.comment.parentId && (
+        <>
+          <section className="comment-item-footer">
+            <Paragraph className="comment-reaction-strong-text">
+              {args.comment.createDateHumanized}
+            </Paragraph>
+            <ButtonGroup className={`variant-${variant}`}>
+              <div>
+                {widgetContext.canLike && (
+                  canLike() ? (
+                    <Button
+                      appearance='secondary-action-button'
+                      className={hasUserLiked ? `active` : ''}
+                      onClick={handleLike}>
+                      <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                      {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
+                      {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
+                    </Button>
+                  ) : (
+                    <Button disabled>
+                      <i className="ri-thumb-up-line"></i>
+                      {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
+                      {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
+                    </Button>
+                  )
+                )}
+                {variant == 'micro-score' && (
+                  <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netPositiveVotes}</Paragraph>
+                )}
+                {widgetContext.canDislike && (
+                  canLike() ? (
+                    <Button
+                      appearance='secondary-action-button'
+                      className={hasUserDisliked ? `active` : ''}
+                      onClick={handleDislike}>
+                      <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
+                      {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
+                      {variant == 'micro-score' && (<span className='sr-only'>Mee oneens</span>)}
+                    </Button>
+                  ) : (
+                    <Button disabled>
+                      <i className="ri-thumb-down-line"></i>
+                      {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
+                      {variant == 'micro-score' && (<span className='sr-only'>Mee oneens</span>)}
+                    </Button>
+                  )
+                )}
+              </div>
             </ButtonGroup>
           </section>
         </>
@@ -318,7 +322,7 @@ function Comment({
         args.comment.replies.map((reply, index) => {
           return (
             <div className="reaction-container" key={index}>
-              <Comment {...args} comment={reply} disableSubmit={disableSubmit} showDateSeperately={false} />
+              <Comment {...args} variant={variant} comment={reply} disableSubmit={disableSubmit} showDateSeperately={false} />
             </div>
           );
         })}
