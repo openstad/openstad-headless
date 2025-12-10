@@ -347,11 +347,11 @@ const defaultItemRenderer = (
             )}
 
             {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
-              <>
+              <div className="micro-score-container">
                 <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' />
                 <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
                 <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' />
-              </>
+              </div>
             )}
 
             {props.displayArguments ? (
