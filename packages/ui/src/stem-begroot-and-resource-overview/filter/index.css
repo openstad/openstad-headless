@@ -110,10 +110,11 @@
 }
 
 .osc-resources-filter .apply-filters-button {
-  width: 53px;
-  height: 43px;
+  height: auto;
+  min-height: 39px;
+  width: 39px;
+  margin-left: -55px;
   padding: 0;
-  margin-left: -67px;
   background: none;
   padding: 0;
   border: none;
@@ -141,6 +142,8 @@
   display: block;
   flex-shrink: 0;
   position: relative;
+  min-height: 39px;
+  min-width: 39px;
 }
 .osc-resources-filter .toggle-filters-button .filter-icon {
   display: block;
