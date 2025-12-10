@@ -184,7 +184,7 @@ function CommentsInner({
     formIntro,
     canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
     canLike: typeof props.comments?.canLike != 'undefined' ? props.comments.canLike : true,
-    canDislike: typeof props.comments?.canDislike != 'undefined' ? props.comments.canDislike : true,
+    canDislike: typeof props.comments?.canDislike != 'undefined' ? props.comments.canDislike : false,
     canReply: typeof props.comments?.canReply != 'undefined' ? props.comments.canReply : true,
     showForm: typeof props.showForm != 'undefined' ? props.showForm : true,
     closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
