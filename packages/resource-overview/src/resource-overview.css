@@ -471,3 +471,26 @@ p.osc-searchtext {
 .bgColor-D3D3D3 {
   background-color: #d3d3d3;
 }
+
+
+
+/* Micro score */
+.micro-score-container {
+  --microScoreBackground: var(--setMicroScoreBackground, unset);
+  --microScoreColor: var(--setMicroScoreColor, unset);
+  --microScoreBorderRadius: var(--setMicroScoreBorderRadius, unset);
+  --microScorePadding: var(--setMicroScorePadding, unset);
+
+  background: var(--microScoreBackground);
+  color: var(--microScoreColor);
+  border-radius: var(--microScoreBorderRadius);
+  padding: var(--microScorePadding);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.micro-score-container .votes-score{
+  margin: 0;
+  padding: 0 8px;
+  color: inherit;
+}

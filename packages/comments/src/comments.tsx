@@ -59,6 +59,7 @@ export type CommentsWidgetProps = BaseProps &
     searchTerm?: string;
     autoApply?: boolean;
     displayCollapsibleFilter?: boolean;
+    variant?: 'micro-score' | 'medium';
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -87,7 +88,7 @@ function CommentsInner({
   searchTerm = '',
   autoApply = false,
   displayCollapsibleFilter = false,
-
+  variant = 'medium',
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
@@ -196,6 +197,7 @@ function CommentsInner({
     minCharactersError: props?.comments?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
     maxCharactersError: props?.comments?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
     adminLabel: props.comments?.adminLabel || 'admin',
+    variant: variant || 'medium',
     ...props,
   } as CommentsWidgetProps;
 
@@ -492,6 +494,7 @@ function Comments({
   setRefreshComments = () => {},
   onGoToLastPage,
   overridePage,
+  variant = 'medium',
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(false);
@@ -520,6 +523,7 @@ function Comments({
         setRefreshComments={triggerRefresh}
         onGoToLastPage={onGoToLastPage}
         overridePage={overridePage}
+        variant={variant}
         {...props}
       />
     </div>

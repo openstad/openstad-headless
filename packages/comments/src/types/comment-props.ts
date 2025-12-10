@@ -12,4 +12,5 @@ export type CommentProps = {
   adminLabel?: string;
   disableSubmit?: boolean;
   extraReplyButton?: boolean;
+  variant?: 'micro-score' | 'medium';
 };

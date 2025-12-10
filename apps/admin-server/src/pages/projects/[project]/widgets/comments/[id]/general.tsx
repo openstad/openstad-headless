@@ -37,6 +37,7 @@ const formSchema = z.object({
   itemsPerPage: z.coerce.number(),
   displayPagination: z.boolean().optional(),
   displaySearchBar: z.boolean().optional(),
+  variant: z.enum(['micro-score', 'medium']),
   displayCollapsibleFilter: z.boolean().optional(),
   autoApply: z.boolean().optional(),
   extraReplyButton: z.boolean().optional(),
@@ -75,6 +76,7 @@ export default function ArgumentsGeneral({
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
       displaySearchBar: props?.displaySearchBar || false,
+      variant: props?.variant || 'medium',
       displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
       autoApply: props?.autoApply || false,
       extraReplyButton: props?.extraReplyButton || false,
@@ -234,6 +236,32 @@ export default function ArgumentsGeneral({
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="variant"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Variant type</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Standaard" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="micro-score">Stemmen: icons met score</SelectItem>
+                    <SelectItem value="medium">Standaard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+
           <Heading size="xl" className="col-span-full mt-6">Filter</Heading>
           <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
           <FormField
@@ -252,7 +280,7 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
-               
+
           <FormField
             control={form.control}
             name="extraReplyButton"
@@ -280,7 +308,7 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
-        
+
           <Button type="submit">Opslaan</Button>
         </form>
       </Form>
