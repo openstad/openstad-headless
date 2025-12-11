@@ -101,9 +101,10 @@ function Form({
         const isSecondToLast = isNumber && isTotalNumber && currentPage === totalPages - 2;
         const lastFieldIsYouthOutro = isTotalNumber && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro';
         
-        const shouldGoToNextPage = hasPages && hasSetCurrentPage && (
+        const shouldGoToNextPage = hasPages && hasSetCurrentPage && (!lastFieldIsYouthOutro || (
             !isSecondToLast ||
             (isSecondToLast && lastFieldIsYouthOutro)
+          )
         );
         
         if (isNumber && isTotalNumber && shouldGoToNextPage) {
