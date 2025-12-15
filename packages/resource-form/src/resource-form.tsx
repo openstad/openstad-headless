@@ -211,11 +211,11 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         }
     }
 
+    const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
     useEffect(() => {
-        const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
         const url = new URL(window.location.href);
 
-        if (Array.isArray(formFields)) {
+        if (Array.isArray(formFields) && hasRole(currentUser, 'member')) {
             formFields.forEach(field => {
                 if (field && field.fieldKey && params.hasOwnProperty(field.fieldKey)) {
                     url.searchParams.delete(field.fieldKey);
@@ -224,7 +224,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         }
        
         window.history.replaceState(null, '', url.toString());
-    }, [formFields]);
+    }, [params]);
+
 
     return (isLoading || !fillDefaults) ? null : (
         <div className="osc">

@@ -63,7 +63,7 @@ export const InitializeFormFields = (items, data) => {
             }
 
             const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
-            if (params) {
+            if (params && params[item.fieldKey]) {
                 fieldData['defaultValue'] = params[item.fieldKey];
             }
 
