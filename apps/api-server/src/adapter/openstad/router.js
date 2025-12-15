@@ -120,6 +120,7 @@ router
   .get(async function (req, res, next) {
     // check redirect first
     let returnTo = req.query.returnTo;
+    returnTo = decodeURIComponent(returnTo);
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
     returnTo = String(returnTo);
     if (!returnTo.match(/\[\[jwt\]\]/) ) returnTo = returnTo + (returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
