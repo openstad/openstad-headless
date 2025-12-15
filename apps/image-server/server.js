@@ -187,7 +187,7 @@ app.get('/image/*',
       const pump = promisify(pipeline);
       
       try {
-        const s3Url = `${endpoint}/images/${req.url}`;
+        const s3Url = `${endpoint}/images/${baseName}`;
         let response;
         try {
           response = await fetch(s3Url);
