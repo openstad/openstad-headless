@@ -246,6 +246,7 @@ router.route('/')
       projectId: req.project.id,
       role: req.body.role || req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
+      emailNotificationConsent: null
     };
     
     db.User
