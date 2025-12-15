@@ -27,13 +27,11 @@ import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { Item, Matrix, MatrixOption, Option } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import {useFieldArray, useForm} from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import { YesNoSelect } from "@/lib/form-widget-helpers";
-import { ProjectSettingProps } from "@openstad-headless/types";
-import { info } from 'console';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -87,8 +85,6 @@ const formSchema = z.object({
   multiple: z.boolean().optional(),
   randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
-  imageAlt: z.string().optional(),
-  imageDescription: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
   maxChoices: z.string().optional(),
@@ -108,6 +104,15 @@ const formSchema = z.object({
   infoField: z.string().optional(),
   infofieldExplanation: z.boolean().optional(),
   numberingStyle: z.string().optional(),
+  images: z
+    .array(z.object({
+      url: z.string(),
+      name: z.string().optional(),
+      imageDescription: z.string().optional(),
+      imageAlt: z.string().optional(),
+    }))
+    .optional()
+    .default([]),
 
 
   // Keeping these for backwards compatibility
@@ -119,7 +124,16 @@ const formSchema = z.object({
   image2Upload: z.string().optional(),
   text2: z.string().optional(),
   key2: z.string().optional(),
+  imageAlt: z.string().optional(),
+  imageDescription: z.string().optional(),
 });
+
+type ImageArray = {
+  url: string;
+  name?: string;
+  imageAlt?: string;
+  imageDescription?: string;
+}
 
 const matrixDefault = {
   columns: [],
@@ -190,12 +204,9 @@ export default function WidgetEnqueteItems(
           options: values.options || [],
           multiple: values.multiple || false,
           randomizeItems: values.randomizeItems || false,
-          image: values.image || '',
           image_b: values.image_b || '',
           description_b: values.description_b || '',
           key_b: values.key_b || '',
-          imageAlt: values.imageAlt || '',
-          imageDescription: values.imageDescription || '',
           fieldRequired: values.fieldRequired || false,
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
@@ -210,6 +221,7 @@ export default function WidgetEnqueteItems(
           infoField: values.infoField || '',
           infofieldExplanation: values.infofieldExplanation || false,
           numberingStyle: values.numberingStyle || 'none',
+          images: values?.images || [],
           // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
@@ -217,6 +229,9 @@ export default function WidgetEnqueteItems(
           image2: values.image2 || '',
           text2: values.text2 || '',
           key2: values.key2 || '',
+          imageDescription: values.imageDescription || '',
+          imageAlt: values.imageAlt || '',
+          image: values.image || '',
         },
       ]);
     }
@@ -326,9 +341,6 @@ export default function WidgetEnqueteItems(
     options: [],
     multiple: false,
     randomizeItems: false,
-    image: '',
-    imageAlt: '',
-    imageDescription: '',
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
     infoBlockExtraButton: '',
@@ -346,6 +358,7 @@ export default function WidgetEnqueteItems(
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
     infoField: '',
+    images: [],
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -354,6 +367,9 @@ export default function WidgetEnqueteItems(
     image2: '',
     text2: '',
     key2: '',
+    image: '',
+    imageAlt: '',
+    imageDescription: '',
   });
 
   const form = useForm<FormData>({
@@ -375,7 +391,17 @@ export default function WidgetEnqueteItems(
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
-      form.reset({
+      // Migrate fallback image fields to images array if needed
+      let images = selectedItem.images || [];
+      if ((!images || images.length === 0) && selectedItem.image) {
+        images = [{
+          url: selectedItem.image,
+          imageAlt: selectedItem.imageAlt || '',
+          imageDescription: selectedItem.imageDescription || '',
+        }];
+      }
+
+      const formValues = {
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
         fieldKey: selectedItem.fieldKey || '',
@@ -389,9 +415,6 @@ export default function WidgetEnqueteItems(
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
         randomizeItems: selectedItem.randomizeItems || false,
-        image: selectedItem.image || '',
-        imageAlt: selectedItem.imageAlt || '',
-        imageDescription: selectedItem.imageDescription || '',
         infoBlockStyle: selectedItem.infoBlockStyle || 'default',
         infoBlockShareButton: selectedItem.infoBlockShareButton || false,
         infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
@@ -410,7 +433,7 @@ export default function WidgetEnqueteItems(
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
         infoField: selectedItem.infoField || '',
         infofieldExplanation: selectedItem.infofieldExplanation || false,
-
+        images,
 
         // Keeping these for backwards compatibility
         image1: selectedItem.image1 || '',
@@ -419,7 +442,12 @@ export default function WidgetEnqueteItems(
         image2: selectedItem.image2 || '',
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
-      });
+        image: '',
+        imageAlt: '',
+        imageDescription: '',
+      };
+
+      form.reset(formValues);
       setOptions(selectedItem.options || []);
       setMatrixOptions(selectedItem.matrix || matrixDefault);
     }
@@ -602,6 +630,11 @@ export default function WidgetEnqueteItems(
       setIsFieldKeyUnique(isUnique);
     }
   }, [form.watch("fieldKey"), selectedItem]);
+
+  const { fields: imageFields, remove: removeImage } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
 
   return (
     <div>
@@ -1416,21 +1449,89 @@ export default function WidgetEnqueteItems(
                           form={form}
                           project={project as string}
                           fieldName="imageUpload"
-                          imageLabel="Afbeelding 1"
+                          imageLabel="Afbeeldingen uploaden"
                           allowedTypes={["image/*"]}
                           onImageUploaded={(imageResult) => {
-                            const image = imageResult ? imageResult.url : '';
+                            let defaultImageArr: ImageArray[] = [];
 
-                            form.setValue("image", image);
+                            if (!!form.watch("image")) {
+                              defaultImageArr = [{
+                                url: form.getValues('image') || '',
+                                name: '',
+                                imageAlt: form.getValues('imageAlt') || '',
+                                imageDescription: form.getValues('imageDescription') || ''
+                              }];
+
+                              form.setValue('image', '');
+                              form.setValue('imageAlt', '');
+                              form.setValue('imageDescription', '');
+                            }
+
+                            let array = [...(form.getValues('images') || defaultImageArr)];
+                            array.push(imageResult);
+                            form.setValue('images', array);
                             form.resetField('imageUpload');
+                            form.trigger('images');
                           }}
                         />
 
-                        {!!form.getValues('image') && (
-                          <div style={{ position: 'relative' }}>
-                            <img src={form.getValues('image')} />
-                          </div>
-                        )}
+                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                          {imageFields.length > 0 && (
+                            <>
+                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
+                              <section className="grid col-span-full grid-cols-1 gap-y-4">
+                                { imageFields.map(({ id, url }, index) => {
+                                  return (
+                                    <div key={id} className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
+                                      <img src={url} alt={url} />
+                                      <Button
+                                        color="red"
+                                        onClick={() => {
+                                          removeImage(index);
+                                        }}
+                                        className="absolute left-0 top-0">
+                                        <X size={24} />
+                                      </Button>
+
+                                      <FormField
+                                        control={form.control}
+                                        name={`images.${index}.imageAlt`}
+                                        render={({ field }) => (
+                                          <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                            <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                {...field}
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+
+                                      <FormField
+                                        control={form.control}
+                                        name={`images.${index}.imageDescription`}
+                                        render={({ field }) => (
+                                          <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                            <FormLabel>Beschrijving afbeelding</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                {...field}
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+
+                                    </div>
+                                  );
+                                })}
+                              </section>
+                            </>
+                          )}
+                        </div>
 
                         <FormField
                           control={form.control}
