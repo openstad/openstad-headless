@@ -137,6 +137,7 @@ export default function CreateUserProjects() {
       toast.error(error.message || 'User kon niet worden bijgewerkt')
     } else {
       toast.success('User is bijgewerkt')
+      window.location.reload();
     }
 
   }
@@ -204,13 +205,17 @@ export default function CreateUserProjects() {
                     </Paragraph>
 
                     <Paragraph className="text-sm text-muted-foreground grid items-center gap-2 grid-cols-[15px_1fr]">
-                      <Checkbox
-                        defaultChecked={user?.emailNotificationConsent || false}
-                        onCheckedChange={(checked) => {
-                          addEmailNotificationConsent(project.id, Boolean(checked));
-                        }}
-                      />
-                      <span>Toestemming voor e-mail notificaties</span>
+                      { !!user?.role && (
+                        <>
+                          <Checkbox
+                            defaultChecked={user?.emailNotificationConsent || false}
+                            onCheckedChange={(checked) => {
+                              addEmailNotificationConsent(project.id, Boolean(checked));
+                            }}
+                          />
+                          <span>Toestemming voor e-mail notificaties</span>
+                        </>
+                      )}
                     </Paragraph>
 
                   </li>
