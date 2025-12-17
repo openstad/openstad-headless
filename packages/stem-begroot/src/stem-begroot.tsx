@@ -125,7 +125,6 @@ function StemBegroot({
   displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
-  // Initialize storage instances with project ID
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(props.projectId),
     [props.projectId]
@@ -141,10 +140,65 @@ function StemBegroot({
     api: props.api,
   });
 
-  const { data: allTags } = datastore.useTags({
+   const { data: allTags } = datastore.useTags({
     projectId: props.projectId,
     type: ''
   });
+
+  const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
+
+  // Restore pending-budget-vote from server if UUID is in URL
+  useEffect(() => {
+
+    if (pendingVoteFetched) return;
+
+    const url = new URL(window.location.href);
+    const pendingUuidFromUrl = url.searchParams.get('pendingBudgetVote');
+
+    async function restoreFromServer(uuid: string) {
+      try {
+        if (!uuid) return;
+
+        setPendingVoteFetched(true);
+
+        if (!props.api || !props.api.url) return;
+
+        let apiUrl =`${props.api.url}/api/pending-budget-vote/${uuid}`;
+
+        const pendingBudgetVote = await fetch(apiUrl, { headers: {
+          'Content-Type': 'application/json'
+        }
+        });
+
+        if (!pendingBudgetVote.ok || !pendingBudgetVote) {
+          console.error('Failed to fetch pending budget vote from server', pendingBudgetVote.statusText);
+          return;
+        }
+
+        const pendingBudgetVoteData = await pendingBudgetVote.json();
+
+        if (!pendingBudgetVoteData || !pendingBudgetVoteData.data) {
+          console.error('No pending budget vote data found on server');
+          return;
+        }
+
+        const { data } = pendingBudgetVoteData;
+
+        if (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag') {
+          votePendingStorage.setVotePendingPerTag(data as any);
+        } else {
+          votePendingStorage.setVotePending(data as any);
+        }
+
+      } catch (e) {
+        console.error('Failed to restore pending budget vote from server', e);
+      }
+    }
+
+    if (pendingUuidFromUrl) {
+      restoreFromServer(pendingUuidFromUrl);
+    }
+  }, [datastore, props.votes.voteType, votePendingStorage]);
 
   const startingStep = props?.votes?.voteType === "countPerTag" || props?.votes?.voteType === "budgetingPerTag" ? -1 : 0;
 
@@ -365,17 +419,16 @@ function StemBegroot({
     }
   }
 
-  function prepareForVote(e: React.MouseEvent<HTMLElement, MouseEvent> | null) {
+  async function prepareForVote(
+    e: React.MouseEvent<HTMLElement, MouseEvent> | null
+  ) {
     if (e) e.stopPropagation();
 
     if (props.votes.voteType !== 'countPerTag' && props.votes.voteType !== 'budgetingPerTag') {
       const resourcesToVoteFor: { [key: string]: any } = {};
-      (selectedResources.length ? selectedResources : []).forEach(
-        (resource: any) => {
-          resourcesToVoteFor[resource.id] = 'yes';
-        }
-      );
-
+      (selectedResources.length ? selectedResources : []).forEach((resource: any) => {
+        resourcesToVoteFor[resource.id] = 'yes';
+      });
       votePendingStorage.setVotePending(resourcesToVoteFor);
     } else {
       const resourcesToVoteForPerTag: { [tag: string]: { [key: string]: any } } = {};
@@ -838,6 +891,9 @@ function StemBegroot({
               step3={props.step3 || ''}
               stemCodeTitle={props.stemCodeTitle}
               step3Title={step3Title || ''}
+              projectId={props.projectId}
+              voteType={props.votes.voteType}
+              apiUrl={props?.api?.url || ''}
             />
           ) : null}
 

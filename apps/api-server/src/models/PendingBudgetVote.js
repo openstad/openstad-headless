@@ -16,6 +16,7 @@ module.exports = function (db, sequelize, DataTypes) {
     {
       tableName: 'pending_budget_votes',
       paranoid: false,
+      updatedAt: false,
     }
   );
 
