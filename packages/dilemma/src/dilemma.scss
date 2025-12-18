@@ -277,8 +277,8 @@
                 transition: all .2s ease-in-out;
 
                 &:has(.active) {
-                    background: #1160A1;
-                    border: 2px solid #1160A1;
+                    background: var(--setActiveOverviewBackground, var(--utrecht-button-primary-action-background-color, #094B81));
+                    border: 2px solid var(--setActiveOverviewBackground, var(--utrecht-button-primary-action-background-color, #094B81));
 
                     .utrecht-heading-4,
                     .utrecht-paragraph {
