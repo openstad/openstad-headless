@@ -86,7 +86,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [dragTransform, setDragTransform] = useState<string>('');
   const animationFrameRef = useRef<number | null>(null);
 
-  const [isInfoVisible, setIsInfoVisible] = useState(false);
+  const [infoVisibleCardId, setInfoVisibleCardId] = useState<string | null>(null);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
 
@@ -254,7 +254,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }, [enableKeyboard, handleSwipeLeft, handleSwipeRight]);
 
   const removeCurrentCard = () => {
-    setIsInfoVisible(false);
+    setInfoVisibleCardId(null);
 
     setTimeout(() => {
       const remainingUnanswered = getUnansweredCards();
@@ -700,13 +700,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     )}
                   </div>
                   {card.infoField && (
-                    <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
-                      <div className="info-card-container">
+                    <div
+                      className="info-card"
+                      aria-hidden={infoVisibleCardId !== card.id ? 'true' : 'false'}
+                      onClick={() => { setInfoVisibleCardId(null); }}
+                    >
+                      <div className="info-card-container" onClick={e => e.stopPropagation()}>
                         <Paragraph>
                           {card.infoField}
                         </Paragraph>
-
-                        <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
+                        <Button appearance="primary-action-button" onClick={() => { setInfoVisibleCardId(null); }}>Snap ik</Button>
                       </div>
                     </div>
                   )}
@@ -732,7 +735,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             </button>
             <button
               className="swipe-info-btn"
-              onClick={(e) => (e.preventDefault(), setIsInfoVisible(!isInfoVisible))}
+              onClick={(e) => {
+                e.preventDefault();
+                setInfoVisibleCardId(infoVisibleCardId === currentCardId ? null : currentCardId);
+              }}
               disabled={!unansweredCards[0]?.infoField}
               aria-label="Toon info"
             >
