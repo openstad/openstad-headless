@@ -13,7 +13,7 @@
   position: absolute;
   top: 48px;
   left: 24px;
-  color: var(--setBackColor, #094B81);
+  color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
   display: flex;
   z-index: 99;
   gap: 4px;
@@ -36,7 +36,7 @@
     mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    background-color: var(--setBackColor, #094B81);
+    background-color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
     display: block;
   }
 }
@@ -52,7 +52,7 @@
   --swipe-like-fill: var(--setSwipeLikeFill, white);
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
 
-  --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, #1260A1);
+  --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, var(--utrecht-button-primary-action-background-color, #1260A1));
 
   max-width: 500px;
   width: 100%;
