@@ -71,7 +71,7 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
 
           document.location.href = loginUrl.toString();
         }}>
-        {stemCodeTitle} 222
+        {stemCodeTitle}
       </Button>
     </>
   );
