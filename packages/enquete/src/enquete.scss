@@ -498,7 +498,7 @@ label.utrecht-form-label {
         position: absolute;
         top: 36px;
         left: 24px;
-        color: var(--setBackColor, #094B81);
+        color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
         z-index: 3;
 
         &:before {
@@ -508,7 +508,7 @@ label.utrecht-form-label {
           height: 20px;
           mask-size: contain;
           mask-repeat: no-repeat;
-          background-color: var(--setBackColor, #094B81);
+          background-color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
 
         }
       }
