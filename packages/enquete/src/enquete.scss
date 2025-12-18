@@ -3,7 +3,7 @@
   justify-content: space-between;
   flex-direction: column;
   grid-gap: 1rem;
-  border: solid 1px var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
+  border: solid var(--setEnqueteBorderWidth, 1px) var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
 .form-container>div {
@@ -236,7 +236,7 @@ label.utrecht-form-label {
   --youth-outro-card-title-font-size: var(--setYouthOutroCardTitleFontSize, 32px);
   --youth-outro-card-description-font-size: var(--setYouthOutroCardDescriptionFontSize, 18px);
 
-  --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, #F8D62D);
+  --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, var(--utrecht-button-primary-action-hover-background-color, #F8D62D));
 }
 
 .osc-enquete-item-content {
@@ -467,7 +467,7 @@ label.utrecht-form-label {
       background-color: unset;
 
       position: absolute;
-      inset: 0;
+      inset: var(--setEnqueteBorderWidth, 1px);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -498,7 +498,7 @@ label.utrecht-form-label {
         position: absolute;
         top: 36px;
         left: 24px;
-        color: var(--setBackColor, #094B81);
+        color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
         z-index: 3;
 
         &:before {
@@ -508,7 +508,7 @@ label.utrecht-form-label {
           height: 20px;
           mask-size: contain;
           mask-repeat: no-repeat;
-          background-color: var(--setBackColor, #094B81);
+          background-color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
 
         }
       }

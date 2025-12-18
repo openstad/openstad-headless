@@ -274,8 +274,8 @@ const handleNextClick = useCallback(() => {
       <div className="dilemma-field dilemma-finished" role="region" aria-live="polite">
         <div className="dilemma-finished-content">
           <div className="dilemma-intro">
-            <Heading level={2}>Jouw keuzes</Heading>
-            <Paragraph>Bekijk en wijzig eventueel je antwoorden op de dilemma's:</Paragraph>
+            <Heading level={2}>Gemaakte keuzes</Heading>
+            <Paragraph>Bekijk en wijzig waar nodig de antwoorden.</Paragraph>
           </div>
 
           <div className="dilemma-actions">
@@ -332,7 +332,7 @@ const handleNextClick = useCallback(() => {
                   <div className="dilemma-summary-explanation">
                     <textarea
                       id={`explanation-${dilemma.id}`}
-                      placeholder="Voeg hier een toelichting (optioneel) toe..."
+                      placeholder="Voeg een korte uitleg (niet verplicht) toe..."
                       value={explanations[dilemma.id] || ''}
                       onChange={(e) => handleExplanationChange(dilemma.id, e.target.value)}
                       rows={3}
@@ -446,11 +446,11 @@ const handleNextClick = useCallback(() => {
       {showExplanationDialog && (
         <div className="explanation-dialog" role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
           <div className="explanation-dialog-content">
-            <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
-            <Paragraph>Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
+            <Heading level={3} id="explanation-dialog-title">Korte uitleg</Heading>
+            <Paragraph>Zodat we beter begrijpen wat belangrijk is.</Paragraph>
             <textarea
               autoFocus
-              placeholder='Toelichting...'
+              placeholder='Ik maak deze keuze, omdat...'
               rows={5}
               value={explanations[currentDilemma.id] || ''}
               onChange={(e) => handleExplanationChange(currentDilemma.id, e.target.value)}
