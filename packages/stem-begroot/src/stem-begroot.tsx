@@ -165,10 +165,15 @@ function StemBegroot({
 
         let apiUrl =`${props.api.url}/api/pending-budget-vote/${uuid}`;
 
-        const pendingBudgetVote = await fetch(apiUrl, { headers: {
-          'Content-Type': 'application/json'
-        }
+        const pendingBudgetVote = await fetch(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
+
+        // Remove pendingBudgetVote from URL
+        url.searchParams.delete('pendingBudgetVote');
+        window.history.replaceState({}, document.title, url.toString());
 
         if (!pendingBudgetVote.ok || !pendingBudgetVote) {
           console.error('Failed to fetch pending budget vote from server', pendingBudgetVote.statusText);
