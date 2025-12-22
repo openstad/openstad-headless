@@ -86,7 +86,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const [dragTransform, setDragTransform] = useState<string>('');
   const animationFrameRef = useRef<number | null>(null);
 
-  const [isInfoVisible, setIsInfoVisible] = useState(false);
+  const [infoVisibleCardId, setInfoVisibleCardId] = useState<string | null>(null);
   const [showExplanationDialog, setShowExplanationDialog] = useState(false);
   const [isDialogClosing, setIsDialogClosing] = useState(false);
 
@@ -254,7 +254,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   }, [enableKeyboard, handleSwipeLeft, handleSwipeRight]);
 
   const removeCurrentCard = () => {
-    setIsInfoVisible(false);
+    setInfoVisibleCardId(null);
 
     setTimeout(() => {
       const remainingUnanswered = getUnansweredCards();
@@ -573,8 +573,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         </button>
         <div className="swipe-widget swipe-finished" role="region" aria-live="polite" tabIndex={0}>
           <div className="swipe-finished-content">
-            <Heading level={2}>Jouw antwoorden</Heading>
-            <Paragraph>Bekijk en wijzig eventueel je antwoorden op de stellingen:</Paragraph>
+            <Heading level={2}>Gemaakte keuzes</Heading>
+            <Paragraph>Bekijk en wijzig waar nodig de antwoorden.</Paragraph>
 
 
             <div className="swipe-summary">
@@ -615,7 +615,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     <div className="swipe-summary-explanation">
                       <textarea
                         id={`explanation-${card.id}`}
-                        placeholder="Voeg hier een toelichting (optioneel) toe..."
+                        placeholder="Voeg een korte uitleg (niet verplicht) toe..."
                         value={explanations[card.id] || ''}
                         onChange={(e) => handleExplanationChange(card.id, e.target.value)}
                         rows={3}
@@ -700,13 +700,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     )}
                   </div>
                   {card.infoField && (
-                    <div className="info-card" aria-hidden={!isInfoVisible ? 'true' : 'false'} onClick={() => { setIsInfoVisible(false); }}>
-                      <div className="info-card-container">
+                    <div
+                      className="info-card"
+                      aria-hidden={infoVisibleCardId !== card.id ? 'true' : 'false'}
+                      onClick={() => { setInfoVisibleCardId(null); }}
+                    >
+                      <div className="info-card-container" onClick={e => e.stopPropagation()}>
                         <Paragraph>
                           {card.infoField}
                         </Paragraph>
-
-                        <Button appearance="primary-action-button" onClick={() => { setIsInfoVisible(false); }}>Snap ik</Button>
+                        <Button appearance="primary-action-button" onClick={() => { setInfoVisibleCardId(null); }}>Snap ik</Button>
                       </div>
                     </div>
                   )}
@@ -732,7 +735,10 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             </button>
             <button
               className="swipe-info-btn"
-              onClick={(e) => (e.preventDefault(), setIsInfoVisible(!isInfoVisible))}
+              onClick={(e) => {
+                e.preventDefault();
+                setInfoVisibleCardId(infoVisibleCardId === currentCardId ? null : currentCardId);
+              }}
               disabled={!unansweredCards[0]?.infoField}
               aria-label="Toon info"
             >
@@ -759,11 +765,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         {showExplanationDialog && (
           <div className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="explanation-dialog-title">
             <div className="explanation-dialog-content">
-              <Heading level={3} id="explanation-dialog-title">Kun je kort uitleggen waarom dit belangrijk is voor jou?</Heading>
-              <Paragraph> Zo begrijpen we beter wat jongeren écht nodig hebben in de wijk.</Paragraph>
+              <Heading level={3} id="explanation-dialog-title">Korte uitleg</Heading>
+              <Paragraph>Zodat we beter begrijpen wat belangrijk is.</Paragraph>
               <textarea
                 autoFocus
-                placeholder='Toelichting...'
+                placeholder='Ik maak deze keuze, omdat...'
                 rows={5}
                 value={explanations[currentCardId] || ''}
                 onChange={(e) => handleExplanationChange(String(currentCardId), e.target.value)}
