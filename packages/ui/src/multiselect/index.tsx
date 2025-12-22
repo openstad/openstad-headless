@@ -37,7 +37,7 @@ export function MultiSelect({
     };
   }, []);
 
-  const checkedOptions = options.filter(option => option.checked);
+  const checkedOptions = options?.filter(option => option.checked);
   let openButtonLabel = label;
   if (checkedOptions.length > 1) {
     openButtonLabel = `${checkedOptions.length} optie${checkedOptions.length !== 1 ? 's' : ''} geselecteerd`;
