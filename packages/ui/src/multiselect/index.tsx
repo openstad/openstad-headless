@@ -8,13 +8,13 @@ import "@utrecht/design-tokens/dist/root.css";
 import { Button, Checkbox, FormLabel, Paragraph, FormField } from "@utrecht/component-library-react";
 
 export function MultiSelect({
-  label,
+  label = 'Selecteer optie',
   onItemSelected,
   defaultOpen,
   options,
   id
 }: {
-  label: string;
+  label?: string;
   options: Array<{ value: string; label: string; checked?: boolean }>;
   defaultOpen?: boolean;
   id: string;
@@ -37,6 +37,13 @@ export function MultiSelect({
     };
   }, []);
 
+  const checkedOptions = options?.filter(option => option.checked) || [];
+  let openButtonLabel = label;
+  if (checkedOptions.length > 1) {
+    openButtonLabel = `${checkedOptions.length} optie${checkedOptions.length !== 1 ? 's' : ''} geselecteerd`;
+  } else if (checkedOptions.length === 1) {
+    openButtonLabel = checkedOptions[0].label;
+  }
 
   return (
     <div className="multi-select" ref={containerRef}>
@@ -51,7 +58,7 @@ export function MultiSelect({
         role="combobox"
         aria-haspopup="listbox"
       >
-        {label}
+        {openButtonLabel}
         <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
       </Button>
 
@@ -61,7 +68,7 @@ export function MultiSelect({
           role="listbox"
           aria-multiselectable="true"
         >
-          {options.map((option, index) => {
+          {options?.map((option, index) => {
             return (
               <div
                 role="option"
