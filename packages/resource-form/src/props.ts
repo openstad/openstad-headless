@@ -75,6 +75,8 @@ export type Item = {
     routingInitiallyHide?: boolean;
     routingSelectedQuestion?: string;
     routingSelectedAnswer?: string;
+    selectAll?: boolean;
+    selectAllLabel?: string;
 };
 
 export type Option = {

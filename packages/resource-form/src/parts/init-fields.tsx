@@ -56,6 +56,8 @@ export const InitializeFormFields = (items, data) => {
                 routingSelectedQuestion: item?.routingSelectedQuestion || '',
                 routingSelectedAnswer: item?.routingSelectedAnswer || '',
                 trigger: item.trigger || '',
+                selectAll: item?.selectAll || false,
+                selectAllLabel: item?.selectAllLabel || '',
             };
 
             if (item.defaultValue) {
