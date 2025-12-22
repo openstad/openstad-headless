@@ -9,6 +9,9 @@ type Props = {
     tagGroupProjectId?: any;
     preFilterTags?: Array<number>;
     parentStopUsingDefaultValue?: boolean;
+    inlineOptions?: boolean;
+    valueSelected?: string;
+    removeActiveTag?: (tagType: string, tagId: number) => void;
 };
 declare const SelectTagFilter: React.ForwardRefExoticComponent<Props & React.RefAttributes<HTMLSelectElement>>;
 export { SelectTagFilter };

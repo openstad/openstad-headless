@@ -1,6 +1,7 @@
 import { Select } from '@openstad-headless/ui/src';
 import React, { forwardRef, useEffect, useState } from 'react';
-import { FormLabel } from "@utrecht/component-library-react";
+import { SubtleButton, FormLabel} from "@utrecht/component-library-react";
+import RadioboxField from "../../form-elements/radio";
 
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
@@ -17,9 +18,12 @@ type Props = {
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
   parentStopUsingDefaultValue?: boolean;
+  inlineOptions?: boolean;
+  valueSelected?: string;
+  removeActiveTag?: (tagType: string, tagId: number) => void;
 };
 
-type TagDefinition = { id: number; name: string; projectId?: any };
+type TagDefinition = { id: number; name: string; type:string; projectId?: any };
 
 const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
   ({
@@ -29,11 +33,16 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
      onUpdateFilter,
      preFilterTags = undefined,
      parentStopUsingDefaultValue = false,
+     inlineOptions = false,
+     valueSelected = '',
+     removeActiveTag,
      ...props
    },
     ref
   ) => {
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
+    const [resetCounter, setResetCounter] = useState(0);
+    const [stopUsingDefaultValueAfterReset, setStopUsingDefaultValueAfterReset] = useState(false);
 
     const useTagsConfig: {
       type: string;
@@ -89,7 +98,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     }, [preFilterTags]);
 
     return (
-      tags.length > 0 && (
+      (tags.length > 0 && !inlineOptions) ? (
         <div className="form-element">
           <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
           <Select
@@ -112,8 +121,44 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
           >
           </Select>
         </div>
+      ) : tags.length > 0 && inlineOptions && (
+        <div className="form-element">
+          <FormLabel>
+            {props.placeholder|| 'Selecteer item'}
+            {!!valueSelected && (
+              <SubtleButton
+                appearance="link"
+                onClick={() => {
+                  setStopUsingDefaultValueAfterReset(true);
+                  setResetCounter(currCount => currCount + 1);
+                  removeActiveTag && removeActiveTag(tagType, Number(valueSelected));
+                }}
+              >
+                Wis
+              </SubtleButton>
+            )}
+          </FormLabel>
+          <RadioboxField
+              key={resetCounter}
+              fieldKey={tagType}
+              choices={(tags || []).map((tag: TagDefinition) => ({
+                value: tag.id,
+                label: tag.name,
+              }))}
+              title=""
+              onChange={({name, value}) => {
+                setStopUsingDefaultValue(true);
+                onUpdateFilter && onUpdateFilter(value, name);
+              }}
+              defaultValue={
+                (!stopUsingDefaultValueAfterReset && preFilterTags && preFilterTags.length > 0) ?
+                  tags.find((tag: TagDefinition) => preFilterTags.includes(tag.id))?.id
+                  : undefined
+              }
+          />
+        </div>
       )
-    );
+    )
   }
 );
 

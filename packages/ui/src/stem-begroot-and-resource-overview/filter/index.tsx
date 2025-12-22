@@ -37,13 +37,13 @@ type Props = {
   displaySearch: boolean;
   itemsPerPage?: number;
   displayTagFilters: boolean;
-  tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
+  tagGroups?: Array<{type: string; label?: string; multiple: boolean; projectId?: any, inlineOptions?: boolean }>;
   tagsLimitation?: Array<number> | { [key: string]: number[] };
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
   showActiveTags?: boolean;
-  preFilterTags?: Array<number>;
+  preFilterTags?: Array<{ id: number; type: string; label: string; name: string }>;
   displayLocationFilter?: boolean;
   displayCollapsibleFilter?: boolean;
 };
@@ -62,8 +62,16 @@ export function Filters({
   autoApply = false,
   ...props
 }: Props) {
+  const preFilterTagIds = preFilterTags
+    ? preFilterTags.map((tag) => Number(tag.id)).filter((id) => !isNaN(id))
+    : [];
+
+  const defaultTags = preFilterTags && preFilterTags.length > 0
+    ? preFilterTags.map((tag) => ({ ...tag, label: tag.name }))
+    : [];
+
   const defaultFilter: Filter = {
-    tags: [],
+    tags: preFilterTagIds,
     search: { text: '' },
     sort: props.defaultSorting || 'createdAt_desc',
     page: 0,
@@ -71,13 +79,24 @@ export function Filters({
     location: undefined,
   };
 
-  const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>();
+  const defaultSelectedOptions: { [key: string]: any } = {};
+  if (preFilterTags && preFilterTags.length > 0) {
+    preFilterTags.forEach((tag) => {
+      if (defaultSelectedOptions[tag.type]) {
+        defaultSelectedOptions[tag.type].push(Number(tag.id));
+      } else {
+        defaultSelectedOptions[tag.type] = [Number(tag.id)];
+      }
+    });
+  }
+
+  const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>(defaultSelectedOptions);
   const [filter, setFilter] = useState<Filter>(defaultFilter);
-  const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
-  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
-  const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
+  const [selectedOptions, setSelected] = useState<{ [key: string]: any }>(defaultSelectedOptions);
+  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
+  const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
-  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>([]);
+  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>(preFilterTagIds);
   const [activeFilter, setActiveFilter] = useState<Filter>(defaultFilter);
   const [searchValue, setSearchValue] = useState<string>('');
   const [sortValue, setSortValue] = useState<string>(props.defaultSorting || 'createdAt_desc');
@@ -285,9 +304,6 @@ export function Filters({
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
 
-    console.log( "newActiveTagsDraft", newActiveTagsDraft );
-    console.log( "updatedTags", updatedTags );
-
     if (updatedTags) {
       setActiveTags(updatedTags);
     } else {
@@ -330,8 +346,9 @@ export function Filters({
                       updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
-                    preFilterTags={preFilterTags}
+                    preFilterTags={preFilterTagIds}
                     parentStopUsingDefaultValue={stopUsingDefaultValue}
+                    inlineOptions={tagGroup.inlineOptions}
                   />
                 );
               } else {
@@ -348,8 +365,11 @@ export function Filters({
                       updateTagListSingle(tagGroup.type, updatedTag, updatedLabel)
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
-                    preFilterTags={preFilterTags}
+                    preFilterTags={preFilterTagIds}
                     parentStopUsingDefaultValue={stopUsingDefaultValue}
+                    inlineOptions={tagGroup.inlineOptions}
+                    valueSelected={selectedOptions[tagGroup.type]?.length ? String(selectedOptions[tagGroup.type]?.[0]) : ''}
+                    removeActiveTag={removeActiveTag}
                   />
                 );
               }

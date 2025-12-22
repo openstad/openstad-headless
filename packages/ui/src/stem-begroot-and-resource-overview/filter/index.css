@@ -262,3 +262,18 @@
   background-image: var(--filterCollapsable-close-icon);
   background-size: var(--filtetCollapsable-close-icon-size);
 }
+
+.osc-resources-filter .form-element .utrecht-form-label .utrecht-button--subtle {
+  padding: 0;
+  margin: 0 0 0 10px;
+  font-size: 0.8rem;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  min-block-size: auto;
+  min-inline-size: auto;
+}
+
+.osc-resources-filter .form-element .utrecht-form-label .utrecht-button--subtle:hover {
+  text-decoration: underline;
+}
