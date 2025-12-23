@@ -60,7 +60,17 @@
     position: relative;
 }
 
-.osc .multi-select .multiselect-container{
+.osc .multi-select.multiselect-container--inline {
+    background-color: transparent;
+}
+
+.osc .multi-select.multiselect-container--inline .multiselect-container {
+    position: relative;
+    background-color: transparent;
+    padding: 0;
+}
+
+.osc .multi-select:not(.multiselect-container--inline) .multiselect-container {
     background: #fff;
     position: absolute;
     z-index: 999;

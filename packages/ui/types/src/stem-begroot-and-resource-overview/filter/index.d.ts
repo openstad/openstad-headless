@@ -37,6 +37,7 @@ type Props = {
         label?: string;
         multiple: boolean;
         projectId?: any;
+        inlineOptions?: boolean;
     }>;
     tagsLimitation?: Array<number> | {
         [key: string]: number[];
@@ -45,7 +46,12 @@ type Props = {
     resetText: string;
     applyText: string;
     showActiveTags?: boolean;
-    preFilterTags?: Array<number>;
+    preFilterTags?: Array<{
+        id: number;
+        type: string;
+        label: string;
+        name: string;
+    }>;
     displayLocationFilter?: boolean;
     displayCollapsibleFilter?: boolean;
 };

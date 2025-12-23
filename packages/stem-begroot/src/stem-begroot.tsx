@@ -240,6 +240,10 @@ function StemBegroot({
   const initTags = urlTagIdsArray && urlTagIdsArray.length > 0 ? urlTagIdsArray : tagIdsToLimitResourcesTo || [];
   const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
 
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
+
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
   const [tags, setTags] = useState<number[]>(initTags);
@@ -1100,7 +1104,7 @@ function StemBegroot({
                         setSort(f.sort);
                         setSearch(f.search.text);
                       }}
-                      preFilterTags={urlTagIdsArray}
+                      preFilterTags={prefilterTagObj}
                     />
                   ) : null}
 

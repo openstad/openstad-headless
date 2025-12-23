@@ -3,13 +3,14 @@ type Group = {
   label?: string;
   multiple?: boolean;
   projectId?: string;
+  inlineOptions?: boolean;
 };
 
 export function handleTagCheckboxGroupChange(
   tagGroupName: string,
   checked: boolean,
   groups: Array<Group>,
-  fieldToChange: keyof Pick<Group, 'type' | 'multiple'>,
+  fieldToChange: keyof Pick<Group, 'type' | 'multiple' | 'inlineOptions'>,
   projectId?: number
 ) {
   const indexToChange = groups.findIndex((g) => g.type === tagGroupName);
@@ -23,6 +24,7 @@ export function handleTagCheckboxGroupChange(
       multiple: false,
       label: '',
       projectId: projectId?.toString(),
+      inlineOptions: false,
     });
   }
 
@@ -32,6 +34,10 @@ export function handleTagCheckboxGroupChange(
   }
   if (existingGroup && fieldToChange === 'multiple') {
     existingGroup.multiple = checked;
+    updatedFields[indexToChange] = existingGroup;
+  }
+  if (existingGroup && fieldToChange === 'inlineOptions') {
+    existingGroup.inlineOptions = checked;
     updatedFields[indexToChange] = existingGroup;
   }
 

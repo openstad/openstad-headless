@@ -65,7 +65,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     defaultValue
 }) => {
     let initialValue = defaultValue as string || "";
-    initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
+    initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : initialValue;
 
     const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
