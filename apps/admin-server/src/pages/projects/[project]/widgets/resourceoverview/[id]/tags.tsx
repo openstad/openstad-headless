@@ -333,7 +333,7 @@ export default function WidgetResourceOverviewTags(
                                 />
                               </FormControl>
                               <FormLabel className="font-normal">
-                                Opties altijd zichtbaar
+                                Toon opties zonder dropdown
                               </FormLabel>
                             </FormItem>
                           );
