@@ -396,6 +396,8 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'video':
                     fieldData['type'] = 'video';
+                    console.log(fieldData['videoUrl'])
+                    fieldData['videoUrl'] = item?.videoUrl || '';
                     break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';

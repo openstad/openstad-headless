@@ -107,6 +107,7 @@ const formSchema = z.object({
   infoBlockExtraButtonTitle: z.string().optional(),
   infoField: z.string().optional(),
   infofieldExplanation: z.boolean().optional(),
+  videoUrl: z.string().optional(),
   numberingStyle: z.string().optional(),
 
 
@@ -346,6 +347,7 @@ export default function WidgetEnqueteItems(
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
     infoField: '',
+    videoUrl: '',
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -410,6 +412,7 @@ export default function WidgetEnqueteItems(
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
         infoField: selectedItem.infoField || '',
         infofieldExplanation: selectedItem.infofieldExplanation || false,
+        videoUrl: selectedItem.videoUrl || '',
 
 
         // Keeping these for backwards compatibility
@@ -1260,7 +1263,7 @@ export default function WidgetEnqueteItems(
                             )}
                           />
                         )}
-                        {(form.watch('questionType') !== 'dilemma' && form.watch('questionType') !== 'swipe') && (
+                        {(form.watch('questionType') !== 'dilemma' && form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'video') && (
                           <FormField
                             control={form.control}
                             name="description"
@@ -1548,6 +1551,21 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
+                    <FormField
+                      control={form.control}
+                      name="videoUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Video url</FormLabel>
+                          <FormDescription>
+                            Voeg hier een YouTube url toe, dit kan een normale video of een short zijn.
+                          </FormDescription>
+                          <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' || form.watch('questionType') === 'documentUpload') && (
                       <FormField
                         control={form.control}
@@ -1578,7 +1596,7 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'sort' && (
+                    {form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'sort' && form.watch('questionType') !== 'video' && (
                       <FormField
                         control={form.control}
                         name="fieldRequired"

@@ -10,7 +10,7 @@ export type VideoFieldProps = BaseProps &
 
 export type VideoProps = {
   videoUrl?: string;
-  cc_lang_pref?: string;
+  lang?: string;
 };
 
 
@@ -18,7 +18,7 @@ const VideoField: FC<VideoFieldProps> = ({
   // videoUrl = 'https://www.youtube.com/watch?v=j38Fqcnfz6M',
   // videoUrl = 'https://www.youtube.com/shorts/_KgcoaeHCBE',
   videoUrl = 'https://www.youtube.com/shorts/mnDe3BaEBxc',
-  cc_lang_pref = 'en',
+  lang = 'nl',
   ...props
 }) => {
   const id = useId();
@@ -61,7 +61,7 @@ const VideoField: FC<VideoFieldProps> = ({
             mute: 1,
             loop: 1,
             playlist: videoId,
-            cc_lang_pref: cc_lang_pref,
+            cc_lang_pref: lang,
             cc_load_policy: 1,
             rel: 0,
             iv_load_policy: 3,
