@@ -12,6 +12,7 @@ export default defineConfig(({command}) => {
     } else {
         return {
             plugins: [react({jsxRuntime: 'classic'})],
+            define: { 'process.env.NODE_ENV': '"production"' },
             build: {
                 lib: {
                     formats: ['iife'],
