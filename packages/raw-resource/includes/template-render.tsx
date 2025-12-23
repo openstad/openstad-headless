@@ -61,7 +61,6 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
           createDateHumanized: resource.createDateHumanized,
           publishDateHumanized: resource.publishDateHumanized,
           publishDate: resource.publishDate,
-          currentUser: updatedProps.currentUser,
         };
 
         // The template can also contain conditionals, like such:
