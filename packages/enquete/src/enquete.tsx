@@ -1,4 +1,4 @@
-import './enquete.css';
+import './enquete.scss';
 import { EnquetePropsType } from './types/';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
