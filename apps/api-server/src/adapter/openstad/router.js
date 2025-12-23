@@ -368,6 +368,7 @@ router
     try {
       codes = await service.fetchUniqueCode({
         authConfig: req.authConfig,
+        isExport: req.query.export === 'true',
       });
     } catch(err) {
       console.log(err);

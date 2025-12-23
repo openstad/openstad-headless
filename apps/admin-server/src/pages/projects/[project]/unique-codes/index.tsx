@@ -20,33 +20,44 @@ import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 export default function ProjectCodes() {
   const router = useRouter();
   const { project } = router.query;
-  const { data: uniquecodes, resetUniqueCode } = useUniqueCodes(project as string);
+  const { data: uniquecodes, fetchAllUniqueCodes, resetUniqueCode } = useUniqueCodes(project as string);
 
 
   const [filterData, setFilterData] = useState(uniquecodes?.data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
-  function transform() {
-    const keyMap: Record<string, string> = {
-      'id': 'Stem ID',
-      'code': 'Code',
-      'userId': 'Gebruikt',
-      'createdAt': 'Aangemaakt op',
-      'updatedAt': 'Bijgewerkt op',
-    };
+  async function handleExport() {
+    try {
+      const allCodes = await fetchAllUniqueCodes();
 
-    const uniqueCodesData = uniquecodes.data?.map((code: any) => {
-      return {
-        ...code,
-        userId: code.userId ? 'Ja' : 'Nee',
-      }
-    });
 
-    const today = new Date();
-    const projectId = router.query.project;
-    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportToXLSX(uniqueCodesData, `${projectId}_stemcodes_${formattedDate}.xlsx`, keyMap);
+      const uniqueCodesData = allCodes?.data
+        ?.flat()
+        .map((code: any) => ({
+          ...code,
+          userId: code.userId ? 'Ja' : 'Nee',
+        }));
+
+      const keyMap: Record<string, string> = {
+        id: 'Stem ID',
+        code: 'Code',
+        userId: 'Gebruikt',
+        createdAt: 'Aangemaakt op',
+        updatedAt: 'Bijgewerkt op',
+      };
+
+      const today = new Date();
+      const projectId = router.query.project;
+      const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+      exportToXLSX(
+        uniqueCodesData,
+        `${projectId}_stemcodes_${formattedDate}.xlsx`,
+        keyMap
+      );
+    } catch (err) {
+      toast.error('Kon stemcodes niet exporteren');
+    }
   }
 
   useEffect(() => {
@@ -77,7 +88,7 @@ export default function ProjectCodes() {
                 Stemcodes toevoegen
               </Button>
             </Link>
-            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+            <Button className="text-xs p-2 w-fit" type="submit" onClick={handleExport}>
               Exporteer stemcodes
             </Button>
           </div>

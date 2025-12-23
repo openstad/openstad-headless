@@ -11,6 +11,23 @@ export default function useUniqueCodes(projectId?: string) {
 
   const uniqueCodesListSwr = useSWR(projectNumber ? url : null);
 
+  async function fetchAllUniqueCodes() {
+    // add export=true for the export fetch
+    const exportParams = new URLSearchParams(params);
+    exportParams.set('export', 'true');
+
+    const exportUrl = `/api/openstad/auth/project/${projectNumber}/uniquecode?` + exportParams.toString();
+
+    const res = await fetch(exportUrl);
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    else{
+      throw new Error('Failed to fetch all stemcodes');
+    }
+  }
+
   async function createUniqueCodes(amount?: string) {
     try {
       const res = await fetch(`/api/openstad/auth/project/${projectNumber}/uniquecode?` + params.toString(), {
@@ -46,6 +63,6 @@ export default function useUniqueCodes(projectId?: string) {
     }
   }
 
-  return { ...uniqueCodesListSwr, createUniqueCodes, resetUniqueCode };
+  return { ...uniqueCodesListSwr, createUniqueCodes, fetchAllUniqueCodes, resetUniqueCode };
 
 }
