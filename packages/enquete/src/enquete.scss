@@ -141,11 +141,11 @@ label.utrecht-form-label {
   align-items: flex-start;
 }
 
-.question-type-imageChoice .image-choice-container > .utrecht-form-field--radio {
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
   display: inline-block;
 }
 
-.question-type-imageChoice .image-choice-container > .utrecht-form-field--radio + .utrecht-form-field--radio {
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
   margin-top: 0;
 }
 
@@ -932,8 +932,25 @@ label.utrecht-form-label {
       }
     }
 
+    .question-type-video {
+      padding: 0;
+      aspect-ratio: 9 / 16;
+          overflow: hidden;
+      &:before{
+        display: none;
+      }
 
-    .form-widget:has(.question.question-type-matrix){
+      &+.button-group.--flex:before {
+        display: none;
+      }
+
+      &+.button-group.--flex .utrecht-button--primary-action:before {
+        display: none;
+      }
+    }
+
+
+    .form-widget:has(.question.question-type-matrix) {
       width: 100%;
       overflow-x: scroll;
     }

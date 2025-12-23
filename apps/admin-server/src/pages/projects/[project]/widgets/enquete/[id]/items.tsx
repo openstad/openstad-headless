@@ -1327,6 +1327,7 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="sort">Sorteren</SelectItem>
                               <SelectItem value="swipe">Swipe</SelectItem>
                               <SelectItem value="dilemma">Dilemma</SelectItem>
+                              <SelectItem value="video">Video toelichting</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />

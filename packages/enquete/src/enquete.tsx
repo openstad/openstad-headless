@@ -394,6 +394,9 @@ function Enquete(props: EnqueteWidgetProps) {
                         };
                     });
                     break;
+                case 'video':
+                    fieldData['type'] = 'video';
+                    break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';
                     fieldData['matrix'] = item?.matrix || undefined;
