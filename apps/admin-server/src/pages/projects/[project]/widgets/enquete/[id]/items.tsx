@@ -1550,21 +1550,22 @@ export default function WidgetEnqueteItems(
 
                       </>
                     )}
-
-                    <FormField
-                      control={form.control}
-                      name="videoUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Video url</FormLabel>
-                          <FormDescription>
-                            Voeg hier een YouTube url toe, dit kan een normale video of een short zijn.
-                          </FormDescription>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch('questionType') === 'video' && (
+                      <FormField
+                        control={form.control}
+                        name="videoUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Video url</FormLabel>
+                            <FormDescription>
+                              Voeg hier een YouTube url toe, dit kan een normale video of een short zijn.
+                            </FormDescription>
+                            <Input {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' || form.watch('questionType') === 'documentUpload') && (
                       <FormField
