@@ -12,6 +12,8 @@ type Props = {
     inlineOptions?: boolean;
     valueSelected?: string;
     removeActiveTag?: (tagType: string, tagId: number) => void;
+    resetCounter: number;
+    setResetCounter: React.Dispatch<React.SetStateAction<number>>;
 };
 declare const SelectTagFilter: React.ForwardRefExoticComponent<Props & React.RefAttributes<HTMLSelectElement>>;
 export { SelectTagFilter };
