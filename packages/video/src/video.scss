@@ -14,10 +14,10 @@
     }
 
     iframe {
-        width: 110%;
+        width: calc(100% + 50px);
         height: calc(100% + 200px);
         padding-bottom: 110px;
-        margin-left: -5%;
+        margin-left: -25px;
         margin-top: -89px;
     }
 
