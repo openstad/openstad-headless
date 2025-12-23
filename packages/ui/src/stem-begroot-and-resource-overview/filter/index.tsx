@@ -420,6 +420,10 @@ export function Filters({
               if (inputsInFilter) {
                 inputsInFilter.forEach((i) => (i.value = ''));
               }
+
+              let filterForResetting = { ...defaultFilter };
+              filterForResetting.tags = [];
+
               setStopUsingDefaultValue(true);
               setSelected({});
               setNewActiveTagsDraft([]);
@@ -428,13 +432,17 @@ export function Filters({
               setSearch('');
               setSortValue(props.defaultSorting || 'createdAt_desc');
               setLocationValue(undefined);
-              updateFilter(defaultFilter);
+              updateFilter(filterForResetting);
               setTagState({});
-              onUpdateFilter && onUpdateFilter(defaultFilter);
+              onUpdateFilter && onUpdateFilter(filterForResetting);
               updateParameter();
               setLocation(undefined);
-              handleSubmit(undefined, defaultFilter, []);
-              setResetCounter(currCount => currCount + 1);
+              handleSubmit(undefined, filterForResetting, []);
+
+              // Set timeout is needed to reset radio buttons properly
+              setTimeout(() => {
+                setResetCounter(resetCounter + 1);
+              }, 1);
             }}
             test-id={"filter-reset-button"}
           >
