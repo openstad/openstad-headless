@@ -104,6 +104,7 @@ export function Filters({
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
   const [disableTransition, setDisableTransition] = useState(true);
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
+  const [resetCounter, setResetCounter] = useState(0);
 
   useEffect(() => {
     if (filtersVisible && disableTransition) {
@@ -370,6 +371,8 @@ export function Filters({
                     inlineOptions={tagGroup.inlineOptions}
                     valueSelected={selectedOptions[tagGroup.type]?.length ? String(selectedOptions[tagGroup.type]?.[0]) : ''}
                     removeActiveTag={removeActiveTag}
+                    resetCounter={resetCounter}
+                    setResetCounter={setResetCounter}
                   />
                 );
               }
@@ -431,6 +434,7 @@ export function Filters({
               updateParameter();
               setLocation(undefined);
               handleSubmit(undefined, defaultFilter, []);
+              setResetCounter(currCount => currCount + 1);
             }}
             test-id={"filter-reset-button"}
           >

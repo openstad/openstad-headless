@@ -21,6 +21,8 @@ type Props = {
   inlineOptions?: boolean;
   valueSelected?: string;
   removeActiveTag?: (tagType: string, tagId: number) => void;
+  resetCounter: number;
+  setResetCounter: React.Dispatch<React.SetStateAction<number>>;
 };
 
 type TagDefinition = { id: number; name: string; type:string; projectId?: any };
@@ -36,12 +38,13 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
      inlineOptions = false,
      valueSelected = '',
      removeActiveTag,
+     resetCounter,
+     setResetCounter,
      ...props
    },
     ref
   ) => {
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
-    const [resetCounter, setResetCounter] = useState(0);
     const [stopUsingDefaultValueAfterReset, setStopUsingDefaultValueAfterReset] = useState(false);
 
     const useTagsConfig: {
@@ -130,7 +133,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
                 appearance="link"
                 onClick={() => {
                   setStopUsingDefaultValueAfterReset(true);
-                  setResetCounter(currCount => currCount + 1);
+                  setResetCounter(resetCounter + 1);
                   removeActiveTag && removeActiveTag(tagType, Number(valueSelected));
                 }}
               >
