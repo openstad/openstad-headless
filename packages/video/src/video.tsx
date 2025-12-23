@@ -6,6 +6,7 @@ export type VideoFieldProps = BaseProps &
   VideoProps & {
     resourceId?: string;
     resourceIdRelativePath?: string;
+    currentPage?: number;
   };
 
 export type VideoProps = {
@@ -15,9 +16,7 @@ export type VideoProps = {
 
 
 const VideoField: FC<VideoFieldProps> = ({
-  // videoUrl = 'https://www.youtube.com/watch?v=j38Fqcnfz6M',
-  // videoUrl = 'https://www.youtube.com/shorts/_KgcoaeHCBE',
-  videoUrl = 'https://www.youtube.com/shorts/mnDe3BaEBxc',
+  videoUrl,
   lang = 'nl',
   ...props
 }) => {
@@ -33,12 +32,28 @@ const VideoField: FC<VideoFieldProps> = ({
     return '';
   }
 
-  const videoId = getYouTubeVideoId(videoUrl);
-
   const playerRef = useRef<any>(null);
+  const [videoId, setVideoId] = useState<string>(getYouTubeVideoId(videoUrl));
   const [player, setPlayer] = useState<any>(null);
-  const [muted, setMuted] = useState(true);
+  // Houd mute-status persistent over paginatie
+  const [muted, setMuted] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = window.sessionStorage.getItem('video-muted');
+      return stored === null ? true : stored === 'true';
+    }
+    return true;
+  });
   const [muteToggle, setMuteToggle] = useState<boolean>(false);
+
+
+  useEffect(() => {
+    setVideoId(getYouTubeVideoId(videoUrl));
+    if (player && typeof player.destroy === 'function') {
+      player.destroy();
+      setPlayer(null);
+    }
+  }, [props.currentPage]);
+
 
   useEffect(() => {
     if ((window as any).YT && (window as any).YT.Player) {
@@ -58,20 +73,23 @@ const VideoField: FC<VideoFieldProps> = ({
           playerVars: {
             autoplay: 1,
             controls: 0,
-            mute: 1,
+            mute: muted ? 1 : 0,
             loop: 1,
             playlist: videoId,
             cc_lang_pref: lang,
             cc_load_policy: 1,
             rel: 0,
             iv_load_policy: 3,
-            showinfo: 0,
             modestbranding: 1,
           },
           events: {
             onReady: (event: any) => {
               setPlayer(event.target);
-              event.target.mute();
+              if (muted) {
+                event.target.mute();
+              } else {
+                event.target.unMute();
+              }
             },
           },
         });
@@ -81,7 +99,6 @@ const VideoField: FC<VideoFieldProps> = ({
 
   const handleVideoClick = () => {
     if (player) {
-      
       setMuteToggle(true);
       setTimeout(() => {
         setMuteToggle(false);
@@ -90,9 +107,11 @@ const VideoField: FC<VideoFieldProps> = ({
       if (muted) {
         player.unMute();
         setMuted(false);
+        if (typeof window !== 'undefined') window.sessionStorage.setItem('video-muted', 'false');
       } else {
         player.mute();
         setMuted(true);
+        if (typeof window !== 'undefined') window.sessionStorage.setItem('video-muted', 'true');
       }
     }
   };
