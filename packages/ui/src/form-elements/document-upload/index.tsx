@@ -21,6 +21,7 @@ registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, F
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 const filePondSettings = {
     labelIdle: "Sleep document(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
@@ -79,6 +80,13 @@ export type DocumentUploadProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
 }
 
 type MockDocFile = {
@@ -116,6 +124,8 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     randomId = '',
     fieldInvalid = false,
     overrideDefaultValue = [],
+    images = [],
+    createImageSlider = false,
     ...props
 }) => {
     const datastore = new DataStore({ props });
@@ -248,12 +258,12 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                 />
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage
+            })}
 
             <div className="utrecht-form-field__input">
                 <FilePond

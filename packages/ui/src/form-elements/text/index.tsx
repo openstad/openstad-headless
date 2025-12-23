@@ -11,6 +11,7 @@ import {
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type TextInputProps = {
     title: string;
@@ -42,6 +43,13 @@ export type TextInputProps = {
     nextPageText?: string;
     prevPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -66,7 +74,9 @@ const TextInput: FC<TextInputProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
-    overrideDefaultValue
+    overrideDefaultValue,
+    images = [],
+    createImageSlider = false,
 }) => {
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
 
@@ -171,12 +181,12 @@ const TextInput: FC<TextInputProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt="" />
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage
+            })}
 
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`} aria-invalid={checkInvalid}>
                 <InputComponent

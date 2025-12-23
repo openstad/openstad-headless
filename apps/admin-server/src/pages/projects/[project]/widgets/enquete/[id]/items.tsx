@@ -87,6 +87,7 @@ const formSchema = z.object({
   image: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
+  createImageSlider: z.boolean().optional(),
   maxChoices: z.string().optional(),
   maxChoicesMessage: z.string().optional(),
   showSmileys: z.boolean().optional(),
@@ -208,6 +209,7 @@ export default function WidgetEnqueteItems(
           description_b: values.description_b || '',
           key_b: values.key_b || '',
           fieldRequired: values.fieldRequired || false,
+          createImageSlider: values.createImageSlider || false,
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
           showSmileys: values.showSmileys || false,
@@ -346,6 +348,7 @@ export default function WidgetEnqueteItems(
     infoBlockExtraButton: '',
     infoBlockExtraButtonTitle: '',
     fieldRequired: false,
+    createImageSlider: false,
     maxChoices: '',
     maxChoicesMessage: '',
     showSmileys: false,
@@ -420,6 +423,7 @@ export default function WidgetEnqueteItems(
         infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
         infoBlockExtraButtonTitle: selectedItem.infoBlockExtraButtonTitle || '',
         fieldRequired: selectedItem.fieldRequired || false,
+        createImageSlider: selectedItem.createImageSlider || false,
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         showSmileys: selectedItem.showSmileys || false,
@@ -635,6 +639,28 @@ export default function WidgetEnqueteItems(
     control: form.control,
     name: 'images',
   });
+
+  function swapArrayElements(arr: any[], indexA: number, indexB: number) {
+    const newArr = [...arr];
+    const temp = newArr[indexA];
+    newArr[indexA] = newArr[indexB];
+    newArr[indexB] = temp;
+    return newArr;
+  }
+
+  const moveUpImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index <= 0) return;
+    const reordered = swapArrayElements(images, index, index - 1);
+    form.setValue('images', reordered);
+  };
+
+  const moveDownImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index >= images.length - 1) return;
+    const reordered = swapArrayElements(images, index, index + 1);
+    form.setValue('images', reordered);
+  };
 
   return (
     <div>
@@ -1451,6 +1477,7 @@ export default function WidgetEnqueteItems(
                           fieldName="imageUpload"
                           imageLabel="Afbeeldingen uploaden"
                           allowedTypes={["image/*"]}
+                          allowMultiple={true}
                           onImageUploaded={(imageResult) => {
                             let defaultImageArr: ImageArray[] = [];
 
@@ -1477,13 +1504,17 @@ export default function WidgetEnqueteItems(
 
                         <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
                           {imageFields.length > 0 && (
-                            <>
-                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
-                              <section className="grid col-span-full grid-cols-1 gap-y-4">
+                            <div className="grid">
+                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2">Afbeeldingen</label>
+                              <section className="grid col-span-full grid-cols-1 gap-y-8">
                                 { imageFields.map(({ id, url }, index) => {
                                   return (
-                                    <div key={id} className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
-                                      <img src={url} alt={url} />
+                                    <div
+                                      key={id}
+                                      className="relative grid col-span-full gap-x-4 items-center"
+                                      style={{gridTemplateColumns: "1fr 2fr 40px"}}
+                                    >
+                                      <img src={url} alt={url}/>
                                       <Button
                                         color="red"
                                         onClick={() => {
@@ -1493,68 +1524,87 @@ export default function WidgetEnqueteItems(
                                         <X size={24} />
                                       </Button>
 
-                                      <FormField
-                                        control={form.control}
-                                        name={`images.${index}.imageAlt`}
-                                        render={({ field }) => (
-                                          <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
-                                            <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
-                                            <FormControl>
-                                              <Input
-                                                {...field}
-                                              />
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        )}
-                                      />
+                                      <div
+                                        className="grid gap-y-4 items-center"
+                                      >
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageAlt`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
 
-                                      <FormField
-                                        control={form.control}
-                                        name={`images.${index}.imageDescription`}
-                                        render={({ field }) => (
-                                          <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
-                                            <FormLabel>Beschrijving afbeelding</FormLabel>
-                                            <FormControl>
-                                              <Input
-                                                {...field}
-                                              />
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        )}
-                                      />
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageDescription`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Beschrijving afbeelding</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </div>
 
+                                      <span className="grid gap-2 py-3 px-2">
+                                        <ArrowUp
+                                          className="cursor-pointer"
+                                          onClick={() => moveUpImage(index) }
+                                        />
+                                        <ArrowDown
+                                          className="cursor-pointer"
+                                          onClick={() => moveDownImage(index) }
+                                        />
+                                      </span>
                                     </div>
                                   );
                                 })}
                               </section>
-                            </>
+                            </div>
                           )}
                         </div>
 
                         <FormField
                           control={form.control}
-                          name="imageAlt"
+                          name="createImageSlider"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
-                              <Input {...field} />
+                              <FormLabel>
+                                Wil je van de afbeeldingen een slider maken?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={form.control}
-                          name="imageDescription"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Beschrijving afbeelding</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+
                         {props.formStyle === 'youth' && (
 
                           <FormField

@@ -19,6 +19,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import { Matrix } from "@openstad-headless/enquete/src/types/enquete-props";
 import './matrix.css';
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type MatrixFieldProps = {
     title: string;
@@ -41,6 +42,13 @@ export type MatrixFieldProps = {
     matrix?: Matrix;
     defaultValue?: FormValue;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
     nextPageText?: string;
     prevPageText?: string;
 }
@@ -65,6 +73,8 @@ const MatrixField: FC<MatrixFieldProps> = ({
        },
        matrixMultiple = false,
        overrideDefaultValue,
+       images = [],
+       createImageSlider = false,
 }) => {
     const initialValue = Array.isArray(overrideDefaultValue) ? overrideDefaultValue as string[] : [];
     const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
@@ -140,12 +150,12 @@ const MatrixField: FC<MatrixFieldProps> = ({
               </>
             )}
 
-            {infoImage && (
-              <figure className="info-image-container">
-                <img src={infoImage} alt=""/>
-                <Spacer size={.5}/>
-              </figure>
-            )}
+            {InfoImage({
+              imageFallback: infoImage || '',
+              images: images,
+              createImageSlider: createImageSlider,
+              addSpacer: !!infoImage
+            })}
 
             <Table role="presentation" data-columns={matrix?.columns?.length || 0} data-rows={matrix?.rows?.length || 0}>
               <TableHeader role="presentation">

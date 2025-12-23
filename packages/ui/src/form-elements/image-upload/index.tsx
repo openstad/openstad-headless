@@ -18,6 +18,7 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import {Spacer} from "../../spacer";
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
@@ -89,6 +90,13 @@ export type ImageUploadProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
 }
 
 const ImageUploadField: FC<ImageUploadProps> = ({
@@ -107,6 +115,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     randomId = '',
     fieldInvalid = false,
     overrideDefaultValue = [],
+    images = [],
+    createImageSlider = false,
     ...props
 }) => {
     const datastore = new DataStore({ props });
@@ -218,12 +228,12 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage
+            })}
 
             <div className="utrecht-form-field__input">
                 <FilePond

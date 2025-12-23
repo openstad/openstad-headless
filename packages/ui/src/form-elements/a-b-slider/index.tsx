@@ -11,6 +11,7 @@ import {
 import { Spacer } from "../../spacer";
 import TextInput from "../text";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type RangeSliderProps = {
     title: string;
@@ -46,6 +47,13 @@ export type RangeSliderProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
 }
 
 type valueObject = {value: string, skipQuestion: boolean, skipQuestionExplanation: string | undefined};
@@ -76,7 +84,9 @@ const RangeSlider: FC<RangeSliderProps> = ({
     skipQuestionAllowExplanation = false,
     skipQuestionExplanation = '',
     skipQuestionLabel = 'Sla vraag over',
-    overrideDefaultValue
+    overrideDefaultValue,
+    images = [],
+    createImageSlider = false,
 }) => {
     const initialValue =
       overrideDefaultValue &&
@@ -171,12 +181,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt="" />
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage
+            })}
 
             <div className="a-b-info-container">
                 <div className="a-b-title label-a">

@@ -69,6 +69,7 @@ export type Item = {
     imageAlt?: string;
     imageDescription?: string;
   }>;
+  createImageSlider?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;

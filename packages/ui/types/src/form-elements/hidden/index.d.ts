@@ -15,6 +15,13 @@ export type HiddenInputProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
 };
 declare const HiddenInput: FC<HiddenInputProps>;
 export default HiddenInput;

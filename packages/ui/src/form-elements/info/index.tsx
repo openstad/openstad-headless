@@ -2,6 +2,7 @@ import React, { FC } from "react";
 import { AccordionProvider, Paragraph, Strong } from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
 import { FormValue } from "@openstad-headless/form/src/form";
+import { InfoImage } from "../../infoImage";
 
 export type InfoFieldProps = {
   overrideDefaultValue?: FormValue;
@@ -24,6 +25,13 @@ export type InfoFieldProps = {
   prevPageText?: string;
   nextPageText?: string;
   fieldOptions?: { value: string; label: string }[];
+  images?: Array<{
+    url: string;
+    name?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+  }>;
+  createImageSlider?: boolean;
 }
 
 const InfoField: FC<InfoFieldProps> = ({
@@ -36,6 +44,8 @@ const InfoField: FC<InfoFieldProps> = ({
   moreInfoButton = 'Meer informatie',
   moreInfoContent = '',
   infoImage = '',
+  images = [],
+  createImageSlider = false,
 }) => {
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -67,19 +77,14 @@ const InfoField: FC<InfoFieldProps> = ({
         </>
       )}
 
-      {infoImage && (
-        <figure className="info-image-container">
-          <img src={infoImage} alt="" />
-          <Spacer size={.5} />
-        </figure>
-      )}
-
-      <figure className="info-image-container">
-        <img src={image} alt={imageAlt} />
-        {imageDescription && (
-          <figcaption>{imageDescription}</figcaption>
-        )}
-      </figure>
+      {InfoImage({
+        imageFallback: infoImage || image,
+        imageAltFallback: imageAlt,
+        imageDescriptionFallback: imageDescription,
+        images: images,
+        createImageSlider: createImageSlider,
+        addSpacer: !!infoImage
+      })}
     </div>
   );
 };

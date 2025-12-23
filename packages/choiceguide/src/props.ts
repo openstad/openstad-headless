@@ -104,7 +104,6 @@ export type Item = {
     showMoreInfo: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
-    infoImage?: string;
     labelA?: string;
     labelB?: string;
     imageA?: string;
@@ -123,6 +122,16 @@ export type Item = {
     routingSelectedAnswer?: string;
     imageOptionUpload?: string;
     placeholder?: string;
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+
+    // Keeping this for backwards compatibility
+    infoImage?: string;
 };
 
 export type Option = {

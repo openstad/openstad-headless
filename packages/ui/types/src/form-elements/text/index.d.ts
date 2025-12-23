@@ -37,6 +37,13 @@ export type TextInputProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
 };
 declare const TextInput: FC<TextInputProps>;
 export default TextInput;

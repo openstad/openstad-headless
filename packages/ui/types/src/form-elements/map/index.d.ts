@@ -31,6 +31,13 @@ export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
 };
 declare const MapField: FC<MapProps>;
 export default MapField;

@@ -10,6 +10,7 @@ import {
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
@@ -43,6 +44,13 @@ export type CheckboxFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
     randomizeItems?: boolean;
     value?: FormValue;
 }
@@ -65,7 +73,9 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        fieldInvalid= false,
        randomizeItems = false,
        overrideDefaultValue,
-       defaultValue
+       defaultValue,
+       images = [],
+       createImageSlider = false,
 }) => {
     let initialValue = defaultValue || [];
     try {
@@ -195,12 +205,12 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     </>
                 )}
 
-                {infoImage && (
-                    <figure className="info-image-container">
-                        <img src={infoImage} alt=""/>
-                        <Spacer size={.5} />
-                    </figure>
-                )}
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage
+                })}
 
                 {displayChoices?.map((choice, index) => (
                     <>
