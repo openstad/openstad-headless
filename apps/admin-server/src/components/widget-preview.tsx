@@ -28,8 +28,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
     }
   }, [sessionData]);
 
-  const idRef = React.useRef(Math.floor(Math.random() * 1000000));
-  const randomId = idRef.current;
+  const randomId = Math.floor(Math.random() * 1000000);
 
   const fetchWidget = useCallback(() => {
     const previewContainer = document.querySelector(
