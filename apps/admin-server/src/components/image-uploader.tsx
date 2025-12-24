@@ -19,7 +19,8 @@ export const ImageUploader: React.FC<{
   description?: string;
   allowedTypes?: string[];
   project?: string;
-}> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding', description = '', project }) => {
+  allowMultiple?: boolean;
+}> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding', description = '', project, allowMultiple = false }) => {
   const [file, setFile] = React.useState<{url: string}>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
 
@@ -81,8 +82,16 @@ export const ImageUploader: React.FC<{
             <Input
               type="file"
               accept={acceptAttribute}
+              multiple={allowMultiple}
               {...field}
-              onChange={(e) => uploadImage(e.target.files?.[0])}
+              onChange={async (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  for (const file of Array.from(files)) {
+                    await uploadImage(file);
+                  }
+                }
+              }}
             />
           </FormControl>
           <FormMessage />

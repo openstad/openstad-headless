@@ -32,6 +32,14 @@ export type SelectFieldProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 declare const SelectField: FC<SelectFieldProps>;
 export default SelectField;

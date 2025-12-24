@@ -15,6 +15,7 @@ type Props = {
   }
   beforeIndexChange?: () => void;
   setIndexInParent?: (setter: (index: number) => void) => void;
+  pager?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export function Carousel({
@@ -24,6 +25,7 @@ export function Carousel({
   buttonText,
   beforeIndexChange = () => {},
   setIndexInParent = () => {},
+  pager = false,
   ...props
 }: Props) {
   const [index, setIndex] = useState<number>(startIndex);
@@ -77,6 +79,19 @@ export function Carousel({
 
       <div className="carousel-items">{itemRenderer(items.at(index))}</div>
 
+      {pager && items.length > 1 && (
+        <div className="osc-carousel-pager">
+          {items.map((_, id) => (
+            <button
+              key={`osc-carousel-pager-button-${id}`}
+              className={`osc-carousel-pager-button ${id === index ? 'active' : ''}`}
+              onClick={() => handleIndexChange(id)}
+              aria-label={`Ga naar slide ${id + 1}`}
+              type="button"
+            ></button>
+          ))}
+        </div>
+      )}
 
     </div>
   );

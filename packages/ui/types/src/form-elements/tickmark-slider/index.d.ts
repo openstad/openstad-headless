@@ -9,6 +9,14 @@ export type TickmarkSliderProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     fieldRequired: boolean;
     fieldKey: string;
     imageSrc?: string;

@@ -8,6 +8,7 @@ import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-rea
 
 import "./sort.css";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 type OptionTitle = {
     key: string;
@@ -26,11 +27,20 @@ export type SortFieldProps = {
     type?: string;
     defaultValue?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     onChange?: (e: { name: string; value: any }, triggerSetLastKey?: boolean) => void;
     prevPageText?: string;
     nextPageText?: string;
     overrideDefaultValue?: FormValue;
     numberingStyle?: string;
+    infoImage?: string;
 };
 
 type SortableItemProps = {
@@ -62,6 +72,10 @@ const SortField: FC<SortFieldProps> = ({
     fieldKey,
     overrideDefaultValue,
     numberingStyle,
+    infoImage,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
     try {
         const defaultOrder = overrideDefaultValue ?
@@ -103,6 +117,14 @@ const SortField: FC<SortFieldProps> = ({
                 {description &&
                     <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
                 }
+
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
             </div>
             <div className="sortable-context">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

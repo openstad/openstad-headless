@@ -9,6 +9,7 @@ import {
 import {Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type NumberInputProps = {
     title: string;
@@ -30,6 +31,15 @@ export type NumberInputProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
+    infoImage?: string;
 }
 
 const NumberInput: FC<NumberInputProps> = ({
@@ -47,6 +57,10 @@ const NumberInput: FC<NumberInputProps> = ({
     randomId = '',
     fieldInvalid = false,
     overrideDefaultValue,
+    infoImage,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
   const initialValue = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
 
@@ -107,6 +121,14 @@ const NumberInput: FC<NumberInputProps> = ({
           <Spacer size={0.5}/>
         </>
       )}
+
+      {InfoImage({
+        imageFallback: infoImage || '',
+        images: images,
+        createImageSlider: createImageSlider,
+        addSpacer: !!infoImage,
+        imageClickable: imageClickable
+      })}
 
       <div className={`utrecht-form-field__input`}>
         {prepend && <span className="utrecht-form-field__prepend">{prepend}</span>}

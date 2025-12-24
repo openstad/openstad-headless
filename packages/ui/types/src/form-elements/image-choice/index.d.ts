@@ -28,6 +28,14 @@ export type ImageChoiceFieldProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     infoField?: string;
 };
 export type ChoiceItem = {

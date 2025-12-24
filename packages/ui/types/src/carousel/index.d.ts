@@ -13,6 +13,7 @@ type Props = {
     };
     beforeIndexChange?: () => void;
     setIndexInParent?: (setter: (index: number) => void) => void;
+    pager?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
-export declare function Carousel({ startIndex, items, itemRenderer, buttonText, beforeIndexChange, setIndexInParent, ...props }: Props): React.JSX.Element | null;
+export declare function Carousel({ startIndex, items, itemRenderer, buttonText, beforeIndexChange, setIndexInParent, pager, ...props }: Props): React.JSX.Element | null;
 export {};
