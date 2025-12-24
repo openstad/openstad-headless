@@ -63,6 +63,14 @@ export type Item = {
   description_b?: string;
   image_b?: string;
   numberingStyle?: string;
+  images?: Array<{
+    url: string;
+    name?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+  }>;
+  createImageSlider?: boolean;
+  imageClickable?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;

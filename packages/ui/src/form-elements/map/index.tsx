@@ -16,6 +16,7 @@ import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
 import {Spacer} from "../../spacer";
 import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type MapProps = BaseProps &
     AreaProps &
@@ -39,6 +40,14 @@ export type MapProps = BaseProps &
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 type Point = {
@@ -61,6 +70,9 @@ const MapField: FC<MapProps> = ({
     enableOnOffSwitching = false,
     defaultValue = {},
     overrideDefaultValue = {},
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
     ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -156,12 +168,13 @@ const MapField: FC<MapProps> = ({
               </>
           )}
 
-          {infoImage && (
-              <figure className="info-image-container">
-                  <img src={infoImage} alt=""/>
-                  <Spacer size={.5} />
-              </figure>
-          )}
+          {InfoImage({
+              imageFallback: infoImage || '',
+              images: images,
+              createImageSlider: createImageSlider,
+              addSpacer: !!infoImage,
+              imageClickable: imageClickable
+          })}
 
           <div
             className="form-field-map-container"
