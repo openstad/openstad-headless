@@ -17,6 +17,7 @@ export type TickmarkSliderProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     fieldRequired: boolean;
     fieldKey: string;
     imageSrc?: string;
@@ -60,6 +61,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     overrideDefaultValue,
     images = [],
     createImageSlider = false,
+    imageClickable = false,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
@@ -110,7 +112,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 imageFallback: infoImage || '',
                 images: images,
                 createImageSlider: createImageSlider,
-                addSpacer: !!infoImage
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
             })}
 
             {imageSrc && (

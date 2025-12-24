@@ -54,6 +54,7 @@ export type RangeSliderProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 type valueObject = {value: string, skipQuestion: boolean, skipQuestionExplanation: string | undefined};
@@ -87,6 +88,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
     overrideDefaultValue,
     images = [],
     createImageSlider = false,
+    imageClickable = false,
 }) => {
     const initialValue =
       overrideDefaultValue &&
@@ -185,7 +187,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 imageFallback: infoImage || '',
                 images: images,
                 createImageSlider: createImageSlider,
-                addSpacer: !!infoImage
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
             })}
 
             <div className="a-b-info-container">

@@ -47,6 +47,7 @@ export type MapProps = BaseProps &
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 type Point = {
@@ -71,6 +72,7 @@ const MapField: FC<MapProps> = ({
     overrideDefaultValue = {},
     images = [],
     createImageSlider = false,
+    imageClickable = false,
     ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -170,7 +172,8 @@ const MapField: FC<MapProps> = ({
               imageFallback: infoImage || '',
               images: images,
               createImageSlider: createImageSlider,
-              addSpacer: !!infoImage
+              addSpacer: !!infoImage,
+              imageClickable: imageClickable
           })}
 
           <div

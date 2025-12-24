@@ -43,6 +43,7 @@ export type SelectFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
@@ -65,6 +66,7 @@ const SelectField: FC<SelectFieldProps> = ({
       overrideDefaultValue,
       images = [],
       createImageSlider = false,
+      imageClickable = false,
 }) => {
     choices = choices.map((choice) => {
       if (typeof choice === 'string') {
@@ -123,7 +125,8 @@ const SelectField: FC<SelectFieldProps> = ({
               imageFallback: infoImage || '',
               images: images,
               createImageSlider: createImageSlider,
-              addSpacer: !!infoImage
+              addSpacer: !!infoImage,
+              imageClickable: imageClickable
             })}
 
             <Paragraph className="utrecht-form-field__input">

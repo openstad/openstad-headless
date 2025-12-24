@@ -38,6 +38,7 @@ export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 declare const MapField: FC<MapProps>;
 export default MapField;

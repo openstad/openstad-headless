@@ -42,6 +42,7 @@ export type ImageUploadProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 declare const ImageUploadField: FC<ImageUploadProps>;
 export default ImageUploadField;

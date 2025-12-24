@@ -16,6 +16,7 @@ type InfoImageProps = {
   images?: ImageType[];
   createImageSlider?: boolean;
   addSpacer?: boolean;
+  imageClickable?: boolean;
 }
 
 const InfoImage = ({
@@ -24,7 +25,8 @@ const InfoImage = ({
   imageDescriptionFallback = '',
   images = [],
   createImageSlider = false,
-  addSpacer = false
+  addSpacer = false,
+  imageClickable = false
 }: InfoImageProps) => {
   let imageArray: ImageType[] = images && images.length > 0 ? images : [];
   if (!imageArray.length && imageFallback) {
@@ -41,7 +43,12 @@ const InfoImage = ({
     imageDescription?: string
   ) => (
     <figure className="info-image-container">
-      <img src={image} alt={imageAlt} />
+      <img
+        src={image}
+        alt={imageAlt}
+        onClick={imageClickable ? () => window.open(image, '_blank') : undefined}
+        className={imageClickable ? 'clickable-image' : undefined}
+      />
       {imageDescription && (
         <figcaption>{imageDescription}</figcaption>
       )}

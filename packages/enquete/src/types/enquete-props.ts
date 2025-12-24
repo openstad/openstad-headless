@@ -70,6 +70,7 @@ export type Item = {
     imageDescription?: string;
   }>;
   createImageSlider?: boolean;
+  imageClickable?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;

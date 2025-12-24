@@ -44,6 +44,7 @@ export type TextInputProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 declare const TextInput: FC<TextInputProps>;
 export default TextInput;

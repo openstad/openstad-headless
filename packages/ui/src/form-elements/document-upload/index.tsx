@@ -87,6 +87,7 @@ export type DocumentUploadProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 type MockDocFile = {
@@ -126,6 +127,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     overrideDefaultValue = [],
     images = [],
     createImageSlider = false,
+    imageClickable = false,
     ...props
 }) => {
     const datastore = new DataStore({ props });
@@ -262,7 +264,8 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                 imageFallback: infoImage || '',
                 images: images,
                 createImageSlider: createImageSlider,
-                addSpacer: !!infoImage
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
             })}
 
             <div className="utrecht-form-field__input">

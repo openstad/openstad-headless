@@ -49,6 +49,7 @@ export type MatrixFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     nextPageText?: string;
     prevPageText?: string;
 }
@@ -75,6 +76,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
        overrideDefaultValue,
        images = [],
        createImageSlider = false,
+       imageClickable = false,
 }) => {
     const initialValue = Array.isArray(overrideDefaultValue) ? overrideDefaultValue as string[] : [];
     const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
@@ -154,7 +156,8 @@ const MatrixField: FC<MatrixFieldProps> = ({
               imageFallback: infoImage || '',
               images: images,
               createImageSlider: createImageSlider,
-              addSpacer: !!infoImage
+              addSpacer: !!infoImage,
+              imageClickable: imageClickable
             })}
 
             <Table role="presentation" data-columns={matrix?.columns?.length || 0} data-rows={matrix?.rows?.length || 0}>

@@ -48,6 +48,7 @@ export type RangeSliderProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 type valueObject = {
     value: string;

@@ -41,6 +41,7 @@ export type CheckboxFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
     value?: FormValue;
 };

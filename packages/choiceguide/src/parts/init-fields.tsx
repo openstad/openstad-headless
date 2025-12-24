@@ -50,6 +50,7 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 placeholder: item.placeholder || '',
                 images: item.images || [],
                 createImageSlider: item?.createImageSlider || false,
+                imageClickable: item?.imageClickable || false,
 
                 // Keeping this for backwards compatibility
                 infoImage: item.infoImage || '',

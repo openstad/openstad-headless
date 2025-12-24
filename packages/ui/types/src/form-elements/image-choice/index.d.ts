@@ -35,6 +35,7 @@ export type ImageChoiceFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     infoField?: string;
 };
 export type ChoiceItem = {

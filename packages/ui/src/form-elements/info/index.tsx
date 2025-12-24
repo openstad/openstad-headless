@@ -32,6 +32,7 @@ export type InfoFieldProps = {
     imageDescription?: string;
   }>;
   createImageSlider?: boolean;
+  imageClickable?: boolean;
 }
 
 const InfoField: FC<InfoFieldProps> = ({
@@ -46,6 +47,7 @@ const InfoField: FC<InfoFieldProps> = ({
   infoImage = '',
   images = [],
   createImageSlider = false,
+  imageClickable = false,
 }) => {
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -83,7 +85,8 @@ const InfoField: FC<InfoFieldProps> = ({
         imageDescriptionFallback: imageDescription,
         images: images,
         createImageSlider: createImageSlider,
-        addSpacer: !!infoImage
+        addSpacer: !!infoImage,
+        imageClickable: imageClickable
       })}
     </div>
   );

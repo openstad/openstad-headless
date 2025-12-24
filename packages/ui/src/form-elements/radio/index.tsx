@@ -51,6 +51,7 @@ export type RadioboxFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
 }
 
@@ -73,6 +74,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     defaultValue,
     images = [],
     createImageSlider = false,
+    imageClickable = false,
 }) => {
     let initialValue = defaultValue as string || "";
     initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
@@ -196,7 +198,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     imageFallback: infoImage || '',
                     images: images,
                     createImageSlider: createImageSlider,
-                    addSpacer: !!infoImage
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
                 })}
 
                 {displayChoices?.map((choice, index) => (

@@ -16,6 +16,7 @@ export type TickmarkSliderProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     fieldRequired: boolean;
     fieldKey: string;
     imageSrc?: string;

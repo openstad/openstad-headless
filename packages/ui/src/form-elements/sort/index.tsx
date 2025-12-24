@@ -34,6 +34,7 @@ export type SortFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     onChange?: (e: { name: string; value: any }, triggerSetLastKey?: boolean) => void;
     prevPageText?: string;
     nextPageText?: string;
@@ -74,6 +75,7 @@ const SortField: FC<SortFieldProps> = ({
     infoImage,
     images = [],
     createImageSlider = false,
+    imageClickable = false,
 }) => {
     try {
         const defaultOrder = overrideDefaultValue ?
@@ -120,7 +122,8 @@ const SortField: FC<SortFieldProps> = ({
                     imageFallback: infoImage || '',
                     images: images,
                     createImageSlider: createImageSlider,
-                    addSpacer: !!infoImage
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
                 })}
             </div>
             <div className="sortable-context">

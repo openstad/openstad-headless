@@ -31,6 +31,7 @@ export type InfoFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 declare const InfoField: FC<InfoFieldProps>;
 export default InfoField;

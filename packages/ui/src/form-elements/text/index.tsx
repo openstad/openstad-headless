@@ -50,6 +50,7 @@ export type TextInputProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -77,6 +78,7 @@ const TextInput: FC<TextInputProps> = ({
     overrideDefaultValue,
     images = [],
     createImageSlider = false,
+    imageClickable = false,
 }) => {
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
 
@@ -185,7 +187,8 @@ const TextInput: FC<TextInputProps> = ({
                 imageFallback: infoImage || '',
                 images: images,
                 createImageSlider: createImageSlider,
-                addSpacer: !!infoImage
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
             })}
 
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`} aria-invalid={checkInvalid}>

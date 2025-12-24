@@ -34,6 +34,7 @@ export type NumberInputProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     infoImage?: string;
 };
 declare const NumberInput: FC<NumberInputProps>;

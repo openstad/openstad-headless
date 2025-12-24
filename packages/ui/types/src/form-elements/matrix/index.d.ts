@@ -36,6 +36,7 @@ export type MatrixFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     nextPageText?: string;
     prevPageText?: string;
 };

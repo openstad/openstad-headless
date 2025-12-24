@@ -17,6 +17,7 @@ export type HiddenInputProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const HiddenInput: FC<HiddenInputProps> = ({

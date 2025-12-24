@@ -51,6 +51,7 @@ export type CheckboxFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
     value?: FormValue;
 }
@@ -76,6 +77,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        defaultValue,
        images = [],
        createImageSlider = false,
+       imageClickable = false,
 }) => {
     let initialValue = defaultValue || [];
     try {
@@ -209,7 +211,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     imageFallback: infoImage || '',
                     images: images,
                     createImageSlider: createImageSlider,
-                    addSpacer: !!infoImage
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
                 })}
 
                 {displayChoices?.map((choice, index) => (

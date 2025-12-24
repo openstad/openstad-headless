@@ -57,3 +57,7 @@
 .osc-carousel-pager .osc-carousel-pager-button.active {
     background-color: var(--osc-primary, #3e3e3e);
 }
+
+.osc-carousel .clickable-image {
+    cursor: pointer;
+}

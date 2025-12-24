@@ -26,6 +26,7 @@ export type SortFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     onChange?: (e: {
         name: string;
         value: any;

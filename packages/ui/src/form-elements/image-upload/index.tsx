@@ -97,6 +97,7 @@ export type ImageUploadProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const ImageUploadField: FC<ImageUploadProps> = ({
@@ -117,6 +118,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     overrideDefaultValue = [],
     images = [],
     createImageSlider = false,
+    imageClickable = false,
     ...props
 }) => {
     const datastore = new DataStore({ props });
@@ -232,7 +234,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 imageFallback: infoImage || '',
                 images: images,
                 createImageSlider: createImageSlider,
-                addSpacer: !!infoImage
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
             })}
 
             <div className="utrecht-form-field__input">

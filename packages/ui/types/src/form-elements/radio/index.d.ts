@@ -39,6 +39,7 @@ export type RadioboxFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
 };
 declare const RadioboxField: FC<RadioboxFieldProps>;

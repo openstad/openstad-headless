@@ -38,6 +38,7 @@ export type NumberInputProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     infoImage?: string;
 }
 
@@ -59,6 +60,7 @@ const NumberInput: FC<NumberInputProps> = ({
     infoImage,
     images = [],
     createImageSlider = false,
+    imageClickable = false,
 }) => {
   const initialValue = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
 
@@ -124,7 +126,8 @@ const NumberInput: FC<NumberInputProps> = ({
         imageFallback: infoImage || '',
         images: images,
         createImageSlider: createImageSlider,
-        addSpacer: !!infoImage
+        addSpacer: !!infoImage,
+        imageClickable: imageClickable
       })}
 
       <div className={`utrecht-form-field__input`}>

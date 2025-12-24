@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {ArrowDown, ArrowUp, X} from 'lucide-react';
+import {ArrowDown, ArrowUp, ArrowLeft, ArrowRight, X} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import {useFieldArray, useForm} from 'react-hook-form';
 import * as z from 'zod';
@@ -31,6 +31,7 @@ import {useWidgetConfig} from "@/hooks/use-widget-config";
 import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/choiceguide/src/props';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
 import { Matrix, MatrixOption } from '@openstad-headless/enquete/src/types/enquete-props';
+import ImageGalleryStyle from "@/components/image-gallery-style";
 
 const weightSchema: z.ZodSchema = z.object({
   weightX: z.any().optional(),
@@ -106,6 +107,7 @@ const formSchema = z.object({
   skipQuestionLabel: z.string().optional(),
   routingInitiallyHide: z.boolean().optional(),
   createImageSlider: z.boolean().optional(),
+  imageClickable: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
   routingSelectedAnswer: z.string().optional(),
   imageOptionUpload: z.string().optional(),
@@ -153,6 +155,7 @@ export default function WidgetChoiceGuideItems(
   const [dimensions, setDimensions] = useState<string[]>([]);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
   const [matrixOption, setMatrixOption] = useState<MatrixOption & {type: 'rows' | 'columns'} | null>(null);
+  const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
 
   const {
     data: widget
@@ -222,6 +225,7 @@ export default function WidgetChoiceGuideItems(
           matrixMultiple: values.matrixMultiple || false,
           routingInitiallyHide: values.routingInitiallyHide || false,
           createImageSlider: values.createImageSlider || false,
+          imageClickable: values.imageClickable || false,
           images: values?.images || [],
           routingSelectedQuestion: values.routingSelectedQuestion || '',
           routingSelectedAnswer: values.routingSelectedAnswer || '',
@@ -348,6 +352,7 @@ export default function WidgetChoiceGuideItems(
     matrixMultiple: false,
     routingInitiallyHide: false,
     createImageSlider: false,
+    imageClickable: false,
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
     images: [],
@@ -422,6 +427,7 @@ export default function WidgetChoiceGuideItems(
         matrixMultiple: selectedItem.matrixMultiple || false,
         routingInitiallyHide: selectedItem.routingInitiallyHide || false,
         createImageSlider: selectedItem.createImageSlider || false,
+        imageClickable: selectedItem.imageClickable || false,
         routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
         images,
@@ -819,7 +825,7 @@ export default function WidgetChoiceGuideItems(
 
   return (
     <div>
-      {/* <ImageUploader /> */}
+      <ImageGalleryStyle />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -1355,8 +1361,8 @@ export default function WidgetChoiceGuideItems(
                           form={form}
                           project={project as string}
                           fieldName="uploadInfoImage"
-                          imageLabel="Upload een afbeelding voor boven de vraag"
-                          description="Let op: de afbeelding wordt afgesneden op 300px hoogte. Het is handig om de afbeelding op voorhand zelf bij te snijden tot deze hoogte."
+                          imageLabel="Afbeeldingen uploaden boven de vraag"
+                          description="Je kunt hier meerdere afbeeldingen tegelijk uploaden. Klik na het uploaden op een afbeelding om extra informatie toe te voegen, zoals een beschrijving of alternatieve tekst voor schermlezers."
                           allowedTypes={["image/*"]}
                           allowMultiple={true}
                           onImageUploaded={(imageResult) => {
@@ -1384,16 +1390,27 @@ export default function WidgetChoiceGuideItems(
                         <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
                           {imageFields.length > 0 && (
                             <div className="grid">
-                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2">Afbeeldingen</label>
-                              <section className="grid col-span-full grid-cols-1 gap-y-8">
+                              <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
                                 { imageFields.map(({ id, url }, index) => {
                                   return (
                                     <div
                                       key={id}
-                                      className="relative grid col-span-full gap-x-4 items-center"
-                                      style={{gridTemplateColumns: "1fr 2fr 40px"}}
+                                      className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                                      style={{gridTemplateColumns: index === imageIndexOpen ? "1fr 2fr 40px" : "1fr"}}
                                     >
-                                      <img src={url} alt={url}/>
+                                      <div className="image-container">
+                                        <img
+                                          src={url}
+                                          alt={url}
+                                          onClick={() => {
+                                            if (index === imageIndexOpen) {
+                                              setImageIndexOpen(-1)
+                                            } else {
+                                              setImageIndexOpen(index)
+                                            }
+                                          }}
+                                        />
+                                      </div>
                                       <Button
                                         color="red"
                                         onClick={() => {
@@ -1405,6 +1422,7 @@ export default function WidgetChoiceGuideItems(
 
                                       <div
                                         className="grid gap-y-4 items-center"
+                                        style={{display: index === imageIndexOpen ? 'grid' : 'none'}}
                                       >
                                         <FormField
                                           control={form.control}
@@ -1439,12 +1457,12 @@ export default function WidgetChoiceGuideItems(
                                         />
                                       </div>
 
-                                      <span className="grid gap-2 py-3 px-2">
-                                        <ArrowUp
+                                      <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                        <ArrowLeft
                                           className="cursor-pointer"
                                           onClick={() => moveUpImage(index) }
                                         />
-                                        <ArrowDown
+                                        <ArrowRight
                                           className="cursor-pointer"
                                           onClick={() => moveDownImage(index) }
                                         />
@@ -1464,6 +1482,33 @@ export default function WidgetChoiceGuideItems(
                             <FormItem>
                               <FormLabel>
                                 Wil je van de afbeeldingen een slider maken?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="imageClickable"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Moeten de afbeeldingen uitvergroot worden als erop geklikt wordt?
                               </FormLabel>
                               <Select
                                 onValueChange={(e: string) => field.onChange(e === 'true')}

@@ -42,6 +42,7 @@ export type ImageChoiceFieldProps = {
         imageDescription?: string;
     }>;
     createImageSlider?: boolean;
+    imageClickable?: boolean;
     infoField?: string;
 }
 
@@ -74,6 +75,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     infoField,
     images = [],
     createImageSlider = false,
+    imageClickable = false,
 }) => {
     let initialValue = [];
 
@@ -149,7 +151,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                     imageFallback: infoImage || '',
                     images: images,
                     createImageSlider: createImageSlider,
-                    addSpacer: !!infoImage
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
                 })}
 
                 <div className={"image-choice-container"}>
