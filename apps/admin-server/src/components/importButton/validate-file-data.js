@@ -1,4 +1,4 @@
-export default async (dataRows, schema) => {
+const validateFileData = async (dataRows, schema) => {
 
   if (!dataRows.length > 0) {
     return [{
@@ -54,3 +54,5 @@ export default async (dataRows, schema) => {
 
   return schemaValidationMessages.concat(validationMessages);
 };
+
+export default validateFileData;
