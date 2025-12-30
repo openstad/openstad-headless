@@ -22,18 +22,19 @@
     "@utrecht/component-library-react": "^4.2.0",
     "clsx": "^2.1.1",
     "html-to-react": "^1.7.0",
-    "tailwind-merge": "^1.14.0",
     "react-transition-group": "^4.4.5",
+    "tailwind-merge": "^1.14.0",
+    "trix": "^2.1.15",
     "vite": "^6.4.1"
   },
   "devDependencies": {
-    "cypress": "^15.3.0",
     "@cypress/react": "^9.0.1",
     "@cypress/vite-dev-server": "^7.0.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.5",
     "@utrecht/design-tokens": "^1.0.0-alpha.607",
+    "cypress": "^15.3.0",
     "rollup": "^4.2.0",
     "rollup-plugin-dts": "^6.1.0",
     "typescript": "^5.2.2"
