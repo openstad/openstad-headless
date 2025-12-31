@@ -396,8 +396,6 @@ service.fetchUniqueCode = async function({ authConfig, isExport = false }) {
 
     if (isExport) {
       url += '&export=true';
-    } else {
-      url += '&amount=3';
     }
     
     let response = await fetch(url, {
