@@ -91,7 +91,7 @@ const TrixEditor: React.FC<{
       if (toolbar) {
         const fileButton = toolbar.querySelector('[data-trix-action="attachFiles"]');
         if (fileButton) {
-          fileButton.remove(); // Remove the file attachment button
+          fileButton.remove();
         }
       }
 
@@ -100,7 +100,7 @@ const TrixEditor: React.FC<{
         editorInstance.current.loadHTML(value);
       }
 
-      // Listen for changes and send synthetic change event
+      // Listen for changes and send change event
       editorEl.addEventListener("trix-change", () => {
         if (editorInstance.current && inputEl) {
           const html = inputEl.value;
