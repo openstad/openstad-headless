@@ -52,7 +52,7 @@ function RawResource(props: RawResourceWidgetProps) {
 
   let updatedProps = { ...props, resourceId, currentUser };
 
-  const { data: resource } = resourceId ? datastore.useResource({...updatedProps, currentUser}) : { data: null };
+  const { data: resource } = resourceId ? datastore.useResource(updatedProps) : { data: null };
 
   const stylingClasses =
     updatedProps.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
