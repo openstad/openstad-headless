@@ -12,12 +12,14 @@ export type VideoFieldProps = BaseProps &
 export type VideoProps = {
   videoUrl?: string;
   lang?: string;
+  subtitle?: boolean;
 };
 
 
 const VideoField: FC<VideoFieldProps> = ({
   videoUrl,
   lang = 'nl',
+  subtitle = true,
   ...props
 }) => {
   const id = useId();
@@ -77,7 +79,7 @@ const VideoField: FC<VideoFieldProps> = ({
             loop: 1,
             playlist: videoId,
             cc_lang_pref: lang,
-            cc_load_policy: 1,
+            cc_load_policy: subtitle ? 1 : 0,
             rel: 0,
             iv_load_policy: 3,
             modestbranding: 1,
