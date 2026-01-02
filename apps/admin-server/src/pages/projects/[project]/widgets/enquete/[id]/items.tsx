@@ -108,6 +108,8 @@ const formSchema = z.object({
   infoField: z.string().optional(),
   infofieldExplanation: z.boolean().optional(),
   videoUrl: z.string().optional(),
+  videoSubtitle: z.boolean().optional(),
+  videoLang: z.string().optional(),
   numberingStyle: z.string().optional(),
 
 
@@ -348,6 +350,8 @@ export default function WidgetEnqueteItems(
     routingSelectedAnswer: '',
     infoField: '',
     videoUrl: '',
+    videoSubtitle: false,
+    videoLang: '',
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -413,6 +417,8 @@ export default function WidgetEnqueteItems(
         infoField: selectedItem.infoField || '',
         infofieldExplanation: selectedItem.infofieldExplanation || false,
         videoUrl: selectedItem.videoUrl || '',
+        videoSubtitle: selectedItem.videoSubtitle || false,
+        videoLang: selectedItem.videoLang || '',
 
 
         // Keeping these for backwards compatibility
@@ -1551,20 +1557,56 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
                     {form.watch('questionType') === 'video' && (
-                      <FormField
-                        control={form.control}
-                        name="videoUrl"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Video url</FormLabel>
-                            <FormDescription>
-                              Voeg hier een YouTube url toe, dit kan een normale video of een short zijn.
-                            </FormDescription>
-                            <Input {...field} />
-                            <FormMessage />
-                          </FormItem>
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="videoUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Video url</FormLabel>
+                              <FormDescription>
+                                Voeg hier een YouTube url toe, dit kan een normale video of een short zijn.
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="videoSubtitle"
+                          render={({ field }) => (
+                            <>
+                              <>
+                                <FormItem>
+                                  <FormLabel>Ondertiteling</FormLabel>
+                                  <FormDescription>
+                                    Als je deze optie aanzet, worden ondertitels standaard ingeschakeld wanneer de video wordt afgespeeld. (Let op: deze optie werkt alleen als de video ondertitels heeft.)
+                                  </FormDescription>
+                                  {YesNoSelect(field, props)}
+                                  <FormMessage />
+                                </FormItem>
+                              </>
+                            </>
+                          )}
+                        />
+                        {form.watch('videoSubtitle') === true && (
+                          <FormField
+                            control={form.control}
+                            name="videoLang"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Ondertiteling taal</FormLabel>
+                                <FormDescription>
+                                  Kies de taal voor de ondertiteling van de video. (Let op: deze optie werkt alleen als de video ondertitels heeft in de gekozen taal.)
+                                </FormDescription>
+                                <Input {...field} placeholder='nl / en / fr / etc...' />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         )}
-                      />
+                      </>
                     )}
 
                     {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' || form.watch('questionType') === 'documentUpload') && (

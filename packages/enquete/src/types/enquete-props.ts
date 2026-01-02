@@ -20,7 +20,6 @@ export type EnqueteProps = {
   datalayer?: DataLayer[];
   enableOnOffSwitching?: boolean;
   infoBlockStyle?: string;
-  videoUrl?: string;
 };
 
 export type Item = {
@@ -65,6 +64,8 @@ export type Item = {
   image_b?: string;
   numberingStyle?: string;
   videoUrl?: string;
+  videoSubtitle?: boolean;
+  videoLang?: string;
 
   // Keeping this for backwards compatibility
   image1?: string;
