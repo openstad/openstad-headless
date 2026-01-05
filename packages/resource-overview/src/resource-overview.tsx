@@ -344,7 +344,7 @@ const defaultItemRenderer = (
             <Paragraph className="data-user-container">
               {props.displayUser && resource.user && (
                 <span className="created-by">
-                  {resource.user.name}
+                  {resource.user.displayName}
                 </span>
               )}
 
