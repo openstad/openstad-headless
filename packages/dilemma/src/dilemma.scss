@@ -173,7 +173,7 @@
         position: absolute;
         top: 48px;
         left: 24px;
-        color: var(--setBackColor, #094B81);
+        color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
         display: flex;
         z-index: 99;
         gap: 4px;
@@ -196,7 +196,7 @@
             mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             mask-repeat: no-repeat;
-            background-color: var(--setBackColor, #094B81);
+            background-color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
             display: block;
         }
     }
@@ -277,8 +277,8 @@
                 transition: all .2s ease-in-out;
 
                 &:has(.active) {
-                    background: #1160A1;
-                    border: 2px solid #1160A1;
+                    background: var(--setActiveOverviewBackground, var(--utrecht-button-primary-action-background-color, #094B81));
+                    border: 2px solid var(--setActiveOverviewBackground, var(--utrecht-button-primary-action-background-color, #094B81));
 
                     .utrecht-heading-4,
                     .utrecht-paragraph {
@@ -309,6 +309,7 @@
                         border-radius: var(--dilemmaImageBorderRadius);
                         overflow: hidden;
                         margin-right: 12px;
+                        flex-shrink: 0;
 
                         img {
                             width: 100%;
