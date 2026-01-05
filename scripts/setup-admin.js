@@ -18,6 +18,7 @@ OAUTH_URL=${process.env.AUTH_APP_URL}
 API_URL=${process.env.API_URL}
 API_URL_INTERNAL=${process.env.API_URL}
 API_FIXED_AUTH_KEY=${process.env.API_FIXED_AUTH_KEY}
+BETA_FEATURES_FLAG=${process.env.BETA_FEATURES_FLAG}
 PORT=${process.env.ADMIN_PORT}
 `
     if (actions['create config']) {
