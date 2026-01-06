@@ -45,6 +45,8 @@ export type CheckboxFieldProps = {
     fieldOptions?: { value: string; label: string }[];
     randomizeItems?: boolean;
     value?: FormValue;
+    selectAll?: boolean;
+    selectAllLabel?: string;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -65,7 +67,9 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        fieldInvalid= false,
        randomizeItems = false,
        overrideDefaultValue,
-       defaultValue
+       defaultValue,
+       selectAll = false,
+       selectAllLabel = ''
 }) => {
     let initialValue = defaultValue || [];
     try {
@@ -200,6 +204,33 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                         <img src={infoImage} alt=""/>
                         <Spacer size={.5} />
                     </figure>
+                )}
+
+                { selectAll && (
+                    <FormField type="checkbox" key="select_all">
+                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                            <FormLabel htmlFor={`${fieldKey}_select_all`} type="checkbox" className="--label-grid">
+                                <Checkbox
+                                    className="utrecht-form-field__input"
+                                    id={`${fieldKey}_select_all`}
+                                    name={fieldKey}
+                                    value="select_all"
+                                    required={fieldRequired}
+                                    checked={selectedChoices.length > 0 && selectedChoices.length === (displayChoices ? displayChoices.length : 0)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            const allValues = displayChoices ? displayChoices.map(choice => choice.value) : [];
+                                            setSelectedChoices(allValues);
+                                        } else {
+                                            setSelectedChoices([]);
+                                        }
+                                    }}
+                                    disabled={disabled}
+                                />
+                                <span>{selectAllLabel}</span>
+                            </FormLabel>
+                        </Paragraph>
+                    </FormField>
                 )}
 
                 {displayChoices?.map((choice, index) => (

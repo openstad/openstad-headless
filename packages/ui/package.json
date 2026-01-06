@@ -28,6 +28,7 @@
     "vite": "^6.4.1"
   },
   "devDependencies": {
+    "cypress": "^15.8.1",
     "@cypress/react": "^9.0.1",
     "@cypress/vite-dev-server": "^7.0.0",
     "@rollup/plugin-commonjs": "^25.0.7",
