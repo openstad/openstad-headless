@@ -18,7 +18,7 @@ import { ImportButton } from '@/components/importButton';
 import { keyMap } from '@/lib/keyMap';
 
 interface ProjectResourcesProps {
-  BETA_FEATURES_FLAG: string;
+  BETA_FEATURE_FLAG_BULK_IMPORT: string;
 }
 
 const prepareDataForExport = (data: any[]) => {
@@ -60,12 +60,12 @@ const prepareDataForExport = (data: any[]) => {
 export async function getServerSideProps() {
   return {
     props: {
-      BETA_FEATURES_FLAG: process.env.BETA_FEATURES_FLAG,
+      BETA_FEATURE_FLAG_BULK_IMPORT: process.env.BETA_FEATURE_FLAG_BULK_IMPORT,
     },
   };
 }
 
-export default function ProjectResources({ BETA_FEATURES_FLAG }: ProjectResourcesProps) {
+export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: ProjectResourcesProps) {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove, duplicate } = useResources(project as string);
@@ -118,7 +118,7 @@ export default function ProjectResources({ BETA_FEATURES_FLAG }: ProjectResource
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
               Exporteer inzendingen
             </Button>
-            {BETA_FEATURES_FLAG === "true" && <ImportButton project={project as string} />}
+            {BETA_FEATURE_FLAG_BULK_IMPORT === "true" && <ImportButton project={project as string} />}
           </div>
         }>
         <div className="container py-6"><div className="float-left mb-4 flex gap-4">
