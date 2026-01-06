@@ -1,6 +1,6 @@
 # Kalender
 
-Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team. [Deel een opmerking of vraag via een issue](https://github.com/openstad/openstad-headless/blob/main/CONTRIBUTING.md).
+Deze kalender omvat evenementen die georganiseerd worden door het OpenStad Kernteam. [Deel een opmerking of vraag via een issue](https://github.com/openstad/openstad-headless/blob/main/CONTRIBUTING.md).
 
 ## 2026
 ### Januari
