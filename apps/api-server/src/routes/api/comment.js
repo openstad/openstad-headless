@@ -7,6 +7,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const express = require('express');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const crypto = require("crypto");
 const router = express.Router({ mergeParams: true });
 
 // scopes: for all get requests
@@ -213,6 +214,7 @@ router.route('/')
     let receiverProjectId = 0;
     let parentComment = '';
     let confirmationSent = undefined;
+    let type = '';
 
     if (confirmation && !req?.results?.parentId) {
       if (overwriteEmailAddress) {
@@ -248,7 +250,11 @@ router.route('/')
     }
 
     if (!!receiver) {
-      const receiverUserIdBase64 = Buffer.from(String(receiverUserId)).toString('base64');
+      const userIdSalt = process.env.USER_ID_SALT;
+
+      const hash = crypto.createHash('md5');
+      hash.update(`${userIdSalt}.${receiverUserId}.${receiverProjectId}`);
+      const hashedUserId = hash.digest('hex');
 
       const commentData = {
         comment: {
@@ -256,10 +262,10 @@ router.route('/')
           sentiment: req.results.sentiment,
           parentId: req.results.parentId,
           createDateHumanized: req.results.createDateHumanized,
-          userName: req.results.user ? req.results.user.name : '',
+          userName: req.results.user ? req.results.user.displayName : '',
           userEmail: req.results.user ? req.results.user.email : '',
         },
-        unsubscribeUrl: receiverUserId ? `${process.env.URL}/api/project/${receiverProjectId}/user/unsubscribe/${receiverUserIdBase64}}` : '',
+        unsubscribeUrl: receiverUserId ? `${process.env.URL}/api/project/${receiverProjectId}/user/unsubscribe/${receiverUserId}/${hashedUserId}` : '',
       };
 
       if (!!parentComment) {
@@ -267,8 +273,16 @@ router.route('/')
       }
 
       try {
+        const notificationType = confirmation && !req?.results?.parentId
+          ? 'notification comment - user'
+          : confirmationReplies
+            ? 'notification comment reply - user'
+            : '';
+
+        if (!notificationType) throw new Error('No valid notification type');
+
         db.Notification.create({
-          type: "notification comment - user",
+          type: notificationType,
           projectId: req.project.id,
           to: receiver,
           data: commentData

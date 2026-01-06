@@ -11,6 +11,7 @@ const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const crypto = require("crypto");
 
 const filterBody = (req, res, next) => {
   const data = {};
@@ -54,16 +55,25 @@ router
   });
 
 router
-  .route('/unsubscribe/:userBase64')
+  .route('/unsubscribe/:userId/:userHash')
   .get(async function (req, res, next) {
     try {
-      const userIdDecoded = Buffer.from(req.params.userBase64, 'base64').toString('utf-8');
-      const userId = parseInt(userIdDecoded);
+      const userId = parseInt(req.params.userId || '');
+      const userHash = req.params.userHash;
 
       if (!userId) return next( new Error('Users: invalid unsubscribe link') );
 
       const user = await db.User.findOne({ where: { id: userId } });
       if (!user) return next( new Error('Users: user not found') );
+
+      const projectId = user.projectId;
+      const userIdSalt = process.env.USER_ID_SALT;
+
+      const hash = crypto.createHash('md5');
+      hash.update(`${userIdSalt}.${userId}.${projectId}`);
+      const hashedUserId = hash.digest('hex');
+
+      if (hashedUserId !== userHash) return next( new Error('Users: invalid unsubscribe link') );
 
       user.emailNotificationConsent = false;
       const updatedUser = await user.save();
