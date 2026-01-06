@@ -103,7 +103,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any, inlineOptions?: boolean }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
@@ -589,7 +589,7 @@ function ResourceOverviewInner({
   const tagIdsToLimitResourcesTo = stringToArray(onlyIncludeTagIds);
   const tagsLimitationArray = stringToArray(onlyShowTheseTagIds);
 
-  const { data: allTags } = datastore.useTags({
+  const { data: allTags, isLoading: tagsLoading } = datastore.useTags({
     projectId: props.projectId,
     type: ''
   });
@@ -620,6 +620,10 @@ function ResourceOverviewInner({
 
   const [open, setOpen] = React.useState(false);
   const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
+
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
 
   useEffect(() => {
     const includeTags = includeOrExcludeTagIds === 'include' ? tagIdsToLimitResourcesTo : [];
@@ -953,7 +957,9 @@ function ResourceOverviewInner({
     </section>
   );
 
-  return (
+  return tagsLoading ? (
+      <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
+    ) : (
     <>
       <Dialog
         open={open}
@@ -1039,7 +1045,7 @@ function ResourceOverviewInner({
                 setSearch(f.search.text);
                 setLocation(f.location)
               }}
-              preFilterTags={urlTagIdsArray}
+              preFilterTags={prefilterTagObj}
               displayCollapsibleFilter={displayCollapsibleFilter}
               autoApply={props?.autoApply || false}
             />
