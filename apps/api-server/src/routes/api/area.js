@@ -75,7 +75,9 @@ router.route('/:areaId(\\d+)')
         where: { id: areaId },
       })
       .then(found => {
-        if (!found) throw new Error('area not found');
+        if (!found) {
+          return next(createError(404, 'Area not found'));
+        }
 
         req.area = found;
         req.results = req.area;
@@ -127,7 +129,9 @@ router.route('/:areaId(\\d+)')
         // where: { id: areaInstance.id, projectId: req.params.projectId },
       })
       .then(found => {
-        if (!found) throw new Error('area not found');
+        if (!found) {
+          return next(createError(404, 'Area not found'));
+        }
         req.results = found;
         next();
       })
