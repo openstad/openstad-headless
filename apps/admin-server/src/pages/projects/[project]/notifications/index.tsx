@@ -16,7 +16,8 @@ export default function ProjectNotifications() {
       | 'user account about to expire'
       | 'new enquete - admin'
       | 'new enquete - user'
-      | 'notification comment - user';
+      | 'notification comment - user'
+      | 'notification comment reply - user';
 
   const defaultDefinitions: { [type in NotificationType]: any[] } = {
     "login email": [],
@@ -27,7 +28,8 @@ export default function ProjectNotifications() {
     "user account about to expire": [],
     "new enquete - admin": [],
     "new enquete - user": [],
-    "notification comment - user": []
+    "notification comment - user": [],
+    "notification comment reply - user": [],
   };
 
   const [typeDefinitions, setTypeDefinitions] = React.useState<{ [type in NotificationType]: any[] }>(defaultDefinitions);
