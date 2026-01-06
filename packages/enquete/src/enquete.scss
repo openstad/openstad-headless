@@ -940,6 +940,10 @@ label.utrecht-form-label {
     .question-type-video {
       padding: 0;
       aspect-ratio: 9 / 16;
+      width: 100%;
+      &:before{
+        display: none;
+      }
 
       + .button-group .utrecht-button--secondary-action{
         background-color: #fff;
