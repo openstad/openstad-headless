@@ -142,11 +142,9 @@ label.utrecht-form-label {
 }
 
 .question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
-.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
   display: inline-block;
 }
 
-.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
 .question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
   margin-top: 0;
 }
@@ -241,7 +239,6 @@ label.utrecht-form-label {
   --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, var(--utrecht-button-primary-action-hover-background-color, #F8D62D));
   --setEnqueteBorderWidth: 1px;
 }
-
 
 .osc-enquete-item-content {
 
@@ -590,7 +587,6 @@ label.utrecht-form-label {
           line-height: 135%;
           font-size: var(--youth-page-card-title-font-size);
           text-align: center;
-          margin-bottom: 0;
 
           strong.utrecht-emphasis {
             color: inherit;
@@ -944,18 +940,15 @@ label.utrecht-form-label {
     .question-type-video {
       padding: 0;
       aspect-ratio: 9 / 16;
-      overflow: hidden;
 
-      &:before {
-        display: none;
-      }
+      +.button-group {
+        &:before {
+          display: none;
+        }
 
-      &+.button-group.--flex:before {
-        display: none;
-      }
-
-      &+.button-group.--flex .utrecht-button--primary-action:before {
-        display: none;
+        .utrecht-button--primary-action:before {
+          display: none;
+        }
       }
     }
 
