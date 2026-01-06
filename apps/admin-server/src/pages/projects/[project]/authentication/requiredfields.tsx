@@ -57,9 +57,14 @@ const requiredUserFields = [
     label: 'Postcode',
   },
   {
+    id: 'emailNotificationConsent',
+    label: 'E-mail notificatie toestemming',
+    defaultLabel: 'Ik ga akkoord met het ontvangen van e-mail notificaties.',
+  },
+  {
     id: 'accessCode',
     label: 'Toegangscode',
-  },
+  }
 ];
 
 const formSchema = z.object({
@@ -233,6 +238,11 @@ export default function ProjectAuthenticationRequiredFields() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {requiredUserFields.map((item) => {
                         const fieldValue = form.getValues('requiredUserFieldsLabels')[item.id] ?? '';
+                        const defaultValue = item.id === 'emailNotificationConsent' ? 'Ik ga akkoord met het ontvangen van e-mail notificaties.' : fieldValue;
+                        if (item.id === 'emailNotificationConsent' && !fieldValue) {
+                          form.setValue(`requiredUserFieldsLabels.${item.id}`, defaultValue);
+                        }
+
                         return form.watch('requiredUserFields').includes(item.id) ? (
                             <FormField
                                 key={item.id}
@@ -243,8 +253,9 @@ export default function ProjectAuthenticationRequiredFields() {
                                       <FormLabel>{item.label}</FormLabel>
                                       <FormControl>
                                         <Input
+                                            {...field}
                                             placeholder={item.label}
-                                            defaultValue={fieldValue}
+                                            value={field.value || defaultValue}
                                             onChange={(e) => {
                                               field.onChange(e);
                                             }}

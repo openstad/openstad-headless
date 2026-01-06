@@ -118,6 +118,7 @@ services:
       - RATE_LIMIT=${RATE_LIMIT}
       - HASH_IP_ADDRESSES=${HASH_IP_ADDRESSES}
       - HASH_IP_SALT=${HASH_IP_SALT}
+      - USER_ID_SALT=${USER_ID_SALT}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:

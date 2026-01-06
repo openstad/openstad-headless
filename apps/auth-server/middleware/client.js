@@ -263,6 +263,18 @@ exports.checkRequiredUserFields = (req, res, next) => {
 
   if (requiredFields) {
     requiredFields.forEach((field) => {
+      // Consent field is a special case since it can contain multiple client IDs
+      if ( field === 'emailNotificationConsent' ) {
+        const clientId = String(req?.client?.id);
+        const currentValue = req?.user?.emailNotificationConsent || {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+        if (!clientConsentIsSet) {
+          error = true;
+          return;
+        }
+      }
+
       // if at least one required field is empty, set to error
       error = error || !req.user[field];
     });

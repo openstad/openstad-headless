@@ -16,6 +16,7 @@ const authLocal = require('../controllers/auth/local');
 const authCode = require('../controllers/auth/code');
 const authRequiredFields = require('../controllers/auth/required');
 const authTwoFactor = require('../controllers/auth/twoFactor');
+const authUnsubscribe = require('../controllers/auth/unsubscribe');
 
 //MIDDLEWARE
 const clientMw = require('../middleware/client');
@@ -203,7 +204,6 @@ module.exports = function (app) {
     app.get('/auth/url/authenticate', clientMw.setAuthType('Url'),  csrfProtection, addCsrfGlobal, authUrl.authenticate);
     app.post('/auth/url/authenticate', clientMw.setAuthType('Url'), csrfProtection, emailUrlBruteForce, authUrl.postAuthenticate);
 
-
     // admin login routes redirect to normal login but with priviliged params
     app.get('/auth/admin/login', [csrfProtection, addCsrfGlobal], (req, res, next) => {
         const queryIndex = req.originalUrl.indexOf('?');
@@ -211,6 +211,11 @@ module.exports = function (app) {
 
         res.redirect('/login/admin' + queryString);
     });
+
+    /**
+     * Auth routes for Unsubscribe from emails
+     */
+    app.get('/auth/unsubscribe', authUnsubscribe.info);
 
     /**
      * Auth routes for Anonymous login
