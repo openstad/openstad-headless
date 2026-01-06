@@ -22,7 +22,7 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 - Donderdag 7-5-2026 11:00-12:30 Overleg kernteam en beheerders
 - Donderdag 7-5-2026 15:00-16:00 Bijdragersbijeenkomst
 - Donderdag 28-5-2026 11:00-12:30 Overleg kernteam en beheerders
-- Donderdag 28-5-2026 13:00-14:00 OpenStad ProjectenParade+
+- Donderdag 28-5-2026 13:00-14:00 ProjectenParade+
 - Donderdag 28-5-2026 14:00-14:30 Communitybijeenkomst
 ### Juni
 - Donderdag 4-6-2026 15:00-16:00 Bijdragersbijeenkomst
@@ -34,7 +34,7 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 ### Augustus
 - Donderdag 6-8-2026 15:00-16:00 Bijdragersbijeenkomst
 - Donderdag 20-8-2026 11:00-12:30 Overleg kernteam en beheerders
-- Donderdag 27-8-2026 13:00-14:00 OpenStad ProjectenParade+
+- Donderdag 27-8-2026 13:00-14:00 ProjectenParade+
 - Donderdag 27-8-2026 14:00-14:30 Communitybijeenkomst
 ### September
 - Donderdag 3-9-2026 15:00-16:00 Bijdragersbijeenkomst
@@ -57,9 +57,9 @@ Deze kalender omvat evenementen die georganiseerd worden door OpenStad Core Team
 - Bijeenkomst vindt zo veel mogelijks plaats buiten schoolvakanties van alle regio’s in Nederland
 - Bijdragersbijeenkomst vindt plaats op de eerste donderdag van een kalendermaand
 - Bijdragersbijeenkomst vindt plaats in Jitsi, enkel op uitnodiging
-- OpenStad Projectenparade+ vindt plaats elk kwartaal
-- OpenStad Projectenparade+ vindt plaats in Microsoft Teams, enkel op uitnodiging
-- Communitybijeenkomst vindt plaats aansluitend op OpenStad ProjectenParade+
+- Projectenparade+ vindt plaats elk kwartaal
+- Projectenparade+ vindt plaats in Microsoft Teams, enkel op uitnodiging
+- Communitybijeenkomst vindt plaats aansluitend op ProjectenParade+
 - Communitybijeenkomst vindt plaats in Jitsi, publiek toegankelijk
 - OpenStad Live vindt plaats op een fysieke locatie, enkel op aanmelding
 - OpenStad Live omvat ProjectenParade
