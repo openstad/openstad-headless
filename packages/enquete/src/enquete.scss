@@ -142,9 +142,11 @@ label.utrecht-form-label {
 }
 
 .question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
   display: inline-block;
 }
 
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
 .question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
   margin-top: 0;
 }
@@ -237,6 +239,7 @@ label.utrecht-form-label {
   --youth-outro-card-description-font-size: var(--setYouthOutroCardDescriptionFontSize, 18px);
 
   --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, var(--utrecht-button-primary-action-hover-background-color, #F8D62D));
+  --setEnqueteBorderWidth: 1px;
 }
 
 
@@ -550,9 +553,9 @@ label.utrecht-form-label {
         background-color: inherit;
         mask-image: linear-gradient(180deg, #ffffff 50%, rgba(255, 255, 255, 0) 100%);
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
+        top: var(--setEnqueteBorderWidth, 1px);
+        left: var(--setEnqueteBorderWidth, 1px);
+        right: var(--setEnqueteBorderWidth, 1px);
         height: 80px;
         z-index: 2;
         pointer-events: none;

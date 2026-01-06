@@ -53,8 +53,6 @@
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
 
   --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, var(--utrecht-button-primary-action-background-color, #1260A1));
-
-  max-width: 500px;
   width: 100%;
   height: auto;
   margin: 0 auto;
@@ -501,10 +499,9 @@
 
   .swipe-summary {
     width: 100%;
-    max-width: 600px;
     margin: 24px 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
     gap: 16px;
   }
 
