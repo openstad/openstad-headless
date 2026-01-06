@@ -25,7 +25,7 @@
     "swr": "^2.2.4"
   },
   "devDependencies": {
-    "cypress": "^15.3.0",
+    "cypress": "^15.8.1",
     "@cypress/react": "^9.0.1",
     "@cypress/vite-dev-server": "^7.0.0",
     "@next/eslint-plugin-next": "^14.2.3",

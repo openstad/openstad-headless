@@ -14,40 +14,12 @@ import flattenObject from "@/lib/export-helpers/flattenObject";
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import {ConfirmActionDialog} from "@/components/dialog-confirm-action";
 import {Checkbox} from "@/components/ui/checkbox";
+import { ImportButton } from '@/components/importButton';
+import { keyMap } from '@/lib/keyMap';
 
-const keyMap: Record<string, string> = {
-  id: 'Inzending ID',
-  projectId: 'Project ID',
-  widgetId: 'Widget ID',
-  title: 'Titel',
-  summary: 'Samenvatting',
-  description: 'Beschrijving',
-  budget: 'Budget',
-  'location.lat': 'Locatie (lat)',
-  'location.lng': 'Locatie (lng)',
-  createDateHumanized: 'Datum aangemaakt (leesbaar)',
-  updatedAt: 'Laatst bijgewerkt',
-  deletedAt: 'Verwijderd op',
-  yes: 'Aantal likes',
-  no: 'Aantal dislikes',
-  score: 'Wilson score interval',
-  progress: 'Voortgang',
-  statuses: 'Statussen',
-  modBreak: 'Moderatie bericht',
-  modBreakDate: 'Moderatie bericht datum',
-  images: 'Afbeeldingen',
-  tags: 'Tags',
-  documents: 'Documenten',
-  extraData: 'Extra gegevens',
-  'user.id': 'Gebruiker ID',
-  'user.role': 'Gebruiker rol',
-  'user.name': 'Gebruiker naam',
-  'user.email': 'Gebruiker e-mailadres',
-  'user.phonenumber': 'Gebruiker telefoonnummer',
-  'user.address': 'Gebruiker adres',
-  'user.city': 'Gebruiker woonplaats',
-  'user.postcode': 'Gebruiker postcode',
-};
+interface ProjectResourcesProps {
+  BETA_FEATURES_FLAG: string;
+}
 
 const prepareDataForExport = (data: any[]) => {
   const allResources: any[] = [];
@@ -85,7 +57,15 @@ const prepareDataForExport = (data: any[]) => {
   return allResources;
 }
 
-export default function ProjectResources() {
+export async function getServerSideProps() {
+  return {
+    props: {
+      BETA_FEATURES_FLAG: process.env.BETA_FEATURES_FLAG,
+    },
+  };
+}
+
+export default function ProjectResources({ BETA_FEATURES_FLAG }: ProjectResourcesProps) {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove, duplicate } = useResources(project as string);
@@ -138,6 +118,7 @@ export default function ProjectResources() {
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
               Exporteer inzendingen
             </Button>
+            {BETA_FEATURES_FLAG === "true" && <ImportButton project={project as string} />}
           </div>
         }>
         <div className="container py-6"><div className="float-left mb-4 flex gap-4">
