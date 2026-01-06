@@ -69,6 +69,7 @@ export default function WidgetResourceDetailDisplay(
       displayDescriptionExpandable_visibleLines: props?.displayDescriptionExpandable_visibleLines || '4',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
+      displayDescription: undefinedToTrueOrProp(props?.displayDescription),
       displayUser: undefinedToTrueOrProp(props?.displayUser),
       displayDate: undefinedToTrueOrProp(props?.displayDate),
       displayBudget: undefinedToTrueOrProp(props?.displayBudget),
