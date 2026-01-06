@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useRef } from "react";
 import {
     AccordionProvider,
     FormField,
@@ -12,6 +12,18 @@ import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
 
+// Temporary TypeScript declaration for 'trix-editor'
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'trix-editor': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & { input?: string },
+        HTMLElement
+      >;
+    }
+  }
+}
+
 export type TextInputProps = {
     title: string;
     overrideDefaultValue?: FormValue;
@@ -23,7 +35,7 @@ export type TextInputProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
-    variant?: 'text input' | 'textarea';
+    variant?: 'text input' | 'textarea' | 'richtext';
     placeholder?: string;
     defaultValue?: string;
     disabled?: boolean;
@@ -44,10 +56,93 @@ export type TextInputProps = {
     fieldOptions?: { value: string; label: string }[];
 }
 
+const TrixEditor: React.FC<{
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+}> = ({ value, onChange }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const editorInstance = useRef<any>(null);
+
+  const idRef = useRef(`trix-editor-${Math.random().toString(36).substring(2, 9)}`);
+
+  useEffect(() => {
+    (async () => {
+      if (typeof window !== "undefined") {
+        // @ts-expect-error: trix has no types
+        await import("trix");
+        // @ts-expect-error: trix has no types
+        await import("trix/dist/trix.css");
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const editorEl = editorRef.current;
+    const inputEl = inputRef.current;
+    if (!editorEl || !inputEl) return;
+
+    const handleTrixInitialize = () => {
+      editorInstance.current = (editorEl as any).editor;
+
+      // Remove the file attachment button from the toolbar
+      const toolbar = document.querySelector('trix-toolbar');
+      if (toolbar) {
+        const fileButton = toolbar.querySelector('[data-trix-action="attachFiles"]');
+        if (fileButton) {
+          fileButton.remove();
+        }
+      }
+
+      // Load initial content
+      if (value && editorInstance.current) {
+        editorInstance.current.loadHTML(value);
+      }
+
+      // Listen for changes and send change event
+      editorEl.addEventListener("trix-change", () => {
+        if (editorInstance.current && inputEl) {
+          const html = inputEl.value;
+
+          // Create a synthetic React-like ChangeEvent
+          const syntheticEvent = {
+            target: { value: html },
+          } as React.ChangeEvent<HTMLInputElement>;
+
+          onChange(syntheticEvent);
+        }
+      });
+    };
+
+    editorEl.addEventListener("trix-initialize", handleTrixInitialize);
+    return () => {
+      editorEl.removeEventListener("trix-initialize", handleTrixInitialize);
+    };
+  }, [onChange]);
+
+  // Keep editor content in sync with external value
+  useEffect(() => {
+    if (!editorInstance.current || !inputRef.current) return;
+    const currentHTML = inputRef.current.value;
+    if (currentHTML !== value) {
+      editorInstance.current.loadHTML(value || "");
+    }
+  }, [value]);
+
+  return (
+    <div>
+      <input ref={inputRef} type="hidden" id={idRef.current} />
+      <trix-editor ref={editorRef} input={idRef.current}></trix-editor>
+    </div>
+  );
+};
+
+
 const TextInput: FC<TextInputProps> = ({
     title,
     description,
-    variant,
+    variant = 'textarea',
     fieldKey,
     fieldRequired = false,
     placeholder,
@@ -68,7 +163,12 @@ const TextInput: FC<TextInputProps> = ({
     fieldInvalid = false,
     overrideDefaultValue
 }) => {
-    const InputComponent = variant === 'textarea' ? Textarea : Textbox;
+        const variantMap = {
+        'text input': Textbox,
+        'textarea': Textarea,
+        'richtext': TrixEditor
+    }
+    const InputComponent = variantMap[variant];
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -186,7 +286,7 @@ const TextInput: FC<TextInputProps> = ({
                     type={getType(fieldKey)}
                     placeholder={placeholder}
                     value={value}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                         setValue(e.target.value);
 
                         if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
@@ -205,7 +305,7 @@ const TextInput: FC<TextInputProps> = ({
                                 value: e.target.value,
                             });
                         }
-                        characterHelpText(e.target.value.length)
+                        characterHelpText(e.target.value.length);
                     }}
                     disabled={disabled}
                     rows={rows}
@@ -223,4 +323,5 @@ const TextInput: FC<TextInputProps> = ({
     );
 };
 
+export { TrixEditor };
 export default TextInput;
