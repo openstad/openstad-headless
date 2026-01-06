@@ -166,10 +166,12 @@ router.route('/')
     req.confirmation = data.confirmation || false;
     req.confirmationReplies = data.confirmationReplies || false;
     req.overwriteEmailAddress = data.overwriteEmailAddress || '';
+    req.embeddedUrl = data.embeddedUrl || '';
 
     delete data.confirmation;
     delete data.confirmationReplies;
     delete data.overwriteEmailAddress;
+    delete data.embeddedUrl;
 
     db.Comment
       .authorizeData(data, 'create', req.user)
@@ -266,6 +268,7 @@ router.route('/')
           userEmail: req.results.user ? req.results.user.email : '',
         },
         unsubscribeUrl: receiverUserId ? `${process.env.URL}/api/project/${receiverProjectId}/user/unsubscribe/${receiverUserId}/${hashedUserId}` : '',
+        embeddedUrl: req.embeddedUrl || '',
       };
 
       if (!!parentComment) {

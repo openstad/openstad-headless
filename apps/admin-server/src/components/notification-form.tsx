@@ -183,6 +183,13 @@ const initialDataCommentNotification = `<mjml>
           </mj-text>
         {% endif %}
         
+        <!-- Embedded url link if Embedded url exist -->
+        {% if embeddedUrl %}
+          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
+            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
+          </mj-text>
+        {% endif %}
+        
       </mj-column>
     </mj-section>
   </mj-body>
@@ -245,6 +252,13 @@ const initialDataCommentReplyNotification = `<mjml>
             Wil je je uitschrijven? Dat kan via de volgende link:
             <br />
             <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
+          </mj-text>
+        {% endif %}
+        
+        <!-- Embedded url link if Embedded url exist -->
+        {% if embeddedUrl %}
+          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
+            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
           </mj-text>
         {% endif %}
         

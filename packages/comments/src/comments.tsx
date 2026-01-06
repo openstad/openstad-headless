@@ -266,6 +266,7 @@ function CommentsInner({
     formDataCopy.confirmation = confirmation || false;
     formDataCopy.confirmationReplies = confirmationReplies || false;
     formDataCopy.overwriteEmailAddress = (confirmation && overwriteEmailAddress) ? overwriteEmailAddress : '';
+    formDataCopy.embeddedUrl = window.location.href;
 
     try {
       if (formDataCopy.id) {
