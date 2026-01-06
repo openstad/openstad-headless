@@ -422,7 +422,9 @@ router
         where: { id: resourceId, projectId: req.params.projectId },
       })
       .then((found) => {
-        if (!found) throw new Error('Resource not found');
+        if (!found) {
+          return next(createError(404, 'Resource not found'));
+        }
         found.project = req.project;
         if (req.query.includePoll) {
           // TODO: naar poll hooks
@@ -547,7 +549,9 @@ router
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Resource not found');
+          if (!found) {
+            return next(createError(404, 'Resource not found'));
+          }
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks
@@ -589,7 +593,9 @@ router
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Resource not found');
+          if (!found) {
+            return next(createError(404, 'Resource not found'));
+          }
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks

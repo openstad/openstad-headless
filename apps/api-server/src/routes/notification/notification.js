@@ -79,7 +79,9 @@ router.route('/:notificationId(\\d+)')
 				where: { id: notificationId }
 			})
 			.then(found => {
-				if ( !found ) throw new Error('Notification not found');
+				if (!found) {
+          return next(createError(404, 'Notification not found'));
+        }
 		    req.results = found;
 				next();
 			})
