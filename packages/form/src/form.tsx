@@ -16,6 +16,7 @@ import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choi
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import SwipeField from "@openstad-headless/swipe/src/swipe";
 import DilemmaField from '@openstad-headless/dilemma/src/dilemma';
+import VideoField from '@openstad-headless/video/src/video';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
 import SortField from "@openstad-headless/ui/src/form-elements/sort";
@@ -207,6 +208,7 @@ function Form({
         none: InfoField as React.ComponentType<ComponentFieldProps>,
         sort: SortField as React.ComponentType<ComponentFieldProps>,
         dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
+        video: VideoField as React.ComponentType<ComponentFieldProps>,
     };
 
     const renderField = (field: ComponentFieldProps, index: number, randomId: string, fieldInvalid: boolean) => {

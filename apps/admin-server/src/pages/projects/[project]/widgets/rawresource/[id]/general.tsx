@@ -117,7 +117,7 @@ export default function WidgetRawGeneral(
                     <li className="ml-4">{`{{title}}`}</li>
                     <li className="ml-4">{`{{summary}}`}</li>
                     <li className="ml-4">{`{{description}}`}</li>
-                    <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].src}}`}</li>
+                    <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].url}}`}</li>
                     <li className="ml-4">{`{{budget}}`}</li>
                     <li className="ml-4">{`{{extraData}}`}</li>
                     <li className="ml-4">{`{{location}}`}</li>

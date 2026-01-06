@@ -175,8 +175,10 @@ async function setupEnvVars() {
   process.env.MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
   process.env.MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
   
-  // beta features flag
-  process.env.BETA_FEATURES_FLAG = process.env.BETA_FEATURES_FLAG || 'false';
+  // Beta feature flag for bulk import of ideas/inzendingen. 
+  // This flag is to be removed when the bulk import functionality is refined and polished.
+  // Set to 'true' to enable the feature.
+  process.env.BETA_FEATURE_FLAG_BULK_IMPORT = process.env.BETA_FEATURE_FLAG_BULK_IMPORT || 'false';
 
 }
 
@@ -219,7 +221,7 @@ MYSQL_USER=${process.env.DB_USERNAME}
 MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
 
-BETA_FEATURES_FLAG=${process.env.BETA_FEATURES_FLAG}
+BETA_FEATURE_FLAG_BULK_IMPORT=${process.env.BETA_FEATURE_FLAG_BULK_IMPORT}
 
 #api server
 API_URL=${process.env.API_URL}

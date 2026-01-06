@@ -20,9 +20,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {ArrowDown, ArrowUp, X} from 'lucide-react';
+import {ArrowDown, ArrowUp, ArrowLeft, ArrowRight, X} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import {useFieldArray, useForm} from 'react-hook-form';
 import * as z from 'zod';
 import useTags from "@/hooks/use-tags";
 import { useRouter } from "next/router";
@@ -31,6 +31,7 @@ import {useWidgetConfig} from "@/hooks/use-widget-config";
 import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/choiceguide/src/props';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
 import { Matrix, MatrixOption } from '@openstad-headless/enquete/src/types/enquete-props';
+import ImageGalleryStyle from "@/components/image-gallery-style";
 
 const weightSchema: z.ZodSchema = z.object({
   weightX: z.any().optional(),
@@ -84,7 +85,6 @@ const formSchema = z.object({
     })
       .optional(),
   matrixMultiple: z.boolean().optional(),
-  infoImage: z.string().optional(),
   uploadInfoImage: z.string().optional(),
   showMoreInfo: z.boolean().optional(),
   moreInfoButton: z.string().optional(),
@@ -106,9 +106,23 @@ const formSchema = z.object({
   skipQuestionExplanation: z.string().optional(),
   skipQuestionLabel: z.string().optional(),
   routingInitiallyHide: z.boolean().optional(),
+  createImageSlider: z.boolean().optional(),
+  imageClickable: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
   routingSelectedAnswer: z.string().optional(),
   imageOptionUpload: z.string().optional(),
+  images: z
+    .array(z.object({
+      url: z.string(),
+      name: z.string().optional(),
+      imageDescription: z.string().optional(),
+      imageAlt: z.string().optional(),
+    }))
+    .optional()
+    .default([]),
+
+  // Keeping this for backwards compatibility
+  infoImage: z.string().optional(),
 });
 
 const matrixDefault = {
@@ -141,6 +155,7 @@ export default function WidgetChoiceGuideItems(
   const [dimensions, setDimensions] = useState<string[]>([]);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
   const [matrixOption, setMatrixOption] = useState<MatrixOption & {type: 'rows' | 'columns'} | null>(null);
+  const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
 
   const {
     data: widget
@@ -189,7 +204,6 @@ export default function WidgetChoiceGuideItems(
           showMoreInfo: values.showMoreInfo || false,
           moreInfoButton: values.moreInfoButton || '',
           moreInfoContent: values.moreInfoContent || '',
-          infoImage: values.infoImage || '',
           labelA: values.labelA || '',
           labelB: values.labelB || '',
           sliderTitleUnderA: values.sliderTitleUnderA || '',
@@ -210,8 +224,14 @@ export default function WidgetChoiceGuideItems(
           matrix: values.matrix || matrixDefault,
           matrixMultiple: values.matrixMultiple || false,
           routingInitiallyHide: values.routingInitiallyHide || false,
+          createImageSlider: values.createImageSlider || false,
+          imageClickable: values.imageClickable || false,
+          images: values?.images || [],
           routingSelectedQuestion: values.routingSelectedQuestion || '',
           routingSelectedAnswer: values.routingSelectedAnswer || '',
+
+          // Keeping this for backwards compatibility
+          image: values.infoImage || '',
         },
       ]);
     }
@@ -308,7 +328,6 @@ export default function WidgetChoiceGuideItems(
     variant: 'text input',
     multiple: false,
     options: [],
-    infoImage: '',
     showMoreInfo: false,
     moreInfoButton: '',
     moreInfoContent: '',
@@ -332,8 +351,14 @@ export default function WidgetChoiceGuideItems(
     matrix: matrixDefault,
     matrixMultiple: false,
     routingInitiallyHide: false,
+    createImageSlider: false,
+    imageClickable: false,
     routingSelectedQuestion: '',
     routingSelectedAnswer: '',
+    images: [],
+
+    // Keeping this for backwards compatibility
+    infoImage: '',
   });
 
   const form = useForm<FormData>({
@@ -355,7 +380,17 @@ export default function WidgetChoiceGuideItems(
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
-      form.reset({
+      // Migrate fallback image fields to images array if needed
+      let images = selectedItem.images || [];
+      if ((!images || images.length === 0) && selectedItem.infoImage) {
+        images = [{
+          url: selectedItem.infoImage,
+          imageAlt: '',
+          imageDescription: '',
+        }];
+      }
+
+      const formValues = {
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
         description: selectedItem.description || '',
@@ -371,7 +406,6 @@ export default function WidgetChoiceGuideItems(
         showMoreInfo: selectedItem.showMoreInfo || false,
         moreInfoButton: selectedItem.moreInfoButton || '',
         moreInfoContent: selectedItem.moreInfoContent || '',
-        infoImage: selectedItem.infoImage || '',
         labelA: selectedItem.labelA || '',
         labelB: selectedItem.labelB || '',
         sliderTitleUnderA: selectedItem.sliderTitleUnderA || '',
@@ -392,9 +426,17 @@ export default function WidgetChoiceGuideItems(
         matrix: selectedItem.matrix || matrixDefault,
         matrixMultiple: selectedItem.matrixMultiple || false,
         routingInitiallyHide: selectedItem.routingInitiallyHide || false,
+        createImageSlider: selectedItem.createImageSlider || false,
+        imageClickable: selectedItem.imageClickable || false,
         routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
         routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
-      });
+        images,
+
+        // Keeping this for backwards compatibility
+        infoImage: '',
+      }
+
+      form.reset(formValues);
       setOptions(selectedItem.options || []);
       setMatrixOptions(selectedItem.matrix || matrixDefault);
       setActiveTab('1');
@@ -581,6 +623,40 @@ export default function WidgetChoiceGuideItems(
     setMatrixOption(null);
   }
 
+  function swapArrayElements(arr: any[], indexA: number, indexB: number) {
+    const newArr = [...arr];
+    const temp = newArr[indexA];
+    newArr[indexA] = newArr[indexB];
+    newArr[indexB] = temp;
+    return newArr;
+  }
+
+  const moveUpImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index <= 0) return;
+    const reordered = swapArrayElements(images, index, index - 1);
+    form.setValue('images', reordered);
+  };
+
+  const moveDownImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index >= images.length - 1) return;
+    const reordered = swapArrayElements(images, index, index + 1);
+    form.setValue('images', reordered);
+  };
+
+  type ImageArray = {
+    url: string;
+    name?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+  }
+
+  const { fields: imageFields, remove: removeImage } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
+
   // Create component for heading dimensions
   const DimensionHeading = (version: number = 1) => (
     <div
@@ -749,7 +825,7 @@ export default function WidgetChoiceGuideItems(
 
   return (
     <div>
-      {/* <ImageUploader /> */}
+      <ImageGalleryStyle />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -1225,7 +1301,7 @@ export default function WidgetChoiceGuideItems(
                   <div style={{display: (activeTab === '1') ? 'block' : 'none'}}>
                     <Heading size="xl">Keuzewijzer items</Heading>
                     <Separator className="my-4" />
-                    <div className="w-full flex flex-col gap-y-4">
+                    <div className="w-full flex flex-col gap-y-8">
                       <FormField
                         control={form.control}
                         name="type"
@@ -1259,16 +1335,6 @@ export default function WidgetChoiceGuideItems(
                         )}></FormField>
                       <FormField
                         control={form.control}
-                        name="trigger"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Input type="hidden" {...field} />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
                         name="title"
                         render={({ field }) => (
                           <FormItem>
@@ -1290,46 +1356,179 @@ export default function WidgetChoiceGuideItems(
                         )}
                       />
 
-                      <div className="col-span-full md:col-span-1 flex flex-col">
+                      <>
                         <ImageUploader
                           form={form}
                           project={project as string}
-                          imageLabel="Upload een afbeelding voor boven de vraag"
                           fieldName="uploadInfoImage"
-                          description="Let op: de afbeelding wordt afgesneden op 300px hoogte. Het is handig om de afbeelding op voorhand zelf bij te snijden tot deze hoogte."
+                          imageLabel="Afbeeldingen uploaden boven de vraag"
+                          description="Je kunt hier meerdere afbeeldingen tegelijk uploaden. Klik na het uploaden op een afbeelding om extra informatie toe te voegen, zoals een beschrijving of alternatieve tekst voor schermlezers."
                           allowedTypes={["image/*"]}
+                          allowMultiple={true}
                           onImageUploaded={(imageResult) => {
-                            const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
-                            form.setValue('infoImage', result);
-                            form.resetField('uploadInfoImage')
+                            let defaultImageArr: ImageArray[] = [];
+
+                            if (!!form.watch("infoImage")) {
+                              defaultImageArr = [{
+                                url: form.getValues('infoImage') || '',
+                                name: '',
+                                imageAlt: '',
+                                imageDescription: ''
+                              }];
+
+                              form.setValue('infoImage', '');
+                            }
+
+                            let array = [...(form.getValues('images') || defaultImageArr)];
+                            array.push(imageResult);
+                            form.setValue('images', array);
+                            form.resetField('uploadInfoImage');
+                            form.trigger('images');
                           }}
                         />
-                      </div>
 
-                      <div className="col-span-full md:col-span-1 flex flex-col my-2">
-                        {!!form.watch('infoImage') && (
-                          <>
-                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeelding boven de vraag</label>
-                            <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                                <div style={{ position: 'relative' }}>
-                                  <img src={form.watch('infoImage')} alt={form.watch('infoImage')} />
-                                  <Button
-                                    color="red"
-                                    onClick={() => {
-                                      form.setValue('infoImage', '');
-                                    }}
-                                    style={{
-                                      position: 'absolute',
-                                      right: 0,
-                                      top: 0,
-                                    }}>
-                                    <X size={24} />
-                                  </Button>
-                                </div>
-                            </section>
-                          </>
-                        )}
-                      </div>
+                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                          {imageFields.length > 0 && (
+                            <div className="grid">
+                              <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
+                                { imageFields.map(({ id, url }, index) => {
+                                  return (
+                                    <div
+                                      key={id}
+                                      className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                                      style={{gridTemplateColumns: index === imageIndexOpen ? "1fr 2fr 40px" : "1fr"}}
+                                    >
+                                      <div className="image-container">
+                                        <img
+                                          src={url}
+                                          alt={url}
+                                          onClick={() => {
+                                            if (index === imageIndexOpen) {
+                                              setImageIndexOpen(-1)
+                                            } else {
+                                              setImageIndexOpen(index)
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <Button
+                                        color="red"
+                                        onClick={() => {
+                                          removeImage(index);
+                                        }}
+                                        className="absolute left-0 top-0">
+                                        <X size={24} />
+                                      </Button>
+
+                                      <div
+                                        className="grid gap-y-4 items-center"
+                                        style={{display: index === imageIndexOpen ? 'grid' : 'none'}}
+                                      >
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageAlt`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageDescription`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Beschrijving afbeelding</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </div>
+
+                                      <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                        <ArrowLeft
+                                          className="cursor-pointer"
+                                          onClick={() => moveUpImage(index) }
+                                        />
+                                        <ArrowRight
+                                          className="cursor-pointer"
+                                          onClick={() => moveDownImage(index) }
+                                        />
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </section>
+                            </div>
+                          )}
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="createImageSlider"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Wil je van de afbeeldingen een slider maken?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="imageClickable"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Moeten de afbeeldingen uitvergroot worden als erop geklikt wordt?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
 
                       <FormField
                         control={form.control}
@@ -1989,6 +2188,17 @@ export default function WidgetChoiceGuideItems(
                           )}
                         </>
                       )}
+
+                      <FormField
+                        control={form.control}
+                        name="trigger"
+                        render={({ field }) => (
+                          <FormItem>
+                            <Input type="hidden" {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       {hasOptions() && (
                         <FormItem>
