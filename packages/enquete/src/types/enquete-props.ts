@@ -63,6 +63,9 @@ export type Item = {
   description_b?: string;
   image_b?: string;
   numberingStyle?: string;
+  videoUrl?: string;
+  videoSubtitle?: boolean;
+  videoLang?: string;
   images?: Array<{
     url: string;
     name?: string;
