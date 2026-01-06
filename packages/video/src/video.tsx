@@ -23,7 +23,6 @@ const VideoField: FC<VideoFieldProps> = ({
   ...props
 }) => {
 
-  console.log(videoSubtitle, videoSubtitle ? 1 : 0);
   const id = useId();
   function getYouTubeVideoId(url?: string) {
     if (!url) return '';
