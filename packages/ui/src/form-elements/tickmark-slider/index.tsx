@@ -3,12 +3,21 @@ import React, { FC, useEffect, useState } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from '@openstad-headless/form/src/form';
+import {InfoImage} from "../../infoImage";
 
 export type TickmarkSliderProps = {
     overrideDefaultValue?: FormValue;
     index: number;
     title: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     fieldRequired: boolean;
     fieldKey: string;
     imageSrc?: string;
@@ -50,6 +59,9 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     randomId = '',
     fieldInvalid = false,
     overrideDefaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
@@ -96,12 +108,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
+            })}
 
             {imageSrc && (
                 <figure>

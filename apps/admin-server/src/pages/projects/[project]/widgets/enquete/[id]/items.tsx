@@ -25,15 +25,14 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { Item, Matrix, MatrixOption, Option } from '@openstad-headless/enquete/src/types/enquete-props';
-import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import {ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import {useFieldArray, useForm} from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import { YesNoSelect } from "@/lib/form-widget-helpers";
-import { ProjectSettingProps } from "@openstad-headless/types";
-import { info } from 'console';
+import ImageGalleryStyle from '@/components/image-gallery-style';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -87,10 +86,10 @@ const formSchema = z.object({
   multiple: z.boolean().optional(),
   randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
-  imageAlt: z.string().optional(),
-  imageDescription: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
+  createImageSlider: z.boolean().optional(),
+  imageClickable: z.boolean().optional(),
   maxChoices: z.string().optional(),
   maxChoicesMessage: z.string().optional(),
   showSmileys: z.boolean().optional(),
@@ -111,6 +110,15 @@ const formSchema = z.object({
   videoSubtitle: z.boolean().optional(),
   videoLang: z.string().optional(),
   numberingStyle: z.string().optional(),
+  images: z
+    .array(z.object({
+      url: z.string(),
+      name: z.string().optional(),
+      imageDescription: z.string().optional(),
+      imageAlt: z.string().optional(),
+    }))
+    .optional()
+    .default([]),
 
 
   // Keeping these for backwards compatibility
@@ -122,7 +130,16 @@ const formSchema = z.object({
   image2Upload: z.string().optional(),
   text2: z.string().optional(),
   key2: z.string().optional(),
+  imageAlt: z.string().optional(),
+  imageDescription: z.string().optional(),
 });
+
+type ImageArray = {
+  url: string;
+  name?: string;
+  imageAlt?: string;
+  imageDescription?: string;
+}
 
 const matrixDefault = {
   columns: [],
@@ -152,6 +169,7 @@ export default function WidgetEnqueteItems(
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
+  const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
 
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
   const [matrixOption, setMatrixOption] = useState<MatrixOption & { type: 'rows' | 'columns' } | null>(null);
@@ -193,13 +211,12 @@ export default function WidgetEnqueteItems(
           options: values.options || [],
           multiple: values.multiple || false,
           randomizeItems: values.randomizeItems || false,
-          image: values.image || '',
           image_b: values.image_b || '',
           description_b: values.description_b || '',
           key_b: values.key_b || '',
-          imageAlt: values.imageAlt || '',
-          imageDescription: values.imageDescription || '',
           fieldRequired: values.fieldRequired || false,
+          createImageSlider: values.createImageSlider || false,
+          imageClickable: values.imageClickable || false,
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
           showSmileys: values.showSmileys || false,
@@ -213,6 +230,7 @@ export default function WidgetEnqueteItems(
           infoField: values.infoField || '',
           infofieldExplanation: values.infofieldExplanation || false,
           numberingStyle: values.numberingStyle || 'none',
+          images: values?.images || [],
           // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
@@ -220,6 +238,9 @@ export default function WidgetEnqueteItems(
           image2: values.image2 || '',
           text2: values.text2 || '',
           key2: values.key2 || '',
+          imageDescription: values.imageDescription || '',
+          imageAlt: values.imageAlt || '',
+          image: values.image || '',
         },
       ]);
     }
@@ -329,14 +350,13 @@ export default function WidgetEnqueteItems(
     options: [],
     multiple: false,
     randomizeItems: false,
-    image: '',
-    imageAlt: '',
-    imageDescription: '',
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
     infoBlockExtraButton: '',
     infoBlockExtraButtonTitle: '',
     fieldRequired: false,
+    createImageSlider: false,
+    imageClickable: false,
     maxChoices: '',
     maxChoicesMessage: '',
     showSmileys: false,
@@ -352,6 +372,7 @@ export default function WidgetEnqueteItems(
     videoUrl: '',
     videoSubtitle: false,
     videoLang: '',
+    images: [],
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -360,6 +381,9 @@ export default function WidgetEnqueteItems(
     image2: '',
     text2: '',
     key2: '',
+    image: '',
+    imageAlt: '',
+    imageDescription: '',
   });
 
   const form = useForm<FormData>({
@@ -381,7 +405,17 @@ export default function WidgetEnqueteItems(
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
-      form.reset({
+      // Migrate fallback image fields to images array if needed
+      let images = selectedItem.images || [];
+      if ((!images || images.length === 0) && selectedItem.image) {
+        images = [{
+          url: selectedItem.image,
+          imageAlt: selectedItem.imageAlt || '',
+          imageDescription: selectedItem.imageDescription || '',
+        }];
+      }
+
+      const formValues = {
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
         fieldKey: selectedItem.fieldKey || '',
@@ -395,14 +429,13 @@ export default function WidgetEnqueteItems(
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
         randomizeItems: selectedItem.randomizeItems || false,
-        image: selectedItem.image || '',
-        imageAlt: selectedItem.imageAlt || '',
-        imageDescription: selectedItem.imageDescription || '',
         infoBlockStyle: selectedItem.infoBlockStyle || 'default',
         infoBlockShareButton: selectedItem.infoBlockShareButton || false,
         infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
         infoBlockExtraButtonTitle: selectedItem.infoBlockExtraButtonTitle || '',
         fieldRequired: selectedItem.fieldRequired || false,
+        createImageSlider: selectedItem.createImageSlider || false,
+        imageClickable: selectedItem.imageClickable || false,
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         showSmileys: selectedItem.showSmileys || false,
@@ -419,7 +452,7 @@ export default function WidgetEnqueteItems(
         videoUrl: selectedItem.videoUrl || '',
         videoSubtitle: selectedItem.videoSubtitle || false,
         videoLang: selectedItem.videoLang || '',
-
+        images,
 
         // Keeping these for backwards compatibility
         image1: selectedItem.image1 || '',
@@ -428,7 +461,12 @@ export default function WidgetEnqueteItems(
         image2: selectedItem.image2 || '',
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
-      });
+        image: '',
+        imageAlt: '',
+        imageDescription: '',
+      };
+
+      form.reset(formValues);
       setOptions(selectedItem.options || []);
       setMatrixOptions(selectedItem.matrix || matrixDefault);
     }
@@ -612,8 +650,36 @@ export default function WidgetEnqueteItems(
     }
   }, [form.watch("fieldKey"), selectedItem]);
 
+  const { fields: imageFields, remove: removeImage } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
+
+  function swapArrayElements(arr: any[], indexA: number, indexB: number) {
+    const newArr = [...arr];
+    const temp = newArr[indexA];
+    newArr[indexA] = newArr[indexB];
+    newArr[indexB] = temp;
+    return newArr;
+  }
+
+  const moveUpImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index <= 0) return;
+    const reordered = swapArrayElements(images, index, index - 1);
+    form.setValue('images', reordered);
+  };
+
+  const moveDownImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index >= images.length - 1) return;
+    const reordered = swapArrayElements(images, index, index + 1);
+    form.setValue('images', reordered);
+  };
+
   return (
     <div>
+      <ImageGalleryStyle />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -1426,44 +1492,176 @@ export default function WidgetEnqueteItems(
                           form={form}
                           project={project as string}
                           fieldName="imageUpload"
-                          imageLabel="Afbeelding 1"
+                          imageLabel="Afbeeldingen uploaden boven de vraag"
+                          description="Je kunt hier meerdere afbeeldingen tegelijk uploaden. Klik na het uploaden op een afbeelding om extra informatie toe te voegen, zoals een beschrijving of alternatieve tekst voor schermlezers."
                           allowedTypes={["image/*"]}
+                          allowMultiple={true}
                           onImageUploaded={(imageResult) => {
-                            const image = imageResult ? imageResult.url : '';
+                            let defaultImageArr: ImageArray[] = [];
 
-                            form.setValue("image", image);
+                            if (!!form.watch("image")) {
+                              defaultImageArr = [{
+                                url: form.getValues('image') || '',
+                                name: '',
+                                imageAlt: form.getValues('imageAlt') || '',
+                                imageDescription: form.getValues('imageDescription') || ''
+                              }];
+
+                              form.setValue('image', '');
+                              form.setValue('imageAlt', '');
+                              form.setValue('imageDescription', '');
+                            }
+
+                            let array = [...(form.getValues('images') || defaultImageArr)];
+                            array.push(imageResult);
+                            form.setValue('images', array);
                             form.resetField('imageUpload');
+                            form.trigger('images');
                           }}
                         />
 
-                        {!!form.getValues('image') && (
-                          <div style={{ position: 'relative' }}>
-                            <img src={form.getValues('image')} />
-                          </div>
-                        )}
+                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                          {imageFields.length > 0 && (
+                            <div className="grid">
+                              <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
+                                { imageFields.map(({ id, url }, index) => {
+                                  return (
+                                    <div
+                                      key={id}
+                                      className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                                      style={{gridTemplateColumns: index === imageIndexOpen ? "1fr 2fr 40px" : "1fr"}}
+                                    >
+                                      <div className="image-container">
+                                        <img
+                                          src={url}
+                                          alt={url}
+                                          onClick={() => {
+                                            if (index === imageIndexOpen) {
+                                              setImageIndexOpen(-1)
+                                            } else {
+                                              setImageIndexOpen(index)
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <Button
+                                        color="red"
+                                        onClick={() => {
+                                          removeImage(index);
+                                        }}
+                                        className="absolute left-0 top-0">
+                                        <X size={24} />
+                                      </Button>
+
+                                      <div
+                                        className="grid gap-y-4 items-center"
+                                        style={{display: index === imageIndexOpen ? 'grid' : 'none'}}
+                                      >
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageAlt`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageDescription`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Beschrijving afbeelding</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </div>
+
+                                      <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                        <ArrowLeft
+                                          className="cursor-pointer"
+                                          onClick={() => moveUpImage(index) }
+                                        />
+                                        <ArrowRight
+                                          className="cursor-pointer"
+                                          onClick={() => moveDownImage(index) }
+                                        />
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </section>
+                            </div>
+                          )}
+                        </div>
 
                         <FormField
                           control={form.control}
-                          name="imageAlt"
+                          name="createImageSlider"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
-                              <Input {...field} />
+                              <FormLabel>
+                                Wil je van de afbeeldingen een slider maken?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+
                         <FormField
                           control={form.control}
-                          name="imageDescription"
+                          name="imageClickable"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Beschrijving afbeelding</FormLabel>
-                              <Input {...field} />
+                              <FormLabel>
+                                Moeten de afbeeldingen uitvergroot worden als erop geklikt wordt?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+
                         {props.formStyle === 'youth' && (
 
                           <FormField

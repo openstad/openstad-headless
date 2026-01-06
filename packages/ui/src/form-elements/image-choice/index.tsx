@@ -11,6 +11,7 @@ import {
 } from "@utrecht/component-library-react";
 import { Spacer } from "../../spacer";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type ImageChoiceFieldProps = {
     title: string;
@@ -34,6 +35,14 @@ export type ImageChoiceFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     infoField?: string;
 }
 
@@ -64,6 +73,9 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     multiple = false,
     overrideDefaultValue,
     infoField,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
     let initialValue = [];
 
@@ -135,12 +147,13 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                     </>
                 )}
 
-                {infoImage && (
-                    <figure className="info-image-container">
-                        <img src={infoImage} alt="" />
-                        <Spacer size={.5} />
-                    </figure>
-                )}
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
 
                 <div className={"image-choice-container"}>
                     {choices?.map((choice, index) => {

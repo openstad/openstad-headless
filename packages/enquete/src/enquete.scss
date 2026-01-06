@@ -1291,6 +1291,29 @@ label.utrecht-form-label {
   }
 }
 
+.osc-enquete-item-content .question .info-field-container .info-image-container figcaption {
+  margin: 10px 0 20px;
+}
+
+.osc-enquete-item-content .question .osc-carousel-previous,
+.osc-enquete-item-content .question .osc-carousel-next {
+  top: 150px;
+  transform: translateY(-50%);
+}
+
+.osc-enquete-item-content .osc-carousel figure.info-image-container img {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 100%;
+  height: 300px;
+  max-height: 300px;
+}
+
+.osc-enquete-item-content .osc-carousel .osc-carousel-pager {
+  bottom: auto;
+  top: 270px;
+}
+
 @keyframes pulseOnce {
   0% {
     transform: scale(1);

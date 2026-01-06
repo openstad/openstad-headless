@@ -11,6 +11,7 @@ import {
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 // Temporary TypeScript declaration for 'trix-editor'
 declare global {
@@ -54,6 +55,14 @@ export type TextInputProps = {
     nextPageText?: string;
     prevPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const TrixEditor: React.FC<{
@@ -161,7 +170,10 @@ const TextInput: FC<TextInputProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
-    overrideDefaultValue
+    overrideDefaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
         const variantMap = {
         'text input': Textbox,
@@ -271,12 +283,13 @@ const TextInput: FC<TextInputProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt="" />
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
+            })}
 
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`} aria-invalid={checkInvalid}>
                 <InputComponent

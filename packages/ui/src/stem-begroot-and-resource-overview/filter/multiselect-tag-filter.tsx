@@ -17,6 +17,7 @@ type Props = {
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
   parentStopUsingDefaultValue?: boolean;
+  inlineOptions?: boolean;
 };
 
 type TagDefinition = { id: number; name: string; projectId?: any };
@@ -29,6 +30,7 @@ const MultiSelectTagFilter = ({
   onlyIncludeIds = [],
   preFilterTags = undefined,
   parentStopUsingDefaultValue = false,
+  inlineOptions = false,
   ...props
 }: Props) => {
 
@@ -105,6 +107,8 @@ const MultiSelectTagFilter = ({
           label: tag.name,
           checked: combinedSelects.includes(tag.id),
         }))}
+        inlineOptions={inlineOptions}
+        defaultOpen={inlineOptions}
       />
     </div>
   );

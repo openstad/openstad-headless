@@ -355,6 +355,9 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['infoBlockShareButton'] = item?.infoBlockShareButton || false;
                     fieldData['infoBlockExtraButtonTitle'] = item?.infoBlockExtraButtonTitle || '';
                     fieldData['infoBlockExtraButton'] = item?.infoBlockExtraButton || '';
+                    fieldData['createImageSlider'] = item?.createImageSlider || false;
+                    fieldData['imageClickable'] = item?.imageClickable || false;
+                    fieldData['images'] = item?.images || [];
                     break;
                 case 'swipe':
                     fieldData['type'] = 'swipe';
