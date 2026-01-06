@@ -270,11 +270,15 @@ const defaultItemRenderer = (
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
-  const firstStatus = resource.statuses
-    ? resource.statuses
-      .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
-    : false;
+  let resourceFilteredStatuses = resource?.statuses
+    ? resource.statuses?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+        if (a.seqnr === undefined || a.seqnr === null) return 1;
+        if (b.seqnr === undefined || b.seqnr === null) return -1;
+        return a.seqnr - b.seqnr;
+      })
+    : [];
+
+  const firstStatus = resourceFilteredStatuses && resourceFilteredStatuses.length > 0 ? resourceFilteredStatuses[0] : null;
 
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
   const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
@@ -290,15 +294,19 @@ const defaultItemRenderer = (
   const overviewTagGroups = props.overviewTagGroups || [];
   const displayOverviewTagGroups = props.displayOverviewTagGroups || [];
 
-  const resourceFilteredTags = (overviewTagGroups && Array.isArray(overviewTagGroups) && Array.isArray(resource?.tags))
+  let resourceFilteredTags = (overviewTagGroups && Array.isArray(overviewTagGroups) && Array.isArray(resource?.tags))
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
     : resource?.tags || [];
 
-  const firstTag = resource?.tags
-    ? resource.tags
-      .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
-      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
-    : false;
+  resourceFilteredTags = resourceFilteredTags.length
+    ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+      if (a.seqnr === undefined || a.seqnr === null) return 1;
+      if (b.seqnr === undefined || b.seqnr === null) return -1;
+      return a.seqnr - b.seqnr;
+    })
+    : [];
+
+  const firstTag = resourceFilteredTags && resourceFilteredTags.length > 0 ? resourceFilteredTags[0] : null;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
 
   return (
@@ -381,7 +389,7 @@ const defaultItemRenderer = (
                         {!!multiProjectLabel ? (
                           <span className="status-label">{multiProjectLabel}</span>
                         ) : (
-                          resource.statuses?.map((statusTag: any) => (
+                          resourceFilteredStatuses?.map((statusTag: any) => (
                             <span className="status-label" key={statusTag.label}>{statusTag.label}</span>
                           ))
                         )}
@@ -477,7 +485,7 @@ const defaultItemRenderer = (
                         {!!multiProjectLabel ? (
                           <span className="status-label">{multiProjectLabel}</span>
                         ) : (
-                          resource.statuses?.map((statusTag: any) => (
+                          resourceFilteredStatuses?.map((statusTag: any) => (
                             <span className="status-label">{statusTag.label}</span>
                           ))
                         )}
