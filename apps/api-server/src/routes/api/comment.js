@@ -54,7 +54,7 @@ router
         return next();
       });
   })
-  .all('/:commentId(\\d+)(/vote)?', function(req, res, next) {
+  .all('/:commentId(\\d+)(/vote)?(/yes|/no)?', function(req, res, next) {
 
     // include one existing comment
     // --------------------------
@@ -355,19 +355,21 @@ router.route('/:commentId(\\d+)')
     }
   });
 
-router.route('/:commentId(\\d+)/vote')
+router.route('/:commentId(\\d+)/vote/:opinion(yes|no)?')
 
   // vote for comment
   // -----------------
 
+  
   .post(auth.useReqUser)
   .post(function(req, res, next) {
     var user = req.user;
     var comment = req.results;
-
+    const opinion = req.params.opinion || "yes";
+    
     if (!(comment && comment.can && comment.can('vote'))) return next(new Error('You cannot vote for this comment'));
 
-    comment.addUserVote(user, req.ip)
+    comment.addUserVote(user, req.ip, opinion)
       .then(function(voteRemoved) {
 
         db.Comment

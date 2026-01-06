@@ -88,18 +88,19 @@ export const StemBegrootResourceList = ({
     }
   });
 
+  const tagIntegers = tags.map((tag: any) => parseInt(tag, 10));
   const filtered = resources && (
     Object.keys(groupedTags).length === 0
       ? resources
       : resources.filter((resource: any) => {
         if (tags.length > 0) {
           if (filterBehavior === 'and') {
-            return tags.every(tagId =>
+            return tagIntegers.every(tagId =>
               resource.tags?.some((tag: { id: number }) => tag.id === tagId)
             );
           } else {
             return resource.tags?.some((tag: { id: number }) =>
-              tags.includes(tag.id)
+              tagIntegers.includes(tag.id)
             );
           }
         }
@@ -186,8 +187,13 @@ export const StemBegrootResourceList = ({
                   <div className="stembegroot-content-item-header-taglist">
                     <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>
                     <div className="pill-grid stembegroot">
-                      {(resource.tags as Array<{ type: string; name: string }>)
+                      {(resource.tags as Array<{ type: string; name: string, seqnr?: number }>)
                         ?.filter((t) => t.type !== 'status')
+                        ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                          if (a.seqnr === undefined || a.seqnr === null) return 1;
+                          if (b.seqnr === undefined || b.seqnr === null) return -1;
+                          return a.seqnr - b.seqnr;
+                        })
                         ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
                     </div>
                   </div>

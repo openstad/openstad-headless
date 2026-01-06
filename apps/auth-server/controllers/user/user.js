@@ -40,6 +40,7 @@ exports.info = (req, res) => {
     emailNotificationConsent: req.user?.emailNotificationConsent || {},
     suffix: req.user.suffix,
     postcode: req.user.postcode,
+    accessCode: req.user.accessCode,
     city: req.user.city,
     scope: req.authInfo.scope,
   });

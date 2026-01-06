@@ -37,13 +37,13 @@ type Props = {
   displaySearch: boolean;
   itemsPerPage?: number;
   displayTagFilters: boolean;
-  tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
-  tagsLimitation?: Array<number>;
+  tagGroups?: Array<{type: string; label?: string; multiple: boolean; projectId?: any, inlineOptions?: boolean }>;
+  tagsLimitation?: Array<number> | { [key: string]: number[] };
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
   showActiveTags?: boolean;
-  preFilterTags?: Array<number>;
+  preFilterTags?: Array<{ id: number; type: string; label: string; name: string }>;
   displayLocationFilter?: boolean;
   displayCollapsibleFilter?: boolean;
 };
@@ -62,8 +62,16 @@ export function Filters({
   autoApply = false,
   ...props
 }: Props) {
+  const preFilterTagIds = preFilterTags
+    ? preFilterTags.map((tag) => Number(tag.id)).filter((id) => !isNaN(id))
+    : [];
+
+  const defaultTags = preFilterTags && preFilterTags.length > 0
+    ? preFilterTags.map((tag) => ({ ...tag, label: tag.name }))
+    : [];
+
   const defaultFilter: Filter = {
-    tags: [],
+    tags: preFilterTagIds,
     search: { text: '' },
     sort: props.defaultSorting || 'createdAt_desc',
     page: 0,
@@ -71,18 +79,44 @@ export function Filters({
     location: undefined,
   };
 
-  const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>();
+  const defaultSelectedOptions: { [key: string]: any } = {};
+  if (preFilterTags && preFilterTags.length > 0) {
+    preFilterTags.forEach((tag) => {
+      if (defaultSelectedOptions[tag.type]) {
+        defaultSelectedOptions[tag.type].push(Number(tag.id));
+      } else {
+        defaultSelectedOptions[tag.type] = [Number(tag.id)];
+      }
+    });
+  }
+
+  const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>(defaultSelectedOptions);
   const [filter, setFilter] = useState<Filter>(defaultFilter);
-  const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
-  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
-  const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
+  const [selectedOptions, setSelected] = useState<{ [key: string]: any }>(defaultSelectedOptions);
+  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
+  const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
-  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>([]);
+  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>(preFilterTagIds);
   const [activeFilter, setActiveFilter] = useState<Filter>(defaultFilter);
   const [searchValue, setSearchValue] = useState<string>('');
   const [sortValue, setSortValue] = useState<string>(props.defaultSorting || 'createdAt_desc');
   const [locationValue, setLocationValue] = useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
+  const [disableTransition, setDisableTransition] = useState(true);
+  const filtersWrapperRef = useRef<HTMLDivElement>(null);
+  const [resetCounter, setResetCounter] = useState(0);
+
+  useEffect(() => {
+    if (filtersVisible && disableTransition) {
+      setDisableTransition(false);
+    }
+    if (filtersVisible && filtersWrapperRef.current) {
+      const focusable = filtersWrapperRef.current.querySelector<HTMLElement>(
+        "input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])"
+      );
+      if (focusable) focusable.focus();
+    }
+  }, [filtersVisible, disableTransition]);
 
   const search = useDebounce(setSearch, 300);
 
@@ -271,9 +305,6 @@ export function Filters({
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
 
-    console.log( "newActiveTagsDraft", newActiveTagsDraft );
-    console.log( "updatedTags", updatedTags );
-
     if (updatedTags) {
       setActiveTags(updatedTags);
     } else {
@@ -297,6 +328,12 @@ export function Filters({
         {(props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
           <>
             {tagGroups.map((tagGroup, index) => {
+              const limitedTags = Array.isArray(tagsLimitation)
+                ? tagsLimitation
+                : (tagsLimitation && tagsLimitation[tagGroup.type])
+                  ? tagsLimitation[tagGroup.type]
+                  : [];
+
               if (tagGroup.multiple) {
                 return (
                   <MultiSelectTagFilter
@@ -305,13 +342,14 @@ export function Filters({
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
-                    onlyIncludeIds={[]}
+                    onlyIncludeIds={limitedTags}
                     onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
                       updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
-                    preFilterTags={preFilterTags}
+                    preFilterTags={preFilterTagIds}
                     parentStopUsingDefaultValue={stopUsingDefaultValue}
+                    inlineOptions={tagGroup.inlineOptions}
                   />
                 );
               } else {
@@ -323,13 +361,18 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     title={`Selecteer een item`}
-                    onlyIncludeIds={[]}
+                    onlyIncludeIds={limitedTags}
                     onUpdateFilter={(updatedTag, updatedLabel) =>
                       updateTagListSingle(tagGroup.type, updatedTag, updatedLabel)
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
-                    preFilterTags={preFilterTags}
+                    preFilterTags={preFilterTagIds}
                     parentStopUsingDefaultValue={stopUsingDefaultValue}
+                    inlineOptions={tagGroup.inlineOptions}
+                    valueSelected={selectedOptions[tagGroup.type]?.length ? String(selectedOptions[tagGroup.type]?.[0]) : ''}
+                    removeActiveTag={removeActiveTag}
+                    resetCounter={resetCounter}
+                    setResetCounter={setResetCounter}
                   />
                 );
               }
@@ -391,6 +434,7 @@ export function Filters({
               updateParameter();
               setLocation(undefined);
               handleSubmit(undefined, defaultFilter, []);
+              setResetCounter(currCount => currCount + 1);
             }}
             test-id={"filter-reset-button"}
           >
@@ -431,12 +475,29 @@ export function Filters({
 
         {displayCollapsibleFilter ? (
           <>
-            <Button className="toggle-filters-button" type="button" aria-expanded={filtersVisible ? 'true' : 'false'} aria-controls="filters-container" onClick={(e) => { setFiltersVisible(!filtersVisible) }}>
+            <Button
+              className="toggle-filters-button"
+              appearance='primary-action-button'
+              type="button"
+              aria-expanded={filtersVisible ? 'true' : 'false'}
+              aria-controls="filters-container"
+              onClick={(e) => {
+                if (!filtersVisible && disableTransition) setDisableTransition(false);
+                setFiltersVisible(!filtersVisible);
+              }}>
               <span className="filter-icon"></span>
               <span className="sr-only">Filters uitklappen</span>
             </Button>
-            <div id="filters-container" className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''}`} aria-hidden={!filtersVisible ? 'true' : 'false'}>
-              <div className="filters-wrapper">
+            <div
+              id="filters-container"
+              className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
+              aria-hidden={!filtersVisible ? 'true' : 'false'}
+              onClick={(e) => { setFiltersVisible(false) }}
+            >
+              <div
+                className="filters-wrapper"
+                ref={filtersWrapperRef}
+                onClick={(e) => { e.stopPropagation(); }}>
                 <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
                   <span className="close-icon"></span>
                   <span className="sr-only">Sluit filters</span>

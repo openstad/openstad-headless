@@ -14,39 +14,12 @@ import flattenObject from "@/lib/export-helpers/flattenObject";
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import {ConfirmActionDialog} from "@/components/dialog-confirm-action";
 import {Checkbox} from "@/components/ui/checkbox";
+import { ImportButton } from '@/components/importButton';
+import { keyMap } from '@/lib/keyMap';
 
-const keyMap: Record<string, string> = {
-  id: 'Inzending ID',
-  projectId: 'Project ID',
-  widgetId: 'Widget ID',
-  title: 'Titel',
-  summary: 'Samenvatting',
-  description: 'Beschrijving',
-  budget: 'Budget',
-  'location.lat': 'Locatie (lat)',
-  'location.lng': 'Locatie (lng)',
-  createDateHumanized: 'Datum aangemaakt (leesbaar)',
-  updatedAt: 'Laatst bijgewerkt',
-  deletedAt: 'Verwijderd op',
-  yes: 'Aantal likes',
-  no: 'Aantal dislikes',
-  progress: 'Voortgang',
-  statuses: 'Statussen',
-  modBreak: 'Moderatie bericht',
-  modBreakDate: 'Moderatie bericht datum',
-  images: 'Afbeeldingen',
-  tags: 'Tags',
-  documents: 'Documenten',
-  extraData: 'Extra gegevens',
-  'user.id': 'Gebruiker ID',
-  'user.role': 'Gebruiker rol',
-  'user.name': 'Gebruiker naam',
-  'user.email': 'Gebruiker e-mailadres',
-  'user.phonenumber': 'Gebruiker telefoonnummer',
-  'user.address': 'Gebruiker adres',
-  'user.city': 'Gebruiker woonplaats',
-  'user.postcode': 'Gebruiker postcode',
-};
+interface ProjectResourcesProps {
+  BETA_FEATURE_FLAG_BULK_IMPORT: string;
+}
 
 const prepareDataForExport = (data: any[]) => {
   const allResources: any[] = [];
@@ -84,7 +57,15 @@ const prepareDataForExport = (data: any[]) => {
   return allResources;
 }
 
-export default function ProjectResources() {
+export async function getServerSideProps() {
+  return {
+    props: {
+      BETA_FEATURE_FLAG_BULK_IMPORT: process.env.BETA_FEATURE_FLAG_BULK_IMPORT,
+    },
+  };
+}
+
+export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: ProjectResourcesProps) {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove, duplicate } = useResources(project as string);
@@ -137,6 +118,7 @@ export default function ProjectResources() {
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
               Exporteer inzendingen
             </Button>
+            {BETA_FEATURE_FLAG_BULK_IMPORT === "true" && <ImportButton project={project as string} />}
           </div>
         }>
         <div className="container py-6"><div className="float-left mb-4 flex gap-4">
@@ -235,7 +217,7 @@ export default function ProjectResources() {
           <div className="p-6 bg-white rounded-md clear-right">
             <div
               className="grid grid-cols-2 items-center py-2 px-2 border-b border-border"
-              style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(4, 1fr) 60px` }}
+              style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
             >
               {bulkSelectActive && (<ListHeading />)}
               <ListHeading className="hidden lg:flex">
@@ -259,6 +241,11 @@ export default function ProjectResources() {
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('score', e, filterData))}>
+                  Wilson score interval
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('date-added', e, filterData))}>
                   Datum aangemaakt
                 </button>
@@ -274,7 +261,7 @@ export default function ProjectResources() {
                 >
                   <li
                     className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
-                    style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(4, 1fr) 60px` }}
+                    style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
                   >
                     {bulkSelectActive && (
                       <Checkbox
@@ -299,6 +286,9 @@ export default function ProjectResources() {
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
                       {resource.no || 0}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">
+                      {resource.score || 0}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
                       {resource.createDateHumanized}

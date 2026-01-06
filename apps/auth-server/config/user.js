@@ -35,7 +35,11 @@ exports.fields = [
     key: 'emailNotificationConsent',
     label: 'E-mail notificatie toestemming',
     type: 'checkbox',
-  }
+  },
+  {
+    key: 'accessCode',
+    label: 'Toegangscode',
+  },
 ];
 
 exports.validation = {

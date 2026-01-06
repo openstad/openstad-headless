@@ -12,6 +12,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
 import { useEffect } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
@@ -43,6 +44,14 @@ export type RadioboxFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
 }
 
@@ -62,14 +71,18 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     fieldInvalid = false,
     randomizeItems = false,
     overrideDefaultValue,
-    defaultValue
+    defaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
     let initialValue = defaultValue as string || "";
-    initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : "";
+    initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : initialValue;
 
     const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
     const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -141,11 +154,17 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         }
     };
 
+    useEffect(() => {
+        if(initialValue){
+            setCheckInvalid(false);
+        }
+    }, [fieldInvalid]);
+
     return (
         <div className="question">
             <Fieldset
                 role="radiogroup"
-                aria-invalid={fieldInvalid}
+                aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             >
                 {title && (
@@ -175,12 +194,13 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     </>
                 )}
 
-                {infoImage && (
-                    <figure className="info-image-container">
-                        <img src={infoImage} alt=""/>
-                        <Spacer size={.5} />
-                    </figure>
-                )}
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
 
                 {displayChoices?.map((choice, index) => (
                     <>
@@ -192,7 +212,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                         id={`${fieldKey}_${index}`}
                                         name={fieldKey}
                                         required={fieldRequired}
-                                        onChange={() => handleRadioChange(choice.value, index)}
+                                        onChange={() => {handleRadioChange(choice.value, index), setCheckInvalid(false)}}
                                         disabled={disabled}
                                         value={choice && choice.value}
                                         checked={selectedOption === choice.value}

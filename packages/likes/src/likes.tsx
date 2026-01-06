@@ -26,7 +26,7 @@ export type LikeWidgetProps = BaseProps &
 
 export type LikeProps = {
   title?: string;
-  variant?: 'small' | 'medium' | 'large';
+  variant?: 'micro-score' | 'small' | 'medium' | 'large';
   yesLabel?: string;
   noLabel?: string;
   displayDislike?: boolean;
@@ -135,61 +135,119 @@ function Likes({
 
   return (
     <div className="osc">
-      <div className={`like-widget-container ${variant}`}>
-        {title ? (
-          <Heading4 className="like-widget-title">{title}</Heading4>
-        ) : null}
 
-        <div className={`like-option-container`}>
-          {supportedLikeTypes.map((likeVariant, index) => (
-            <Button
-              appearance="primary-action-button"
-              key={`${likeVariant.type}-${index}`}
-              onClick={(e) => doVote(e, likeVariant.type)}
-              className={`like-option ${
-                resource?.userVote?.opinion === likeVariant.type
-                  ? 'selected'
-                  : ''
-                } ${hideCounters ? 'osc-no-counter' : ''}`
-              }
-              disabled={disabled}
-            >
-              <section className="like-kind">
-                <i className={likeVariant.icon}></i>
-                {variant === 'small' ? null : likeVariant.label}
-              </section>
+      {variant !== 'micro-score' ? (
+        <div className={`like-widget-container ${variant}`}>
+          {title ? (
+            <Heading4 className="like-widget-title">{title}</Heading4>
+          ) : null}
 
-              {!hideCounters ? (
-                <section className="like-counter">
-                  {resource[likeVariant.type] && resource[likeVariant.type] < 10
-                    ? resource[likeVariant.type].toString().padStart(2, '0')
-                    : resource[likeVariant.type] ||
-                      (0).toString().padStart(2, '0')}
+          <div className={`like-option-container`}>
+            {supportedLikeTypes.map((likeVariant, index) => (
+              <Button
+                appearance="primary-action-button"
+                key={`${likeVariant.type}-${index}`}
+                onClick={(e) => doVote(e, likeVariant.type)}
+                className={`like-option ${
+                  resource?.userVote?.opinion === likeVariant.type
+                    ? 'selected'
+                    : ''
+                  } ${hideCounters ? 'osc-no-counter' : ''}`
+                }
+                disabled={disabled}
+              >
+                <section className="like-kind">
+                  <i className={likeVariant.icon}></i>
+                  {variant === 'small' ? null : likeVariant.label}
                 </section>
-              ) : null}
-            </Button>
-          ))}
-        </div>
 
-        {props?.resources?.minimumYesVotes && showProgressBar ? (
-          <div className="progressbar-container">
-            <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
-            <Paragraph className="progressbar-counter">
-              {resource.yes || 0} /{necessaryVotes}
-            </Paragraph>
+                {!hideCounters ? (
+                  <section className="like-counter">
+                    {resource[likeVariant.type] && resource[likeVariant.type] < 10
+                      ? resource[likeVariant.type].toString().padStart(2, '0')
+                      : resource[likeVariant.type] ||
+                        (0).toString().padStart(2, '0')}
+                  </section>
+                ) : null}
+              </Button>
+            ))}
           </div>
-        ) : null}
 
-        <div>
-          {props?.resources?.minimumYesVotes &&
-            showProgressBar &&
-            props.progressBarDescription && (
-              <Heading6>
-                {props.progressBarDescription}
-              </Heading6>
-            )}
+          {props?.resources?.minimumYesVotes && showProgressBar ? (
+            <div className="progressbar-container">
+              <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
+              <Paragraph className="progressbar-counter">
+                {resource.yes || 0} /{necessaryVotes}
+              </Paragraph>
+            </div>
+          ) : null}
+
+          <div>
+            {props?.resources?.minimumYesVotes &&
+              showProgressBar &&
+              props.progressBarDescription && (
+                <Heading6>
+                  {props.progressBarDescription}
+                </Heading6>
+              )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className={`like-widget-container ${variant}`}>
+          {title ? (
+            <Heading4 className="like-widget-title">{title}</Heading4>
+          ) : null}
+
+          <div className={`like-option-container`}>
+            {supportedLikeTypes.map((likeVariant, index) => (
+              <>
+                <Button
+                  appearance="primary-action-button"
+                  key={`${likeVariant.type}-${index}`}
+                  onClick={(e) => doVote(e, likeVariant.type)}
+                  className={`like-option ${
+                    resource?.userVote?.opinion === likeVariant.type
+                      ? 'selected'
+                      : ''
+                    } ${hideCounters ? 'osc-no-counter' : ''}`
+                  }
+                  disabled={disabled}
+                >
+
+                  <section className="like-kind">
+                    <i className={likeVariant.icon}></i> <span className="sr-only">{likeVariant.label}</span>
+                  </section>
+
+                </Button>
+                {!hideCounters && index === 0 ? (
+                  <section className="like-counter">
+                    <span className="sr-only">Score</span> {resource['netPositiveVotes'] ? resource['netPositiveVotes']  : '0'}
+                  </section>
+                ) : null}
+              </>
+            ))}
+          </div>
+
+          {props?.resources?.minimumYesVotes && showProgressBar ? (
+            <div className="progressbar-container">
+              <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
+              <Paragraph className="progressbar-counter">
+                {resource.yes || 0} /{necessaryVotes}
+              </Paragraph>
+            </div>
+          ) : null}
+
+          <div>
+            {props?.resources?.minimumYesVotes &&
+              showProgressBar &&
+              props.progressBarDescription && (
+                <Heading6>
+                  {props.progressBarDescription}
+                </Heading6>
+              )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

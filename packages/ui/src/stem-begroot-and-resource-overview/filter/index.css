@@ -110,18 +110,20 @@
 }
 
 .osc-resources-filter .apply-filters-button {
-  width: 53px;
-  height: 53px;
+  height: auto;
+  min-height: 39px;
+  width: 39px;
+  margin-left: -55px;
   padding: 0;
-  margin-left: -67px;
   background: none;
   padding: 0;
   border: none;
+  position: relative;
 }
 .osc-resources-filter .apply-filters-button .filter-icon {
   display: block;
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  inset: 0;
   background-color: #000;
   mask-size: 20px;
   mask-position: center;
@@ -136,22 +138,28 @@
   );
   --toggleFilterButton-maskSize: var(--setToggleFilterButton-maskSize, 26px);
   --toggleFilterButton-maskColor: var(--setToggleFilterButton-maskColor, #fff);
-  --toggleFilterButton-size: var(--setToggleFilterButton-size, 53px);
   padding: 0;
   display: block;
-  height: var(--toggleFilterButton-size);
-  width: var(--toggleFilterButton-size);
   flex-shrink: 0;
+  position: relative;
+  min-height: 39px;
+  min-width: 39px;
 }
 .osc-resources-filter .toggle-filters-button .filter-icon {
   display: block;
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  inset: 0;
   background-color: var(--toggleFilterButton-maskColor);
   mask-size: var(--toggleFilterButton-maskSize);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-image: var(--toggleFilterButton-maskImage);
+}
+
+.filters-container.no-transition,
+.filters-container.--collapsable.no-transition,
+.filters-container.--collapsable.no-transition .filters-wrapper {
+  transition: none !important;
 }
 
 .filters-container.--collapsable {
@@ -237,6 +245,10 @@
   gap: 1rem;
 }
 
+.osc-resource-overview-content .osc-resources-filter .utrecht-form-fieldset label.utrecht-form-label {
+  margin-block-end: 6px;
+}
+
 .filters-container.--collapsable .close-filters-button {
   width: 50px;
   height: 50px;
@@ -253,4 +265,19 @@
   background-repeat: no-repeat;
   background-image: var(--filterCollapsable-close-icon);
   background-size: var(--filtetCollapsable-close-icon-size);
+}
+
+.osc-resources-filter .form-element .utrecht-form-label .utrecht-button--subtle {
+  padding: 0;
+  margin: 0 0 0 10px;
+  font-size: 0.8rem;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  min-block-size: auto;
+  min-inline-size: auto;
+}
+
+.osc-resources-filter .form-element .utrecht-form-label .utrecht-button--subtle:hover {
+  text-decoration: underline;
 }

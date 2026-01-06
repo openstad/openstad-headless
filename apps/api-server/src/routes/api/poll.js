@@ -134,7 +134,9 @@ router.route('/:pollId(\\d+)')
 				where: { id: pollId, resourceId: req.params.resourceId }
 			})
 			.then(found => {
-				if ( !found ) throw new Error('Poll not found');
+				if (!found) {
+          return next(createError(404, 'Poll not found'));
+        }
         if (req.query.includeVoteCount) found.countVotes(!req.query.includeVotes);
 
 		    req.results = found;
@@ -195,7 +197,9 @@ router.route('/:pollId(\\d+)/vote')
 				where: { id: pollId, resourceId: req.params.resourceId }
 			})
 			.then(found => {
-				if ( !found ) throw new Error('Poll not found');
+				if (!found) {
+          return next(createError(404, 'Poll not found'));
+        }
 		    req.results = found;
 				next();
 			})
@@ -251,7 +255,7 @@ router.route('/:pollId(\\d+)/vote')
 				console.log('err', err)
 				next(err);
 			});
-    
+   
 	})
 	.post(function( req, res, next ) {
 		db.PollVote

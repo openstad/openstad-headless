@@ -26,6 +26,7 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
     locationProx?: PostcodeAutoFillLocation
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
+    displayDislike?: boolean;
   };
 
 export type dataLayerArray = {

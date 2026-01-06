@@ -3,7 +3,7 @@
   justify-content: space-between;
   flex-direction: column;
   grid-gap: 1rem;
-  border: solid 1px var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
+  border: solid var(--setEnqueteBorderWidth, 1px) var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
 .form-container>div {
@@ -12,6 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem 1rem;
+  position: relative;
 }
 
 .form-container .utrecht-form-field .utrecht-form-field-description:empty {
@@ -120,4 +121,1209 @@ label.utrecht-form-label {
 .question-type-text textarea,
 .question-type-text input[type="text"] {
   max-width: none;
+}
+
+.question-type-imageChoice .image-choice-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media only screen and (max-width: 767px) {
+  .question-type-imageChoice .image-choice-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.question-type-imageChoice .image-choice-container label figure figcaption {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
+  display: inline-block;
+}
+
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
+  margin-top: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Youth widgets
+
+@mixin utrecht-button-appearance {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  left: 24px;
+
+  margin: 0;
+  padding: 0;
+  max-width: unset;
+  border: unset;
+  outline: unset;
+  background: unset;
+  scale: unset;
+  pointer-events: none;
+  height: 64px;
+
+  &:focus {
+    outline: none;
+
+    &:after {
+      outline: 2px dashed var(--youth-next-button-background-color);
+      outline-offset: 2px;
+    }
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--%3E%3Cpath d='M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z'/%3E%3C/svg%3E");
+    background-size: 26px;
+    background-repeat: no-repeat;
+    background-color: var(--youth-next-button-background-color);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    right: 0;
+    background-position: 20px 20px;
+    animation: nextPagePulse .8s infinite ease-in-out;
+    pointer-events: all;
+  }
+
+  span {
+    display: none;
+  }
+}
+
+.osc:has(.--youth) {
+  max-width: 500px;
+  margin: 0 auto;
+  word-break: auto-phrase;
+
+  --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
+  --youth-intro-card-title-color: var(--setYouthIntroCardTitleColor, #ffffff);
+  --youth-intro-card-description-color: var(--setYouthIntroCardDescriptionColor, #ffffff);
+
+  --youth-intro-card-title-font-size: var(--setYouthIntroCardTitleFontSize, 32px);
+  --youth-intro-card-description-font-size: var(--setYouthIntroCardDescriptionFontSize, 18px);
+
+  --youth-page-card-background-color: var(--setYouthPageCardBackgroundColor, #ffffff);
+  --youth-page-card-title-font-size: var(--setYouthPageCardTitleFontSize, 32px);
+  --youth-page-card-description-font-size: var(--setYouthPageCardDescriptionFontSize, 18px);
+
+  --youth-outro-card-background-color: var(--setYouthOutroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
+  --youth-outro-card-title-color: var(--setYouthOutroCardTitleColor, #ffffff);
+  --youth-outro-card-description-color: var(--setYouthOutroCardDescriptionColor, #ffffff);
+
+  --youth-outro-card-title-font-size: var(--setYouthOutroCardTitleFontSize, 32px);
+  --youth-outro-card-description-font-size: var(--setYouthOutroCardDescriptionFontSize, 18px);
+
+  --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, var(--utrecht-button-primary-action-hover-background-color, #F8D62D));
+  --setEnqueteBorderWidth: 1px;
+}
+
+.osc-enquete-item-content {
+
+
+  &.--youth {
+    height: 100%;
+    // min-height: 500px;
+    position: relative;
+    display: grid;
+    transform: translate(0, 0);
+
+    &:has(.question-type-none),
+    &:has([aria-invalid="true"]),
+    &:has(.swipe-finished) {
+      .button-group.--flex .utrecht-button--primary-action:before {
+        display: none;
+      }
+    }
+
+    &:has([aria-invalid="true"]) {
+      .button-group.--flex .utrecht-button--primary-action:after {
+        pointer-events: none;
+        opacity: .5;
+        animation: none;
+      }
+    }
+
+    &:has([aria-invalid="false"]) {
+      .button-group.--flex .utrecht-button--primary-action:after {
+        pointer-events: all;
+        opacity: 1;
+        animation: nextPagePulse .8s infinite ease-in-out;
+      }
+    }
+
+    &:has([required]),
+    &:has(:required) {
+      .button-group.--flex .utrecht-button--primary-action:before {
+        display: none;
+      }
+    }
+
+    .osc-enquete-item-description {
+      display: none;
+    }
+
+    .form-widget,
+    .form-widget-container,
+    .form-container,
+    .question.question-type-none {
+      height: 100%;
+    }
+
+    &:has(.--youth-intro) {
+      .button-group.--flex {
+        &:before {
+          display: none;
+        }
+
+        .utrecht-button--primary-action {
+          opacity: 0;
+          transform: translateY(20px);
+
+          animation: IntroButtonFadeIn .4s ease-out forwards;
+          animation-delay: .4s;
+
+          &:after {
+            box-shadow: -1px -4px 15px 0px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
+
+      .question.question-type-none {
+        background: var(--youth-intro-card-background-color);
+
+        .info-field-container {
+          .info-field-title {
+            color: var(--youth-intro-card-title-color);
+            font-size: var(--youth-intro-card-title-font-size);
+
+            i {
+              font-style: normal;
+              color: black;
+              font-weight: inherit;
+              font-family: inherit;
+            }
+          }
+
+          .info-field-description {
+            color: var(--youth-intro-card-description-color);
+            font-size: var(--youth-intro-card-description-font-size);
+            margin-top: 32px;
+            text-align: center;
+            order: unset;
+          }
+        }
+      }
+    }
+
+    &:has(.--youth-page) {
+      .question.question-type-none {
+        background: var(--youth-page-card-background-color);
+
+        .info-field-container {
+          .info-field-title {
+
+            i {
+              color: var(--youth-intro-card-background-color, #1D6B34);
+              font-style: normal;
+              font-weight: inherit;
+              font-family: inherit;
+
+              &:nth-of-type(even) {
+                color: #094B81;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    &:has(.--youth-outro) {
+      .button-group.--flex {
+        &:before {
+          display: none;
+        }
+
+        .utrecht-button--secondary-action {
+          display: none;
+        }
+      }
+
+      .info-image-container {
+        max-width: 300px;
+        margin: 0 auto;
+      }
+
+      .question.question-type-none {
+        background: var(--youth-outro-card-background-color);
+        z-index: 99;
+
+        .info-field-container {
+          .info-field-title {
+            color: var(--youth-outro-card-title-color);
+            font-size: var(--youth-outro-card-title-font-size);
+
+            i {
+              font-style: normal;
+              color: black;
+              font-weight: inherit;
+              font-family: inherit;
+            }
+          }
+
+          .info-field-description {
+            color: var(--youth-outro-card-description-color);
+            font-size: var(--youth-outro-card-description-font-size);
+            margin-top: 0;
+            text-align: center;
+            order: 1;
+          }
+        }
+      }
+
+      .info-block-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .update-button {
+        background: #fff;
+        font-family: var(--setSwipeFontFamily--2, inherit);
+        font-weight: 500;
+        font-size: 18px;
+        line-height: 130%;
+        text-align: center;
+
+        color: rgba(45, 45, 45, 1);
+        border: none;
+        height: 42px;
+        border-radius: 3px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .utrecht-button--primary-action {
+        display: none;
+      }
+
+      .share-buttons {
+        background: #0000;
+        border: solid 1px #fff;
+        position: relative;
+        font-family: var(--setSwipeFontFamily--2, inherit);
+        font-weight: 500;
+        font-size: 18px;
+        line-height: 130%;
+        text-align: center;
+        height: 42px;
+        border-radius: 3px;
+        color: #fff;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        cursor: pointer;
+        transition: all .2s ease-in-out;
+
+        &:hover {
+          background: #fff;
+          color: #000;
+        }
+
+      }
+    }
+
+
+    .button-group.--flex {
+      padding: unset;
+      flex-direction: unset;
+      gap: unset;
+      color: unset;
+      background-color: unset;
+
+      position: absolute;
+      inset: var(--setEnqueteBorderWidth, 1px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+
+      &:before {
+        content: '';
+        width: 100%;
+        height: 110px;
+        bottom: 0;
+        position: absolute;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.0) 0%, #ffffff 100%);
+        z-index: 0;
+      }
+
+      >button {
+        pointer-events: all;
+
+        &:hover {
+          scale: unset;
+        }
+      }
+
+      .utrecht-button--secondary-action {
+        padding: 0;
+        border: unset;
+        background: unset;
+        position: absolute;
+        top: 36px;
+        left: 24px;
+        color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
+        z-index: 3;
+
+        &:before {
+          content: '';
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
+          width: 20px;
+          height: 20px;
+          mask-size: contain;
+          mask-repeat: no-repeat;
+          background-color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
+
+        }
+      }
+
+
+      .utrecht-button--primary-action {
+        @include utrecht-button-appearance;
+
+        &:before {
+          content: attr(data-label);
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          white-space: nowrap;
+          text-decoration: underline;
+          color: rgba(75, 75, 75, 1);
+          pointer-events: all;
+          font-family: var(--setSwipeFontFamily--2, inherit);
+          font-weight: 500;
+          font-size: 20px;
+          line-height: 130%;
+          text-decoration: underline;
+          text-underline-offset: 4px;
+
+        }
+      }
+    }
+
+    .question {
+      padding: 95px 30px 119px 30px;
+      background: unset;
+      min-height: 700px;
+      position: relative;
+
+      &:before {
+        content: "";
+        background-color: inherit;
+        mask-image: linear-gradient(180deg, #ffffff 50%, rgba(255, 255, 255, 0) 100%);
+        position: fixed;
+        top: var(--setEnqueteBorderWidth, 1px);
+        left: var(--setEnqueteBorderWidth, 1px);
+        right: var(--setEnqueteBorderWidth, 1px);
+        height: 80px;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      @media screen and (max-width: 400px) {
+        min-height: unset;
+      }
+
+      .question {
+        padding: 0;
+        min-height: unset;
+
+        &:before {
+          display: none;
+        }
+      }
+    }
+
+    .question.question-type-none {
+
+      .info-field-container {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding-bottom: 30px;
+
+        .info-field-title {
+          font-family: var(--setSwipeFontFamily--1, inherit);
+          font-weight: 700;
+          line-height: 135%;
+          font-size: var(--youth-page-card-title-font-size);
+          text-align: center;
+
+          strong.utrecht-emphasis {
+            color: inherit;
+          }
+        }
+
+        .info-field-description {
+          font-family: var(--setSwipeFontFamily--2, inherit);
+          font-weight: 500;
+          font-style: Regular;
+          line-height: 150%;
+          font-size: var(--youth-page-card-description-font-size);
+          text-align: left;
+          order: 1;
+        }
+
+        .info-image-container {
+          height: 100%;
+          max-height: 350px;
+
+          img {
+            height: 100%;
+            max-height: unset;
+            object-position: center;
+            object-fit: scale-down;
+          }
+        }
+      }
+    }
+
+    .question.question-type-imageChoice {
+      height: 100%;
+      justify-content: center;
+
+      .utrecht-form-fieldset__legend.utrecht-form-fieldset__legend--html-legend {
+        text-align: center;
+      }
+
+      fieldset.utrecht-form-fieldset__fieldset {
+        overflow: unset;
+      }
+
+      &:has(input:checked) {
+        figure:not(:has(input:checked)) {
+          img {
+            opacity: 0.6;
+            scale: .9;
+          }
+
+          figcaption {
+            opacity: 0;
+          }
+        }
+      }
+
+      .question {
+        height: 100%;
+      }
+
+      label.utrecht-form-label {
+        margin: 0;
+        // dirty fix for DH custom styles.
+        background-color: unset !important;
+      }
+
+      .image-choice-container {
+        display: grid;
+        gap: 10px;
+        margin-top: 140px;
+        position: relative;
+        justify-content: center;
+        grid-template-columns: 1fr 1fr;
+
+        &:before {
+          content: "OF";
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translate(-50%, 130px);
+          z-index: 1;
+          background: #fff;
+          border-radius: 100%;
+          width: 35px;
+          height: 35px;
+          line-height: 35px;
+          text-align: center;
+          font-weight: 700;
+          font-size: 15.58px;
+          letter-spacing: 0px;
+          text-align: center;
+          box-shadow: 0px 3.67px 12.83px 0px rgba(0, 0, 0, 0.55);
+
+        }
+
+        figure {
+          height: 300px;
+
+          &:hover {
+            img {
+              box-shadow: 0px 7px 8px 5px rgba(0, 0, 0, 0.15);
+            }
+          }
+
+          &:has(input:checked) {
+            img {
+              border: solid 3px var(--youth-intro-card-background-color, #1D6B34);
+              box-shadow: 0px 7px 8px 5px rgba(0, 0, 0, 0.15);
+            }
+          }
+
+          img {
+            max-height: none;
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+            border: solid 0px var(--youth-intro-card-background-color, #1D6B34);
+
+            transition: all 0.3s ease;
+          }
+
+          figcaption {
+            opacity: 1;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+          }
+        }
+
+        .utrecht-form-field.utrecht-form-field--radio {
+          display: block;
+
+          .utrecht-radio-button.utrecht-radio-button--html-input.radio-field-input {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .question-type-radiobox {
+      align-items: center;
+
+      label.utrecht-form-label {
+        margin: 0;
+        padding: 0 10px;
+        align-items: center
+      }
+
+      .utrecht-radio-button--html-input:invalid {
+        border-color: black;
+      }
+
+      .utrecht-form-field.utrecht-form-field--radio {
+        border: solid 1px rgba(210, 210, 210, 1);
+        padding: 0;
+        border-radius: 8px;
+        margin-bottom: 8px;
+
+        span {
+          display: block;
+          padding: 10px 10px 10px 0;
+        }
+      }
+    }
+
+    .question-type-tickmark-slider {
+      --scale-hover: 3;
+      --range-slider-height: 8px;
+      --range-thumb-size: 44px;
+      --range-slider-background: #F1F1F1;
+      --range-slider-thumb-background: #268641;
+      --range-slider-thumb-borderRadius: 50%;
+      --range-thumb-backgroundImage: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Pro v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--%3E%3Cpath fill='%23ffffff' d='M342.6 73.4C330.1 60.9 309.8 60.9 297.3 73.4L153.3 217.4C140.8 229.9 140.8 250.2 153.3 262.7C165.8 275.2 186.1 275.2 198.6 262.7L320 141.3L441.4 262.6C453.9 275.1 474.2 275.1 486.7 262.6C499.2 250.1 499.2 229.8 486.7 217.3L342.7 73.3zM486.6 422.7C499.1 410.2 499.1 389.9 486.6 377.4C474.1 364.9 453.8 364.9 441.3 377.4L320 498.7L198.6 377.4C186.1 364.9 165.8 364.9 153.3 377.4C140.8 389.9 140.8 410.2 153.3 422.7L297.3 566.7C309.8 579.2 330.1 579.2 342.6 566.7L486.6 422.7z'/%3E%3C/svg%3E");
+      --range-thumb-backgroundSize: 24px;
+      align-items: center;
+      justify-content: center;
+
+
+      .a-b-slider-container {
+        position: relative;
+        display: flex;
+        flex-direction: column-reverse;
+
+        .utrecht-form-field__label .utrecht-form-label {
+          position: relative;
+          z-index: 2;
+          margin-bottom: 50px;
+          text-align: center;
+        }
+
+        .range-slider-labels {
+          pointer-events: none;
+
+          &.smiley-scale {
+            width: 94%;
+            margin: 0 auto;
+          }
+        }
+
+        input[type=range] {
+          margin-bottom: 0;
+          margin-top: 30px;
+
+          &:before {
+            content: '';
+            inset: 0 0 -20px 0;
+            position: absolute;
+            z-index: 1;
+          }
+
+
+          &[value="1"]~.range-slider-labels>span:nth-of-type(1) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="2"]~.range-slider-labels>span:nth-of-type(2) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="3"]~.range-slider-labels>span:nth-of-type(3) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="4"]~.range-slider-labels>span:nth-of-type(4) {
+            scale: var(--scale-hover);
+          }
+
+          &[value="5"]~.range-slider-labels>span:nth-of-type(5) {
+            scale: var(--scale-hover);
+          }
+        }
+
+        .range-slider-labels>span {
+          transition: all 0.3s ease;
+          scale: 1.4;
+          display: block;
+          text-align: center;
+          line-height: 53px;
+          padding-left: 4px;
+        }
+
+
+
+
+        /* Basis styling van de slider */
+        input[type="range"] {
+          -webkit-appearance: none;
+          width: 100%;
+          height: var(--range-slider-height);
+          background: var(--range-slider-background);
+          outline: none;
+        }
+
+        /* Voor Chrome, Safari, Edge (WebKit) */
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: var(--range-thumb-size);
+          height: var(--range-thumb-size);
+          border-radius: var(--range-slider-thumb-borderRadius);
+          background-color: var(--range-slider-thumb-background);
+          background-image: var(--range-thumb-backgroundImage);
+          background-size: var(--range-thumb-backgroundSize);
+          background-repeat: no-repeat;
+          background-position: center;
+          transform: rotate(90deg);
+          cursor: pointer;
+          transition: background 0.2s, transform 0.1s;
+        }
+
+        /* Voor Firefox */
+        input[type="range"]::-moz-range-thumb {
+          width: var(--range-thumb-size);
+          height: var(--range-thumb-size);
+          border-radius: var(--range-slider-thumb-borderRadius);
+          background-color: var(--range-slider-thumb-background);
+          background-image: var(--range-thumb-backgroundImage);
+          background-size: var(--range-thumb-backgroundSize);
+          background-repeat: no-repeat;
+          background-position: center;
+          transform: rotate(90deg);
+          cursor: pointer;
+          transition: background 0.2s, transform 0.1s;
+        }
+
+        /* Voor Edge (Chromium gebruikt ook WebKit, maar voor oudere versies) */
+        input[type="range"]::-ms-thumb {
+          width: var(--range-thumb-size);
+          height: var(--range-thumb-size);
+          border-radius: var(--range-slider-thumb-borderRadius);
+          background-color: var(--range-slider-thumb-background);
+          background-image: var(--range-thumb-backgroundImage);
+          background-size: var(--range-thumb-backgroundSize);
+          background-repeat: no-repeat;
+          background-position: center;
+          transform: rotate(90deg);
+          cursor: pointer;
+        }
+      }
+
+      .utrecht-form-field-error-message.error-message {
+        margin-top: 20px;
+      }
+    }
+
+    .question-type-swipe {
+      padding-bottom: 32px;
+      height: 100%;
+      display: flex;
+
+      // &:not(:has(.swipe-finished)):has([data-required="true"]) {
+      &:not(:has(.swipe-finished)) {
+        +.button-group .utrecht-button--submit.utrecht-button--primary-action {
+          display: none;
+        }
+      }
+
+      .swipe-widget:not(.swipe-finished) {
+        justify-content: start;
+      }
+
+      .swipe-finished-content {
+        padding-bottom: 100px;
+      }
+    }
+
+    .question-type-text {
+      justify-content: center;
+      align-items: center;
+      max-width: 80ch;
+      margin: 0 auto;
+
+      .utrecht-form-field__input.help-text-active {
+        margin-top: 30px;
+      }
+    }
+
+    .question-type-dilemma {
+      height: 100%;
+      display: flex;
+
+      .dilemma-field>.utrecht-button--primary-action {
+        @include utrecht-button-appearance;
+        position: fixed;
+        left: unset;
+        width: 64px;
+        z-index: 99;
+      }
+    }
+
+    .question-type-video {
+      padding: 0;
+      aspect-ratio: 9 / 16;
+
+      + .button-group .utrecht-button--secondary-action{
+        background-color: #fff;
+        color: #000;
+        padding: 0 10px;
+        span{
+          color: #000;
+        }
+      }
+
+      +.button-group {
+        &:before {
+          display: none;
+        }
+
+        .utrecht-button--primary-action:before {
+          display: none;
+        }
+      }
+    }
+
+
+    .form-widget:has(.question.question-type-matrix) {
+      width: 100%;
+      overflow-x: scroll;
+    }
+
+    .question-type-text .utrecht-form-field__label .utrecht-form-label,
+    .a-b-slider-container .utrecht-form-field__label .utrecht-form-label,
+    .utrecht-form-fieldset__legend.utrecht-form-fieldset__legend--html-legend {
+      font-family: var(--setSwipeFontFamily--1, inherit);
+      font-weight: 700;
+      line-height: 135%;
+      font-size: var(--youth-page-card-title-font-size);
+      color: #000;
+
+
+      i {
+        color: var(--youth-intro-card-background-color, #1D6B34);
+        font-style: normal;
+        font-weight: inherit;
+        font-family: inherit;
+      }
+    }
+
+
+  }
+}
+
+
+.more-info-btn {
+  border-radius: 50%;
+  border: solid 1px #BFBFBF;
+  box-shadow: 0px 2.35px 6.27px 0px rgba(0, 0, 0, 0.149);
+  font-size: 1rem;
+  background: #fff;
+  width: 50px;
+  height: 50px;
+  margin-top: 4px;
+  transition: all 0.2s ease;
+  line-height: 49px;
+  color: #000;
+  z-index: 1;
+
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translate(-50%, 0);
+
+  &:hover:not(:disabled) {
+    cursor: pointer;
+    transform: scale(1.05) translate(-50%, 0);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.info-card {
+  position: fixed;
+  inset: 1px;
+  z-index: 100;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+
+  transition: all 0.3s ease-in-out;
+
+
+  &-container {
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+    scale: .98;
+    transform: translateY(10px);
+    padding: 25px;
+    position: absolute;
+    inset: auto 0 0 0;
+
+    .utrecht-button {
+      width: 100%;
+      max-width: none;
+      margin-top: 40px;
+    }
+  }
+
+
+  &[aria-hidden='false'] {
+    opacity: 1;
+    pointer-events: all;
+
+    .info-card-container {
+      opacity: 1;
+      scale: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+  }
+}
+
+@keyframes nextPagePulse {
+  0% {
+    background-position: 50% 50%;
+  }
+
+  25% {
+    background-position: 30% 50%;
+  }
+
+  75% {
+    background-position: 55% 50%;
+  }
+
+  100% {
+    background-position: 50% 50%;
+  }
+}
+
+@keyframes IntroButtonFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+// Fullscreen enquete
+
+.osc:has(.--youth) {
+  max-width: 500px;
+
+  .youth-form-actions {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    .youth-fullscreen-btn {
+      padding: 0;
+      margin: 0;
+      border: unset;
+      background: unset;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: #000;
+      animation: pulseOnce 0.6s ease-out;
+      animation-delay: 1s;
+    }
+  }
+
+  &.--fullscreen {
+    position: fixed;
+    inset: 0;
+    background: #f7f7f7;
+    z-index: 9999;
+    max-width: unset;
+    overflow: auto;
+
+    .swipe-progress,
+    .dilemma-progress {
+      z-index: 99;
+      margin-right: 60px;
+    }
+
+    .osc-enquete-item-content.--youth fieldset.utrecht-form-fieldset__fieldset,
+    .dilemma-field .dilemma-finished-content .dilemma-summary {
+      margin-bottom: 120px;
+    }
+
+    .form-container {
+      border: none;
+    }
+
+    .form-widget-container {
+      container-type: size;
+    }
+
+    .form-widget,
+    .form-widget-container,
+    .form-container,
+    .question.question-type-none {
+      height: 100%;
+      overflow: auto;
+    }
+
+    .youth-form-actions {
+      display: block;
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+      background: var(--youth-next-button-background-color);
+      border-radius: 50%;
+
+      button {
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+
+        i {
+          color: #000;
+        }
+
+        span {
+          display: none;
+        }
+      }
+    }
+
+    .--youth {
+      height: 100dvh;
+      min-height: unset;
+      position: relative;
+      display: grid;
+      transform: translate(0);
+      width: 100%;
+      margin: 0 auto;
+      max-width: 1200px;
+      box-shadow: 0 6px 17px 0px #0000001a;
+      background: #fff;
+
+      .form-fieldCounter {
+        padding-right: 60px;
+        margin-top: 8px;
+      }
+
+      .question {
+        height: 100%;
+        justify-content: start;
+
+        @container (min-height: 900px) and (min-width: 768px) {
+          justify-content: center;
+
+          &:has(.dilemma-finished),
+          &:has(.swipe-finished) {
+            justify-content: start;
+          }
+        }
+
+        .question {
+          height: unset;
+          padding: 0;
+        }
+
+        &.-- {
+          background: #fff;
+        }
+
+        &.--youth-intro,
+        &.--youth-page,
+        &.--youth-outro {
+          >div {
+            max-width: 500px;
+            max-height: 500px;
+            align-self: center;
+          }
+        }
+
+        &.--youth-outro {
+          display: grid;
+          grid-auto-rows: auto;
+          padding-bottom: 30px;
+
+          .info-field-container {
+            display: grid;
+            grid-template-rows: 1fr minmax(auto, 200px) 1fr;
+            height: 100%;
+            max-height: unset;
+            gap: 20px;
+            padding: 0;
+          }
+
+          .info-block-buttons {
+            align-self: end;
+          }
+
+          .utrecht-form-field-error-message.error-message {
+            display: none;
+          }
+        }
+      }
+    }
+
+    @container (min-width: 700px) {
+      .info-card {
+
+        .info-card-container {
+          position: absolute;
+          max-width: 500px;
+          border-radius: 25px;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(.95);
+          bottom: unset;
+        }
+
+        &[aria-hidden='false'] .info-card-container {
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+    }
+  }
+}
+
+
+.osc:has(.--youth) {
+
+  &:has(.dilemma-back-button:not([disabled])),
+  &:has(.swipe-back-button:not([disabled])) {
+    .osc-enquete-item-content.--youth .button-group.--flex .utrecht-button--secondary-action {
+      display: none;
+      pointer-events: none;
+    }
+  }
+}
+
+.osc-enquete-item-content .question .info-field-container .info-image-container figcaption {
+  margin: 10px 0 20px;
+}
+
+.osc-enquete-item-content .question .osc-carousel-previous,
+.osc-enquete-item-content .question .osc-carousel-next {
+  top: 150px;
+  transform: translateY(-50%);
+}
+
+.osc-enquete-item-content .osc-carousel figure.info-image-container img {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 100%;
+  height: 300px;
+  max-height: 300px;
+}
+
+.osc-enquete-item-content .osc-carousel .osc-carousel-pager {
+  bottom: auto;
+  top: 270px;
+}
+
+@keyframes pulseOnce {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }

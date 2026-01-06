@@ -9,6 +9,7 @@ export type EnqueteProps = {
   description?: string;
   items?: Array<Item>;
   formVisibility?: string;
+  formStyle?: string;
   imageUrl?: string;
   multiple?: boolean;
   confirmation?: Confirmation;
@@ -18,6 +19,7 @@ export type EnqueteProps = {
   maxCharactersError?: string;
   datalayer?: DataLayer[];
   enableOnOffSwitching?: boolean;
+  infoBlockStyle?: string;
 };
 
 export type Item = {
@@ -39,6 +41,10 @@ export type Item = {
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
+  infoBlockStyle?: string;
+  infoBlockShareButton?: boolean;
+  infoBlockExtraButton?: string;
+  infoBlockExtraButtonTitle?: string;
   fieldRequired?: boolean;
   maxChoices?: string,
   maxChoicesMessage?: string,
@@ -51,6 +57,23 @@ export type Item = {
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
   routingSelectedAnswer?: string;
+  infoField?: string;
+  infofieldExplanation?: boolean;
+  key_b?: string;
+  description_b?: string;
+  image_b?: string;
+  numberingStyle?: string;
+  videoUrl?: string;
+  videoSubtitle?: boolean;
+  videoLang?: string;
+  images?: Array<{
+    url: string;
+    name?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+  }>;
+  createImageSlider?: boolean;
+  imageClickable?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -69,10 +92,17 @@ export type Option = {
 export type Title = {
   text?: string;
   key: string;
+  infoField?: string;
+  infofieldExplanation?: boolean;
   isOtherOption?: boolean;
   defaultValue?: boolean;
   image?: string;
   hideLabel?: boolean;
+  description?: string;
+  explanationRequired?: boolean;
+  key_b?: string;
+  description_b?: string;
+  image_b?: string;
 };
 
 export type Confirmation = {

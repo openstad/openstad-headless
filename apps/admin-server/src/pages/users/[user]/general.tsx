@@ -31,6 +31,7 @@ const formSchema = z.object({
   password: z.string().optional(),
   firstname: z.string().optional(),
   lastname: z.string().optional(),
+  accessCode: z.string().optional(),
 });
 
 export default function CreateUserGeneral() {
@@ -57,6 +58,7 @@ export default function CreateUserGeneral() {
       password: user?.password || '',
       firstname: user?.firstname || '',
       lastname: user?.lastname || '',
+      accessCode: user?.accessCode || '',
     }),
     [user]
   );
@@ -241,6 +243,22 @@ export default function CreateUserGeneral() {
                 <FormLabel>Wachtwoord</FormLabel>
                 <FormControl>
                   <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="accessCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toegangscode
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -37,13 +37,21 @@ type Props = {
         label?: string;
         multiple: boolean;
         projectId?: any;
+        inlineOptions?: boolean;
     }>;
-    tagsLimitation?: Array<number>;
+    tagsLimitation?: Array<number> | {
+        [key: string]: number[];
+    };
     searchPlaceholder: string;
     resetText: string;
     applyText: string;
     showActiveTags?: boolean;
-    preFilterTags?: Array<number>;
+    preFilterTags?: Array<{
+        id: number;
+        type: string;
+        label: string;
+        name: string;
+    }>;
     displayLocationFilter?: boolean;
     displayCollapsibleFilter?: boolean;
 };

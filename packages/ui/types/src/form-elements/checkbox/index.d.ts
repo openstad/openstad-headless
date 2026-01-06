@@ -34,7 +34,18 @@ export type CheckboxFieldProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
+    value?: FormValue;
+    selectAll?: boolean;
+    selectAllLabel?: string;
 };
 declare const CheckboxField: FC<CheckboxFieldProps>;
 export default CheckboxField;

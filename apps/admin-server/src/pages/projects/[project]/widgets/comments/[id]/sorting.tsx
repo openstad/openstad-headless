@@ -49,6 +49,14 @@ const SortingTypes = [
     value: "votes_asc",
     label: "Minste stemmen"
   },
+  {
+    value: "score",
+    label: "Beste bijdragen"
+  },
+  {
+    value: "random",
+    label: "Willekeurig"
+  },
 ];
 
 const formSchema = z.object({

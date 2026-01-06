@@ -8,6 +8,7 @@ import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-rea
 
 import "./sort.css";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 type OptionTitle = {
     key: string;
@@ -26,10 +27,20 @@ export type SortFieldProps = {
     type?: string;
     defaultValue?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     onChange?: (e: { name: string; value: any }, triggerSetLastKey?: boolean) => void;
     prevPageText?: string;
     nextPageText?: string;
     overrideDefaultValue?: FormValue;
+    numberingStyle?: string;
+    infoImage?: string;
 };
 
 type SortableItemProps = {
@@ -59,15 +70,20 @@ const SortField: FC<SortFieldProps> = ({
     onChange,
     onSort,
     fieldKey,
-    overrideDefaultValue
+    overrideDefaultValue,
+    numberingStyle,
+    infoImage,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
     try {
         const defaultOrder = overrideDefaultValue ?
-          (JSON.parse(overrideDefaultValue as string) as string[]) :
-          options.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key);
+            (JSON.parse(overrideDefaultValue as string) as string[]) :
+            options.filter(opt => !!opt.titles)?.map(opt => opt.titles?.[0]?.key);
 
         options = defaultOrder.map(key => options.find(opt => opt.titles?.[0]?.key === key)).filter(opt => opt) as Option[];
-    } catch(e) {}
+    } catch (e) { }
 
     const [items, setItems] = useState(options);
 
@@ -91,7 +107,7 @@ const SortField: FC<SortFieldProps> = ({
     }, [items]);
 
     return (
-        <div className="sort-field-container">
+        <div className={`sort-field-container --${numberingStyle}`}>
             <div className="sortable-intro">
                 {title && (
                     <Paragraph className="utrecht-form-field__label">
@@ -101,6 +117,14 @@ const SortField: FC<SortFieldProps> = ({
                 {description &&
                     <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
                 }
+
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
             </div>
             <div className="sortable-context">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -108,45 +132,49 @@ const SortField: FC<SortFieldProps> = ({
                         items={items.map(opt => opt.titles?.[0]?.key || "")}
                         strategy={verticalListSortingStrategy}
                     >
-                        {items.map((option, index) => (
-                            <SortableItem
-                                key={option.titles?.[0]?.key || index}
-                                id={option.titles?.[0]?.key || String(index)}
-                                dragHandle={<i className="ri-draggable"></i>}
-                            >
-                                <Paragraph className="sortable-item-title">{option.titles?.[0]?.key}</Paragraph>
-                                <div className="sortable-item-actions">
-                                    <button
-                                        aria-label="Zet omhoog"
-                                        disabled={index === 0}
-                                        onClick={(e) => {
-                                            if (index > 0) {
-                                                const newItems = arrayMove(items, index, index - 1);
-                                                setItems(newItems);
-                                                if (onSort) onSort(newItems);
-                                            }
-                                            e.preventDefault();
-                                        }}
+                        <ol>
+                            {items.map((option, index) => (
+                                <li>
+                                    <SortableItem
+                                        key={option.titles?.[0]?.key || index}
+                                        id={option.titles?.[0]?.key || String(index)}
+                                        dragHandle={<i className="ri-draggable"></i>}
                                     >
-                                        <i className="ri-arrow-up-line"></i>
-                                    </button>
-                                    <button
-                                        aria-label="Zet omlaag"
-                                        disabled={index === items.length - 1}
-                                        onClick={(e) => {
-                                            if (index < items.length - 1) {
-                                                const newItems = arrayMove(items, index, index + 1);
-                                                setItems(newItems);
-                                                if (onSort) onSort(newItems);
-                                            }
-                                            e.preventDefault();
-                                        }}
-                                    >
-                                        <i className="ri-arrow-down-line"></i>
-                                    </button>
-                                </div>
-                            </SortableItem>
-                        ))}
+                                        <Paragraph className="sortable-item-title">{option.titles?.[0]?.key}</Paragraph>
+                                        <div className="sortable-item-actions">
+                                            <button
+                                                aria-label="Zet omhoog"
+                                                disabled={index === 0}
+                                                onClick={(e) => {
+                                                    if (index > 0) {
+                                                        const newItems = arrayMove(items, index, index - 1);
+                                                        setItems(newItems);
+                                                        if (onSort) onSort(newItems);
+                                                    }
+                                                    e.preventDefault();
+                                                }}
+                                            >
+                                                <i className="ri-arrow-up-line"></i>
+                                            </button>
+                                            <button
+                                                aria-label="Zet omlaag"
+                                                disabled={index === items.length - 1}
+                                                onClick={(e) => {
+                                                    if (index < items.length - 1) {
+                                                        const newItems = arrayMove(items, index, index + 1);
+                                                        setItems(newItems);
+                                                        if (onSort) onSort(newItems);
+                                                    }
+                                                    e.preventDefault();
+                                                }}
+                                            >
+                                                <i className="ri-arrow-down-line"></i>
+                                            </button>
+                                        </div>
+                                    </SortableItem>
+                                </li>
+                            ))}
+                        </ol>
                     </SortableContext>
                 </DndContext>
             </div>

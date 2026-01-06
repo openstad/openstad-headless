@@ -182,21 +182,62 @@ app.get('/image/*',
       
       const endpoint = process.env.S3_ENDPOINT.replace('https://', `https://${process.env.S3_BUCKET}.`);
       
-      // build s3 url
-      const s3Url = `${endpoint}/images/${req.url}`;
-      const response = await fetch(s3Url);
+      const { pipeline, Readable } = require('stream');
+      const { promisify } = require('util');
+      const pump = promisify(pipeline);
       
-      if (!response.ok) {
-        return res.status(response.status).send('File not found');
+      try {
+        const s3Url = `${endpoint}/images/${baseName}`;
+        let response;
+        try {
+          response = await fetch(s3Url);
+        } catch (err) {
+          console.error('Upstream fetch failed', err);
+          return res.status(502).send('Upstream fetch failed');
+        }
+      
+        if (!response || !response.ok) {
+          return res.status(response ? response.status : 502).send('File not found');
+        }
+      
+        res.setHeader('Content-Type', mimeType);
+        const contentLength = response.headers.get('content-length');
+        if (contentLength) res.setHeader('Content-Length', contentLength);
+      
+        const upstream = response.body ? Readable.fromWeb(response.body) : null;
+        if (!upstream) {
+          console.error('No upstream body available');
+          return res.status(500).send('No upstream body');
+        }
+      
+        upstream.on('error', (err) => {
+          console.error('Upstream stream error', err);
+          if (!res.headersSent) res.status(500).end();
+          else res.destroy();
+        });
+      
+        res.on('error', (err) => {
+          console.error('Client response error', err);
+          upstream.destroy(err);
+        });
+      
+        res.on('close', () => {
+          // client disconnected
+          upstream.destroy(new Error('Client disconnected'));
+        });
+      
+        try {
+          await pump(upstream, res);
+        } catch (err) {
+          console.error('Pipeline failed', err);
+          if (!res.headersSent) res.status(500).send('Stream error');
+          else res.destroy();
+        }
+      } catch (err) {
+        console.error('Unexpected error', err);
+        if (!res.headersSent) res.status(500).send('Internal server error');
+        else res.destroy();
       }
-      
-      res.setHeader('Content-Type', mimeType);
-      res.setHeader('Content-Length', response.headers.get('content-length'));
-      
-      
-      // Pipe the S3 response to the client
-      const { Readable } = require("stream");
-      Readable.fromWeb(response.body).pipe(res);
     } else {
       req.url = req.url.replace('/image', '');
   
@@ -214,6 +255,7 @@ const documentMulterConfig = {
   },
   fileFilter: function (req, file, cb) {
     const allowedTypes = [
+      'image/gif',
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -311,26 +353,68 @@ app.get('/document/*',
         
         const endpoint = process.env.S3_ENDPOINT.replace('https://', `https://${process.env.S3_BUCKET}.`);
         
-        // build s3 url
-        const s3Url = `${endpoint}/documents/${sanitizedPath}`;
-        const response = await fetch(s3Url);
+        const { pipeline, Readable } = require('stream');
+        const { promisify } = require('util');
+        const pump = promisify(pipeline);
         
-        if (!response.ok) {
-          return res.status(response.status).send('File not found');
+        try {
+          const s3Url = `${endpoint}/documents/${sanitizedPath}`;
+          let response;
+          try {
+            response = await fetch(s3Url);
+          } catch (err) {
+            console.error('Upstream fetch failed', err);
+            return res.status(502).send('Upstream fetch failed');
+          }
+          
+          if (!response || !response.ok) {
+            return res.status(response ? response.status : 502).send('File not found');
+          }
+        
+          res.setHeader('Content-Type', mimeType || 'application/octet-stream');
+          const contentLength = response.headers.get('content-length');
+          if (contentLength) res.setHeader('Content-Length', contentLength);
+          // Use basename to ensure only filename is used in Content-Disposition
+          res.setHeader('Content-Disposition', 'attachment; filename="' + path.basename(sanitizedPath) + '"');
+        
+          const upstream = response.body ? Readable.fromWeb(response.body) : null;
+          if (!upstream) {
+            console.error('No upstream body available');
+            return res.status(500).send('No upstream body');
+          }
+        
+          // Protect against upstream stream errors
+          upstream.on('error', (err) => {
+            console.error('Upstream stream error', err);
+            if (!res.headersSent) return res.status(500).end();
+            res.destroy();
+          });
+        
+          // If the client connection errors or closes, destroy the upstream
+          res.on('error', (err) => {
+            console.error('Client response error', err);
+            upstream.destroy(err);
+          });
+          res.on('close', () => {
+            upstream.destroy(new Error('Client disconnected'));
+          });
+        
+          try {
+            await pump(upstream, res);
+          } catch (err) {
+            console.error('Pipeline failed', err);
+            if (!res.headersSent) return res.status(500).send('Stream error');
+            res.destroy();
+          }
+        
+          return;
+        } catch (err) {
+          console.error('Unexpected error while streaming from S3', err);
+          if (!res.headersSent) return res.status(500).send('Internal server error');
+          res.destroy();
         }
-        
-        res.setHeader('Content-Type', mimeType);
-        res.setHeader('Content-Length', response.headers.get('content-length'));
-        res.setHeader('Content-Disposition', 'attachment; filename=' + sanitizedPath);
-        
-        
-        // Pipe the S3 response to the client
-        const { Readable } = require("stream");
-        Readable.fromWeb(response.body).pipe(res);
-        return;
       }
       
-      const path = require('path');
       const documentsDir = path.resolve('documents/');
 
       const requestedPath = req.path.replace(/^\/document\//, '');

@@ -59,6 +59,10 @@ const SortingTypes = [
     label: "Ranglijst"
   },
   {
+    value: "score",
+    label: "Beste bijdragen"
+  },
+  {
     value: "random",
     label: "Willekeurig"
   }
@@ -66,7 +70,6 @@ const SortingTypes = [
 
 const formSchema = z.object({
   displaySorting: z.boolean(),
-  autoApply: z.boolean().optional(),
   defaultSorting: z.string(),
   sorting: z
     .array(z.object({ value: z.string(), label: z.string() }))
@@ -88,7 +91,6 @@ export default function WidgetResourceOverviewSorting(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displaySorting: props?.displaySorting || false,
-      autoApply: props?.autoApply || false,
       defaultSorting: props?.defaultSorting || 'random',
       sorting: props?.sorting || [],
     },
@@ -109,17 +111,6 @@ export default function WidgetResourceOverviewSorting(
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sorteeropties weergeven</FormLabel>
-                  {YesNoSelect(field, props)}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="autoApply"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Automatisch toepassen van de filters wanneer een filter wijzigt</FormLabel>
                   {YesNoSelect(field, props)}
                   <FormMessage />
                 </FormItem>

@@ -57,6 +57,7 @@ const formSchema = z.object({
   displayLocationFilter: z.boolean(),
   listTabTitle: z.string().optional(),
   mapTabTitle: z.string().optional(),
+  autoApply: z.boolean().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -68,6 +69,8 @@ const formSchema = z.object({
   dialogTagGroups: z.array(z.string()).optional(),
   displayTagIcon: z.boolean().optional(),
   displayCollapsibleFilter: z.boolean().optional(),
+  displayUser: z.boolean().optional(),
+  displayCreatedAt: z.boolean().optional(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -116,6 +119,9 @@ export default function WidgetResourceOverviewDisplay(
       overviewTagGroups: props?.overviewTagGroups || [],
       dialogTagGroups: props?.dialogTagGroups || [],
       displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
+      autoApply: props?.autoApply || false,
+      displayUser: props?.displayUser || false,
+      displayCreatedAt: props?.displayCreatedAt || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -708,6 +714,34 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="displayUser"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Gebruikersnaam weergeven in de tegels
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayCreatedAt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Aanmaakdatum weergeven in de tegels
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Heading size="xl" className="col-span-full mt-6">Dialog</Heading>
           <Separator style={{ margin: "-10px 0 0" }} className="my-4 col-span-full" />
 
@@ -900,6 +934,18 @@ export default function WidgetResourceOverviewDisplay(
                 <FormDescription>
                   Als je dit aanvinkt, worden de filters getoond in een inklapbaar menu.
                 </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="autoApply"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Automatisch toepassen van de filters wanneer een filter wijzigt</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

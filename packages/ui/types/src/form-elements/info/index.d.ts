@@ -9,6 +9,10 @@ export type InfoFieldProps = {
     image?: string;
     imageAlt?: string;
     imageDescription?: string;
+    infoBlockStyle?: string;
+    infoBlockShareButton?: boolean;
+    infoBlockExtraButton?: string;
+    infoBlockExtraButtonTitle?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -20,6 +24,14 @@ export type InfoFieldProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 declare const InfoField: FC<InfoFieldProps>;
 export default InfoField;

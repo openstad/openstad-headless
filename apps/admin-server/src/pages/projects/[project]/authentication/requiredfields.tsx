@@ -60,6 +60,10 @@ const requiredUserFields = [
     id: 'emailNotificationConsent',
     label: 'E-mail notificatie toestemming',
     defaultLabel: 'Ik ga akkoord met het ontvangen van e-mail notificaties.',
+  },
+  {
+    id: 'accessCode',
+    label: 'Toegangscode',
   }
 ];
 

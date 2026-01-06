@@ -34,6 +34,7 @@ export type GridderResourceDetailProps =
   currentUser?: any;
   displayDocuments?: boolean;
   displayLikeButton?: boolean;
+  displayDislike?: boolean;
   clickableImage?: boolean;
   documentsTitle?: string;
   documentsDesc?: string;
@@ -51,6 +52,7 @@ export const GridderResourceDetail = ({
   onRemoveClick,
   displayDocuments = false,
   displayLikeButton = false,
+  displayDislike = false,
   documentsTitle = '',
   documentsDesc = '',
   clickableImage = false,
@@ -62,9 +64,17 @@ export const GridderResourceDetail = ({
 }: GridderResourceDetailProps) => {
   // When resource is correctly typed the we will not need :any
 
-  const resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
+  let resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
     ? resource?.tags.filter((tag: { type: string }) => dialogTagGroups.includes(tag.type))
     : resource?.tags;
+
+  resourceFilteredTags = resourceFilteredTags.length
+    ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+      if (a.seqnr === undefined || a.seqnr === null) return 1;
+      if (b.seqnr === undefined || b.seqnr === null) return -1;
+      return a.seqnr - b.seqnr;
+    })
+    : [];
 
   const resourceUserId = resource?.userId || null;
   const canDelete = hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
@@ -73,7 +83,7 @@ export const GridderResourceDetail = ({
     name?: string;
     url?: string;
   }
-  
+
   let defaultImage = '';
 
   interface Tag {
@@ -183,7 +193,7 @@ export const GridderResourceDetail = ({
                 title={props.likeWidget?.title}
                 yesLabel={props.likeWidget?.yesLabel}
                 noLabel={props.likeWidget?.noLabel}
-                displayDislike={props.likeWidget?.displayDislike}
+                displayDislike={displayDislike}
                 hideCounters={props.likeWidget?.hideCounters}
                 variant={props.likeWidget?.variant}
                 showProgressBar={props.likeWidget?.showProgressBar}

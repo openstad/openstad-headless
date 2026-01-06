@@ -226,6 +226,10 @@ function DocumentMap({
   const [selectedTags, setSelectedTags] = useState<Array<number>>(urlTagIdsArray);
   const [selectedTagsString, setSelectedTagsString] = useState<string>( urlTagIdsArray?.join(',') || '' );
 
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
+
   const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
@@ -1079,7 +1083,7 @@ function DocumentMap({
               sorting={ sorting || [] }
               tagGroups={tagGroups}
               tagsLimitation={filteredTagIdsArray}
-              preFilterTags={urlTagIdsArray}
+              preFilterTags={prefilterTagObj}
             />
           ) : null}
 

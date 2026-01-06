@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import dynamic from "next/dynamic";
 import { CodeEditor } from '@/components/ui/code-editor';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
@@ -30,6 +31,14 @@ import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
 import { useProject } from '@/hooks/use-project';
 import MapInput from '@/components/maps/leaflet-input';
+
+const TrixEditor = dynamic(
+  () =>
+    import("@openstad-headless/ui/src/form-elements/text/index").then(
+      (mod) => mod.TrixEditor
+    ),
+  { ssr: false }
+);
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -342,7 +351,12 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
                 <FormLabel>Beschrijving</FormLabel>
                 <FormControl>
-                  <Textarea rows={6} {...field} />
+                  {typeof window !== 'undefined' && (
+                    <TrixEditor
+                      value={field.value || ''}
+                      onChange={(val) => field.onChange(val)}
+                    />
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>

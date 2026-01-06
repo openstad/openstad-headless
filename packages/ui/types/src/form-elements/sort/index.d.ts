@@ -19,6 +19,14 @@ export type SortFieldProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     onChange?: (e: {
         name: string;
         value: any;
@@ -26,6 +34,8 @@ export type SortFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     overrideDefaultValue?: FormValue;
+    numberingStyle?: string;
+    infoImage?: string;
 };
 declare const SortField: FC<SortFieldProps>;
 export default SortField;

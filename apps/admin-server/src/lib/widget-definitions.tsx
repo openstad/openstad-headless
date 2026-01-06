@@ -119,6 +119,11 @@ export const WidgetDefinitions = {
     description: 'Toon inzendingen en project-tegels van verschillende projecten in één widget.',
     image: '/widget_preview/multiproject-inzendingenoverzicht-preview.png',
   },
+  // videoSlider: {
+  //   name: 'Video Slider',
+  //   description: 'Module voor het tonen van een video slider',
+  //   image: '/widget_preview/video_slider_preview.png',
+  // },
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;

@@ -48,6 +48,7 @@ const formSchema = z.object({
   tagTypeSelector: z.string().optional(),
   tagTypeTag: z.string().optional(),
   voteAfterLoggingIn: z.boolean().optional(),
+  displayModBreak: z.boolean().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -85,6 +86,7 @@ export default function BegrootmoduleDisplay(
       tagTypeSelector: props.tagTypeSelector || 'tag',
       hideTagsForResources: props.hideTagsForResources || false,
       voteAfterLoggingIn: props.voteAfterLoggingIn || false,
+      displayModBreak: props.displayModBreak || false,
     },
   });
 
@@ -240,6 +242,20 @@ export default function BegrootmoduleDisplay(
               <FormItem className="col-span-1">
                 <FormLabel>
                   Automatisch stemmen na inloggen?
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayModBreak"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Toon de ModBreak
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />

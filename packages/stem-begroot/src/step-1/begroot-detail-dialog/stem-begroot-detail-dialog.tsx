@@ -15,7 +15,7 @@ import { Dialog } from '@openstad-headless/ui/src';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Paragraph, Strong, Link, Heading5, Heading4, Heading1 } from "@utrecht/component-library-react";
+import {Button, Paragraph, Strong, Link, Heading5, Heading4, Heading1, Heading} from "@utrecht/component-library-react";
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 
 export const StemBegrootResourceDetailDialog = ({
@@ -45,6 +45,9 @@ export const StemBegrootResourceDetailDialog = ({
   filteredResources = [],
   currentPage = 0,
   pageSize = 999,
+  filterBehavior = 'or',
+  displayModBreak = false,
+  modBreakTitle = '',
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -73,6 +76,9 @@ export const StemBegrootResourceDetailDialog = ({
   filteredResources?: Array<any>;
   currentPage: number;
   pageSize: number;
+  filterBehavior?: string;
+  modBreakTitle?: string;
+  displayModBreak?: boolean;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -92,15 +98,22 @@ export const StemBegrootResourceDetailDialog = ({
     }
   });
 
+  const tagIntegers = tags.map((tag: any) => parseInt(tag, 10));
   const filtered = resources && (
     Object.keys(groupedTags).length === 0
       ? resources
       : resources.filter((resource: any) => {
-        return Object.keys(groupedTags).every(tagType => {
-          return groupedTags[tagType].some(tagId =>
-            resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
-          );
-        });
+        if (tags.length > 0) {
+          if (filterBehavior === 'and') {
+            return tagIntegers.every(tagId =>
+              resource.tags?.some((tag: { id: number }) => tag.id === tagId)
+            );
+          } else {
+            return resource.tags?.some((tag: { id: number }) =>
+              tagIntegers.includes(tag.id)
+            );
+          }
+        }
       })
   )
     ?.filter((resource: any) => {
@@ -232,8 +245,13 @@ export const StemBegrootResourceDetailDialog = ({
                         <Heading4>Tags</Heading4>
                         <Spacer size={.5}/>
                         <div className="pill-grid">
-                          {(resource?.tags as Array<{ type: string; name: string }>)
+                          {(resource?.tags as Array<{ type: string; name: string, seqnr?: number }>)
                             ?.filter((t) => t.type !== 'status')
+                            ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                              if (a.seqnr === undefined || a.seqnr === null) return 1;
+                              if (b.seqnr === undefined || b.seqnr === null) return -1;
+                              return a.seqnr - b.seqnr;
+                            })
                             ?.map((t) => <Pill text={t.name || 'Geen thema'}/>)}
                         </div>
                       </div>
@@ -248,6 +266,17 @@ export const StemBegrootResourceDetailDialog = ({
                           <Heading1 dangerouslySetInnerHTML={{__html: resource?.title}}/>
                           <Paragraph className="strong" dangerouslySetInnerHTML={{__html: resource?.summary}}/>
                           <Paragraph dangerouslySetInnerHTML={{__html: resource?.description}}/>
+
+                          {displayModBreak && resource.modBreak && (
+                            <div className="resource-detail-modbreak-banner">
+                              <section>
+                                <Heading level={2} appearance='utrecht-heading-6'>{modBreakTitle}</Heading>
+                                <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreakDateHumanized}</Heading>
+                              </section>
+                              <Spacer size={1} />
+                              <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreak}</Heading>
+                            </div>
+                          )}
                         </div>
                       </div>
 

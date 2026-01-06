@@ -116,7 +116,9 @@ router
       include: [db.Project.scope('includeAreas')],
     })
       .then((found) => {
-        if (!found) throw new Error('Widget not found');
+        if (!found) {
+          return next(createError(404, 'Widget not found'));
+        }
         req.widget = found;
         next();
       })
@@ -380,7 +382,7 @@ function getWidgetJavascriptOutput(
           redirectUri.searchParams.delete('openstadlogout');
           redirectUri.searchParams.delete('openstadlogintoken');
           
-          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri.toString()));
+          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", encodeURIComponent(redirectUri.toString())));
           
           function insertCssLinks(urls) {
             const head = document.querySelector('head');
