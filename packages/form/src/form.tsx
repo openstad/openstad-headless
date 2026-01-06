@@ -148,6 +148,7 @@ function Form({
 
     const handleInputChange = (event: { name: string, value: any }, triggerSetLastKey?: boolean) => {
         const { name, value } = event;
+        console.log( "Veld waarde is verandert", name, value );
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
 
         if (triggerSetLastKey !== false) {
@@ -176,6 +177,8 @@ function Form({
                 formValues
             });
         }
+
+        console.log( "Formulier waarde is verandert", formValues );
     }, [formValues]);
 
     const scrollTop = () => {

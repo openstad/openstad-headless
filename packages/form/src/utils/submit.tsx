@@ -21,6 +21,9 @@ export const handleSubmit = (
                 return;
             }
 
+            console.log( "Formulier waardes", formValues, field.fieldKey );
+            console.log( "Veld waarde", formValues[field.fieldKey], typeof(formValues[field.fieldKey]) );
+
             const fieldValue = formValues[field.fieldKey];
             const fieldSchema: ZodType<any> | undefined = getSchemaForField(field);
 

@@ -79,6 +79,10 @@ const SelectField: FC<SelectFieldProps> = ({
       ? (overrideDefaultValue as string | string[])
       : initialValue;
 
+    console.log( "SelectField defaultValue", defaultValue );
+    console.log( "SelectField initialValue", initialValue );
+    console.log( "SelectField overrideDefaultValue", overrideDefaultValue );
+
     const [selected, setSelected] = useState<string | string[]>(initialValue);
 
     return (
