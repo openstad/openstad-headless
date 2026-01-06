@@ -395,7 +395,6 @@ function Enquete(props: EnqueteWidgetProps) {
                     });
                     break;
                 case 'video':
-                    console.log(item.videoLang, item.videoSubtitle);
                     fieldData['type'] = 'video';
                     fieldData['videoUrl'] = item?.videoUrl || '';
                     fieldData['videoSubtitle'] = item?.videoSubtitle;
