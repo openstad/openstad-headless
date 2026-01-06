@@ -10,10 +10,10 @@ function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
 
   // Handle array bracket notation like images[0]
   const firstPart = splitVarName[0];
-  const arrayMatch = firstPart.match(/^([^\[]+)\[(\d+)\]$/);
-  
-  if (arrayMatch) {
-    const [, key, index] = arrayMatch;
+  const arrayMatch = /^(?<key>[^\[]+)\[(?<index>\d+)\]$/.exec(firstPart);
+
+  if (arrayMatch && arrayMatch?.groups) {
+    const { key, index } = arrayMatch.groups;
     varValue = varMapping[key]?.[parseInt(index)];
   } else {
     varValue = varMapping[firstPart];
