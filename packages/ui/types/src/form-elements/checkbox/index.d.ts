@@ -44,6 +44,8 @@ export type CheckboxFieldProps = {
     imageClickable?: boolean;
     randomizeItems?: boolean;
     value?: FormValue;
+    selectAll?: boolean;
+    selectAllLabel?: string;
 };
 declare const CheckboxField: FC<CheckboxFieldProps>;
 export default CheckboxField;

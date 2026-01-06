@@ -1,6 +1,15 @@
-import { FC } from "react";
+import React, { FC } from "react";
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'trix-editor': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+                input?: string;
+            }, HTMLElement>;
+        }
+    }
+}
 export type TextInputProps = {
     title: string;
     overrideDefaultValue?: FormValue;
@@ -12,7 +21,7 @@ export type TextInputProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
-    variant?: 'text input' | 'textarea';
+    variant?: 'text input' | 'textarea' | 'richtext';
     placeholder?: string;
     defaultValue?: string;
     disabled?: boolean;
@@ -46,5 +55,10 @@ export type TextInputProps = {
     createImageSlider?: boolean;
     imageClickable?: boolean;
 };
+declare const TrixEditor: React.FC<{
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+}>;
 declare const TextInput: FC<TextInputProps>;
+export { TrixEditor };
 export default TextInput;

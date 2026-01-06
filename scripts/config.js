@@ -175,6 +175,8 @@ async function setupEnvVars() {
   process.env.MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
   process.env.MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
   
+  // beta features flag
+  process.env.BETA_FEATURES_FLAG = process.env.BETA_FEATURES_FLAG || 'false';
 
 }
 
@@ -216,6 +218,8 @@ FORCE_HTTP=${process.env.FORCE_HTTP}
 MYSQL_USER=${process.env.DB_USERNAME}
 MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
+
+BETA_FEATURES_FLAG=${process.env.BETA_FEATURES_FLAG}
 
 #api server
 API_URL=${process.env.API_URL}

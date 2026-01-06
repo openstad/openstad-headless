@@ -2,7 +2,8 @@ import React from 'react';
 import './index.css';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-export declare function MultiSelect({ label, onItemSelected, defaultOpen, options, id }: {
+
+export declare function MultiSelect({ label, onItemSelected, defaultOpen, options, inlineOptions, id }: {
     label: string;
     options: Array<{
         value: string;
@@ -12,4 +13,5 @@ export declare function MultiSelect({ label, onItemSelected, defaultOpen, option
     defaultOpen?: boolean;
     id: string;
     onItemSelected: (optionValue: string, optionLabel?: string) => void;
+    inlineOptions?: boolean;
 }): React.JSX.Element;

@@ -240,7 +240,7 @@ router
       imageServer = 'https://' + imageServer;
     }
     const hostname = new URL(imageServer).hostname;
-    if(data.images && data.images.length > 0) {
+    if(data.images && Array.isArray(data.images) && data.images.length > 0) {
       data.images.forEach(image => {
         try{
           // Add protocol to image URL for `new URL` to work correctly.

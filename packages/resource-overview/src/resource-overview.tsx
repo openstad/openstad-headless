@@ -103,7 +103,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any, inlineOptions?: boolean }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
@@ -162,6 +162,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     filterBehaviorInclude?: string;
     onlyShowTheseTagIds?: string;
     displayCollapsibleFilter?: boolean;
+    displayUser?: boolean;
+    displayCreatedAt?: boolean;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -336,6 +338,30 @@ const defaultItemRenderer = (
                 dangerouslySetInnerHTML={{ __html: elipsizeHTML(resource.description, props.descriptionMaxLength || 30) }}
               />
             ) : null}
+          </div>
+
+          <div className="osc-resource-overview-content-date-user">
+            <Paragraph className="data-user-container">
+              {props.displayUser && resource.user && (
+                <span className="created-by">
+                  {resource.user.displayName}
+                </span>
+              )}
+
+              { props.displayCreatedAt && props.displayUser && (
+                <span className="join-text">{props.displayCreatedAt && (` op `)}</span>
+              )}
+
+              {props.displayCreatedAt && resource.createdAt && (
+                <span className="created-at">
+                  {new Date(resource.createdAt).toLocaleDateString('nl-NL', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              )}
+            </Paragraph>
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
@@ -563,7 +589,7 @@ function ResourceOverviewInner({
   const tagIdsToLimitResourcesTo = stringToArray(onlyIncludeTagIds);
   const tagsLimitationArray = stringToArray(onlyShowTheseTagIds);
 
-  const { data: allTags } = datastore.useTags({
+  const { data: allTags, isLoading: tagsLoading } = datastore.useTags({
     projectId: props.projectId,
     type: ''
   });
@@ -594,6 +620,10 @@ function ResourceOverviewInner({
 
   const [open, setOpen] = React.useState(false);
   const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
+
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
 
   useEffect(() => {
     const includeTags = includeOrExcludeTagIds === 'include' ? tagIdsToLimitResourcesTo : [];
@@ -927,7 +957,9 @@ function ResourceOverviewInner({
     </section>
   );
 
-  return (
+  return tagsLoading ? (
+      <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
+    ) : (
     <>
       <Dialog
         open={open}
@@ -1013,7 +1045,7 @@ function ResourceOverviewInner({
                 setSearch(f.search.text);
                 setLocation(f.location)
               }}
-              preFilterTags={urlTagIdsArray}
+              preFilterTags={prefilterTagObj}
               displayCollapsibleFilter={displayCollapsibleFilter}
               autoApply={props?.autoApply || false}
             />
