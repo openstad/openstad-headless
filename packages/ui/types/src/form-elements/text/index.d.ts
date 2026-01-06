@@ -46,6 +46,14 @@ export type TextInputProps = {
         value: string;
         label: string;
     }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 };
 declare const TrixEditor: React.FC<{
     value: string;

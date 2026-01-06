@@ -12,6 +12,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
 import { useEffect } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
@@ -43,6 +44,14 @@ export type RadioboxFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
 }
 
@@ -62,7 +71,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     fieldInvalid = false,
     randomizeItems = false,
     overrideDefaultValue,
-    defaultValue
+    defaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
     let initialValue = defaultValue as string || "";
     initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : initialValue;
@@ -182,12 +194,13 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     </>
                 )}
 
-                {infoImage && (
-                    <figure className="info-image-container">
-                        <img src={infoImage} alt=""/>
-                        <Spacer size={.5} />
-                    </figure>
-                )}
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
 
                 {displayChoices?.map((choice, index) => (
                     <>
