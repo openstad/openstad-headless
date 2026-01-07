@@ -56,7 +56,7 @@ function Activity({
   });
 
   // get userId from session storage, perhaps we should change this in the future.
-  const sessionData = sessionStorage.getItem('openstad');
+  const sessionData = localStorage.getItem('openstad');
   const userId = sessionData ? JSON.parse(sessionData)[props.projectId]?.openStadUser?.id : null;
   
   const {

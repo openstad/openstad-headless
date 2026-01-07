@@ -8,7 +8,7 @@ import {
   Heading6,
 } from '@utrecht/component-library-react';
 import { ProgressBar } from '@openstad-headless/ui/src';
-import { SessionStorage } from '@openstad-headless/lib/session-storage';
+import { LocalStorage } from '@openstad-headless/lib/local-storage';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { hasRole } from '@openstad-headless/lib';
@@ -63,7 +63,7 @@ function Likes({
     api: props.api,
   });
 
-  const session = new SessionStorage({ projectId: props.projectId });
+  const storage = new LocalStorage({ projectId: props.projectId });
 
   const { data: currentUser } = datastore.useCurrentUser(props);
   const { data: resource } = datastore.useResource({
@@ -87,11 +87,11 @@ function Likes({
 
 
   useEffect(() => {
-    let pending = session.get('osc-resource-vote-pending');
+    let pending = storage.get('osc-resource-vote-pending');
     if (pending && pending[resource.id]) {
       if (currentUser && currentUser.role) {
         doVote(null, pending[resource.id]);
-        session.remove('osc-resource-vote-pending');
+        storage.remove('osc-resource-vote-pending');
       }
     }
   }, [resource, currentUser]);
@@ -119,7 +119,7 @@ function Likes({
         return;
       }
       // login
-      session.set('osc-resource-vote-pending', { [resource.id]: value });
+      storage.set('osc-resource-vote-pending', { [resource.id]: value });
       return (document.location.href = loginUrl);
     }
 
