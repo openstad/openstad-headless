@@ -1,4 +1,4 @@
-import { SessionStorage } from '../../../lib/session-storage';
+import { LocalStorage } from '../../../lib/local-storage';
 import useSWR from 'swr';
 
 export default function useCurrentUser(props) {
@@ -12,14 +12,14 @@ export default function useCurrentUser(props) {
   );
 
   async function getCurrentUser() {
-    const session = new SessionStorage(props);
+    const storage = new LocalStorage(props);
 
     // jwt in url: use and remove from url
     const params = new URLSearchParams(window.location.search);
 
     if (params.has('openstadlogout')) {
-      session.remove('cmsUser');
-      session.remove('openStadUser');
+      storage.remove('cmsUser');
+      storage.remove('openStadUser');
       
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogout=true`), '');
@@ -46,7 +46,7 @@ export default function useCurrentUser(props) {
     let jwt;
     if (params.has('openstadlogintoken')) {
       jwt = params.get('openstadlogintoken');
-      session.set('openStadUser', { jwt });
+      storage.set('openStadUser', { jwt });
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogintoken=${jwt}`), '');
       history.replaceState(null, '', url);
@@ -58,19 +58,19 @@ export default function useCurrentUser(props) {
     } catch(err) {}
 
     // get cmsUser from session data - this is a fix for badly written cms logouts
-    let sessionCmsUser = session.get('cmsUser') || {};
+    let sessionCmsUser = storage.get('cmsUser') || {};
     if (sessionCmsUser && cmsUser) {
       // compare with current cmsUser
       if (sessionCmsUser.access_token != cmsUser.access_token) {
         // delete exising session cache
-        session.remove('cmsUser');
-        session.remove('openStadUser');
+        storage.remove('cmsUser');
+        storage.remove('openStadUser');
       }
     }
-    session.set('cmsUser', cmsUser);
+    storage.set('cmsUser', cmsUser);
 
     // get openStad user from session data
-    let sessionUser = session.get('openStadUser') || {};
+    let sessionUser = storage.get('openStadUser') || {};
 
     // or use existing jwt
     jwt = jwt || initialUser.jwt || sessionUser.jwt;
@@ -91,13 +91,18 @@ export default function useCurrentUser(props) {
       // refresh already fetched data, now with the current user
       self.refresh();
 
-      // TODO: delete jwt on error
-      let openStadUser = await self.api.user.fetchMe({
-        projectId: self.projectId,
-      });
+      try {
+        let openStadUser = await self.api.user.fetchMe({
+          projectId: self.projectId,
+        });
 
-      session.set('openStadUser', { ...openStadUser, jwt });
-      return openStadUser;
+        storage.set('openStadUser', { ...openStadUser, jwt });
+        return openStadUser;
+      } catch (err) {
+        storage.remove('openStadUser');
+        return {};
+      }
+
     } else {
       return {};
     }
@@ -106,8 +111,8 @@ export default function useCurrentUser(props) {
   // add functionality
   if (data) {
     data.logout = function(params) {
-      const session = new SessionStorage(props);
-      session.destroy();
+      const storage = new LocalStorage(props);
+      storage.destroy();
       self.api.user.logout(params);
     }
   }
