@@ -307,11 +307,10 @@ module.exports = function (app) {
         res.status(404).render('errors/404');
     });
 
-    // Handle 500
+    // Handle errors
     app.use(async function (err, req, res, next) {
-        console.log('===> err', err);
         // Return a 404 for when no client ID has been set, this is not a server error
-        if (err && err.message && err.message.match(/^'No Client ID is set for login/)) {
+        if (err && err.message && err.message.match(/^No Client ID is set for login/)) {
           return res.status(404).render('errors/404');
         }
         // een deserialize error betekent een data fout; daar hoef je een gebruiker niet mee te belasten
@@ -327,6 +326,7 @@ module.exports = function (app) {
           if (req.query.access_token) querystring += `&access_token=${req.query.access_token}`;
           return res.redirect('/logout'+querystring);
         }
+        console.log('===> err', err);
         res.status(500).render('errors/500');
     });
 
