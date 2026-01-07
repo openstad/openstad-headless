@@ -228,6 +228,9 @@ router
 
         if (clientConsentIsSet) {
             data.emailNotificationConsent = currentValue[clientId];
+        } else {
+          // clientConsent is not set (correctly); remove it to prevent overwriting existing consent
+          delete data.emailNotificationConsent;
         }
     }
 
