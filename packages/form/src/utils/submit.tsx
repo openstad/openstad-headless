@@ -26,6 +26,7 @@ export const handleSubmit = (
 
             if (fieldSchema) {
                 try {
+                    console.log( "Value", fieldValue, typeof fieldValue, "for field", field.fieldKey, "being validated with schema", fieldSchema);
                     fieldSchema.parse(fieldValue);
                 } catch (error) {
                     let errorMessage = null;

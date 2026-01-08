@@ -12,6 +12,8 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
       ? ` '${stripHtmlTags(field.title)}' `
       : ' ';
 
+    console.log('Generating schema for field:', fieldTitle, 'of type:', field.type, 'with field value', field );
+
     switch (field.type) {
         case 'text':
             let min = field.minCharacters || 0;

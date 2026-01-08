@@ -74,8 +74,12 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             const updatedFormFields = initialFormFields.map((field) => {
                 const existingValue = getExistingValue(field.fieldKey, existingResource);
 
+                console.log('existingValue for fieldKey', field.fieldKey, existingValue);
+
                 return existingValue ? { ...field, defaultValue: existingValue } : field;
             });
+
+            console.log('updatedFormFields', updatedFormFields);
 
             setFormFields(updatedFormFields);
         } else if (JSON.stringify(formFields) !== JSON.stringify(initialFormFields)) {

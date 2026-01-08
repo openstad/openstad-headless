@@ -64,6 +64,8 @@ function Form({
                 initialFormValues[fieldKey] = Math.ceil((field?.fieldOptions?.length || 2) / 2).toString();
             }
 
+            console.log('Setting initial value for fieldKey:', fieldKey, 'to', initialFormValues[fieldKey]);
+
             if (field?.routingInitiallyHide && field?.routingSelectedQuestion && field?.routingSelectedAnswer) {
                 const getRoutingSelectedQuestionField = fields.find((f) => f.trigger === field.routingSelectedQuestion);
                 const routingSelectedQuestionFieldKey = getRoutingSelectedQuestionField?.fieldKey || '';
@@ -149,6 +151,8 @@ function Form({
     const handleInputChange = (event: { name: string, value: any }, triggerSetLastKey?: boolean) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
+
+        console.log('Input changed - name:', name, 'value:', value);
 
         if (triggerSetLastKey !== false) {
             setLastUpdatedKey(name);

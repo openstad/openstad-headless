@@ -145,6 +145,7 @@ export const InitializeFormFields = (items, data) => {
         }
     }
 
+    console.log('Initialized form fields:', formFields);
 
     return formFields;
 }
