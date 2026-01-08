@@ -25,7 +25,7 @@ import {
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { TabsContent, TabsList, TabsTrigger, Tabs } from "@openstad-headless/admin-server/src/components/ui/tabs";
-import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
+import {Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
@@ -71,7 +71,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     ) => React.JSX.Element; renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
-      onItemClick?: () => void
+      onItemClick?: () => void,
+      refreshLikes?: () => void,
     ) => React.JSX.Element;
     resourceType?: 'resource';
     displayPagination?: boolean;
@@ -164,6 +165,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayCollapsibleFilter?: boolean;
     displayUser?: boolean;
     displayCreatedAt?: boolean;
+    allowLikingInOverview?: boolean;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -205,8 +207,30 @@ const defaultHeaderRenderer = (
 const defaultItemRenderer = (
   resource: any,
   props: ResourceOverviewWidgetProps,
-  onItemClick?: () => void
-) => {
+  onItemClick?: () => void,
+  refreshLikes?: () => void,
+) => (
+  <DefaultItemRenderer
+    resource={resource}
+    props={props}
+    onItemClick={onItemClick}
+    refreshLikes={refreshLikes}
+  />
+);
+
+type DefaultItemRendererProps = {
+  resource: any;
+  props: ResourceOverviewWidgetProps;
+  onItemClick?: () => void;
+  refreshLikes?: () => void;
+};
+
+const DefaultItemRenderer = ({
+  resource,
+  props,
+  onItemClick,
+  refreshLikes,
+}: DefaultItemRendererProps) => {
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
       return <Paragraph>Template is nog niet ingesteld</Paragraph>;
@@ -311,6 +335,47 @@ const defaultItemRenderer = (
   const firstTag = resourceFilteredTags && resourceFilteredTags.length > 0 ? resourceFilteredTags[0] : null;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
 
+  const TileFooter = (
+    { doVote }: { doVote?: (value: string) => any }
+  ) => {
+    const vote = async (sentiment: string) => {
+      if (doVote) {
+        await doVote(sentiment)
+      }
+    }
+
+    return (
+      <div className={`osc-resource-overview-content-item-footer ${doVote ? 'liking-allowed' : ''}`}>
+        {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
+          <>
+            <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' onClick={() => vote('yes')}/>
+
+            {props.likeWidget?.displayDislike &&
+              <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' onClick={() => vote('no')}/>}
+          </>
+        )}
+
+        {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+          <div className="micro-score-container">
+            <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' onClick={() => vote('yes')}/>
+            <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+            {props.likeWidget?.displayDislike &&
+              <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' onClick={() => vote('no')}/>}
+          </div>
+        )}
+
+        {props.displayArguments ? (
+          <Icon
+            icon="ri-message-line"
+            variant="big"
+            text={resource.commentCount}
+            description='Aantal reacties'
+          />
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
@@ -372,32 +437,23 @@ const defaultItemRenderer = (
             </Paragraph>
           </div>
 
-          <div className="osc-resource-overview-content-item-footer">
-            {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
-              <>
-                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' />
-
-                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />}
-              </>
-            )}
-
-            {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
-              <div className="micro-score-container">
-                <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' />
-                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
-                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' />}
-              </div>
-            )}
-
-            {props.displayArguments ? (
-              <Icon
-                icon="ri-message-line"
-                variant="big"
-                text={resource.commentCount}
-                description='Aantal reacties'
-              />
-            ) : null}
-          </div>
+          { props.allowLikingInOverview ? (
+            <Likes
+              {...props.likeWidget}
+              resourceId={resource.id}
+              projectId={props.projectId}
+              {...props}
+              refreshResourceLikes={refreshLikes}
+            >
+              {(doVote) => (
+                <TileFooter
+                  doVote={doVote}
+                />
+              )}
+            </Likes>
+          ) : (
+            <TileFooter />
+          )}
 
           <Carousel
             items={resourceImages}
@@ -939,6 +995,10 @@ function ResourceOverviewInner({
     }, 200);
   }
 
+  const refreshLikes = () => {
+    datastore.refresh()
+  }
+
   const overviewSection = (
     <section className="osc-resource-overview-resource-collection" id={randomId}>
       {filteredResources?.length === 0 ? (
@@ -957,7 +1017,7 @@ function ResourceOverviewInner({
               <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
                 {renderItem(resource, { ...props, displayType, selectedProjects, displayOverviewTagGroups, overviewTagGroups }, () => {
                   onResourceClick(resource, index);
-                })}
+                }, refreshLikes )}
               </React.Fragment>
             );
           })

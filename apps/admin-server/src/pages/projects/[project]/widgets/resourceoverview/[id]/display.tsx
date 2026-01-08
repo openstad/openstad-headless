@@ -71,6 +71,7 @@ const formSchema = z.object({
   displayCollapsibleFilter: z.boolean().optional(),
   displayUser: z.boolean().optional(),
   displayCreatedAt: z.boolean().optional(),
+  allowLikingInOverview: z.boolean().optional(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -122,6 +123,7 @@ export default function WidgetResourceOverviewDisplay(
       autoApply: props?.autoApply || false,
       displayUser: props?.displayUser || false,
       displayCreatedAt: props?.displayCreatedAt || false,
+      allowLikingInOverview: props?.allowLikingInOverview || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -735,6 +737,20 @@ export default function WidgetResourceOverviewDisplay(
               <FormItem>
                 <FormLabel>
                   Aanmaakdatum weergeven in de tegels
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="allowLikingInOverview"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Stemmen toestaan in het overzicht
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
