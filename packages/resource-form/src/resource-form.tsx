@@ -11,7 +11,7 @@ import NotificationService from '@openstad-headless/lib/NotificationProvider/not
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 
-const getExistingValue = (fieldKey, resource) => {
+const getExistingValue = (fieldKey, resource, multiple) => {
     if (!!resource) {
         const field = resource[fieldKey] || null;
         const returnField = (!field && resource.extraData) ? resource.extraData[fieldKey] || null : field
@@ -23,9 +23,11 @@ const getExistingValue = (fieldKey, resource) => {
         if (fieldKey.startsWith('tags[') && resource.tags) {
             const tagType = fieldKey.substring(5, fieldKey.length - 1);
 
-            return resource.tags
+            const filteredTags =  resource.tags
                 ?.filter((tag) => tag.type === tagType)
                 .map((tag) => tag.id);
+
+            return multiple ? filteredTags : (filteredTags.length > 0 ? filteredTags[0] : undefined);
         }
     }
     return undefined;
@@ -72,7 +74,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
         if (canEdit) {
             const updatedFormFields = initialFormFields.map((field) => {
-                const existingValue = getExistingValue(field.fieldKey, existingResource);
+                // @ts-ignore
+                const existingValue = getExistingValue(field.fieldKey, existingResource, field?.multiple);
 
                 console.log('existingValue for fieldKey', field.fieldKey, existingValue);
 
