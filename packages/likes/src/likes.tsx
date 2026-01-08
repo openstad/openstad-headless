@@ -133,9 +133,6 @@ function Likes({
     });
 
     setIsBusy(false);
-    if (refreshResourceLikes) {
-      refreshResourceLikes();
-    }
   }
 
   if (typeof props.children === 'function') {

@@ -209,28 +209,7 @@ const defaultItemRenderer = (
   props: ResourceOverviewWidgetProps,
   onItemClick?: () => void,
   refreshLikes?: () => void,
-) => (
-  <DefaultItemRenderer
-    resource={resource}
-    props={props}
-    onItemClick={onItemClick}
-    refreshLikes={refreshLikes}
-  />
-);
-
-type DefaultItemRendererProps = {
-  resource: any;
-  props: ResourceOverviewWidgetProps;
-  onItemClick?: () => void;
-  refreshLikes?: () => void;
-};
-
-const DefaultItemRenderer = ({
-  resource,
-  props,
-  onItemClick,
-  refreshLikes,
-}: DefaultItemRendererProps) => {
+) => {
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
       return <Paragraph>Template is nog niet ingesteld</Paragraph>;
@@ -341,6 +320,7 @@ const DefaultItemRenderer = ({
     const vote = async (sentiment: string) => {
       if (doVote) {
         await doVote(sentiment)
+        refreshLikes && await refreshLikes();
       }
     }
 
