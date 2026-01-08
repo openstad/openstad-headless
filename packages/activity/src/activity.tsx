@@ -55,10 +55,10 @@ function Activity({
       api: props.api,
   });
 
-  // get userId from session storage, perhaps we should change this in the future.
+  // get userId from local storage, perhaps we should change this in the future.
   const sessionData = localStorage.getItem('openstad');
   const userId = sessionData ? JSON.parse(sessionData)[props.projectId]?.openStadUser?.id : null;
-  
+
   const {
       data: userActivityData,
       error: activityError,
@@ -106,7 +106,7 @@ function Activity({
   React.useEffect(() => {
     getActivityData();
   }, [activityDataLoading]);
-  
+
   const listItem = (data: ActivityData, key: number) => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const date = new Date(data.date);
