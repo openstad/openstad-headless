@@ -34,6 +34,7 @@ export type LikeProps = {
   showProgressBar?: boolean;
   progressBarDescription?: string;
   disabled?: boolean;
+  refreshResourceLikes?: () => void;
 };
 
 function Likes({
@@ -45,8 +46,9 @@ function Likes({
   displayDislike = false,
   showProgressBar = true,
   disabled = false,
+  refreshResourceLikes,
   ...props
-}: LikeWidgetProps) {
+}: LikeWidgetProps & { children?: (doVote: (value: string) => void) => React.ReactNode }) {
 
   let resourceId = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -131,6 +133,13 @@ function Likes({
     });
 
     setIsBusy(false);
+    if (refreshResourceLikes) {
+      await refreshResourceLikes();
+    }
+  }
+
+  if (typeof props.children === 'function') {
+    return <>{props.children((value: string) => doVote(null, value))}</>;
   }
 
   return (

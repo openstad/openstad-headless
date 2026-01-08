@@ -247,6 +247,15 @@ p.osc-searchtext {
   margin-top: -38px;
 }
 
+.resource-card--link .osc-resource-overview-content-item-footer.liking-allowed {
+  z-index: 2;
+}
+
+.resource-card--link .osc-resource-overview-content-item-footer.liking-allowed div.icon:not([data-description="Aantal reacties"]) {
+  pointer-events: all;
+  cursor: pointer;
+}
+
 .osc-resource-overview-resource-collection .resource-card--link {
   display: grid;
 }
