@@ -27,8 +27,7 @@ const getExistingValue = (fieldKey, resource, multiple) => {
                 ?.filter((tag) => tag.type === tagType)
                 .map((tag) => String(tag.id));
 
-            // return multiple ? filteredTags : (filteredTags.length > 0 ? filteredTags[0] : undefined);
-            return filteredTags;
+            return multiple ? filteredTags : (filteredTags.length > 0 ? filteredTags[0] : undefined);
         }
     }
     return undefined;
