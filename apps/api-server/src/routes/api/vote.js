@@ -287,8 +287,14 @@ router.route('/*')
 	.post(function(req, res, next) {
 		let ids = req.votes.map( entry => entry.resourceId ).sort((a, b) => a - b);
 		let transaction = res.locals.transaction
-		db.Resource
-			.findAll({ where: { id:ids, projectId: req.project.id }, transaction, lock: true, order: [['id', 'ASC']] })
+		withDeadlockRetry(() =>
+			db.Resource.findAll({
+				where: { id:ids, projectId: req.project.id },
+				transaction,
+				lock: true,
+				order: [['id', 'ASC']],
+			})
+		)
 			.then(found => {
 
 				if (req.votes.length != found.length) {
@@ -337,8 +343,14 @@ router.route('/*')
 				}
 
 				// get existing votes for this IP
-				db.Vote
-					.findAll({ where: whereClause, transaction, lock: true, order: [['id', 'ASC']] })
+				withDeadlockRetry(() =>
+					db.Vote.findAll({
+						where: whereClause,
+						transaction,
+						lock: true,
+						order: [['id', 'ASC']],
+					})
+				)
 					.then(found => {
 						if (found && found.length > 0) {
 							throw createError(403, 'Je hebt al gestemd');
