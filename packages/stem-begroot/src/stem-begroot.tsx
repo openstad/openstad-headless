@@ -159,6 +159,8 @@ function StemBegroot({
       try {
         if (!uuid) return;
 
+        console.info('[stem-begroot] restoring pending budget vote from server', { uuid });
+
         setPendingVoteFetched(true);
 
         if (!props.api || !props.api.url) return;
@@ -195,12 +197,27 @@ function StemBegroot({
           votePendingStorage.setVotePending(data as any);
         }
 
+        console.info('[stem-begroot] restored pending budget vote from server', { uuid });
       } catch (e) {
         console.error('Failed to restore pending budget vote from server', e);
       }
     }
 
     if (pendingUuidFromUrl) {
+      console.info('[stem-begroot] pending budget vote UUID found in URL', { uuid: pendingUuidFromUrl });
+      const localPending = (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag')
+        ? votePendingStorage.getVotePendingPerTag()
+        : votePendingStorage.getVotePending();
+
+      if (localPending) {
+        // Prefer local storage pending votes; skip server restore to avoid double voting
+        console.info('[stem-begroot] local pending vote found; skipping server restore', { uuid: pendingUuidFromUrl });
+        url.searchParams.delete('pendingBudgetVote');
+        window.history.replaceState({}, document.title, url.toString());
+        setPendingVoteFetched(true);
+        return;
+      }
+
       restoreFromServer(pendingUuidFromUrl);
     }
   }, [datastore, props.votes.voteType, votePendingStorage]);
