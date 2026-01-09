@@ -205,20 +205,16 @@ function StemBegroot({
 
     if (pendingUuidFromUrl) {
       console.info('[stem-begroot] pending budget vote UUID found in URL', { uuid: pendingUuidFromUrl });
-      const localPending = (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag')
-        ? votePendingStorage.getVotePendingPerTag()
-        : votePendingStorage.getVotePending();
-
-      if (localPending) {
-        // Prefer local storage pending votes; skip server restore to avoid double voting
-        console.info('[stem-begroot] local pending vote found; skipping server restore', { uuid: pendingUuidFromUrl });
-        url.searchParams.delete('pendingBudgetVote');
-        window.history.replaceState({}, document.title, url.toString());
-        setPendingVoteFetched(true);
-        return;
-      }
-
       restoreFromServer(pendingUuidFromUrl);
+      return;
+    }
+
+    const localPending = (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag')
+      ? votePendingStorage.getVotePendingPerTag()
+      : votePendingStorage.getVotePending();
+
+    if (localPending) {
+      setPendingVoteFetched(true);
     }
   }, [datastore, props.votes.voteType, votePendingStorage]);
 
@@ -235,6 +231,7 @@ function StemBegroot({
 
   const [activeTagTab, setActiveTagTab] = useState<string>('');
   const [visitedTagTabs, setVisitedTagTabs] = useState<Array<string>>([]);
+  const submitInProgressRef = React.useRef(false);
 
   const stringToArray = (str: string) => {
     return str
@@ -412,6 +409,13 @@ function StemBegroot({
 
   async function submitVoteAndCleanup() {
     try {
+      if (submitInProgressRef.current) {
+        console.info('[stem-begroot] submitVoteAndCleanup ignored; already in progress');
+        return;
+      }
+      submitInProgressRef.current = true;
+      console.info('[stem-begroot] submitVoteAndCleanup start');
+
       if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
         let allResourcesToVote: any[] = [];
 
@@ -438,8 +442,12 @@ function StemBegroot({
         selectedResourcesStorage.clearSelectedResources();
       }
       setCurrentStep(currentStep + 1);
+      console.info('[stem-begroot] submitVoteAndCleanup done');
     } catch (err: any) {
       notifyVoteMessage(err.message, true);
+      console.error('[stem-begroot] submitVoteAndCleanup failed', err);
+    } finally {
+      submitInProgressRef.current = false;
     }
   }
 
