@@ -407,13 +407,13 @@ function StemBegroot({
         ).map((id) => allResourcesToVote.find((r) => r.id === id));
 
         if (uniqueResourcesToVote.length > 0) {
-          localStorage.removeItem('oscResourceVotePendingPerTag');
+          votePendingStorage.clearVotePendingPerTag();
 
           await doVote(uniqueResourcesToVote);
         }
       } else {
         if (selectedResources.length > 0) {
-          localStorage.removeItem('oscResourceVotePending');
+          votePendingStorage.clearVotePending();
           return await doVote(selectedResources);
         }
       }
