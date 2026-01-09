@@ -16,6 +16,28 @@ const userhasModeratorRights = (user) => {
   return hasRole( user, 'admin' )
 }
 
+const isDeadlockError = (err) => {
+	const code = err?.parent?.code || err?.original?.code || err?.code;
+	const errno = err?.parent?.errno || err?.original?.errno || err?.errno;
+	return code === 'ER_LOCK_DEADLOCK' || errno === 1213;
+};
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const withDeadlockRetry = async (fn, maxAttempts = 3) => {
+	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+		try {
+			return await fn();
+		} catch (err) {
+			if (isDeadlockError(err) && attempt < maxAttempts) {
+				await wait(20 * attempt);
+				continue;
+			}
+			throw err;
+		}
+	}
+};
+
 // basis validaties
 // ----------------
 router.route('*')
@@ -180,26 +202,28 @@ router.route('/*')
 
 // heb je al gestemd
 	.post( rateLimiter(), function(req, res, next) {
-		db.sequelize.transaction()
-			.then(transaction => {
-				res.locals.transaction = transaction
-				return db.Vote // get existing votes for this user
-				.scope(req.scope)
-				.findAll({ where: { userId: req.user.id }, transaction, lock: true })
-			})
-			.then(found => {
-				if (req.project.config.votes.voteType !== 'likes' && req.project.config.votes.withExisting == 'error' && found && found.length ) throw createError(403, 'Je hebt al gestemd');
-				req.existingVotes = found.map(entry => entry.toJSON());
-				return next();
-			})
-			.catch(err => {
-				if (res.locals.transaction) {
-					return res.locals.transaction.rollback()
-						.then(() => next(err))
-						.catch(() => next(err))
-				}
-				next(err)
-			})
+		withDeadlockRetry(() =>
+			db.sequelize.transaction()
+				.then(transaction => {
+					res.locals.transaction = transaction
+					return db.Vote // get existing votes for this user
+						.scope(req.scope)
+						.findAll({ where: { userId: req.user.id }, transaction, lock: true })
+				})
+				.then(found => {
+					if (req.project.config.votes.voteType !== 'likes' && req.project.config.votes.withExisting == 'error' && found && found.length ) throw createError(403, 'Je hebt al gestemd');
+					req.existingVotes = found.map(entry => entry.toJSON());
+					return next();
+				})
+		)
+		.catch(err => {
+			if (res.locals.transaction) {
+				return res.locals.transaction.rollback()
+					.then(() => next(err))
+					.catch(() => next(err))
+			}
+			next(err)
+		})
 	})
 
 // filter body

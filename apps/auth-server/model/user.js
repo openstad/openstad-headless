@@ -82,6 +82,8 @@ module.exports = (db, sequelize, Sequelize) => {
 
     emailNotificationConsent: {
       type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
       set: function (value) {
         try {
           if (typeof value === 'string') {
