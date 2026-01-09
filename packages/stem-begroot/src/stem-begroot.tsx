@@ -393,7 +393,7 @@ function StemBegroot({
     ) {
       if (voteAfterLoggingIn) {
         if (selectedResources.length > 0 || tagCounter.length > 0) {
-          setCurrentStep(4);
+          setCurrentStep(3);
           submitVoteAndCleanup();
         }
       } else {
@@ -434,6 +434,7 @@ function StemBegroot({
         votePendingStorage.clearVotePending();
         selectedResourcesStorage.clearSelectedResources();
       }
+      setCurrentStep((prev) => prev + 1);
     } catch (err: any) {
       notifyVoteMessage(err.message, true);
     } finally {
@@ -673,6 +674,10 @@ function StemBegroot({
   useEffect(() => {
     setVisitedTagTabs((prev) => prev.includes(activeTagTab) ? prev : [...prev, activeTagTab]);
   }, [activeTagTab]);
+
+  useEffect(() => {
+    console.log("Curr step", currentStep);
+  }, [currentStep]);
 
   return (
     <>
