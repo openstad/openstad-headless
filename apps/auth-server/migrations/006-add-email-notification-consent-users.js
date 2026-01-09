@@ -4,9 +4,8 @@ module.exports = {
     async up({ context: queryInterface }) {
         await queryInterface.addColumn('users', 'emailNotificationConsent', {
             type: Sequelize.JSON,
-            allowNull: false,
-            after: 'postcode',
-            defaultValue: {},
+            allowNull: true,
+            after: 'postcode'
         });
     },
 
