@@ -203,13 +203,13 @@ router.route('/*')
 // heb je al gestemd
 	.post( rateLimiter(), function(req, res, next) {
 		withDeadlockRetry(() =>
-			db.sequelize.transaction()
-				.then(transaction => {
-					res.locals.transaction = transaction
-					return db.Vote // get existing votes for this user
-						.scope(req.scope)
-						.findAll({ where: { userId: req.user.id }, transaction, lock: true })
-				})
+		db.sequelize.transaction()
+			.then(transaction => {
+				res.locals.transaction = transaction
+				return db.Vote // get existing votes for this user
+				.scope(req.scope)
+				.findAll({ where: { userId: req.user.id }, transaction, lock: true, order: [['id', 'ASC']] })
+			})
 				.then(found => {
 					if (req.project.config.votes.voteType !== 'likes' && req.project.config.votes.withExisting == 'error' && found && found.length ) throw createError(403, 'Je hebt al gestemd');
 					req.existingVotes = found.map(entry => entry.toJSON());
@@ -285,10 +285,10 @@ router.route('/*')
 
   // validaties: bestaan de resources waar je op wilt stemmen
 	.post(function(req, res, next) {
-		let ids = req.votes.map( entry => entry.resourceId );
+		let ids = req.votes.map( entry => entry.resourceId ).sort((a, b) => a - b);
 		let transaction = res.locals.transaction
 		db.Resource
-			.findAll({ where: { id:ids, projectId: req.project.id }, transaction, lock: true })
+			.findAll({ where: { id:ids, projectId: req.project.id }, transaction, lock: true, order: [['id', 'ASC']] })
 			.then(found => {
 
 				if (req.votes.length != found.length) {
@@ -338,7 +338,7 @@ router.route('/*')
 
 				// get existing votes for this IP
 				db.Vote
-					.findAll({ where: whereClause, transaction, lock: true })
+					.findAll({ where: whereClause, transaction, lock: true, order: [['id', 'ASC']] })
 					.then(found => {
 						if (found && found.length > 0) {
 							throw createError(403, 'Je hebt al gestemd');
