@@ -159,8 +159,6 @@ function StemBegroot({
       try {
         if (!uuid) return;
 
-        console.info('[stem-begroot] restoring pending budget vote from server', { uuid });
-
         setPendingVoteFetched(true);
 
         if (!props.api || !props.api.url) return;
@@ -196,15 +194,12 @@ function StemBegroot({
         } else {
           votePendingStorage.setVotePending(data as any);
         }
-
-        console.info('[stem-begroot] restored pending budget vote from server', { uuid });
       } catch (e) {
         console.error('Failed to restore pending budget vote from server', e);
       }
     }
 
     if (pendingUuidFromUrl) {
-      console.info('[stem-begroot] pending budget vote UUID found in URL', { uuid: pendingUuidFromUrl });
       restoreFromServer(pendingUuidFromUrl);
       return;
     }
@@ -410,11 +405,9 @@ function StemBegroot({
   async function submitVoteAndCleanup() {
     try {
       if (submitInProgressRef.current) {
-        console.info('[stem-begroot] submitVoteAndCleanup ignored; already in progress');
         return;
       }
       submitInProgressRef.current = true;
-      console.info('[stem-begroot] submitVoteAndCleanup start');
 
       if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
         let allResourcesToVote: any[] = [];
@@ -441,11 +434,8 @@ function StemBegroot({
         votePendingStorage.clearVotePending();
         selectedResourcesStorage.clearSelectedResources();
       }
-      setCurrentStep(currentStep + 1);
-      console.info('[stem-begroot] submitVoteAndCleanup done');
     } catch (err: any) {
       notifyVoteMessage(err.message, true);
-      console.error('[stem-begroot] submitVoteAndCleanup failed', err);
     } finally {
       submitInProgressRef.current = false;
     }
