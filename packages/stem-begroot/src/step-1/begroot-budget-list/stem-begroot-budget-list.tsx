@@ -2,10 +2,15 @@ import './stem-begroot-budget-list.css';
 import React, { Dispatch, SetStateAction } from 'react';
 import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading5, Paragraph, Strong, Button } from "@utrecht/component-library-react";
-import {TagType} from "../../stem-begroot";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import {
+  Heading5,
+  Paragraph,
+  Strong,
+  Button,
+} from '@utrecht/component-library-react';
+import { TagType } from '../../stem-begroot';
 
 export const StemBegrootBudgetList = ({
   introText = '',
@@ -27,9 +32,9 @@ export const StemBegrootBudgetList = ({
   typeIsPerTag = false,
   setActiveTagTab,
   step1MaxText = '',
-  tagCounter = []
+  tagCounter = [],
 }: {
-  allResourceInList: Array<any>
+  allResourceInList: Array<any>;
   selectedResources: Array<any>;
   maxBudget: number;
   typeIsBudgeting: boolean;
@@ -37,7 +42,7 @@ export const StemBegrootBudgetList = ({
   introText?: string;
   showInfoMenu?: boolean;
   decideCanAddMore: () => boolean;
-  onSelectedResourceRemove: (resource: { id: number, budget: number }) => void;
+  onSelectedResourceRemove: (resource: { id: number; budget: number }) => void;
   step1Title: string;
   resourceCardTitle: string;
   panelTitle?: string;
@@ -50,13 +55,14 @@ export const StemBegrootBudgetList = ({
   step1MaxText?: string;
   tagCounter?: Array<TagType>;
 }) => {
-
   const canAddMore = decideCanAddMore();
 
   let filteredResources = selectedResources;
 
   if (typeIsPerTag && !!tagCounter && !!activeTagTab) {
-    const tagObj = tagCounter.find((tagObj) => Object.keys(tagObj)[0] === activeTagTab);
+    const tagObj = tagCounter.find(
+      (tagObj) => Object.keys(tagObj)[0] === activeTagTab
+    );
     if (tagObj) {
       filteredResources = tagObj[activeTagTab]?.selectedResources;
     }
@@ -74,7 +80,7 @@ export const StemBegrootBudgetList = ({
           {!!introText && (
             <div className="stem-begroot-budget-list-used-budgets">
               <div className="stem-begroot-helptext-and-budget-section-helptext">
-                <Paragraph>{introText}</Paragraph>
+                <div dangerouslySetInnerHTML={{ __html: introText }} />
               </div>
             </div>
           )}
@@ -105,7 +111,9 @@ export const StemBegrootBudgetList = ({
 
         <Spacer size={1} />
         <div className="budget-list-selections">
-          <div className="budget-list-selection-indicaction-container" role="status">
+          <div
+            className="budget-list-selection-indicaction-container"
+            role="status">
             {filteredResources.map((resource) => {
               let defaultImage = '';
 
@@ -114,17 +122,26 @@ export const StemBegrootBudgetList = ({
                 defaultResourceImage?: string;
               }
               if (Array.isArray(resource?.tags)) {
-                const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
-                const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+                const sortedTags = resource.tags.sort((a: Tag, b: Tag) =>
+                  a.name.localeCompare(b.name)
+                );
+                const tagWithImage = sortedTags.find(
+                  (tag: Tag) => tag.defaultResourceImage
+                );
                 defaultImage = tagWithImage?.defaultResourceImage || '';
               }
 
-              const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
-              const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
+              const resourceImages =
+                Array.isArray(resource.images) && resource.images.length > 0
+                  ? resource.images?.at(0)?.url
+                  : defaultImage;
+              const hasImages = !!resourceImages
+                ? ''
+                : 'resource-has-no-images';
               return (
                 <Image
                   imageHeader={
-                    <div className='iconButton--container'>
+                    <div className="iconButton--container">
                       <IconButton
                         onClick={() => {
                           onSelectedResourceRemove(resource);
@@ -140,7 +157,7 @@ export const StemBegrootBudgetList = ({
                   className={`budget-list-selection-indicaction ${hasImages}`}
                   src={resourceImages}
                 />
-              )
+              );
             })}
 
             {allResourceInList.length === 0 || canAddMore ? (
@@ -157,16 +174,18 @@ export const StemBegrootBudgetList = ({
                     });
                   }
                 }}>
-                  {resourceCardTitle || 'Selecteer een plan'}
+                {resourceCardTitle || 'Selecteer een plan'}
               </Button>
             ) : null}
           </div>
         </div>
 
-        { (typeIsPerTag && !!tagsToDisplay) && (
+        {typeIsPerTag && !!tagsToDisplay && (
           <div className="themes-container">
             {tagsToDisplay?.map((tag: string) => (
-              <div className={`theme ${tag === activeTagTab ? 'active' : ''}`} key={tag}>
+              <div
+                className={`theme ${tag === activeTagTab ? 'active' : ''}`}
+                key={tag}>
                 <Button
                   appearance="primary-action-button"
                   disabled={tag === activeTagTab}
@@ -174,15 +193,13 @@ export const StemBegrootBudgetList = ({
                     if (!!setActiveTagTab) {
                       setActiveTagTab(tag);
                     }
-                  }}
-                >
+                  }}>
                   {tag.charAt(0).toUpperCase() + tag.slice(1)}
                 </Button>
               </div>
             ))}
           </div>
         )}
-
       </section>
     </>
   );
