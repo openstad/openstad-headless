@@ -30,6 +30,9 @@ const withDeadlockRetry = async (fn, maxAttempts = 3) => {
 			return await fn();
 		} catch (err) {
 			if (isDeadlockError(err) && attempt < maxAttempts) {
+				const code = err?.parent?.code || err?.original?.code || err?.code;
+				const errno = err?.parent?.errno || err?.original?.errno || err?.errno;
+				console.warn('vote deadlock retry', { attempt, maxAttempts, code, errno });
 				await wait(20 * attempt);
 				continue;
 			}
@@ -199,315 +202,190 @@ router.route('/')
 // create votes
 // ------------
 router.route('/*')
+	.post(rateLimiter(), async function(req, res, next) {
+		try {
+			const result = await withDeadlockRetry(() =>
+				db.sequelize.transaction(async (transaction) => {
+					const existing = await db.Vote
+						.scope(req.scope)
+						.findAll({
+							where: { userId: req.user.id },
+							transaction,
+							lock: true,
+							order: [['id', 'ASC']],
+						});
 
-// heb je al gestemd
-	.post( rateLimiter(), function(req, res, next) {
-		withDeadlockRetry(() =>
-		db.sequelize.transaction()
-			.then(transaction => {
-				res.locals.transaction = transaction
-				return db.Vote // get existing votes for this user
-				.scope(req.scope)
-				.findAll({ where: { userId: req.user.id }, transaction, lock: true, order: [['id', 'ASC']] })
-			})
-				.then(found => {
-					if (req.project.config.votes.voteType !== 'likes' && req.project.config.votes.withExisting == 'error' && found && found.length ) throw createError(403, 'Je hebt al gestemd');
-					req.existingVotes = found.map(entry => entry.toJSON());
-					return next();
-				})
-		)
-		.catch(err => {
-			if (res.locals.transaction) {
-				return res.locals.transaction.rollback()
-					.then(() => next(err))
-					.catch(() => next(err))
-			}
-			next(err)
-		})
-	})
+					if (req.project.config.votes.voteType !== 'likes' &&
+						req.project.config.votes.withExisting == 'error' &&
+						existing &&
+						existing.length
+					) {
+						throw createError(403, 'Je hebt al gestemd');
+					}
 
-// filter body
-	.post(function(req, res, next) {
-		let votes = req.body || [];
-		if (!Array.isArray(votes)) votes = [votes];
+					const existingVotes = existing.map(entry => entry.toJSON());
+					let votes = req.body || [];
+					if (!Array.isArray(votes)) votes = [votes];
 
-		votes = votes.map((entry) => {
-			return {
-				resourceId: parseInt(entry.resourceId, 10),
-				opinion: typeof entry.opinion == 'string' ? entry.opinion : null,
-				userId: req.user.id,
-				confirmed: false,
-				confirmReplacesVoteId: null,
-				ip: req.ip,
-				checked: null,
-			}
-		});
+					votes = votes.map((entry) => ({
+						resourceId: parseInt(entry.resourceId, 10),
+						opinion: typeof entry.opinion == 'string' ? entry.opinion : null,
+						userId: req.user.id,
+						confirmed: false,
+						confirmReplacesVoteId: null,
+						ip: req.ip,
+						checked: null,
+					}));
 
-    // merge
-    if (req.project.config.votes.withExisting == 'merge') {
-      // no double votes
-      try {
-        if (req.existingVotes.find( newVote => votes.find( oldVote => oldVote.resourceId == newVote.resourceId) )) {
-			const transaction = res.locals.transaction
-			const err = createError(403, 'Je hebt al gestemd')
-			if (transaction) {
-				return transaction.commit()
-					.finally(() => next(err))
-			}
-			throw err
-		}
-      } catch (err) {
-        return next(err);
-      }
-      // now merge
-      votes = votes
-        .concat(
-          req.existingVotes
-            .map( oldVote => {
-              return {
-                resourceId: parseInt(oldVote.resourceId, 10),
-                opinion: typeof oldVote.opinion == 'string' ? oldVote.opinion : null,
-                userId: req.user.id,
-                confirmed: false,
-                confirmReplacesVoteId: null,
-                ip: req.ip,
-                checked: null,
-              }
-              return oldVote
-            })
-        );
-    }
-
-    req.votes = votes;
-
-		return next();
-	})
-
-  // validaties: bestaan de resources waar je op wilt stemmen
-	.post(function(req, res, next) {
-		let ids = req.votes.map( entry => entry.resourceId ).sort((a, b) => a - b);
-		let transaction = res.locals.transaction
-		withDeadlockRetry(() =>
-			db.Resource.findAll({
-				where: { id:ids, projectId: req.project.id },
-				transaction,
-				lock: true,
-				order: [['id', 'ASC']],
-			})
-		)
-			.then(found => {
-
-				if (req.votes.length != found.length) {
-					console.log('req.votes', req.votes);
-					console.log('found', found);
-					console.log('req.body',req.body);
-
-					return next(createError(400, 'Resource niet gevonden'));
-				}
-				req.resources = found;
-				return next();
-			})
-			.catch(err => {
-				if (transaction) {
-					return transaction.rollback()
-						.then(() => next(err))
-						.catch(() => next(err))
-				}
-				next(err)
-			})
-	})
-
-  // validaties voor voteType=likes
-	.post(function(req, res, next) {
-		let transaction = res.locals.transaction
-		if (req.project.config.votes.voteType != 'likes') return next();
-
-		if (req.project.config.votes.voteType == 'likes' && req.project.config.votes.requiredUserRole == 'anonymous') {
-			req.votes.forEach((vote) => {
-				// check if votes exists for same opinion on the same IP within 5 minutes
-				const whereClause = {
-						ip: vote.ip,
-			//			opinion : vote.opinion,
-						resourceId: vote.resourceId,
-						createdAt: {
-							[Op.gte]: db.sequelize.literal('NOW() - INTERVAL 5 MINUTE'),
+					if (req.project.config.votes.withExisting == 'merge') {
+						if (existingVotes.find(newVote =>
+							votes.find(oldVote => oldVote.resourceId == newVote.resourceId)
+						)) {
+							throw createError(403, 'Je hebt al gestemd');
 						}
-				};
 
-				// Make sure it only blocks new users
-				// otherwise the toggle functionality for liking is blocked
-				if (req.user) {
-					whereClause.userId = {
-						[Op.ne] : req.user.id
-					};
-				}
+						votes = votes.concat(
+							existingVotes.map(oldVote => ({
+								resourceId: parseInt(oldVote.resourceId, 10),
+								opinion: typeof oldVote.opinion == 'string' ? oldVote.opinion : null,
+								userId: req.user.id,
+								confirmed: false,
+								confirmReplacesVoteId: null,
+								ip: req.ip,
+								checked: null,
+							}))
+						);
+					}
 
-				// get existing votes for this IP
-				withDeadlockRetry(() =>
-					db.Vote.findAll({
-						where: whereClause,
+					const ids = votes.map(entry => entry.resourceId).sort((a, b) => a - b);
+					const resources = await db.Resource.findAll({
+						where: { id: ids, projectId: req.project.id },
 						transaction,
 						lock: true,
 						order: [['id', 'ASC']],
-					})
-				)
-					.then(found => {
-						if (found && found.length > 0) {
-							throw createError(403, 'Je hebt al gestemd');
-						}
-						return next();
-					})
-					.catch(err => {
-						if (transaction) {
-							return transaction.rollback()
-								.then(() => next(err))
-								.catch(() => next(err))
-						}
-						next(err)
-					})
-			});
-		} else {
-			return next();
-		}
-	})
+					});
 
-  // validaties voor voteType=count
-	.post(function(req, res, next) {
-		let transaction = res.locals.transaction
-		if (req.project.config.votes.voteType != 'count') return next();
-		if (req.votes.length >= req.project.config.votes.minResources && req.votes.length <= req.project.config.votes.maxResources) {
-			return next();
-		}
-		let err = createError(400, 'Aantal resources klopt niet');
-		if (transaction) {
-			return transaction.rollback()
-				.then(() => next(err))
-				.catch(() => next(err))
-		} else {
-			return next(err);
-		}
-	})
-
-  // validaties voor voteType=budgeting
-	.post(function(req, res, next) {
-		let transaction = res.locals.transaction
-		if (req.project.config.votes.voteType != 'budgeting') return next();
-		let budget = 0;
-		req.votes.forEach((vote) => {
-			let resource = req.resources.find(resource => resource.id == vote.resourceId);
-			budget += resource.budget;
-		});
-		let err;
-		if (!( budget >= req.project.config.votes.minBudget && budget <= req.project.config.votes.maxBudget )) {
-		  err = createError(400, 'Budget klopt niet');
-		}
-		if (err) {
-			if (transaction) {
-				return transaction.rollback()
-					.then(() => next(err))
-					.catch(() => next(err))
-			} else {
-				return next(err);
-			}
-		} else {
-			return next();
-		}
-  })
-
-	.post(function(req, res, next) {
-		let transaction = res.locals.transaction;
-		
-		let actions = [];
-		switch(req.project.config.votes.voteType) {
-
-			case 'likes':
-				req.votes.forEach((vote) => {
-					let existingVote =  req.existingVotes ? req.existingVotes.find(entry => entry.resourceId == vote.resourceId) : false;
-					if ( existingVote ) {
-						if (existingVote.opinion == vote.opinion) {
-							actions.push({ action: 'delete', vote: existingVote })
-						} else {
-							existingVote.opinion = vote.opinion
-							actions.push({ action: 'update', vote: existingVote})
-						}
-					} else {
-						actions.push({ action: 'create', vote: vote})
+					if (votes.length != resources.length) {
+						throw createError(400, 'Resource niet gevonden');
 					}
-				});
-				break;
 
-			case 'count':
-			case 'countPerTag':
-			case 'budgeting':
-			case 'budgetingPerTag':
-				req.votes.map( vote => actions.push({ action: 'create', vote: vote}) );
-				req.existingVotes.map( vote => actions.push({ action: 'delete', vote: vote}) );
-				break;
+					if (req.project.config.votes.voteType == 'likes' &&
+						req.project.config.votes.requiredUserRole == 'anonymous'
+					) {
+						for (const vote of votes) {
+							const whereClause = {
+								ip: vote.ip,
+								resourceId: vote.resourceId,
+								createdAt: {
+									[Op.gte]: db.sequelize.literal('NOW() - INTERVAL 5 MINUTE'),
+								}
+							};
 
-		}
+							if (req.user) {
+								whereClause.userId = {
+									[Op.ne]: req.user.id
+								};
+							}
 
-    let promises = [];
-    actions.map(action => {
-				switch(action.action) {
-					case 'create':
-						promises.push(db.Vote.create( action.vote, { transaction, lock: true })); // HACK: `upsert` on paranoid deleted row doesn't unset `deletedAt`.
-						break;
-					case 'update':
-						promises.push(db.Vote.update(action.vote, { where: { id: action.vote.id }, transaction, lock: true }));
-						break;
-					case 'delete':
-						promises.push(db.Vote.destroy({ where: { id: action.vote.id }, transaction, lock: true, individualHooks: true }));
-						break;
-				}
-    });
+							const found = await db.Vote.findAll({
+								where: whereClause,
+								transaction,
+								lock: true,
+								order: [['id', 'ASC']],
+							});
 
-		Promise
-			.all(promises)
-      .then(
-				result => {
-					req.result = result;
-					if (transaction) {
-						return transaction.commit()
-							.finally(() => result)
+							if (found && found.length > 0) {
+								throw createError(403, 'Je hebt al gestemd');
+							}
+						}
 					}
-					return result
-				}
-			)
-			.then(() => {
-				return next();
-			})
-			.catch(err => {
-				if (transaction) {
-					return transaction.rollback()
-						.finally(() => next(err))
-				}
-				next(err)
-			})
 
-	})
+					if (req.project.config.votes.voteType == 'count') {
+						if (votes.length < req.project.config.votes.minResources ||
+							votes.length > req.project.config.votes.maxResources
+						) {
+							throw createError(400, 'Aantal resources klopt niet');
+						}
+					}
 
-	.post(function(req, res, next) {
-		let resourceIds = req.votes.map( entry => entry.resourceId );
-		db.Vote // get existing votes for this user
-			.findAll({ where: { userId: req.user.id, resourceId: resourceIds } })
-			.then(found => {
-				let result = found.map(entry => { return {
-					id: entry.id,
-					resourceId: entry.resourceId,
-					opinion: entry.opinion,
-					userId: entry.userId,
-					confirmed: entry.confirmed,
-					confirmReplacesVoteId: entry.confirmReplacesVoteId,
-				}})
-				res.json(result.map(entry => { return {
-					id: entry.id,
-					resourceId: entry.resourceId,
-					userId: entry.userId,
-					confirmed: entry.confirmed,
-					opinion: entry.opinion,
-				}}));
-			})
-			.catch(next)
+					if (req.project.config.votes.voteType == 'budgeting') {
+						let budget = 0;
+						votes.forEach((vote) => {
+							const resource = resources.find(resource => resource.id == vote.resourceId);
+							budget += resource.budget;
+						});
+
+						if (!(budget >= req.project.config.votes.minBudget &&
+							budget <= req.project.config.votes.maxBudget
+						)) {
+							throw createError(400, 'Budget klopt niet');
+						}
+					}
+
+					let actions = [];
+					switch (req.project.config.votes.voteType) {
+						case 'likes':
+							votes.forEach((vote) => {
+								let existingVote = existingVotes
+									? existingVotes.find(entry => entry.resourceId == vote.resourceId)
+									: false;
+								if (existingVote) {
+									if (existingVote.opinion == vote.opinion) {
+										actions.push({ action: 'delete', vote: existingVote });
+									} else {
+										existingVote.opinion = vote.opinion;
+										actions.push({ action: 'update', vote: existingVote });
+									}
+								} else {
+									actions.push({ action: 'create', vote: vote });
+								}
+							});
+							break;
+
+						case 'count':
+						case 'countPerTag':
+						case 'budgeting':
+						case 'budgetingPerTag':
+							votes.map(vote => actions.push({ action: 'create', vote: vote }));
+							existingVotes.map(vote => actions.push({ action: 'delete', vote: vote }));
+							break;
+					}
+
+					const promises = actions.map(action => {
+						switch (action.action) {
+							case 'create':
+								return db.Vote.create(action.vote, { transaction, lock: true });
+							case 'update':
+								return db.Vote.update(action.vote, { where: { id: action.vote.id }, transaction, lock: true });
+							case 'delete':
+								return db.Vote.destroy({ where: { id: action.vote.id }, transaction, lock: true, individualHooks: true });
+						}
+					});
+
+					await Promise.all(promises);
+
+					const resourceIds = votes.map(entry => entry.resourceId);
+					const found = await db.Vote.findAll({
+						where: { userId: req.user.id, resourceId: resourceIds },
+						transaction,
+						lock: true,
+						order: [['id', 'ASC']],
+					});
+
+					return found.map(entry => ({
+						id: entry.id,
+						resourceId: entry.resourceId,
+						userId: entry.userId,
+						confirmed: entry.confirmed,
+						opinion: entry.opinion,
+					}));
+				})
+			);
+
+			res.json(result);
+		} catch (err) {
+			next(err);
+		}
 	})
 
 	router.route('/:voteId(\\d+)')
