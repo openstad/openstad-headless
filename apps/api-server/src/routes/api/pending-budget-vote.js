@@ -31,17 +31,24 @@ router.get('/:id', async function (req, res, next) {
     const { id } = req.params;
     if (!id) return next(createError(400, 'ID is required'));
 
-    const record = await db.PendingBudgetVote.findByPk(id);
+    const result = await db.sequelize.transaction(async (transaction) => {
+      const record = await db.PendingBudgetVote.findOne({
+        where: { id },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
 
-    if (!record) {
-      return next(createError(404, 'Pending budget vote not found'));
-    }
+      if (!record) {
+        throw createError(404, 'Pending budget vote not found');
+      }
 
-    const data = record.data;
+      const data = record.data;
+      await record.destroy({ transaction });
 
-    await record.destroy();
+      return { id, data };
+    });
 
-    res.json({ id, data });
+    res.json(result);
   } catch (err) {
     console.log ('Error fetching pending budget vote:', err);
     next(err);
