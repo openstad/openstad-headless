@@ -26,10 +26,18 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import {Input} from "@/components/ui/input";
 
 const formSchema = z.object({
   resourceId: z.string(),
   rawInput: z.string(),
+  resourceIdRelativePath: z
+    .string()
+    .optional()
+    .refine(
+      (value) => !value || value.includes('[id]'),
+      'Specificeer een [id] veld'
+    ),
 });
 
 export default function WidgetRawGeneral(
@@ -49,8 +57,9 @@ export default function WidgetRawGeneral(
     () => ({
       resourceId: props?.resourceId || '',
       rawInput: props?.rawInput || '',
+      resourceIdRelativePath: props?.resourceIdRelativePath || '',
     }),
-    [props?.resourceId, props?.rawInput]
+    [props?.resourceId, props?.rawInput, props?.resourceIdRelativePath]
   );
 
   const form = useForm<FormData>({
@@ -101,6 +110,29 @@ export default function WidgetRawGeneral(
               </FormItem>
             )}
           />
+
+          { form.watch('resourceId') === '' ? (
+            <FormField
+              control={form.control}
+              name="resourceIdRelativePath"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Geen specifieke inzending gekoppeld?
+                  </FormLabel>
+                  <em className="text-xs">Beschrijf hoe de inzending gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                  <FormControl>
+                    <Input {...field} onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
+
           <FormField
             control={form.control}
             name="rawInput"
