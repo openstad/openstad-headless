@@ -137,7 +137,7 @@ function Counter({
   }
 
   if (counterType === 'votedUsers') {
-    amountDisplayed = votes || 0;
+    amountDisplayed = votes.length || 0;
   }
 
   if (counterType === 'votedUsersPerProject') {
