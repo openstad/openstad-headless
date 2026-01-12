@@ -21,7 +21,8 @@ export type CounterProps = {
   | 'static'
   | 'argument'
   | 'enqueteResults'
-  | 'choiceGuideResults';
+  | 'choiceGuideResults'
+  | 'votedUsersPerProject';
   label?: string;
   url?: string;
   opinion?: string;
@@ -110,6 +111,12 @@ function Counter({
       counterType === 'enqueteResults' ? props.widgetToFetchId : undefined,
   });
 
+  const {
+    data: projectVotedUsersCount
+  } = datastore.useProjectVotedUsersCount({
+    projectId: props.projectId,
+  });
+
   if (counterType === 'resource') {
     amountDisplayed = (filteredResources || []).length;
   }
@@ -134,6 +141,10 @@ function Counter({
     uniqueUserIds = Array.from(new Set(uniqueUserIds));
 
     amountDisplayed = uniqueUserIds.length || 0;
+  }
+
+  if (counterType === 'votedUsersPerProject') {
+    amountDisplayed = projectVotedUsersCount || 0;
   }
 
   if (counterType === 'static') {
