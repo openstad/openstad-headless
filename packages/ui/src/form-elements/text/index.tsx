@@ -195,12 +195,17 @@ const TextInput: FC<TextInputProps> = ({
     const [helpText, setHelpText] = useState('');
     const [value, setValue] = useState(initialValue);
     const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+ 
 
     useEffect(() => {
         if (reset) {
             reset(() => setValue(initialValue));
         }
     }, [reset, defaultValue]);
+
+    useEffect(() => {
+        value && setCheckInvalid(false);
+    }, [])
 
     const characterHelpText = (count: number) => {
         let helpText = '';
@@ -301,11 +306,10 @@ const TextInput: FC<TextInputProps> = ({
                     value={value}
                     onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                         setValue(e.target.value);
-
                         if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
                             setCheckInvalid(false);
                         } else {
-                            if(fieldRequired){
+                            if(fieldRequired && e.target.value.length === 0){
                                 setCheckInvalid(true);
                             }else{
                                 setCheckInvalid(false);
@@ -319,6 +323,7 @@ const TextInput: FC<TextInputProps> = ({
                             });
                         }
                         characterHelpText(e.target.value.length);
+
                     }}
                     disabled={disabled}
                     rows={rows}

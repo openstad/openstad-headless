@@ -200,7 +200,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'open':
                     fieldData['type'] = 'text';
                     fieldData['variant'] = item.variant;
-                    fieldData['minCharacters'] = item.minCharacters || '';
+                    fieldData['minCharacters'] = item.minCharacters || '0';
                     fieldData['maxCharacters'] = item.maxCharacters || '';
                     fieldData['rows'] = 5;
                     fieldData['placeholder'] = item.placeholder || '';
