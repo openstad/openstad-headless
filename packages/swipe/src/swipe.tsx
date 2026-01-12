@@ -1,5 +1,5 @@
 import './swipe.scss';
-import React, { useState, useEffect, useMemo, FC, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, FC, useCallback, useRef, useId } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
 import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
 import { FormValue } from '@openstad-headless/form/src/form';
@@ -48,24 +48,62 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   agreeText = 'Eens',
   disagreeText = 'Oneens',
 }) => {
+  // Generate unique ID for this component instance
+  const componentId = useId();
+  
   // Track previous answers per card for visual feedback
   const [previousAnswers, setPreviousAnswers] = useState<Record<string, string>>({});
   const swipeCards = useMemo(() => cards.length > 0 ? cards : [], [cards]);
-  let initialAnswers: Record<string, string> = {};
-  let initialAnswersExplanation: Record<string, string> = {};
+  
+  // Track the card IDs this component is responsible for
+  const componentCardIds = useMemo(() => {
+    return new Set(swipeCards.map(card => card.id));
+  }, [swipeCards]);
+  
+  // Helper function to validate if overrideDefaultValue belongs to this swipe component
+  const validateOverrideData = useCallback((override: FormValue | undefined): boolean => {
+    if (!override || typeof override !== 'object' || !Array.isArray(override)) {
+      return false;
+    }
+    
+    const overrideArray = override as valueObject;
+    if (overrideArray.length === 0) {
+      return false;
+    }
+    
+    // Check if at least one cardId in the override data exists in current swipeCards
+    // This allows for valid data even if the override contains answers for already-answered cards
+    return overrideArray.some(item => componentCardIds.has(item.cardId));
+  }, [componentCardIds]);
+  
+  // Initialize answers from overrideDefaultValue only if it's valid for this component
+  const getInitialAnswers = useCallback(() => {
+    let initialAnswers: Record<string, string> = {};
+    let initialAnswersExplanation: Record<string, string> = {};
 
-  if (overrideDefaultValue && typeof overrideDefaultValue === 'object') {
-    const overrideArray = overrideDefaultValue as valueObject;
-    overrideArray.forEach(item => {
-      initialAnswers[item.cardId as string] = item.answer;
-      if (item.explanation) {
-        initialAnswersExplanation[item.cardId as string] = item.explanation;
-      }
-    });
-  }
+    if (validateOverrideData(overrideDefaultValue)) {
+      const overrideArray = overrideDefaultValue as valueObject;
+      overrideArray.forEach(item => {
+        // Only include answers for cards that belong to this component
+        if (componentCardIds.has(item.cardId)) {
+          initialAnswers[item.cardId as string] = item.answer;
+          if (item.explanation) {
+            initialAnswersExplanation[item.cardId as string] = item.explanation;
+          }
+        }
+      });
+    }
+    
+    return { initialAnswers, initialAnswersExplanation };
+  }, [overrideDefaultValue, validateOverrideData, componentCardIds]);
 
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, string>>(initialAnswers);
-  const [explanations, setExplanations] = useState<Record<string, string>>(initialAnswersExplanation);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, string>>(() => getInitialAnswers().initialAnswers);
+  const [explanations, setExplanations] = useState<Record<string, string>>(() => getInitialAnswers().initialAnswersExplanation);
+  
+  // Track if we've already initialized from overrideDefaultValue to prevent loops
+  const hasInitialized = useRef(false);
+  // Track the cards this component was initialized with
+  const initializedCardIds = useRef<Set<string>>(componentCardIds);
   const [isFinished, setIsFinished] = useState(false);
 
   const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
@@ -200,6 +238,53 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       }, 200);
     }, 200);
   }, [pendingSwipe]);
+
+  // Detect when cards change (new swipe component with different cards)
+  useEffect(() => {
+    // Check if the cards have changed compared to what we initialized with
+    const currentCardIdsString = Array.from(componentCardIds).sort().join(',');
+    const initialCardIdsString = Array.from(initializedCardIds.current).sort().join(',');
+    
+    if (currentCardIdsString !== initialCardIdsString) {
+      // Cards have changed - this is a different swipe component
+      // Reset all state and reinitialize with new data
+      const { initialAnswers, initialAnswersExplanation } = getInitialAnswers();
+      setSwipeAnswers(initialAnswers);
+      setExplanations(initialAnswersExplanation);
+      setIsFinished(false);
+      setPreviousAnswers({});
+      
+      // Update the ref to track these new cards
+      initializedCardIds.current = componentCardIds;
+      hasInitialized.current = false; // Allow reinitialization
+    }
+  }, [componentCardIds, getInitialAnswers]);
+
+  // Reset state when overrideDefaultValue changes to data that doesn't belong to this component
+  useEffect(() => {
+    // Skip if we haven't initialized yet or if the component just mounted
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      return;
+    }
+    
+    // Only act if overrideDefaultValue has data that doesn't match our cards
+    if (overrideDefaultValue && Array.isArray(overrideDefaultValue) && overrideDefaultValue.length > 0) {
+      const overrideArray = overrideDefaultValue as valueObject;
+      
+      // Check if ANY of the cardIds in override belong to another component
+      const hasOtherComponentData = overrideArray.some(item => !componentCardIds.has(item.cardId));
+      const hasOwnComponentData = overrideArray.some(item => componentCardIds.has(item.cardId));
+      
+      // Only reset if ALL data is for another component (none is for us)
+      if (hasOtherComponentData && !hasOwnComponentData) {
+        setSwipeAnswers({});
+        setExplanations({});
+        setIsFinished(false);
+        setPreviousAnswers({});
+      }
+    }
+  }, [overrideDefaultValue, componentCardIds]);
 
   useEffect(() => {
     const unanswered = getUnansweredCards();
