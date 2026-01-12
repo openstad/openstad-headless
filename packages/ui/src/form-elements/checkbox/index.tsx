@@ -73,7 +73,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        maxChoices = '',
        maxChoicesMessage = '',
        randomId= '',
-       fieldInvalid= false,
+       fieldInvalid,
        randomizeItems = false,
        overrideDefaultValue,
        defaultValue,
@@ -100,6 +100,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;
     const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
+
+    const checkFieldValidation = () => {
+        if (fieldRequired && selectedChoices.length === 0) {
+            return false;
+        }
+        return true;
+    }
 
     useEffect(() => {
         let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
@@ -181,7 +188,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         <div className="question">
             <Fieldset
               role="group"
-              aria-invalid={fieldInvalid}
+              aria-invalid={checkFieldValidation() ? 'false' : 'true'}
               aria-describedby={`${randomId}_error`}
             >
                 {title && (
