@@ -28,7 +28,7 @@ exports.withOne = async (req, res, next) => {
     clientId = req.params.clientId;
   }
  
-  if (!clientId) return next('No Client ID is set for login');
+  if (!clientId) return next(new Error('No Client ID is set for login'));
 
   let scope = [];
   let where = { clientId: clientId }
@@ -72,7 +72,7 @@ exports.withOne = async (req, res, next) => {
       return next();
 
     } else {
-      return next('No Client found for clientID');
+      return next(new Error('No Client found for clientID'));
     }
 
   } catch(err) {
@@ -263,6 +263,18 @@ exports.checkRequiredUserFields = (req, res, next) => {
 
   if (requiredFields) {
     requiredFields.forEach((field) => {
+      // Consent field is a special case since it can contain multiple client IDs
+      if ( field === 'emailNotificationConsent' ) {
+        const clientId = String(req?.client?.id);
+        const currentValue = req?.user?.emailNotificationConsent || {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+        if (!clientConsentIsSet) {
+          error = true;
+          return;
+        }
+      }
+
       // if at least one required field is empty, set to error
       error = error || !req.user[field];
     });

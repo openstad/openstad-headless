@@ -3,6 +3,7 @@ const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const createError = require('http-errors');
 
 let router = express.Router({ mergeParams: true });
 
@@ -85,7 +86,9 @@ router
     db.Status.scope(...req.scope)
       .findOne({ where: { id: statusId } })
       .then((found) => {
-        if (!found) throw new Error('Status not found');
+        if (!found) {
+          return next(createError(404, 'Status not found'));
+        }
         req.results = found;
         next();
       })

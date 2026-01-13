@@ -6,6 +6,10 @@
   border: solid var(--setEnqueteBorderWidth, 1px) var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
+.form-container>div.button-group {
+  flex-direction: row;
+}
+
 .form-container>div {
   color: var(--osc-card-foreground);
   padding: 1.5rem;
@@ -141,11 +145,11 @@ label.utrecht-form-label {
   align-items: flex-start;
 }
 
-.question-type-imageChoice .image-choice-container > .utrecht-form-field--radio {
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
   display: inline-block;
 }
 
-.question-type-imageChoice .image-choice-container > .utrecht-form-field--radio + .utrecht-form-field--radio {
+.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
   margin-top: 0;
 }
 
@@ -237,6 +241,7 @@ label.utrecht-form-label {
   --youth-outro-card-description-font-size: var(--setYouthOutroCardDescriptionFontSize, 18px);
 
   --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, var(--utrecht-button-primary-action-hover-background-color, #F8D62D));
+  --setEnqueteBorderWidth: 1px;
 }
 
 .osc-enquete-item-content {
@@ -250,7 +255,9 @@ label.utrecht-form-label {
     transform: translate(0, 0);
 
     &:has(.question-type-none),
+  
     &:has([aria-invalid="true"]),
+    &:has(.utrecht-textbox--required),
     &:has(.swipe-finished) {
       .button-group.--flex .utrecht-button--primary-action:before {
         display: none;
@@ -549,9 +556,9 @@ label.utrecht-form-label {
         background-color: inherit;
         mask-image: linear-gradient(180deg, #ffffff 50%, rgba(255, 255, 255, 0) 100%);
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
+        top: var(--setEnqueteBorderWidth, 1px);
+        left: var(--setEnqueteBorderWidth, 1px);
+        right: var(--setEnqueteBorderWidth, 1px);
         height: 80px;
         z-index: 2;
         pointer-events: none;
@@ -586,6 +593,10 @@ label.utrecht-form-label {
           line-height: 135%;
           font-size: var(--youth-page-card-title-font-size);
           text-align: center;
+
+          strong.utrecht-emphasis {
+            color: inherit;
+          }
         }
 
         .info-field-description {
@@ -932,8 +943,36 @@ label.utrecht-form-label {
       }
     }
 
+    .question-type-video {
+      padding: 0;
+      aspect-ratio: 9 / 16;
+      width: 100%;
+      &:before{
+        display: none;
+      }
 
-    .form-widget:has(.question.question-type-matrix){
+      + .button-group .utrecht-button--secondary-action{
+        background-color: #fff;
+        color: #000;
+        padding: 0 10px;
+        span{
+          color: #000;
+        }
+      }
+
+      +.button-group {
+        &:before {
+          display: none;
+        }
+
+        .utrecht-button--primary-action:before {
+          display: none;
+        }
+      }
+    }
+
+
+    .form-widget:has(.question.question-type-matrix) {
       width: 100%;
       overflow-x: scroll;
     }
@@ -1260,6 +1299,29 @@ label.utrecht-form-label {
       pointer-events: none;
     }
   }
+}
+
+.osc-enquete-item-content .question .info-field-container .info-image-container figcaption {
+  margin: 10px 0 20px;
+}
+
+.osc-enquete-item-content .question .osc-carousel-previous,
+.osc-enquete-item-content .question .osc-carousel-next {
+  top: 150px;
+  transform: translateY(-50%);
+}
+
+.osc-enquete-item-content .osc-carousel figure.info-image-container img {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 100%;
+  height: 300px;
+  max-height: 300px;
+}
+
+.osc-enquete-item-content .osc-carousel .osc-carousel-pager {
+  bottom: auto;
+  top: 270px;
 }
 
 @keyframes pulseOnce {

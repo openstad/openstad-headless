@@ -237,11 +237,15 @@ function ResourceDetail({
     useSentiments = JSON.parse(useSentiments);
   }
 
-  const firstStatus = resource.statuses
-    ? resource.statuses
-      .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
-    : false;
+  const statuses = (resource?.statuses || []).length ? resource.statuses
+    ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+      if (a.seqnr === undefined || a.seqnr === null) return 1;
+      if (b.seqnr === undefined || b.seqnr === null) return -1;
+      return a.seqnr - b.seqnr;
+    })
+  : [];
+
+  const firstStatus = statuses && statuses.length > 0 ? statuses[0] : false;
 
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
   const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
@@ -259,6 +263,11 @@ function ResourceDetail({
                 <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                   {resource.statuses
                     ?.map((s: { name: string }) => s.name)
+                    ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                      if (a.seqnr === undefined || a.seqnr === null) return 1;
+                      if (b.seqnr === undefined || b.seqnr === null) return -1;
+                      return a.seqnr - b.seqnr;
+                    })
                     ?.join(', ')}
                 </Paragraph>
               </div>
@@ -515,7 +524,7 @@ function ResourceDetail({
                   <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {resource.statuses?.map((s: { name: string }) => (
+                    {statuses?.map((s: { name: string }) => (
                       <Pill light rounded text={s.name}></Pill>
                     ))}
                   </div>
@@ -530,8 +539,13 @@ function ResourceDetail({
 
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {(resource.tags as Array<{ type: string; name: string }>)
+                    {(resource.tags as Array<{ type: string; name: string, seqnr?: number }>)
                       ?.filter((t) => t.type !== 'status')
+                      ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                        if (a.seqnr === undefined || a.seqnr === null) return 1;
+                        if (b.seqnr === undefined || b.seqnr === null) return -1;
+                        return a.seqnr - b.seqnr;
+                      })
                       ?.map((t) => <Pill text={t.name} />)}
                   </div>
                   <Spacer size={2} />
@@ -594,6 +608,9 @@ function ResourceDetail({
             closedText={props.commentsWidget?.closedText}
             itemsPerPage={props.commentsWidget?.itemsPerPage}
             displayPagination={props.commentsWidget?.displayPagination}
+            confirmation={ props.commentsWidget?.confirmation }
+            overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+            confirmationReplies={ props.commentsWidget?.confirmationReplies }
             extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
             defaultTags={props.commentsWidget?.defaultTags}
             includeOrExclude={props.commentsWidget?.includeOrExclude}
@@ -619,6 +636,9 @@ function ResourceDetail({
               closedText={props.commentsWidget_multiple?.closedText}
               itemsPerPage={props.commentsWidget?.itemsPerPage}
               displayPagination={props.commentsWidget?.displayPagination}
+              confirmation={ props.commentsWidget?.confirmation }
+              overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+              confirmationReplies={ props.commentsWidget?.confirmationReplies }
               extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
               defaultTags={props.commentsWidget?.defaultTags}
               includeOrExclude={props.commentsWidget?.includeOrExclude}

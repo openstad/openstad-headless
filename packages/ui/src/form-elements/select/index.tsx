@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import {FC} from "react";
 import {MultiSelect, Spacer} from '@openstad-headless/ui/src';
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type SelectFieldProps = {
     overrideDefaultValue?: FormValue;
@@ -35,6 +36,14 @@ export type SelectFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
@@ -55,6 +64,9 @@ const SelectField: FC<SelectFieldProps> = ({
       multiple = false,
       defaultValue = [],
       overrideDefaultValue,
+      images = [],
+      createImageSlider = false,
+      imageClickable = false,
 }) => {
     choices = choices.map((choice) => {
       if (typeof choice === 'string') {
@@ -109,12 +121,13 @@ const SelectField: FC<SelectFieldProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+              imageFallback: infoImage || '',
+              images: images,
+              createImageSlider: createImageSlider,
+              addSpacer: !!infoImage,
+              imageClickable: imageClickable
+            })}
 
             <Paragraph className="utrecht-form-field__input">
               { multiple ? (

@@ -5,6 +5,7 @@ const db = require('../../db');
 const sanitize = require('../../util/sanitize');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 const getWidgetSettings = require('../widget/widget-settings');
+const createError = require('http-errors');
 router.all('*', function (req, res, next) {
   req.scope = [];
   return next();
@@ -183,7 +184,9 @@ router
     db.Widget.scope(...req.scope)
       .findOne(query)
       .then((found) => {
-        if (!found) throw new Error('Widget not found');
+        if (!found) {
+          return next(createError(404, 'Widget not found'));
+        }
         req.results = found;
         req.widget = req.results; // middleware expects this to exist
         next();
@@ -210,7 +213,7 @@ router
 
       if (typesToSanitize.includes(widget.dataValues.type)) {
         widget.dataValues.config.rawInput = sanitize.content(widget.dataValues.config.rawInput);
-    }            
+    }
       widget.update({ config, description }).then((result) => res.json(result));
     }
   })

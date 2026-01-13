@@ -38,7 +38,8 @@ const formSchema = z.object({
         type: z.string(),
         label: z.string().optional(),
         multiple: z.boolean(),
-        projectId: z.string().optional()
+        projectId: z.string().optional(),
+        inlineOptions: z.boolean().optional(),
       })
     )
     .refine((value) => value.some((item) => item), {
@@ -102,7 +103,7 @@ export default function WidgetResourceOverviewTags(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-1 gap-4">
+          className="lg:w-full grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="displayTagFilters"
@@ -164,8 +165,11 @@ export default function WidgetResourceOverviewTags(
                 <div>
                   <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
-                  {(tagGroupNames || []).map((groupName, index) => (
+                <div
+                  className="grid grid-cols-1 lg:grid-cols-4 gap-x-4 gap-y-2 items-center"
+                  style={{gridTemplateColumns: '1fr 1fr 120px 1fr'}}
+                >
+                  {(tagGroupNames || []).map((groupName) => (
                     <>
                       <FormField
                         key={`parent${groupName}`}
@@ -226,7 +230,7 @@ export default function WidgetResourceOverviewTags(
                                 <Input
                                   placeholder="Groep label"
                                   key={`${groupName}-label-input-field`}
-                                  defaultValue={field.value.at(index)?.label}
+                                  name={groupName}
                                   disabled={
                                     field.value.find(
                                       (g) => g.type === groupName
@@ -293,6 +297,49 @@ export default function WidgetResourceOverviewTags(
                           );
                         }}
                       />
+
+                      <FormField
+                        key={`parent${groupName}-inlineOptions`}
+                        control={form.control}
+                        name="tagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={groupName}
+                              className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  disabled={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    ) === undefined
+                                  }
+                                  checked={
+                                    field.value?.findIndex(
+                                      (el) =>
+                                        el.type === groupName && el.inlineOptions
+                                    ) > -1
+                                  }
+                                  onCheckedChange={(checked: any) => {
+                                    const groups = handleTagCheckboxGroupChange(
+                                      groupName,
+                                      checked,
+                                      field.value,
+                                      'inlineOptions'
+                                    );
+                                    field.onChange(groups);
+                                    props.onFieldChanged(field.name, groups);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Toon opties zonder dropdown
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+
                     </>
                   ))}
                 </div>

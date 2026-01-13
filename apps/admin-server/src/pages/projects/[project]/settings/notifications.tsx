@@ -87,7 +87,7 @@ export default function ProjectSettingsNotifications() {
           },
           {
             name: 'E-mail instellingen',
-            url: `'/projects/${project}/settings/notifications'`,
+            url: `/projects/${project}/settings/notifications`,
           },
         ]}>
         <div className="container py-6">
