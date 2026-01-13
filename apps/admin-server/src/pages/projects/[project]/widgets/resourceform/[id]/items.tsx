@@ -991,19 +991,6 @@ export default function WidgetResourceFormItems(
                                             )}
                                         />
 
-                                        {form.watch('type') === 'title' && (
-                                            <FormField
-                                                control={form.control}
-                                                name="placeholder"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Placeholder</FormLabel>
-                                                        <Input {...field} />
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        )}
                                         {form.watch('type') !== 'none' && (
                                             <FormField
                                                 control={form.control}
@@ -1197,7 +1184,9 @@ export default function WidgetResourceFormItems(
                                                 }}
                                             />
                                         )}
-                                        {form.watch('fieldType') === 'text' || form.watch('type') === 'text' && (
+                                        {
+                                            ['description', 'text'].includes(form.watch('type') || '' ) &&
+                                          (
                                             <>
                                                 <FormField
                                                     control={form.control}
@@ -1215,7 +1204,7 @@ export default function WidgetResourceFormItems(
                                                     name="variant"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
+                                                            <FormLabel>Welke opmaak krijgt het tekstveld?</FormLabel>
                                                             <Select
                                                                 value={field.value || 'text input'}
                                                                 onValueChange={field.onChange}>
