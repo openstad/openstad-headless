@@ -991,6 +991,20 @@ export default function WidgetResourceFormItems(
                                             )}
                                         />
 
+                                        {form.watch('type') === 'title' && (
+                                          <FormField
+                                            control={form.control}
+                                            name="placeholder"
+                                            render={({ field }) => (
+                                              <FormItem>
+                                                  <FormLabel>Placeholder</FormLabel>
+                                                  <Input {...field} />
+                                                  <FormMessage />
+                                              </FormItem>
+                                            )}
+                                          />
+                                        )}
+
                                         {form.watch('type') !== 'none' && (
                                             <FormField
                                                 control={form.control}
