@@ -14,6 +14,14 @@ const path = require('path');
 
 console.log ('S3 enabled:', s3.isEnabled());
 
+const swapLastDotUnderscore = (name) => {
+  if (!name) return null;
+  const match = name.match(/^(.*)([._])([a-z0-9]+)$/i);
+  if (!match) return null;
+  const sep = match[2] === '.' ? '_' : '.';
+  return `${match[1]}${sep}${match[3]}`;
+};
+
 const imageMulterConfig = {
   onError: function (err, next) {
     console.error(err);
@@ -197,6 +205,14 @@ app.get('/image/*',
         }
       
         if (!response || !response.ok) {
+          const altName = swapLastDotUnderscore(baseName);
+          if (altName && altName !== baseName) {
+            const altUrl = `${endpoint}/images/${altName}`;
+            response = await fetch(altUrl);
+          }
+        }
+
+        if (!response || !response.ok) {
           return res.status(response ? response.status : 502).send('File not found');
         }
       
@@ -240,6 +256,22 @@ app.get('/image/*',
       }
     } else {
       req.url = req.url.replace('/image', '');
+
+      const unsafePath = req.url.replace(/^\//, '');
+      const baseName = path.basename(unsafePath);
+      if (baseName === unsafePath) {
+        const imagesDir = process.env.IMAGES_DIR || 'images/';
+        const resolvedPath = path.resolve(imagesDir, baseName);
+        if (!fs.existsSync(resolvedPath)) {
+          const altName = swapLastDotUnderscore(baseName);
+          if (altName) {
+            const altPath = path.resolve(imagesDir, altName);
+            if (fs.existsSync(altPath)) {
+              req.url = `/${altName}`;
+            }
+          }
+        }
+      }
   
       /**
        * Pass request en response to the imageserver
@@ -368,6 +400,14 @@ app.get('/document/*',
           }
           
           if (!response || !response.ok) {
+            const altName = swapLastDotUnderscore(sanitizedPath);
+            if (altName && altName !== sanitizedPath) {
+              const altUrl = `${endpoint}/documents/${altName}`;
+              response = await fetch(altUrl);
+            }
+          }
+
+          if (!response || !response.ok) {
             return res.status(response ? response.status : 502).send('File not found');
           }
         
@@ -419,10 +459,21 @@ app.get('/document/*',
 
       const requestedPath = req.path.replace(/^\/document\//, '');
 
-      const resolvedPath = path.resolve(documentsDir, requestedPath);
+      let resolvedPath = path.resolve(documentsDir, requestedPath);
       
       if (!resolvedPath.startsWith(documentsDir)) {
           return res.status(403).send('Forbidden');
+      }
+
+      if (!fs.existsSync(resolvedPath)) {
+        const baseName = path.basename(requestedPath);
+        const altName = swapLastDotUnderscore(baseName);
+        if (altName) {
+          const altResolved = path.resolve(documentsDir, altName);
+          if (altResolved.startsWith(documentsDir) && fs.existsSync(altResolved)) {
+            resolvedPath = altResolved;
+          }
+        }
       }
 
       res.download(resolvedPath);
