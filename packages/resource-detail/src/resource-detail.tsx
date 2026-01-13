@@ -30,6 +30,7 @@ import { Button } from '@utrecht/component-library-react';
 import { hasRole } from '../../lib';
 import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting'
 
 type booleanProps = {
   [K in
@@ -442,7 +443,7 @@ function ResourceDetail({
                 {displayDescription && (
                   !displayDescriptionExpandable ? (
                     <div className="resource-detail-description">
-                      <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                      <Paragraph dangerouslySetInnerHTML={{ __html: RenderContent(resource.description) }}></Paragraph>
                     </div>
                   ) : (
                     showAccordion ? (
@@ -451,7 +452,7 @@ function ResourceDetail({
                           <div id={id} className="dd-accordion-container" role="region" aria-hidden={!expanded}>
                             <div className="dd-accordion-content-wrapper" data-visible-lines={displayDescriptionExpandable_visibleLines}>
                               <div className="dd-accordion-content" ref={descriptionRef}>
-                                <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                                <Paragraph dangerouslySetInnerHTML={{ __html: RenderContent(resource.description) }}></Paragraph>
                               </div>
                             </div>
                           </div>
@@ -469,7 +470,7 @@ function ResourceDetail({
                     ) : (
                       <div className="resource-detail-description">
                         <div ref={descriptionRef}>
-                          <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                          <Paragraph dangerouslySetInnerHTML={{ __html: RenderContent(resource.description) }}></Paragraph>
                         </div>
                       </div>
                     )

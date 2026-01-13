@@ -155,8 +155,9 @@ const initialDataCommentNotification = `<mjml>
           Geplaatst op {{ comment.createDateHumanized }} 
           door {{ comment.userName or 'een anonieme gebruiker' }}.
           
-          {% if comment.userEmail %}
-            Reageer op deze persoon via {{ comment.userEmail }}.
+          <!-- Embedded url link if Embedded url exist -->
+          {% if embeddedUrl %}
+            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
           {% endif %}
         </mj-text>
 
@@ -180,13 +181,6 @@ const initialDataCommentNotification = `<mjml>
             Wil je je uitschrijven? Dat kan via de volgende link:
             <br />
             <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
-          </mj-text>
-        {% endif %}
-        
-        <!-- Embedded url link if Embedded url exist -->
-        {% if embeddedUrl %}
-          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
-            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
           </mj-text>
         {% endif %}
         
@@ -217,8 +211,9 @@ const initialDataCommentReplyNotification = `<mjml>
           Geplaatst op {{ comment.createDateHumanized }} 
           door {{ comment.userName or 'een anonieme gebruiker' }}.
           
-          {% if comment.userEmail %}
-            Reageer op deze persoon via {{ comment.userEmail }}.
+          <!-- Embedded url link if Embedded url exist -->
+          {% if embeddedUrl %}
+            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
           {% endif %}
         </mj-text>
 
@@ -252,13 +247,6 @@ const initialDataCommentReplyNotification = `<mjml>
             Wil je je uitschrijven? Dat kan via de volgende link:
             <br />
             <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
-          </mj-text>
-        {% endif %}
-        
-        <!-- Embedded url link if Embedded url exist -->
-        {% if embeddedUrl %}
-          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
-            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
           </mj-text>
         {% endif %}
         
