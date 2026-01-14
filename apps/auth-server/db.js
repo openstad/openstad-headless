@@ -8,7 +8,12 @@ const ssl = {
 }
 
 if (process.env.MYSQL_CA_CERT) {
-  ssl.ca = process.env.MYSQL_CA_CERT;
+  
+  const caCert = process.env.MYSQL_CA_CERT.trim()
+  // support for base64 encoded certs (no newlines)
+  // if it starts with -----BEGIN CERTIFICATE----- we assume it's a raw cert
+  // otherwise we assume it's base64 encoded
+  ssl.ca = caCert.indexOf('-----BEGIN CERTIFICATE-----') === 0 ? caCert : Buffer.from(caCert, 'base64').toString('utf8');
   ssl.rejectUnauthorized = true;
 }
 
@@ -59,6 +64,7 @@ db.Role = require('./model/role')(db, sequelize, Sequelize);
 db.UniqueCode = require('./model/unique~code')(db, sequelize, Sequelize);
 db.User = require('./model/user')(db, sequelize, Sequelize);
 db.UserRole = require('./model/user-role')(db, sequelize, Sequelize);
+db.AccessCode = require('./model/access-code')(db, sequelize, Sequelize);
 
 // invoke associations and scopes
 for (let modelName in sequelize.models) {

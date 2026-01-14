@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,10 +19,14 @@ import { ResourceOverviewMapWidgetTabProps } from '.';
 import useAreas from '@/hooks/use-areas';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/router';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import React from "react";
+import { Spacer } from '@/components/ui/spacer';
 
 const formSchema = z.object({
   customPolygon: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
-  customPolygonUrl: z.any().optional()
+  customPolygonUrl: z.any().optional(),
+  interactionType: z.enum(['default', 'direct']).optional().default('default'),
 });
 
 export default function WidgetResourcesMapButton(
@@ -30,6 +34,7 @@ export default function WidgetResourcesMapButton(
     EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
       customPolygon?: any;
       customPolygonUrl?: any;
+      interactionType?: 'default' | 'direct';
     }
 ) {
 
@@ -52,7 +57,8 @@ export default function WidgetResourcesMapButton(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       customPolygon: props?.customPolygon || [],
-      customPolygonUrl: props?.customPolygonUrl || []
+      customPolygonUrl: props?.customPolygonUrl || [],
+      interactionType: props?.interactionType || 'default',
     },
   });
   const router = useRouter();
@@ -67,7 +73,7 @@ export default function WidgetResourcesMapButton(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
+          className="space-y-4 lg:w-full">
 
           {areas?.map((item) => (
             <FormField
@@ -80,7 +86,7 @@ export default function WidgetResourcesMapButton(
                 return (
                   <FormItem
                     key={item.id}
-                    className="flex flex-column items-start space-x-0 space-y-3">
+                    className="flex flex-column items-start space-x-0 space-y-3 ">
                     <div className='flex flex-row items-start space-x-3 space-y-0'>
                       <FormControl>
                         <Checkbox
@@ -107,7 +113,7 @@ export default function WidgetResourcesMapButton(
                       </FormLabel>
                     </div>
                     {isChecked && (
-                      <div className='w-full'>
+                      <div className='w-1/2'>
                         <FormField
                           control={form.control}
                           name={`customPolygonUrl.${Number(item.id)}`}
@@ -141,6 +147,37 @@ export default function WidgetResourcesMapButton(
             />
           )) || null}
 
+          <Spacer size={3} />
+
+          <FormField
+            control={form.control}
+            name="interactionType"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>
+                  Hoe wil je dat de interactie werkt met de polygonen?
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'default'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Standaard"/>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="default"><strong>Standaard</strong>: Op een polygoon klikken opent een pop-up met de titel van de polygoon en een knop met de ingevulde URL (als deze is ingevuld).
+                    </SelectItem>
+                    <SelectItem value="direct">
+                      <strong>Direct naar URL</strong>: Op een polygoon klikken opent direct de ingevulde URL. De titel van de polygoon wordt ook direct getoond.
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
 
           <Button type="submit">Opslaan</Button>
         </form>

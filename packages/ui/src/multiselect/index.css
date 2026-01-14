@@ -60,7 +60,17 @@
     position: relative;
 }
 
-.osc .multi-select .multiselect-container{
+.osc .multi-select.multiselect-container--inline {
+    background-color: transparent;
+}
+
+.osc .multi-select.multiselect-container--inline .multiselect-container {
+    position: relative;
+    background-color: transparent;
+    padding: 0;
+}
+
+.osc .multi-select:not(.multiselect-container--inline) .multiselect-container {
     background: #fff;
     position: absolute;
     z-index: 999;
@@ -68,4 +78,12 @@
     max-height: 250px;
     overflow: auto;
     box-shadow: 0 0 6px hsl(0deg 0% 0% / 16.08%);
+}
+
+.osc .multi-select .multiselect-container .utrecht-form-field__label--checkbox{
+    display: flex;
+}
+
+.osc .multi-select .multiselect-container .utrecht-checkbox.utrecht-checkbox--html-input.utrecht-checkbox--custom {
+    order: 0;
 }

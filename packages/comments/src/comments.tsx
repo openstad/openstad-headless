@@ -31,6 +31,7 @@ export type CommentsWidgetProps = BaseProps &
     hideReplyAsAdmin?: boolean; // todo: wat is dit?
     canComment?: boolean,
     canLike?: boolean,
+    canDislike?: boolean,
     canReply?: boolean,
     showForm?: boolean,
     closedText?: string;
@@ -47,7 +48,21 @@ export type CommentsWidgetProps = BaseProps &
     itemsPerPage?: number;
     overridePage?: number;
     displayPagination?: boolean;
+    displaySearchBar?: boolean;
+    extraReplyButton?: boolean;
     onGoToLastPage?: (goToLastPage: () => void) => void;
+    extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    defaultTags?: string;
+    includeOrExclude?: string;
+    onlyIncludeOrExcludeTagIds?: string;
+    overrideSort?: string;
+    confirmation?: boolean;
+    overwriteEmailAddress?: string;
+    confirmationReplies?: boolean;
+    searchTerm?: string;
+    autoApply?: boolean;
+    displayCollapsibleFilter?: boolean;
+    variant?: 'micro-score' | 'medium';
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -65,14 +80,78 @@ function CommentsInner({
   itemsPerPage,
   onGoToLastPage,
   displayPagination = false,
+  displaySearchBar = false,
+  extraReplyButton = false,
   overridePage = 0,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
+  defaultTags,
+  includeOrExclude = 'include',
+  onlyIncludeOrExcludeTagIds = '',
+  overrideSort = '',
+  confirmation = false,
+  overwriteEmailAddress = '',
+  confirmationReplies = false,
+  searchTerm = '',
+  autoApply = false,
+  displayCollapsibleFilter = false,
+  variant = 'medium',
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(displayPagination ? itemsPerPage || 9999 : 9999 );
+  const [search, setSearch] = useState<string>('');
+
+  useEffect(() => {
+    if (searchTerm !== search) setSearch(searchTerm)
+  }, [searchTerm]);
+
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    api: props.api,
+  });
+
+  const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
+
+  const { data: allTags } = datastore.useTags({
+    projectId: props.projectId,
+    type: ''
+  });
+
+  const stringToArray = (str: string) => {
+    return str.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+  }
+
+  const tagIdsArray = stringToArray(tagIds);
+
+  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
+    let filteredTagIdsArray: Array<number> = [];
+    try {
+      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0) {
+        const filteredTags = allTags.filter((tag: { id: number }) => !tagIdsArray.includes((tag.id)));
+        const filteredTagIds = filteredTags.map((tag: { id: number }) => tag.id);
+        filteredTagIdsArray = filteredTagIds;
+      } else if (includeOrExclude === 'include') {
+        filteredTagIdsArray = tagIdsArray;
+      }
+
+      const filteredTagsIdsString = filteredTagIdsArray.join(',');
+
+      return {
+        tagsString: filteredTagsIdsString || ''
+      };
+
+    } catch (error) {
+      return {
+        tagsString: ''
+      };
+    }
+  }
+
+  const {
+    tagsString: filteredTagsIdsString
+  } = determineTags(includeOrExclude, allTags, tagIdsArray);
 
   const goToLastPage = () => {
     if (totalPages > 0 && displayPagination) {
@@ -112,6 +191,7 @@ function CommentsInner({
     formIntro,
     canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
     canLike: typeof props.comments?.canLike != 'undefined' ? props.comments.canLike : true,
+    canDislike: typeof props.comments?.canDislike != 'undefined' ? props.comments.canDislike : false,
     canReply: typeof props.comments?.canReply != 'undefined' ? props.comments.canReply : true,
     showForm: typeof props.showForm != 'undefined' ? props.showForm : true,
     closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
@@ -123,23 +203,20 @@ function CommentsInner({
     minCharactersError: props?.comments?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
     maxCharactersError: props?.comments?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
     adminLabel: props.comments?.adminLabel || 'admin',
+    variant: variant || 'medium',
     ...props,
   } as CommentsWidgetProps;
-
-  const datastore = new DataStore({
-    projectId: props.projectId,
-    api: props.api,
-  });
 
   const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: args.sentiment,
-    onlyIncludeTagIds: props.onlyIncludeTags || undefined,
+    onlyIncludeTagIds: props.onlyIncludeTags || filteredTagsIdsString || undefined,
+    search: search || '',
     refreshKey
   };
 
-  const { data: comments } = datastore.useComments(useCommentsData);
+  const { data: comments, isLoading } = datastore.useComments(useCommentsData);
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
@@ -177,6 +254,30 @@ function CommentsInner({
     const formDataCopy = { ...formData };
 
     formDataCopy.resourceId = `${resourceId}`;
+
+    const defaultTagsArray = defaultTags
+      ? defaultTags.split(',').map(tag => parseInt(tag.trim(), 10)).filter(tag => !isNaN(tag))
+      : [];
+
+    const formTags: string[] = [];
+    Object.keys(formDataCopy)
+      .filter(key => key.startsWith('tags-'))
+      .forEach(key => {
+        const tagsValue = formDataCopy[key];
+        if (Array.isArray(tagsValue)) {
+          formTags.push(...tagsValue);
+        } else if (typeof tagsValue === 'string') {
+          formTags.push(...tagsValue.split(',').map(tag => tag));
+        }
+      });
+
+    const allTags = Array.from(new Set([...defaultTagsArray, ...formTags]) );
+    formDataCopy.tags = allTags;
+
+    formDataCopy.confirmation = confirmation || false;
+    formDataCopy.confirmationReplies = confirmationReplies || false;
+    formDataCopy.overwriteEmailAddress = (confirmation && overwriteEmailAddress) ? overwriteEmailAddress : '';
+    formDataCopy.embeddedUrl = window.location.href;
 
     try {
       if (formDataCopy.id) {
@@ -245,14 +346,14 @@ function CommentsInner({
         {!args.canComment ? (
           <Banner>
             <Spacer size={2} />
-            <Heading level={4} appearance='utrecht-heading-6'>{args.closedText}</Heading>
+            <p>{args.closedText}</p>
             <Spacer size={2} />
           </Banner>
         ) : null}
 
         {!args.canComment && hasRole(currentUser, 'moderator') ? (
           <Banner>
-            <Heading level={4} appearance='utrecht-heading-6'>U kunt nog reageren vanwege uw rol als moderator</Heading>
+            <p>U kunt nog reageren vanwege uw rol als moderator</p>
             <Spacer size={2} />
           </Banner>
         ) : null}
@@ -265,11 +366,12 @@ function CommentsInner({
                   <Spacer size={1} />
                 </>
               )}
-              <Banner className="big">
-                <Heading level={4} appearance='utrecht-heading-6'>{ loginText }</Heading>
+              <Banner className="big" role="complementary">
+                <p id="login-description">{ loginText }</p>
                 <Spacer size={1} />
                 <Button
                   appearance="primary-action-button"
+                  aria-describedby="login-description"
                   onClick={() => {
                     // login
                     if (args.login?.url) {
@@ -293,44 +395,81 @@ function CommentsInner({
 
         <Spacer size={1} />
 
-        {Array.isArray(comments) && comments.length === 0 ? (
-          <Paragraph>{emptyListText}</Paragraph>
-        ) : ((props.sorting || []).length > 0 && datastore) ? (
+        {
+          ( ((props.sorting || []).length > 0 && datastore) || displaySearchBar) ? (
           <>
             <Filters
               className="osc-flex-columned"
               dataStore={datastore}
               sorting={props.sorting || []}
-              displaySorting={true}
+              displaySorting={ (props.sorting || []).length > 0 && datastore }
               defaultSorting={props.defaultSorting || 'createdAt_asc'}
               onUpdateFilter={(f) => {
-                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc', 'random', 'score'].includes(f.sort)) {
                   setSort(f.sort);
                 }
+                setSearch(f?.search?.text || '');
               }}
               applyText={'Toepassen'}
               resources={undefined}
-              displaySearch={false}
+              displaySearch={displaySearchBar || false}
               displayTagFilters={false}
               searchPlaceholder={''}
               resetText={'Reset'}
+              displayCollapsibleFilter={displayCollapsibleFilter}
+              autoApply={autoApply}
             />
 
-            <Spacer size={1} />
+            <Spacer size={1}/>
           </>
-          ) : null
-        }
+        ) : null}
+
+         {(Array.isArray(comments) && comments.length === 0) && (
+            isLoading ? (
+              <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
+            ) : (
+              <Paragraph className="osc-no-results-text">
+                {search ? `Er zijn geen resultaten gevonden voor "${search}".` : emptyListText}
+              </Paragraph>
+            )
+          )}
+
         {(comments || [])
           ?.sort((a: any, b: any) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
-            return sort === 'createdAt_desc' ? dateB - dateA : dateA - dateB;
+            const sortMethod = overrideSort || sort;
+
+            if (sortMethod === 'createdAt_desc') {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }
+            if (sortMethod === 'createdAt_asc') {
+              return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            }
+            if (sortMethod === 'title_asc' && a.description && b.description) {
+              return a.description.localeCompare(b.description);
+            }
+            if (sortMethod === 'title_desc' && a.description && b.description) {
+              return b.description.localeCompare(a.description);
+            }
+            if (sortMethod === 'votes_desc') {
+              return b.yes - a.yes;
+            }
+            if (sortMethod === 'votes_asc') {
+              return a.yes - b.yes;
+            }
+            if (sort === 'random') {
+              return Math.random() - 0.5;
+            }
+            if (sort === 'score') {
+              return (b.score || 0) - (a.score || 0);
+            }
+
+            return 0;
           })
           .slice(page * pageSize, (page + 1) * pageSize)
           ?.map((comment: any, index: number) => {
 
           let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
-          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} />;
+          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === comment?.id} extraReplyButton={extraReplyButton} />;
         })}
 
         {displayPagination && (
@@ -366,6 +505,7 @@ function Comments({
   setRefreshComments = () => {},
   onGoToLastPage,
   overridePage,
+  variant = 'medium',
   ...props
 }: CommentsWidgetProps) {
   const [refreshKey, setRefreshKey] = useState(false);
@@ -394,6 +534,7 @@ function Comments({
         setRefreshComments={triggerRefresh}
         onGoToLastPage={onGoToLastPage}
         overridePage={overridePage}
+        variant={variant}
         {...props}
       />
     </div>

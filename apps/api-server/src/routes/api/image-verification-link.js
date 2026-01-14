@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const createError = require('http-errors');
 const config = require('config');
 const db = require('../../db');

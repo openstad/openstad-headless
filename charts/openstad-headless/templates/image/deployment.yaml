@@ -43,17 +43,69 @@ spec:
             value: "{{ .Values.image.throttle.ccPrefetcher | default 20 }}"
           - name: THROTTLE_CC_REQUESTS
             value: "{{ .Values.image.throttle.ccRequests | default 100 }}"
+          - name: HQ_ORIGINAL_MAX_PIXELS
+            value: "{{ .Values.image.hqOriginalMaxPixels | default 160000 }}"
+          - name: DISABLE_WEBP_CONVERSION
+            value: "{{ .Values.image.disableWebpConversion | default false }}"
           - name: IMAGE_VERIFICATION_TOKEN
             valueFrom:
               secretKeyRef:
                 key: verificationToken
                 name: {{ template "openstad.image.secret.fullname" . }}
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+{{- if eq .Values.image.useS3 "true" }}
+          - name: S3_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                key: cmsEndpoint
+                name: {{ template "openstad.s3.secret.fullname" . }}
+
+          - name: S3_BUCKET
+            valueFrom:
+              secretKeyRef:
+                key: cmsBucket
+                name: {{ template "openstad.s3.secret.fullname" . }}
+
+          - name: S3_REGION
+            valueFrom:
+              secretKeyRef:
+                key: cmsRegion
+                name: {{ template "openstad.s3.secret.fullname" . }}
+
+          - name: S3_KEY
+            valueFrom:
+              secretKeyRef:
+                key: cmsKey
+                name: {{ template "openstad.s3.secret.fullname" . }}
+
+          - name: S3_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: cmsSecret
+                name: {{ template "openstad.s3.secret.fullname" . }}
+{{- end }}
           # Inject extra environment variables
           {{- if .Values.image.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
+        {{- if .Values.image.customCommand }}
+        command: {{ toYaml .Values.image.customCommand | nindent 12 }}
+        {{- end }}
+        {{- if .Values.image.customWorkingDir }}
+        workingDir: {{ .Values.image.customWorkingDir }}
+        {{- end }}
         resources:
 {{ toYaml .Values.image.resources | indent 12 }}
+{{- if ne .Values.image.useS3 "true" }}
         volumeMounts:
           - mountPath: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
             name: data-vol
@@ -66,3 +118,4 @@ spec:
         - name: data-docs-vol
           persistentVolumeClaim:
             claimName: docs-data-claim
+{{- end}}

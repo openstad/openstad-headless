@@ -125,6 +125,8 @@ module.exports = ( db, sequelize, DataTypes ) => {
             'new enquete - user',
             'new published resource - admin update',
             'updated resource - admin update',
+            'notification comment - user',
+            'notification comment reply - user',
             'login email', 'login sms',
             'user account about to expire',
             'project issues warning',
@@ -313,11 +315,11 @@ module.exports = ( db, sequelize, DataTypes ) => {
   }
 
   Notification.auth = Notification.prototype.auth = {
-    listableBy: 'admin',
-    viewableBy: 'admin',
-    createableBy: 'admin',
-    updateableBy: 'admin',
-    deleteableBy: 'admin',
+    listableBy: 'editor',
+    viewableBy: 'editor',
+    createableBy: 'editor',
+    updateableBy: 'editor',
+    deleteableBy: 'editor',
   };
 
   return Notification;

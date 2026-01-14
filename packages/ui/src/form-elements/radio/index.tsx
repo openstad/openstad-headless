@@ -11,9 +11,21 @@ import {
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
 import { useEffect } from "react";
+import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
 
 export type RadioboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -21,13 +33,26 @@ export type RadioboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
+    randomizeItems?: boolean;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -44,9 +69,20 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    randomizeItems = false,
+    overrideDefaultValue,
+    defaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
-    const [selectedOption, setSelectedOption] = useState<string>("");
+    let initialValue = defaultValue as string || "";
+    initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : initialValue;
+
+    const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+    const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -56,14 +92,32 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     }
 
     useEffect(() => {
+        let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
+
+        if (randomizeItems) {
+            const storageKey = `randomizedChoices_${fieldKey}`;
+            const stored = sessionStorage.getItem(storageKey);
+            if (stored) {
+                setDisplayChoices(JSON.parse(stored));
+            } else {
+                const shuffled = shuffleArray(normalizedChoices);
+                setDisplayChoices(shuffled);
+                sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
+            }
+        } else {
+            setDisplayChoices(normalizedChoices);
+        }
+    }, [choices, fieldKey, randomizeItems]);
+
+    useEffect(() => {
         const initialOtherOptionValues: { [key: string]: string } = {};
-        choices?.forEach((choice, index) => {
-            if (choice.isOtherOption) {
+        displayChoices?.forEach((choice, index) => {
+            if (choice?.isOtherOption) {
                 initialOtherOptionValues[`${fieldKey}_${index}_other`] = "";
             }
         });
         setOtherOptionValues(initialOtherOptionValues);
-    }, [choices, fieldKey]);
+    }, [displayChoices, fieldKey]);
 
     const handleRadioChange = (value: string, index: number) => {
         setSelectedOption(value);
@@ -80,7 +134,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     onChange({
                         name: key,
                         value: ""
-                    });
+                    }, false);
                 }
             }
         });
@@ -96,30 +150,26 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
             onChange({
                 name: e.name,
                 value: e.value
-            });
+            }, false);
         }
     };
 
-    if (choices) {
-        choices = choices.map((choice) => {
-            if (typeof choice === 'string') {
-                return {value: choice, label: choice}
-            } else {
-                return choice;
-            }
-        }) as [{ value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }];
-    }
+    useEffect(() => {
+        if(initialValue){
+            setCheckInvalid(false);
+        }
+    }, [fieldInvalid]);
 
     return (
         <div className="question">
             <Fieldset
                 role="radiogroup"
-                aria-invalid={fieldInvalid}
+                aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend>
-                    {title}
-                </FieldsetLegend>
+                {title && (
+                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                )}
 
                 {description &&
                     <>
@@ -144,14 +194,15 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     </>
                 )}
 
-                {infoImage && (
-                    <figure className="info-image-container">
-                        <img src={infoImage} alt=""/>
-                        <Spacer size={.5} />
-                    </figure>
-                )}
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
 
-                {choices?.map((choice, index) => (
+                {displayChoices?.map((choice, index) => (
                     <>
                         <FormField type="radio" key={index}>
                             <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
@@ -161,9 +212,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                         id={`${fieldKey}_${index}`}
                                         name={fieldKey}
                                         required={fieldRequired}
-                                        onChange={() => handleRadioChange(choice.value, index)}
+                                        onChange={() => {handleRadioChange(choice.value, index), setCheckInvalid(false)}}
                                         disabled={disabled}
                                         value={choice && choice.value}
+                                        checked={selectedOption === choice.value}
                                     />
                                     <span>{choice && choice.label}</span>
                                 </FormLabel>

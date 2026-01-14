@@ -7,6 +7,7 @@ var log          = require('debug')('app:http');
 const morgan     = require('morgan');
 const db 		 = require('./db');
 const cookieParser = require('cookie-parser');
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const https = require('https');
 module.exports  = {
@@ -24,6 +25,7 @@ module.exports  = {
       this.app.set('trust proxy', true);
       this.app.set('view engine', 'njk');
       this.app.set('env', process.env.NODE_APP_INSTANCE || 'development');
+	  this.app.use(rateLimiter());
 
       if (process.env.REQUEST_LOGGING === 'ON') {
         this.app.use(morgan('dev'));
@@ -43,7 +45,7 @@ module.exports  = {
 		});
 	  });
 
-	  this.app.get('/db-health', async (req, res) => {
+	  this.app.get( '/db-health', async (req, res) => {
 		try {
 			await db.sequelize.authenticate();
 			res.status(200).json({
@@ -191,6 +193,6 @@ ZcWsZqyui9/+6hczT3KupoH0mQ==
   _initSessionMiddleware: function() {
     // Middleware to fill `req.user` with a `User` instance.
     const getUser = require('./middleware/user');
-    this.app.use(getUser);
+    this.app.use( getUser );
   },
 };

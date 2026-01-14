@@ -1,12 +1,23 @@
 import {FormLabel, FormFieldDescription, Paragraph, AccordionProvider} from '@utrecht/component-library-react';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
+import { FormValue } from '@openstad-headless/form/src/form';
+import {InfoImage} from "../../infoImage";
 
 export type TickmarkSliderProps = {
+    overrideDefaultValue?: FormValue;
     index: number;
     title: string;
-    fieldOptions: { value: string; label: string }[];
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     fieldRequired: boolean;
     fieldKey: string;
     imageSrc?: string;
@@ -14,7 +25,7 @@ export type TickmarkSliderProps = {
     imageDescription?: string;
     description?: string;
     disabled?: boolean;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     type?: string;
     showSmileys?: boolean;
     showMoreInfo?: boolean;
@@ -23,6 +34,9 @@ export type TickmarkSliderProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -44,9 +58,15 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
-    const [value, setValue] = useState<string>(defaultValue);
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
+
+    const [value, setValue] = useState<string>(initialValue);
 
     const maxCharacters = fieldOptions.length > 0 ? fieldOptions.length.toString() : "1";
 
@@ -57,10 +77,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         }
     }
 
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+
+
     return (
         <div className="a-b-slider-container">
             <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={`a-to-b-range--${index}`}>{title}</FormLabel>
+                <FormLabel htmlFor={`a-to-b-range--${index}`} dangerouslySetInnerHTML={{__html: title}} />
             </Paragraph>
             {description &&
                 <>
@@ -85,12 +108,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
+            })}
 
             {imageSrc && (
                 <figure>
@@ -111,6 +135,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 required={fieldRequired}
                 onChange={(e) => {
                     setValue(e.target.value);
+                    setCheckInvalid(false);
                     if (onChange) {
                         onChange({
                             name: fieldKey,
@@ -119,7 +144,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                     }
                 }}
                 disabled={disabled}
-                aria-invalid={fieldInvalid}
+                aria-invalid={checkInvalid}
                 aria-describedby={`${randomId}_error`}
             />
             <div className={`range-slider-labels ${showSmileys && 'smiley-scale'}`} aria-hidden="true">

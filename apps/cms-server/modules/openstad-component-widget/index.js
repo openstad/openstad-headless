@@ -1,7 +1,7 @@
 // const styleSchema = require('../../../config/styleSchema.js').default;
 
 module.exports = {
-  extend: '@apostrophecms/widget-type',
+  extend: 'base-widget',
   options: {
     label: 'Openstad Component'
   },
@@ -36,7 +36,7 @@ module.exports = {
         }
         
         // Extract the URL from the script tag
-        const regex = /<script src="([a-zA-Z0-9\/:]*)".*><\/script>/;
+        const regex = /<script[^>]*\s+src=(["'])(.*?)\1[^>]*><\/script>/i;
         const match = input.componentUrl.match(regex);
         
         if (match) {

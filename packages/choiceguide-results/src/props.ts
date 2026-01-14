@@ -6,4 +6,9 @@ export type ChoiceGuideResultsProps = BaseProps &
 
 export type ChoiceGuideResults = {
     choiceguideWidgetId?: string;
+    displayTitle?: boolean;
+    displayDescription?: boolean;
+    displayImage?: boolean;
+    displayAsFeaturedOnly?: boolean;
+    hideScores?: boolean;
 };

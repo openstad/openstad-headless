@@ -111,12 +111,31 @@ export function Sidenav({
           </Button>
         </Link>
         ) : null }
+        {sessionData?.role == 'superuser' ? (
+          <Link href="/settings">
+            <Button
+              variant={location.startsWith('/settings') ? 'secondary' : 'ghost'}
+              className={cn(
+                'w-full flex flex-row justify-start',
+                narrow ? 'p-0 h-10 w-10 justify-center' : null
+              )}>
+              <Settings
+                size="20"
+                className={
+                  location.startsWith('/settings') ? 'text-brand' : 'text-foreground'
+                }
+              />
+              {narrow ? '' : 'Instellingen'}
+            </Button>
+          </Link>
+        ) : null }
       </div>
       <div className="flex-grow"></div>
       <div
         className={cn(
           'p-4 flex flex-col gap-2',
-          narrow ? 'items-center' : null
+          narrow ? 'items-center' : null,
+          process.env.NEXT_PUBLIC_OPENSTAD_VERSION ? 'pb-6' : null
         )}>
         <Link href="/signout">
           <Button
@@ -129,6 +148,12 @@ export function Sidenav({
             {narrow ? '' : 'Uitloggen'}
           </Button>
         </Link>
+
+        {process.env.NEXT_PUBLIC_OPENSTAD_VERSION &&
+          <p className={cn('absolute left-0 right-0 bottom-2 text-center text-gray-400 text-xs')}>
+            v{process.env.NEXT_PUBLIC_OPENSTAD_VERSION}
+          </p>
+        }
       </div>
     </nav>
   );

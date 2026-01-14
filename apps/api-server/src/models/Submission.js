@@ -40,7 +40,18 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.User,
-            attributes: ['role', 'displayName', 'nickName', 'name', 'email'],
+            attributes: [
+              'role',
+              'displayName',
+              'nickName',
+              'name',
+              'displayName',
+              'email',
+              'phonenumber',
+              'address',
+              'city',
+              'postcode'
+            ],
           },
         ],
       },
@@ -55,15 +66,16 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   Submission.auth = Submission.prototype.auth = {
-    listableBy: 'admin',
-    viewableBy: ['admin', 'owner'],
+    listableBy: 'editor',
+    viewableBy: ['editor', 'owner'],
     createableBy: 'all',
-    updateableBy: 'admin',
-    deleteableBy: 'admin',
+    updateableBy: 'editor',
+    deleteableBy: 'editor',
   };
 
   Submission.associate = function (models) {
     this.belongsTo(models.Widget);
+    Submission.belongsTo(models.User, { onDelete: 'CASCADE' });
   };
 
   return Submission;

@@ -9,9 +9,21 @@ import {
 } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
+import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
 
 export type CheckboxFieldProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     choices?: { value: string, label: string, isOtherOption?: boolean, defaultValue?: boolean }[];
     fieldRequired?: boolean;
@@ -19,7 +31,7 @@ export type CheckboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: {name: string, value: FormValue}, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -28,6 +40,22 @@ export type CheckboxFieldProps = {
     maxChoicesMessage?: string,
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string | string[];
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
+    randomizeItems?: boolean;
+    value?: FormValue;
+    selectAll?: boolean;
+    selectAllLabel?: string;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -45,24 +73,58 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        maxChoices = '',
        maxChoicesMessage = '',
        randomId= '',
-       fieldInvalid= false,
+       fieldInvalid,
+       randomizeItems = false,
+       overrideDefaultValue,
+       defaultValue,
+       images = [],
+       createImageSlider = false,
+       imageClickable = false,
+       selectAll = false,
+       selectAllLabel = ''
 }) => {
-    const defaultSelectedChoices = choices?.filter((choice) => choice.defaultValue).map((choice) => choice.value) || [];
-    const [selectedChoices, setSelectedChoices] = useState<string[]>(defaultSelectedChoices);
+    let initialValue = defaultValue || [];
+    try {
+        initialValue = overrideDefaultValue ? JSON.parse(overrideDefaultValue as string) : initialValue;
+    } catch (e) {}
+
+    initialValue = initialValue && Array.isArray(initialValue)
+      ? initialValue.map(val => String(val))
+      : typeof initialValue === 'string' || typeof initialValue === 'number'
+        ? [ String(initialValue) ]
+        : [];
+
+    const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+    const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;
     const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
 
+    const checkFieldValidation = () => {
+        if (fieldRequired && selectedChoices.length === 0) {
+            return false;
+        }
+        return true;
+    }
+
     useEffect(() => {
-        const initialOtherOptionValues: { [key: string]: string } = {};
-        choices?.forEach((choice, index) => {
-            if (choice.isOtherOption) {
-                initialOtherOptionValues[`${fieldKey}_${index}_other`] = "";
+        let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
+
+        if (randomizeItems) {
+            const storageKey = `randomizedChoices_${fieldKey}`;
+            const stored = sessionStorage.getItem(storageKey);
+            if (stored) {
+                setDisplayChoices(JSON.parse(stored));
+            } else {
+                const shuffled = shuffleArray(normalizedChoices);
+                setDisplayChoices(shuffled);
+                sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
             }
-        });
-        setOtherOptionValues(initialOtherOptionValues);
-    }, [choices, fieldKey]);
+        } else {
+            setDisplayChoices(normalizedChoices);
+        }
+    }, [choices, fieldKey, randomizeItems]);
 
     useEffect(() => {
         if (onChange) {
@@ -93,7 +155,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     onChange({
                         name: `${fieldKey}_${index}_other`,
                         value: ""
-                    });
+                    }, false);
                 }
             }
         }
@@ -108,7 +170,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
             onChange({
                 name: e.name,
                 value: e.value
-            });
+            }, false);
         }
     };
 
@@ -126,12 +188,12 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         <div className="question">
             <Fieldset
               role="group"
-              aria-invalid={fieldInvalid}
+              aria-invalid={checkFieldValidation() ? 'false' : 'true'}
               aria-describedby={`${randomId}_error`}
             >
-                <FieldsetLegend>
-                    {title}
-                </FieldsetLegend>
+                {title && (
+                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                )}
 
                 {description &&
                 <>
@@ -156,14 +218,42 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     </>
                 )}
 
-                {infoImage && (
-                    <figure className="info-image-container">
-                        <img src={infoImage} alt=""/>
-                        <Spacer size={.5} />
-                    </figure>
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
+
+                { selectAll && (
+                    <FormField type="checkbox" key="select_all">
+                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                            <FormLabel htmlFor={`${fieldKey}_select_all`} type="checkbox" className="--label-grid">
+                                <Checkbox
+                                    className="utrecht-form-field__input"
+                                    id={`${fieldKey}_select_all`}
+                                    name={fieldKey}
+                                    value="select_all"
+                                    required={fieldRequired}
+                                    checked={selectedChoices.length > 0 && selectedChoices.length === (displayChoices ? displayChoices.length : 0)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            const allValues = displayChoices ? displayChoices.map(choice => choice.value) : [];
+                                            setSelectedChoices(allValues);
+                                        } else {
+                                            setSelectedChoices([]);
+                                        }
+                                    }}
+                                    disabled={disabled}
+                                />
+                                <span>{selectAllLabel}</span>
+                            </FormLabel>
+                        </Paragraph>
+                    </FormField>
                 )}
 
-                {choices?.map((choice, index) => (
+                {displayChoices?.map((choice, index) => (
                     <>
                         <FormField type="checkbox" key={index}>
                             <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">

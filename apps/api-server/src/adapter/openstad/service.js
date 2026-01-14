@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const merge = require('merge');
 const mapUserData = require('../../util/map-user-data');
 const authSettings = require('../../util/auth-settings');
@@ -139,6 +138,8 @@ service.updateUser = async function({ authConfig, userData = {} }) {
     };
     delete userData.role;
   }
+
+  userData.clientId = authConfig.clientId;
 
   let url = `${authConfig.serverUrlInternal}/api/admin/user/${userData.id}?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
@@ -384,7 +385,7 @@ service.updateClient = async function({ authConfig, project }) {
   
 }
 
-service.fetchUniqueCode = async function({ authConfig }) {
+service.fetchUniqueCode = async function({ authConfig, isExport = false }) {
 
   let clientId = authConfig.clientId;
   if (!clientId) {
@@ -393,7 +394,12 @@ service.fetchUniqueCode = async function({ authConfig }) {
 
   try {
 
-    let url = `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${clientId}&amount=3`;
+    let url = `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${clientId}`;
+
+    if (isExport) {
+      url += '&export=true';
+    }
+    
     let response = await fetch(url, {
 	    headers: {
         Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
@@ -462,6 +468,87 @@ service.resetUniqueCode = async function({ authConfig, uniqueCodeId }) {
     })
     if (!response.ok) {
       throw new Error('OpenStad.service.resetUniqueCodes: fetch client failed')
+    }
+    let result = await response.json();
+    return result;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
+}
+
+service.fetchAccessCode = async function({ authConfig }) {
+  let clientId = authConfig.clientId;
+  if (!clientId) {
+    throw new Error('OpenStad.service.fetchAccessCode: clientId not found')
+  }
+
+  try {
+    let url = `${authConfig.serverUrlInternal}/api/admin/access-code?clientId=${clientId}`;
+    let response = await fetch(url, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+    })
+    if (!response.ok) {
+      throw new Error('OpenStad.service.fetchAccessCode: fetch client failed')
+    }
+    let codes = await response.json();
+    return codes;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
+}
+
+service.createAccessCode = async function({ authConfig, code }) {
+  let clientId = authConfig.clientId;
+  if (!clientId) {
+    throw new Error('OpenStad.service.createAccessCodes: clientId not found')
+  }
+
+  try {
+    let url = `${authConfig.serverUrlInternal}/api/admin/access-code?clientId=${clientId}&code=${code}`;
+    let response = await fetch(url, {
+	    headers: {
+        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+      method: 'post',
+      body: '{}',
+    })
+    if (!response.ok) {
+      throw new Error('OpenStad.service.createAccessCodes: fetch client failed')
+    }
+    let result = await response.json();
+    return result;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
+}
+
+service.deleteAccessCode = async function({ authConfig, accessCodeId }) {
+  let clientId = authConfig.clientId;
+  if (!clientId) {
+    throw new Error('OpenStad.service.createAccessCodes: clientId not found')
+  }
+
+  if (!accessCodeId) {
+    throw new Error('OpenStad.service.resetAccessCodes: accessCodeId not found')
+  }
+
+  try {
+    let url = `${authConfig.serverUrlInternal}/api/admin/access-code/${accessCodeId}/delete?clientId=${clientId}`;
+    let response = await fetch(url, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+      method: 'post',
+      body: '{}',
+    })
+
+    if (!response.ok) {
+      throw new Error('OpenStad.service.resetAccessCodes: fetch client failed')
     }
     let result = await response.json();
     return result;

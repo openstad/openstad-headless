@@ -9,8 +9,7 @@ export default {
       'Content-Type': 'application/json'
     };
 
-    return this.fetch(url, { headers });
-
+    return userId ? this.fetch(url, { headers }) : [];
   },
 
   fetchMe: async function({ projectId }) {
@@ -68,6 +67,7 @@ export default {
       nickName: user.nickName,
       address: user.address,
       city: user.city,
+      emailNotificationConsent: user.emailNotificationConsent,
     }
 
     let json = await this.fetch(url, {

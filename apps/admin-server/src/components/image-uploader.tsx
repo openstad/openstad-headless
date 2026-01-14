@@ -9,6 +9,7 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {UploadDocument} from "@/hooks/upload-document";
 
 export const ImageUploader: React.FC<{
   form: UseFormReturn<any>;
@@ -18,7 +19,8 @@ export const ImageUploader: React.FC<{
   description?: string;
   allowedTypes?: string[];
   project?: string;
-}> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding', description = '', project }) => {
+  allowMultiple?: boolean;
+}> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding', description = '', project, allowMultiple = false }) => {
   const [file, setFile] = React.useState<{url: string}>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
 
@@ -32,16 +34,24 @@ export const ImageUploader: React.FC<{
   }
 
   async function uploadImage(data: any) {
-    let image = prepareFile(data);
+    let response;
 
-    const projectNumber: number | undefined = validateProjectNumber(project);
+    if (data && data.type === 'image/gif') {
+      response = await UploadDocument(data, project)
+    } else {
+      let image = prepareFile(data);
 
-    const response = await fetch(`/api/openstad/api/project/${projectNumber}/upload/image`, {
-      method: 'POST',
-      body: image
-    })
+      const projectNumber: number | undefined = validateProjectNumber(project);
 
-    setFile(await response.json());
+      const uploadCall = await fetch(`/api/openstad/api/project/${projectNumber}/upload/image`, {
+        method: 'POST',
+        body: image
+      })
+
+      response = await uploadCall.json()
+    }
+
+    setFile(response);
   }
 
   useEffect(() => {
@@ -72,8 +82,16 @@ export const ImageUploader: React.FC<{
             <Input
               type="file"
               accept={acceptAttribute}
+              multiple={allowMultiple}
               {...field}
-              onChange={(e) => uploadImage(e.target.files?.[0])}
+              onChange={async (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  for (const file of Array.from(files)) {
+                    await uploadImage(file);
+                  }
+                }
+              }}
             />
           </FormControl>
           <FormMessage />

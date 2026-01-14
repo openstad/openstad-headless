@@ -11,9 +11,11 @@ import {
 import { Spacer } from "../../spacer";
 import TextInput from "../text";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type RangeSliderProps = {
     title: string;
+    overrideDefaultValue?: FormValue | valueObject;
     description?: string;
     labelA: string;
     labelB: string;
@@ -30,7 +32,7 @@ export type RangeSliderProps = {
     maxCharacters?: number;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | valueObject | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue | valueObject }, triggerSetLastKey?: boolean) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
@@ -41,6 +43,18 @@ export type RangeSliderProps = {
     skipQuestionAllowExplanation?: boolean;
     skipQuestionExplanation?: string;
     skipQuestionLabel?: string;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 type valueObject = {value: string, skipQuestion: boolean, skipQuestionExplanation: string | undefined};
@@ -71,19 +85,35 @@ const RangeSlider: FC<RangeSliderProps> = ({
     skipQuestionAllowExplanation = false,
     skipQuestionExplanation = '',
     skipQuestionLabel = 'Sla vraag over',
+    overrideDefaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
-    const [rangeValue, setRangeValue] = useState(undefined);
-    const [skipSelected, setSkipSelected] = useState(false);
-    const [fieldDisabled, setFieldDisabled] = useState(false);
-    const [value, setValue] = useState<valueObject>({
-        value: '50',
-        skipQuestion: false,
-        skipQuestionExplanation: ''
-    });
+    const initialValue =
+      overrideDefaultValue &&
+      typeof overrideDefaultValue === 'object' &&
+      'value' in overrideDefaultValue &&
+      'skipQuestion' in overrideDefaultValue &&
+      'skipQuestionExplanation' in overrideDefaultValue
+      ? overrideDefaultValue as valueObject
+      : { value: '50', skipQuestion: false, skipQuestionExplanation: '' };
 
-    class HtmlContent extends React.Component<{ html: any }> {
+    const [skipSelected, setSkipSelected] = useState(initialValue.skipQuestion || false);
+    const [fieldDisabled, setFieldDisabled] = useState(initialValue.skipQuestion || false);
+
+    const [value, setValue] = useState<valueObject>(initialValue as valueObject);
+
+    const parsed = parseInt(initialValue.value);
+    const [rangeValue, setRangeValue] = useState<number>( isNaN(parsed) ? 50 : parsed );
+
+    class HtmlContent extends React.Component<{ html: any, bold?: boolean }> {
         render() {
-            let { html } = this.props;
+            let { html, bold = false } = this.props;
+
+            if (bold) {
+                html = `<strong>${html}</strong>`;
+            }
             return <Paragraph dangerouslySetInnerHTML={{ __html: html }} />;
         }
     }
@@ -128,10 +158,14 @@ const RangeSlider: FC<RangeSliderProps> = ({
     return (
         <div className="a-b-slider-container">
             {title && (
-                <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
+                <Paragraph>
+                    <Strong>
+                        <label htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                    </Strong>
+                </Paragraph>
             )}
             {description && (
-                <Paragraph dangerouslySetInnerHTML={{ __html: description }}></Paragraph>
+                <HtmlContent html={description} />
             )}
             {showMoreInfo && (
                 <>
@@ -149,20 +183,21 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt="" />
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
+            })}
 
             <div className="a-b-info-container">
                 <div className="a-b-title label-a">
                     {showLabels && (<p className="label">A</p>)}
                     {(titleA || descriptionA || imageA) && (
                         <div className="a-b-info">
-                            {titleA && <Paragraph><Strong>{titleA}</Strong></Paragraph>}
-                            {descriptionA && <Paragraph>{descriptionA}</Paragraph>}
+                            {titleA && <HtmlContent html={titleA} bold={true} />}
+                            {descriptionA && <HtmlContent html={descriptionA} />}
                             {!!imageA && (<figure><img src={imageA} alt={`${titleA} - ${descriptionA}`} /></figure>)}
                         </div>
                     )}
@@ -171,8 +206,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 {showLabels && (<p className="label">B</p>)}
                     {(titleB || descriptionB || imageB) && (
                         <div className="a-b-info">
-                            {titleB && <Paragraph><Strong>{titleB}</Strong></Paragraph>}
-                            {descriptionB && <Paragraph>{descriptionB}</Paragraph>}
+                            {titleB && <HtmlContent html={titleB} bold={true} />}
+                            {descriptionB && <HtmlContent html={descriptionB} />}
                             {!!imageB && (<figure><img src={imageB} alt={`${titleB} - ${descriptionB}`} /></figure>)}
                         </div>
                     )}
@@ -185,6 +220,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     max="100"
                     step="5"
                     className="a-to-b-range"
+                    value={rangeValue}
                     name={fieldKey}
                     required={fieldRequired}
                     id={randomId}
@@ -218,7 +254,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 </Paragraph>
             </div>
 
-            { (skipQuestion && skipQuestionAllowExplanation) && (
+            { skipQuestion && (
                 <div className="skip-question-container">
                     <Spacer size={2} />
                     <FormLabel htmlFor={`${randomId}_skip`} type="checkbox" className="--label-grid">
@@ -237,7 +273,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                         <span>{skipQuestionLabel}</span>
                     </FormLabel>
 
-                    { skipSelected && (
+                    { (skipSelected && skipQuestionAllowExplanation) && (
                         <div className="marginTop10 marginBottom15">
                             <Spacer size={2} />
                             <TextInput
@@ -249,6 +285,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                                 disabled={disabled}
                                 variant="textarea"
                                 rows={4}
+                                overrideDefaultValue={value.skipQuestionExplanation || ''}
                             />
                         </div>
                     )}

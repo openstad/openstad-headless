@@ -43,6 +43,7 @@ async function setupEnvVars() {
   let AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET || generateRandomToken({ length: 64 });
   let AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID || generateRandomToken({ length: 64 });
   let AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET || generateRandomToken({ length: 64 });
+  let AUTH_PHONE_HASH_SALT = process.env.AUTH_PHONE_HASH_SALT = process.env.AUTH_PHONE_HASH_SALT || generateRandomToken({ length: 32 });
 
   let IMAGE_PORT_API = process.env.IMAGE_PORT_API = process.env.IMAGE_PORT_API || BASE_PORT + 50;
   let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + IMAGE_PORT_API : 'image.' + process.env.BASE_DOMAIN );
@@ -62,6 +63,11 @@ async function setupEnvVars() {
   let CMS_MONGODB_URI = process.env.CMS_MONGODB_URI = process.env.CMS_MONGODB_URI || '';
   let CMS_DEFAULT_SETTINGS = process.env.CMS_DEFAULT_SETTINGS = process.env.CMS_DEFAULT_SETTINGS || '{}';
 
+  let MAIL_TRANSPORTER_TYPE = process.env.MAIL_TRANSPORTER_TYPE || 'smtp';
+  let MAIL_MS_CLIENT_ID = process.env.MAIL_MS_CLIENT_ID || '';
+  let MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
+  let MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
+  
   // api server
   process.env.API_URL = API_URL;
   process.env.API_DOMAIN = API_DOMAIN;
@@ -127,6 +133,7 @@ async function setupEnvVars() {
   process.env.AUTH_FIRST_CLIENT_ID = AUTH_FIRST_CLIENT_ID;
   process.env.AUTH_FIRST_CLIENT_SECRET = AUTH_FIRST_CLIENT_SECRET;
   process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || generateRandomToken({ length: 32 });
+  process.env.AUTH_PHONE_HASH_SALT = AUTH_PHONE_HASH_SALT
 
   process.env.KPN_CLIENT_ID=process.env.KPN_CLIENT_ID || '';
   process.env.KPN_CLIENT_SECRET=process.env.KPN_CLIENT_SECRET || '';
@@ -146,6 +153,9 @@ async function setupEnvVars() {
   process.env.IMAGE_THROTTLE_CC_PREFETCHER = process.env.IMAGE_THROTTLE_CC_PREFETCHER || 20;
   process.env.IMAGE_THROTTLE_CC_REQUESTS = process.env.IMAGE_THROTTLE_CC_REQUESTS || 100;
 
+  process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS = process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS || 160000;
+  process.env.DISABLE_WEBP_CONVERSION = process.env.DISABLE_WEBP_CONVERSION || false;
+
   // admin server
   process.env.ADMIN_URL = ADMIN_URL;
   process.env.ADMIN_COOKIE_SECRET = ADMIN_COOKIE_SECRET;
@@ -158,6 +168,17 @@ async function setupEnvVars() {
   process.env.CMS_OVERWRITE_URL=CMS_OVERWRITE_URL;
   process.env.CMS_MONGODB_URI=CMS_MONGODB_URI;
   process.env.CMS_DEFAULT_SETTINGS=CMS_DEFAULT_SETTINGS;
+  
+  // mail settings
+  process.env.MAIL_TRANSPORTER_TYPE = process.env.MAIL_TRANSPORTER_TYPE || '';
+  process.env.MAIL_MS_CLIENT_ID = process.env.MAIL_MS_CLIENT_ID || '';
+  process.env.MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
+  process.env.MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
+  
+  // Beta feature flag for bulk import of ideas/inzendingen. 
+  // This flag is to be removed when the bulk import functionality is refined and polished.
+  // Set to 'true' to enable the feature.
+  process.env.BETA_FEATURE_FLAG_BULK_IMPORT = process.env.BETA_FEATURE_FLAG_BULK_IMPORT || 'false';
 
 }
 
@@ -200,6 +221,8 @@ MYSQL_USER=${process.env.DB_USERNAME}
 MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
 
+BETA_FEATURE_FLAG_BULK_IMPORT=${process.env.BETA_FEATURE_FLAG_BULK_IMPORT}
+
 #api server
 API_URL=${process.env.API_URL}
 API_DOMAIN=${process.env.API_DOMAIN}
@@ -221,6 +244,11 @@ API_SMTP_PORT=${process.env.API_SMTP_PORT}
 API_SMTP_HOST=${process.env.API_SMTP_HOST}
 API_SMTP_USERNAME=${process.env.API_SMTP_USERNAME}
 API_SMTP_PASSWORD=${process.env.API_SMTP_PASSWORD}
+
+API_MAIL_TRANSPORTER_TYPE=${process.env.MAIL_TRANSPORTER_TYPE}
+API_MAIL_MS_CLIENT_ID=${process.env.MAIL_MS_CLIENT_ID}
+API_MAIL_MS_CLIENT_SECRET=${process.env.MAIL_MS_CLIENT_SECRET}
+API_MAIL_MS_TENANT_ID=${process.env.MAIL_MS_TENANT_ID}
 
 API_COOKIE_SECRET=${process.env.API_COOKIE_SECRET}
 API_COOKIE_ONLY_SECURE=${process.env.API_COOKIE_ONLY_SECURE}
@@ -250,6 +278,10 @@ AUTH_MAIL_SERVER_USER_NAME=${process.env.AUTH_MAIL_SERVER_USER_NAME}
 AUTH_FROM_NAME=${process.env.AUTH_FROM_NAME}
 AUTH_FROM_EMAIL=${process.env.AUTH_FROM_EMAIL}
 AUTH_EMAIL_ASSETS_URL=${process.env.AUTH_EMAIL_ASSETS_URL}
+AUTH_MAIL_TRANSPORTER_TYPE=${process.env.MAIL_TRANSPORTER_TYPE}
+AUTH_MAIL_MS_CLIENT_ID=${process.env.MAIL_MS_CLIENT_ID}
+AUTH_MAIL_MS_CLIENT_SECRET=${process.env.MAIL_MS_CLIENT_SECRET}
+AUTH_MAIL_MS_TENANT_ID=${process.env.MAIL_MS_TENANT_ID}
 
 AUTH_SESSION_SECRET=${process.env.AUTH_SESSION_SECRET}
 AUTH_COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF}
@@ -259,6 +291,7 @@ AUTH_ADMIN_CLIENT_SECRET=${process.env.AUTH_ADMIN_CLIENT_SECRET}
 AUTH_FIRST_CLIENT_ID=${process.env.AUTH_FIRST_CLIENT_ID}
 AUTH_FIRST_CLIENT_SECRET=${process.env.AUTH_FIRST_CLIENT_SECRET}
 AUTH_FIRST_LOGIN_CODE=${process.env.AUTH_FIRST_LOGIN_CODE}
+AUTH_PHONE_HASH_SALT=${process.env.AUTH_PHONE_HASH_SALT}
 
 #KPN_CLIENT_ID=${process.env.KPN_CLIENT_ID}
 #KPN_CLIENT_SECRET=${process.env.KPN_CLIENT_SECRET}
@@ -277,6 +310,9 @@ IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}
 IMAGE_THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 IMAGE_THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
 IMAGE_THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
+
+IMAGE_HQ_ORIGINAL_MAX_PIXELS=${process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS}
+DISABLE_WEBP_CONVERSION=${process.env.DISABLE_WEBP_CONVERSION}
 
 #admin server
 ADMIN_URL=${process.env.ADMIN_URL}

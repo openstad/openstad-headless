@@ -1,5 +1,17 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { authMiddleware, getSession } from './auth';
+import { HasAccess } from './lib/hasAccess';
+
+const restrictedPaths = [
+  '/areas',
+  '/duplicate',
+  '/settings/anonymization',
+  '/settings/notifications',
+  '/settings/alloweddomains',
+  '/settings/design',
+  '/authentication/2fa',
+  '/export',
+];
 
 export default async function middleware(req: NextRequest) {
 
@@ -31,6 +43,19 @@ export default async function middleware(req: NextRequest) {
     const session = await getSession(req, res);
     session.destroy()
     return NextResponse.redirect(`${process.env.API_URL}/auth/project/1/logout?useAuth=default&redirectUri=${process.env.URL}/`, { headers: res.headers });
+  }
+
+  const match = req.nextUrl.pathname.match(/^\/projects\/(\d+)(\/.*)?$/);
+
+  if (match) {
+    const subPath = match[2] || '/';
+    const projectId = match[1];
+
+    if (!HasAccess(session?.user) && restrictedPaths.includes(subPath)) {
+      return NextResponse.redirect(`${process.env.URL}/projects/${projectId}/widgets`);
+    } else if (!HasAccess(session?.user) && subPath === '/settings') {
+      return NextResponse.redirect(`${process.env.URL}/projects/${projectId}/settings/voting`);
+    }
   }
 
   return authMiddleware(req, res);

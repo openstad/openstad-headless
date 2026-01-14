@@ -2,6 +2,8 @@ const express = require('express');
 const db      = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const createError = require('http-errors');
 
 let router = express.Router({mergeParams: true});
 
@@ -43,6 +45,7 @@ router.route('/')
 
     // create Action
     // ---------------
+    .post(rateLimiter())
     .post(auth.can('Action', 'create'))
     .post(function(req, res, next) {
         const data = req.body;
@@ -70,7 +73,9 @@ router.route('/:actionId(\\d+)')
          //   .scope(...req.scope)
             .findOne({ where: { id: actionId } })
             .then(found => {
-                if ( !found ) throw new Error('Action not found');
+                if (!found) {
+                  return next(createError(404, 'Action not found'));
+                }
                 req.results = found;
                 next();
             })
@@ -87,6 +92,7 @@ router.route('/:actionId(\\d+)')
 
     // update action
     // ---------------
+    .put(rateLimiter())
     .put(auth.useReqUser)
     .put(function(req, res, next) {
         const action = req.results;

@@ -55,10 +55,10 @@ function Activity({
       api: props.api,
   });
 
-  // get userId from session storage, perhaps we should change this in the future.
-  const sessionData = sessionStorage.getItem('openstad');
+  // get userId from local storage, perhaps we should change this in the future.
+  const sessionData = localStorage.getItem('openstad');
   const userId = sessionData ? JSON.parse(sessionData)[props.projectId]?.openStadUser?.id : null;
-  
+
   const {
       data: userActivityData,
       error: activityError,
@@ -68,14 +68,14 @@ function Activity({
   const getActivityData = () => {
     if(activityDataLoading === false && activityData === undefined ){
       // Get all activities, and sort them by project id (other than this project id and current project id), data.activitiy is the array
-      const others = userActivityData.activity.filter((data: any) => data?.resource?.projectId != props.projectId);
-      const current = userActivityData.activity.filter((data: any) => data?.resource?.projectId == props.projectId);
+      const others = userActivityData?.activity?.filter((data: any) => data?.resource?.projectId != props.projectId);
+      const current = userActivityData?.activity?.filter((data: any) => data?.resource?.projectId == props.projectId);
 
       let formattedCurrent: ActivityData[] = [];
       let formattedOthers: ActivityData[] = [];
 
       // format each activity like the activityData type
-      current.forEach((activity: any) => {
+      current?.forEach((activity: any) => {
         formattedCurrent.push({
           date: activity?.createdAt ?? '',
           description: activity?.description  ?? '-',
@@ -85,7 +85,7 @@ function Activity({
         });
       });
 
-      others.forEach((activity: any) => {
+      others?.forEach((activity: any) => {
         formattedOthers.push({
           date: activity?.createdAt ?? '',
           description: activity?.description ?? '-',
@@ -106,7 +106,7 @@ function Activity({
   React.useEffect(() => {
     getActivityData();
   }, [activityDataLoading]);
-  
+
   const listItem = (data: ActivityData, key: number) => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const date = new Date(data.date);

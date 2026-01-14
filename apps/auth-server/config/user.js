@@ -31,6 +31,15 @@ exports.fields = [
     key: 'city',
     label: 'Woonplaats',
   },
+  {
+    key: 'emailNotificationConsent',
+    label: 'E-mail notificatie toestemming',
+    type: 'checkbox',
+  },
+  {
+    key: 'accessCode',
+    label: 'Toegangscode',
+  },
 ];
 
 exports.validation = {

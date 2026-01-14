@@ -15,20 +15,39 @@ import React from 'react';
 
 const EditorMap = ({
   fieldName = 'location',
-  centerOnEditorMarker = true,
+  centerOnEditorMarker = false,
   editorMarker = undefined,
   markerIcon = undefined,
   center = undefined,
   markers = [],
   onChange,
   fieldRequired = false,
+  overrideDefaultValue = {},
+  defaultValue = {},
   ...props
 }: PropsWithChildren<EditorMapWidgetProps>) => {
+  const isValidLocation = (val: any): val is { lat: number; lng: number; icon?: string } =>
+    val && typeof val === 'object' && 'lat' in val && 'lng' in val;
+
+  const initialValue =
+    isValidLocation(overrideDefaultValue)
+      ? overrideDefaultValue
+      : isValidLocation(defaultValue)
+        ? defaultValue
+        : editorMarker;
+
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
-    ...editorMarker,
-    icon: editorMarker?.icon || markerIcon,
+    ...initialValue,
+    icon: initialValue?.icon || markerIcon,
     doNotCluster: true,
   });
+
+  useEffect(() => {
+    if (isValidLocation(initialValue) && onChange) {
+      onChange({ name: fieldName, value: initialValue });
+    }
+  }, [JSON.stringify(initialValue)]);
+
   parseLocation(currentEditorMarker); // unify location format
 
   let [currentCenter, setCurrentCenter] = useState(center);
@@ -78,6 +97,8 @@ const EditorMap = ({
         markers={[currentEditorMarker]}
         onClick={updateLocation}
         onMarkerClick={removeMarker}
+        zoomAfterInit={false}
+        autoZoomAndCenter="area"
       />
 
       <input

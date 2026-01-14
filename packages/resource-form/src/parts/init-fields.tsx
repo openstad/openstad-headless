@@ -1,5 +1,5 @@
-import {FieldProps} from "@openstad-headless/form/src/props.js";
-import React from "react";
+import { FieldProps } from "@openstad-headless/form/src/props.js";
+import React, { useEffect } from "react";
 import DataStore from "@openstad-headless/data-store/src";
 
 const getMinMaxByField = (key, data) => {
@@ -17,7 +17,7 @@ export const InitializeFormFields = (items, data) => {
         });
         for (const item of items) {
 
-            if ( item.type === 'tags' ) {
+            if (item.type === 'tags') {
 
                 const { data: tags } = datastore.useTags({
                     projectId: data.projectId,
@@ -29,7 +29,7 @@ export const InitializeFormFields = (items, data) => {
                         .filter((tag: any) => tag.type === item.tags)
                         .map((tag: any, index: number) => ({
                             trigger: `${index}`,
-                            titles: [{text: tag.name, key: tag.id}],
+                            titles: [{ text: tag.name, key: tag.id }],
                             images: []
                         }))
                     : [];
@@ -52,11 +52,24 @@ export const InitializeFormFields = (items, data) => {
                 minCharactersWarning: data?.general?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.general?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.general?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+                routingInitiallyHide: item?.routingInitiallyHide || false,
+                routingSelectedQuestion: item?.routingSelectedQuestion || '',
+                routingSelectedAnswer: item?.routingSelectedAnswer || '',
+                trigger: item.trigger || '',
+                selectAll: item?.selectAll || false,
+                selectAllLabel: item?.selectAllLabel || '',
             };
 
-            if ( item.defaultValue ) {
+            if (item.defaultValue) {
                 fieldData['defaultValue'] = item.defaultValue;
             }
+
+            const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+            if (params && params[item.fieldKey]) {
+                fieldData['defaultValue'] = params[item.fieldKey];
+            }
+
+
 
             switch (item.type) {
                 case 'checkbox':
@@ -76,7 +89,8 @@ export const InitializeFormFields = (items, data) => {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 isOtherOption: option.titles[0].isOtherOption,
-                                defaultValue: option.titles[0].defaultValue
+                                defaultValue: option.titles[0].defaultValue,
+                                trigger: option.trigger || ''
                             }
                         });
 
@@ -100,19 +114,39 @@ export const InitializeFormFields = (items, data) => {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return { value: (option.titles[0].key).toString(), label: option.titles[0].text }
+                            return {
+                                value: (option.titles[0].key).toString(),
+                                label: option.titles[0].text,
+                                trigger: option.trigger || ''
+                            }
                         });
                     }
                     break;
                 case 'budget':
                     fieldData['format'] = true;
                     break;
-                
+                case 'map':
+                case 'location':
+                    if (!!data?.datalayer) {
+                        fieldData['datalayer'] = data?.datalayer;
+                    }
+
+                    if (typeof (data?.enableOnOffSwitching) === 'boolean') {
+                        fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
+                    }
+                    break;
+                case 'matrix':
+                    fieldData['type'] = 'matrix';
+                    fieldData['matrix'] = item?.matrix || undefined;
+                    fieldData['matrixMultiple'] = item?.matrixMultiple || false;
+                    fieldData['defaultValue'] = [];
+                    break;
             }
 
             formFields.push(fieldData);
         }
     }
+
 
     return formFields;
 }

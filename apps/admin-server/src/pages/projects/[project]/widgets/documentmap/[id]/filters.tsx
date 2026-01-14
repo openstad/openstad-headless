@@ -23,6 +23,7 @@ import _ from 'lodash';
 import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   tagGroups: z
@@ -35,7 +36,8 @@ const formSchema = z.object({
     )
     .refine((value) => value.some((item) => item), {
       message: 'You have to select at least one item.',
-    })
+    }),
+  filterBehavior: z.string().optional(),
 });
 
 type Tag = {
@@ -71,6 +73,7 @@ export default function DocumentFilters(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       tagGroups: props.tagGroups || [],
+      filterBehavior: props?.filterBehavior || 'or',
     },
   });
 
@@ -82,6 +85,37 @@ export default function DocumentFilters(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
+
+          <FormField
+            control={form.control}
+            name="filterBehavior"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Kies de manier waarop je de filters wilt combineren
+                </FormLabel>
+                <FormDescription>
+                  <strong>Of</strong>: Als er meerdere filters actief zijn, wordt alleen één van de filters toegepast. Bijvoorbeeld, als je zoekt op meerdere eigenschappen, wordt er een resultaat getoond als één van die eigenschappen overeenkomt.<br />
+                  <strong>En</strong>: Als er meerdere filters actief zijn, moeten alle filters tegelijkertijd van toepassing zijn. Alleen resultaten die aan alle geselecteerde criteria voldoen, worden getoond.
+                </FormDescription>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'or'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Of" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="or">Of</SelectItem>
+                    <SelectItem value="and">En</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}

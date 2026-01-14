@@ -7,25 +7,40 @@ import './footer.css';
 
 interface Item {
   content: string;
+  logo?: any;
+  alt?: string;
 };
 
-function Footer({ content }: Item) {
+function Footer({
+  content,
+  logo = null,
+  alt = ''
+}: Item) {
+  const hasValidLogo = logo && JSON.parse(logo)?._urls?.original;
+
   return (
     <footer>
       <div className="container">
         {JSON.parse(content).map((section: any, index: number) => (
           <div key={index} className="footer-section">
-            <Heading level={2} appearance="utrecht-heading-4">{section.title}</Heading>
-            <Paragraph> {section.intro} </Paragraph>
-            <ul>
-              {section.items.map((item: any, index: number) => (
-                <li key={index}>
-                  <Link href={item.url}>{item.label}</Link>
-                </li>
-              ))}
-            </ul>
+            {section?.title && (<Heading level={2} appearance="utrecht-heading-4">{section.title}</Heading>)}
+            {section?.intro && (<Paragraph> {section.intro} </Paragraph>)}
+            {(!!section.items && section.items.length > 0) && (
+              <ul>
+                {section.items.map((item: any, index: number) => (
+                  <li key={index}>
+                    <Link href={item.url}>{item.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         ))}
+        {hasValidLogo &&
+          <figure className="footer-logo">
+            <img src={JSON.parse(logo)?._urls?.original} alt={alt || 'Afbeelding van het logo'} />
+          </figure>
+        }
       </div>
     </footer>
   )

@@ -124,7 +124,7 @@ export default function ProjectComments() {
         <ul>
           {comments.map((comment: any) => (
               <React.Fragment key={comment.id}>
-                <li className={`grid grid-cols-3 lg:grid-cols-9 items-center py-3 px-2`}>
+                <li className={`grid grid-cols-3 lg:grid-cols-12 items-center py-3 px-2`}>
                   <div className="col-span-1 truncate">
                     <Paragraph>{comment.id}</Paragraph>
                   </div>
@@ -145,6 +145,15 @@ export default function ProjectComments() {
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                     {comment.sentiment}
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate my-auto">
+                    {comment.yes || 0}
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate my-auto">
+                    {comment.no || 0}
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate my-auto">
+                    {comment.score || 0}
                   </Paragraph>
                   <div className="hidden lg:col-span-1 lg:flex ml-auto">
                     <RemoveResourceDialog
@@ -230,7 +239,7 @@ export default function ProjectComments() {
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
-            <div className="grid grid-cols-1 lg:grid-cols-9 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-12 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button className="filter-button" onClick={(e) => {
                   const sortedData = sortTable('id', e, filterData);
@@ -269,6 +278,21 @@ export default function ProjectComments() {
                   setFilterData(sortedData ? sortedData : []);
                 }}>
                   Sentiment
+                </button>
+              </ListHeading>
+             <ListHeading className="hidden lg:flex lg:col-span-1">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('voted-yes', e, filterData))}>
+                  Gestemd op ja
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('voted-no', e, filterData))}>
+                  Gestemd op nee
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('score', e, filterData))}>
+                  Wilson score interval
                 </button>
               </ListHeading>
             </div>

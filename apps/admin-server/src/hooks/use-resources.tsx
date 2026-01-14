@@ -1,10 +1,10 @@
 import useSWR from 'swr';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useResources(projectId?: string) {
+export default function useResources(projectId?: string, includeGlobalTags?: boolean) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const url = `/api/openstad/api/project/${projectNumber}/resource?includeUserVote=1&includeVoteCount=1`;
+  const url = `/api/openstad/api/project/${projectNumber}/resource?includeUser=1&includeVoteCount=1&includeTags=1`;
 
   const resourcesListSwr = useSWR(projectNumber ? url : null);
 
@@ -27,7 +27,11 @@ export default function useResources(projectId?: string) {
   }
 
   async function update(id: number, body: any) {
-    const updateUrl = `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
+    let updateUrl = `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
+
+    if (includeGlobalTags) {
+      updateUrl += '&includeGlobalTags=true';
+    }
 
     const res = await fetch(updateUrl, {
       method: 'PUT',
@@ -49,14 +53,17 @@ export default function useResources(projectId?: string) {
     }
   }
 
-  async function remove(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
+  async function remove(id: number, multiple?: boolean, ids?: number[]) {
+    const deleteUrl = multiple
+      ? `/api/openstad/api/project/${projectNumber}/resource/delete`
+      : `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: multiple ? JSON.stringify({ ids }) : undefined,
     });
 
     if (res.ok) {
@@ -68,5 +75,27 @@ export default function useResources(projectId?: string) {
       throw new Error('Could not remove the plan');
     }
   }
-  return { ...resourcesListSwr, create, update, remove };
+
+  async function duplicate(ids: number[]) {
+    const duplicateUrl = `/api/openstad/api/project/${projectNumber}/resource/duplicate`;
+
+    const res = await fetch(duplicateUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+
+      resourcesListSwr.mutate([...resourcesListSwr.data, ...data]);
+      return data;
+    } else {
+      throw new Error('Could not duplicate the widgets');
+    }
+  }
+
+  return { ...resourcesListSwr, create, update, remove, duplicate };
 }

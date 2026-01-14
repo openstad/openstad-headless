@@ -9,16 +9,18 @@ import './accordion.css';
 interface Item {
   content: any;
   label: string;
+  headingLevel?: number;
 };
 
-function Accordion({ content, label }: Item) {
+function Accordion({ content, label, headingLevel = 2 }: Item) {
   return (
     <AccordionProvider
       sections={[
         {
+          headingLevel: headingLevel,
           body: <div className="rte" dangerouslySetInnerHTML={{ __html: RenderContent(content) }} />,
           expanded: false,
-          label: label
+          label: label,
         }
       ]}
     />

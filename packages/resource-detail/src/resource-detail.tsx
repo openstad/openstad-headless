@@ -16,7 +16,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useId } from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
@@ -28,6 +28,8 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { Button } from '@utrecht/component-library-react';
 import { hasRole } from '../../lib';
+import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 type booleanProps = {
   [K in
@@ -37,6 +39,7 @@ type booleanProps = {
   | 'displayModBreak'
   | 'displaySummary'
   | 'displayDescription'
+  | 'displayDescriptionExpandable'
   | 'displayUser'
   | 'displayDate'
   | 'displayBudget'
@@ -48,12 +51,18 @@ type booleanProps = {
   | 'displayDocuments'
   | 'clickableImage'
   | 'displayStatusBar'
+  | 'displayEditResourceButton'
+  | 'displayDeleteButton'
+  | 'displayDeleteEditButtonOnTop'
   | 'displaySocials']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
   documentsTitle?: string;
   documentsDesc?: string;
+  displayDescriptionExpandable_expandBeforeText?: string;
+  displayDescriptionExpandable_expandAfterText?: string;
+  displayDescriptionExpandable_visibleLines?: string;
 } &
   BaseProps &
   ProjectSettingProps & {
@@ -63,7 +72,9 @@ export type ResourceDetailWidgetProps = {
     backUrlIdRelativePath?: string;
     pageTitle?: boolean;
     backUrlText?: string;
-  } & booleanProps & {
+    urlWithResourceFormForEditing?: string;
+    displayDeleteButton?: boolean;
+  } & MapPropsType & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -74,6 +85,10 @@ export type ResourceDetailWidgetProps = {
     >;
     commentsWidget_multiple?: Omit<
       CommentsWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
+    resourceOverviewMapWidget?: Omit<
+      ResourceOverviewMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     resourceDetailMap?: Omit<
@@ -94,6 +109,10 @@ function ResourceDetail({
   displayModBreak = true,
   displaySummary = true,
   displayDescription = true,
+  displayDescriptionExpandable = false,
+  displayDescriptionExpandable_expandBeforeText = 'Lees meer',
+  displayDescriptionExpandable_expandAfterText = 'Lees minder',
+  displayDescriptionExpandable_visibleLines = '4',
   displayUser = true,
   displayDate = true,
   displayBudget = true,
@@ -110,9 +129,18 @@ function ResourceDetail({
   documentsDesc = '',
   backUrlText = 'Terug naar het document',
   backUrlIdRelativePath = '',
+  resourceOverviewMapWidget = {},
+  displayEditResourceButton = false,
+  urlWithResourceFormForEditing = '',
+  displayDeleteButton = true,
+  displayDeleteEditButtonOnTop = false,
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [showAccordion, setShowAccordion] = useState(false);
+  const descriptionRef = React.useRef<HTMLDivElement>(null);
+  const id = useId();
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -125,7 +153,7 @@ function ResourceDetail({
     resourceId: resourceId,
     api: props.api,
   });
-  const { data: resource } = datastore.useResource({
+  const { data: resource, canEdit, canDelete } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });
@@ -209,11 +237,15 @@ function ResourceDetail({
     useSentiments = JSON.parse(useSentiments);
   }
 
-  const firstStatus = resource.statuses
-    ? resource.statuses
-    .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-    .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
-    : false;
+  const statuses = (resource?.statuses || []).length ? resource.statuses
+    ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+      if (a.seqnr === undefined || a.seqnr === null) return 1;
+      if (b.seqnr === undefined || b.seqnr === null) return -1;
+      return a.seqnr - b.seqnr;
+    })
+  : [];
+
+  const firstStatus = statuses && statuses.length > 0 ? statuses[0] : false;
 
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
   const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
@@ -231,6 +263,11 @@ function ResourceDetail({
                 <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                   {resource.statuses
                     ?.map((s: { name: string }) => s.name)
+                    ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                      if (a.seqnr === undefined || a.seqnr === null) return 1;
+                      if (b.seqnr === undefined || b.seqnr === null) return -1;
+                      return a.seqnr - b.seqnr;
+                    })
                     ?.join(', ')}
                 </Paragraph>
               </div>
@@ -257,10 +294,6 @@ function ResourceDetail({
     );
   };
 
-  const { data: currentUser, isLoading: userIsLoading } = datastore.useCurrentUser({ ...props });
-  const resourceUserId = resource?.userId || null;
-  const canDelete = !userIsLoading && hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
-
   const onRemoveClick = async (resource: any) => {
     try {
       if (typeof resource.delete === 'function') {
@@ -279,13 +312,65 @@ function ResourceDetail({
 
   useEffect(() => {
     if (props.pageTitle === true && resource.title !== undefined) {
-      const current = document.title.includes(' - ') && document.title.split(' - ')[0].length ? ' - '+ document.title.split(' - ')[0] : '';
+      const current = document.title.includes(' - ') && document.title.split(' - ')[0].length ? ' - ' + document.title.split(' - ')[0] : '';
       document.title = resource.title + current;
     }
   }, [resource]);
 
+  useEffect(() => {
+    if (displayDescriptionExpandable && descriptionRef.current) {
+      const lineHeight = parseFloat(getComputedStyle(descriptionRef.current).lineHeight || '1.65');
+      const visibleLines = parseInt(displayDescriptionExpandable_visibleLines, 10) || 4;
+      const maxHeight = lineHeight * visibleLines;
+      const contentHeight = descriptionRef.current.scrollHeight;
+      setShowAccordion(contentHeight > maxHeight);
+    }
+  }, [resource?.description, displayDescriptionExpandable, displayDescriptionExpandable_visibleLines, expanded]);
+
+  const dataLayerSettings = !!resourceOverviewMapWidget?.datalayer ? {
+    datalayer: resourceOverviewMapWidget?.datalayer || [],
+    enableOnOffSwitching: resourceOverviewMapWidget?.enableOnOffSwitching || false,
+  } : {};
+
+  const GroupButtonDeleteEdit = () => (
+    <ButtonGroup>
+      {(canDelete && displayDeleteButton) && (
+        <>
+          <Spacer size={2} />
+          <Button
+            appearance="primary-action-button"
+            onClick={() => {
+              if (confirm("De inzending wordt verwijderd. Dit kan niet teruggedraaid worden. Doorgaan?"))
+                onRemoveClick(resource);
+            }}
+          >
+            <Icon icon="ri-delete-bin-line"></Icon>
+            Verwijder de inzending
+          </Button>
+        </>
+      )}
+
+      {(canEdit && displayEditResourceButton && urlWithResourceFormForEditing) && (
+        <>
+          <Spacer size={2} />
+          <Button
+            appearance="primary-action-button"
+            onClick={() => {
+              const hrefUrl = `${urlWithResourceFormForEditing}?openstadResourceId=${resource.id}`;
+              document.location.href = hrefUrl;
+            }}
+          >
+            <Icon icon="ri-edit-box-line"></Icon>
+            Bewerk de inzending
+          </Button>
+        </>
+      )}
+    </ButtonGroup>
+  )
+
   return (
-    <section>
+    <section className="osc-resource-detail-widget-container">
+      {displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
       <div
         className={`osc ${shouldHaveSideColumn
           ? 'osc-resource-detail-column-container'
@@ -355,7 +440,40 @@ function ResourceDetail({
               <div className="resource-detail-content">
                 {displaySummary && <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading>}
                 {displayDescription && (
-                  <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                  !displayDescriptionExpandable ? (
+                    <div className="resource-detail-description">
+                      <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                    </div>
+                  ) : (
+                    showAccordion ? (
+                      <div className="resource-detail-description --expandable">
+                        <div className="dd-accordion ">
+                          <div id={id} className="dd-accordion-container" role="region" aria-hidden={!expanded}>
+                            <div className="dd-accordion-content-wrapper" data-visible-lines={displayDescriptionExpandable_visibleLines}>
+                              <div className="dd-accordion-content" ref={descriptionRef}>
+                                <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            appearance="primary-action-button"
+                            type="button"
+                            className="dd-accordion-trigger"
+                            aria-expanded={expanded}
+                            aria-controls={id} onClick={() => setExpanded(!expanded)}>
+                            <span>{expanded ? displayDescriptionExpandable_expandAfterText : displayDescriptionExpandable_expandBeforeText}</span>
+                            <i className="ri-arrow-drop-down-line icon"></i>
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="resource-detail-description">
+                        <div ref={descriptionRef}>
+                          <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }}></Paragraph>
+                        </div>
+                      </div>
+                    )
+                  )
                 )}
               </div>
               {displayLocation && resource.location && (
@@ -364,7 +482,9 @@ function ResourceDetail({
                   <ResourceDetailMap
                     resourceId={resource.id || resourceId || '0'}
                     resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
+                    {...resourceOverviewMapWidget}
                     {...props}
+                    dataLayerSettings={dataLayerSettings}
                     center={resource.location}
                     area={props.resourceDetailMap?.area}
                   />
@@ -404,7 +524,7 @@ function ResourceDetail({
                   <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {resource.statuses?.map((s: { name: string }) => (
+                    {statuses?.map((s: { name: string }) => (
                       <Pill light rounded text={s.name}></Pill>
                     ))}
                   </div>
@@ -419,8 +539,13 @@ function ResourceDetail({
 
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {(resource.tags as Array<{ type: string; name: string }>)
+                    {(resource.tags as Array<{ type: string; name: string, seqnr?: number }>)
                       ?.filter((t) => t.type !== 'status')
+                      ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                        if (a.seqnr === undefined || a.seqnr === null) return 1;
+                        if (b.seqnr === undefined || b.seqnr === null) return -1;
+                        return a.seqnr - b.seqnr;
+                      })
                       ?.map((t) => <Pill text={t.name} />)}
                   </div>
                   <Spacer size={2} />
@@ -463,20 +588,7 @@ function ResourceDetail({
         ) : null}
       </div>
 
-      {canDelete && (
-        <>
-          <Spacer size={2} />
-          <Button
-            appearance="primary-action-button"
-            onClick={() => {
-              if (confirm("Deze actie verwijderd de resource"))
-                onRemoveClick(resource);
-            }}
-          >
-            Verwijder de inzending
-          </Button>
-        </>
-      )}
+      {!displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
 
       <Spacer size={2} />
 
@@ -496,9 +608,20 @@ function ResourceDetail({
             closedText={props.commentsWidget?.closedText}
             itemsPerPage={props.commentsWidget?.itemsPerPage}
             displayPagination={props.commentsWidget?.displayPagination}
+            confirmation={ props.commentsWidget?.confirmation }
+            overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+            confirmationReplies={ props.commentsWidget?.confirmationReplies }
+            extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
+            defaultTags={props.commentsWidget?.defaultTags}
+            includeOrExclude={props.commentsWidget?.includeOrExclude}
+            onlyIncludeOrExcludeTagIds={props.commentsWidget?.onlyIncludeOrExcludeTagIds}
+            displaySearchBar={props.commentsWidget?.displaySearchBar}
+            variant={props.commentsWidget?.variant}
+            extraReplyButton={ props.commentsWidget?.extraReplyButton }
+            defaultSorting={ props.commentsWidget?.defaultSorting }
+            sorting={ props.commentsWidget?.sorting }
             sentiment={useSentiments[0]}
           />
-
           {useSentiments?.length > 1 && (
             <Comments
               {...props}
@@ -513,6 +636,17 @@ function ResourceDetail({
               closedText={props.commentsWidget_multiple?.closedText}
               itemsPerPage={props.commentsWidget?.itemsPerPage}
               displayPagination={props.commentsWidget?.displayPagination}
+              confirmation={ props.commentsWidget?.confirmation }
+              overwriteEmailAddress={ props.commentsWidget?.overwriteEmailAddress }
+              confirmationReplies={ props.commentsWidget?.confirmationReplies }
+              extraFieldsTagGroups={props.commentsWidget?.extraFieldsTagGroups}
+              defaultTags={props.commentsWidget?.defaultTags}
+              includeOrExclude={props.commentsWidget?.includeOrExclude}
+              onlyIncludeOrExcludeTagIds={props.commentsWidget?.onlyIncludeOrExcludeTagIds}
+              displaySearchBar={props.commentsWidget?.displaySearchBar}
+              variant={props.commentsWidget?.variant}
+              extraReplyButton={ props.commentsWidget?.extraReplyButton }
+              sorting={ props.commentsWidget?.sorting }
               sentiment={useSentiments[1]}
             />
           )}

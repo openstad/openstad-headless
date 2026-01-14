@@ -6,7 +6,7 @@ import "@utrecht/design-tokens/dist/root.css";
 import { Select as NLDS_Select, SelectOption } from "@utrecht/component-library-react";
 
 type Props = {
-  onValueChange?: (resource: any) => void;
+  onValueChange?: (resource: any, label?: string) => void;
   options?: Array<{ value: string; label: string }>;
   disableDefaultOption?: boolean;
 } & React.SelectHTMLAttributes<HTMLSelectElement>;
@@ -23,7 +23,7 @@ const Select = forwardRef<HTMLSelectElement, Props>(
         className={`select ${props.className}`}
         onChange={
           props.onChange ||
-          ((e) => onValueChange && onValueChange(e.target.value))
+          ((e) => onValueChange && onValueChange(e.target.value, e.target?.selectedOptions[0]?.dataset?.label || ''))
         }>
         {props.children}
 
@@ -35,7 +35,7 @@ const Select = forwardRef<HTMLSelectElement, Props>(
 
         {selectOptions.map((option) => (
           <React.Fragment key={`select-item-${option.label}`}>
-            <SelectOption className="select-item" value={option.value}>
+            <SelectOption className="select-item" value={option.value} data-label={option.label}>
               {option.label}
             </SelectOption>
           </React.Fragment>

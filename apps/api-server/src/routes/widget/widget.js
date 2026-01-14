@@ -116,7 +116,9 @@ router
       include: [db.Project.scope('includeAreas')],
     })
       .then((found) => {
-        if (!found) throw new Error('Widget not found');
+        if (!found) {
+          return next(createError(404, 'Widget not found'));
+        }
         req.widget = found;
         next();
       })
@@ -190,6 +192,8 @@ function getDefaultConfig(project, widgetType) {
   const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
 
   let url = process.env.IMAGE_APP_URL;
+  let zipCodeAutofillApiUrl = process.env.ZIPCODE_AUTOFILL_API_URL;
+  let zipCodeApiUrl = process.env.ZIPCODE_API_URL;
 
   let protocol = '';
 
@@ -212,6 +216,8 @@ function getDefaultConfig(project, widgetType) {
     },
     projectId: project.id,
     imageUrl: config.url + `/api/project/${project.id}/upload`,
+    zipCodeApiUrl: zipCodeApiUrl || '',
+    zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
   };
 
   if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {
@@ -372,9 +378,11 @@ function getWidgetJavascriptOutput(
         const currentScript = document.currentScript;
           currentScript.insertAdjacentHTML('afterend', \`<div class="openstad" id="\${randomComponentId}"></div>\`);
 
-          const redirectUri = encodeURI(window.location.href);
+          const redirectUri = new URL(encodeURI(window.location.href));
+          redirectUri.searchParams.delete('openstadlogout');
+          redirectUri.searchParams.delete('openstadlogintoken');
           
-          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
+          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", encodeURIComponent(redirectUri.toString())));
           
           function insertCssLinks(urls) {
             const head = document.querySelector('head');

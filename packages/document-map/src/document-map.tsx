@@ -1,5 +1,5 @@
 import DataStore from '@openstad-headless/data-store/src';
-import { Comments } from '@openstad-headless/comments/src/comments';
+import {Comments, CommentsWidgetProps} from '@openstad-headless/comments/src/comments';
 import hasRole from '../../lib/has-role';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
@@ -34,6 +34,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 import './gesture';
+import { FormValue } from '@openstad-headless/form/src/form';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -70,9 +71,15 @@ export type DocumentMapProps = BaseProps &
     displayResourceInfo?: string;
     displayMapSide?: string;
     displayResourceDescription?: string;
+    displayResourceTitle?: string;
+    displayResourceSummary?: string;
     infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
+    commentsWidget?: Omit<
+      CommentsWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     largeDoc?: boolean;
@@ -94,6 +101,10 @@ export type DocumentMapProps = BaseProps &
     maxCharactersWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
+    filterBehavior?: string;
+    defaultSorting?: string;
+    sorting?: Array<{ value: string; label: string }>;
+    displaySearchBar?: boolean;
   };
 
 
@@ -119,6 +130,8 @@ function DocumentMap({
   displayResourceInfo = 'left',
   displayMapSide = 'left',
   displayResourceDescription = 'no',
+  displayResourceTitle = 'yes',
+  displayResourceSummary = 'yes',
   infoPopupContent = 'Op deze afbeelding kun je reacties plaatsen. Klik op de afbeelding om een reactie toe te voegen. Klik op een marker om de bijbehorende reacties te bekijken.',
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
@@ -133,8 +146,16 @@ function DocumentMap({
   onlyAllowClickOnImage = false,
   popupNotLoggedInText = 'Om een reactie te plaatsen, moet je ingelogd zijn.',
   popupNotLoggedInButton = 'Inloggen',
+  filterBehavior = 'or',
+  defaultSorting,
+  sorting = [],
+  displaySearchBar = false,
   ...props
 }: DocumentMapProps) {
+  const [sort, setSort] = useState<string | undefined>(
+    defaultSorting || "createdAt_asc"
+  );
+  const [search, setSearch] = useState<string>('');
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -205,11 +226,16 @@ function DocumentMap({
   const [selectedTags, setSelectedTags] = useState<Array<number>>(urlTagIdsArray);
   const [selectedTagsString, setSelectedTagsString] = useState<string>( urlTagIdsArray?.join(',') || '' );
 
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
+
   const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: sentiment,
     onlyIncludeTagIds: filteredTagsIdsString || undefined,
+    search: search || '',
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
@@ -249,7 +275,15 @@ function DocumentMap({
           return false;
         }
 
-        return comment?.tags.some((tag: any) => finalAllTagsToFilter.includes(tag.id));
+        if (filterBehavior === 'and') {
+          return finalAllTagsToFilter.every(tagId =>
+            comment.tags?.some((tag: { id: number }) => tag.id === tagId)
+          );
+        } else {
+          return comment.tags?.some((tag: { id: number }) =>
+            finalAllTagsToFilter.includes(tag.id)
+          );
+        }
       });
 
     const tagsNewString = !!finalAllTagsToFilter ? finalAllTagsToFilter.join(',') : '';
@@ -790,9 +824,8 @@ function DocumentMap({
               </div>
               {displayResourceInfo === 'left' && (
                 <section className="content-intro">
-                  {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-                  {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
-
+                  {(displayResourceTitle === 'yes' && resource.title) ? <Heading level={1}>{resource.title}</Heading> : null}
+                  {(displayResourceSummary === 'yes' && resource.summary) ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
                   {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
                 </section>
               )}
@@ -802,9 +835,8 @@ function DocumentMap({
           {displayResourceInfo === 'right' && (
             <div className="content-container mobileonly">
               <section className="content-intro">
-                {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-                {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
-
+                {(displayResourceTitle === 'yes' && resource.title) ? <Heading level={1}>{resource.title}</Heading> : null}
+                {(displayResourceSummary === 'yes' && resource.summary) ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
                 {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
               </section>
             </div>
@@ -895,6 +927,7 @@ function DocumentMap({
 
                               {group && group.multiple ? (
                                 <MultiSelect
+                                  id={group.type}
                                   label={'Selecteer een optie'}
                                   onItemSelected={(optionValue: string) => {
                                     const value = parseInt(optionValue, 10);
@@ -914,7 +947,7 @@ function DocumentMap({
                                     label: tag.name
                                   })))}
                                   fieldKey={`tag[${group.type}]`}
-                                  onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
+                                  onChange={(e: { name: string; value: FormValue; }) => {
                                     let selectedTag = e.value as string;
 
                                     updateTagListMultiple(parseInt(selectedTag, 10));
@@ -1018,12 +1051,9 @@ function DocumentMap({
 
           {displayResourceInfo === 'right' && (
             <section className="content-intro desktoponly">
-              {resource.title ? <Heading level={1} appearance='utrecht-heading-2'>{resource.title}</Heading> : null}
-              <Spacer size={1}/>
-              {resource.summary ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
-
+              {(displayResourceTitle === 'yes' && resource.title) ? <><Heading level={1} appearance='utrecht-heading-2'>{resource.title}</Heading><Spacer size={1}/></> : null}
+              {(displayResourceSummary === 'yes' && resource.summary) ? <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{ __html: resource.summary }}></Heading> : null}
               {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
-
             </section>
           )}
 
@@ -1031,9 +1061,9 @@ function DocumentMap({
             <Filters
               className="osc-flex-columned"
               dataStore={datastore}
-              defaultSorting=""
-              displaySearch={false}
-              displaySorting={false}
+              defaultSorting={defaultSorting || 'createdAt_asc'}
+              displaySearch={ displaySearchBar || false }
+              displaySorting={ (sorting || []).length > 0 }
               displayTagFilters={true}
               searchPlaceholder='Zoeken'
               applyText='Toepassen'
@@ -1044,12 +1074,16 @@ function DocumentMap({
                 } else {
                   setSelectedTags(f.tags);
                 }
+                if (['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'].includes(f.sort)) {
+                  setSort(f.sort);
+                }
+                setSearch(f?.search?.text || '');
               }}
               resources={[]}
-              sorting={[]}
+              sorting={ sorting || [] }
               tagGroups={tagGroups}
               tagsLimitation={filteredTagIdsArray}
-              preFilterTags={urlTagIdsArray}
+              preFilterTags={prefilterTagObj}
             />
           ) : null}
 
@@ -1070,6 +1104,8 @@ function DocumentMap({
                 displayPagination={displayPagination}
                 onGoToLastPage={setGoToLastPage}
                 overridePage={overridePage}
+                overrideSort={sort}
+                searchTerm={search}
               />
             </div>
           )}

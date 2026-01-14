@@ -4,5 +4,6 @@ export type AreaProps = {
   area?: Array<LatLng>,
   areas?: any,
   areaPolygonStyle?: any,
+  interactionType?: 'default' | 'direct',
 };
 

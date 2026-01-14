@@ -142,7 +142,7 @@ exports.validateUser = async(req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  let { name, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+  let { name, email, streetName, houseNumber, suffix, postcode, accessCode, emailNotificationConsent, city, phoneNumber, hashedPhoneNumber, password } = req.body;
 
   db.User
     .create({
@@ -152,6 +152,8 @@ exports.create =  (req, res, next) => {
       houseNumber,
       suffix,
       postcode,
+      emailNotificationConsent,
+      accessCode,
       city,
       phoneNumber,
       password: password ? bcrypt.hashSync(password, saltRounds) : null,
@@ -166,8 +168,8 @@ exports.create =  (req, res, next) => {
 
 }
 
-exports.update = (req, res, next) => {
-  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
+exports.update = async(req, res, next) => {
+  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'accessCode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
 
   let data = {};
   keysToUpdate.forEach((key) => {
@@ -182,15 +184,43 @@ exports.update = (req, res, next) => {
     }
   });
 
-  req.userObject.update(data)
-    .then(user => {
-      req.userObject = user;
-      next();
-    })
-    .catch((err) => {
-      console.log('==> update err', err);
-      next(err);
-    });
+  const clientId = req?.body?.clientId || null;
+
+  if (clientId && req.body.hasOwnProperty('emailNotificationConsent') ) {
+    let projectId = null;
+
+    await db.Client
+      .findOne({ where: { clientId: clientId } })
+      .then((client) => {
+        if (client) {
+          projectId = String(client.id);
+
+          const currentConsent = { ...(req.userObject.emailNotificationConsent || {}) };
+          currentConsent[projectId] = req.body.emailNotificationConsent;
+          data.emailNotificationConsent = currentConsent;
+
+          req.userObject.update(data)
+            .then(user => {
+              req.userObject = user;
+              next();
+            })
+            .catch((err) => {
+              next(err);
+            });
+        }
+      })
+      .catch((err) => {}
+      );
+  } else {
+    req.userObject.update(data)
+      .then(user => {
+        req.userObject = user;
+        next();
+      })
+      .catch((err) => {
+        next(err);
+      });
+  }
 }
 
 exports.saveRoles = (req, res, next) => {
@@ -214,7 +244,7 @@ exports.saveRoles = (req, res, next) => {
         }
 
         if (roleId){
-          clientId = clientId.replace('\'', '')
+          clientId = clientId.replace(/'/g, '')
           let parsedClientId = parseInt(clientId, 10);
           if ( !( parsedClientId && clientId == parsedClientId && Number.isInteger(parsedClientId))) {
             let found = req.clients.find(availableClient => availableClient.clientId == clientId);

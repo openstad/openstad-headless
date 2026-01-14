@@ -22,7 +22,8 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         introDescription,
         noOfQuestionsToShow,
         afterUrl,
-        choicesType
+        choicesType,
+        showBackButtonInTopOfPage
     } = choiceGuide;
 
     const {
@@ -56,26 +57,42 @@ function ChoiceGuide(props: ChoiceGuideProps) {
 
     const [weights, setWeights] = useState<WeightOverview>({});
     const [answers, setAnswers] = useState<{ [key: string]: FormValue }>(defaultAnswers);
-    const [completeAnswers, setCompleteAnswers] = useState<{ [key: string]: FormValue }>({});
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [currentAnswers, setCurrentAnswers] = useState<{ [key: string]: string }>({});
+    const [hiddenFields, setHiddenFields ] = useState< string[] >([]);
 
     const sidebarRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions);
+        const initialWeights = InitializeWeights(items, choiceOption?.choiceOptions, choicesType, hiddenFields);
         setWeights(initialWeights);
-    }, [items, choiceOption]);
+    }, [items, choiceOption, hiddenFields]);
+
+    const getChangedAnswers = (newAnswers: { [key: string]: string}, newHiddenFields: string[]) => {
+        if (
+          newHiddenFields.length !== hiddenFields.length ||
+          !newHiddenFields.every(field => hiddenFields.includes(field))
+        ) {
+            setHiddenFields(newHiddenFields);
+        }
+
+        let answersChanged = false;
+        Object.keys(newAnswers).forEach((key) => {
+            if (JSON.stringify(newAnswers[key]) !== JSON.stringify(currentAnswers[key])) {
+                answersChanged = true;
+            }
+        });
+
+        if (answersChanged) {
+            setCurrentAnswers(newAnswers);
+        }
+    }
 
     useEffect(() => {
         const updatedAnswers = { ...answers, ...currentAnswers };
         setAnswers(updatedAnswers);
     }, [currentAnswers]);
-
-    const questionsPerPage = Number(noOfQuestionsToShow) || 100;
-    const totalPages = Math.ceil(formFields.length / questionsPerPage);
-    const currentFields = formFields.slice(currentPage * questionsPerPage, (currentPage + 1) * questionsPerPage);
 
     const notifySuccess = () => NotificationService.addNotification("Versturen gelukt", "success");
     const notifyFailed = () => NotificationService.addNotification("Versturen mislukt", "error");
@@ -84,39 +101,41 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         projectId: props.projectId,
     });
     const onSubmit = async (formData: any) => {
-        setCompleteAnswers((prevAnswers) => ({
-            ...prevAnswers,
-            ...formData
-        }));
+        const projectId = props.projectId; // Assume projectId is available in props
+        const widgetId = props.widgetId;
+        const storageKey = `choiceguide-${projectId}-${widgetId}`;
 
-        const finalAnswers = { ...completeAnswers, ...formData };
+        const finalAnswers = { ...formData, hiddenFields };
+        // Store in local storage
+        localStorage.setItem(storageKey, JSON.stringify(finalAnswers));
 
-        if (currentPage < totalPages - 1) {
-            setCurrentPage((prevPage) => prevPage + 1);
-        } else {
+        try {
+            const result = await createChoicesguideResult(finalAnswers ,props.widgetId);
+            if (result) {
+                notifySuccess();
 
-            const projectId = props.projectId; // Assume projectId is available in props
-            const widgetId = props.widgetId;
-            const storageKey = `choiceguide-${projectId}-${widgetId}`;
-
-            // Store in local storage
-            localStorage.setItem(storageKey, JSON.stringify(finalAnswers));
-
-            try {
-                const result = await createChoicesguideResult(finalAnswers ,props.widgetId);
-                if (result) {
-                    notifySuccess();
-
-                    if(afterUrl) {
-                        location.href = afterUrl || '/';
-                    }
+                if(afterUrl) {
+                    location.href = afterUrl || '/';
                 }
-            } catch (e) {
-                console.log('Error', e);
-                notifyFailed();
             }
+        } catch (e) {
+            console.log('Error', e);
+            notifyFailed();
         }
     };
+
+    const questionsPerPage = Number(noOfQuestionsToShow) || 100;
+    const totalPages = Math.ceil(formFields.length / questionsPerPage);
+
+    const paginationFieldPositions: number[] = [];
+    for (let i = 0; i < totalPages - 1; i++) {
+        const endIndex = (i + 1) * questionsPerPage;
+        paginationFieldPositions.push(endIndex);
+    }
+
+    // Add start and end indices for slicing
+    const pageFieldStartPositions = [0, ...paginationFieldPositions];
+    const pageFieldEndPositions = [...paginationFieldPositions, formFields.length];
 
     return (
       <div className="osc">
@@ -149,17 +168,22 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                       </div>
                   </div>
                   <Form
-                    fields={currentFields}
+                    fields={formFields}
                     title=""
                     submitText={currentPage < totalPages - 1 ? (nextButtonText || "Volgende") : (submitButtonText || "Versturen")}
                     submitHandler={onSubmit}
                     secondaryLabel={""}
-                    getValuesOnChange={setCurrentAnswers}
+                    getValuesOnChange={(currentAnswers:{ [key: string]: string}, hiddenFields) => getChangedAnswers(currentAnswers, hiddenFields)}
                     allowResetAfterSubmit={false}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     prevPage={currentPage > 0 ? currentPage - 1 : null}
                     submitDisabled={!showForm}
+                    prevPageText={"Vorige"}
+                    pageFieldStartPositions={pageFieldStartPositions}
+                    pageFieldEndPositions={pageFieldEndPositions}
+                    totalPages={totalPages}
+                    showBackButtonInTopOfPage={showBackButtonInTopOfPage || false}
                     {...props}
                   />
                   <NotificationProvider />
@@ -172,6 +196,8 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                         weights={weights}
                         answers={answers}
                         widgetId={widgetId}
+                        hiddenFields={hiddenFields}
+                        items={formFields}
                       />
                   )}
               </div>

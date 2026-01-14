@@ -8,7 +8,7 @@ import {
 } from "@utrecht/component-library-react";
 
 import { FilePond, registerPlugin } from 'react-filepond'
-import { FilePondFile, FilePondErrorDescription } from 'filepond'
+import { FilePondFile, FilePondErrorDescription, FilePondInitialFile } from 'filepond'
 import 'filepond/dist/filepond.min.css'
 import './image-upload.css'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
@@ -17,6 +17,8 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import {Spacer} from "../../spacer";
 import DataStore from '@openstad-headless/data-store/src';
+import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
@@ -53,8 +55,21 @@ const filePondSettings = {
     maxParallelUploads: 1
 };
 
+type MockImageFile = {
+    source: string,
+    options: {
+        type: string,
+        file: {
+            name: string,
+            size: number,
+            type: string
+        }
+    }
+}
+
 export type ImageUploadProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;
@@ -63,7 +78,7 @@ export type ImageUploadProps = {
     disabled?: boolean;
     multiple?: boolean;
     type?: string;
-    onChange?: (e: { name: string; value: { name: string; url: string }[] }) => void;
+    onChange?: (e: { name: string; value: { name: string; url: string }[] }, triggerSetLastKey?: boolean) => void;
     imageUrl?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -71,6 +86,18 @@ export type ImageUploadProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    defaultValue?: string;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const ImageUploadField: FC<ImageUploadProps> = ({
@@ -88,12 +115,32 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue = [],
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
     ...props
 }) => {
-
     const datastore = new DataStore({ props });
 
+    const initialValue: MockImageFile[] = (overrideDefaultValue && Array.isArray(overrideDefaultValue))
+      ? (overrideDefaultValue as { url: string; name: string }[]).map((item: {url: string, name: string}) => {
+          return {
+              source: item.url,
+              options: {
+                  type: 'local',
+                  file: {
+                      name: item.name,
+                      size: 1,
+                      type: '*',
+                  },
+              },
+          }
+      })
+      : [];
+
     const [files, setImages] = useState<FilePondFile[]>([]);
+    const [mockImages, setMockImages] = useState<MockImageFile[]>(initialValue);
     const [uploadedImages, setUploadedImages] = useState<{ name: string, url: string }[]>([]);
 
     class HtmlContent extends React.Component<{ html: any }> {
@@ -104,13 +151,19 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     }
 
     useEffect(() => {
+        const images = [...uploadedImages];
+        for (let i = 0; i < mockImages.length; i++) {
+            const mockImage = mockImages[i];
+            images.push({ name: mockImage.options.file.name, url: mockImage.source });
+        }
+        
         if (onChange) {
             onChange({
                 name: fieldKey,
-                value: uploadedImages,
+                value: images,
             });
         }
-    }, [uploadedImages.length, setImages, setUploadedImages]);
+    }, [uploadedImages.length, mockImages.length, setImages, setUploadedImages]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes
@@ -145,12 +198,17 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             });
         });
     }, []);
+    
+    const finalImages = Array.from( new Set( [...mockImages, ...files] ) );
 
     return (
         <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomId}>{title}</FormLabel>
-            </Paragraph>
+
+            {title && (
+                <Paragraph className="utrecht-form-field__label">
+                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                </Paragraph>
+            )}
 
             {description &&
                 <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
@@ -172,18 +230,27 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
+            })}
 
             <div className="utrecht-form-field__input">
                 <FilePond
-                    files={files.map(file => file.file)}
+                    files={finalImages as File[] | FilePondInitialFile[]}
                     onupdatefiles={(fileItems: FilePondFile[]) => {
-                        setImages(fileItems);
+                        const imagesExceptMockedImages = fileItems?.map(img => {
+                            const isMockedImages = mockImages?.find(mockImage => mockImage.options.file.name === img.file.name);
+                            if (isMockedImages) {
+                                return null;
+                            }
+                            return img;
+                        }).filter(img => img !== null) as FilePondFile[];
+                        
+                        setImages(imagesExceptMockedImages);
                     }}
                     allowMultiple={multiple}
                     server={{
@@ -207,9 +274,26 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                     }}
                     onremovefile={(error: FilePondErrorDescription | null, file: FilePondFile) => {
                         const fileName = file?.file?.name;
+
                         if (!!fileName) {
-                            const updatedImages = uploadedImages.filter(item => item.name !== fileName);
-                            setUploadedImages(updatedImages);
+                           const uploadImageFileName = fileName.replace(/\./g, '_');
+                           const fileIsInUploadedImages = uploadedImages.find(item => item.name === uploadImageFileName);
+
+                           const fileIsInMockImages = mockImages.find(item => item.options.file.name === fileName);
+
+                           if (fileIsInMockImages) {
+                               const updatedMockImages = mockImages.filter(item => item.options.file.name !== fileName);
+                               setMockImages(updatedMockImages);
+                               return;
+                           }
+
+                           if (!fileIsInUploadedImages) return;
+
+                           const updatedImages = uploadedImages.filter(item => item.name !== uploadImageFileName);
+                           setUploadedImages(updatedImages);
+
+                           const updatedFiles = files.filter(item => item.file.name !== fileName);
+                           setImages(updatedFiles);
                         }
                     }}
                     id={randomId}

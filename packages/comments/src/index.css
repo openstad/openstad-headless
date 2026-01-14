@@ -6,6 +6,7 @@
    font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
    display: grid;
    grid-gap: 1rem;
+   justify-content: unset;
  }
 
  .utrecht-form-field {
@@ -128,4 +129,10 @@
  left: auto;
  right: 0;
  min-width: 170px;
+}
+
+.comment-item .reply-container-button{
+  width: 100%;
+  max-width: none;
+  margin-top: 1rem;
 }

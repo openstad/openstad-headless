@@ -25,7 +25,18 @@ const isRedirectAllowed = async (projectId, redirectUri) => {
         }
     });
     
-    let redirectHost = new URL(redirectUri).host;
+    let redirectHost;
+    try {
+      if (redirectUri.startsWith('http%3A%2F%2F') || redirectUri.startsWith('https%3A%2F%2F')) {
+        redirectUri = decodeURIComponent(redirectUri);
+      }
+      redirectHost = new URL(redirectUri).host;
+    }  catch (e) {
+        console.log (`Error parsing redirect URI project ID: ${projectId}`);
+        return false;
+    }
+    
+    if (!redirectHost) return false;
     
     if (redirectHost.startsWith('www.')) {
         redirectHost = redirectHost.slice(4);
@@ -34,6 +45,7 @@ const isRedirectAllowed = async (projectId, redirectUri) => {
     if(allowedDomains.includes(redirectHost)){
         return true;
     }
+    
     return false;
 }
 

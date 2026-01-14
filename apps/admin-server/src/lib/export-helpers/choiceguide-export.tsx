@@ -1,6 +1,9 @@
 import {calculateScoreForItem} from "../../../../../packages/choiceguide/src/parts/scoreUtils";
 import {InitializeWeights} from "../../../../../packages/choiceguide/src/parts/init-weights";
 import {useEffect, useState} from "react";
+import * as XLSX from "xlsx";
+import { fetchMatrixData } from "./fetch-matrix-data";
+import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
 
 export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, project: string, limit: number) => {
   const fetchResults = async () => {
@@ -17,7 +20,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
     const fetchBatch = async (page: number, retries: number = 0) => {
       try {
-        const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}`;
+        const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}&includeUser=1`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -67,13 +70,6 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       const choiceOptions = selectedWidget?.config?.choiceOption?.choiceOptions || [];
       const choiceType = selectedWidget?.config?.choicesType || 'default';
 
-      let weights: any = {};
-      try {
-        weights = InitializeWeights(items, choiceOptions);
-      } catch (error) {
-        weights = {};
-      }
-
       const fieldKeyToTitleMap = new Map();
       items.forEach((item: any) => {
         if (item.type === 'none') {
@@ -90,7 +86,14 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
         const newKey = item.type + '-' + item.trigger;
 
-        fieldKeyToTitleMap.set(newKey, title);
+        if (item.type === 'matrix') {
+          item.matrix?.rows?.forEach((row: any) => {
+            const matrixKey = `${newKey}_${row.trigger}`;
+            fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
+          });
+        } else {
+          fieldKeyToTitleMap.set(newKey, title);
+        }
 
         if (item.options && Array.isArray(item.options) && item.options.length > 0) {
           item.options.forEach((option: {titles: [{key?: string, title?: string, isOtherOption?: boolean}], trigger: string}) => {
@@ -107,10 +110,19 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
 
       data = data.map((row: any) => {
         const scores: { [key: string]: any } = {};
+        const result = row?.result || {};
+        const hiddenFields = result?.hiddenFields || [];
+
+        let weights: any = {};
+        try {
+          weights = InitializeWeights(items, choiceOptions, choiceType, hiddenFields);
+        } catch (error) {
+          weights = {};
+        }
 
         choiceOptions.forEach((choiceOption: any) => {
           try {
-            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType);
+            const calculatedScores = calculateScoreForItem(choiceOption, row?.result || {}, weights, choiceType, hiddenFields, items);
             scores[choiceOption.title] = calculatedScores.x ? (calculatedScores.x).toFixed(0) : 0;
           } catch (error) {
             scores[choiceOption.title] = 0;
@@ -121,7 +133,11 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         fieldKeyToTitleMap.forEach((value, key) => {
           const index = Array.from(fieldKeyToTitleMap.keys()).indexOf(key);
 
-          if (row?.result && row?.result[key]) {
+          if ( key?.startsWith('matrix') ) {
+            const rowResult = fetchMatrixData(key, items, row?.result || []) || '-';
+
+            rowMap.set(index, {'result': rowResult, 'value': value });
+          } else if (row?.result && row?.result[key]) {
             rowMap.set(index, {'result': row?.result[key], 'value': value });
           } else {
             rowMap.set(index, {'result': '-', 'value': value});
@@ -132,6 +148,11 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
           const index = rowMap.size;
           rowMap.set(index, {'result': scores[key], 'value': `Score: ${key}` });
         });
+
+        if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' && row?.result?.ipAddress ) {
+          const index = rowMap.size;
+          rowMap.set(index, {'result': row?.result?.ipAddress, 'value': 'Gebruikers IP-adres (gehasht)' });
+        }
 
         return {
           ...row,
@@ -154,7 +175,7 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
       return `export-${widgetName}-${currentDate}`;
     }
 
-    const fileName = transformString();
+    const fileName = transformString() + '.xlsx';
 
     const normalizeData = (value: any) => {
       let parsedValue;
@@ -181,41 +202,54 @@ export const exportChoiceGuideToCSV = (widgetName: string, selectedWidget: any, 
         let escapedValue = value.replace(/(\r\n|\r\r|\n\n|\n|\r)+/g, '\n');
         escapedValue = escapedValue.replace(/"/g, "'");
 
-        return `"${escapedValue}"`;
+        return `${escapedValue}`;
       }
 
       return value;
     };
 
-    const headerRow = [
-      'ID',
-      'Aangemaakt op',
-      'Project ID',
-      'Widget',
-      'Gebruikers ID',
-      ...Object.values(data[0].result).map((item: any) => item.value)
-    ].join(';');
+    const rows: any[] = [];
 
-    const dataRows = data.map((row: any) => {
-      return [
-        row.id,
-        row.createdAt,
-        row.projectId,
-        widgetName,
-        row.userId,
-        ...Object.values(row.result).map((item: any) => normalizeData(item.result))
-      ].join(';');
+    data.forEach((row: any) => {
+      const rowObj: Record<string, any> = {
+        'ID': row.id,
+        'Aangemaakt op': row.createdAt,
+        'Project ID': row.projectId,
+        'Widget': widgetName,
+        'Gebruikers ID': row.userId || ' ',
+        'Gebruikers rol': row.user?.role || ' ',
+        'Gebruikers naam': row.user?.name || ' ',
+        'Gebruikers weergavenaam': row.user?.displayName || ' ',
+        'Gebruikers e-mailadres': row.user?.email || ' ',
+        'Gebruikers telefoonnummer': row.user?.phonenumber || ' ',
+        'Gebruikers adres': row.user?.address || ' ',
+        'Gebruikers woonplaats': row.user?.city || ' ',
+        'Gebruikers postcode': row.user?.postcode || ' ',
+      };
+
+      if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' ) {
+        rowObj['Gebruikers IP-adres (gehasht)'] = row?.result?.ipAddress || ' ';
+      }
+
+      const keyCount: Record<string, number> = {};
+      Object.values(row.result || {}).forEach((item: any) => {
+        const baseKey = item.value;
+        let key = keyCount[baseKey]
+          ? `${baseKey} (${keyCount[baseKey]++})`
+          : (keyCount[baseKey] = 1, baseKey);
+
+        key = key && stripHtmlTags(key);
+
+        rowObj[key] = normalizeData(item.result);
+      });
+
+      rows.push(rowObj);
     });
 
-    const csv = [headerRow, ...dataRows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Keuzewijzer');
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName + '.csv';
-    a.click();
-
-    window.URL.revokeObjectURL(url);
+    XLSX.writeFile(workbook, fileName);
   });
 };

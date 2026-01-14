@@ -13,7 +13,9 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
       props.choiceOptions,
       props.answers,
       props.weights,
-      props.choicesType
+      props.choicesType,
+      props.hiddenFields,
+      props.items
     );
     setScore(itemScore);
   }, [props.choiceOptions, props.answers, props.weights]);
@@ -80,6 +82,11 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
                       choicesPreferenceMaxColor={props.choicesPreferenceMaxColor}
                       showPageCountAndCurrentPageInButton={props.showPageCountAndCurrentPageInButton}
                       startWithAllQuestionsAnswered={props.startWithAllQuestionsAnswered}
+                      hiddenFields={props.hiddenFields}
+                      items={props.items}
+                      displayTitle={props?.displayTitle}
+                      displayDescription={props?.displayDescription}
+                      displayImage={props?.displayImage}
                     />
                   </li>
                 ))}

@@ -66,9 +66,9 @@ module.exports = function (db, sequelize, DataTypes) {
   DataLayer.auth = DataLayer.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
-    createableBy: 'moderator',
-    updateableBy: 'moderator',
-    deleteableBy: 'moderator',
+    createableBy: 'editor',
+    updateableBy: 'editor',
+    deleteableBy: 'editor',
   };
 
   return DataLayer;

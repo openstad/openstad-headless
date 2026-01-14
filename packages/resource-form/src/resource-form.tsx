@@ -1,20 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import hasRole from '../../lib/has-role';
-import type {ResourceFormWidgetProps} from "./props.js";
-import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
-import {InitializeFormFields} from "./parts/init-fields.js";
+import type { ResourceFormWidgetProps } from "./props.js";
+import { Banner, Button, Spacer } from "@openstad-headless/ui/src/index.js";
+import { InitializeFormFields } from "./parts/init-fields.js";
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
 import { Heading } from '@utrecht/component-library-react';
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { FieldProps } from '@openstad-headless/form/src/props';
+
+const getExistingValue = (fieldKey, resource, multiple) => {
+    if (!!resource) {
+        const field = resource[fieldKey] || null;
+        const returnField = (!field && resource.extraData) ? resource.extraData[fieldKey] || null : field
+
+        if (!!returnField) {
+            return returnField;
+        }
+
+        if (fieldKey.startsWith('tags[') && resource.tags) {
+            const tagType = fieldKey.substring(5, fieldKey.length - 1);
+
+            const filteredTags =  resource.tags
+              ?.filter((tag) => tag.type === tagType)
+              .map((tag) => String(tag.id));
+
+            return multiple ? filteredTags : (filteredTags.length > 0 ? filteredTags[0] : undefined);
+        }
+    }
+    return undefined;
+}
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
-    const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
-    const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
-    const { confirmationUser, confirmationAdmin} = props.confirmation  || {};
+    const { submitButton, saveConceptButton, defaultAddedTags } = props.submit || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
+    const { loginText, loginButtonText } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+    const { confirmationUser, confirmationAdmin } = props.confirmation || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
+
+    let resourceId: string | undefined = String(getResourceId({
+        url: document.location.href
+    }));
 
     const datastore: any = new DataStore({
         projectId: props.projectId,
@@ -32,10 +60,41 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         widgetId: props.widgetId,
     });
 
-    const formFields = InitializeFormFields(props.items, props);
+    const { data: existingResource, isLoading, canEdit } = datastore.useResource({
+        projectId: props.projectId,
+        resourceId: resourceId || undefined
+    });
 
-    const notifySuccess = () => NotificationService.addNotification("Idee indienen gelukt", "success");
-    const notifyFailed = () => NotificationService.addNotification("Idee indienen mislukt", "error");
+    const initialFormFields = InitializeFormFields(props.items, props);
+    type FormField = { fieldKey?: string; [key: string]: any };
+    const [formFields, setFormFields] = useState<FormField[]>([]);
+    const [fillDefaults, setFillDefaults] = useState(false);
+
+    useEffect(() => {
+        if (isLoading) return;
+
+        if (canEdit) {
+            const updatedFormFields = initialFormFields.map((field) => {
+                type FieldsWithMultiple = FieldProps & { multiple?: boolean };
+                const fieldWithMultiple = field as FieldsWithMultiple;
+
+                const existingValue = getExistingValue(field.fieldKey, existingResource, fieldWithMultiple?.multiple);
+
+                return existingValue ? { ...field, defaultValue: existingValue } : field;
+            });
+
+            setFormFields(updatedFormFields);
+        } else if (JSON.stringify(formFields) !== JSON.stringify(initialFormFields)) {
+            setFormFields(initialFormFields);
+        }
+
+        setFillDefaults(true);
+    }, [JSON.stringify(existingResource), JSON.stringify(initialFormFields), isLoading]);
+
+    const notifySuccess = () => NotificationService.addNotification("Inzending indienen gelukt", "success");
+    const notifySuccessEdit = () => NotificationService.addNotification("Inzending bewerken gelukt", "success");
+    const notifyFailed = () => NotificationService.addNotification("Inzending indienen mislukt", "error");
+    const notifyFailedEdit = (message: string) => NotificationService.addNotification(message, "error");
 
     const addTagsToFormData = (formData) => {
         const tags = [];
@@ -44,14 +103,20 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             if (formData.hasOwnProperty(key)) {
                 if (key.startsWith('tags[')) {
                     try {
+                        if (!formData[key]) {
+                            continue;
+                        }
+
                         const tagsArray = JSON.parse(formData[key]);
 
                         if (typeof tagsArray === 'object') {
                             tagsArray?.map((value) => {
-                                tags.push(value);
+                                const pushValue = typeof (value) === 'string' ? Number(value) : value;
+                                tags.push(pushValue);
                             });
                         } else if (typeof tagsArray === 'string' || typeof tagsArray === 'number') {
-                            tags.push(tagsArray);
+                            const pushValue = typeof (tagsArray) === 'string' ? Number(tagsArray) : tagsArray;
+                            tags.push(pushValue);
                         }
                     } catch (error) {
                         console.error(`Error parsing tags for key ${key}:`, error);
@@ -62,6 +127,18 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             }
         }
 
+        if (defaultAddedTags) {
+            const defaultTagsArray = defaultAddedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+
+            defaultTagsArray.forEach(tag => {
+                const tagNumber = Number(tag);
+
+                if (!isNaN(tagNumber) && !tags.includes(tagNumber)) {
+                    tags.push(tagNumber);
+                }
+            });
+        }
+
         formData.tags = tags;
 
         return formData;
@@ -70,25 +147,43 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const configureFormData = (formData, publish = false) => {
         const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags', 'documents'];
         const extraData = {};
+        let configuredFormData = {...formData };
 
-        formData = addTagsToFormData(formData);
+        configuredFormData = addTagsToFormData(configuredFormData);
 
-        for (const key in formData) {
-            if (formData.hasOwnProperty(key)) {
+        for (const key in configuredFormData) {
+            if (configuredFormData.hasOwnProperty(key)) {
                 if (!dbFixedColumns.includes(key)) {
-                    extraData[key] = formData[key];
-                    delete formData[key];
+                    extraData[key] = configuredFormData[key];
+                    delete configuredFormData[key];
                 }
             }
         }
 
-        formData.extraData = extraData;
-        formData.publishDate = publish ? new Date() : '';
-        formData.confirmationUser = confirmationUser;
-        formData.confirmationAdmin = confirmationAdmin;
+        configuredFormData.extraData = extraData;
+        configuredFormData.publishDate = publish ? new Date() : '';
+        configuredFormData.confirmationUser = confirmationUser;
+        configuredFormData.confirmationAdmin = confirmationAdmin;
 
-        return formData;
+        return configuredFormData;
     }
+
+    const redirectAfterSaveOrCreate = (resource: { id?: string }, reloadPageAsFallback = false) => {
+        if (props.redirectUrl && resource.id) {
+            let redirectUrl = props.redirectUrl.replace("[id]", resource.id);
+            if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+                redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
+            }
+            document.location.href = redirectUrl.replace("[id]", resource.id);
+        } else if (reloadPageAsFallback) {
+            window.location.reload();
+        }
+    }
+
+    const editMode = canEdit && existingResource && existingResource.id && existingResource.update;
+    const submitButtonText = editMode
+        ? "Opslaan"
+        : submitButton || "Versturen";
 
     async function onSubmit(formData: any) {
         setDisableSubmit(true);
@@ -96,28 +191,49 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         const finalFormData = configureFormData(formData, true);
 
         try {
+            if (editMode) {
+                try {
+                    await existingResource.update(finalFormData);
+                    notifySuccessEdit();
+                    redirectAfterSaveOrCreate(existingResource, true);
+                } catch (e) {
+                    notifyFailedEdit(e.message || 'Inzending bewerken mislukt');
+                } finally {
+                    setDisableSubmit(false);
+                }
+
+                return;
+            }
+
             const result = await createResource(finalFormData, props.widgetId);
             if (result) {
                 notifySuccess();
-
-                if(props.redirectUrl) {
-                    let redirectUrl = props.redirectUrl.replace("[id]", result.id);
-                    if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
-                        redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
-                    }
-                    document.location.href = redirectUrl.replace("[id]", result.id);
-                } else {
-                    setDisableSubmit(false);
-                }
+                redirectAfterSaveOrCreate(result);
             }
+            setDisableSubmit(false);
         } catch (e) {
             notifyFailed();
             setDisableSubmit(false);
         }
     }
 
+    const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    useEffect(() => {
+        const url = new URL(window.location.href);
 
-    return (
+        if (Array.isArray(formFields) && hasRole(currentUser, 'member')) {
+            formFields.forEach(field => {
+                if (field && field.fieldKey && params.hasOwnProperty(field.fieldKey)) {
+                    url.searchParams.delete(field.fieldKey);
+                }
+            });
+        }
+       
+        window.history.replaceState(null, '', url.toString());
+    }, [params]);
+
+
+    return (isLoading || !fillDefaults) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
                 {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}
@@ -145,9 +261,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         fields={formFields}
                         secondaryLabel={saveConceptButton || ""}
                         submitHandler={onSubmit}
-                        submitText={submitButton || "Versturen"}
+                        submitText={submitButtonText}
                         title=""
                         submitDisabled={disableSubmit}
+                        allowResetAfterSubmit={editMode}
                         {...props}
                     />
                 )}

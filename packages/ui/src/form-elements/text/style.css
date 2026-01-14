@@ -35,3 +35,45 @@
 .question-type-text:has(.utrecht-form-field-error-message:not(:empty)) .utrecht-form-field .utrecht-textbox--html-input:invalid{
     border-color: var(--utrecht-textbox-invalid-border-color, var(--utrecht-form-control-invalid-border-color, var(--utrecht-textbox-border-color, var(--utrecht-form-control-border-color))));
 }
+
+
+trix-editor blockquote {
+  border-left: 4px solid #ccc;
+  margin: 0 0 1rem 0;
+  padding-left: 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+trix-editor h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+}
+
+trix-editor h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+}
+
+trix-editor a {
+  color: #0070f3;
+  text-decoration: underline;
+}
+
+trix-editor ul {
+  list-style-type: disc; 
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+trix-editor ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+trix-editor p {
+  margin-bottom: 1rem;
+}

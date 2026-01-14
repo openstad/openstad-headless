@@ -7,7 +7,7 @@ export default function useUserVote(props) {
   const projectId = props.projectId;
   const type = props.type;
 
-  const { data, error, isLoading } = self.useSWR({ type: 'user-vote', projectId: self.projectId }, 'userVote.fetch');
+  const { data, error, isLoading } = self.useSWR({ type, projectId: self.projectId }, 'userVote.fetch');
 
   // add functionality
   let userVote = data || {};

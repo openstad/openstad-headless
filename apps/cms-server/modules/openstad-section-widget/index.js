@@ -11,10 +11,12 @@ const contentWidgets = {
   'openstad-image': {},
   'openstad-iconSection': {},
   'openstad-carousel': {},
+  'openstad-blog-post': {},
+  'openstad-breadcrumbs': {}
 };
 
 module.exports = {
-  extend: '@apostrophecms/widget-type',
+  extend: 'base-widget',
   options: {
     label: 'Sectie'
   },

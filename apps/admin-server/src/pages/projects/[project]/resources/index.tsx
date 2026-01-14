@@ -11,34 +11,80 @@ import { toast } from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import * as XLSX from 'xlsx';
 import flattenObject from "@/lib/export-helpers/flattenObject";
+import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
+import {ConfirmActionDialog} from "@/components/dialog-confirm-action";
+import {Checkbox} from "@/components/ui/checkbox";
+import { ImportButton } from '@/components/importButton';
+import { keyMap } from '@/lib/keyMap';
 
-export default function ProjectResources() {
+interface ProjectResourcesProps {
+  BETA_FEATURE_FLAG_BULK_IMPORT: string;
+}
+
+const prepareDataForExport = (data: any[]) => {
+  const allResources: any[] = [];
+
+  data.forEach((resource) => {
+    for (const [key, values] of Object.entries(resource)) {
+      if ( (key.startsWith('tags') || key.startsWith('statuses')) && Array.isArray(values)) {
+        try {
+          const createString = values.map((value: any) => {
+            return key.startsWith('tags')
+            ? `${value.name} (type: ${value.type})`
+            : value.name
+          }).filter(Boolean).join(' | ');
+
+          resource[key] = createString || '';
+        } catch (e) {}
+      }
+
+      if ( (key.startsWith('images') || key.startsWith('documents') ) && Array.isArray(values)) {
+        try {
+          const createString = values.map((value: any) => {
+            return key.startsWith('images')
+              ? `${value.url}${ value.description ? ` (${value.description})` : '' }`
+              : `${value.url}${ value.name ? ` (${value.name})` : '' }`;
+          }).filter(Boolean).join(' | ');
+
+          resource[key] = createString || '';
+        } catch (e) {}
+      }
+    };
+
+    allResources.push(resource);
+  });
+
+  return allResources;
+}
+
+export async function getServerSideProps() {
+  return {
+    props: {
+      BETA_FEATURE_FLAG_BULK_IMPORT: process.env.BETA_FEATURE_FLAG_BULK_IMPORT,
+    },
+  };
+}
+
+export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: ProjectResourcesProps) {
   const router = useRouter();
   const { project } = router.query;
-  const { data, error, isLoading, remove } = useResources(project as string);
-
-  const exportData = (data: any[], fileName: string) => {
-
-    const flattenedData = data.map(item => flattenObject(item));
-
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    XLSX.writeFile(workbook, fileName);
-  };
+  const { data, error, isLoading, remove, duplicate } = useResources(project as string);
 
   function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
 
-    exportData(data, `${projectId}_resources_${formattedDate}.xlsx`);
+    const preparedData = prepareDataForExport(data);
+
+    exportToXLSX(preparedData, `${projectId}_resources_${formattedDate}.xlsx`, keyMap);
   }
 
   const [filterData, setFilterData] = useState(data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [bulkSelectActive, setBulkSelectActive] = useState<boolean>(false);
+  const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
 
   useEffect(() => {
     setFilterData(data);
@@ -72,9 +118,78 @@ export default function ProjectResources() {
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
               Exporteer inzendingen
             </Button>
+            {BETA_FEATURE_FLAG_BULK_IMPORT === "true" && <ImportButton project={project as string} />}
           </div>
         }>
-        <div className="container py-6">
+        <div className="container py-6"><div className="float-left mb-4 flex gap-4">
+          <Button
+            variant={'outline'}
+            className="flex items-center gap-2 float-left"
+            onClick={() => {
+              setSelectedWidgets([])
+              setBulkSelectActive(!bulkSelectActive)
+            }}
+          >
+            {bulkSelectActive ? 'Bulk selecteren stoppen' : 'Bulk selecteren'}
+          </Button>
+
+          {bulkSelectActive && (
+            <>
+              <Button
+                variant={'default'}
+                className="flex items-center gap-2 float-left"
+                onClick={(e) => e.preventDefault()}
+                disabled={ selectedWidgets.length === 0 }
+              >
+                <ConfirmActionDialog
+                  buttonText="Dupliceren"
+                  header="Widgets Dupliceren"
+                  message="Weet je zeker dat je de geselecteerde widgets wilt dupliceren?"
+                  confirmButtonText="Dupliceren"
+                  cancelButtonText="Annuleren"
+                  onConfirmAccepted={() => {
+                    duplicate(selectedWidgets)
+                      .then(() => {
+                        toast.success('Widgets successvol gedupliceerd');
+                        setSelectedWidgets([]);
+                        setBulkSelectActive(false);
+                      })
+                      .catch((e) =>
+                        toast.error('Widgets konden (gedeeltelijk) niet worden gedupliceerd')
+                      )
+                  }}
+                  confirmButtonVariant="default"
+                />
+              </Button>
+              <Button
+                variant={'destructive'}
+                className="flex items-center gap-2 float-left"
+                onClick={(e) => e.preventDefault()}
+                disabled={ selectedWidgets.length === 0 }
+              >
+                <ConfirmActionDialog
+                  buttonText="Verwijderen"
+                  header="Widgets Verwijderen"
+                  message="Weet je zeker dat je de geselecteerde widgets wilt verwijderen?"
+                  confirmButtonText="Verwijderen"
+                  cancelButtonText="Annuleren"
+                  onConfirmAccepted={() => {
+                    remove(0, true, selectedWidgets)
+                      .then(() => {
+                        toast.success('Widgets successvol verwijderd');
+                        setSelectedWidgets([]);
+                        setBulkSelectActive(false);
+                      })
+                      .catch((e) =>
+                        toast.error('Widgets konden (gedeeltelijk) niet worden verwijderd')
+                      )
+                  }}
+                  confirmButtonVariant="destructive"
+                />
+              </Button>
+            </>
+          )}
+        </div>
 
           <div className="float-right mb-4 flex gap-4">
             <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
@@ -100,7 +215,11 @@ export default function ProjectResources() {
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
-            <div className="grid grid-cols-2 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
+            <div
+              className="grid grid-cols-2 items-center py-2 px-2 border-b border-border"
+              style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
+            >
+              {bulkSelectActive && (<ListHeading />)}
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
                   ID
@@ -122,6 +241,11 @@ export default function ProjectResources() {
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('score', e, filterData))}>
+                  Wilson score interval
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('date-added', e, filterData))}>
                   Datum aangemaakt
                 </button>
@@ -131,9 +255,26 @@ export default function ProjectResources() {
             <ul>
               {filterData?.map((resource: any) => (
                 <Link
-                  href={`/projects/${project}/resources/${resource.id}`}
-                  key={resource.id}>
-                  <li className="grid grid-cols-2 lg:grid-cols-7 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  key={resource.id}
+                  href={ bulkSelectActive ? `/projects/${project}/resources/` : `/projects/${project}/resources/${resource.id}`}
+                  scroll={ !bulkSelectActive }
+                >
+                  <li
+                    className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                    style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
+                  >
+                    {bulkSelectActive && (
+                      <Checkbox
+                        className="my-auto"
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedWidgets((prev) => [...prev, resource.id]);
+                          } else {
+                            setSelectedWidgets((prev) => prev.filter(id => id !== resource.id));
+                          }
+                        }}
+                      />
+                    )}
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       {resource.id}
                     </Paragraph>
@@ -145,6 +286,9 @@ export default function ProjectResources() {
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
                       {resource.no || 0}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">
+                      {resource.score || 0}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
                       {resource.createDateHumanized}

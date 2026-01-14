@@ -56,7 +56,7 @@ module.exports = function (db, sequelize, DataTypes) {
       userId: {
         type: DataTypes.INTEGER,
         auth: {
-          updateableBy: 'moderator',
+          updateableBy: 'editor',
         },
         allowNull: false,
         defaultValue: 0,
@@ -64,7 +64,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       startDate: {
         auth: {
-          updateableBy: 'moderator',
+          updateableBy: 'editor',
         },
         type: DataTypes.DATE,
         allowNull: false,
@@ -83,6 +83,15 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
 
+      score: {
+        type: DataTypes.DECIMAL(12,11),
+        auth: {
+          updateableBy: 'editor',
+        },
+        allowNull: false,
+        defaultValue: '0.00000000000',
+      },
+      
       sort: {
         type: DataTypes.INTEGER,
         auth: {
@@ -96,8 +105,8 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.ENUM(
           'superuser',
           'admin',
-          'editor',
           'moderator',
+          'editor',
           'member',
           'anonymous',
           'all'
@@ -213,7 +222,7 @@ module.exports = function (db, sequelize, DataTypes) {
       budget: {
         type: DataTypes.INTEGER,
         auth: {
-          updateableBy: 'moderator',
+          updateableBy: 'editor',
         },
         allowNull: true,
         set: function (budget) {
@@ -236,8 +245,8 @@ module.exports = function (db, sequelize, DataTypes) {
       modBreak: {
         type: DataTypes.TEXT,
         auth: {
-          createableBy: 'moderator',
-          updateableBy: 'moderator',
+          createableBy: 'editor',
+          updateableBy: 'editor',
         },
         allowNull: true,
         set: function (text) {
@@ -249,8 +258,8 @@ module.exports = function (db, sequelize, DataTypes) {
       modBreakUserId: {
         type: DataTypes.INTEGER,
         auth: {
-          createableBy: 'moderator',
-          updateableBy: 'moderator',
+          createableBy: 'editor',
+          updateableBy: 'editor',
         },
         allowNull: true,
       },
@@ -258,8 +267,8 @@ module.exports = function (db, sequelize, DataTypes) {
       modBreakDate: {
         type: DataTypes.DATE,
         auth: {
-          createableBy: 'moderator',
-          updateableBy: 'moderator',
+          createableBy: 'editor',
+          updateableBy: 'editor',
         },
         allowNull: true,
       },
@@ -291,6 +300,16 @@ module.exports = function (db, sequelize, DataTypes) {
             ? Number((Math.min(1, yes / minimumYesVotes) * 100).toFixed(2))
             : undefined;
         },
+      },
+      
+      // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero
+      netPositiveVotes: {
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          const yes = this.getDataValue('yes') || 0;
+          const no = this.getDataValue('no') || 0;
+          return Math.max(yes - no, 0);
+        }
       },
 
       createDateHumanized: {
@@ -671,7 +690,7 @@ module.exports = function (db, sequelize, DataTypes) {
           where: {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
-                (SELECT resourceId FROM resource_tags 
+                (SELECT resourceId FROM resource_tags
                 WHERE tagId IN (${tags.map(tag => `'${tag}'`).join(', ')}))
               `),
             },
@@ -752,6 +771,10 @@ module.exports = function (db, sequelize, DataTypes) {
               'name',
               'email',
               'extraData',
+              'phonenumber',
+              'address',
+              'city',
+              'postcode'
             ],
           },
         ],
@@ -815,6 +838,23 @@ module.exports = function (db, sequelize, DataTypes) {
           ],
           exclude: ['modBreak'],
         },
+      },
+
+      selectProjectIds: function (projectIds) {
+        if (!projectIds || projectIds.length == 0) {
+          return {};
+        }
+        return {
+          where: {
+            [db.Sequelize.Op.or]: [
+                ...projectIds.map((projectId) => {
+                return {
+                  projectId: projectId,
+                };
+              })
+            ]
+          }
+        };
       },
 
     };
@@ -929,7 +969,7 @@ module.exports = function (db, sequelize, DataTypes) {
     canMutateStatus: function canMutateStatus (user, self) {
       if (!user || !self) return false;
       if (!self.auth.canUpdate(user, self)) return false;
-      return userHasRole(user, 'moderator');
+      return userHasRole(user, 'editor');
     },
     toAuthorizedJSON: function (user, data, self) {
       if (!self.auth.canView(user, self)) {
@@ -983,6 +1023,39 @@ module.exports = function (db, sequelize, DataTypes) {
       return data;
     },
   };
+  
+  const wilsonScore = require('../lib/wilson-score');
+  
+  Resource.calculateAndSaveScore = Resource.prototype.calculateAndSaveScore = async function() {
+    const resource = this;
+    const votes = await db.Vote.findAll({
+      where: {
+        resourceId: resource.id,
+        deletedAt: null,
+        [Op.or]: [
+          { checked: null },
+          { checked: true }
+        ]
+      },
+      attributes: ['opinion', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      group: ['opinion']
+    });
+    
+    let yesVotes = 0;
+    let noVotes = 0;
+
+    votes.forEach(vote => {
+      if (vote.opinion === 'yes') {
+        yesVotes = parseInt(vote.get('count'), 10);
+      } else if (vote.opinion === 'no') {
+        noVotes = parseInt(vote.get('count'), 10);
+      }
+    });
+    
+    // Calculate & save the score to the resource
+    resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
+    await resource.save({ validate: false, hooks: false });
+  }
 
   return Resource;
 
@@ -997,10 +1070,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
     // count comments and votes
     let canEditAfterFirstLikeOrComment =
-      (projectConfig && projectConfig.canEditAfterFirstLikeOrComment) || false;
+      (projectConfig && projectConfig.resources && projectConfig.resources.canEditAfterFirstLikeOrComment) || false;
     if (
       !canEditAfterFirstLikeOrComment &&
-      !userHasRole(instance.auth && instance.auth.user, 'moderator')
+      !userHasRole(instance.auth && instance.auth.user, 'editor')
     ) {
       let firstLikeSubmitted = await db.Vote.count({
         where: { resourceId: instance.id },
@@ -1009,8 +1082,8 @@ module.exports = function (db, sequelize, DataTypes) {
         where: { resourceId: instance.id },
       });
       if (firstLikeSubmitted || firstCommentSubmitted) {
-        throw Error(
-          'You cannot edit an resource after the first like or comment has been added'
+        throw new Error(
+          'Inzending kan niet meer bewerkt worden nadat er een stem of reactie is geplaatst.'
         );
       }
     }

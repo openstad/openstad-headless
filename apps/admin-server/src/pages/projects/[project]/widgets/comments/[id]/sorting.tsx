@@ -33,6 +33,30 @@ const SortingTypes = [
     value: "createdAt_asc",
     label: "Oudste eerst"
   },
+  {
+    value: "title_asc",
+    label: "Titel A-Z"
+  },
+  {
+    value: "title_desc",
+    label: "Titel Z-A"
+  },
+  {
+    value: "votes_desc",
+    label: "Meeste stemmen"
+  },
+  {
+    value: "votes_asc",
+    label: "Minste stemmen"
+  },
+  {
+    value: "score",
+    label: "Beste bijdragen"
+  },
+  {
+    value: "random",
+    label: "Willekeurig"
+  },
 ];
 
 const formSchema = z.object({

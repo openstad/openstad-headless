@@ -28,6 +28,7 @@ exports.info = (req, res) => {
   // todo: ik denk dat hier de default role moet komen
   res.json({
     user_id: req.user.id,
+    clientId: req?.client?.id || null,
     role: req.user.role,
     name: req.user.name,
     email: req.user.email,
@@ -36,8 +37,10 @@ exports.info = (req, res) => {
     phoneNumberConfirmed: req.user.phoneNumberConfirmed,
     streetName: req.user.streetName,
     houseNumber: req.user.houseNumber,
+    emailNotificationConsent: req.user?.emailNotificationConsent || {},
     suffix: req.user.suffix,
     postcode: req.user.postcode,
+    accessCode: req.user.accessCode,
     city: req.user.city,
     scope: req.authInfo.scope,
   });

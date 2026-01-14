@@ -7,11 +7,14 @@ import {
     Select,
     SelectOption
 } from "@utrecht/component-library-react";
-import React from "react";
+import React, { useState } from "react";
 import {FC} from "react";
-import { Spacer } from '@openstad-headless/ui/src';
+import {MultiSelect, Spacer} from '@openstad-headless/ui/src';
+import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type SelectFieldProps = {
+    overrideDefaultValue?: FormValue;
     title?: string;
     description?: string;
     choices?: string[] | [{value: string, label: string}];
@@ -20,7 +23,7 @@ export type SelectFieldProps = {
     fieldKey: string;
     defaultOption?: string;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: {name: string, value: FormValue}, triggerSetLastKey?: boolean) => void;
     type?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -28,6 +31,19 @@ export type SelectFieldProps = {
     infoImage?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    multiple?: boolean;
+    defaultValue?: string | string[];
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
@@ -45,6 +61,12 @@ const SelectField: FC<SelectFieldProps> = ({
       infoImage = '',
       randomId = '',
       fieldInvalid = false,
+      multiple = false,
+      defaultValue = [],
+      overrideDefaultValue,
+      images = [],
+      createImageSlider = false,
+      imageClickable = false,
 }) => {
     choices = choices.map((choice) => {
       if (typeof choice === 'string') {
@@ -61,9 +83,21 @@ const SelectField: FC<SelectFieldProps> = ({
         }
     }
 
+    let initialValue = multiple
+      ? defaultValue
+      : (Array.isArray(defaultValue) && defaultValue.length > 0 ? defaultValue[0] : '');
+
+    initialValue = overrideDefaultValue
+      ? (overrideDefaultValue as string | string[])
+      : initialValue;
+
+    const [selected, setSelected] = useState<string | string[]>(initialValue);
+
     return (
         <FormField type="select">
-            <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
+          {title && (
+            <FormLabel htmlFor={fieldKey} dangerouslySetInnerHTML={{ __html: title }} />
+          )}
             {description &&
                 <>
                     <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
@@ -87,35 +121,73 @@ const SelectField: FC<SelectFieldProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+              imageFallback: infoImage || '',
+              images: images,
+              createImageSlider: createImageSlider,
+              addSpacer: !!infoImage,
+              imageClickable: imageClickable
+            })}
 
             <Paragraph className="utrecht-form-field__input">
+              { multiple ? (
+                  <MultiSelect
+                    label={defaultOption}
+                    id={fieldKey}
+                    options={choices.map(choice => ({
+                      value: choice.value,
+                      label: choice.label,
+                      checked: Array.isArray(selected) ? selected.includes(choice.value) : false,
+                    }))}
+                    onItemSelected={(optionValue: string) => {
+                      let newSelected = Array.isArray(selected) ? [...selected] : [];
+                      if (newSelected.includes(optionValue)) {
+                        newSelected = newSelected.filter(v => v !== optionValue);
+                      } else {
+                        newSelected.push(optionValue);
+                      }
+                      setSelected(newSelected);
+                      if (onChange) {
+                        onChange({
+                          name: fieldKey,
+                          value: newSelected?.join(","),
+                        });
+                      }
+                    }}
+                  />
+              ) : (
                 <Select
-                    className="form-item"
-                    name={fieldKey}
-                    required={fieldRequired}
-                    onChange={(e) => onChange ? onChange({
+                  className="form-item"
+                  name={fieldKey}
+                  id={fieldKey}
+                  required={fieldRequired}
+                  onChange={(e) => {
+                    setSelected(e.target.value);
+                    if (onChange) {
+                      onChange({
                         name: fieldKey,
                         value: e.target.value
-                    }) : null }
-                    disabled={disabled}
-                    aria-invalid={fieldInvalid}
-                    aria-describedby={`${randomId}_error`}
+                      })
+                    }
+                  }}
+                  disabled={disabled}
+                  aria-invalid={fieldInvalid}
+                  aria-describedby={`${randomId}_error`}
+                  value={ selected }
                 >
-                    <SelectOption value="">
-                        {defaultOption}
+                  <SelectOption value="">
+                    {defaultOption}
+                  </SelectOption>
+                  {choices?.map((value, index) => (
+                    <SelectOption
+                      key={index}
+                      value={value && value.value}
+                    >
+                      {value && value.label}
                     </SelectOption>
-                    {choices?.map((value, index) => (
-                        <SelectOption value={value && value.value} key={index}>
-                            {value && value.label}
-                        </SelectOption>
-                    ))}
+                  ))}
                 </Select>
+              ) }
             </Paragraph>
         </FormField>
     );

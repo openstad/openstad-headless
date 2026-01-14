@@ -14,8 +14,13 @@ router
     let userNickName = '';
 
     try {
+      const whereCondition = { id: req.user.id };
+      if (req.params.projectId && req.params.projectId !== 1) {
+        whereCondition.projectId = req.params.projectId;
+      }
+
       const user = await db.User.findOne({
-        where: { id: req.user.id, projectId: req.params.projectId }
+        where: whereCondition
       });
 
       userNickName = user?.nickName || '';
@@ -45,6 +50,7 @@ router
       createdAt: req.user.createdAt,
       updatedAt: req.user.updatedAt,
       deletedAt: req.user.deletedAt,
+      emailNotificationConsent: req.user.emailNotificationConsent || false,
     };
     res.json(data);
   })

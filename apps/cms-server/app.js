@@ -22,6 +22,13 @@ const apostropheServer = {};
 let startUpIsBusy = false;
 let startUpQueue = [];
 
+app.set('trust proxy', true);
+
+if (!process.env?.DISABLE_RATE_LIMITER || process.env?.DISABLE_RATE_LIMITER !== 'true') {
+  const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+  app.use(rateLimiter());
+}
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -158,6 +165,19 @@ async function doStartServer(domain, req, res) {
   }
 }
 
+// Generate a session secret based on project details and environment variables
+// This ensures the session secret is the same for each restart of this server,
+// but different for each project and version of the cms server
+async function getSessionSecret(projectUrl, projectId) {
+  const crypto = require('crypto');
+  const hash = crypto.createHash('sha256');
+  const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
+  const data = (process.env.APOS_RELEASE_ID || '') + apiUrl + projectUrl + projectId;
+  hash.update(data);
+  
+  return hash.digest('hex');
+}
+
 async function run(id, projectData, options, callback) {
 
 
@@ -166,8 +186,9 @@ async function run(id, projectData, options, callback) {
   const protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
   projectData.url = protocol + url.hostname + (url.port ? ':' + url.port : '');
 
+  const sessionSecret = await getSessionSecret(projectData.url, projectData.id);
+  
   const project = {
-    ...aposConfig,
     baseUrl: /*process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : */projectData.url,
     options: projectData,
     project: projectData,
@@ -175,6 +196,16 @@ async function run(id, projectData, options, callback) {
     shortName: 'openstad-' + projectData.id,
     mongo: {},
     prefix: projectData.sitePrefix ? '/' + projectData.sitePrefix : false,
+    modules: {
+      ...aposConfig.modules,
+      '@apostrophecms/express': {
+        options: {
+          session: {
+            secret: sessionSecret
+          }
+        }
+      }
+    },
   };
 
   if (process.env.MONGODB_URI) {
@@ -255,8 +286,8 @@ app.use(async function (req, res, next) {
   }
 
   if (Object.keys(projects).length === 0) {
-    console.log('No config for projects found');
-    return res.status(500).json({ error: 'No projects found' });
+    // fallback to generic 404
+    return res.status(404).send(`Error: No projects found`);
   }
 
   next();
@@ -334,8 +365,8 @@ app.use(function (req, res, next) {
   const url = req.url;
 
   if (req.url.indexOf('//') > -1 || req.url.indexOf('%5C') > -1) {
-    req.url = req.url.replace('//', '/');
-    req.url = req.url.replace('%5C', '');
+    req.url = req.url.replace(/\/{2,}/g, '/');
+    req.url = req.url.replace(/%5c/gi, '');
 
     // Reinitialize route parameters, so the next middleware will see the correct parameters
     req.app._router.handle(req, res, next);
@@ -391,14 +422,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Create a middleware function for basic authentication
 app.use((req, res, next) => {
-
   if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
-
     return basicAuth({
-      users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
-      challenge: true
+        users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
+        challenge: true
     })(req, res, next);
   }
 
@@ -427,7 +455,6 @@ app.get('/auth/login', (req, res, next) => {
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
-  url = req.query.useOauth ? url + '&useOauth=' + req.query.useOauth : url;
   url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;
 
   return res.redirect(url);
@@ -452,7 +479,6 @@ app.get('/auth/logout', (req, res, next) => {
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/logout?redirectUri=${returnUrl}`;
-  url = req.query.useOauth ? url + '&useOauth=' + req.query.useOauth : url;
   url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;
 
   return res.redirect(url);
@@ -465,8 +491,18 @@ app.use(async function (req, res, next){
       return await serveSite(req, res, projects[completeDomain], req.forceRestart);
     }
 
+  function escapeHtml(input) {
+    return String(input)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/`/g, '&#96;');
+  }
+
     // fallback to generic 404
-    res.status(404).send(`Error: No project found for given URL ${req.openstadDomain}${req.url}`);
+    res.status(404).send(`Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`);
 
 });
 

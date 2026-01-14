@@ -227,7 +227,13 @@ exports.authorization = [
 
         // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
         if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
-          console.log('===> redirectURI allowedDomains', redirectURI);
+          // Find and encode returnTo param if present, this allows us to support returnTo urls with special characters (e.g. `?` and `&`)
+          const returnTo = redirectURI.substr(redirectURI.lastIndexOf('returnTo=') + 9);
+          if (returnTo) {
+            // encode returnTo param
+            const encodedReturnTo = encodeURIComponent(returnTo);
+            redirectURI = redirectURI.replace(returnTo, encodedReturnTo);
+          }
           return done(null, client, redirectURI);
         } else {
           console.log('===> Redirect host doesn\'t match the client host');

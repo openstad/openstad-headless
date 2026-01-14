@@ -11,9 +11,14 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Gemeente Amsterdam",
+  "license": "MIT",
   "dependencies": {
-    "autoprefixer": "^10.4.20"
+    "@azure/msal-node": "^3.8.0",
+    "autoprefixer": "^10.4.20",
+    "dompurify": "^3.2.6",
+    "express-rate-limit": "^7.5.1",
+    "ip": "^2.0.1",
+    "nodemailer": "^7.0.11"
   }
 }

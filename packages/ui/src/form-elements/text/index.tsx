@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useRef } from "react";
 import {
     AccordionProvider,
     FormField,
@@ -10,9 +10,24 @@ import {
 } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
+import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
+
+// Temporary TypeScript declaration for 'trix-editor'
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'trix-editor': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & { input?: string },
+        HTMLElement
+      >;
+    }
+  }
+}
 
 export type TextInputProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     minCharacters?: number;
     minCharactersWarning?: string;
@@ -21,13 +36,13 @@ export type TextInputProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
-    variant?: 'text input' | 'textarea';
+    variant?: 'text input' | 'textarea' | 'richtext';
     placeholder?: string;
     defaultValue?: string;
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined | number;
     type?: string;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     reset?: (resetFn: () => void) => void;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -37,12 +52,106 @@ export type TextInputProps = {
     fieldInvalid?: boolean;
     minCharactersError?: string;
     maxCharactersError?: string;
+    nextPageText?: string;
+    prevPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
 }
+
+const TrixEditor: React.FC<{
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+}> = ({ value, onChange }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const editorInstance = useRef<any>(null);
+
+  const idRef = useRef(`trix-editor-${Math.random().toString(36).substring(2, 9)}`);
+
+  useEffect(() => {
+    (async () => {
+      if (typeof window !== "undefined") {
+        // @ts-expect-error: trix has no types
+        await import("trix");
+        // @ts-expect-error: trix has no types
+        await import("trix/dist/trix.css");
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const editorEl = editorRef.current;
+    const inputEl = inputRef.current;
+    if (!editorEl || !inputEl) return;
+
+    const handleTrixInitialize = () => {
+      editorInstance.current = (editorEl as any).editor;
+
+      // Remove the file attachment button from the toolbar
+      const toolbar = document.querySelector('trix-toolbar');
+      if (toolbar) {
+        const fileButton = toolbar.querySelector('[data-trix-action="attachFiles"]');
+        if (fileButton) {
+          fileButton.remove();
+        }
+      }
+
+      // Load initial content
+      if (value && editorInstance.current) {
+        editorInstance.current.loadHTML(value);
+      }
+
+      // Listen for changes and send change event
+      editorEl.addEventListener("trix-change", () => {
+        if (editorInstance.current && inputEl) {
+          const html = inputEl.value;
+
+          // Create a synthetic React-like ChangeEvent
+          const syntheticEvent = {
+            target: { value: html },
+          } as React.ChangeEvent<HTMLInputElement>;
+
+          onChange(syntheticEvent);
+        }
+      });
+    };
+
+    editorEl.addEventListener("trix-initialize", handleTrixInitialize);
+    return () => {
+      editorEl.removeEventListener("trix-initialize", handleTrixInitialize);
+    };
+  }, [onChange]);
+
+  // Keep editor content in sync with external value
+  useEffect(() => {
+    if (!editorInstance.current || !inputRef.current) return;
+    const currentHTML = inputRef.current.value;
+    if (currentHTML !== value) {
+      editorInstance.current.loadHTML(value || "");
+    }
+  }, [value]);
+
+  return (
+    <div>
+      <input ref={inputRef} type="hidden" id={idRef.current} />
+      <trix-editor ref={editorRef} input={idRef.current}></trix-editor>
+    </div>
+  );
+};
+
 
 const TextInput: FC<TextInputProps> = ({
     title,
     description,
-    variant,
+    variant = 'textarea',
     fieldKey,
     fieldRequired = false,
     placeholder,
@@ -61,25 +170,42 @@ const TextInput: FC<TextInputProps> = ({
     infoImage = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
-    const InputComponent = variant === 'textarea' ? Textarea : Textbox;
+        const variantMap = {
+        'text input': Textbox,
+        'textarea': Textarea,
+        'richtext': TrixEditor
+    }
+    const InputComponent = variantMap[variant];
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
-            let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            let { html } = this.props;
+            return <div dangerouslySetInnerHTML={{ __html: html }} />;
         }
     }
 
+    const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
+
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
-    const [value, setValue] = useState(defaultValue);
+    const [value, setValue] = useState(initialValue);
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+ 
 
     useEffect(() => {
         if (reset) {
-            reset(() => setValue(defaultValue));
+            reset(() => setValue(initialValue));
         }
     }, [reset, defaultValue]);
+
+    useEffect(() => {
+        value && setCheckInvalid(false);
+    }, [])
 
     const characterHelpText = (count: number) => {
         let helpText = '';
@@ -136,12 +262,12 @@ const TextInput: FC<TextInputProps> = ({
         <FormField type="text">
             {title && (
                 <Paragraph className="utrecht-form-field__label">
-                    <FormLabel htmlFor={randomId}>{title}</FormLabel>
+                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
                 </Paragraph>
             )}
             {description &&
                 <>
-                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
                     <Spacer size={.5} />
                 </>
             }
@@ -162,14 +288,15 @@ const TextInput: FC<TextInputProps> = ({
                 </>
             )}
 
-            {infoImage && (
-                <figure className="info-image-container">
-                    <img src={infoImage} alt=""/>
-                    <Spacer size={.5} />
-                </figure>
-            )}
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
+            })}
 
-            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
+            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`} aria-invalid={checkInvalid}>
                 <InputComponent
                     id={randomId}
                     name={fieldKey}
@@ -177,30 +304,42 @@ const TextInput: FC<TextInputProps> = ({
                     type={getType(fieldKey)}
                     placeholder={placeholder}
                     value={value}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                         setValue(e.target.value);
+                        if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
+                            setCheckInvalid(false);
+                        } else {
+                            if(fieldRequired && e.target.value.length === 0){
+                                setCheckInvalid(true);
+                            }else{
+                                setCheckInvalid(false);
+                            }
+                        }
+
                         if (onChange) {
                             onChange({
                                 name: fieldKey,
                                 value: e.target.value,
                             });
                         }
-                        characterHelpText(e.target.value.length)
+                        characterHelpText(e.target.value.length);
+
                     }}
                     disabled={disabled}
                     rows={rows}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     autoComplete={getAutocomplete(fieldKey)}
-                    aria-invalid={fieldInvalid}
+
                     aria-describedby={`${randomId}_error`}
                 />
                 {isFocused && helpText &&
-                  <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
+                    <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
                 }
             </div>
         </FormField>
     );
 };
 
+export { TrixEditor };
 export default TextInput;

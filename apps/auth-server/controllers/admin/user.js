@@ -36,7 +36,7 @@ exports.new = (req, res) => {
  * @TODO validation
  */
 exports.create = (req, res, next) => {
-  let { name, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+  let { name, email, streetName, houseNumber, suffix, postcode, emailNotificationConsent, accessCode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
 
   password = bcrypt.hashSync(password, saltRounds);
 
@@ -48,6 +48,8 @@ exports.create = (req, res, next) => {
       houseNumber,
       suffix,
       postcode,
+      emailNotificationConsent,
+      accessCode,
       city,
       phoneNumber,
       password
@@ -62,7 +64,7 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
+  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'emailNotificationConsent', 'accessCode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
 
   let data = {};
   keysToUpdate.forEach((key) => {
@@ -84,7 +86,7 @@ exports.update = (req, res, next) => {
 
   for (let clientId in roles) {
     let roleId = roles[clientId];
-    let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+    let parsedClientId = parseInt(clientId.replace(/'/g, ''), 10);
     saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
   }
 

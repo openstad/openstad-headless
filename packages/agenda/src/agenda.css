@@ -65,6 +65,9 @@
 
 
 /* The last item should not have a line extending down */
-.osc-agenda > .osc-agenda-item:last-child::before {
+.osc-agenda > .osc-agenda-item:last-child::before,
+.osc-agenda > .osc-agenda-item:has(+.utrecht-accordion__section)::before,
+.osc-agenda > :nth-last-child(1 of .osc-agenda-item)::before,
+.osc-agenda > .utrecht-accordion__section > .utrecht-accordion__panel > :nth-last-child(1 of .osc-agenda-item)::before {
   content: none;
 }

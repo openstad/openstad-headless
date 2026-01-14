@@ -23,6 +23,18 @@
   "dependencies": {
     "@azure/identity": "^4.6.0",
     "@kubernetes/client-node": "^1.1.2",
+    "@opentelemetry/api": "1.7.0",
+    "@opentelemetry/auto-instrumentations-node": "0.40.3",
+    "@opentelemetry/exporter-trace-otlp-http": "0.46.0",
+    "@opentelemetry/instrumentation": "0.46.0",
+    "@opentelemetry/instrumentation-express": "0.33.0",
+    "@opentelemetry/instrumentation-http": "0.46.0",
+    "@opentelemetry/instrumentation-mysql2": "0.33.0",
+    "@opentelemetry/instrumentation-redis": "0.33.0",
+    "@opentelemetry/resources": "1.19.0",
+    "@opentelemetry/sdk-node": "0.46.0",
+    "@opentelemetry/sdk-trace-base": "1.19.0",
+    "@opentelemetry/semantic-conventions": "1.19.0",
     "@openstad-headless/account": "*",
     "@openstad-headless/activity": "*",
     "@openstad-headless/agenda": "*",
@@ -72,11 +84,10 @@
     "marked": "^4.0.14",
     "merge": "^2.1.1",
     "method-override": "^3.0.0",
-    "mjml": "^5.0.0-alpha.6",
+    "mjml": "5.0.0-alpha.6",
     "morgan": "^1.10.0",
     "mysql2": "^3.9.7",
-    "node-fetch": "^2.6.7",
-    "nodemailer": "^6.7.3",
+    "nodemailer": "^7.0.11",
     "nodemon": "^3.0.1",
     "nunjucks": "^3.2.2",
     "pmx": "^1.6.7",
@@ -102,6 +113,6 @@
     "sequelize-mock": "^0.10.2",
     "supertest": "^4.0.2"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Gemeente Amsterdam",
+  "license": "MIT"
 }

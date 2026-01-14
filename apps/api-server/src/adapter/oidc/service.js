@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const mapUserData = require('../../util/map-user-data');
 
 let service = {};

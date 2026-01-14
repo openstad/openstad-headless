@@ -344,6 +344,23 @@ section.osc-begrootmodule-resource-detail-photo
   }
 }
 
+.resource-detail-modbreak-banner {
+  padding: 1rem;
+  border: 1px solid grey;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.resource-detail-modbreak-banner > section {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+}
+
+.resource-detail-modbreak-banner > section > *:first-child {
+  font-weight: bold;
+}
+
 
 .budget-badge.budget-badge-primary.osc-budget-0 { flex: var(--osc-budget-0); }
 .budget-badge.budget-badge-primary.osc-budget-1 { flex: var(--osc-budget-1); }

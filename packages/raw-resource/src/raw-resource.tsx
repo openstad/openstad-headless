@@ -1,5 +1,6 @@
 import './raw-resource.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
+import { useEffect } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
@@ -10,6 +11,7 @@ import { renderRawTemplate } from '../includes/template-render';
 
 export type RawResourceWidgetProps = BaseProps &
   ProjectSettingProps & {
+    currentUser?: any;
     projectId?: string;
   } & {
     resourceId?: string;
@@ -27,13 +29,28 @@ function RawResource(props: RawResourceWidgetProps) {
     targetUrl: props.resourceIdRelativePath,
   })); // todo: make it a number throughout the code
 
-  const updatedProps = { ...props, resourceId };
-
   const datastore = new DataStore({
-    projectId: updatedProps.projectId,
+    projectId: props.projectId,
     resourceId: resourceId,
-    api: updatedProps.api,
+    api: props.api,
   });
+
+  const { data: currentUser } = datastore.useCurrentUser({ ...props });
+
+  // Expose logout function globally so it can be called from raw HTML
+  useEffect(() => {
+    if (currentUser?.logout) {
+      (window as any).openstadLogout = () => {
+        currentUser.logout({url: location.href});
+      };
+    }
+
+    return () => {
+      delete (window as any).openstadLogout;
+    };
+  }, [currentUser]);
+
+  let updatedProps = { ...props, resourceId, currentUser };
 
   const { data: resource } = resourceId ? datastore.useResource(updatedProps) : { data: null };
 

@@ -26,10 +26,18 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import {Input} from "@/components/ui/input";
 
 const formSchema = z.object({
   resourceId: z.string(),
   rawInput: z.string(),
+  resourceIdRelativePath: z
+    .string()
+    .optional()
+    .refine(
+      (value) => !value || value.includes('[id]'),
+      'Specificeer een [id] veld'
+    ),
 });
 
 export default function WidgetRawGeneral(
@@ -49,8 +57,9 @@ export default function WidgetRawGeneral(
     () => ({
       resourceId: props?.resourceId || '',
       rawInput: props?.rawInput || '',
+      resourceIdRelativePath: props?.resourceIdRelativePath || '',
     }),
-    [props?.resourceId, props?.rawInput]
+    [props?.resourceId, props?.rawInput, props?.resourceIdRelativePath]
   );
 
   const form = useForm<FormData>({
@@ -101,6 +110,29 @@ export default function WidgetRawGeneral(
               </FormItem>
             )}
           />
+
+          { form.watch('resourceId') === '' ? (
+            <FormField
+              control={form.control}
+              name="resourceIdRelativePath"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Geen specifieke inzending gekoppeld?
+                  </FormLabel>
+                  <em className="text-xs">Beschrijf hoe de inzending gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                  <FormControl>
+                    <Input {...field} onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
+
           <FormField
             control={form.control}
             name="rawInput"
@@ -117,7 +149,7 @@ export default function WidgetRawGeneral(
                     <li className="ml-4">{`{{title}}`}</li>
                     <li className="ml-4">{`{{summary}}`}</li>
                     <li className="ml-4">{`{{description}}`}</li>
-                    <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].src}}`}</li>
+                    <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].url}}`}</li>
                     <li className="ml-4">{`{{budget}}`}</li>
                     <li className="ml-4">{`{{extraData}}`}</li>
                     <li className="ml-4">{`{{location}}`}</li>
@@ -126,6 +158,7 @@ export default function WidgetRawGeneral(
                     <li className="ml-4">{`{{progress}}`}</li>
                     <li className="ml-4">{`{{createDateHumanized}}`}</li>
                     <li className="ml-4">{`{{publishDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{currentUser}} -> Bevat gegevens van de ingelogde gebruiker. Bijvoorbeeld: {{currentUser.name}} of {{currentUser.email}}`}</li>
                     <li className="ml-4">{`{{resource}} -> Bevat alle data van de resource`}</li>
                   </ul>
                   <br/>
@@ -152,6 +185,8 @@ export default function WidgetRawGeneral(
                       className="ml-4">{`{{ resource | tagGroup('[group]') }}: Laat alle gekoppelde tags van de taggroep [group] zien gescheiden met komma's. [group] dient vervangen te worden door de naam van de taggroep.`}</li>
                     <li
                       className="ml-4">{`{{ resource | status }}: Laat alle gekoppelde statussen zien gescheiden met komma's`}</li>
+                   <li
+                      className="ml-4">{`window.openstadLogout(): JavaScript functie om uit te loggen. Voorbeeld: <a href="#" onclick="window.openstadLogout(); return false;">Uitloggen</a>`}</li>                       
                   </ul>
                 </div>
                 <FormControl>

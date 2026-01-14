@@ -1,6 +1,5 @@
 const express 				= require('express');
 const config 					= require('config');
-const fetch           = require('node-fetch');
 const merge           = require('merge');
 const Sequelize       = require('sequelize');
 const db      				= require('../../db');
@@ -22,6 +21,7 @@ const createError = require('http-errors');
 
 let router = express.Router({mergeParams: true});
 const {Op} = require("sequelize");
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 async function getProject(req, res, next, include = []) {
 	const projectId = req.params.projectId;
@@ -290,7 +290,7 @@ async function setServerLoginPathForProvider(project, authProviderId, provider) 
 // Endpoint to delete duplicated project and its associated data
 router.route('/delete-duplicated-data')
   .post(auth.can('Project', 'delete'))
-  .post(async function(req, res, next) {
+  .post( rateLimiter(), async function(req, res, next) {
     const { projectId, tagMap, statusMap, widgetMap, resourceMap, userMap } = req.body;
 
     try {
@@ -377,6 +377,10 @@ router
       req.scope.push('includeEmailConfig');
     }
 
+    if (req.query.getBasicInformation) {
+      req.scope.push('getBasicInformation');
+    }
+
     if (req.query.includeAreas) {
       req.scope.push('includeAreas');
     }
@@ -393,7 +397,13 @@ router.route('/')
 
 // list projects
 // ----------
-	.get(auth.can('Project', 'list'))
+    .get(function(req, res, next) {
+      if (req.scope.includes("getBasicInformation")) {
+        return next();
+      }
+
+      return auth.can('Project', 'list')(req, res, next);
+    })
 	.get(pagination.init)
 	.get(function(req, res, next) {
     if (req.query.includeAuthConfig) return next('includeAuthConfig is not implemented for projects list')
@@ -403,7 +413,7 @@ router.route('/')
 
     try {
       let where = {};
-      if (!hasRole( req.user, 'superuser' )) {
+      if (!hasRole( req.user, 'superuser' ) && !req.scope.includes("getBasicInformation") ) {
         // first find all corresponding users for the current user, only where she is admin
         let users = await db.User.findAll({
           where: {
@@ -411,7 +421,7 @@ router.route('/')
               identifier: req.user?.idpUser?.identifier || 'no identifier found',
               provider: req.user?.idpUser?.provider || 'no provider found',
             },
-            role: 'admin',
+            [Op.or]: [{role: 'admin'}, {role: 'editor'}]
           }
         })
         let projectIds = users.map(u => u.projectId);
@@ -420,6 +430,21 @@ router.route('/')
 
       // now find the corresponding projects
       let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+      if (req.user?.role === 'editor') {
+        result.rows = result.rows.filter(project => project.id !== 1);
+      }
+
+      if ( req.scope.includes("getBasicInformation") ) {
+        result.rows = result.rows.map(project => {
+          const p = project.toJSON();
+          return {
+            id: p.id,
+            createdAt: p.createdAt,
+            tags: p?.config?.project?.tags || ''
+          };
+        });
+      }
+
       req.results = result.rows;
       req.dbQuery.count = result.count;
       return next();
@@ -437,7 +462,7 @@ router.route('/')
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
       // todo: waarom is dit? dat zou door het auth systeem moeten worden afgevangen
-      let project = record.toJSON()
+          let project = typeof record.toJSON === 'function' ? record.toJSON() : record;
 			if (!( req.user && hasRole( req.user, 'admin') )) {
         project.config = undefined;
         project.safeConfig = undefined;
@@ -451,7 +476,7 @@ router.route('/')
 // -----------
 	.post(auth.can('Project', 'create'))
 	.post(removeProtocolFromUrl)
-	.post(async function (req, res, next) {
+	.post( rateLimiter(), async function (req, res, next) {
     req.widgets = req.body.widgets || [];
     req.tags = req.body.tags || [];
     req.statuses = req.body.statuses || [];
@@ -475,6 +500,10 @@ router.route('/')
       let providersDone = [];
       for (let provider of providers) {
         let authConfig = await authSettings.config({ project, useAuth: provider, req });
+
+        // Prevent prototype pollution
+        if (authConfig?.provider === '__proto__' || authConfig?.provider === 'constructor' || authConfig?.provider === 'prototype') continue;
+
         if ( !providersDone[authConfig.provider] ) { // filter for duplicates like 'default'
           let adapter = await authSettings.adapter({ authConfig });
           if (adapter.service.createClient) {
@@ -704,7 +733,7 @@ router.route('/:projectId') //(\\d+)
 // -----------
 	.put(auth.useReqUser)
 	.put(removeProtocolFromUrl)
-	.put(async function (req, res, next) {
+	.put( rateLimiter(), async function (req, res, next) {
     // update certain parts of config to the oauth client
 		const project = await db.Project.findOne({ where: { id: req.results.id} });
     if (!hasRole( req.user, 'admin')) return next();
@@ -856,13 +885,15 @@ router.route('/:projectId(\\d+)/export')
 // -------------------
 router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 	.put(auth.can('Project', 'anonymizeAllUsers'))
-	.put(function(req, res, next) {
+	.put( rateLimiter(), function(req, res, next) {
     // the project
 		let where = { id: parseInt(req.params.projectId) };
 		db.Project
 			.findOne({ where })
 			.then(found => {
-				if ( !found ) throw new Error('Project not found');
+				if (!found) {
+          return next(createError(404, 'Project not found'));
+        }
 				req.results = found;
 				req.project = req.results; // middleware expects this to exist
         		next();
@@ -878,9 +909,7 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 
 		req.project.doAnonymizeAllUsers(
 			[...result.users],
-			[...result.externalUserIds],
 			req.query.useAuth
-
 		);
       }
       next();

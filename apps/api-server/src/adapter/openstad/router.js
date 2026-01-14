@@ -1,7 +1,6 @@
 const config = require('config');
 const express = require('express');
 const createError = require('http-errors');
-const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
 const db = require('../../db');
@@ -121,6 +120,7 @@ router
   .get(async function (req, res, next) {
     // check redirect first
     let returnTo = req.query.returnTo;
+    returnTo = decodeURIComponent(returnTo);
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
     returnTo = String(returnTo);
     if (!returnTo.match(/\[\[jwt\]\]/) ) returnTo = returnTo + (returnTo.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
@@ -220,6 +220,19 @@ router
 
     req.userData.projectId = req.project.id; // todo: ik weet nog niet waar dit moet
     let data = req.userData;
+
+    if ( !!data && !!data.emailNotificationConsent && !!data.clientId ) {
+        const clientId = String(data?.clientId);
+        const currentValue = typeof(data.emailNotificationConsent) === 'object' ? data.emailNotificationConsent : {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+        if (clientConsentIsSet) {
+            data.emailNotificationConsent = currentValue[clientId];
+        } else {
+          // clientConsent is not set (correctly); remove it to prevent overwriting existing consent
+          delete data.emailNotificationConsent;
+        }
+    }
 
     // if user has same projectId and userId
     // rows are duplicate for a user
@@ -351,7 +364,8 @@ router
     
     const projectId = req.params.projectId;
     if(req.query.redirectUri && projectId && await isRedirectAllowed(projectId, req.query.redirectUri)){
-      return res.redirect(req.query.redirectUri);
+      const redirectUri = req.query.redirectUri + (req.query.redirectUri.includes('?') ? '&' : '?') + 'openstadlogout=true';
+      return res.redirect(redirectUri);
     }else if(req.query.redirectUri){
       return next(createError(403, 'redirectUri not found in allowlist.'));
     }
@@ -366,7 +380,7 @@ router
 router
   .route('(/project/:projectId)?/uniquecode')
   .all(async function (req, res, next) {
-    if (!hasRole(req.user, 'admin')) return next(new Error('You cannot list these codes'))
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
     return next();
   })
 
@@ -376,6 +390,7 @@ router
     try {
       codes = await service.fetchUniqueCode({
         authConfig: req.authConfig,
+        isExport: req.query.export === 'true',
       });
     } catch(err) {
       console.log(err);
@@ -404,7 +419,7 @@ router
 
   // reset
   .post(async function (req, res, next) {
-    if (!hasRole(req.user, 'admin')) return next(new Error('You cannot list these codes'))
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
 
     let uniqueCodeId= parseInt(req.params.uniqueCodeId);
     if (!uniqueCodeId) return next(new Error('No code id found'))
@@ -414,6 +429,70 @@ router
       codes = await service.resetUniqueCode({
         authConfig: req.authConfig,
         uniqueCodeId: uniqueCodeId,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+// ----------------------------------------------------------------------------------------------------
+// access codes
+
+router
+  .route('(/project/:projectId)?/accesscode')
+  .all(async function (req, res, next) {
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
+    return next();
+  })
+
+  // list
+  .get(async function (req, res, next) {
+    let codes = {};
+    try {
+      codes = await service.fetchAccessCode({
+        authConfig: req.authConfig,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+  // create
+  .post(async function (req, res, next) {
+    let codes = {};
+    if (!req.body.code) return next(new Error('No code provided'))
+
+    try {
+      codes = await service.createAccessCode({
+        authConfig: req.authConfig,
+        code: req.body.code,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+router
+  .route('(/project/:projectId)?/accesscode/:accessCodeId/delete')
+
+  // delete
+  .delete(async function (req, res, next) {
+    if (!hasRole(req.user, 'editor')) return next(new Error('You cannot list these codes'))
+
+    let accessCodeId= parseInt(req.params.accessCodeId);
+    if (!accessCodeId) return next(new Error('No code id found'))
+
+    let codes = {};
+    try {
+      codes = await service.deleteAccessCode({
+        authConfig: req.authConfig,
+        accessCodeId: accessCodeId,
       });
     } catch(err) {
       console.log(err);

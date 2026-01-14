@@ -1,0 +1,83 @@
+.utrecht-accordion__button {
+    position: relative;
+    padding-right: 2rem;
+}
+
+.utrecht-accordion__button::before {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(135deg);
+    width: 0.5rem;
+    height: 0.5rem;
+    border-style: solid;
+    border-width: 0.15em 0.15em 0 0;
+    transform-origin: center;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.utrecht-accordion__button[aria-expanded="true"]::before {
+    transform: translateY(-50%) rotate(-45deg);
+}
+
+figure.info-image-container {
+    aspect-ratio: unset;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+}
+
+
+html body .question .marginTop10.marginBottom15 {
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.utrecht-form-field.utrecht-form-field--checkbox .utrecht-form-label--checkbox .utrecht-checkbox--custom.utrecht-checkbox--html-input:disabled {
+    background-color: var(--utrecht-checkbox-disabled-background-color, var(--utrecht-checkbox-background-color));
+    border-color: var(--utrecht-checkbox-disabled-border-color, var(--utrecht-checkbox-border-color));
+    border-width: var(--utrecht-checkbox-disabled-border-width, var(--utrecht-checkbox-border-width));
+    cursor: var(--utrecht-action-disabled-cursor, not-allowed);
+    background-image: var(--utrecht-checkbox-disabled-background-image, none);
+}
+
+.form-fieldCounter {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    z-index: 9999;
+    height: 4px;
+    inset: 20px 20px auto 20px;
+
+    li {
+        width: 100%;
+        height: 4px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 2px;
+        position: relative;
+        overflow: hidden;
+
+        &:before {
+            content: '';
+            background: rgba(0, 0, 0, 0.5);
+
+            position: absolute;
+            inset: 0 100% 0 0;
+            transition: all 0.3s ease;
+        }
+
+        &:has(~.--active),
+        &.--active {
+            &:before {
+                inset: 0 0 0 0;
+            }
+        }
+    }
+}

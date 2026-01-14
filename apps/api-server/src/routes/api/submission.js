@@ -3,8 +3,47 @@ const db      = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const createError = require("http-errors");
+const crypto = require('crypto');
 
 let router = express.Router({mergeParams: true});
+
+router.route('/widgets')
+	.get(auth.can('Submission', 'list'))
+	.get(function (req, res, next){
+		db.Widget
+			.findAll({
+				attributes: ['id', 'description'],
+				where: {
+					projectId: req.params.projectId,
+					type: 'enquete',
+				}
+			})
+			.then((found) => {
+				res.json(found);
+			}).catch(next);
+	});
+
+router.route('/widgets/:widgetId(\\d+)/count')
+	.get(auth.can('Submission', 'list'))
+	.get(function (req, res, next) {
+		const widgetId = parseInt(req.params.widgetId);
+		if (!widgetId) return next(createError(404, 'Widget not found'));
+
+		db.Submission
+			.scope('defaultScope', {method: ['forProjectId', req.params.projectId]})
+			.count({
+				where: {
+					widgetId,
+					projectId: req.params.projectId
+				}
+			})
+			.then((count) => {
+				res.json({ count });
+			})
+			.catch(next);
+	});
 
 router.route('/')
 
@@ -22,6 +61,10 @@ router.route('/')
 
 		if (req.params && req.params.projectId) {
 			req.scope.push({method: ['forProjectId', req.params.projectId]});
+		}
+
+		if (req.query && req.query.includeUser) {
+			req.scope.push('includeUser');
 		}
 
 		db.Submission
@@ -44,7 +87,7 @@ router.route('/')
 // create submission
 // ---------------
   .post(auth.can('Submission', 'create'))
-	.post(function(req, res, next) {
+	.post( rateLimiter(), function(req, res, next) {
 		let data = {
 			submittedData: req.body.submittedData,
 			projectId: req.params.projectId,
@@ -62,6 +105,17 @@ router.route('/')
 		delete data.submittedData.userEmailAddress;
 		delete data.submittedData.confirmationAdmin;
 		delete data.submittedData.overwriteEmailAddress;
+
+		if ( process.env.HASH_IP_ADDRESSES === 'true' && process.env.HASH_IP_SALT) {
+			const ipSalt = process.env.HASH_IP_SALT;
+
+			const hash = crypto.createHash('md5');
+
+			hash.update(req.ip + ipSalt);
+			const hashedIp = hash.digest('hex');
+
+			data.submittedData.ipAddress = hashedIp;
+		}
 
 		db.Submission
 			.authorizeData(data, 'create', req.user)
@@ -140,7 +194,9 @@ router.route('/')
 				    where: {id: submissionId, projectId: req.params.projectId}
 				})
 				.then(found => {
-					if ( !found ) throw new Error('Submission not found');
+					if (!found) {
+            return next(createError(404, 'Submission not found'));
+          }
 					req.results = found;
 					next();
 				})
@@ -158,7 +214,7 @@ router.route('/')
 	// update submission
 	// ---------------
 	.put(auth.useReqUser)
-		.put(function(req, res, next) {
+		.put( rateLimiter(), function(req, res, next) {
 		  var submission = req.results;
       if (!( submission && submission.can && submission.can('update') )) return next( new Error('You cannot update this submission') );
 		  submission

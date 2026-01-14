@@ -1,7 +1,6 @@
 const config = require('config');
 const jwt = require('jsonwebtoken');
 const merge = require('merge');
-const fetch = require('node-fetch');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 
@@ -45,7 +44,7 @@ module.exports = async function getUser( req, res, next ) {
     console.log ('set auth provider in cookie', authProvider);
     req.cookies['useAuthProvider'] = authProvider || 'default';
     let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider, req })
-    
+
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);
     }
@@ -140,7 +139,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
           ]});
       } else {
         where.projectId = config.admin.projectId;
-        where.role = 'admin';
+        where.role = { [db.Sequelize.Op.in]: ['admin', 'editor'] };
       }
     }
     

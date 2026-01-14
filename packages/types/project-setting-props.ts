@@ -10,6 +10,8 @@ export type ProjectSettingProps = {
     anonymizeUsersXDaysAfterEndDate: number;
     warnUsersAfterXDaysOfInactivity: number;
     anonymizeUsersAfterXDaysOfInactivity: number;
+    anonymizeUserName: string;
+    allowAnonymizeUsersAfterEndDate: boolean;
   };
   auth: {
     default: string;
@@ -26,13 +28,14 @@ export type ProjectSettingProps = {
     descriptionMaxLength: number;
     minimumYesVotes: number;
     showVoteButtons: boolean;
-    canEditAfterFirstLikeOrComment: boolean;
+    canEditAfterFirstLikeOrComment?: boolean;
     modbreakTitle?: string;
     types: Array<string>;
   };
   comments: {
     canComment: boolean,
     canLike: boolean,
+    canDislike: boolean,
     canReply: boolean,
     closedText: string;
     requiredUserRole: string,
@@ -43,6 +46,7 @@ export type ProjectSettingProps = {
     maxCharactersWarning?: string,
     minCharactersError?: string;
     maxCharactersError?: string;
+    variant?: 'micro-score' | 'medium';
   };
   users: {
     canCreateNewUsers: boolean;
@@ -77,5 +81,6 @@ export type ProjectSettingProps = {
     areaId: string;
     tilesVariant?: string;
     customUrl?: string;
+    autoZoomAndCenter?: "area" | "markers";
   };
 };

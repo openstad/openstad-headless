@@ -24,6 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Spacer } from "@/components/ui/spacer";
 import useAuthProvidersList, {useAuthProvidersEnabledCheck} from "@/hooks/use-auth-providers";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {useRouter} from "next/router";
 
 const requiredUserFields = [
   {
@@ -58,6 +59,15 @@ const requiredUserFields = [
     id: 'postcode',
     label: 'Postcode'
   },
+  {
+    id: 'emailNotificationConsent',
+    label: 'E-mail notificatie toestemming',
+    defaultLabel: 'Ik ga akkoord met het ontvangen van e-mail notificaties.',
+  },
+  {
+    id: 'accessCode',
+    label: 'Toegangscode',
+  }
 ];
 
 const formSchema = z.object({
@@ -76,6 +86,9 @@ export default function ProjectAuthenticationRequiredFields() {
     data,
     updateProject,
   } = useProject(['includeAuthConfig']);
+
+  const router = useRouter();
+  const { project } = router.query;
 
   const defaultLabels = requiredUserFields.reduce((acc: Record<string, string>, field) => {
     acc[field.id] = '';
@@ -154,8 +167,11 @@ export default function ProjectAuthenticationRequiredFields() {
     }
   }
 
-  const selectedUserFields = form.watch('requiredUserFields');
-  const showPageFields = Array.isArray(selectedUserFields) && selectedUserFields.length > 0;
+  const [showPageFields, setShowPageFields] = useState(false)
+  useEffect(() => {
+    // data is not available right away
+    setShowPageFields(data?.config?.auth?.provider?.openstad?.requiredUserFields?.length > 0);
+  }, [data]);
 
   const authProvidersEnabled = useAuthProvidersEnabledCheck();
   const { data: authProviders, updateAuthProviderServerLoginPath } = useAuthProvidersList();
@@ -171,11 +187,11 @@ export default function ProjectAuthenticationRequiredFields() {
           },
           {
             name: 'Authenticatie',
-            url: `/projects/${data?.id}/authentication`,
+            url: `/projects/${project}/authentication`,
           },
           {
             name: 'Verplichte velden',
-            url: `/projects/${data?.id}/authentication/requiredfields`,
+            url: `/projects/${project}/authentication/requiredfields`,
           },
         ]}>
         <div className="container py-6">
@@ -219,6 +235,7 @@ export default function ProjectAuthenticationRequiredFields() {
                                       <Checkbox
                                         checked={field.value?.includes(item.id)}
                                         onCheckedChange={(checked: any) => {
+                                          setShowPageFields(field.value.length > 1 || checked)
                                           return checked
                                             ? field.onChange([
                                                 ...field.value,
@@ -425,7 +442,8 @@ export default function ProjectAuthenticationRequiredFields() {
                                     })}
                                   </div>
                                 </FormItem>
-                                <Spacer size={3} />
+                              {/*  <Spacer size={3} />*/}
+                              {/*</>*/}
                               </>
                             )}
                           />

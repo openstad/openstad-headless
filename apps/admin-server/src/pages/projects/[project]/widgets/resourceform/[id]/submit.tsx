@@ -13,15 +13,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
+import { CheckboxList } from '@/components/checkbox-list';
+import useTags from "@/hooks/use-tags";
+import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
+import { Spacer } from '@/components/ui/spacer';
 
 const formSchema = z.object({
   submitButton: z.string(),
   saveButton: z.string(),
   saveConceptButton: z.string(),
+  defaultAddedTags: z.string().optional()
 });
 
 export default function WidgetResourceFormSubmit() {
@@ -40,6 +46,7 @@ export default function WidgetResourceFormSubmit() {
       submitButton: widget?.config?.[category]?.submitButton || '',
       saveButton: widget?.config?.[category]?.saveButton || '',
       saveConceptButton: widget?.config?.[category]?.saveConceptButton || '',
+      defaultAddedTags: widget?.config?.[category]?.defaultAddedTags || '',
     }),
     [widget?.config]
   );
@@ -60,6 +67,14 @@ export default function WidgetResourceFormSubmit() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
+
+  const projectId = widget?.config?.projectId;
+  const { data: loadedTags } = useTags(projectId);
+  const tags = (loadedTags || []) as Array<{
+    id: string;
+    name: string;
+    type?: string;
+  }>;
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -118,6 +133,35 @@ export default function WidgetResourceFormSubmit() {
               </FormItem>
             )}
           />
+
+          <Spacer />
+
+          <FormLabel>Kies de tags die standaard toegevoegd worden bij een nieuwe inzending</FormLabel>
+          <CheckboxList
+            form={form}
+            fieldName="defaultAddedTags"
+            label={(t) => t.name}
+            keyForGrouping="type"
+            keyPerItem={(t) => `${t.id}`}
+            items={tags}
+            selectedPredicate={(t) =>
+              // @ts-ignore
+              form
+                ?.getValues('defaultAddedTags')
+                ?.split(',')
+                ?.findIndex((tg) => tg === `${t.id}`) > -1
+            }
+            onValueChange={(tag, checked) => {
+              const ids = form.getValues('defaultAddedTags')?.split(',') ?? [];
+
+              const idsToSave = (checked
+                ? [...ids, tag.id]
+                : ids.filter((id) => id !== `${tag.id}`)).join(',');
+
+              form.setValue('defaultAddedTags', idsToSave);
+            }}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

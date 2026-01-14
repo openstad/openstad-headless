@@ -1,3 +1,5 @@
+import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
+
 export type EnqueteProps = {
   widgetId?: number;
   afterSubmitUrl?: string;
@@ -7,6 +9,7 @@ export type EnqueteProps = {
   description?: string;
   items?: Array<Item>;
   formVisibility?: string;
+  formStyle?: string;
   imageUrl?: string;
   multiple?: boolean;
   confirmation?: Confirmation;
@@ -14,6 +17,9 @@ export type EnqueteProps = {
   maxCharactersWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
+  datalayer?: DataLayer[];
+  enableOnOffSwitching?: boolean;
+  infoBlockStyle?: string;
 };
 
 export type Item = {
@@ -25,13 +31,20 @@ export type Item = {
   fieldKey?: string;
   minCharacters?: string;
   maxCharacters?: string;
+  nextPageText?: string;
+  prevPageText?: string;
   variant?: string;
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
+  randomizeItems?: boolean;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
+  infoBlockStyle?: string;
+  infoBlockShareButton?: boolean;
+  infoBlockExtraButton?: string;
+  infoBlockExtraButtonTitle?: string;
   fieldRequired?: boolean;
   maxChoices?: string,
   maxChoicesMessage?: string,
@@ -39,6 +52,28 @@ export type Item = {
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
+  matrix?: Matrix;
+  matrixMultiple?: boolean;
+  routingInitiallyHide?: boolean;
+  routingSelectedQuestion?: string;
+  routingSelectedAnswer?: string;
+  infoField?: string;
+  infofieldExplanation?: boolean;
+  key_b?: string;
+  description_b?: string;
+  image_b?: string;
+  numberingStyle?: string;
+  videoUrl?: string;
+  videoSubtitle?: boolean;
+  videoLang?: string;
+  images?: Array<{
+    url: string;
+    name?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+  }>;
+  createImageSlider?: boolean;
+  imageClickable?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -57,10 +92,17 @@ export type Option = {
 export type Title = {
   text?: string;
   key: string;
+  infoField?: string;
+  infofieldExplanation?: boolean;
   isOtherOption?: boolean;
   defaultValue?: boolean;
   image?: string;
   hideLabel?: boolean;
+  description?: string;
+  explanationRequired?: boolean;
+  key_b?: string;
+  description_b?: string;
+  image_b?: string;
 };
 
 export type Confirmation = {
@@ -69,3 +111,13 @@ export type Confirmation = {
   overwriteEmailAddress?: string;
   userEmailAddress?: string;
 };
+
+export type Matrix = {
+  columns: Array<MatrixOption>;
+  rows: Array<MatrixOption>;
+}
+
+export type MatrixOption = {
+  trigger: string;
+  text?: string;
+}

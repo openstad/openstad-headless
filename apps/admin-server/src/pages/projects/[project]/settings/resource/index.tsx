@@ -81,6 +81,7 @@ const formSchema = z.object({
   modbreakTitle: z.string().optional(),
   tagGroups: z.number().array().optional().default([]),
   statusGroups: z.number().array().optional().default([]),
+  canEditAfterFirstLikeOrComment: z.boolean().optional(),
 });
 
 export default function ProjectSettingsResource() {
@@ -115,6 +116,7 @@ export default function ProjectSettingsResource() {
       modbreakTitle: data?.config?.[category]?.modbreakTitle || null,
       tagGroups: data?.config?.resources?.defaultTagIds || [],
       statusGroups: data?.config?.resources?.defaultStatusIds || [],
+      canEditAfterFirstLikeOrComment: data?.config?.resources?.canEditAfterFirstLikeOrComment || false,
     }),
     [data?.config]
   );
@@ -147,6 +149,7 @@ export default function ProjectSettingsResource() {
           modbreakTitle: values.modbreakTitle,
           defaultTagIds: values.tagGroups || [],
           defaultStatusIds: values.statusGroups || [],
+          canEditAfterFirstLikeOrComment: values.canEditAfterFirstLikeOrComment,
         },
       });
       if (project) {
@@ -324,6 +327,33 @@ export default function ProjectSettingsResource() {
                       />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="canEditAfterFirstLikeOrComment"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>
+                      Kunnen gebruikers hun inzendingen bewerken nadat ze een like of reactie hebben ontvangen?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) => field.onChange(e === 'true')}
+                      value={field.value ? 'true' : 'false'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Kies een optie"/>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="false">Nee</SelectItem>
+                        <SelectItem value="true">Ja</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage/>
                   </FormItem>
                 )}
               />

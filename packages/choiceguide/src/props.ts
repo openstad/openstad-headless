@@ -1,3 +1,5 @@
+import { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
+import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type ChoiceGuideProps = ChoiceGuide &
@@ -24,6 +26,9 @@ export type ChoiceGuide = {
     maxCharactersWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
+    datalayer?: DataLayer[];
+    enableOnOffSwitching?: boolean;
+    showBackButtonInTopOfPage?: boolean;
 };
 
 type ExtraProjectSettings = {
@@ -59,6 +64,8 @@ export type ChoiceGuideSidebarProps = {
     showPageCountAndCurrentPageInButton?: boolean;
     weights?: WeightOverview;
     widgetId?: string;
+    hiddenFields?: string[];
+    items?: Array<Item>;
 }
 
 export type Score = {
@@ -97,7 +104,6 @@ export type Item = {
     showMoreInfo: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
-    infoImage?: string;
     labelA?: string;
     labelB?: string;
     imageA?: string;
@@ -109,6 +115,24 @@ export type Item = {
     skipQuestionAllowExplanation?: boolean;
     skipQuestionExplanation?: string;
     skipQuestionLabel?: string;
+    matrix?: Matrix;
+    matrixMultiple?: boolean;
+    routingInitiallyHide?: boolean;
+    routingSelectedQuestion?: string;
+    routingSelectedAnswer?: string;
+    imageOptionUpload?: string;
+    placeholder?: string;
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
+
+    // Keeping this for backwards compatibility
+    infoImage?: string;
 };
 
 export type Option = {
@@ -122,6 +146,8 @@ export type Title = {
     weights?: Record<string, Weight>;
     isOtherOption?: boolean;
     defaultValue?: boolean;
+    image?: string;
+    hideLabel?: boolean;
 };
 
 export type Weight = {

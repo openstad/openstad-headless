@@ -1,0 +1,4 @@
+* @openstad/gemeente-amsterdam @openstad/draad
+
+# Exception for CMS-server, this is maintained by Draad
+/apps/cms-server/ @openstad/draad

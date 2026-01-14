@@ -3,7 +3,6 @@
  * and if valid fetches the user data
  */
 
-const fetch = require('node-fetch');
 const Url = require('url');
 const expressSession = require('express-session');
 
@@ -44,7 +43,12 @@ module.exports = {
       async authenticate (req, res, next) {
 
         if (!req.session) {
-          next();
+          return next();
+        }
+        
+        if (req.query.openstadlogout) {
+          req.session.destroy(() => {});
+          return next();
         }
 
         const thisHost = req.headers['x-forwarded-host'] || req.get('host');
@@ -89,7 +93,7 @@ module.exports = {
           const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
           
           if (!jwt) {
-            next();
+            return next();
           } else {
 
             const projectId = req.project.id;
@@ -112,7 +116,7 @@ module.exports = {
               }
 
               req.session.save(() => {
-                next();
+                return next();
               });
             };
 

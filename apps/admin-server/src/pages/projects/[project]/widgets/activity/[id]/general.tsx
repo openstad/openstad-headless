@@ -25,7 +25,6 @@ import { ActivityWidgetProps } from '@openstad-headless/activity/src/activity';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useRouter } from 'next/router';
-import useChoiceGuides from '@/hooks/use-choiceguides';
 import useResources from '@/hooks/use-resources';
 
 const formSchema = z.object({
@@ -112,7 +111,7 @@ export default function ActivityDisplay(
             </FormItem>
           )}
         />
-        
+
         <hr />
 
         <FormField

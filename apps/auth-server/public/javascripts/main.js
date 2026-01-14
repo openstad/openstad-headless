@@ -4,6 +4,20 @@ $(function() {
   initRemoveErrorLabelOnType();
 });
 
+$.validator.addMethod("codeExistsInDB", function(value, element) {
+  var isValid = false;
+  $.ajax({
+    url: "/api/validation/code/",
+    type: "POST",
+    async: false,
+    success: function(response) {
+      isValid = response.data === value;
+    },
+    contentType: "application/json",
+    data: JSON.stringify({ codeId: value }),
+  });
+  return isValid;
+}, "Code is niet geldig");
 
  $.validator.addMethod("postcodeNL", function(value, element, val) {
     var rege = /^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$/i;
@@ -32,6 +46,9 @@ function initFormsValidation () {
         },
         postcode : {
           postcodeNL: true
+        },
+        accessCode: {
+          codeExistsInDB: true
         }
       },
       submitHandler: function(form) {

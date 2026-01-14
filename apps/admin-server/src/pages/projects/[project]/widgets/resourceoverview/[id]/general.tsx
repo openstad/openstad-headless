@@ -53,10 +53,6 @@ export default function WidgetResourceOverviewGeneral(
     },
   });
 
-  if ( props.widgetName ) {
-    console.log( 'props.widgetName', props.widgetName );
-  }
-
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -181,7 +177,7 @@ export default function WidgetResourceOverviewGeneral(
                       <li className="ml-4">{`{{title}}`}</li>
                       <li className="ml-4">{`{{summary}}`}</li>
                       <li className="ml-4">{`{{description}}`}</li>
-                      <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].src}}`}</li>
+                      <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].url}}`}</li>
                       <li className="ml-4">{`{{budget}}`}</li>
                       <li className="ml-4">{`{{extraData}}`}</li>
                       <li className="ml-4">{`{{location}}`}</li>

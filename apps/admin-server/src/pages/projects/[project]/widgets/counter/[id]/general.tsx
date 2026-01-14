@@ -25,12 +25,13 @@ import { CounterWidgetProps } from '@openstad-headless/counter/src/counter';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useRouter } from 'next/router';
-import useChoiceGuides from '@/hooks/use-choiceguides';
+import useChoiceGuideWidgets from '@/hooks/use-choice-guide-widgets';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useTags from "@/hooks/use-tags";
 import {Spacer} from "@/components/ui/spacer";
 import {CheckboxList} from "@/components/checkbox-list";
+import useEnqueteWidgets from "@/hooks/use-enquete-widgets";
 
 const formSchema = z.object({
   label: z.string().optional(),
@@ -41,12 +42,14 @@ const formSchema = z.object({
     'votedUsers',
     'static',
     'argument',
-    'submission',
+    'choiceGuideResults',
+    'enqueteResults',
   ]),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
+  rigCounter: z.any().optional(),
   id: z.string().optional(),
-  choiceGuideId: z.string().optional(),
+  widgetToFetchId: z.string().optional(),
   resourceId: z.string().optional(),
   includeOrExclude: z.string().optional(),
   onlyIncludeOrExcludeTagIds: z.string().optional()
@@ -61,7 +64,8 @@ export default function CounterDisplay(
   const router = useRouter();
 
   const projectId = router.query.project as string;
-  const { data: choiceGuides } = useChoiceGuides(projectId as string);
+  const { data: choiceGuides } = useChoiceGuideWidgets(projectId as string);
+  const { data: enquetes } = useEnqueteWidgets(projectId as string);
   const { data: resourceList } = useResources(projectId as string);
   const resources = resourceList as { id: string; title: string }[];
 
@@ -83,10 +87,11 @@ export default function CounterDisplay(
       label: props?.label || 'Hoeveelheid',
       url: props?.url || '',
       opinion: props?.opinion || '',
-      choiceGuideId: props?.choiceGuideId,
+      widgetToFetchId: props?.widgetToFetchId,
       resourceId: props?.resourceId,
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
+      rigCounter: props?.rigCounter || '0',
     },
   });
 
@@ -159,20 +164,48 @@ export default function CounterDisplay(
                   <SelectItem value="resource">
                     Aantal inzendingen
                   </SelectItem>
-                  <SelectItem value="vote">Hoeveelheid stemmen</SelectItem>
+                  <SelectItem value="vote">Aantal stemmen</SelectItem>
                   <SelectItem value="votedUsers">
-                    Hoeveelheid gestemde gebruikers
+                    Aantal gestemde gebruikers
                   </SelectItem>
-                  <SelectItem value="static">Vaste waarde</SelectItem>
                   <SelectItem value="argument">Aantal reacties</SelectItem>
-                  <SelectItem value="submission">
+                  <SelectItem value="choiceGuideResults">
                     Aantal inzendingen keuzewijzer
                   </SelectItem>
+                  <SelectItem value="enqueteResults">
+                    Aantal inzendingen formulier
+                  </SelectItem>
+                  <SelectItem value="static">Vaste waarde</SelectItem>
                 </SelectContent>
               </Select>
             </FormItem>
           )}
         />
+
+        { form.watch("counterType") !== "static" && (
+          <FormField
+            control={form.control}
+            name="rigCounter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pas de teller aan</FormLabel>
+                <FormDescription>
+                  Door hier een waarde in te vullen, wordt de teller verhoogd of verlaagd met de opgegeven waarde.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    type="number"
+                    value={field.value || '0'}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        ) }
 
         {props?.counterType === 'vote' || props.counterType === 'argument' ? (
           <>
@@ -239,16 +272,29 @@ export default function CounterDisplay(
           />
         ) : null}
 
-        {props.counterType === 'submission' ? (
+        {props.counterType === 'choiceGuideResults' ? (
           <FormObjectSelectField
             form={form}
-            fieldName="choiceGuideId"
+            fieldName="widgetToFetchId"
             fieldLabel="Gewenste keuzewijzer"
             items={choiceGuides}
             keyForValue="id"
-            label={(ch) => `${ch.id}`}
+            label={(ch) => `${ch.description} (Widget ID ${ch.id})`}
             onFieldChanged={props.onFieldChanged}
             noSelection="Selecteer uw gewenste keuzewijzer"
+          />
+        ) : null}
+
+        {props.counterType === 'enqueteResults' ? (
+          <FormObjectSelectField
+            form={form}
+            fieldName="widgetToFetchId"
+            fieldLabel="Gewenste enquête"
+            items={enquetes}
+            keyForValue="id"
+            label={(ch) => `${ch.description} (Widget ID ${ch.id})`}
+            onFieldChanged={props.onFieldChanged}
+            noSelection="Selecteer uw gewenste enquête"
           />
         ) : null}
           </div>

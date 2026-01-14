@@ -17,7 +17,7 @@ const allowlist = [
 
 function isInAllowlist(key) {
   return allowlist.some(allowKey => {
-    const regex = new RegExp('^' + allowKey.replace('.', '\\.').replace('*', '.*') + '$');
+    const regex = new RegExp('^' + allowKey.replace(/\\/g, '\\\\').replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
     return regex.test(key);
   });
 }
@@ -30,11 +30,19 @@ function setObjectValue(obj, path, value) {
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
 
+    // Prevent prototype pollution
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+
     if (!current[key]) {
       current[key] = {};
     }
 
     current = current[key];
+  }
+
+  const lastKey = keys[keys.length - 1];
+  if (lastKey === '__proto__' || lastKey === 'constructor' || lastKey === 'prototype') {
+    return;
   }
 
   current[keys[keys.length - 1]] = value;

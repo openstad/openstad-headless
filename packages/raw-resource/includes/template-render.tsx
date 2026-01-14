@@ -2,31 +2,40 @@ import stringFilters from "./nunjucks-filters";
 import {RawResourceWidgetProps} from "../src/raw-resource";
 
 function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
-  let varValue = '';
+  let varValue: any = '';
 
   // varName can be a dot notation, then we must fetch the correct deeper layer
   // e.g. resource.extraData.phone, we must get resource['extraData']['phone'] if it exists
   const splitVarName = varName.split('.');
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  varValue = varMapping[splitVarName[0]];
+  // Handle array bracket notation like images[0]
+  const firstPart = splitVarName[0];
+  const arrayMatch = firstPart.match(/^([^\[]+)\[(\d+)\]$/);
+  
+  if (arrayMatch) {
+    const [, key, index] = arrayMatch;
+    varValue = varMapping[key]?.[parseInt(index)];
+  } else {
+    varValue = varMapping[firstPart];
+  }
 
   if (splitVarName.length > 1) {
     // Loop through the splitVarName array, skipping index 0
     splitVarName.shift();
 
     splitVarName.forEach((vn) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      if (varValue && varValue[vn]) {
+      if (varValue && varValue[vn] !== undefined && varValue[vn] !== null) {
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        // @ts-expect-error any
         varValue = varValue[vn] as string;
       } else {
         varValue = '';
       }
     });
+  }
+
+  // Convert objects/arrays to JSON string for display
+  if (typeof varValue === 'object' && varValue !== null) {
+    return JSON.stringify(varValue);
   }
 
   return varValue;
@@ -61,6 +70,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
           createDateHumanized: resource.createDateHumanized,
           publishDateHumanized: resource.publishDateHumanized,
           publishDate: resource.publishDate,
+          currentUser: updatedProps.currentUser,
         };
 
         // The template can also contain conditionals, like such:
@@ -110,15 +120,16 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
           }
         }
 
+
+
         // Get all variables fom the string
-        const regex = /\{\{([^}]*)\}\}/g
-        const varsInString = Array.from(rendered.matchAll(regex));
+        const varsInString = extractVars(rendered);
 
         if (varsInString && varsInString.length) {
           for (const match of varsInString) {
 
             let newValue = '';
-            const cleanMatches = match[1].trim().split('|');
+            const cleanMatches = match.trim().split('|');
             const varName = cleanMatches[0].trim();
             const filters = cleanMatches.slice(1).map((filter) => filter.trim());
 
@@ -150,7 +161,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
               }
             }
 
-            rendered = rendered.replaceAll(match[0], newValue);
+            rendered = rendered.replaceAll(`{{${match}}}`, newValue);
 
           }
         }
@@ -163,4 +174,23 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
   })();
 
   return render;
+}
+
+function extractVars(input: string) {
+  const vars = [];
+  let pos = 0;
+
+  while (pos < input.length) {
+    const start = input.indexOf('{{', pos);
+    if (start === -1) break;
+
+    const end = input.indexOf('}}', start);
+    if (end === -1) break;
+
+    const inside = input.slice(start + 2, end);
+    vars.push(inside);
+    pos = end + 2;
+  }
+
+  return vars;
 }

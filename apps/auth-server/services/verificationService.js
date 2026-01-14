@@ -1,5 +1,4 @@
 const emailProvider = require('./email');
-const fetch = require('node-fetch');
 const tokenUrl = require('./tokenUrl');
 const tokenSMS = require('./tokenSMS');
 

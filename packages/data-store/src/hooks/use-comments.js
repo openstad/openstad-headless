@@ -4,6 +4,7 @@ export default function useComments(props) {
   const resourceId = props.resourceId;
   const sentiment = props.sentiment || null;
   const onlyIncludeTagIds = props.onlyIncludeTagIds || null;
+  const search = props.search || '';
 
   let dataToReturn = [];
   let errorToReturn = undefined;
@@ -11,7 +12,7 @@ export default function useComments(props) {
 
   if (resourceId && resourceId !== '0') {
     const { data, error, isLoading } = self.useSWR(
-      { projectId, resourceId, sentiment, onlyIncludeTagIds },
+      { projectId, resourceId, sentiment, onlyIncludeTagIds, search },
       'comments.fetch'
     );
 
@@ -55,6 +56,14 @@ export default function useComments(props) {
         { action: 'update' }
       );
     };
+    comment.submitDislike = function () {
+      return self.mutate(
+        { projectId, resourceId, sentiment },
+        'comments.submitDislike',
+        comment,
+        { action: 'update' }
+      );
+    };
     comment.replies?.map(async (reply) => {
       reply.update = function (newData) {
         return self.mutate(
@@ -73,6 +82,14 @@ export default function useComments(props) {
         );
       };
       reply.submitLike = function () {
+        return self.mutate(
+          { projectId, resourceId, sentiment },
+          'comments.submitLike',
+          reply,
+          { action: 'update' }
+        );
+      };
+      reply.submitDislike = function () {
         return self.mutate(
           { projectId, resourceId, sentiment },
           'comments.submitLike',

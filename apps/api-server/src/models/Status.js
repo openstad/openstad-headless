@@ -127,9 +127,9 @@ module.exports = function (db, sequelize, DataTypes) {
   Status.auth = Status.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
-    createableBy: 'moderator',
-    updateableBy: 'moderator',
-    deleteableBy: 'moderator',
+    createableBy: 'editor',
+    updateableBy: 'editor',
+    deleteableBy: 'editor',
   };
 
   return Status;

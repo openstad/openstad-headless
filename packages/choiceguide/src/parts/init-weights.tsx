@@ -1,17 +1,35 @@
 // @ts-nocheck
 import {ChoiceOptions, WeightOverview} from '../props';
 
-export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[]) => {
+export const InitializeWeights = (
+  items: any[],
+  choiceOptions: ChoiceOptions[],
+  choicesType: string,
+  hiddenFields: string[]
+) => {
   let weights: WeightOverview = {};
+
+  if (choicesType === 'plane') {
+    choiceOptions = [{id: 'plane'}];
+  }
 
   if ( choiceOptions.length < 1 ) return {};
 
   choiceOptions.forEach((choiceOption) => {
     const id = choiceOption.id;
+    // Prevent prototype pollution. Needed for security warning #216.
+    if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
 
     items.forEach((item) => {
+      const itemType = item.type || '';
+      const allowedTypes = ["radiobox", "checkbox", "select", "a-b-slider", "images"];
+
+      if (!allowedTypes.includes(itemType) || !itemType) return;
+
       const { trigger, weights: itemWeights = {} } = item;
-      const triggerKey = `${item.type}-${trigger}`
+      const triggerKey = `${itemType}-${trigger}`
+
+      if (hiddenFields?.includes(triggerKey)) return;
 
       // @ts-ignore
       if (
@@ -31,10 +49,15 @@ export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[]) 
 
         const groupWeights = itemWeights[id];
 
-        ['weightX', 'weightY', 'weightAB'].forEach((key) => {
+        ['weightX', 'weightY', 'weightAB', 'weightABY'].forEach((key) => {
           if (groupWeights[key] !== undefined) {
             const dimension = key.replace('weight', '').toLowerCase();
-            const value = dimension === 'ab' ? groupWeights[key] : parseInt(groupWeights[key], 10);
+
+            const isAB = dimension === 'ab';
+            const isABY = dimension === 'aby';
+            const value = (isAB || isABY)
+              ? groupWeights[key]
+              : parseInt(groupWeights[key], 10);
 
             weights[id][triggerKey][dimension] = value;
           }

@@ -11,10 +11,11 @@ const c = require('config');
 
 const { Op } = require('sequelize');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
-  return hasRole( user, 'moderator')
+  return hasRole( user, 'editor')
 };
 
 // scopes: for all get requests
@@ -105,6 +106,14 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeUser');
   }
 
+  if (req?.query?.projectIds && (typeof req?.query?.projectIds === "object" || typeof req?.query?.projectIds === "string")) {
+    let projectIds = req.query.projectIds;
+
+    if (!Array.isArray(projectIds)) projectIds = [projectIds];
+    req.scope.push({ method: ['selectProjectIds', projectIds] });
+    req.query.projectIds = projectIds;
+  }
+
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
   // todo? volgens mij wordt dit niet meer gebruikt
   // if (req.query.highlighted) {
@@ -125,11 +134,16 @@ router
     let { dbQuery } = req;
 
     dbQuery.where = {
-      projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
       deletedAt: null,
     };
+
+    let projectIds = req?.query?.projectIds || [];
+
+    if (!Array.isArray(projectIds) || ( Array.isArray(projectIds) && projectIds.length === 0 ) ) {
+        dbQuery.where.projectId = req.params.projectId;
+    }
 
     if (dbQuery.hasOwnProperty('order')) {
       /**
@@ -180,7 +194,7 @@ router
     }
     return next();
   })
-  .post(function (req, res, next) {
+  .post( rateLimiter(), function (req, res, next) {
     try {
       req.body.location = req.body.location
         ? JSON.parse(req.body.location)
@@ -226,7 +240,7 @@ router
       imageServer = 'https://' + imageServer;
     }
     const hostname = new URL(imageServer).hostname;
-    if(data.images && data.images.length > 0) {
+    if(data.images && Array.isArray(data.images) && data.images.length > 0) {
       data.images.forEach(image => {
         try{
           // Add protocol to image URL for `new URL` to work correctly.
@@ -408,7 +422,9 @@ router
         where: { id: resourceId, projectId: req.params.projectId },
       })
       .then((found) => {
-        if (!found) throw new Error('Resource not found');
+        if (!found) {
+          return next(createError(404, 'Resource not found'));
+        }
         found.project = req.project;
         if (req.query.includePoll) {
           // TODO: naar poll hooks
@@ -465,7 +481,7 @@ router
     req.changedToPublished = wasConcept && willNowBePublished;
     next();
   })
-  .put(function (req, res, next) {
+  .put( rateLimiter(), function (req, res, next) {
     var resource = req.results;
 
     if (!(resource && resource.can && resource.can('update')))
@@ -520,7 +536,8 @@ router
     }
 
     const projectId = req.params.projectId;
-    const tagEntities = await getValidTags(projectId, tags, req.user);
+    const canBeGlobal = req?.query?.includeGlobalTags === 'true';
+    const tagEntities = await getValidTags(projectId, tags, canBeGlobal);
     
     const resourceInstance = req.results;
     resourceInstance.setTags(tagEntities).then((result) => {
@@ -532,7 +549,9 @@ router
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Resource not found');
+          if (!found) {
+            return next(createError(404, 'Resource not found'));
+          }
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks
@@ -574,7 +593,9 @@ router
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Resource not found');
+          if (!found) {
+            return next(createError(404, 'Resource not found'));
+          }
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks
@@ -628,12 +649,141 @@ router
       .catch(next);
   });
 
+
+// Multiple resource routes
+// -------------------------
+
+// Delete multiple resources
+router
+    .route ('/delete')
+    .delete(auth.useReqUser)
+    .delete( rateLimiter(), async function (req, res, next)  {
+      let ids = req.body.ids;
+
+      if (!ids || !Array.isArray(ids)) {
+        return next(new Error('Invalid request: ids must be an array'));
+      }
+
+      ids = ids.filter((id) => Number.isInteger(id));
+      if (ids.length === 0) {
+        return next(new Error('Invalid request: no valid ids provided'));
+      }
+
+      try {
+        const resources = await db.Resource.scope(...req.scope).findAll({
+          where: { id: ids }
+        });
+
+        if (resources.length === 0) {
+          return res.status(404).json({ error: 'No resources found for the provided IDs' });
+        }
+
+        for (const resource of resources) {
+          if (!resource.can || !resource.can('delete')) {
+            return next(new Error(`You cannot delete resource with ID ${resource.id}`));
+          }
+        }
+
+        await db.Resource.destroy({
+          where: { id: ids }
+        });
+
+        res.json({ message: 'Resources deleted successfully' });
+      } catch (error) {
+        next(error);
+      }
+    })
+
+// Duplicate multiple resources
+router
+    .route('/duplicate')
+    .post(auth.useReqUser)
+    .post(rateLimiter(), async function (req, res, next) {
+      let ids = req.body.ids;
+      const projectId = req.params.projectId;
+
+      if (!ids || !Array.isArray(ids)) {
+        return next(new Error('Invalid request: ids must be an array'));
+      }
+
+      ids = ids.filter((id) => Number.isInteger(id));
+      if (ids.length === 0) {
+        return next(new Error('Invalid request: no valid ids provided'));
+      }
+
+      try {
+        req.scope.push('includeTags', 'includeStatuses');
+        const resources = await db.Resource.scope(...req.scope).findAll({
+          where: { id: ids }
+        });
+
+        if (resources.length === 0) {
+          return res.status(404).json({ error: 'No resources found for the provided IDs' });
+        }
+
+        for (const resource of resources) {
+          if (!resource.can || !resource.can('create')) {
+            return next(new Error(`You cannot duplicate resource with ID ${resource.id}`));
+          }
+        }
+
+        const duplicatedResources = await Promise.all(
+            resources.map(async (resource) => {
+              const resourceData = resource.dataValues;
+              const { id, createdAt, updatedAt, deletedAt, ...newResourceData } = resourceData;
+              newResourceData.startDate = newResourceData.publishDate = new Date();
+
+              let statuses = newResourceData.statuses || [];
+              let tags = newResourceData.tags || [];
+
+              tags = getOnlyIds(tags);
+              statuses = getOnlyIds(statuses);
+
+              let finalTags = [];
+              if (Array.isArray(tags) && tags.length > 0) {
+                const projectId = req.params.projectId;
+
+                finalTags = await getValidTags(projectId, tags, true);
+              }
+
+              let finalStatuses = [];
+              if (Array.isArray(statuses) && statuses.length > 0) {
+                const projectId = req.params.projectId;
+
+                finalStatuses = await getValidStatuses(projectId, statuses);
+              }
+
+              return db.Resource.create(newResourceData).then((result) => {
+                if (Array.isArray(finalTags) && finalTags.length > 0) {
+                  result.setTags(finalTags);
+                }
+                if (Array.isArray(finalStatuses) && finalStatuses.length > 0) {
+                  result.setStatuses(finalStatuses);
+                }
+
+                return result;
+              });
+            })
+        );
+
+        res.json(duplicatedResources);
+      } catch (error) {
+        next(error);
+      }
+    });
+
+
 // Get all valid tags of the project based on given ids
-async function getValidTags(projectId, tags) {
+async function getValidTags(projectId, tags, canBeGlobal) {
   const uniqueIds = Array.from(new Set(tags));
 
+  const whereClause = {
+    id: { [Op.in]: uniqueIds },
+    projectId: canBeGlobal ? { [Op.or]: [projectId, 0] } : projectId,
+  };
+
   const tagsOfProject = await db.Tag.findAll({
-    where: { projectId, id: { [Op.in]: uniqueIds } },
+    where: whereClause,
   });
 
   return tagsOfProject;
@@ -648,6 +798,21 @@ async function getValidStatuses(projectId, statuses) {
   });
 
   return statusesOfProject;
+}
+
+// Get all ids from an array of objects
+function getOnlyIds(objArr) {
+  return objArr.map((obj) => {
+    if (typeof obj === 'object' && obj?.id ) {
+      let objId = obj?.id;
+      if (typeof objId === 'string') {
+        objId = parseInt(objId);
+      }
+
+      return objId;
+    }
+    return false;
+  }).filter((obj) => obj !== false);
 }
 
 module.exports = router;

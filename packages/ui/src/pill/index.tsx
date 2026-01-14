@@ -14,7 +14,9 @@ export const Pill = ({
     <div
       className={`osc-pill ${rounded && 'osc-pill-rounded'} ${
         light && 'osc-pill-light'
-      }`}>
+      }`}
+      data-text={text?.toLowerCase() || ''}
+    >
       <p>{text}</p>
     </div>
   );

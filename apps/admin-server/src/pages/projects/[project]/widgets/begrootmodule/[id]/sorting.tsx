@@ -69,9 +69,8 @@ const formSchema = z.object({
   defaultSorting: z.string(),
   sorting: z
     .array(z.object({ value: z.string(), label: z.string() }))
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
+    .optional()
+    .default([])
 });
 
 export default function WidgetStemBegrootSorting(

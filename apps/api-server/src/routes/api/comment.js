@@ -6,6 +6,8 @@ const searchInResults = require('../../middleware/search-in-results');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const express = require('express');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const crypto = require("crypto");
 const router = express.Router({ mergeParams: true });
 
 // scopes: for all get requests
@@ -52,7 +54,7 @@ router
         return next();
       });
   })
-  .all('/:commentId(\\d+)(/vote)?', function(req, res, next) {
+  .all('/:commentId(\\d+)(/vote)?(/yes|/no)?', function(req, res, next) {
 
     // include one existing comment
     // --------------------------
@@ -120,7 +122,7 @@ router.route('/')
 
   })
   .get(auth.useReqUser)
-  .get(searchInResults({ searchfields: ['description'] }))
+  .get(searchInResults({ searchfields: ['description', 'user.name', 'replies.description'] }))
   .get(pagination.paginateResults)
   .get(function(req, res, next) {
     res.json(req.results);
@@ -145,11 +147,12 @@ router.route('/')
       )
       .findByPk(req.body.parentId)
       .then(function(comment) {
+        req.parentComment = comment;
         if (!(comment && comment.can && comment.can('reply', req.user))) return next(new Error('You cannot reply to this comment'));
         return next();
       });
   })
-  .post(function(req, res, next) {
+  .post( rateLimiter(), function(req, res, next) {
 
     let userId = req.user.id;
     if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
@@ -160,6 +163,15 @@ router.route('/')
       userId,
     };
 
+    req.confirmation = data.confirmation || false;
+    req.confirmationReplies = data.confirmationReplies || false;
+    req.overwriteEmailAddress = data.overwriteEmailAddress || '';
+    req.embeddedUrl = data.embeddedUrl || '';
+
+    delete data.confirmation;
+    delete data.confirmationReplies;
+    delete data.overwriteEmailAddress;
+    delete data.embeddedUrl;
 
     db.Comment
       .authorizeData(data, 'create', req.user)
@@ -186,12 +198,106 @@ router.route('/')
           .scope(...scopes)
           .findByPk(result.id)
           .then(function(comment) {
-            res.json(comment);
+            req.results = comment;
+            next();
           })
           .catch(next);
       })
       .catch(next);
 
+  })
+  .post(async function (req, res, next) {
+    const confirmation = req.confirmation;
+    const confirmationReplies = req.confirmationReplies;
+    const overwriteEmailAddress = req.overwriteEmailAddress;
+
+    let receiver = '';
+    let receiverUserId = 0;
+    let receiverProjectId = 0;
+    let parentComment = '';
+    let confirmationSent = undefined;
+    let type = '';
+
+    if (confirmation && !req?.results?.parentId) {
+      if (overwriteEmailAddress) {
+        receiver = overwriteEmailAddress;
+      } else if (req.results && req.results.resourceId) {
+        const resource = await db.Resource.findByPk(req.results.resourceId);
+        if (resource && resource.userId) {
+          const user = await db.User.findByPk(resource.userId);
+          if (user && user.email && user.emailNotificationConsent) {
+            receiver = user.email;
+            receiverUserId = user.id;
+            receiverProjectId = user.projectId;
+          } else {
+            confirmationSent = false;
+          }
+        }
+      }
+    } else if (confirmationReplies) {
+      const parentId = req.results.parentId;
+      if (parentId) {
+        const parentUserId = req?.parentComment?.user?.id || null;
+        const parentUser = parentUserId ? await db.User.findByPk(parentUserId) : null;
+
+        if (parentUser && parentUser.emailNotificationConsent && parentUser.email) {
+          receiver = parentUser.email;
+          receiverUserId = parentUser.id;
+          receiverProjectId = parentUser.projectId;
+          parentComment = req?.parentComment?.description;
+        } else {
+          confirmationSent = false;
+        }
+      }
+    }
+
+    if (!!receiver) {
+      const userIdSalt = process.env.USER_ID_SALT;
+
+      const hash = crypto.createHash('md5');
+      hash.update(`${userIdSalt}.${receiverUserId}.${receiverProjectId}`);
+      const hashedUserId = hash.digest('hex');
+
+      const commentData = {
+        comment: {
+          description: req.results.description,
+          sentiment: req.results.sentiment,
+          parentId: req.results.parentId,
+          createDateHumanized: req.results.createDateHumanized,
+          userName: req.results.user ? req.results.user.displayName : '',
+          userEmail: req.results.user ? req.results.user.email : '',
+        },
+        unsubscribeUrl: receiverUserId ? `${process.env.URL}/api/project/${receiverProjectId}/user/unsubscribe/${receiverUserId}/${hashedUserId}` : '',
+        embeddedUrl: req.embeddedUrl || '',
+      };
+
+      if (!!parentComment) {
+        commentData.comment.parentComment = parentComment;
+      }
+
+      try {
+        const notificationType = confirmation && !req?.results?.parentId
+          ? 'notification comment - user'
+          : confirmationReplies
+            ? 'notification comment reply - user'
+            : '';
+
+        if (!notificationType) throw new Error('No valid notification type');
+
+        db.Notification.create({
+          type: notificationType,
+          projectId: req.project.id,
+          to: receiver,
+          data: commentData
+        });
+        confirmationSent = true;
+      } catch (e) {
+        console.log('Error sending notification email for comment:', e);
+      }
+    }
+
+    req.results.confirmationSent = confirmationSent;
+    res.json(req.results);
   });
 
 router.route('/:commentId(\\d+)')
@@ -207,13 +313,22 @@ router.route('/:commentId(\\d+)')
   // update comment
   // ---------------
   .put(auth.useReqUser)
-  .put(function(req, res, next) {
+  .put( rateLimiter(), function(req, res, next) {
     var comment = req.results;
     if (!(comment && comment.can && comment.can('update'))) return next(new Error('You cannot update this comment'));
     comment
       .authorizeData(req.body, 'update')
       .update(req.body)
-      .then(result => {
+      .then(async result => {
+        if ( !comment.location && !comment.parentId ) {
+            let tags = req.body.tags || [];
+            if (!Array.isArray(tags)) tags = [tags];
+            tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
+            tags = tags.map(tag => parseInt(tag));
+            tags = tags.filter((value, index) => tags.indexOf(value) === index);
+            await result.setTags(tags);
+        }
+
         res.json(result);
       })
       .catch(next);
@@ -240,19 +355,21 @@ router.route('/:commentId(\\d+)')
     }
   });
 
-router.route('/:commentId(\\d+)/vote')
+router.route('/:commentId(\\d+)/vote/:opinion(yes|no)?')
 
   // vote for comment
   // -----------------
 
+  
   .post(auth.useReqUser)
   .post(function(req, res, next) {
     var user = req.user;
     var comment = req.results;
-
+    const opinion = req.params.opinion || "yes";
+    
     if (!(comment && comment.can && comment.can('vote'))) return next(new Error('You cannot vote for this comment'));
 
-    comment.addUserVote(user, req.ip)
+    comment.addUserVote(user, req.ip, opinion)
       .then(function(voteRemoved) {
 
         db.Comment

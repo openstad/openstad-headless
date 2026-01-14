@@ -39,7 +39,7 @@ Dit zijn de standaarden die OpenStad gebruikt. Zorg ervoor dat je bijdragen hier
 
 - [Standard for Public Code](https://standard.publiccode.net/) - voor manier van samenwerken
 - [NEN-EN-ISO/IEC 27001:2017+A11:2020](https://www.nen.nl/nen-en-iso-iec-27001-2017-a11-2020-nl-265545) en [NEN-EN-ISO/IEC 27002:2017](https://www.nen.nl/nen-en-iso-iec-27002-2017-nl-245390) - voor informatiebeveiliging
-- [Web Content Accessibility Guidelines 2.1](https://www.w3.org/WAI/WCAG22/quickref/?showtechniques=315#reading-level) - voor leesbaarheid
+- [Web Content Accessibility Guidelines 2.1](https://www.w3.org/WAI/WCAG22/quickref/?showtechniques=315#reading-level) - voor toegankelijkheid
 
 ### 2. Pull request
 

@@ -31,6 +31,7 @@ const formSchema = z.object({
   maxZoom: z.number().optional(),
   itemsPerPage: z.coerce.number().optional(),
   displayPagination: z.boolean().optional(),
+  displaySearchBar: z.boolean().optional(),
   onlyAllowClickOnImage: z.boolean().optional()
 });
 type FormData = z.infer<typeof formSchema>;
@@ -63,6 +64,7 @@ export default function DocumentGeneral(
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
       onlyAllowClickOnImage: props?.onlyAllowClickOnImage || false,
+      displaySearchBar: props?.displaySearchBar || false,
     },
   });
 
@@ -314,6 +316,20 @@ export default function DocumentGeneral(
             )}
           />
         )}
+
+        <FormField
+          control={form.control}
+          name="displaySearchBar"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>
+                Zoekbalk tonen
+              </FormLabel>
+              {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button
           type="submit"

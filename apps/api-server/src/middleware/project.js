@@ -13,8 +13,9 @@ const getProjectId = (path) => {
 module.exports = function( req, res, next ) {
 
   // deze paden mogen dit overslaan
-  if (req.path.match('^(/api/repo|/api/template|/api/area|/api/datalayer|/api/widget|/api/image|/api/document|/api/widget-type|/api/project/delete-duplicated-data|/api/auth-provider|/widget|/api/project/update-server-login-paths-for-auth-provider|/$)')) return next();
+  if (req.path.match('^(/api/repo|/api/template|/api/area|/api/datalayer|/api/widget|/api/image|/api/document|/api/widget-type|/api/project/delete-duplicated-data|/api/project/0/tag|/api/auth-provider|/auth/project/0/me|/widget|/api/project/update-server-login-paths-for-auth-provider|/api/pending-budget-vote|/$)')) return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
+  if (req.path.match('^(/api/project)$') && req.method == 'GET') return next();
   if ((req.path.match('^(/api/user)') && ( req.method == 'GET' ))) return next();
 
   let projectId = getProjectId(req.path);

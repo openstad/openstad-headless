@@ -3,17 +3,17 @@ export default {
   fetch: async function({ projectId, resourceId }, key) {
 
     let url = `/api/project/${projectId}/resource/${resourceId}?includeUser=1&includeVoteCount=1&includeUserVote=1&includeTags=1&includeStatus=1`;
+
     let headers = {
       'Content-Type': 'application/json'
     };
 
-    return this.fetch(url, { headers });
-
+    return ( !resourceId || resourceId === 'undefined' ) ? [] : this.fetch(url, { headers });
   },
 
   update: async function({ projectId, resourceId }, data) {
 
-    let url = `/api/project/${projectId}/resource/${resourceId}`;
+    let url = `/api/project/${projectId}/resource/${resourceId}?includeGlobalTags=true`;
     let headers = {
       'Content-Type': 'application/json'
     };

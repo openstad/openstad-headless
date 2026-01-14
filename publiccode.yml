@@ -1,121 +1,227 @@
-publiccodeYmlVersion: "0.2"
+publiccodeYmlVersion: "0.5"
 
 name: OpenStad headless
 applicationSuite: OpenStad
 url: "https://github.com/openstad/openstad-headless"
-isBasedOn: "https://github.com/italia/otello.git"
-softwareVersion: "dev"
-releaseDate: "2023-09-01"
+landingURL: "https://openstad.org"
+softwareVersion: "2.0.44"
+releaseDate: "2025-11-11"
 logo: /img/logo.png
-
 platforms:
   - web
-
 categories:
   - digital-citizenship
-  - content-management
+  - survey
   - data-collection
-
+  - data-visualization
+  - content-management
+  - online-community
+  - feedback-and-reviews-management
+  - collaboration
+  - project-collaboration
+  - web-collaboration
+  - communications
+  - geographic-information-systems
 usedBy:
+  - Buro Regen&Water
+  - Democracy Agency
+  - Draad
   - Gemeente Amsterdam
   - Gemeente Den Haag
   - Gemeente Alphen aan den Rijn
-  - Gemeente Nijmegen
-  - Provincie Zuid-Holland
-  - Provincie Noord-Holland
-  - Woonstad Rotterdam
-  - Gemeente Enschede
   - Gemeente Apeldoorn
-  - Gemeente Delft
-  - Gemeente Tilburg
+  - Gemeente Bloemendaal
   - Gemeente Deventer
-  - Gemeente Hardenberg
-  - Gemeente Voorne aan Zee
+  - Gemeente Duiven
+  - Gemeente Enschede
+  - Gemeente Groningen
+  - Gemeente Haarlem
   - Gemeente Haarlemmermeer
+  - Gemeente Hardenberg
+  - Gemeente Heemstede
+  - Gemeente Nijkerk
+  - Gemeente Nijmegen
+  - Gemeente Tilburg
   - Gemeente Veenendaal
-  - Gemeente Emmen
-  - Gemeente Westland
   - Gemeente Velsen
+  - Gemeente Westervoort
+  - Gemeente Westland
+  - Gemeente Zaanstad
   - Gemeente Zutphen
   - Gemeente Zwolle
-  - Gemeente Heemstede Bloemendaal
-  - Gemeente Duiven/Westervoort
-  - Gemeente Haarlem
-  - Gemeente Alblasserdam
-  - Gemeente Kaag en Braassem
-  - Gemeente Wijchen
-  - Gemeente Druten
-
-developmentStatus: development
-
+  - Provincie Gelderland
+  - Provincie Noord-Holland
+  - Provincie Zuid-Holland
+  - Stichting Stukken Beter
+  - Werkorganisatie Druten-Wijchen
+  - Woonstad Rotterdam
+fundedBy:
+  - Democracy Agency
+  - Draad
+  - Gemeente Amsterdam
+  - Gemeente Den Haag
+  - Gemeente Deventer
+  - Gemeente Enschede
+  - Gemeente Groningen
+  - Gemeente Haarlemmermeer
+  - Gemeente Hardenberg
+  - Gemeente Nijmegen
+  - Gemeente Tilburg
+  - Gemeente Zutphen
+  - Gemeente Zwolle
+  - Provincie Noord-Holland
+  - Werkorganisatie Druten-Wijchen
+roadmap: "https://github.com/openstad/openstad-headless/milestones"
+developmentStatus: stable
 softwareType: "standalone/web"
 
+organisation:
+  uri: "https://amsterdam.nl"
+  name: Gemeente Amsterdam
+
 intendedAudience:
+  countries:
+    - nl
   scope:
     - local-authorities
     - government
-  countries:
-    - nl
+    - society
+    - environment
 
 description:
   nl:
     localisedName: OpenStad
     shortDescription: >
-          OpenStad biedt een open source platform
-          waarmee je eenvoudig interactieve websites
-          kunt maken voor jouw participatieprojecten. 
+      OpenStad biedt een open source platform
+      waarmee je eenvoudig interactieve websites
+      kunt maken voor jouw participatieprojecten. 
 
     longDescription: >
-          OpenStad biedt een open source platform
-          waarmee je eenvoudig interactieve websites
-          kunt maken voor jouw participatieprojecten. 
+      OpenStad biedt een open source platform
+      waarmee je eenvoudig interactieve websites
+      kunt maken voor jouw participatieprojecten. 
 
-          Het platform bevat widgets die speciaal
-          zijn ontwikkeld om inwoners op een interactieve
-          manier meer invloed en zeggenschap te geven
-          op wat er in hun stad of dorp gebeurt. Denk
-          bijvoorbeeld aan een online stemtool, manieren
-          om plannen in te sturen, een tool waarmee
-          bewoners budget kunnen toewijzen aan plannen
-          voor het gebied en een keuzewijzer voor
-          bijvoorbeeld complexe openbare ruimteprojecten.
+      Het platform bevat widgets die speciaal
+      zijn ontwikkeld om inwoners op een interactieve
+      manier meer invloed en zeggenschap te geven
+      op wat er in hun stad of dorp gebeurt. Denk
+      bijvoorbeeld aan een online stemtool, manieren
+      om plannen in te sturen, een tool waarmee
+      bewoners budget kunnen toewijzen aan plannen
+      voor het gebied en een keuzewijzer voor
+      bijvoorbeeld complexe openbare ruimteprojecten.
 
-          Daarnaast hebben deelnemende gemeenten al
-          een hoop kennis opgedaan in het ontwerpen van
-          (online) participatieprocessen, die we graag
-          delen met collega’s uit andere gemeenten.
+      Daarnaast hebben deelnemende gemeenten al
+      een hoop kennis opgedaan in het ontwerpen en verbinden
+      van offline en online participatieprocessen, die we
+      graag delen met collega’s uit andere organisaties.
 
     documentation: "https://docs.openstad.org/openstad"
     apiDocumentation: "https://docs.openstad.org/openstad/technical"
 
     features:
-       - stemtools en likes
-       - voorstellen uploaden
-       - participatief begroten
-       - keuzewijzer (beta)
-       - interactieve kaart (beta)
-       - authenticatiemethoden
-       - argumenten en reacties
-       - afbeeldingen en video’s
-       - agenda/tijdlijn
-       - notificaties
-       - moderatie
+      - stemtools en likes
+      - voorstellen uploaden
+      - participatief begroten
+      - keuzewijzer
+      - interactieve kaart
+      - authenticatiemethoden
+      - argumenten en reacties
+      - afbeeldingen en video’s
+      - agenda/tijdlijn
+      - notificaties
+      - moderatie
     videos:
-       - https://www.youtube.com/watch?v=jMT6VujnKLY
+      - "https://www.youtube.com/watch?v=jMT6VujnKLY"
     awards:
-       - Gemeente Delers 2021
+      - Gemeente Delers 2021
+
+  en:
+    localisedName: OpenStad
+    shortDescription: >
+      OpenStad offers an open-source platform
+      that allows you to easily create interactive websites
+      for your participation projects.
+
+    longDescription: >
+      OpenStad offers an open-source platform
+      that allows you to easily create interactive websites
+      for your participation projects.
+      
+      The platform contains widgets specifically
+      developed to give residents more influence and control
+      over what happens in their city or town in an interactive
+      way. For example: an online voting tool, ways
+      to submit plans, a tool that allows
+      residents to allocate budgets to plans
+      for the area, a selection guide for
+      complex public space projects. And more.
+      
+      In addition, participating municipalities have already
+      gained a wealth of knowledge in designing
+      and connecting offline and online participation processes,
+      which we are happy to share with colleagues from other
+      organisations.
+
+    documentation: "https://docs.openstad.org/openstad"
+    apiDocumentation: "https://docs.openstad.org/openstad/technical"
+
+    features:
+      - voting tools and likes
+      - uploading proposals
+      - participatory budgeting
+      - choice guide
+      - interactive map
+      - authentication methods
+      - arguments and comments
+      - images and videos
+      - agenda/timeline
+      - notifications
+      - moderation
 
 legal:
-  license: ISC
+  license: MIT
+  mainCopyrightOwner: Gemeente Amsterdam
 
 maintenance:
-  type: community
-
+  type: contract
+  contractors:
+  - name: "Gemeente Amsterdam"
+    until: "2025-12-31"
+    email: "i.rieken\x64amsterdam.nl"
+    website: "https://amsterdam.nl"
+  - name: "Draad"
+    until: "2025-12-31"
+    email: "mail\x64draad.nl"
+    website: "https://draad.nl"
+  - name: "Sniglet"
+    until: "2025-12-31"
+    email: "bauke.huijbers\x64sniglet.nl"
+    website: "https://sniglet.nl"
   contacts:
-    - name: Bart Nieuwenweg
-      email: "mail@draad.nl"
+    - name: "Ian Rieken"
+      email: "i.rieken\x64amsterdam.nl"
+      affiliation: "Gemeente Amsterdam, maintainer of repository and code"
+    - name: "Rudi van Hierden"
+      email: "rudi\x64draad.nl"
+      affiliation: "Draad, maintainer of repository and code"
+    - name: "Bauke Huijbers"
+      email: "bauke.huijbers\x64sniglet.nl"
+      affiliation: "Sniglet, maintainer of community"
 
 localisation:
   localisationReady: false
   availableLanguages:
     - nl
+
+dependsOn:
+  open:
+    - name: "NodeJS"
+      versionMin: "18"
+      optional: false
+    - name: "MySQL"
+      versionMin: "8"
+      optional: false
+    - name: "MongoDB"
+      versionMin: "8"
+      optional: false

@@ -1,6 +1,7 @@
 import { Select } from '@openstad-headless/ui/src';
 import React, { forwardRef, useEffect, useState } from 'react';
-import { FormLabel } from "@utrecht/component-library-react";
+import { SubtleButton, FormLabel} from "@utrecht/component-library-react";
+import RadioboxField from "../../form-elements/radio";
 
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
@@ -12,15 +13,19 @@ type Props = {
   tagType: string;
   placeholder?: string;
   onlyIncludeIds?: number[];
-  onUpdateFilter?: (filter: string) => void;
+  onUpdateFilter?: (filter: any, label?: string) => void;
   title: string;
-  quickFixTags?: TagDefinition[];
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
   parentStopUsingDefaultValue?: boolean;
+  inlineOptions?: boolean;
+  valueSelected?: string;
+  removeActiveTag?: (tagType: string, tagId: number) => void;
+  resetCounter: number;
+  setResetCounter: React.Dispatch<React.SetStateAction<number>>;
 };
 
-type TagDefinition = { id: number; name: string; projectId?: any };
+type TagDefinition = { id: number; name: string; type:string; projectId?: any };
 
 const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
   ({
@@ -28,19 +33,34 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
      dataStore,
      tagType,
      onUpdateFilter,
-     quickFixTags = [],
      preFilterTags = undefined,
      parentStopUsingDefaultValue = false,
+     inlineOptions = false,
+     valueSelected = '',
+     removeActiveTag,
+     resetCounter,
+     setResetCounter,
      ...props
    },
     ref
   ) => {
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
+    const [stopUsingDefaultValueAfterReset, setStopUsingDefaultValueAfterReset] = useState(false);
 
-    const { data: tags } = dataStore.useTags({
+    const useTagsConfig: {
+      type: string;
+      onlyIncludeIds: number[];
+      projectId?: string;
+    } = {
       type: tagType,
       onlyIncludeIds,
-    });
+    }
+
+    if ( typeof props?.tagGroupProjectId === 'string' && props?.tagGroupProjectId === "0" ) {
+      useTagsConfig.projectId = props.tagGroupProjectId;
+    }
+
+    const {data:tags} = dataStore.useTags(useTagsConfig);
 
     const [defaultValue, setDefaultValue] = useState<string | undefined>(undefined);
     const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState(false);
@@ -64,17 +84,15 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
       }
     }
 
-    const filterTags = quickFixTags.length > 0 ? (quickFixTags.filter(tag => tag.projectId === parseInt(props.tagGroupProjectId))) : tags;
-
     useEffect(() => {
       if (!stopUsingDefaultValue && preFilterTags && preFilterTags.length > 0 && tags && tags.length && onUpdateFilter) {
         preFilterTags.forEach((tagId) => {
-          const tag = filterTags.find((tag: TagDefinition) => tag.id === tagId);
+          const tag = tags.find((tag: TagDefinition) => tag.id === tagId);
           if (tag) {
             const tagId = tag?.id?.toString();
 
             if ( defaultValue !== tagId ) {
-              onUpdateFilter(tagId);
+              onUpdateFilter(tagId, tag?.name || '');
               setDefaultValue(tagId);
             }
           }
@@ -83,31 +101,67 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     }, [preFilterTags]);
 
     return (
-      filterTags.length > 0 && (
+      (tags.length > 0 && !inlineOptions) ? (
         <div className="form-element">
           <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
           <Select
             id={getRandomId(props.placeholder)}
             ref={ref}
-            options={(filterTags || []).map((tag: TagDefinition) => ({
+            options={(tags || []).map((tag: TagDefinition) => ({
               value: tag.id,
               label: tag.name,
             }))}
             title={props.title}
-            onValueChange={(value) => {
+            onValueChange={(value, label) => {
               setStopUsingDefaultValue(true);
-              onUpdateFilter && onUpdateFilter(value);
+              onUpdateFilter && onUpdateFilter(value, label);
             }}
             defaultValue={
               (preFilterTags && preFilterTags.length > 0) ?
-                filterTags.find((tag: TagDefinition) => preFilterTags.includes(tag.id))?.id?.toString()
+                tags.find((tag: TagDefinition) => preFilterTags.includes(tag.id))?.id?.toString()
                 : undefined
             }
           >
           </Select>
         </div>
+      ) : tags.length > 0 && inlineOptions && (
+        <div className="form-element">
+          <FormLabel>
+            {props.placeholder|| 'Selecteer item'}
+            {!!valueSelected && (
+              <SubtleButton
+                appearance="link"
+                onClick={() => {
+                  setStopUsingDefaultValueAfterReset(true);
+                  setResetCounter(resetCounter + 1);
+                  removeActiveTag && removeActiveTag(tagType, Number(valueSelected));
+                }}
+              >
+                Wis
+              </SubtleButton>
+            )}
+          </FormLabel>
+          <RadioboxField
+              key={resetCounter}
+              fieldKey={tagType}
+              choices={(tags || []).map((tag: TagDefinition) => ({
+                value: tag.id,
+                label: tag.name,
+              }))}
+              title=""
+              onChange={({name, value}) => {
+                setStopUsingDefaultValue(true);
+                onUpdateFilter && onUpdateFilter(value, name);
+              }}
+              defaultValue={
+                (!stopUsingDefaultValueAfterReset && preFilterTags && preFilterTags.length > 0) ?
+                  tags.find((tag: TagDefinition) => preFilterTags.includes(tag.id))?.id
+                  : undefined
+              }
+          />
+        </div>
       )
-    );
+    )
   }
 );
 

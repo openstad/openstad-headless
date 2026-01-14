@@ -44,13 +44,12 @@ module.exports = async function seed(db) {
   let adminDomainWithoutPortnumber = adminDomain.replace(/:\d+/, '');
   if (adminDomain != adminDomainWithoutPortnumber) allowedDomains.push(adminDomainWithoutPortnumber);
 
-  process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || rack() 
+  process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || rack()
   let uniqueCode = process.env.AUTH_FIRST_LOGIN_CODE;
 
   console.log('  creating initial clients');
   console.log('    - admin site');
   console.log('      clientId:', adminClientId);
-  console.log('      clientSecret:', adminClientSecret);
 
   try {
     await db.Client.create({
@@ -68,7 +67,6 @@ module.exports = async function seed(db) {
 
     console.log("    - default site");
     console.log("      clientId:", clientId);
-    console.log("      clientSecret:", clientSecret);
     await db.Client.create({
       id: 2,
       redirectUrl: "", // deprecated
@@ -167,5 +165,38 @@ module.exports = async function seed(db) {
     });
   } catch (err) {
     console.log(err);
+  }
+  
+  if (process.env.AUTH_INITIAL_USERS) {
+    // Initial users from env var, list of e-mails
+    const initialUsers = JSON.parse(process.env.AUTH_INITIAL_USERS);
+    console.log ('  creating initial users from AUTH_INITIAL_USERS env var');
+    for (const initialUser of initialUsers) {
+      const user = await db.User.create({
+        email: initialUser,
+      });
+      
+      // Make user admin on client 1
+      await db.UserRole.create({
+        roleId: 1,
+        clientId: 1,
+        userId: user.id,
+      });
+      
+      console.log (`    - created user ${initialUser} with admin role on client 1`);
+    }
+    
+    // Set auth type to URL and set twoFactorRoles to admin
+    const adminClient = await db.Client.findOne({ where: { id: 1 } });
+    if (!adminClient) {
+      throw new Error('Admin client not found');
+    }
+    
+    await adminClient.update({
+      authTypes: JSON.stringify(["Url"]),
+      twoFactorRoles: JSON.stringify(["admin"]),
+    });
+    
+    console.log ('  updated admin client to use URL auth type with twoFactorRoles admin');
   }
 };

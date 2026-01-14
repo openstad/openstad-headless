@@ -8,15 +8,18 @@ import {
 } from "@utrecht/component-library-react";
 import {Spacer } from '@openstad-headless/ui/src';
 import './style.css';
+import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 export type NumberInputProps = {
     title: string;
+    overrideDefaultValue?: FormValue;
     description?: string;
     requiredWarning?: string;
     fieldKey: string;
     defaultValue?: string | number;
     disabled?: boolean;
-    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
     reset?: (resetFn: () => void) => void;
     format?: boolean;
     prepend?: string;
@@ -25,6 +28,18 @@ export type NumberInputProps = {
     placeholder?: string;
     randomId?: string;
     fieldInvalid?: boolean;
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
+    infoImage?: string;
 }
 
 const NumberInput: FC<NumberInputProps> = ({
@@ -41,16 +56,23 @@ const NumberInput: FC<NumberInputProps> = ({
     placeholder = '',
     randomId = '',
     fieldInvalid = false,
+    overrideDefaultValue,
+    infoImage,
+    images = [],
+    createImageSlider = false,
+    imageClickable = false,
 }) => {
+  const initialValue = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
+
   const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(initialValue);
   const MAX_VALUE = 1_000_000_000_000;
 
   useEffect(() => {
     if (reset) {
-      reset(() => setValue(defaultValue));
+      reset(() => setValue(initialValue));
     }
-  }, [reset, defaultValue]);
+  }, [reset, initialValue]);
 
   const formatNumber = (num: string) => {
     return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -90,7 +112,7 @@ const NumberInput: FC<NumberInputProps> = ({
     <FormField type="text">
       {title && (
         <Paragraph className="utrecht-form-field__label">
-          <FormLabel htmlFor={randomID}>{title}</FormLabel>
+          <FormLabel htmlFor={randomID} dangerouslySetInnerHTML={{ __html: title }} />
         </Paragraph>
       )}
       {description && (
@@ -99,6 +121,14 @@ const NumberInput: FC<NumberInputProps> = ({
           <Spacer size={0.5}/>
         </>
       )}
+
+      {InfoImage({
+        imageFallback: infoImage || '',
+        images: images,
+        createImageSlider: createImageSlider,
+        addSpacer: !!infoImage,
+        imageClickable: imageClickable
+      })}
 
       <div className={`utrecht-form-field__input`}>
         {prepend && <span className="utrecht-form-field__prepend">{prepend}</span>}

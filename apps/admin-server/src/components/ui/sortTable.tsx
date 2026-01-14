@@ -20,6 +20,7 @@ const sortFunctions = {
     'votesIsActive': (a: any, b: any) => ( b.config.votes.isActive ? 1 : -1 ) - ( a.config.votes.isActive ? 1 : -1 ),
     'commentsIsActive': (a: any, b: any) => ( b.config.comments.canComment ? 1 : -1 ) - ( a.config.comments.canComment ? 1 : -1 ),
     'addToNewResources': (a: any, b: any) => ( b.addToNewResources ? 1 : -1 ) - ( a.addToNewResources ? 1 : -1 ),
+    'score': (a: any, b: any) => b.score - a.score,
 };
 
 export const sortTable = (sortType: string, el: React.MouseEvent<HTMLElement, MouseEvent>, data: Array<any>) => {

@@ -1,4 +1,10 @@
 require('dotenv').config();
+
+// Initialize telemetry FIRST, before any other modules
+const { telemetryManager, setupGracefulShutdown } = require('./src/telemetry');
+telemetryManager.initialize();
+setupGracefulShutdown();
+
 const config = require('config');
 
 // Env variable used by npm's `debug` package.

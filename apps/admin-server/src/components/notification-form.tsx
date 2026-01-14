@@ -25,6 +25,7 @@ import {
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { fetchSessionUser } from '@/auth';
 import { applyFilters } from '@/lib/nunjucks-filters';
+import {useProject} from "@/hooks/use-project";
 
 const nunjucksEnv = new nunjucks.Environment();
 applyFilters(nunjucksEnv);
@@ -127,6 +128,146 @@ const initialDataEnqueteSubmissionUser = `<mjml>
 </mjml>
 `;
 
+const initialDataCommentNotification = `<mjml>
+  <mj-body background-color="#f6f6f7">
+    <!-- Main section for the email content -->
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+
+        <!-- Title of the email -->
+        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+          Je hebt een nieuwe reactie ontvangen
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+        
+        <!-- Introduction text based on conditions -->
+        <mj-text font-size="16px" color="#444" font-family="Helvetica">
+          {% if comment.sentiment == 'for' %}
+            Hier zie je een positieve reactie op je inzending.
+          {% elseif comment.sentiment == 'against' %}
+            Hier zie je een negatieve reactie op je inzending.
+          {% else %}
+            Hier zie je de reactie op je inzending.
+          {% endif %}
+          
+          Geplaatst op {{ comment.createDateHumanized }} 
+          door {{ comment.userName or 'een anonieme gebruiker' }}.
+          
+          {% if comment.userEmail %}
+            Reageer op deze persoon via {{ comment.userEmail }}.
+          {% endif %}
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-width="0" padding="10px" />
+        
+        <!-- The comment description itself -->
+        <mj-text font-size="14px" font-weight="700" color="#444" font-family="Helvetica" align="center">
+            Reactie:
+          </mj-text>
+        <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
+          {{ comment.description }}
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-width="0" padding="10px" />
+        
+        <!-- Unsubscribe link if unsubscribeUrl exist -->
+        {% if unsubscribeUrl %}
+          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
+            Wil je je uitschrijven? Dat kan via de volgende link:
+            <br />
+            <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
+          </mj-text>
+        {% endif %}
+        
+        <!-- Embedded url link if Embedded url exist -->
+        {% if embeddedUrl %}
+          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
+            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
+          </mj-text>
+        {% endif %}
+        
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
+
+const initialDataCommentReplyNotification = `<mjml>
+  <mj-body background-color="#f6f6f7">
+    <!-- Main section for the email content -->
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+
+        <!-- Title of the email -->
+        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+          Je hebt een nieuwe reactie ontvangen
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+        
+        <!-- Introduction text based on conditions -->
+        <mj-text font-size="16px" color="#444" font-family="Helvetica">
+          Hier zie je de reactie op je reactie.
+          
+          Geplaatst op {{ comment.createDateHumanized }} 
+          door {{ comment.userName or 'een anonieme gebruiker' }}.
+          
+          {% if comment.userEmail %}
+            Reageer op deze persoon via {{ comment.userEmail }}.
+          {% endif %}
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-width="0" padding="10px" />
+        
+        <!-- The comment description itself -->
+        <mj-text font-size="14px" font-weight="700" color="#444" font-family="Helvetica" align="center">
+            Reactie:
+          </mj-text>
+        <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
+          {{ comment.description }}
+        </mj-text>
+        
+        <!-- The parent comment description -->
+        {% if comment.parentComment %}
+          <mj-text font-size="14px" font-weight="700" color="#444" font-family="Helvetica" align="center">
+              Jouw reactie:
+            </mj-text>
+          <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
+            {{ comment.parentComment }}
+          </mj-text>
+        {% endif %}
+
+        <!-- Divider line -->
+        <mj-divider border-width="0" padding="10px" />
+        
+        <!-- Unsubscribe link if unsubscribeUrl exist -->
+        {% if unsubscribeUrl %}
+          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
+            Wil je je uitschrijven? Dat kan via de volgende link:
+            <br />
+            <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
+          </mj-text>
+        {% endif %}
+        
+        <!-- Embedded url link if Embedded url exist -->
+        {% if embeddedUrl %}
+          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
+            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
+          </mj-text>
+        {% endif %}
+        
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
+
 const initialDataEnqueteSubmissionAdmin = `<mjml>
   <mj-body background-color="#f6f6f7">
     <mj-section background-color="#ffffff" padding="20px">
@@ -157,6 +298,49 @@ const initialDataEnqueteSubmissionAdmin = `<mjml>
 </mjml>
 `;
 
+const initialDataAccountExpiry = `<mjml>
+        <mj-body background-color="#f6f6f7">
+            <mj-section background-color="#ffffff" padding="20px">
+                <mj-column>
+
+                    <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+                        We gaan je account verwijderen
+                    </mj-text>
+
+                    <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+                    <mj-divider border-width="0" padding="10px"  ></mj-divider>
+
+                    <mj-text  line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">
+                        Beste {{user.name or 'bezoeker'}},
+                    </mj-text>
+
+                    <mj-text  line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">
+                        Je bent al een tijd niet actief geweest op de website
+                        
+                        {% if projectUrl %}
+                            <a href="{{projectUrl}}">{{projectUrl}}</a>.
+                        {% else %}
+                            {{projectName}}.
+                        {% endif %}
+                        
+                        We willen niet onnodig je gegevens blijven bewaren, en gaan die daarom verwijderen. Dat betekent dat een eventuele bijdrage die je hebt geleverd op de website, bijvoorbeeld inzendingen en/of reacties, geanonimiseerd worden.
+                    </mj-text>
+
+                    <mj-text  line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">
+                        Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website om je account actief te houden. Doe dit wel voor {{anonymizeDate}}, want anders gaan we op die dag je gegevens verwijderen.
+                    </mj-text>
+
+                    <mj-divider border-width="0" padding="10px" ></mj-divider>
+                    <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+
+                    <mj-text  line-height="1.3" font-size="14px" color="#999999" font-family="Helvetica" align="center">
+                        Dit is een automatisch bericht, antwoorden op deze e-mail is niet mogelijk.
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+        </mj-body>
+    </mjml>`;
+
 type Props = {
   type:
   | 'login email'
@@ -166,7 +350,9 @@ type Props = {
   | 'updated resource - user feedback'
   | 'user account about to expire'
   | 'new enquete - admin'
-  | 'new enquete - user';
+  | 'new enquete - user'
+  | 'notification comment - user'
+  | 'notification comment reply - user';
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
@@ -182,7 +368,9 @@ const notificationTypes = {
   'updated resource - user feedback': 'Resource bijgewerkt - Notificatie naar de gebruiker',
   'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen',
   'new enquete - admin': 'Nieuwe formulier inzending - Notificatie naar de admin',
-  'new enquete - user': 'Nieuwe formulier inzending - Notificatie naar de gebruiker'
+  'new enquete - user': 'Nieuwe formulier inzending - Notificatie naar de gebruiker',
+  'notification comment - user': 'Nieuwe reactie op een inzending - Notificatie naar de gebruiker',
+  'notification comment reply - user': 'Nieuwe reactie op een reactie - Notificatie naar de gebruiker',
 };
 
 const formSchema = z.object({
@@ -244,6 +432,9 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
       || ( type === 'login email' ? initialData : "" )
       || ( type === 'new enquete - admin' ? initialDataEnqueteSubmissionAdmin : "" )
       || ( type === 'new enquete - user' ? initialDataEnqueteSubmissionUser : "" )
+      || ( type === 'notification comment - user' ? initialDataCommentNotification : "" )
+      || ( type === 'notification comment reply - user' ? initialDataCommentReplyNotification : "" )
+      || ( type === 'user account about to expire' ? initialDataAccountExpiry : "" )
 
   const defaults = React.useCallback(
     () => ({

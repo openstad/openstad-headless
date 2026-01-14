@@ -14,14 +14,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Input} from "@/components/ui/input";
-import {useFieldDebounce} from "@/hooks/useFieldDebounce";
+import { Input } from "@/components/ui/input";
+import { useFieldDebounce } from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   displayImage: z.boolean(),
   displayImageDescription: z.boolean(),
   displayTitle: z.boolean(),
   displayDescription: z.boolean(),
+  displayDescriptionExpandable: z.boolean(),
+  displayDescriptionExpandable_expandBeforeText: z.string().optional(),
+  displayDescriptionExpandable_expandAfterText: z.string().optional(),
+  displayDescriptionExpandable_visibleLines: z.string().optional(),
   displaySummary: z.boolean(),
   displayUser: z.boolean(),
   displayDate: z.boolean(),
@@ -34,9 +38,13 @@ const formSchema = z.object({
   displayStatusBar: z.boolean(),
   displayLikes: z.boolean(),
   displayDocuments: z.boolean(),
+  displayEditResourceButton: z.boolean().optional(),
   documentsTitle: z.string().optional(),
   documentsDesc: z.string().optional(),
   clickableImage: z.boolean(),
+  urlWithResourceFormForEditing: z.string().optional(),
+  displayDeleteButton: z.boolean().optional(),
+  displayDeleteEditButtonOnTop: z.boolean().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -55,9 +63,13 @@ export default function WidgetResourceDetailDisplay(
     defaultValues: {
       displayImage: undefinedToTrueOrProp(props?.displayImage),
       displayImageDescription: undefinedToTrueOrProp(props?.displayImageDescription),
+      displayDescriptionExpandable: props?.displayDescriptionExpandable || false,
+      displayDescriptionExpandable_expandBeforeText: props?.displayDescriptionExpandable_expandBeforeText || 'Lees meer',
+      displayDescriptionExpandable_expandAfterText: props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
+      displayDescriptionExpandable_visibleLines: props?.displayDescriptionExpandable_visibleLines || '4',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
-      displayDescription: undefinedToTrueOrProp(props?.displayDescription),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
+      displayDescription: undefinedToTrueOrProp(props?.displayDescription),
       displayUser: undefinedToTrueOrProp(props?.displayUser),
       displayDate: undefinedToTrueOrProp(props?.displayDate),
       displayBudget: undefinedToTrueOrProp(props?.displayBudget),
@@ -74,6 +86,10 @@ export default function WidgetResourceDetailDisplay(
       clickableImage: props?.clickableImage || false,
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
+      displayEditResourceButton: props?.displayEditResourceButton || false,
+      displayDeleteButton: undefinedToTrueOrProp(props?.displayDeleteButton),
+      urlWithResourceFormForEditing: props?.urlWithResourceFormForEditing || '',
+      displayDeleteEditButtonOnTop: props?.displayDeleteEditButtonOnTop || false,
     },
   });
 
@@ -174,17 +190,82 @@ export default function WidgetResourceDetailDisplay(
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="displayDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Beschrijving weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
+          <div>
+            <FormField
+              control={form.control}
+              name="displayDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Beschrijving weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.watch("displayDescription") && (
+              <div className="bg-stone-100 p-4 mt-4 rounded-md border border-stone-200">
+                <FormField
+                  control={form.control}
+                  name="displayDescriptionExpandable"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Uitklapbaar</FormLabel>
+                      <FormDescription>
+                        Als je dit aanzet, wordt de beschrijving standaard ingeklapt weergegeven met een &apos;Lees meer&apos; knop.
+                      </FormDescription>
+                      {YesNoSelect(field, props)}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {form.watch("displayDescriptionExpandable") && (
+                  <>
+                    <div className='flex gap-4 mt-4 mb-4'>
+                      <FormField
+                        control={form.control}
+                        name="displayDescriptionExpandable_expandBeforeText"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tekst voor de &apos;Lees meer&apos; knop</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="displayDescriptionExpandable_expandAfterText"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tekst voor de &apos;Lees minder&apos; knop</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="displayDescriptionExpandable_visibleLines"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Aantal zichtbare regels (0 - 10)</FormLabel>
+                          <FormControl>
+                            <Input {...field} min={0} max={10} type="number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+              </div>
             )}
-          />
+          </div>
           <FormField
             control={form.control}
             name="displayLocation"
@@ -337,6 +418,67 @@ export default function WidgetResourceDetailDisplay(
               />
             </>
           )}
+
+          <FormField
+            control={form.control}
+            name="displayEditResourceButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de knop om de inzending te bewerken
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch("displayEditResourceButton") && (
+            <FormField
+              control={form.control}
+              name="urlWithResourceFormForEditing"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Wat is de URL van de pagina waar het formulier staat?</FormLabel>
+                  <FormDescription>
+                    Vul hier de URL in van de pagina waar het inzendingformulier staat. Op die pagina kan de gebruiker zijn inzending bewerken. Er wordt automatisch ?openstadResourceId=[id] aan de URL toegevoegd.
+                  </FormDescription>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
+            name="displayDeleteButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de knop om de inzending te verwijderen
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayDeleteEditButtonOnTop"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon de bewerk- en verwijderknoppen bovenaan in plaats van onderaan
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

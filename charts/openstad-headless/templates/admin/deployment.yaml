@@ -58,9 +58,30 @@ spec:
               secretKeyRef:
                 key: apiKey
                 name: {{ template "openstad.admin.secret.fullname" . }}
+          - name: RATE_LIMIT
+            valueFrom:
+              secretKeyRef:
+                key: rateLimit
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+          - name: RATE_WINDOW_MS
+            valueFrom:
+              secretKeyRef:
+                key: rateWindowMs
+                name: {{ template "openstad.ratelimit.secret.fullname" . }}
+          - name: NEXT_PUBLIC_HASH_IP_ADDRESSES
+            valueFrom:
+              secretKeyRef:
+                key: hashIpAddresses
+                name: {{ template "openstad.ipaddress.secret.fullname" . }}
           # Inject extra environment variables
           {{- if .Values.admin.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.admin.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
+        {{- if .Values.admin.customCommand }}
+        command: {{ toYaml .Values.admin.customCommand | nindent 12}}
+        {{- end }}
+        {{- if .Values.admin.customWorkingDir }}
+        workingDir: {{ .Values.admin.customWorkingDir }}
+        {{- end }}
         resources:
 {{ toYaml .Values.admin.resources | indent 12 }}

@@ -39,6 +39,7 @@ export default function ProjectCodeCreate() {
     const codes = await createUniqueCodes(values.numberOfCodes)
     if (codes) {
       toast.success('De codes worden aangemaakt!');
+      router.push(`/projects/${project}/unique-codes`);
     } else {
       toast.error('Er is helaas iets mis gegaan.')
     }

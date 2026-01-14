@@ -1,9 +1,18 @@
 export default {
   fetch: async function (
-    { projectId, page, pageSize, search, tags, sort, statuses },
+    { projectId, page, pageSize, search, tags, sort, statuses, projectIds, allowMultipleProjects },
     options
   ) {
     const params = new URLSearchParams();
+
+    const getPseudoRandomSortSeed = () => {
+      if (!localStorage.getItem('pseudoRandomSortSeed')) {
+        const MAX_INT_UNSIGNED = 4294967295
+        const getRandomSeed = () => Math.floor(Math.random() * MAX_INT_UNSIGNED)
+        localStorage.setItem('pseudoRandomSortSeed', getRandomSeed())
+      }
+      return localStorage.getItem('pseudoRandomSortSeed')
+    }
 
     if (Array.isArray(tags) && tags.length > 0) {
       tags.forEach((tag) => params.append('tags', tag));
@@ -20,6 +29,7 @@ export default {
     if (sort) {
       if (!Array.isArray(sort)) sort = [sort];
       sort.map((criterium) => params.append('sort', criterium));
+      if (sort.includes('random')) params.append('pseudoRandomSortSeed', getPseudoRandomSortSeed())
     }
 
     if (page >= 0 && pageSize) {
@@ -28,6 +38,10 @@ export default {
     } else if (pageSize >= 0) {
       params.append('page', 0);
       params.append('pageSize', pageSize);
+    }
+
+    if (projectIds && projectIds.length > 0 && allowMultipleProjects) {
+      projectIds.forEach((projectId) => params.append('projectIds', projectId));
     }
 
     let url = `/api/project/${projectId}/resource?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1&includeCommentsCount=1&${params.toString()}`;

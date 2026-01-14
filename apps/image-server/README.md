@@ -63,7 +63,6 @@ Example with node.js, using node-fetch & form-data. Notice dotenv is used for AP
 
 ```
 const FormData = require('form-data');
-const fetch = require('node-fetch');
 
 exports.upload = function (token, buffer, fileName) {
   const form = new FormData();

@@ -8,36 +8,106 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import useUsers from "@/hooks/use-users";
 import { sortTable, searchTable } from '@/components/ui/sortTable';
-import * as XLSX from 'xlsx';
+import {exportToXLSX} from "@/lib/export-helpers/xlsx-export";
+import { Paginator } from '@openstad-headless/ui/src';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, remove } = useVotes(project as string);
-
-  const [filterData, setFilterData] = useState(data);
+  const { remove } = useVotes(project as string);
+  const [filterData, setFilterData] = useState<{ createdAt: string, id?: string }[]>([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
-  const exportData = (data: any[], fileName: string) => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    XLSX.writeFile(workbook, fileName);
-  };
-  function transform() {
+  async function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportData(data, `${projectId}_stemmen_${formattedDate}.xlsx`);
+
+    const keyMap: Record<string, string> = {
+      'id'                    : 'Stem ID',
+      'resourceId'            : 'Inzending ID',
+      'resource.title'        : 'Inzending titel',
+      'opinion'               : 'Stem',
+      'createdAt'             : 'Datum',
+      'ip'                    : 'IP Adres',
+      'userId'                : 'Gebruiker ID',
+      'user.role'             : 'Gebruiker rol',
+      'user.name'             : 'Gebruiker naam',
+      'user.displayName'      : 'Gebruiker weergavenaam',
+      'user.email'            : 'Gebruiker e-mailadres',
+      'user.phonenumber'      : 'Gebruiker telefoonnummer',
+      'user.address'          : 'Gebruiker adres',
+      'user.city'             : 'Gebruiker woonplaats',
+      'user.postcode'         : 'Gebruiker postcode',
+    };
+
+    await toast.promise(
+      fetchAllResults().then((dataToExport) => {
+        exportToXLSX(dataToExport, `${projectId}_stemmen_${formattedDate}.xlsx`, keyMap);
+      }),
+      {
+        loading: 'Laden...',
+        success: "De stemmen zijn succesvol geëxporteerd",
+        error: "Er is een fout opgetreden bij het exporteren van de stemmen"
+      }
+    );
   }
 
   const { data: usersData } = useUsers();
 
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageLimit = 200;
+  const [totalCount, setTotalCount] = useState(0);
+
+  const fetchResults = async (page: number) => {
+    try {
+      const projectNumber = parseInt(project as string);
+
+      if (isNaN(projectNumber) || isNaN(page) || isNaN(pageLimit)) {
+        return;
+      }
+
+      let url = `/api/openstad/api/project/${projectNumber}/vote?page=${page}&limit=${pageLimit}&includeResource&pageSize=${pageLimit}`;
+
+      const response = await fetch(url);
+      return response.json();
+    } catch (error) {}
+  };
+
   useEffect(() => {
-    setFilterData(data);
-  }, [data])
+    fetchResults(page).then((results) => {
+      if (results) {
+        const data = results?.records || [];
+        const totalCount = results?.metadata?.totalCount || 50;
+
+        const pageCount = Math.ceil(totalCount / pageLimit);
+        setTotalPages(pageCount);
+
+        let loadedVotesResults = (data || []) as { createdAt: string }[];
+        const sortedData = loadedVotesResults.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+
+        setTotalCount(totalCount);
+        setFilterData(sortedData);
+      }
+    });
+  }, [page, project]);
+
+  const fetchAllResults = async () => {
+    let allData: any[] = [];
+    let currentPage = 0;
+    let totalPages = Math.ceil(totalCount / pageLimit);
+    while (currentPage < totalPages) {
+      // eslint-disable-next-line no-await-in-loop
+      const results = await fetchResults(currentPage);
+      const data = results?.records || [];
+      allData = allData.concat(data);
+      currentPage += 1;
+    }
+
+    return allData;
+  }
 
   return (
     <div>
@@ -76,12 +146,13 @@ export default function ProjectResources() {
               <option value="ip">Gebruiker IP</option>
               <option value="opinion">Voorkeur</option>
             </select>
-            <input
-              type="text"
-              className='p-2 rounded'
-              placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
-            />
+            {/*  --- Search werkt voor even niet ---  */}
+            {/*<input*/}
+            {/*  type="text"*/}
+            {/*  className='p-2 rounded'*/}
+            {/*  placeholder="Zoeken..."*/}
+            {/*  onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}*/}
+            {/*/>*/}
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
@@ -166,6 +237,17 @@ export default function ProjectResources() {
                 );
               })}
             </ul>
+
+            <div className="mt-8 flex justify-center">
+              {totalPages > 0 && (
+                <Paginator
+                  page={page || 0}
+                  totalPages={totalPages || 1}
+                  onPageChange={(newPage) => setPage(newPage)}
+                />
+              )}
+            </div>
+
           </div>
         </div>
       </PageLayout>

@@ -1,5 +1,4 @@
-
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -15,6 +14,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { ResetResourceDialog } from '@/components/dialog-resource-reset';
 import useUser from '@/hooks/use-user';
 import { toast } from 'react-hot-toast';
 
@@ -31,6 +31,7 @@ const formSchema = z.object({
   password: z.string().optional(),
   firstname: z.string().optional(),
   lastname: z.string().optional(),
+  accessCode: z.string().optional(),
 });
 
 export default function CreateUserGeneral() {
@@ -41,6 +42,7 @@ export default function CreateUserGeneral() {
    */
 
   const { data, updateUser } = useUser();
+  const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
 
   let user = data;
   if (Array.isArray(data)) user = data[0];
@@ -56,6 +58,7 @@ export default function CreateUserGeneral() {
       password: user?.password || '',
       firstname: user?.firstname || '',
       lastname: user?.lastname || '',
+      accessCode: user?.accessCode || '',
     }),
     [user]
   );
@@ -69,12 +72,42 @@ export default function CreateUserGeneral() {
     form.reset(defaults());
   }, [form, defaults]);
 
+  // Fetch two-factor status
+  useEffect(() => {
+    async function fetchTwoFactorStatus() {
+      try {
+        const response = await fetch(`/api/openstad/api/project/${user.projectId}/user/${user.id}/two-factor-status`);
+        const data = await response.json();
+        setIsTwoFactorEnabled(data.twoFactorEnabled);
+      } catch (error) {
+        toast.error('Failed to fetch two-factor status');
+      }
+    }
+
+    if (user?.id) {
+      fetchTwoFactorStatus();
+    }
+  }, [user]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await updateUser({ ...values, id: user.id, projectId: user.projectId });
       toast.success('User is bijgewerkt')
     } catch(err:any) {
       toast.error(err.message || 'User kon niet worden bijgewerkt')
+    }
+  }
+
+  async function handleResetTwoFactor() {
+    try {
+      await fetch(`/api/openstad/api/project/${user.projectId}/user/${user.id}/reset-two-factor`, {
+        method: 'PUT',
+      });
+
+      setIsTwoFactorEnabled(false);
+      toast.success('Two-factor authentication reset succesvol');
+    } catch (error) {
+      toast.error('Two-factor authenticatie kon niet worden gereset');
     }
   }
 
@@ -216,11 +249,45 @@ export default function CreateUserGeneral() {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="accessCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toegangscode
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="col-span-full w-fit" type="submit">
             Opslaan
           </Button>
         </form>
       </Form>
+
+      <Separator className="my-4" />
+
+      <div>
+        <p>
+          {isTwoFactorEnabled
+            ? 'Two-factor authenticatie is ingeschakeld.'
+            : 'Deze gebruiker heeft nog geen two-factor authenticatie ingesteld.'}
+        </p>
+        {isTwoFactorEnabled && (
+          <ResetResourceDialog
+            header="Two-Factor Authenticatie Reset"
+            message="Weet je zeker dat je de two-factor authentication wilt resetten voor deze gebruiker?"
+            resetButtonText="Reset Two-Factor Authenticatie"
+            onResetAccepted={handleResetTwoFactor}
+          />
+        )}
+      </div>
     </div>
   );
 }

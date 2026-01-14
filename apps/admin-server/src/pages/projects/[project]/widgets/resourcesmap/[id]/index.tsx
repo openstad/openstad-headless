@@ -20,10 +20,14 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import WidgetResourcesMapDatalayers from './datalayers';
+import {boolean} from "zod";
 
 export const getServerSideProps = withApiUrl;
 
-export type ResourceOverviewMapWidgetTabProps = Omit<
+export type ResourceOverviewMapWidgetTabProps = {
+    hideOverviewFields?: boolean;
+  } & Omit<
   ResourceOverviewMapWidgetProps,
   keyof Omit<BaseProps, 'projectId'>
 >;
@@ -84,6 +88,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="button">Knoppen</TabsTrigger>
               <TabsTrigger value="polygons">Polygonen</TabsTrigger>
+              <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
@@ -100,6 +105,11 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="polygons" className="p-0">
                   <WidgetResourcesMapPolygons
+                    {...totalPropPackage}
+                  />
+                </TabsContent>
+                <TabsContent value="datalayers" className="p-0">
+                  <WidgetResourcesMapDatalayers
                     {...totalPropPackage}
                   />
                 </TabsContent>

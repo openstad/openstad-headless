@@ -8,6 +8,7 @@ const {formatGeoJsonToPolygon} = require('../../util/geo-json-formatter');
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 var createError = require('http-errors');
+const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 
 // scopes: for all get requests
 router
@@ -52,7 +53,7 @@ router.route('/')
     if (!req.body.polygon) return next(createError(401, 'Geen polygoon opgegeven'));
     return next();
   })
-  .post(function(req, res, next) {
+  .post( rateLimiter(), function(req, res, next) {
     db.Area
       .create(req.body)
       .catch((err) => {
@@ -74,7 +75,9 @@ router.route('/:areaId(\\d+)')
         where: { id: areaId },
       })
       .then(found => {
-        if (!found) throw new Error('area not found');
+        if (!found) {
+          return next(createError(404, 'Area not found'));
+        }
 
         req.area = found;
         req.results = req.area;
@@ -101,7 +104,7 @@ router.route('/:areaId(\\d+)')
     next();
   })
   .put(auth.useReqUser)
-  .put(function(req, res, next) {
+  .put( rateLimiter(), function(req, res, next) {
     const area = req.results;
 
     if (!( area && area.can && area.can('update') )) return next( new Error('You cannot update this area') );
@@ -126,7 +129,9 @@ router.route('/:areaId(\\d+)')
         // where: { id: areaInstance.id, projectId: req.params.projectId },
       })
       .then(found => {
-        if (!found) throw new Error('area not found');
+        if (!found) {
+          return next(createError(404, 'Area not found'));
+        }
         req.results = found;
         next();
       })

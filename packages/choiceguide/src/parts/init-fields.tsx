@@ -29,7 +29,6 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 showMoreInfo: item.showMoreInfo || false,
                 moreInfoButton: item.moreInfoButton || '',
                 moreInfoContent: item.moreInfoContent || '',
-                infoImage: item.infoImage || '',
                 titleA: item.labelA || '',
                 titleB: item.labelB || '',
                 descriptionA: item.sliderTitleUnderA || '',
@@ -44,6 +43,17 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 minCharactersWarning: data?.choiceGuide?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.choiceGuide?.minCharactersError|| 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.choiceGuide?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+                routingInitiallyHide: item?.routingInitiallyHide || false,
+                routingSelectedQuestion: item?.routingSelectedQuestion || '',
+                routingSelectedAnswer: item?.routingSelectedAnswer || '',
+                trigger: item.trigger || '',
+                placeholder: item.placeholder || '',
+                images: item.images || [],
+                createImageSlider: item?.createImageSlider || false,
+                imageClickable: item?.imageClickable || false,
+
+                // Keeping this for backwards compatibility
+                infoImage: item.infoImage || '',
             };
 
             switch (item.type) {
@@ -65,7 +75,8 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                                 value: option.titles[0].key,
                                 label: option.titles[0].key,
                                 isOtherOption: option.titles[0].isOtherOption,
-                                defaultValue: option.titles[0].defaultValue
+                                defaultValue: option.titles[0].defaultValue,
+                                trigger: option.trigger || ''
                             }
                         });
 
@@ -79,6 +90,37 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                     }
                     if (item.maxChoicesMessage) {
                         fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
+                    break;
+                case 'images':
+                    fieldData['type'] = 'imageChoice';
+                    fieldData['multiple'] = item.multiple || false;
+
+                    if (item.options && item.options.length > 0) {
+                        fieldData['choices'] = item.options.map((option) => {
+                            return {
+                                value: option.titles[0].key,
+                                label: option.titles[0].key,
+                                imageSrc: option.titles[0].image,
+                                imageAlt: option.titles[0].key,
+                                hideLabel: option.titles[0].hideLabel,
+                                trigger: option.trigger || ''
+                            };
+                        });
+                    } else {
+                        fieldData['choices'] = [
+                            {
+                                label: item?.text1 || '',
+                                value: item?.key1 || '',
+                                imageSrc: item?.image1 || ''
+                            },
+                            {
+                                label: item?.text2 || '',
+                                value: item?.key2 || '',
+                                imageSrc: item?.image2 || ''
+                            }
+                        ];
                     }
 
                     break;
@@ -100,6 +142,21 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                         skipQuestion: false,
                         skipQuestionExplanation: ''
                     }
+                    break;
+                case 'map':
+                    if ( !!data?.datalayer ) {
+                        fieldData['datalayer'] = data?.datalayer;
+                    }
+
+                    if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
+                        fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
+                    }
+                    break;
+                case 'matrix':
+                    fieldData['type'] = 'matrix';
+                    fieldData['matrix'] = item?.matrix || undefined;
+                    fieldData['matrixMultiple'] = item?.matrixMultiple || false;
+                    fieldData['defaultValue'] = [];
                     break;
             }
 

@@ -33,11 +33,12 @@ const formSchema = z.object({
     'submission',
   ]),
   formName: z.string(),
-  redirectUrl: z.string().refine(value =>
-    /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value),
-    {
-      message: "Must be a valid URL or a relative path",
-    }
+  redirectUrl: z.preprocess(
+    (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.string().refine(
+      (value) => /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value),
+      { message: "Must be a valid URL or a relative path" }
+    ).optional()
   ),
   hideAdmin: z.boolean(),
   minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),

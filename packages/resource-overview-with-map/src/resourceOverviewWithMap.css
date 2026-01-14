@@ -143,11 +143,18 @@
 }
 
 @container detailContainer (max-width: 600px) {
-  .resourceOverviewWithMap-container .resource-card--link {
+  .map-wrapper .resourceOverviewWithMap-container .resource-card--link {
     display: flex;
     flex-direction: column;
   }
   .resourceOverviewWithMap-container .osc-resource-overview-content #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
     grid-template-columns: 1fr;
   }
+}
+
+.osc-resource-overview-resource-collection .osc-loading-results-text,
+.osc-resource-overview-resource-collection .osc-no-results-text {
+  position: relative;
+  width: 100%;
+  text-align: center;
 }

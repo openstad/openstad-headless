@@ -38,6 +38,7 @@ const formSchema = z.object({
   areaId: z.string().optional(),
   tilesVariant: z.string().optional(),
   customUrl: z.string().optional(),
+  autoZoomAndCenter: z.string().optional(),
 });
 
 export default function ProjectSettingsMap() {
@@ -55,6 +56,7 @@ export default function ProjectSettingsMap() {
         areaId: data?.config?.map?.areaId || '',
         tilesVariant: data?.config?.map?.tilesVariant || 'nlmaps',
         customUrl: data?.config?.map?.customUrl || '',
+        autoZoomAndCenter: data?.config?.map?.autoZoomAndCenter || 'area',
       }
     },
     [data, areas]
@@ -78,6 +80,7 @@ export default function ProjectSettingsMap() {
           maxZoom: values.maxZoom,
           tilesVariant: values.tilesVariant,
           customUrl: values.customUrl,
+          autoZoomAndCenter: values.autoZoomAndCenter,
         },
       });
       if (project) {
@@ -252,6 +255,40 @@ export default function ProjectSettingsMap() {
                   )}
                 />
               )}
+
+              <FormField
+                control={form.control}
+                name="autoZoomAndCenter"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>
+                      Waarop moet de kaart automatisch centreren?
+                    </FormLabel>
+                    <FormDescription>
+                      Kies of de kaart moet centreren op het geselecteerde gebied (polygoon) of op alle zichtbare punten op de kaart. Het centreren gebeurt bij het laden van de pagina en na het filteren in een overzicht.
+                    </FormDescription>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || 'area'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Gebied" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="area">
+                          <strong>Gebied</strong>: De kaart zoomt automatisch in en centreert zich op het geselecteerde gebied (polygoon).
+                        </SelectItem>
+                        <SelectItem value="markers">
+                          <strong>Punten</strong>: De kaart zoomt automatisch in en centreert zich op alle zichtbare punten op de kaart.
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Button
                 type="submit"

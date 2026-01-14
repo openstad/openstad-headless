@@ -6,6 +6,12 @@ const db = require('../src/db');
 
 const { Umzug, SequelizeStorage } = require('umzug');
 
+const { AUTH_ADMIN_CLIENT_ID: authId, AUTH_ADMIN_CLIENT_SECRET: authSecret } = process.env;
+
+if ((typeof authId !== "undefined" && authId.includes(':')) || (typeof authSecret !== "undefined" && authSecret.includes(':'))) {
+  throw new Error("Auth client id/secret must not contain ':'");
+}
+
 (async () => {
   const resetDatabase = async () => {
     try {

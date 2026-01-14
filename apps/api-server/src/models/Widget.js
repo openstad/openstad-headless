@@ -23,9 +23,9 @@ module.exports = function (db, sequelize, DataTypes) {
   Widget.auth = Widget.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
-    createableBy: 'moderator',
-    updateableBy: ['moderator', 'owner'],
-    deleteableBy: ['moderator', 'owner'],
+    createableBy: 'editor',
+    updateableBy: ['editor', 'owner'],
+    deleteableBy: ['editor', 'owner'],
   };
 
   Widget.scopes = function scopes() {

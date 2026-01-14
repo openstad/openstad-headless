@@ -15,7 +15,7 @@ function getResourceId({
   if (!targetUrl) targetUrl = '?openstadResourceId=[id]';
 
   // Methode 2: Resource ID ophalen via reguliere expressie uit de URL
-  let regex = targetUrl.replace(/([.^$*+?()[\]{\|/])/g, "\\$1");
+  let regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, "\\$1");
   regex = regex.replace(/\\\[id\\\]/, "(\\d+)");
 
   let match = url.match(regex);
@@ -28,7 +28,7 @@ function getResourceId({
   if (!resourceId) {
     const urlPath = new URL(url).pathname + new URL(url).search;
 
-    regex = targetUrl.replace(/([.^$*+?()[\]{\|/])/g, "\\$1");
+    regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, "\\$1");
     regex = regex.replace(/\\\[id\\\]/, "(\\d+)");
 
     match = urlPath.match(regex);
@@ -46,14 +46,15 @@ function getResourceId({
 
       // Methode 5: Extra controle op [id] patroon in targetUrl en query parameter
       if (!resourceId && targetUrl.includes('[id]')) {
-        const paramNameMatch = targetUrl.match(/[?&]([^=]+)=\[id\]/);
+        const paramName = getFirstParamNameWithIdValue(targetUrl);
 
-        if (paramNameMatch && paramNameMatch[1]) {
-          const paramName = paramNameMatch[1];
-          const paramValue = urlParams.get(paramName);
+        let paramValue = undefined;
 
-          resourceId = paramValue ? parseInt(paramValue, 10) : undefined;
+        if (paramName && urlParams.has(paramName)) {
+          paramValue = urlParams.get(paramName);
         }
+
+        resourceId = paramValue ? parseInt(paramValue, 10) : undefined;
       }
     }
   }
@@ -61,9 +62,26 @@ function getResourceId({
   return resourceId ? resourceId : undefined;
 }
 
+// Get the first parameter name that has a value of [id] in the targetUrl
+function getFirstParamNameWithIdValue(targetUrl: string): string|null {
+  const queryString = targetUrl.split('?')[1];
+  if (!queryString) return null;
+
+  const params = new URLSearchParams(queryString);
+
+  let paramName: string | null = null;
+
+  params.forEach((value, key) => {
+    if (paramName === null && value === '[id]') {
+      paramName = key;
+    }
+  });
+
+  return paramName;
+}
+
 export {
   getResourceId as default,
   getResourceId,
+  getFirstParamNameWithIdValue
 }
-
-

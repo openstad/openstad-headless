@@ -50,7 +50,6 @@ function uppercase(str: string): string {
 }
 
 function replace(str: string, search: string, replacement: string): string {
-  console.log( str, search, replacement);
   if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') return '';
   return str.split(search).join(replacement);
 }

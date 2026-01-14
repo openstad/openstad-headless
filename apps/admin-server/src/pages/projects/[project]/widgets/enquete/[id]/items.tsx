@@ -15,6 +15,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,15 +24,15 @@ import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
-import { Item, Option } from '@openstad-headless/enquete/src/types/enquete-props';
-import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { Item, Matrix, MatrixOption, Option } from '@openstad-headless/enquete/src/types/enquete-props';
+import {ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import {useFieldArray, useForm} from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
-import {YesNoSelect} from "@/lib/form-widget-helpers";
-import {ProjectSettingProps} from "@openstad-headless/types";
+import { YesNoSelect } from "@/lib/form-widget-helpers";
+import ImageGalleryStyle from '@/components/image-gallery-style';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -41,7 +43,12 @@ const formSchema = z.object({
   fieldKey: z.string(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
+  nextPageText: z.string().optional(),
+  prevPageText: z.string().optional(),
   variant: z.string().optional(),
+  key_b: z.string().optional(),
+  description_b: z.string().optional(),
+  image_b: z.string().optional(),
   options: z
     .array(
       z.object({
@@ -49,26 +56,70 @@ const formSchema = z.object({
         titles: z.array(z.object({
           text: z.string().optional(),
           key: z.string(),
+          infoField: z.string().optional(),
+          infofieldExplanation: z.boolean().optional(),
+          explanationRequired: z.boolean().optional(),
+          description: z.string().optional(),
           image: z.string().optional(),
           isOtherOption: z.boolean().optional(),
           defaultValue: z.boolean().optional(),
-          hideLabel: z.boolean().optional()
+          hideLabel: z.boolean().optional(),
+          key_b: z.string().optional(),
+          description_b: z.string().optional(),
+          image_b: z.string().optional(),
         })),
       })
     )
     .optional(),
+  matrix:
+    z.object({
+      columns: z.array(z.object({
+        trigger: z.string(),
+        text: z.string().optional(),
+      })),
+      rows: z.array(z.object({
+        trigger: z.string(),
+        text: z.string().optional(),
+      })),
+    })
+      .optional(),
   multiple: z.boolean().optional(),
+  randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
-  imageAlt: z.string().optional(),
-  imageDescription: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
+  createImageSlider: z.boolean().optional(),
+  imageClickable: z.boolean().optional(),
   maxChoices: z.string().optional(),
   maxChoicesMessage: z.string().optional(),
   showSmileys: z.boolean().optional(),
   placeholder: z.string().optional(),
   defaultValue: z.string().optional(),
   imageOptionUpload: z.string().optional(),
+  matrixMultiple: z.boolean().optional(),
+  routingInitiallyHide: z.boolean().optional(),
+  routingSelectedQuestion: z.string().optional(),
+  routingSelectedAnswer: z.string().optional(),
+  infoBlockStyle: z.string().optional(),
+  infoBlockShareButton: z.boolean().optional(),
+  infoBlockExtraButton: z.string().optional(),
+  infoBlockExtraButtonTitle: z.string().optional(),
+  infoField: z.string().optional(),
+  infofieldExplanation: z.boolean().optional(),
+  videoUrl: z.string().optional(),
+  videoSubtitle: z.boolean().optional(),
+  videoLang: z.string().optional(),
+  numberingStyle: z.string().optional(),
+  images: z
+    .array(z.object({
+      url: z.string(),
+      name: z.string().optional(),
+      imageDescription: z.string().optional(),
+      imageAlt: z.string().optional(),
+    }))
+    .optional()
+    .default([]),
+
 
   // Keeping these for backwards compatibility
   image1Upload: z.string().optional(),
@@ -79,7 +130,33 @@ const formSchema = z.object({
   image2Upload: z.string().optional(),
   text2: z.string().optional(),
   key2: z.string().optional(),
+  imageAlt: z.string().optional(),
+  imageDescription: z.string().optional(),
 });
+
+type ImageArray = {
+  url: string;
+  name?: string;
+  imageAlt?: string;
+  imageDescription?: string;
+}
+
+const matrixDefault = {
+  columns: [],
+  rows: [],
+}
+
+const matrixList: { type: 'rows' | 'columns', heading: string, description: string }[] = [
+  {
+    type: 'rows',
+    heading: 'Lijst van onderwerpen',
+    description: 'Dit zijn de onderwerpen die in de matrix worden weergegeven. Deze komen in de eerste kolom (verticaal) van de matrix.',
+  }, {
+    type: 'columns',
+    heading: 'Lijst van kopjes',
+    description: 'Dit zijn de kopjes die gekozen kunnen worden per onderwerp. Deze komen in de eerste rij (horizontaal) van de matrix.',
+  }
+];
 
 export default function WidgetEnqueteItems(
   props: EnqueteWidgetProps & EditFieldProps<EnqueteWidgetProps>
@@ -92,6 +169,10 @@ export default function WidgetEnqueteItems(
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
+  const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
+
+  const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
+  const [matrixOption, setMatrixOption] = useState<MatrixOption & { type: 'rows' | 'columns' } | null>(null);
 
   const router = useRouter();
   const { project } = router.query;
@@ -105,7 +186,7 @@ export default function WidgetEnqueteItems(
     if (selectedItem) {
       setItems((currentItems) =>
         currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? {...item, ...values} : item
+          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
         )
       );
       setItem(null);
@@ -124,19 +205,32 @@ export default function WidgetEnqueteItems(
           fieldKey: values.fieldKey,
           minCharacters: values.minCharacters,
           maxCharacters: values.maxCharacters,
+          nextPageText: values.nextPageText || '',
+          prevPageText: values.prevPageText || '',
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
-          image: values.image || '',
-          imageAlt: values.imageAlt || '',
-          imageDescription: values.imageDescription || '',
+          randomizeItems: values.randomizeItems || false,
+          image_b: values.image_b || '',
+          description_b: values.description_b || '',
+          key_b: values.key_b || '',
           fieldRequired: values.fieldRequired || false,
+          createImageSlider: values.createImageSlider || false,
+          imageClickable: values.imageClickable || false,
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
           showSmileys: values.showSmileys || false,
           defaultValue: values.defaultValue || '',
           placeholder: values.placeholder || '',
-
+          matrix: values.matrix || matrixDefault,
+          matrixMultiple: values.matrixMultiple || false,
+          routingInitiallyHide: values.routingInitiallyHide || false,
+          routingSelectedQuestion: values.routingSelectedQuestion || '',
+          routingSelectedAnswer: values.routingSelectedAnswer || '',
+          infoField: values.infoField || '',
+          infofieldExplanation: values.infofieldExplanation || false,
+          numberingStyle: values.numberingStyle || 'none',
+          images: values?.images || [],
           // Keeping these for backwards compatibility
           image1: values.image1 || '',
           text1: values.text1 || '',
@@ -144,12 +238,16 @@ export default function WidgetEnqueteItems(
           image2: values.image2 || '',
           text2: values.text2 || '',
           key2: values.key2 || '',
+          imageDescription: values.imageDescription || '',
+          imageAlt: values.imageAlt || '',
+          image: values.image || '',
         },
       ]);
     }
 
     form.reset(defaults);
     setOptions([]);
+    setMatrixOptions(matrixDefault);
   }
 
   // adds link to options array if no option is selected, otherwise updates the selected option
@@ -167,9 +265,9 @@ export default function WidgetEnqueteItems(
             };
           }
 
-          return typeof(option?.trigger) !== "undefined" ? option : false;
+          return typeof (option?.trigger) !== "undefined" ? option : false;
         })
-        .filter((option) => option !== false);
+          .filter((option) => option !== false);
 
         return updatedOptions;
       });
@@ -187,6 +285,54 @@ export default function WidgetEnqueteItems(
     }
   }
 
+  function handleAddMatrixOption(values: FormData, updatedMatrixOption: 'rows' | 'columns') {
+    if (matrixOption) {
+      setMatrixOptions((currentMatrix) => {
+        const updatedMatrix = { ...currentMatrix };
+
+        if (updatedMatrixOption === 'rows') {
+          updatedMatrix.rows = updatedMatrix.rows.map((row) =>
+            row.trigger === matrixOption.trigger
+              ? { ...row, text: values.matrix?.rows?.find((r) => r.trigger === row.trigger)?.text || '' }
+              : row
+          );
+        } else {
+          updatedMatrix.columns = updatedMatrix.columns.map((column) =>
+            column.trigger === matrixOption.trigger
+              ? { ...column, text: values.matrix?.columns?.find((c) => c.trigger === column.trigger)?.text || '' }
+              : column
+          );
+        }
+
+        return updatedMatrix;
+      });
+
+      setMatrixOption(null);
+    } else {
+      const newTrigger = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
+        ? values?.matrix?.[updatedMatrixOption].reduce((max, option) => {
+          return (parseInt(option?.trigger || '0') > max ? parseInt(option?.trigger || '0') : max);
+        }, 0) + 1
+        : '0';
+
+      const newTextObj = (values?.matrix && values?.matrix?.[updatedMatrixOption]?.length > 0)
+        ? values?.matrix?.[updatedMatrixOption]?.find((option: { trigger?: string }) => typeof (option?.trigger) === 'undefined')
+        : { text: '' };
+
+      const newText = newTextObj?.text || '';
+
+      const newMatrixOption: MatrixOption = {
+        trigger: newTrigger.toString(),
+        text: newText
+      };
+
+      setMatrixOptions((currentMatrix) => ({
+        rows: updatedMatrixOption === 'rows' ? [...currentMatrix.rows, newMatrixOption] : currentMatrix.rows,
+        columns: updatedMatrixOption === 'columns' ? [...currentMatrix.columns, newMatrixOption] : currentMatrix.columns,
+      }));
+    }
+  }
+
   const defaults = () => ({
     trigger: '0',
     title: '',
@@ -198,18 +344,35 @@ export default function WidgetEnqueteItems(
     fieldKey: '',
     minCharacters: '',
     maxCharacters: '',
+    nextPageText: 'Volgende',
+    prevPageText: 'Vorige',
     variant: 'text input',
     options: [],
     multiple: false,
-    image: '',
-    imageAlt: '',
-    imageDescription: '',
+    randomizeItems: false,
+    infoBlockStyle: 'default',
+    infoBlockShareButton: false,
+    infoBlockExtraButton: '',
+    infoBlockExtraButtonTitle: '',
     fieldRequired: false,
+    createImageSlider: false,
+    imageClickable: false,
     maxChoices: '',
     maxChoicesMessage: '',
     showSmileys: false,
     defaultValue: '',
     placeholder: '',
+    matrix: matrixDefault,
+    matrixMultiple: false,
+    routingInitiallyHide: false,
+    numberingStyle: 'none',
+    routingSelectedQuestion: '',
+    routingSelectedAnswer: '',
+    infoField: '',
+    videoUrl: '',
+    videoSubtitle: false,
+    videoLang: '',
+    images: [],
 
     // Keeping these for backwards compatibility
     image1: '',
@@ -218,6 +381,9 @@ export default function WidgetEnqueteItems(
     image2: '',
     text2: '',
     key2: '',
+    image: '',
+    imageAlt: '',
+    imageDescription: '',
   });
 
   const form = useForm<FormData>({
@@ -239,7 +405,17 @@ export default function WidgetEnqueteItems(
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
-      form.reset({
+      // Migrate fallback image fields to images array if needed
+      let images = selectedItem.images || [];
+      if ((!images || images.length === 0) && selectedItem.image) {
+        images = [{
+          url: selectedItem.image,
+          imageAlt: selectedItem.imageAlt || '',
+          imageDescription: selectedItem.imageDescription || '',
+        }];
+      }
+
+      const formValues = {
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
         fieldKey: selectedItem.fieldKey || '',
@@ -247,18 +423,36 @@ export default function WidgetEnqueteItems(
         questionType: selectedItem.questionType || '',
         minCharacters: selectedItem.minCharacters || '',
         maxCharacters: selectedItem.maxCharacters || '',
+        nextPageText: selectedItem.nextPageText || '',
+        prevPageText: selectedItem.prevPageText || '',
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
         multiple: selectedItem.multiple || false,
-        image: selectedItem.image || '',
-        imageAlt: selectedItem.imageAlt || '',
-        imageDescription: selectedItem.imageDescription || '',
+        randomizeItems: selectedItem.randomizeItems || false,
+        infoBlockStyle: selectedItem.infoBlockStyle || 'default',
+        infoBlockShareButton: selectedItem.infoBlockShareButton || false,
+        infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
+        infoBlockExtraButtonTitle: selectedItem.infoBlockExtraButtonTitle || '',
         fieldRequired: selectedItem.fieldRequired || false,
+        createImageSlider: selectedItem.createImageSlider || false,
+        imageClickable: selectedItem.imageClickable || false,
         maxChoices: selectedItem.maxChoices || '',
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         showSmileys: selectedItem.showSmileys || false,
         defaultValue: selectedItem.defaultValue || '',
         placeholder: selectedItem.placeholder || '',
+        matrix: selectedItem.matrix || matrixDefault,
+        matrixMultiple: selectedItem.matrixMultiple || false,
+        routingInitiallyHide: selectedItem.routingInitiallyHide || false,
+        numberingStyle: selectedItem.numberingStyle || 'none',
+        routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
+        routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
+        infoField: selectedItem.infoField || '',
+        infofieldExplanation: selectedItem.infofieldExplanation || false,
+        videoUrl: selectedItem.videoUrl || '',
+        videoSubtitle: selectedItem.videoSubtitle || false,
+        videoLang: selectedItem.videoLang || '',
+        images,
 
         // Keeping these for backwards compatibility
         image1: selectedItem.image1 || '',
@@ -267,8 +461,14 @@ export default function WidgetEnqueteItems(
         image2: selectedItem.image2 || '',
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
-      });
+        image: '',
+        imageAlt: '',
+        imageDescription: '',
+      };
+
+      form.reset(formValues);
       setOptions(selectedItem.options || []);
+      setMatrixOptions(selectedItem.matrix || matrixDefault);
     }
   }, [selectedItem, form]);
 
@@ -288,10 +488,19 @@ export default function WidgetEnqueteItems(
     }
   }, [selectedOption, form, options]);
 
+  useEffect(() => {
+    form.reset({
+      ...form.getValues(),
+      matrix: matrixOptions
+    });
+  }, [matrixOption, form, matrixOptions]);
+
   const handleAction = (
     actionType: 'moveUp' | 'moveDown' | 'delete',
     clickedTrigger: string,
-    isItemAction: boolean // Determines if the action is for items or options
+    isItemAction: boolean, // Determines if the action is for items or options
+    isMatrixAction: boolean = false,
+    matrixType: 'rows' | 'columns' = 'rows'
   ) => {
     if (isItemAction) {
       setItems((currentItems) => {
@@ -301,6 +510,33 @@ export default function WidgetEnqueteItems(
           clickedTrigger
         ) as Item[];
       });
+    } else if (isMatrixAction) {
+      let newMatrixOptions: Matrix;
+
+      const updatedRows = matrixType === 'rows'
+        ? handleMovementOrDeletion(
+          matrixOptions.rows,
+          actionType,
+          clickedTrigger
+        ) as MatrixOption[]
+        : matrixOptions.rows;
+
+      const updatedColumns = matrixType === 'columns'
+        ? handleMovementOrDeletion(
+          matrixOptions.columns,
+          actionType,
+          clickedTrigger
+        ) as MatrixOption[]
+        : matrixOptions.columns;
+
+      newMatrixOptions = {
+        ...matrixOptions,
+        rows: updatedRows,
+        columns: updatedColumns,
+      }
+      setMatrixOptions(newMatrixOptions);
+
+      form.setValue('matrix', newMatrixOptions);
     } else {
       setOptions((currentLinks) => {
         return handleMovementOrDeletion(
@@ -314,7 +550,7 @@ export default function WidgetEnqueteItems(
 
   // This is a helper function to handle moving up, moving down, or deleting an entry
   function handleMovementOrDeletion(
-    list: Array<Item | Option>,
+    list: Array<Item | Option | MatrixOption>,
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
@@ -343,7 +579,7 @@ export default function WidgetEnqueteItems(
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith("options.")) {
+      if (key.startsWith("options.") || key.startsWith("matrix.")) {
         // @ts-ignore
         delete updatedProps[key];
       }
@@ -351,14 +587,19 @@ export default function WidgetEnqueteItems(
 
     props.updateConfig({ ...updatedProps, items });
     setOptions([]);
+    setMatrixOptions(matrixDefault);
   }
 
 
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
+      case 'swipe':
+      case 'dilemma':
       case 'multiple':
       case 'images':
+      case 'matrix':
+      case 'sort':
         return true;
       default:
         return false;
@@ -369,7 +610,10 @@ export default function WidgetEnqueteItems(
     switch (form.watch('questionType')) {
       case 'multiplechoice':
       case 'multiple':
+      case 'swipe':
+      case 'dilemma':
       case 'images':
+      case 'sort':
         return true;
       default:
         return false;
@@ -379,12 +623,19 @@ export default function WidgetEnqueteItems(
   function resetForm() {
     form.reset(defaults());
     setOptions([]);
+    setMatrixOptions(matrixDefault);
     setItem(null);
   }
 
   function handleSaveOptions() {
     form.setValue('options', options);
     setSettingOptions(false);
+  }
+
+  function handleSaveMatrixOptions() {
+    form.setValue('matrix', matrixOptions);
+    setSettingOptions(false);
+    setMatrixOption(null);
   }
 
   useEffect(() => {
@@ -399,8 +650,36 @@ export default function WidgetEnqueteItems(
     }
   }, [form.watch("fieldKey"), selectedItem]);
 
+  const { fields: imageFields, remove: removeImage } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
+
+  function swapArrayElements(arr: any[], indexA: number, indexB: number) {
+    const newArr = [...arr];
+    const temp = newArr[indexA];
+    newArr[indexA] = newArr[indexB];
+    newArr[indexB] = temp;
+    return newArr;
+  }
+
+  const moveUpImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index <= 0) return;
+    const reordered = swapArrayElements(images, index, index - 1);
+    form.setValue('images', reordered);
+  };
+
+  const moveDownImage = (index: number) => {
+    const images = form.getValues('images');
+    if (index >= images.length - 1) return;
+    const reordered = swapArrayElements(images, index, index + 1);
+    form.setValue('images', reordered);
+  };
+
   return (
     <div>
+      <ImageGalleryStyle />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -419,9 +698,9 @@ export default function WidgetEnqueteItems(
                       .map((item, index) => (
                         <div
                           key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
-                            'bg-secondary'
-                            }`}>
+                          className={`flex cursor-pointer justify-between border border-secondary 
+                            ${(item.questionType === 'pagination' && item.trigger !== selectedItem?.trigger) ? 'bg-[#f8f8f8]' : ''}
+                            ${item.trigger == selectedItem?.trigger && 'bg-secondary'}`}>
                           <span className="flex gap-2 py-3 px-2">
                             <ArrowUp
                               className="cursor-pointer"
@@ -441,9 +720,11 @@ export default function WidgetEnqueteItems(
                             onClick={() => {
                               setItem(item);
                               setOptions([]);
+                              setMatrixOptions(matrixDefault);
                               setSettingOptions(false);
-                            }}>
-                            {`${item.title || 'Geen titel'}`}
+                            }}
+                            dangerouslySetInnerHTML={{ __html: `${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : (item?.questionType === 'swipe' ? 'Swipe' : 'Geen titel'))}` }}
+                          >
                           </span>
                           <span className="gap-2 py-3 px-2">
                             <X
@@ -470,87 +751,214 @@ export default function WidgetEnqueteItems(
 
             {settingOptions ? (
               <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
-                <div className="flex flex-col justify-between">
-                  <div className="flex flex-col gap-y-2">
-                    <Heading size="xl">Antwoordopties</Heading>
-                    <Separator className="mt-2" />
-                    {hasList() && (
-                      (() => {
-                        const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
-                        const activeOption = currentOption !== -1 ? currentOption : options.length;
+                {form.watch("questionType") === "matrix" ? (
+                  matrixList.map((matrixItem) => (
+                    <>
+                      <div className="flex flex-col justify-between">
+                        <div className="flex flex-col gap-y-2">
+                          <Heading size="xl">{matrixItem.heading}</Heading>
+                          <FormDescription>{matrixItem.description}</FormDescription>
+                          <Separator className="mt-2" />
 
-                        return form.watch("questionType") !== "images" ? (
-                          <>
-                            <FormField
-                              control={form.control}
-                              name={`options.${activeOption}.titles.0.key`}
-                              render={({field}) => (
-                                <FormItem>
-                                  <FormLabel>Optie tekst</FormLabel>
-                                  <Input {...field} />
-                                  <FormMessage/>
-                                </FormItem>
-                              )}
-                            />
+                          <div className="flex flex-col gap-1">
+                            {matrixOptions?.[matrixItem.type]?.length > 0
+                              ? matrixOptions?.[matrixItem.type]
+                                .sort(
+                                  (a, b) =>
+                                    parseInt(a.trigger) - parseInt(b.trigger)
+                                )
+                                .map((option, index) => (
+                                  <div
+                                    key={index}
+                                    className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
+                                      'bg-secondary'
+                                      }`}>
+                                    <span className="flex gap-2 py-3 px-2">
+                                      <ArrowUp
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                          handleAction(
+                                            'moveUp',
+                                            option.trigger,
+                                            false,
+                                            true,
+                                            matrixItem.type
+                                          )
+                                        }
+                                      />
+                                      <ArrowDown
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                          handleAction(
+                                            'moveDown',
+                                            option.trigger,
+                                            false,
+                                            true,
+                                            matrixItem.type
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span
+                                      className="py-3 px-2 w-full"
+                                      onClick={() => setMatrixOption({
+                                        ...option,
+                                        type: matrixItem.type
+                                      })}>
+                                      {option?.text}
+                                    </span>
+                                    <span className="py-3 px-2">
+                                      <X
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                          handleAction(
+                                            'delete',
+                                            option.trigger,
+                                            false,
+                                            true,
+                                            matrixItem.type
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                  </div>
+                                ))
+                              : ''}
+                          </div>
 
-                            <FormField
-                              control={form.control}
-                              // @ts-ignore
-                              name={`options.${activeOption}.titles.0.isOtherOption`}
-                              render={({field}) => (
-                                <>
-                                  <FormItem
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'flex-start',
-                                      flexDirection: 'row',
-                                      marginTop: '10px'
-                                    }}>
-                                    {YesNoSelect(field, props)}
-                                    <FormLabel
-                                      style={{marginTop: 0, marginLeft: '6px'}}>Is &apos;Anders, namelijk...&apos;</FormLabel>
-                                    <FormMessage/>
-                                  </FormItem>
-                                  <FormDescription>
-                                    Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
-                                    formulier.
-                                    Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
-                                  </FormDescription>
-                                </>
-                              )}
-                            />
+                          {(() => {
+                            const currentOption = matrixOptions?.[matrixItem.type].findIndex((option) => option.trigger === matrixOption?.trigger);
+                            const activeOption = currentOption !== -1 ? currentOption : matrixOptions?.[matrixItem.type]?.length;
 
-                            { form.watch('questionType') === 'multiple' && (
+                            return (
                               <FormField
                                 control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.defaultValue`}
-                                render={({field}) => (
-                                  <>
-                                    <FormItem
-                                      style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
-                                        marginTop: '10px'
-                                      }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{marginTop: 0, marginLeft: '6px'}}>Standaard aangevinkt?</FormLabel>
-                                      <FormMessage/>
-                                    </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
-                                    </FormDescription>
-                                  </>
+                                name={`matrix.${matrixItem.type}.${activeOption}.text`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
                                 )}
                               />
-                            )}
-                          </>
+                            )
+                          })()}
+
+                          <Button
+                            className="w-full bg-secondary text-black hover:text-white mt-4"
+                            type="button"
+                            onClick={() => handleAddMatrixOption(form.getValues(), matrixItem.type)}>
+                            {(matrixOption && matrixOption.type === matrixItem.type)
+                              ? 'Sla wijzigingen op'
+                              : 'Voeg optie toe aan lijst'}
+                          </Button>
+                        </div>
+
+                        {matrixItem.type === 'rows' && (
+                          <div className="flex gap-2">
+                            <Button
+                              className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                              type="button"
+                              onClick={() => {
+                                setSettingOptions(() => !settingOptions),
+                                  setMatrixOption(null);
+                              }}>
+                              Annuleer
+                            </Button>
+                            <Button
+                              className="w-fit mt-4"
+                              type="button"
+                              onClick={() => handleSaveMatrixOptions()}>
+                              Sla antwoordopties op
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ))) : (
+                  <div className="flex flex-col justify-between">
+                    <div className="flex flex-col gap-y-2">
+                      <Heading size="xl">Antwoordopties</Heading>
+                      <Separator className="mt-2" />
+                      {hasList() && (
+                        (() => {
+                          const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
+                          const activeOption = currentOption !== -1 ? currentOption : options.length;
+                          return (form.watch("questionType") !== "images" && form.watch("questionType") !== "swipe" && form.watch("questionType") !== "dilemma") ? (
+                            <>
+                              <FormField
+                                control={form.control}
+                                name={`options.${activeOption}.titles.0.key`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Optie tekst</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              {form.watch('questionType') !== 'sort' && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.isOtherOption`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
+                                        formulier.
+                                        Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
+
+                              {form.watch('questionType') === 'multiple' && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.defaultValue`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Standaard aangevinkt?</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
+                            </>
                           ) : (
                             <>
+                              {form.watch("questionType") === "dilemma" && <b>Dilemma A</b>}
                               <ImageUploader
                                 form={form}
                                 project={project as string}
@@ -577,73 +985,243 @@ export default function WidgetEnqueteItems(
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>Titel</FormLabel>
-                                    <FormDescription>
-                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
-                                    </FormDescription>
+                                    {(form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'dilemma') && (
+                                      <FormDescription>
+                                        Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                        De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                      </FormDescription>
+                                    )}
                                     <Input {...field} />
                                     <FormMessage />
                                   </FormItem>
                                 )}
                               />
+                              {form.watch("questionType") === "dilemma" && (
+                                <>
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.description`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Beschrijving</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
 
-                              <FormField
-                                control={form.control}
-                                // @ts-ignore
-                                name={`options.${activeOption}.titles.0.hideLabel`}
-                                render={({field}) => (
-                                  <>
+                                  <br />
+                                  <hr />
+                                  <br />
+
+                                  <b>Dilemma B</b>
+                                  <ImageUploader
+                                    form={form}
+                                    project={project as string}
+                                    fieldName="imageOptionUpload"
+                                    imageLabel="Afbeelding"
+                                    allowedTypes={["image/*"]}
+                                    onImageUploaded={(imageResult) => {
+                                      const image = imageResult ? imageResult.url : '';
+
+                                      form.setValue(`options.${activeOption}.titles.0.image_b`, image);
+                                      form.resetField('imageOptionUpload');
+                                    }}
+                                  />
+                                  {!!form.getValues(`options.${activeOption}.titles.0.image_b`) && (
+                                    <div style={{ position: 'relative' }}>
+                                      <img src={form.getValues(`options.${activeOption}.titles.0.image_b`)} />
+                                    </div>
+                                  )}
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.key_b`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Titel</FormLabel>
+                                        {(form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'dilemma') && (
+                                          <FormDescription>
+                                            Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
+                                            De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                          </FormDescription>
+                                        )}
+                                        <Input {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.description_b`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Beschrijving</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <br />
+                                  <hr />
+                                  <br />
+
+
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.infoField`}
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          marginTop: '10px'
+                                        }}>
+                                        <FormLabel>Extra info veld</FormLabel>
+                                        <Textarea rows={6} {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.infofieldExplanation`}
+                                    render={({ field }) => (
+                                      <>
+                                        <FormItem
+                                          style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'flex-start',
+                                            flexDirection: 'row',
+                                            marginTop: '10px'
+                                          }}>
+                                          {YesNoSelect(field, props)}
+                                          <FormLabel
+                                            style={{ marginTop: 0, marginLeft: '6px' }}>Toelichting vragen</FormLabel>
+                                          <FormMessage />
+                                        </FormItem>
+                                        <FormDescription>
+                                          Als je deze optie selecteert, wordt er na deze vraag om een toelichting gevraagd.
+                                        </FormDescription>
+                                      </>
+                                    )}
+                                  />
+                                </>
+
+                              )}
+
+
+
+                              {(form.watch("questionType") !== "swipe" && form.watch("questionType") !== "dilemma") && (
+                                <FormField
+                                  control={form.control}
+                                  // @ts-ignore
+                                  name={`options.${activeOption}.titles.0.hideLabel`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
+                              {form.watch("questionType") === "swipe" && (
+                                <FormField
+                                  control={form.control}
+                                  name={`options.${activeOption}.titles.0.infoField`}
+                                  render={({ field }) => (
                                     <FormItem
                                       style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-start',
-                                        flexDirection: 'row',
                                         marginTop: '10px'
                                       }}>
-                                      {YesNoSelect(field, props)}
-                                      <FormLabel
-                                        style={{marginTop: 0, marginLeft: '6px'}}>Titel verbergen?</FormLabel>
-                                      <FormMessage/>
+                                      <FormLabel>Extra informatie</FormLabel>
+                                      <FormDescription>
+                                        Deze tekst wordt getoond in het informatiescherm dat verschijnt wanneer de gebruiker op de info-knop tikt.
+                                      </FormDescription>
+                                      <Textarea rows={6} {...field} />
+                                      <FormMessage />
                                     </FormItem>
-                                    <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
-                                    </FormDescription>
-                                  </>
-                                )}
-                              />
+                                  )}
+                                />
+                              )}
+
+                              {form.watch("questionType") === "swipe" && (
+                                <FormField
+                                  control={form.control}
+                                  name={`options.${activeOption}.titles.0.explanationRequired`}
+                                  render={({ field }) => (
+                                    <>
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px'
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{ marginTop: 0, marginLeft: '6px' }}>Toelichting vragen</FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                      <FormDescription>
+                                        Als je deze optie selecteert, wordt er na deze vraag om een toelichting gevraagd.
+                                      </FormDescription>
+                                    </>
+                                  )}
+                                />
+                              )}
                             </>
                           );
                         })()
                       )}
-
-                    <Button
-                      className="w-full bg-secondary text-black hover:text-white mt-4"
-                      type="button"
-                      onClick={() => handleAddOption(form.getValues())}>
-                      {selectedOption
-                        ? 'Sla wijzigingen op'
-                        : 'Voeg optie toe aan lijst'}
-                    </Button>
+                      <Button
+                        className="w-full bg-secondary text-black hover:text-white mt-4"
+                        type="button"
+                        onClick={() => handleAddOption(form.getValues())}>
+                        {selectedOption
+                          ? 'Sla wijzigingen op'
+                          : 'Voeg optie toe aan lijst'}
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          setSettingOptions(() => !settingOptions),
+                            setOption(null);
+                        }}>
+                        Annuleer
+                      </Button>
+                      <Button
+                        className="w-fit mt-4"
+                        type="button"
+                        onClick={() => handleSaveOptions()}>
+                        Sla antwoordopties op
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        setSettingOptions(() => !settingOptions),
-                        setOption(null);
-                      }}>
-                      Annuleer
-                    </Button>
-                    <Button
-                      className="w-fit mt-4"
-                      type="button"
-                      onClick={() => handleSaveOptions()}>
-                      Sla antwoordopties op
-                    </Button>
-                  </div>
-                </div>
+                )}
                 {hasList() && (
                   <div>
                     <Heading size="xl">Lijst van antwoordopties</Heading>
@@ -723,49 +1301,55 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Titel/Vraag</FormLabel>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {form.watch('questionType') !== 'none' && (
-                      <FormField
-                        control={form.control}
-                        name="fieldKey"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Key voor het opslaan
-                              <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
-                            </FormLabel>
-                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
-                            <Input {...field} />
-                            {(!field.value || !isFieldKeyUnique) && (
-                              <FormMessage>
-                                {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
-                              </FormMessage>
+                    {(form.watch('questionType') !== 'pagination') && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titel/Vraag</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch('questionType') !== 'none' && (
+                          <FormField
+                            control={form.control}
+                            name="fieldKey"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Key voor het opslaan
+                                  <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                                </FormLabel>
+                                <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+                                <Input {...field} />
+                                {(!field.value || !isFieldKeyUnique) && (
+                                  <FormMessage>
+                                    {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
+                                  </FormMessage>
+                                )}
+                              </FormItem>
                             )}
-                          </FormItem>
+                          />
                         )}
-                      />
+                        {(form.watch('questionType') !== 'dilemma' && form.watch('questionType') !== 'swipe' && form.watch('questionType') !== 'video') && (
+                          <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Beschrijving</FormLabel>
+                                <Textarea rows={6} {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </>
                     )}
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Beschrijving</FormLabel>
-                          <Textarea rows={6} {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
                     {form.watch('questionType') === 'open' && (
 
@@ -812,6 +1396,13 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
                               <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
+                              <SelectItem value="documentUpload">Document upload</SelectItem>
+                              <SelectItem value="matrix">Matrix vraag</SelectItem>
+                              <SelectItem value="pagination">Voeg pagina toe</SelectItem>
+                              <SelectItem value="sort">Sorteren</SelectItem>
+                              <SelectItem value="swipe">Swipe</SelectItem>
+                              <SelectItem value="dilemma">Dilemma</SelectItem>
+                              <SelectItem value="video">Video toelichting</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -868,62 +1459,362 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
+                    {form.watch('questionType') === 'pagination' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="prevPageText"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tekst voor: Vorige pagina</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="nextPageText"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tekst voor: Volgende pagina</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
+
                     {form.watch('questionType') === 'none' && (
                       <>
                         <ImageUploader
                           form={form}
                           project={project as string}
                           fieldName="imageUpload"
-                          imageLabel="Afbeelding 1"
+                          imageLabel="Afbeeldingen uploaden boven de vraag"
+                          description="Je kunt hier meerdere afbeeldingen tegelijk uploaden. Klik na het uploaden op een afbeelding om extra informatie toe te voegen, zoals een beschrijving of alternatieve tekst voor schermlezers."
                           allowedTypes={["image/*"]}
+                          allowMultiple={true}
                           onImageUploaded={(imageResult) => {
-                            const image = imageResult ? imageResult.url : '';
+                            let defaultImageArr: ImageArray[] = [];
 
-                            form.setValue("image", image);
+                            if (!!form.watch("image")) {
+                              defaultImageArr = [{
+                                url: form.getValues('image') || '',
+                                name: '',
+                                imageAlt: form.getValues('imageAlt') || '',
+                                imageDescription: form.getValues('imageDescription') || ''
+                              }];
+
+                              form.setValue('image', '');
+                              form.setValue('imageAlt', '');
+                              form.setValue('imageDescription', '');
+                            }
+
+                            let array = [...(form.getValues('images') || defaultImageArr)];
+                            array.push(imageResult);
+                            form.setValue('images', array);
                             form.resetField('imageUpload');
+                            form.trigger('images');
                           }}
                         />
 
-                        {!!form.getValues('image') && (
-                          <div style={{ position: 'relative' }}>
-                            <img src={form.getValues('image')} />
+                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                          {imageFields.length > 0 && (
+                            <div className="grid">
+                              <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
+                                { imageFields.map(({ id, url }, index) => {
+                                  return (
+                                    <div
+                                      key={id}
+                                      className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                                      style={{gridTemplateColumns: index === imageIndexOpen ? "1fr 2fr 40px" : "1fr"}}
+                                    >
+                                      <div className="image-container">
+                                        <img
+                                          src={url}
+                                          alt={url}
+                                          onClick={() => {
+                                            if (index === imageIndexOpen) {
+                                              setImageIndexOpen(-1)
+                                            } else {
+                                              setImageIndexOpen(index)
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <Button
+                                        color="red"
+                                        onClick={() => {
+                                          removeImage(index);
+                                        }}
+                                        className="absolute left-0 top-0">
+                                        <X size={24} />
+                                      </Button>
+
+                                      <div
+                                        className="grid gap-y-4 items-center"
+                                        style={{display: index === imageIndexOpen ? 'grid' : 'none'}}
+                                      >
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageAlt`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+
+                                        <FormField
+                                          control={form.control}
+                                          name={`images.${index}.imageDescription`}
+                                          render={({ field }) => (
+                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                              <FormLabel>Beschrijving afbeelding</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </div>
+
+                                      <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                        <ArrowLeft
+                                          className="cursor-pointer"
+                                          onClick={() => moveUpImage(index) }
+                                        />
+                                        <ArrowRight
+                                          className="cursor-pointer"
+                                          onClick={() => moveDownImage(index) }
+                                        />
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </section>
+                            </div>
+                          )}
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="createImageSlider"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Wil je van de afbeeldingen een slider maken?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="imageClickable"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Moeten de afbeeldingen uitvergroot worden als erop geklikt wordt?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                value={field.value ? 'true' : 'false'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {props.formStyle === 'youth' && (
+
+                          <FormField
+                            control={form.control}
+                            name="infoBlockStyle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Informatie blok stijl</FormLabel>
+                                <Select
+                                  value={field.value}
+                                  onValueChange={field.onChange}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kies type" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+
+                                    <SelectItem value="default">
+                                      Standaard uiterlijk
+                                    </SelectItem>
+                                    <SelectGroup>
+                                      <SelectLabel>Jongeren widgets</SelectLabel>
+                                      <SelectItem value="youth-intro">
+                                        - Introductie
+                                      </SelectItem>
+                                      <SelectItem value="youth-page">
+                                        - Tussenpagina
+                                      </SelectItem>
+                                      <SelectItem value="youth-outro">
+                                        - Afsluiting
+                                      </SelectItem>
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+
+                            )}
+                          />
+                        )}
+                        {(form.watch('infoBlockStyle') === 'youth-outro' && props.formStyle === 'youth') && (
+                          <div className="border border-secondary p-6 rounded-md bg-secondary/60">
+                            <FormField
+                              control={form.control}
+                              name={'infoBlockShareButton'}
+
+                              render={({ field }) => (
+                                <>
+                                  <FormItem>
+                                    <FormLabel
+                                      style={{ marginTop: 0, marginLeft: '6px' }}>Toon &apos;Deel&apos; knop?</FormLabel>
+                                    <FormMessage />
+                                    {YesNoSelect(field, props)}
+                                  </FormItem>
+                                </>
+                              )}
+                            />
+                            <br />
+                            <hr />
+                            <br />
+                            <div className="flex gap-4">
+                              <FormField
+                                control={form.control}
+                                name="infoBlockExtraButtonTitle"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Titel</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="infoBlockExtraButton"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Link</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
                           </div>
                         )}
 
-                        <FormField
-                          control={form.control}
-                          name="imageAlt"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="imageDescription"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Beschrijving afbeelding</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <hr />
 
                       </>
                     )}
+                    {form.watch('questionType') === 'video' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="videoUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Video url</FormLabel>
+                              <FormDescription>
+                                Voeg hier een YouTube url toe, dit kan een normale video of een short zijn.
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="videoSubtitle"
+                          render={({ field }) => (
+                            <>
+                              <>
+                                <FormItem>
+                                  <FormLabel>Ondertiteling</FormLabel>
+                                  <FormDescription>
+                                    Als je deze optie aanzet, worden ondertitels standaard ingeschakeld wanneer de video wordt afgespeeld. (Let op: deze optie werkt alleen als de video ondertitels heeft.)
+                                  </FormDescription>
+                                  {YesNoSelect(field, props)}
+                                  <FormMessage />
+                                </FormItem>
+                              </>
+                            </>
+                          )}
+                        />
+                        {form.watch('videoSubtitle') === true && (
+                          <FormField
+                            control={form.control}
+                            name="videoLang"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Ondertiteling taal</FormLabel>
+                                <FormDescription>
+                                  Kies de taal voor de ondertiteling van de video. (Let op: deze optie werkt alleen als de video ondertitels heeft in de gekozen taal.)
+                                </FormDescription>
+                                <Input {...field} placeholder='nl / en / fr / etc...' />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </>
+                    )}
 
-                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' ) && (
+                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images' || form.watch('questionType') === 'documentUpload') && (
                       <FormField
                         control={form.control}
                         name="multiple"
                         render={({ field }) => (
                           <FormItem>
-                            {form.watch('questionType') === 'imageUpload' ? (
-                              <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
+                            {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'documentUpload') ? (
+                              <FormLabel>Mogen er meerdere {form.watch('questionType') === 'documentUpload' ? 'documenten' : 'afbeeldingen'} tegelijkertijd geüpload worden?</FormLabel>
                             ) : (
                               <FormLabel>Mogen er meerdere afbeeldingen geselecteerd worden?</FormLabel>
                             )}
@@ -946,32 +1837,69 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    <FormField
-                      control={form.control}
-                      name="fieldRequired"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Is dit veld verplicht?
-                          </FormLabel>
-                          <Select
-                            onValueChange={(e: string) => field.onChange(e === 'true')}
-                            value={field.value ? 'true' : 'false'}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Kies een optie" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="false">Nee</SelectItem>
-                              <SelectItem value="true">Ja</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'sort' && form.watch('questionType') !== 'video' && (
+                      <FormField
+                        control={form.control}
+                        name="fieldRequired"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Is dit veld verplicht?
+                            </FormLabel>
+                            {form.watch("questionType") === "matrix" && (
+                              <FormDescription>
+                                Als je het veld <b>verplicht</b> maakt moeten gebruikers bij elke rij een antwoord selecteren.
+                                Als je het veld <b>niet verplicht</b> maakt kunnen gebruikers elke rij overslaan en invullen wat ze willen.
+                              </FormDescription>
+                            )}
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("questionType") === "matrix" && (
+                      <FormField
+                        control={form.control}
+                        name="matrixMultiple"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Mogen er meerdere antwoorden per rij worden geselecteerd?
+                            </FormLabel>
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     {form.watch('questionType') === 'scale' && (
                       <FormField
@@ -1054,13 +1982,208 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
+                    {form.watch('questionType') !== 'pagination' && (
+                      <FormField
+                        control={form.control}
+                        name="routingInitiallyHide"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Is deze vraag altijd zichtbaar?</FormLabel>
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {/* True and false are deliberately switched */}
+                                <SelectItem value="true">Nee</SelectItem>
+                                <SelectItem value="false">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('questionType') === 'sort' && (
+                      <FormField
+                        control={form.control}
+                        name="numberingStyle"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nummeringstijl</FormLabel>
+                            <FormDescription>
+                              Kies hoe de opsomming wordt genummerd: geen nummering, decimaal, alfabetisch of Romeins.
+                            </FormDescription>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">Geen opsomming</SelectItem>
+                                <SelectItem value="decimal">Decimale nummers</SelectItem>
+                                <SelectItem value="alphabetical">Alfabetische letters</SelectItem>
+                                <SelectItem value="roman">Romeinse cijfers</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {(form.watch('questionType') === 'multiplechoice' || form.watch('questionType') === 'multiple') && (
+                      <FormField
+                        control={form.control}
+                        // @ts-ignore
+                        name={`randomizeItems`}
+                        render={({ field }) => (
+                          <>
+                            <FormItem
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                                flexDirection: 'row',
+                                marginTop: '10px'
+                              }}>
+                              {YesNoSelect(field, props)}
+                              <FormLabel
+                                style={{ marginTop: 0, marginLeft: '6px' }}>Willekeurige volgorde</FormLabel>
+                              <FormMessage />
+                            </FormItem>
+                          </>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('routingInitiallyHide') && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="routingSelectedQuestion"
+                          render={({ field }) => {
+                            const formFields = items || [];
+                            let formMultipleChoiceFields = formFields
+                              .filter((f: any) =>
+                                (
+                                  f.questionType === 'multiplechoice'
+                                  || f.questionType === 'multiple'
+                                  || f.questionType === 'images'
+                                  || f.questionType === 'select'
+                                )
+                                && f.trigger !== form.watch('trigger'));
+
+                            return (
+                              <FormItem>
+                                <FormLabel>Welke vraag beïnvloedt de zichtbaarheid van deze vraag?</FormLabel>
+
+                                {formMultipleChoiceFields.length === 0 ? (
+                                  <p
+                                    className="text-sm"
+                                    style={{
+                                      padding: "11px",
+                                      borderLeft: "4px solid red",
+                                      backgroundColor: "#ffdbd7",
+                                      borderTopRightRadius: '5px',
+                                      borderBottomRightRadius: '5px',
+                                      marginTop: '12px',
+                                    }}
+                                  >
+                                    Je hebt nog geen meerkeuze, multiplechoice of afbeelding keuze vragen toegevoegd. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                  </p>
+                                ) : (
+                                  <Select
+                                    value={field.value}
+                                    onValueChange={field.onChange}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Kies een vraag" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {formMultipleChoiceFields.map((f: any) => (
+                                        <SelectItem key={f.trigger} value={f.trigger}>{f.title || f.fieldKey}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                )}
+
+                                <FormMessage />
+                              </FormItem>
+                            )
+                          }}
+                        />
+
+                        {form.watch("routingSelectedQuestion") !== '' && (
+                          <FormField
+                            control={form.control}
+                            name="routingSelectedAnswer"
+                            render={({ field }) => {
+                              const selectedQuestion = items?.find((i: any) => i.trigger === form.watch("routingSelectedQuestion"));
+                              const options = selectedQuestion?.options || [];
+
+                              return (
+                                <FormItem>
+                                  <FormLabel>Bij welk antwoord moet deze vraag getoond worden?</FormLabel>
+
+                                  {options.length === 0 ? (
+                                    <p
+                                      className="text-sm"
+                                      style={{
+                                        padding: "11px",
+                                        borderLeft: "4px solid red",
+                                        backgroundColor: "#ffdbd7",
+                                        borderTopRightRadius: '5px',
+                                        borderBottomRightRadius: '5px',
+                                        marginTop: '12px',
+                                      }}
+                                    >
+                                      De geselecteerde vraag heeft nog geen antwoordopties. Voeg deze eerst toe om deze vraag te kunnen tonen op basis van een ander antwoord.
+                                    </p>
+                                  ) : (
+                                    <Select
+                                      value={field.value}
+                                      onValueChange={field.onChange}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Kies een antwoord" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {options.map((o: any) => (
+                                          <SelectItem key={o.trigger} value={o.trigger}>{o.titles?.[0]?.key || o.trigger}</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  )}
+
+                                  <FormMessage />
+                                </FormItem>
+                              )
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+
                     {hasOptions() && (
                       <FormItem>
                         <Button
                           className="w-fit mt-4 bg-secondary text-black hover:text-white"
                           type="button"
                           onClick={() => setSettingOptions(!settingOptions)}>
-                          {`Antwoordopties (${options.length}) aanpassen`}
+                          {form.watch("questionType") === "matrix"
+                            ? `Matrix antwoordopties aanpassen`
+                            : `Antwoordopties (${options.length}) aanpassen`}
                         </Button>
                         <FormMessage />
                       </FormItem>
@@ -1088,15 +2211,16 @@ export default function WidgetEnqueteItems(
                         e.preventDefault();
                         onSubmit(form.getValues());
                         setOptions([]);
+                        setMatrixOptions(matrixDefault);
                       }}
-                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none'}
+                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none' && form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'swipe'}
                     >
                       {selectedItem
                         ? 'Sla wijzigingen op'
                         : 'Voeg item toe aan lijst'}
                     </Button>
                   </div>
-                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
+                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'pagination' && form.watch('questionType') !== 'swipe' && (
                     <FormMessage>
                       {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
                     </FormMessage>
@@ -1107,6 +2231,6 @@ export default function WidgetEnqueteItems(
           </div>
         </form>
       </Form>
-    </div>
+    </div >
   );
 }

@@ -59,6 +59,10 @@ const SortingTypes = [
     label: "Ranglijst"
   },
   {
+    value: "score",
+    label: "Beste bijdragen"
+  },
+  {
     value: "random",
     label: "Willekeurig"
   }
@@ -69,9 +73,8 @@ const formSchema = z.object({
   defaultSorting: z.string(),
   sorting: z
     .array(z.object({ value: z.string(), label: z.string() }))
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
+    .optional()
+    .default([])
 });
 
 export default function WidgetResourceOverviewSorting(
@@ -101,17 +104,19 @@ export default function WidgetResourceOverviewSorting(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="displaySorting"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sorteeropties weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="displaySorting"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sorteeropties weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name="defaultSorting"

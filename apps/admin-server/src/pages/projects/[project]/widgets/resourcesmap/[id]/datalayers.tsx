@@ -30,6 +30,7 @@ export default function WidgetResourcesMapDatalayers(
         datalayer?: any;
         enableOnOffSwitching?: boolean;
         activeOnInit?: boolean;
+        buttonType?: "submit" | "button";
     }
 ) {
 
@@ -166,7 +167,14 @@ export default function WidgetResourcesMapDatalayers(
                       )}
                     />
 
-                    <Button type="submit">Opslaan</Button>
+                    <Button
+                      type={props?.buttonType || "submit" }
+                      onClick={() => {
+                        if (props?.buttonType === "button") {
+                          onSubmit(form.getValues());
+                        }
+                      }}
+                    >Opslaan</Button>
                 </form>
             </Form>
         </div>
