@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, FolderOpen, LogOut, Users, UnplugIcon } from 'lucide-react';
+import { AlertTriangle, FolderOpen, LogOut, Users, UnplugIcon, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
