@@ -795,12 +795,15 @@ label.utrecht-form-label {
         input[type=range] {
           margin-bottom: 0;
           margin-top: 30px;
+          touch-action: none;
+          overscroll-behavior: contain;
 
           &:before {
             content: '';
             inset: 0 0 -20px 0;
             position: absolute;
             z-index: 1;
+            pointer-events: none;
           }
 
 
