@@ -4,7 +4,7 @@ import { PostcodeAutoFillLocation } from '../stem-begroot-and-resource-overview/
 import {Select} from "../select";
 import {FormLabel} from "@utrecht/component-library-react";
 
-const proximityOptions = [
+const proximityDefaultOptions = [
   { label: '100 meter', value: "0.1" },
   { label: '250 meter', value: "0.25" },
   { label: '500 meter', value: "0.5" },
@@ -18,6 +18,7 @@ type Props = {
   locationDefault: PostcodeAutoFillLocation;
   zipCodeAutofillApiUrl?: string;
   zipCodeApiUrl?: string;
+  proximityOptions?: { label: string; value: string }[];
 };
 
 type Suggestion = {
@@ -34,7 +35,12 @@ type FullSuggestion = Suggestion & {
   longitude: string;
 };
 
-export default function PostcodeAutoFill({ onValueChange, locationDefault, ...props }: Props) {
+export default function PostcodeAutoFill({
+  onValueChange,
+  locationDefault,
+  proximityOptions = proximityDefaultOptions,
+  ...props
+}: Props) {
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
