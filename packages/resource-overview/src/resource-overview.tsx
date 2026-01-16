@@ -338,7 +338,7 @@ const defaultItemRenderer = (
         {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
           <div className="micro-score-container">
             <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' onClick={() => vote('yes')}/>
-            <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
             {props.likeWidget?.displayDislike &&
               <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' onClick={() => vote('no')}/>}
           </div>
@@ -517,7 +517,7 @@ const defaultItemRenderer = (
             {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" />
-                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
                 {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big"  />}
               </>
             )}
