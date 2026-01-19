@@ -87,16 +87,17 @@
   .swipe-container {
     position: relative;
     // perspective: 1000px;
-    aspect-ratio: 2 / 3;
-    max-height: 517px;
+    // aspect-ratio: 2 / 3;
+    max-height: unset !important;
     width: 400px;
     max-width: calc(100vw - 86px);
     z-index: 999;
     margin: 0 auto;
+    height: 100%;
 
     @media screen and (max-width: 400px) {
       max-width: 290px;
-      max-height: unset;
+      max-height: unset !important;
       margin: 0 auto;
     }
   }
@@ -114,6 +115,7 @@
     position: absolute;
     width: 100%;
     height: calc(100% - 25px);
+    max-height: 500px;
     align-self: start;
     background: #fff;
     border-radius: 10px;
@@ -346,17 +348,21 @@
 
     .swipe-info-btn,
     .swipe-skip-btn {
-      border-radius: 50%;
+      border-radius: 20px;
       border: solid 1px #BFBFBF;
       background: #fff;
-      width: var(--button-size);
+      min-width: var(--button-size);
       height: var(--button-size);
       transition: all 0.2s ease;
       line-height: 0;
       flex-shrink: 0;
       color: #000;
       text-align: center;
-      padding: 0;
+      padding: 0 20px;
+
+      svg{
+        margin-left: 5px;
+      }
 
       &:disabled {
         opacity: 0.5;
@@ -370,8 +376,10 @@
     }
 
     .swipe-info-btn {
+      padding: 0;
       svg {
         width: 20px;
+        margin: 0;
       }
     }
 
