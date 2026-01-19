@@ -86,12 +86,12 @@ const VideoField: FC<VideoFieldProps> = ({
           events: {
             onReady: (event: any) => {
               setPlayer(event.target);
-if (muted) {
-  event.target.mute();
-} else {
-  event.target.unMute();
-}
-event.target.playVideo();
+              if (muted) {
+                event.target.mute();
+              } else {
+                event.target.unMute();
+              }
+              event.target.playVideo();
             },
           },
         });
