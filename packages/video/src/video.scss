@@ -73,3 +73,14 @@
         opacity: 0;
     }
 }
+
+
+
+.osc-enquete-item-content.--default {
+
+    .video-field div,
+    .video-field iframe {
+        aspect-ratio: 16 / 9;
+    }
+    
+}
