@@ -27,6 +27,7 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
         ports:
           - containerPort: {{ .Values.image.service.httpPort }}
             name: http
