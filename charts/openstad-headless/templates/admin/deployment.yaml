@@ -24,6 +24,8 @@ spec:
       serviceAccountName: openstad-headless-ingress-sa
       containers:
       - name: {{ template "openstad.admin.fullname" . }}
+        securityContext:
+          allowPrivilegeEscalation: false
         image: {{ .Values.admin.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
         ports:
