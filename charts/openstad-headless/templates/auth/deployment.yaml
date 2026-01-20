@@ -29,6 +29,10 @@ spec:
       - name: {{ template "openstad.auth.fullname" . }}
         image: {{ .Values.auth.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
         volumeMounts:
           - mountPath: "/opt/openstad-headless/apps/auth-server/certs"
             name: certs

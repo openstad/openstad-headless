@@ -28,6 +28,10 @@ spec:
         ports:
           - containerPort: {{ .Values.image.service.httpPort }}
             name: http
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
         env:
           - name: APP_URL
             value: https://{{ template "openstad.image.url" . }}

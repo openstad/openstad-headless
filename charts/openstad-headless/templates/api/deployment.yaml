@@ -277,6 +277,10 @@ spec:
           image: {{ .Values.api.deploymentContainer.image }}
           imagePullPolicy: IfNotPresent
           name: {{ template "openstad.api.fullname" . }}
+          securityContext:
+            capabilities:
+              drop:
+                - NET_RAW
           ports:
             - containerPort: {{ .Values.api.service.httpPort }}
               name: http

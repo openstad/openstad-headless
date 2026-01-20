@@ -25,6 +25,10 @@ spec:
       - name: {{ template "openstad.cms.fullname" . }}
         image: {{ .Values.cms.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
         ports:
           - containerPort: {{ .Values.cms.service.httpPort }}
             name: http
