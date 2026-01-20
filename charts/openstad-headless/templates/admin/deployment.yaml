@@ -26,6 +26,8 @@ spec:
       - name: {{ template "openstad.admin.fullname" . }}
         image: {{ .Values.admin.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
         ports:
           - containerPort: {{ .Values.admin.service.httpPort }}
             name: http
