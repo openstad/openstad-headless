@@ -30,6 +30,8 @@ spec:
         image: {{ .Values.auth.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
         securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
             - NET_RAW

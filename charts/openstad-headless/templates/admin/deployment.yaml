@@ -24,12 +24,14 @@ spec:
       serviceAccountName: openstad-headless-ingress-sa
       containers:
       - name: {{ template "openstad.admin.fullname" . }}
-        image: {{ .Values.admin.deploymentContainer.image }}
-        imagePullPolicy: IfNotPresent
         securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           capabilities:
             drop:
             - NET_RAW
+        image: {{ .Values.admin.deploymentContainer.image }}
+        imagePullPolicy: IfNotPresent
         ports:
           - containerPort: {{ .Values.admin.service.httpPort }}
             name: http
