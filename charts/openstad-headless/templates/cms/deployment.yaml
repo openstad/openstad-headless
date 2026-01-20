@@ -17,6 +17,10 @@ spec:
       labels:
         app: {{ .Values.cms.label }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       containers:
       - name: {{ template "openstad.cms.fullname" . }}
         image: {{ .Values.cms.deploymentContainer.image }}

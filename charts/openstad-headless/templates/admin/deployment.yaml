@@ -17,6 +17,10 @@ spec:
       labels:
         app: {{ .Values.admin.label }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
       containers:
       - name: {{ template "openstad.admin.fullname" . }}

@@ -17,6 +17,10 @@ spec:
       labels:
         app: {{ .Values.auth.label }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       volumes:
         - name: certs
           secret:
