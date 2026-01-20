@@ -25,6 +25,7 @@ spec:
       serviceAccountName: openstad-headless-ingress-sa
       containers:
         - securityContext:
+            allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
           env:
           - name: URL
