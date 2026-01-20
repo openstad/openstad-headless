@@ -30,6 +30,7 @@ spec:
         image: {{ .Values.auth.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
         securityContext:
+          readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
         volumeMounts:
           - mountPath: "/opt/openstad-headless/apps/auth-server/certs"

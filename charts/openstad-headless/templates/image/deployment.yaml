@@ -26,6 +26,7 @@ spec:
         image: {{ .Values.image.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
         securityContext:
+          readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
         ports:
           - containerPort: {{ .Values.image.service.httpPort }}
