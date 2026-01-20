@@ -115,7 +115,6 @@
     position: absolute;
     width: 100%;
     height: calc(100% - 25px);
-    max-height: 500px;
     align-self: start;
     background: #fff;
     border-radius: 10px;
@@ -360,7 +359,7 @@
       text-align: center;
       padding: 0 20px;
 
-      svg{
+      svg {
         margin-left: 5px;
       }
 
@@ -377,6 +376,7 @@
 
     .swipe-info-btn {
       padding: 0;
+
       svg {
         width: 20px;
         margin: 0;
@@ -514,7 +514,7 @@
     width: 100%;
     margin: 24px 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 16px;
   }
 
@@ -739,5 +739,41 @@
 
   to {
     transform: translateY(20px) scale(0.95);
+  }
+}
+
+
+@media screen and (max-height: 550px) {
+  .osc.--fullscreen .osc-enquete-item-content.--youth {
+
+    .question:not(:has(.dilemma-finished)):not(.question-type-video) {
+      padding: 75px 30px 20px;
+    }
+
+    .swipe-widget {
+      .swipe-card-content{
+        padding: 10px 20px;
+      }
+      .swipe-main-actions{
+        gap: 10px;
+      }
+      .swipe-actions{
+        gap: 20px;
+      }
+      .swipe-btn {
+        width: unset;
+        border-radius: 30px;
+        height: 40px;
+        display: flex;
+        gap: 8px;
+        padding: 0 16px;
+
+        span {
+          position: relative;
+          bottom: 0;
+          color: #fff;
+        }
+      }
+    }
   }
 }
