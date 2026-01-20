@@ -32,6 +32,9 @@ spec:
         securityContext:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - NET_RAW
         volumeMounts:
           - mountPath: "/opt/openstad-headless/apps/auth-server/certs"
             name: certs

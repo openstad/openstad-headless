@@ -28,6 +28,9 @@ spec:
         securityContext:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - NET_RAW
         ports:
           - containerPort: {{ .Values.cms.service.httpPort }}
             name: http
