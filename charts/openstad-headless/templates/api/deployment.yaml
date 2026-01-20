@@ -24,7 +24,9 @@ spec:
         runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
       containers:
-        - env:
+        - securityContext:
+            readOnlyRootFilesystem: true
+          env:
           - name: URL
             value: https://{{ template "openstad.api.url" . }}
 
