@@ -76,6 +76,7 @@ export function Area({
     fillOpacity: 0.15,
   },
   interactionType = 'default',
+  showHiddenPolygonsForAdmin = false,
   ...props
 }: BaseProps & AreaProps) {
   const datastore = new DataStore({});
@@ -111,73 +112,76 @@ export function Area({
 
   const multiPolygon: any[] = [];
   const areaIds = areas?.map((item: Area) => item.id);
-  const filteredAreas = allAreas.filter((item: any) => areaIds?.includes(item.id));
+  const safeAllAreas = Array.isArray(allAreas) ? allAreas : [];
+  const filteredAreas = safeAllAreas.filter((item: any) => areaIds?.includes(item.id));
 
-  if (filteredAreas) {
-    filteredAreas.forEach((item: any) => {
-      multiPolygon.push({ title: item.name, polygon: item.polygon });
-    });
-    areas.forEach((item: any) => {
-      const existingItem = multiPolygon.find((polygonItem) => polygonItem.title === item.name);
-      if (existingItem) {
-        existingItem.url = item.url;
-      }
-    });
-  }
+  filteredAreas.forEach((item: any) => {
+    multiPolygon.push({ title: item.name, polygon: item.polygon, hidePolygon: item.hidePolygon });
+  });
+  areas?.forEach((item: any) => {
+    const existingItem = multiPolygon.find((polygonItem) => polygonItem.title === item.name);
+    if (existingItem) {
+      existingItem.url = item.url;
+    }
+  });
+
+  const hiddenOverlayStyle = {
+    ...areaPolygonStyle,
+    color: '#ff0000',
+    fillColor: '#ff7070',
+    fillOpacity: 0.3,
+    dashArray: '6 6',
+  };
+
+  const visiblePolygons = multiPolygon.filter((item) => item.hidePolygon !== true);
+  const hiddenPolygons = multiPolygon.filter((item) => item.hidePolygon === true);
+  const hiddenOverlays = showHiddenPolygonsForAdmin ? hiddenPolygons : [];
 
   return (
     <>
       {multiPolygon.length > 0 ? (
-        multiPolygon.map((item, index) => (
-          <>
-            <Polygon
-              key={index}
-              {...props}
-              pathOptions={areaPolygonStyle}
-              positions={item.polygon}
-              eventHandlers={
-                interactionType !== 'direct'
-                  ? {
-                    mouseover: (e) => {
-                      e.target.setStyle({
-                        fillOpacity: 0.05,
-                      });
-                    },
-                    mouseout: (e) => {
-                      e.target.setStyle(areaPolygonStyle);
-                    },
-                  }
-                  : {
-                    click: () => {
-                      if (item.url) window.open(item.url, '_self');
-                    },
-                  }
-              }
-            >
-              {(item.title && interactionType !== 'direct') ? (
-                <>
-                  <Popup className={'leaflet-popup'}>
-                    {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
-                    {item.url && <a className="pop-up-link" href={item.url}>Lees verder</a>}
-                  </Popup>
-                </>
-              ) : (
-                <Tooltip
-                  permanent
-                  direction="center"
+        visiblePolygons.map((item, index) => (
+          <Polygon
+            key={index}
+            {...props}
+            pathOptions={areaPolygonStyle}
+            positions={item.polygon}
+            eventHandlers={
+              interactionType !== 'direct'
+                ? {
+                  mouseover: (e) => {
+                    e.target.setStyle({
+                      fillOpacity: 0.05,
+                    });
+                  },
+                  mouseout: (e) => {
+                    e.target.setStyle(areaPolygonStyle);
+                  },
+                }
+                : {
+                  click: () => {
+                    if (item.url) window.open(item.url, '_self');
+                  },
+                }
+            }
+          >
+            {(item.title && interactionType !== 'direct') ? (
+              <Popup className={'leaflet-popup'}>
+                {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
+                {item.url && <a className="pop-up-link" href={item.url}>Lees verder</a>}
+              </Popup>
+            ) : (
+              <Tooltip permanent direction="center">
+                <span
+                  onClick={() => {
+                    if (item.url) window.open(item.url, '_self');
+                  }}
                 >
-                  <span
-                    onClick={() => {
-                      if (item.url) window.open(item.url, '_self');
-                    }}
-                  >
-                    {item.title}
-                  </span>
-                </Tooltip>
-              )}
-            </Polygon>
-
-          </>
+                  {item.title}
+                </span>
+              </Tooltip>
+            )}
+          </Polygon>
         ))
       ) : (
         poly && (
@@ -188,6 +192,15 @@ export function Area({
           />
         )
       )}
+      {hiddenOverlays.map((item, index) => (
+        <Polygon
+          key={`hidden-${index}`}
+          {...props}
+          pathOptions={hiddenOverlayStyle}
+          positions={item.polygon}
+        >
+        </Polygon>
+      ))}
     </>
   );
 }

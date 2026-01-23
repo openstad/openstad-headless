@@ -169,6 +169,7 @@ const BaseMap = ({
   defaultIcon = undefined,
 
   area = undefined,
+  renderArea = undefined,
   areaPolygonStyle = undefined,
 
   markers = [],
@@ -200,7 +201,8 @@ const BaseMap = ({
 
   width = '100%',
   height = undefined,
-  customPolygon = [],
+  adminOnlyPolygons = undefined,
+  customPolygon = undefined,
   locationProx = undefined,
   dataLayerSettings = {
     datalayer: [],
@@ -699,7 +701,13 @@ const BaseMap = ({
           <TileLayer {...tileLayerProps} />
 
           {area && area.length ? (
-            <Area area={area} areas={customPolygon} areaPolygonStyle={areaPolygonStyle} {...props} />
+            <Area
+              area={renderArea ?? area}
+              areas={adminOnlyPolygons ?? customPolygon ?? []}
+              areaPolygonStyle={areaPolygonStyle}
+              showHiddenPolygonsForAdmin={!!props.showHiddenPolygonsForAdmin}
+              {...props}
+            />
           ) : null}
 
           {currentPolyLines && currentPolyLines.length > 0 && currentPolyLines.map((polyLine, i) => {
@@ -764,7 +772,7 @@ const BaseMap = ({
 };
 
 type MapEventsListenerProps = {
-  area?: Array<LocationType>;
+  area?: Array<LocationType> | Array<Array<LocationType>>;
   onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void;
   onMarkerClick?: (e: LeafletMouseEvent, map: any) => void,
 };
