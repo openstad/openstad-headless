@@ -20,6 +20,7 @@ export type ResourceFormWidget = {
     placeholder?: string,
     datalayer?: DataLayer[],
     enableOnOffSwitching?: boolean;
+    allowedPolygons?: Array<{ id: number; name: string }>;
 };
 
 export type General = {

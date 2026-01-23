@@ -20,6 +20,7 @@ export type EnqueteProps = {
   datalayer?: DataLayer[];
   enableOnOffSwitching?: boolean;
   infoBlockStyle?: string;
+  allowedPolygons?: Array<{ id: number; name: string }>;
 };
 
 export type Item = {

@@ -127,6 +127,23 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             }
         }
 
+        for (const key in formData) {
+            if (formData.hasOwnProperty(key) && key.endsWith('__polygonTagIds')) {
+                const value = formData[key];
+
+                if (Array.isArray(value)) {
+                    value.forEach((tagId) => {
+                        const tagNumber = Number(tagId);
+                        if (!isNaN(tagNumber)) {
+                            tags.push(tagNumber);
+                        }
+                    });
+                }
+
+                delete formData[key];
+            }
+        }
+
         if (defaultAddedTags) {
             const defaultTagsArray = defaultAddedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
 
