@@ -157,6 +157,14 @@ module.exports = function (db, sequelize, DataTypes) {
       constraints: false,
     });
 
+    this.belongsToMany(models.Area, {
+      through: 'area_tags',
+      as: 'areas',
+      foreignKey: 'tagId',
+      otherKey: 'areaId',
+      constraints: false,
+    });
+
     this.belongsToMany(models.Comment, {
       through: 'comment_tags',
       as: 'comments',

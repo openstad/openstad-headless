@@ -25,6 +25,7 @@ router.route('/')
     let { dbQuery } = req;
 
     return db.Area
+      .scope('includeTags')
       .findAndCountAll(dbQuery)
       .then(function(result) {
         req.results = result.rows || [];
@@ -56,12 +57,15 @@ router.route('/')
   .post( rateLimiter(), function(req, res, next) {
     db.Area
       .create(req.body)
+      .then(async (result) => {
+        if (Array.isArray(req.body.tagIds) && req.body.tagIds.length > 0) {
+          await result.setTags(req.body.tagIds);
+        }
+        res.json({ success: true, id: result.id });
+      })
       .catch((err) => {
         console.log('errr', err);
         next(err);
-      })
-      .then(function(result) {
-        res.json({ success: true, id: result.id });
       });
   });
 
@@ -70,6 +74,7 @@ router.route('/:areaId(\\d+)')
     var areaId = parseInt(req.params.areaId) || 1;
 
     db.Area
+      .scope('includeTags')
       .findOne({
         // where: { id: areaId, projectId: req.params.projectId }
         where: { id: areaId },
@@ -114,7 +119,10 @@ router.route('/:areaId(\\d+)')
       .update({
         ...req.body,
       })
-      .then(result => {
+      .then(async (result) => {
+        if (Array.isArray(req.body.tagIds)) {
+          await result.setTags(req.body.tagIds);
+        }
         req.results = result;
         next();
       })

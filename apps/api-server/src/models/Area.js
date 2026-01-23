@@ -10,6 +10,12 @@ module.exports = function( db, sequelize, DataTypes ) {
       unique: true
     },
 
+    hidePolygon: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
     polygon: {
       type: DataTypes.GEOMETRY,
       allowNull: false,
@@ -46,7 +52,26 @@ module.exports = function( db, sequelize, DataTypes ) {
 
   Area.associate = function( models ) {
     this.hasMany(models.Project);
+    this.belongsToMany(models.Tag, {
+      through: 'area_tags',
+      as: 'tags',
+      foreignKey: 'areaId',
+      otherKey: 'tagId',
+    });
   }
+
+  Area.scopes = function scopes() {
+    return {
+      includeTags: {
+        include: [
+          {
+            model: db.Tag,
+            as: 'tags',
+          },
+        ],
+      },
+    };
+  };
 
   Area.auth = Area.prototype.auth = {
     listableBy: 'all',
