@@ -748,16 +748,24 @@
       padding: 75px 30px 20px;
     }
 
+    .question.question-type-none {
+      height: calc(100% + 150px);
+      justify-content: start;
+    }
+
     .swipe-widget {
-      .swipe-card-content{
+      .swipe-card-content {
         padding: 10px 20px;
       }
-      .swipe-main-actions{
+
+      .swipe-main-actions {
         gap: 10px;
       }
-      .swipe-actions{
+
+      .swipe-actions {
         gap: 20px;
       }
+
       .swipe-btn {
         width: unset;
         border-radius: 30px;

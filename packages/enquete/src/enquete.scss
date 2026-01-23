@@ -618,6 +618,7 @@ label.utrecht-form-label {
             max-height: unset;
             object-position: center;
             object-fit: scale-down;
+            margin: 0 auto;
           }
         }
       }
@@ -940,7 +941,8 @@ label.utrecht-form-label {
     .question-type-dilemma {
       height: 100%;
       display: flex;
-      @media screen and (max-height: 550px){
+
+      @media screen and (max-height: 550px) {
         justify-content: start !important;
       }
 
