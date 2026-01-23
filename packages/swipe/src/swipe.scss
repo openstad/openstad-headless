@@ -86,9 +86,7 @@
 
   .swipe-container {
     position: relative;
-    // perspective: 1000px;
-    // aspect-ratio: 2 / 3;
-    max-height: unset !important;
+    max-height: unset;
     width: 400px;
     max-width: calc(100vw - 86px);
     z-index: 999;
@@ -97,7 +95,7 @@
 
     @media screen and (max-width: 400px) {
       max-width: 290px;
-      max-height: unset !important;
+      max-height: unset;
       margin: 0 auto;
     }
   }
@@ -743,7 +741,7 @@
 }
 
 
-@media screen and (max-height: 550px) {
+@media screen and (max-height: 690px) {
   .osc.--fullscreen .osc-enquete-item-content.--youth {
 
     .question:not(:has(.dilemma-finished)):not(.question-type-video) {
