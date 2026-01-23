@@ -8,13 +8,23 @@ export default function useArea(areaId?: string) {
 
   const areaSwr = useSWR(areaNumber ? url : null);
 
-  async function updateArea(name: string, geoJSON: string) {
+  async function updateArea(
+    name: string,
+    geoJSON: string,
+    hidePolygon = false,
+    tagIds: number[] = []
+  ) {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name: name, geoJSON: JSON.parse(geoJSON)}),
+      body: JSON.stringify({
+        name: name,
+        geoJSON: JSON.parse(geoJSON),
+        hidePolygon,
+        tagIds,
+      }),
     });
 
     return await res.json();

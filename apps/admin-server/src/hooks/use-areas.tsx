@@ -8,13 +8,23 @@ export default function useAreas(projectId?: string) {
 
   const areasSwr = useSWR(projectNumber ? url : null);
 
-  async function createArea(name: string, geoJSON: string) {
+  async function createArea(
+    name: string,
+    geoJSON: string,
+    hidePolygon = false,
+    tagIds: number[] = []
+  ) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name: name, geoJSON: JSON.parse(geoJSON) }),
+      body: JSON.stringify({
+        name: name,
+        geoJSON: JSON.parse(geoJSON),
+        hidePolygon,
+        tagIds,
+      }),
     });
     return await res.json();
   }
