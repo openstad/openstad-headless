@@ -33,11 +33,15 @@ function createCutoutPolygonMulti(areas: any) {
   return cutOutCoordinates;
 }
 
+const isMultiPolygon = (
+  value: Array<LatLng> | Array<Array<LatLng>>
+): value is Array<Array<LatLng>> => Array.isArray(value[0]);
+
 export function isPointInArea(area: Array<Array<LatLng>> | Array<LatLng>, point: LatLng) {
   if (!point) return false;
   if (!area) return true;
 
-  if (Array.isArray(area[0])) {
+  if (isMultiPolygon(area)) {
     for (let poly of area) {
       if (isPointInSinglePolygon(Array.isArray(poly) ? poly : [poly], point)) {
         return true;
@@ -96,12 +100,12 @@ export function Area({
     if (area && area.length > 0) {
       let validPolygons: LatLng[][] = [];
 
-      if (Array.isArray(area[0])) {
-        validPolygons = area.map((polygon: any) =>
-          polygon.map(({ lat, lng }: { lat: number, lng: number }) => ({ lat, lng }))
+      if (isMultiPolygon(area)) {
+        validPolygons = area.map((polygon) =>
+          polygon.map((point) => new LatLng(point.lat, point.lng))
         );
       } else {
-        validPolygons = [area.map(({ lat, lng }) => new LatLng(lat, lng))];
+        validPolygons = [area.map((point) => new LatLng(point.lat, point.lng))];
       }
 
       const cutout = createCutoutPolygonMulti(validPolygons);
