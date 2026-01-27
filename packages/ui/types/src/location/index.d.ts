@@ -6,6 +6,10 @@ type Props = {
     locationDefault: PostcodeAutoFillLocation;
     zipCodeAutofillApiUrl?: string;
     zipCodeApiUrl?: string;
+    proximityOptions?: {
+        label: string;
+        value: string;
+    }[];
 };
-export default function PostcodeAutoFill({ onValueChange, locationDefault, ...props }: Props): React.JSX.Element;
+export default function PostcodeAutoFill({ onValueChange, locationDefault, proximityOptions, ...props }: Props): React.JSX.Element;
 export {};

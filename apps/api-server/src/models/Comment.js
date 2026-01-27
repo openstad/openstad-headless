@@ -114,13 +114,13 @@ module.exports = function( db, sequelize, DataTypes ) {
       defaultValue: '0.00000000000',
     },
     
-    // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero
-    netPositiveVotes: {
+    // Field that calculates net votes based on yes and no votes, ensuring it doesn't go below zero
+    netVotes: {
       type: DataTypes.VIRTUAL,
       get: function () {
         const yes = this.getDataValue('yes') || 0;
         const no = this.getDataValue('no') || 0;
-        return Math.max(yes - no, 0);
+        return yes - no;
       }
     },
 
