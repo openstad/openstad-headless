@@ -49,6 +49,9 @@ const formSchema = z.object({
     .string()
     .optional()
     .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+  editorLabel: z
+    .string()
+    .optional(),
 });
 
 export default function ProjectSettingsComments() {
@@ -80,6 +83,7 @@ export default function ProjectSettingsComments() {
       maxCharactersError:
         data?.config?.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      editorLabel: data?.config?.comments?.editorLabel,
     }),
     [data]
   );
@@ -106,6 +110,7 @@ export default function ProjectSettingsComments() {
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
           adminLabel: values.adminLabel,
+          editorLabel: values.editorLabel,
           minCharactersWarning: values.minCharactersWarning,
           maxCharactersWarning: values.maxCharactersWarning,
           minCharactersError: values.minCharactersError,
@@ -305,6 +310,22 @@ export default function ProjectSettingsComments() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="editorLabel"
+                render={({ field }) => (
+                  <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                      <FormLabel>Label bij reacties van Editors
+                        <InfoDialog content={`Dit is de beschrijving die achter de gebruikersnaam van de Editor komt te staan. Bijvoorbeeld 'redactie'.`} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="typ een tekst" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
               <FormField
                 control={form.control}
