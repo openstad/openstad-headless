@@ -50,7 +50,7 @@ export default function WidgetEnqueteGeneral(
       maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError: props.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
       maxCharactersError: props.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
-      enableDraftPersistence: props.enableDraftPersistence ?? true,
+      enableDraftPersistence: props.enableDraftPersistence ?? false,
       draftRetentionHours: props.draftRetentionHours ?? 24,
     },
   });

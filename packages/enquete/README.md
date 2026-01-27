@@ -32,7 +32,7 @@ The Enquete widget automatically saves user input to `localStorage`, allowing us
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `enableDraftPersistence` | `boolean` | `true` | Enable/disable automatic draft saving |
+| `enableDraftPersistence` | `boolean` | `false` | Enable/disable automatic draft saving |
 | `draftRetentionHours` | `number` | `24` | Hours before a draft expires and is deleted |
 
 These settings can be configured in the admin panel under the Enquete widget's "Algemeen" (General) tab.

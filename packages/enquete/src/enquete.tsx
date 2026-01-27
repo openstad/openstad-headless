@@ -122,7 +122,7 @@ function Enquete(props: EnqueteWidgetProps) {
         const pathname = window.location.pathname;
         const storageKey = getStorageKey(props.projectId, props.widgetId, pathname);
 
-        if (props.enableDraftPersistence === false) {
+        if (props.enableDraftPersistence !== true) {
             setDraftChecked(true);
             return;
         }
@@ -273,7 +273,7 @@ function Enquete(props: EnqueteWidgetProps) {
         const result = await createSubmission(formData, props.widgetId);
 
         if (result) {
-            if (typeof window !== 'undefined' && props.enableDraftPersistence !== false) {
+            if (typeof window !== 'undefined' && props.enableDraftPersistence === true) {
                 const pathname = window.location.pathname;
                 const storageKey = getStorageKey(props.projectId, props.widgetId, pathname);
                 clearDraft(storageKey);
@@ -573,7 +573,7 @@ function Enquete(props: EnqueteWidgetProps) {
 
     const handleValuesChange = (values: Record<string, unknown>) => {
         if (typeof window === 'undefined') return;
-        if (props.enableDraftPersistence === false) return;
+        if (props.enableDraftPersistence !== true) return;
 
         latestValuesRef.current = values;
 
