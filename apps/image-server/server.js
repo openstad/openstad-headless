@@ -94,6 +94,14 @@ const imageSteamConfig = {
     supportWebP: !disableWebpSupport,
     hqOriginalMaxPixels: process.env.HQ_ORIGINAL_MAX_PIXELS || 160000,  // default value of image-steam is 400 * 400 = 160000 px
   },
+  processor: {
+    sharp: {
+      defaults: {
+        // Fix for Samsung S9 JPG's
+        failOnError: false,
+      },
+    },
+  },
 };
 
 if (s3.isEnabled()) {
