@@ -44,6 +44,9 @@
     "prettier": "3.0.3",
     "vitest": "^3.2.3"
   },
+  "overrides": {
+    "vega-lite": "^5.23.0"
+  },
   "dependencies": {
     "@aikidosec/safe-chain": "^1.1.10",
     "@aws-sdk/client-s3": "3.919.0",
