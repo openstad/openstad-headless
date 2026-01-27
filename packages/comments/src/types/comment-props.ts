@@ -10,6 +10,7 @@ export type CommentProps = {
   submitComment?: (e: any) => void;
   setRefreshComments: () => void;
   adminLabel?: string;
+  editorLabel?: string;
   disableSubmit?: boolean;
   extraReplyButton?: boolean;
   variant?: 'micro-score' | 'medium';

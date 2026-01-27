@@ -42,6 +42,7 @@ export type ProjectSettingProps = {
     descriptionMinLength: number,
     descriptionMaxLength: number,
     adminLabel: string,
+    editorLabel?: string,
     minCharactersWarning?: string,
     maxCharactersWarning?: string,
     minCharactersError?: string;
