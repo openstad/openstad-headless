@@ -32,6 +32,7 @@ const formSchema = z.object({
   descriptionMinLength: z.coerce.number().gt(0).optional(),
   descriptionMaxLength: z.coerce.number().gt(0).optional(),
   adminLabel: z.string().optional(),
+  editorLabel: z.string().optional(),
   minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
   maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
   minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
@@ -56,6 +57,7 @@ export default function ProjectSettingsComments() {
       descriptionMinLength: data?.config?.comments?.descriptionMinLength,
       descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
       adminLabel: data?.config?.comments?.adminLabel,
+      editorLabel: data?.config?.comments?.editorLabel,
       minCharactersWarning: data?.config?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning: data?.config?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError: data?.config?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
@@ -86,6 +88,7 @@ export default function ProjectSettingsComments() {
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
           adminLabel: values.adminLabel,
+          editorLabel: values.editorLabel,
           minCharactersWarning: values.minCharactersWarning,
           maxCharactersWarning: values.maxCharactersWarning,
           minCharactersError: values.minCharactersError,
@@ -273,6 +276,22 @@ export default function ProjectSettingsComments() {
 
                       <FormLabel>Label bij reacties van beheerders
                         <InfoDialog content={`Dit is de beschrijving die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld 'webredactie'.`} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="typ een tekst" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+              <FormField
+                control={form.control}
+                name="editorLabel"
+                render={({ field }) => (
+                  <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                      <FormLabel>Label bij reacties van Editors
+                        <InfoDialog content={`Dit is de beschrijving die achter de gebruikersnaam van de Editor komt te staan. Bijvoorbeeld 'redactie'.`} />
                       </FormLabel>
                       <FormControl>
                         <Input placeholder="typ een tekst" {...field} />
