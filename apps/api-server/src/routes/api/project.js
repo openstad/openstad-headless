@@ -632,14 +632,20 @@ router.route('/:projectId') //(\\d+)
     if (!hasRole( req.user, 'admin')) return next();
     try {
       let providers = await authSettings.providers({ project });
-      const configData = req.body.config?.auth?.provider?.openstad?.config || {};
       const allowedDomains = req.body.config?.allowedDomains || false;
-      const twoFactorRoles = req.body.config?.auth?.provider?.openstad?.twoFactorRoles;
 
       for (let provider of providers) {
+        // Get provider-specific config data
+        const providerConfig = req.body.config?.auth?.provider?.[provider] || {};
+        const configData = providerConfig.config || {};
+        const requiredUserFields = providerConfig.requiredUserFields;
+        const twoFactorRoles = providerConfig.twoFactorRoles;
+
+        // Skip if no config data and no allowedDomains update
         if (
             Object.keys(configData).length === 0
-            && !(!!allowedDomains && Object.keys(configData).length === 0)
+            && !requiredUserFields
+            && !(!!allowedDomains)
         ) {
           continue;
         }
@@ -654,6 +660,7 @@ router.route('/:projectId') //(\\d+)
         if (adapter.service.updateClient) {
           let merged = merge.recursive({}, authConfig, {
             config: configData,
+            requiredUserFields: requiredUserFields || authConfig.requiredUserFields,
             twoFactorRoles: twoFactorRoles || authConfig.twoFactorRoles
           });
           await adapter.service.updateClient({ authConfig: merged, project });
