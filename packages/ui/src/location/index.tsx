@@ -44,6 +44,7 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sanitizeZipInput = (value: string) => value.replace(/\s+/g, '');
 
   useEffect(() => {
     if ( !locationDefault && input !== '' ) {
@@ -150,9 +151,15 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
             ref={inputRef}
             value={input}
             onChange={e => {
-              setInput(e.target.value);
+              const nextValue = sanitizeZipInput(e.target.value);
+              setInput(nextValue);
               setSelected(null);
               setShowDropdown(true);
+            }}
+            onKeyDown={e => {
+              if (e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+              }
             }}
             disabled={!!selected}
             className="utrecht-textbox utrecht-textbox--html-input"
