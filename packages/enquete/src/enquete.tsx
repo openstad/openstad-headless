@@ -12,7 +12,7 @@ import hasRole from '../../lib/has-role';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import Form from "@openstad-headless/form/src/form";
+import Form, { FormValue } from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
     Paragraph,
@@ -250,7 +250,7 @@ function Enquete(props: EnqueteWidgetProps) {
         if (getUserEmailFromField) {
             const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
 
-            if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
+            if (userEmailAddressFieldKey && formData.hasOwnProperty(userEmailAddressFieldKey)) {
                 formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
             }
         }
@@ -543,7 +543,7 @@ function Enquete(props: EnqueteWidgetProps) {
         }
     }
 
-    const initialValues: Record<string, unknown> = {};
+    const initialValues: { [p: string]: FormValue } = {};
     if (savedDraft) {
         for (const [key, value] of Object.entries(savedDraft)) {
             if (value !== undefined && value !== null && value !== '') {
