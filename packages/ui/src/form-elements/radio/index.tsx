@@ -82,7 +82,9 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     const [selectedOption, setSelectedOption] = useState<string>(initialValue);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
     const [displayChoices, setDisplayChoices] = useState<typeof choices>([]);
-    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+
+    const hasInitialValue = !!initialValue;
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired && !hasInitialValue);
 
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -119,8 +121,16 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         setOtherOptionValues(initialOtherOptionValues);
     }, [displayChoices, fieldKey]);
 
+    useEffect(() => {
+        // If a value is present initially or after a draft load, clear invalid for required fields.
+        if (fieldRequired && (initialValue || selectedOption)) {
+            setCheckInvalid(false);
+        }
+    }, [fieldRequired, initialValue, selectedOption]);
+
     const handleRadioChange = (value: string, index: number) => {
         setSelectedOption(value);
+        setCheckInvalid(false);
         if (onChange) {
             onChange({
                 name: fieldKey,
@@ -153,12 +163,6 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
             }, false);
         }
     };
-
-    useEffect(() => {
-        if(initialValue){
-            setCheckInvalid(false);
-        }
-    }, [fieldInvalid]);
 
     return (
         <div className="question">
