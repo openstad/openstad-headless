@@ -48,6 +48,7 @@ function Form({
     showBackButtonInTopOfPage = false,
     totalFieldCount = 0,
     formStyle = 'default',
+    initialValues,
     ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -75,6 +76,12 @@ function Form({
         }
     });
 
+    if (initialValues) {
+        Object.entries(initialValues).forEach(([key, value]) => {
+            initialFormValues[key] = value as FormValue;
+        });
+    }
+
     const [formValues, setFormValues] = useState(initialFormValues);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string | null }>({});
     const formRef = useRef<HTMLFormElement>(null);
@@ -94,20 +101,20 @@ function Form({
         const nonPaginationFields = fields.filter(field => field.type !== 'pagination');
 
         let pageHandler = undefined;
-        
+
         const isNumber = typeof currentPage === 'number';
         const isTotalNumber = typeof totalPages === 'number';
         const hasPages = isNumber && isTotalNumber && currentPage < totalPages - 1;
         const hasSetCurrentPage = !!setCurrentPage;
         const isSecondToLast = isNumber && isTotalNumber && currentPage === totalPages - 2;
         const lastFieldIsYouthOutro = isTotalNumber && (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle === 'youth-outro';
-        
+
         const shouldGoToNextPage = hasPages && hasSetCurrentPage && (!lastFieldIsYouthOutro || (
             !isSecondToLast ||
             (isSecondToLast && lastFieldIsYouthOutro)
           )
         );
-        
+
         if (isNumber && isTotalNumber && shouldGoToNextPage) {
             allowResetAfterSubmit = false;
             pageHandler = () => setCurrentPage(currentPage + 1);
