@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {useContext, useEffect, useState} from 'react';
 import toast from 'react-hot-toast';
+import { useProject } from '@/hooks/use-project';
 
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
 
+  const { data: projectData } = useProject();
 
   const { data: widgets, isLoading: isLoadingWidgets, remove, duplicate } = useWidgetsHook(
     project as string
@@ -43,7 +45,7 @@ export default function ProjectWidgets() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projectnaam"
+        pageHeader={projectData?.name ? `Projectnaam: ${projectData.name}` : `Projectnaam niet gevonden`}
         breadcrumbs={[
           {
             name: 'Projecten',
