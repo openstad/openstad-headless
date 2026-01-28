@@ -18,9 +18,16 @@ spec:
       labels:
         app: {{ .Values.api.label }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
       containers:
-        - env:
+        - securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          env:
           - name: URL
             value: https://{{ template "openstad.api.url" . }}
 

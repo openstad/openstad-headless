@@ -2,6 +2,7 @@
 
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const utils = require('../utils');
 
 // The access tokens.
 // You will use these to access your end point data through the means outlined
@@ -19,9 +20,18 @@ let tokens = Object.create(null);
  * @returns {Promise} resolved with the token if found, otherwise resolved with undefined
  */
 exports.find = (token) => {
-  const id = jwt.decode(token).jti;
 
   const findAction = new Promise((resolve, reject) => {
+    let decoded;
+    try {
+      decoded = utils.verifyToken(token);
+    } catch (e) {
+      console.warn('Error verifying JWT: ', e)
+      return resolve(undefined);
+    }
+    
+    const id = decoded.jti;
+    
     db.AccessToken
       .findOne({where: { tokenId: id  } })
       .then((token) => {
@@ -51,9 +61,18 @@ exports.find = (token) => {
  * @returns {Promise} resolved with the saved token
  */
 exports.save = (token, expirationDate, userID, clientID, scope) => {
-  const id = jwt.decode(token).jti;
-
   const saveAction = new Promise((resolve, reject) => {
+    
+    let decoded;
+    try {
+      decoded = utils.verifyToken(token);
+    } catch (e) {
+      console.warn('Error verifying JWT: ', e)
+      return resolve(undefined);
+    }
+    
+    const id = decoded.jti;
+    
     db.AccessToken
       .create({tokenId: id, userID, expirationDate, clientID, scope})
       .then((token) => {
@@ -79,9 +98,18 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
  * @returns {Promise} resolved with the deleted token
  */
 exports.delete = (token) => {
-  const id = jwt.decode(token).jti;
-
   const deleteAction = new Promise((resolve, reject) => {
+    
+    let decoded;
+    try {
+      decoded = utils.verifyToken(token);
+    } catch (e) {
+      console.warn('Error verifying JWT: ', e)
+      return resolve(undefined);
+    }
+    
+    const id = decoded.jti;
+    
     db.AccessToken
       .findOne({where: { tokenId: id  } })
       .then((token) => {

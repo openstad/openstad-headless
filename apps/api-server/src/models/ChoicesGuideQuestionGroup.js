@@ -123,8 +123,9 @@ module.exports = function( db, sequelize, DataTypes ) {
       forProjectId: function( projectId ) {
         return {
           where: {
-            choicesGuideId: [sequelize.literal(`select id FROM choicesGuides WHERE projectId = ${projectId}`)]
-          }
+            choicesGuideId: [sequelize.literal(`select id FROM choicesGuides WHERE projectId = :projectId`)]
+          },
+          replacements: { projectId: projectId }
         };
       },
 

@@ -1,6 +1,8 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
+const path = require('node:path');
+const utils = require('../utils');
 
 // The refresh tokens.
 // You will use these to get access tokens to access your end point data through the means outlined
@@ -19,7 +21,8 @@ let tokens = Object.create(null);
  */
 exports.find = (token) => {
   try {
-    const id = jwt.decode(token).jti;
+    const decoded = utils.verifyToken(token);
+    const id = decoded.jti;
     return Promise.resolve(tokens[id]);
   } catch (error) {
     return Promise.resolve(undefined);
@@ -37,7 +40,14 @@ exports.find = (token) => {
  * @returns {Promise} resolved with the saved token
  */
 exports.save = (token, userID, clientID, scope) => {
-  const id = jwt.decode(token).jti;
+  let decoded;
+  try {
+    decoded = utils.verifyToken(token);
+  } catch (e) {
+    console.warn('Error verifying JWT: ', e)
+    return Promise.resolve(new Error('Invalid refresh token'));
+  }
+  const id = decoded.jti;
   tokens[id] = { userID, clientID, scope };
   return Promise.resolve(tokens[id]);
 };
@@ -49,7 +59,8 @@ exports.save = (token, userID, clientID, scope) => {
  */
 exports.delete = (token) => {
   try {
-    const id = jwt.decode(token).jti;
+    const decoded = utils.verifyToken(token);
+    const id = decoded.jti;
     const deletedToken = tokens[id];
     delete tokens[id];
     return Promise.resolve(deletedToken);
