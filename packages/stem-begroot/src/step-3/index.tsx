@@ -3,7 +3,7 @@ import React from 'react';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading3, Paragraph, Button } from "@utrecht/component-library-react";
+import { Heading3, Button } from "@utrecht/component-library-react";
 import { createVotePendingStorage } from '../utils/vote-pending-storage';
 
 type Props = {
@@ -24,7 +24,7 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
   return (
     <>
       <Heading3>{step3Title}</Heading3>
-      <Paragraph>{step3}</Paragraph>
+      <div dangerouslySetInnerHTML={{ __html: step3 }} />
       <Spacer size={2} />
       <Button
         appearance='primary-action-button'
