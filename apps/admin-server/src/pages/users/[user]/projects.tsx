@@ -12,6 +12,7 @@ import UserRoleDropdownList from '@/components/user-role-dropdown-list';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
 import {Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import {Checkbox} from "@/components/ui/checkbox";
 
 const formSchema = z.object({
 });
@@ -21,12 +22,24 @@ type ProjectRole = {
   roleId: string;
 };
 
+type EmailNotificationConsent = {
+  projectId: string;
+  consent: boolean;
+};
+
+type CombinedProjectRoleAndConsent = {
+  projectId: string;
+  roleId?: string;
+  consent?: boolean;
+}
+
 export default function CreateUserProjects() {
 
   const { data:projects } = projectListSwr();
   const { data:users, updateUser } = useUser();
   const { createUser } = useUsers();
   const [projectRoles, setProjectRoles] = useState<Array<ProjectRole>>([]);
+  const [emailNotificationConsents, setEmailNotificationConsents] = useState<Array<EmailNotificationConsent>>([]);
 
   useEffect(() => {
   }, [projects, users]);
@@ -54,21 +67,46 @@ export default function CreateUserProjects() {
     });
   };
 
+  const addEmailNotificationConsent = (projectId: string, consent: boolean) => {
+    setEmailNotificationConsents(prev => {
+      let updated = [...prev];
+      const index = updated.findIndex(e => e.projectId === projectId);
+
+      if (index !== -1) {
+        updated[index].consent = consent;
+      } else {
+        updated.push({ projectId, consent });
+      }
+      return updated;
+    });
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
 
     let error:any;
-    for (let projectRole of projectRoles) {
+
+    const mergedProjects: CombinedProjectRoleAndConsent[] = [
+      ...projectRoles,
+      ...emailNotificationConsents
+    ];
+
+    for (let updateValue of mergedProjects) {
 
       let user = users;
       if (Array.isArray(users)) {
-        user = users.find((user:any) => user.projectId == projectRole.projectId);
+        user = users.find((user:any) => user.projectId == updateValue.projectId);
       }
       if (user) {
         try {
-          await updateUser({
-            ...user,
-            role: projectRole.roleId,
-          })
+          const updatedUser = user;
+          if (user.emailNotificationConsent !== updateValue.consent) {
+            updatedUser.emailNotificationConsent = updateValue.consent;
+          }
+          if (user.role !== updateValue.roleId) {
+            updatedUser.role = updateValue.roleId;
+          }
+
+          await updateUser(updatedUser)
         } catch(err) {
           error = err;
         }
@@ -76,11 +114,18 @@ export default function CreateUserProjects() {
         user = users[0];
         if (user.idpUser?.identifier && user.idpUser?.provider) {
           try {
-            await createUser({
-              idpUser: user.idpUser,
-              projectId: projectRole.projectId,
-              role: projectRole.roleId,
-            });
+            const newUser = {
+              ...user,
+              projectId: updateValue.projectId
+            }
+            if (typeof updateValue.consent !== 'undefined') {
+              newUser.emailNotificationConsent = updateValue.consent;
+            }
+            if (updateValue.roleId) {
+              newUser.role = updateValue.roleId;
+            }
+
+            await createUser(newUser);
           } catch(err) {
             error = err;
           }
@@ -92,6 +137,7 @@ export default function CreateUserProjects() {
       toast.error(error.message || 'User kon niet worden bijgewerkt')
     } else {
       toast.success('User is bijgewerkt')
+      window.location.reload();
     }
 
   }
@@ -126,9 +172,10 @@ export default function CreateUserProjects() {
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="ml-1">
-            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 items-center lg:py-2 lg:border-b border-border gap-4">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 items-center lg:py-3 lg:border-b border-border gap-4">
               <ListHeading className="hidden lg:flex">Projectnaam</ListHeading>
               <ListHeading className="hidden lg:flex">Rol</ListHeading>
+              <ListHeading className="hidden lg:flex">E-mail notificaties toestemming</ListHeading>
             </div>
             <ul>
               {projects.map((project: any) => {
@@ -145,9 +192,9 @@ export default function CreateUserProjects() {
                 const cannotCreateNewUsers = project?.config?.users?.canCreateNewUsers === false;
 
                 return (
-                  <li key={project.id} className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border">
+                  <li key={project.id} className="grid grid-cols-1 lg:grid-cols-3 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-4">
                     <Paragraph className="truncate">{project.name}</Paragraph>
-                    <Paragraph className="truncate">
+                    <Paragraph className="truncate mr-4">
                       <UserRoleDropdownList
                         roleId={user?.role || ''}
                         addProject={(roleId) => {
@@ -156,6 +203,21 @@ export default function CreateUserProjects() {
                         disabled={cannotCreateNewUsers}
                       />
                     </Paragraph>
+
+                    <Paragraph className="text-sm text-muted-foreground grid items-center gap-2 grid-cols-[15px_1fr]">
+                      { !!user?.role && (
+                        <>
+                          <Checkbox
+                            defaultChecked={user?.emailNotificationConsent || false}
+                            onCheckedChange={(checked) => {
+                              addEmailNotificationConsent(project.id, Boolean(checked));
+                            }}
+                          />
+                          <span>Toestemming voor e-mail notificaties</span>
+                        </>
+                      )}
+                    </Paragraph>
+
                   </li>
                 );
               })}

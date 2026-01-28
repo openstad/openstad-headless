@@ -63,6 +63,17 @@ export type Item = {
   description_b?: string;
   image_b?: string;
   numberingStyle?: string;
+  videoUrl?: string;
+  videoSubtitle?: boolean;
+  videoLang?: string;
+  images?: Array<{
+    url: string;
+    name?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+  }>;
+  createImageSlider?: boolean;
+  imageClickable?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;

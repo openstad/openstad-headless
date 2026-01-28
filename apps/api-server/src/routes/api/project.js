@@ -784,7 +784,9 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 		db.Project
 			.findOne({ where })
 			.then(found => {
-				if ( !found ) throw new Error('Project not found');
+				if (!found) {
+          return next(createError(404, 'Project not found'));
+        }
 				req.results = found;
 				req.project = req.results; // middleware expects this to exist
         		next();

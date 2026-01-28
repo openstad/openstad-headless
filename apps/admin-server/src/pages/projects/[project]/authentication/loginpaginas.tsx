@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
+import {useRouter} from "next/router";
 
 const formSchema = z.object({
   UniqueCodeTitle: z.string().optional(),
@@ -61,7 +62,8 @@ export default function ProjectAuthentication() {
     updateProject,
   } = useProject(['includeAuthConfig']);
 
-  
+  const router = useRouter();
+  const { project } = router.query;
 
   const defaults = useCallback(
     () => ({
@@ -177,11 +179,11 @@ export default function ProjectAuthentication() {
           },
           {
             name: 'Authenticatie',
-            url: '/projects/1/authentication',
+            url: `/projects/${project}/authentication`,
           },
           {
-            name: 'Login pagina&apos;s',
-            url: '/projects/1/authentication/loginpaginas',
+            name: 'Login pagina\'s',
+            url: `/projects/${project}/authentication/loginpaginas`,
           },
         ]}>
         <div className="container py-6">

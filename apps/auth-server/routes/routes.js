@@ -16,6 +16,7 @@ const authLocal = require('../controllers/auth/local');
 const authCode = require('../controllers/auth/code');
 const authRequiredFields = require('../controllers/auth/required');
 const authTwoFactor = require('../controllers/auth/twoFactor');
+const authUnsubscribe = require('../controllers/auth/unsubscribe');
 
 //MIDDLEWARE
 const clientMw = require('../middleware/client');
@@ -203,7 +204,6 @@ module.exports = function (app) {
     app.get('/auth/url/authenticate', clientMw.setAuthType('Url'),  csrfProtection, addCsrfGlobal, authUrl.authenticate);
     app.post('/auth/url/authenticate', clientMw.setAuthType('Url'), csrfProtection, emailUrlBruteForce, authUrl.postAuthenticate);
 
-
     // admin login routes redirect to normal login but with priviliged params
     app.get('/auth/admin/login', [csrfProtection, addCsrfGlobal], (req, res, next) => {
         const queryIndex = req.originalUrl.indexOf('?');
@@ -211,6 +211,11 @@ module.exports = function (app) {
 
         res.redirect('/login/admin' + queryString);
     });
+
+    /**
+     * Auth routes for Unsubscribe from emails
+     */
+    app.get('/auth/unsubscribe', authUnsubscribe.info);
 
     /**
      * Auth routes for Anonymous login
@@ -302,11 +307,10 @@ module.exports = function (app) {
         res.status(404).render('errors/404');
     });
 
-    // Handle 500
+    // Handle errors
     app.use(async function (err, req, res, next) {
-        console.log('===> err', err);
         // Return a 404 for when no client ID has been set, this is not a server error
-        if (err && err.message && err.message.match(/^'No Client ID is set for login/)) {
+        if (err && err.message && err.message.match(/^No Client ID is set for login/)) {
           return res.status(404).render('errors/404');
         }
         // een deserialize error betekent een data fout; daar hoef je een gebruiker niet mee te belasten
@@ -322,6 +326,7 @@ module.exports = function (app) {
           if (req.query.access_token) querystring += `&access_token=${req.query.access_token}`;
           return res.redirect('/logout'+querystring);
         }
+        console.log('===> err', err);
         res.status(500).render('errors/500');
     });
 

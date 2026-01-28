@@ -1,5 +1,5 @@
 import './swipe.scss';
-import React, { useState, useEffect, useMemo, FC, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, FC, useCallback, useRef, useId } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
 import { Heading, Paragraph, Button } from '@utrecht/component-library-react';
 import { FormValue } from '@openstad-headless/form/src/form';
@@ -48,24 +48,62 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   agreeText = 'Eens',
   disagreeText = 'Oneens',
 }) => {
+  // Generate unique ID for this component instance
+  const componentId = useId();
+  
   // Track previous answers per card for visual feedback
   const [previousAnswers, setPreviousAnswers] = useState<Record<string, string>>({});
   const swipeCards = useMemo(() => cards.length > 0 ? cards : [], [cards]);
-  let initialAnswers: Record<string, string> = {};
-  let initialAnswersExplanation: Record<string, string> = {};
+  
+  // Track the card IDs this component is responsible for
+  const componentCardIds = useMemo(() => {
+    return new Set(swipeCards.map(card => card.id));
+  }, [swipeCards]);
+  
+  // Helper function to validate if overrideDefaultValue belongs to this swipe component
+  const validateOverrideData = useCallback((override: FormValue | undefined): boolean => {
+    if (!override || typeof override !== 'object' || !Array.isArray(override)) {
+      return false;
+    }
+    
+    const overrideArray = override as valueObject;
+    if (overrideArray.length === 0) {
+      return false;
+    }
+    
+    // Check if at least one cardId in the override data exists in current swipeCards
+    // This allows for valid data even if the override contains answers for already-answered cards
+    return overrideArray.some(item => componentCardIds.has(item.cardId));
+  }, [componentCardIds]);
+  
+  // Initialize answers from overrideDefaultValue only if it's valid for this component
+  const getInitialAnswers = useCallback(() => {
+    let initialAnswers: Record<string, string> = {};
+    let initialAnswersExplanation: Record<string, string> = {};
 
-  if (overrideDefaultValue && typeof overrideDefaultValue === 'object') {
-    const overrideArray = overrideDefaultValue as valueObject;
-    overrideArray.forEach(item => {
-      initialAnswers[item.cardId as string] = item.answer;
-      if (item.explanation) {
-        initialAnswersExplanation[item.cardId as string] = item.explanation;
-      }
-    });
-  }
+    if (validateOverrideData(overrideDefaultValue)) {
+      const overrideArray = overrideDefaultValue as valueObject;
+      overrideArray.forEach(item => {
+        // Only include answers for cards that belong to this component
+        if (componentCardIds.has(item.cardId)) {
+          initialAnswers[item.cardId as string] = item.answer;
+          if (item.explanation) {
+            initialAnswersExplanation[item.cardId as string] = item.explanation;
+          }
+        }
+      });
+    }
+    
+    return { initialAnswers, initialAnswersExplanation };
+  }, [overrideDefaultValue, validateOverrideData, componentCardIds]);
 
-  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, string>>(initialAnswers);
-  const [explanations, setExplanations] = useState<Record<string, string>>(initialAnswersExplanation);
+  const [swipeAnswers, setSwipeAnswers] = useState<Record<string, string>>(() => getInitialAnswers().initialAnswers);
+  const [explanations, setExplanations] = useState<Record<string, string>>(() => getInitialAnswers().initialAnswersExplanation);
+  
+  // Track if we've already initialized from overrideDefaultValue to prevent loops
+  const hasInitialized = useRef(false);
+  // Track the cards this component was initialized with
+  const initializedCardIds = useRef<Set<string>>(componentCardIds);
   const [isFinished, setIsFinished] = useState(false);
 
   const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
@@ -127,6 +165,24 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsFinished(false);
   }, [swipeCards, swipeAnswers, fieldKey]);
 
+  const moveToNext = useCallback(() => {
+    const unansweredCards = getUnansweredCards();
+    if (unansweredCards.length > 0) {
+      // Markeer de huidige kaart als 'skipped'
+      const currentCard = unansweredCards[0];
+      setSwipeAnswers(prev => ({
+        ...prev,
+        [currentCard.id]: 'skipped'
+      }));
+      setIsAnimating(false);
+      setSwipeDirection(null);
+      setAnimationType(null);
+      setIsFadingOut(false);
+      setPendingSwipe(null);
+      setShowExplanationDialog(false);
+    }
+  }, [swipeCards, swipeAnswers, fieldKey]);
+
   const canGoBack = useCallback(() => {
     const answeredCardIds = Object.keys(swipeAnswers);
     return answeredCardIds.length > 0;
@@ -139,11 +195,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         ...prev,
         [card.id]: direction
       }));
-      
+
       // Start fadeout animation
       setIsFadingOut(true);
       setSwipeDirection(null);
-      
+
       // Second phase: fadeout animation (300ms)
       setTimeout(() => {
         removeCurrentCard();
@@ -167,11 +223,11 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           }));
           setPendingSwipe(null);
         }
-        
+
         // Start fadeout animation
         setIsFadingOut(true);
         setSwipeDirection(null);
-        
+
         // Fadeout animation (300ms)
         setTimeout(() => {
           removeCurrentCard();
@@ -182,6 +238,53 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       }, 200);
     }, 200);
   }, [pendingSwipe]);
+
+  // Detect when cards change (new swipe component with different cards)
+  useEffect(() => {
+    // Check if the cards have changed compared to what we initialized with
+    const currentCardIdsString = Array.from(componentCardIds).sort().join(',');
+    const initialCardIdsString = Array.from(initializedCardIds.current).sort().join(',');
+    
+    if (currentCardIdsString !== initialCardIdsString) {
+      // Cards have changed - this is a different swipe component
+      // Reset all state and reinitialize with new data
+      const { initialAnswers, initialAnswersExplanation } = getInitialAnswers();
+      setSwipeAnswers(initialAnswers);
+      setExplanations(initialAnswersExplanation);
+      setIsFinished(false);
+      setPreviousAnswers({});
+      
+      // Update the ref to track these new cards
+      initializedCardIds.current = componentCardIds;
+      hasInitialized.current = false; // Allow reinitialization
+    }
+  }, [componentCardIds, getInitialAnswers]);
+
+  // Reset state when overrideDefaultValue changes to data that doesn't belong to this component
+  useEffect(() => {
+    // Skip if we haven't initialized yet or if the component just mounted
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      return;
+    }
+    
+    // Only act if overrideDefaultValue has data that doesn't match our cards
+    if (overrideDefaultValue && Array.isArray(overrideDefaultValue) && overrideDefaultValue.length > 0) {
+      const overrideArray = overrideDefaultValue as valueObject;
+      
+      // Check if ANY of the cardIds in override belong to another component
+      const hasOtherComponentData = overrideArray.some(item => !componentCardIds.has(item.cardId));
+      const hasOwnComponentData = overrideArray.some(item => componentCardIds.has(item.cardId));
+      
+      // Only reset if ALL data is for another component (none is for us)
+      if (hasOtherComponentData && !hasOwnComponentData) {
+        setSwipeAnswers({});
+        setExplanations({});
+        setIsFinished(false);
+        setPreviousAnswers({});
+      }
+    }
+  }, [overrideDefaultValue, componentCardIds]);
 
   useEffect(() => {
     const unanswered = getUnansweredCards();
@@ -314,7 +417,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   const handlePointerDown = useCallback((event: React.PointerEvent) => {
     if (isAnimating || getUnansweredCards().length === 0) return;
-    
+
     // Skip touch events when pointer events are from touch (iOS sends both)
     if (event.pointerType === 'touch') return;
 
@@ -341,7 +444,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const handlePointerMove = useCallback((event: React.PointerEvent) => {
     const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
-    
+
     // Skip touch events when pointer events are from touch
     if (event.pointerType === 'touch') return;
 
@@ -371,7 +474,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const handlePointerUp = useCallback((event: React.PointerEvent) => {
     const dragState = dragStateRef.current;
     if (!dragState.isDragging) return;
-    
+
     // Skip touch events when pointer events are from touch
     if (event.pointerType === 'touch') return;
 
@@ -720,43 +823,55 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         </div>
         {showButtons && (
           <div className="swipe-actions" role="group" aria-label="Acties">
-            <button
-              className={`swipe-btn swipe-btn-pass${
-                previousAnswers[currentCardId] === disagreeText
+            <div className="swipe-main-actions">
+              <button
+                className={`swipe-btn swipe-btn-pass${previousAnswers[currentCardId] === disagreeText
                   ? ' --previous-awnser'
                   : ''
-              }`}
-              onClick={(e) => (e.preventDefault(), handleSwipeLeft(true))}
-              disabled={unansweredCards.length === 0}
-              aria-label="Afwijzen"
-            >
-              <i className="ri-thumb-down-fill"></i>
-              <span>Oneens</span>
-            </button>
-            <button
-              className="swipe-info-btn"
-              onClick={(e) => {
-                e.preventDefault();
-                setInfoVisibleCardId(infoVisibleCardId === currentCardId ? null : currentCardId);
-              }}
-              disabled={!unansweredCards[0]?.infoField}
-              aria-label="Toon info"
-            >
-              <span>Info</span>
-            </button>
-            <button
-              className={`swipe-btn swipe-btn-like${
-                previousAnswers[currentCardId] === agreeText
+                  }`}
+                onClick={(e) => (e.preventDefault(), handleSwipeLeft(true))}
+                disabled={unansweredCards.length === 0}
+                aria-label="Afwijzen"
+              >
+                <i className="ri-thumb-down-fill"></i>
+                <span>Oneens</span>
+              </button>
+              <button
+                className={`swipe-btn swipe-btn-like${previousAnswers[currentCardId] === agreeText
                   ? ' --previous-awnser'
                   : ''
-              }`}
-              onClick={(e) => (e.preventDefault(), handleSwipeRight(true))}
-              disabled={unansweredCards.length === 0}
-              aria-label="Goedkeuren"
-            >
-              <i className="ri-thumb-up-fill"></i>
-              <span>Eens</span>
-            </button>
+                  }`}
+                onClick={(e) => (e.preventDefault(), handleSwipeRight(true))}
+                disabled={unansweredCards.length === 0}
+                aria-label="Goedkeuren"
+              >
+                <i className="ri-thumb-up-fill"></i>
+                <span>Eens</span>
+              </button>
+            </div>
+
+            <div className="swipe-middle-actions">
+              <button
+                className="swipe-info-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setInfoVisibleCardId(infoVisibleCardId === currentCardId ? null : currentCardId);
+                }}
+                disabled={!unansweredCards[0]?.infoField}
+                aria-label="Toon info"
+              >
+                <span className="sr-only">Toon info</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                  <path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM280 400C266.7 400 256 410.7 256 424C256 437.3 266.7 448 280 448L360 448C373.3 448 384 437.3 384 424C384 410.7 373.3 400 360 400L352 400L352 312C352 298.7 341.3 288 328 288L280 288C266.7 288 256 298.7 256 312C256 325.3 266.7 336 280 336L304 336L304 400L280 400zM320 256C337.7 256 352 241.7 352 224C352 206.3 337.7 192 320 192C302.3 192 288 206.3 288 224C288 241.7 302.3 256 320 256z" />
+                </svg>
+              </button>
+              <button className="swipe-skip-btn" onClick={(e) => (e.preventDefault(), moveToNext())} aria-label="Kaart overslaan" disabled={required}>
+                <span>Overslaan</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                  <path d="M141.5 130.2C139.2 128 135.8 127.4 132.8 128.6C129.8 129.8 128 132.8 128 136L128 504C128 507.2 129.9 510.1 132.9 511.4C135.9 512.7 139.3 512 141.6 509.8L333.6 325.8C335.2 324.3 336.1 322.2 336.1 320C336.1 317.8 335.2 315.7 333.6 314.2L141.6 130.2zM336 367.7L163.7 532.9C152.1 544 135.1 547.1 120.3 540.8C105.5 534.5 96 520 96 504L96 136C96 120 105.6 105.5 120.3 99.2C135 92.9 152.1 96 163.7 107.1L336 272.3L336 136C336 120 345.6 105.5 360.3 99.2C375 92.9 392.1 96 403.7 107.1L595.7 291.1C603.6 298.6 608 309.1 608 320C608 330.9 603.5 341.3 595.7 348.9L403.7 532.9C392.1 544 375.1 547.1 360.3 540.8C345.5 534.5 336 520 336 504L336 367.7zM372.9 128.6C370 129.9 368 132.8 368 136L368 504C368 507.2 369.9 510.1 372.9 511.4C375.9 512.7 379.3 512 381.6 509.8L573.6 325.8C575.2 324.3 576.1 322.2 576.1 320C576.1 317.8 575.2 315.7 573.6 314.2L381.6 130.2C379.3 128 375.9 127.4 372.9 128.6z" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
 

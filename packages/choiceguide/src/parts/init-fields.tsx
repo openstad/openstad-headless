@@ -29,7 +29,6 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 showMoreInfo: item.showMoreInfo || false,
                 moreInfoButton: item.moreInfoButton || '',
                 moreInfoContent: item.moreInfoContent || '',
-                infoImage: item.infoImage || '',
                 titleA: item.labelA || '',
                 titleB: item.labelB || '',
                 descriptionA: item.sliderTitleUnderA || '',
@@ -49,6 +48,12 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 routingSelectedAnswer: item?.routingSelectedAnswer || '',
                 trigger: item.trigger || '',
                 placeholder: item.placeholder || '',
+                images: item.images || [],
+                createImageSlider: item?.createImageSlider || false,
+                imageClickable: item?.imageClickable || false,
+
+                // Keeping this for backwards compatibility
+                infoImage: item.infoImage || '',
             };
 
             switch (item.type) {

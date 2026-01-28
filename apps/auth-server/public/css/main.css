@@ -7754,3 +7754,16 @@ textarea:disabled {
     transform: rotate(360deg);
   }
 }
+
+.form-group.emailNotificationConsent {
+  display: flex;
+  gap: 10px;
+}
+
+.form-group.emailNotificationConsent label,
+.form-group.emailNotificationConsent input {
+  font-weight: normal;
+  font-size: 16px;
+  margin: 0;
+  color: #000;
+}

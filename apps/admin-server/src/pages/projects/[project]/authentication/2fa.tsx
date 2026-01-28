@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import toast from 'react-hot-toast';
+import {useRouter} from "next/router";
 
 
 const twoFactorRoles = [
@@ -58,6 +59,9 @@ export default function ProjectAuthentication2FA() {
     data,
     updateProject,
   } = useProject(['includeAuthConfig']);
+
+  const router = useRouter();
+  const { project } = router.query;
 
   const defaults = useCallback(
     () => ({
@@ -133,11 +137,11 @@ export default function ProjectAuthentication2FA() {
           },
           {
             name: 'Authenticatie',
-            url: '/projects/1/authentication',
+            url: `/projects/${project}/authentication`,
           },
           {
             name: 'Tweestapsverificatie',
-            url: '/projects/1/authentication/2fa',
+            url: `/projects/${project}/authentication/2fa`,
           },
         ]}>
         <div className="container py-6">

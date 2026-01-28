@@ -17,6 +17,7 @@ type Props = {
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
   parentStopUsingDefaultValue?: boolean;
+  inlineOptions?: boolean;
 };
 
 type TagDefinition = { id: number; name: string; projectId?: any };
@@ -29,6 +30,7 @@ const MultiSelectTagFilter = ({
   onlyIncludeIds = [],
   preFilterTags = undefined,
   parentStopUsingDefaultValue = false,
+  inlineOptions = false,
   ...props
 }: Props) => {
 
@@ -93,10 +95,9 @@ const MultiSelectTagFilter = ({
 
   return tags.length > 0 && (
     <div className="form-element">
-      <FormLabel id={getRandomId(props.placeholder)}>{props.placeholder || 'Selecteer item'}</FormLabel>
+      <FormLabel id={getRandomId(props.placeholder)}>{props.placeholder || `Selecteer ${tagType.toLowerCase()}` }</FormLabel>
       <MultiSelect
         id={getRandomId(props.placeholder)}
-        label={props.placeholder || ''}
         onItemSelected={(value, label) => {
           setStopUsingDefaultValue(true);
           onUpdateFilter && onUpdateFilter(value, label);
@@ -106,6 +107,8 @@ const MultiSelectTagFilter = ({
           label: tag.name,
           checked: combinedSelects.includes(tag.id),
         }))}
+        inlineOptions={inlineOptions}
+        defaultOpen={inlineOptions}
       />
     </div>
   );
