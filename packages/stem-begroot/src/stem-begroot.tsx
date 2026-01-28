@@ -457,6 +457,7 @@ function StemBegroot({
       } else {
         setCurrentStep(3);
       }
+     }
     }
   }, [currentUser, currentStep, selectedResources, tagCounter]);
 
@@ -956,6 +957,7 @@ function StemBegroot({
                   budget: number;
                 }) => {
                   votePendingStorage.clearAllVotePending();
+                  selectedResourcesStorage.clearSelectedResources()
 
                   let newTagCounter = [...tagCounter];
 
@@ -1348,7 +1350,7 @@ function StemBegroot({
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 votePendingStorage.clearAllVotePending();
-
+                selectedResourcesStorage.clearSelectedResources()
                 let newTagCounter = [...tagCounter];
 
                 if (
