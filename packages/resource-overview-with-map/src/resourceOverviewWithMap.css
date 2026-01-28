@@ -1,35 +1,35 @@
 .resourceOverviewWithMap-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: calc(100vh - 193px);
+  grid-template-columns: var(--setResourceOverviewMapFilterColumns, var(--resourceOverviewMapFilterColumns, 1fr 1fr));
+  height: var(--setResourceOverviewMapHeight, var(--resourceOverviewMapHeight, calc(100vh - 193px)));
 }
 
 .resourceOverviewWithMap-container
   .osc-resourceoverview-search-container.col-span-full:not(:empty) {
-  margin-block-end: 1.5rem;
+  margin-block-end: var(--setResourceOverviewMapMarginBlock, var(--resourceOverviewMapMarginBlock, 1.5rem));
 }
 
 .resourceOverviewWithMap-container .osc-resource-overview-content {
-  grid-template-columns: 1fr;
-  gap: 0 2rem;
+  grid-template-columns: var(--setResourceOverviewMapMobileColumns, var(--resourceOverviewMapMobileColumns, 1fr));
+  gap: var(--setResourceOverviewMapGap, var(--resourceOverviewMapGap, 0 2rem));
 }
 .resourceOverviewWithMap-container
   .osc-resource-overview-content
   #stem-begroot-filter {
   grid-column: 1 / -1;
-  margin-block-end: 3rem;
+  margin-block-end: var(--setResourceOverviewMapFilterMarginBlock, var(--resourceOverviewMapFilterMarginBlock, 3rem));
 }
 .resourceOverviewWithMap-container
   .osc-resource-overview-content
   #stem-begroot-filter
   .osc-resources-filter.osc-flex-columned {
-  width: calc(100% + 2rem);
-  padding-inline-start: 2rem;
-  padding-inline-end: 2rem;
+  width: var(--setResourceOverviewMapFilterWidth, var(--resourceOverviewMapFilterWidth, calc(100% + 2rem)));
+  padding-inline-start: var(--setResourceOverviewMapFilterPaddingStart, var(--resourceOverviewMapFilterPaddingStart, 2rem));
+  padding-inline-end: var(--setResourceOverviewMapFilterPaddingEnd, var(--resourceOverviewMapFilterPaddingEnd, 2rem));
   box-sizing: border-box;
 
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: var(--setResourceOverviewMapFilterColumns, var(--resourceOverviewMapFilterColumns, 1fr 1fr));
 }
 
 .resourceOverviewWithMap-container .detail-container {
@@ -54,14 +54,14 @@
 }
 .resourceOverviewWithMap-container .resource-card--link {
   display: grid;
-  grid-template-columns: 230px auto;
-  border-bottom: solid 1px var(--nlds-default-border-color, #a9b2ba);
-  padding-bottom: 1rem;
-  padding-inline-start: 1rem;
-  padding-inline-end: 1rem;
+  grid-template-columns: var(--setResourceOverviewMapCardColumns, var(--resourceOverviewMapCardColumns, 230px auto));
+  border-bottom: solid var(--setResourceOverviewMapCardBorderWidth, var(--resourceOverviewMapCardBorderWidth, 1px)) var(--setResourceOverviewMapCardBorderColor, var(--resourceOverviewMapCardBorderColor, var(--nlds-default-border-color, #a9b2ba)));
+  padding-bottom: var(--setResourceOverviewMapCardPaddingBottom, var(--resourceOverviewMapCardPaddingBottom, 1rem));
+  padding-inline-start: var(--setResourceOverviewMapCardPaddingStart, var(--resourceOverviewMapCardPaddingStart, 1rem));
+  padding-inline-end: var(--setResourceOverviewMapCardPaddingEnd, var(--resourceOverviewMapCardPaddingEnd, 1rem));
   align-content: center;
-  grid-gap: 0 1.5rem;
-  margin-block-start: -1rem;
+  grid-gap: var(--setResourceOverviewMapCardGap, var(--resourceOverviewMapCardGap, 0 1.5rem));
+  margin-block-start: var(--setResourceOverviewMapCardMarginBlock, var(--resourceOverviewMapCardMarginBlock, -1rem));
   justify-content: stretch;
 }
 
@@ -110,9 +110,9 @@
 
 @container resourceOverviewWithMapContainer (max-width: 1000px) {
   .resourceOverviewWithMap-container {
-    grid-template-columns: 1fr;
-    height: auto;
-    grid-template-rows: 250px auto;
+    grid-template-columns: var(--setResourceOverviewMapMobileColumns, var(--resourceOverviewMapMobileColumns, 1fr));
+    height: var(--setResourceOverviewMapMobileHeight, var(--resourceOverviewMapMobileHeight, auto));
+    grid-template-rows: var(--setResourceOverviewMapRows, var(--resourceOverviewMapRows, 250px auto));
   }
   .resourceOverviewWithMap-container .map-container {
     grid-row: 1;
@@ -138,7 +138,7 @@
     display: block;
   }
   .osc .image-container > img {
-    aspect-ratio: 16/5;
+    aspect-ratio: var(--setResourceOverviewMapImageAspectRatio, var(--resourceOverviewMapImageAspectRatio, 16/5));
   }
 }
 
@@ -148,7 +148,7 @@
     flex-direction: column;
   }
   .resourceOverviewWithMap-container .osc-resource-overview-content #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
-    grid-template-columns: 1fr;
+    grid-template-columns: var(--setResourceOverviewMapMobileColumns, var(--resourceOverviewMapMobileColumns, 1fr));
   }
 }
 

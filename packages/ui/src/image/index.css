@@ -1,15 +1,14 @@
 
 .osc .image-container {
-    border-radius: 4px;
+    border-radius: var(--setImageBorderRadius, var(--imageBorderRadius, 4px));
     box-sizing: border-box;
     position: relative;
     overflow: clip;
-    background: #212529;
-
+    background: var(--setImageBackground, var(--imageBackground, #212529));
 }
 
 .osc .image-container.selected {
-    border: 4px solid var(--osc-primary);
+    border: var(--setImageSelectedBorder, var(--imageSelectedBorder, 4px solid var(--osc-primary, #12B886)));
 }
 
 .osc .image-container > img {
@@ -24,15 +23,15 @@
     width: 100%;
     position: relative;
     bottom: 0;
-    gap: 1rem;
+    gap: var(--setImageFooterGap, var(--imageFooterGap, 1rem));
     box-sizing: border-box;
-    background: var(--nlds-figcaption-background-color, var(--utrecht-button-primary-action-background-color));
-    color: var(--nlds-figcaption-color, var(--utrecht-button-primary-action-color));    
+    background: var(--setImageFooterBackground, var(--imageFooterBackground, var(--osc-primary, #12B886)));
+    color: var(--setImageFooterColor, var(--imageFooterColor, var(--osc-primary-foreground, #ffffff)));
 }
 
 .osc .image-container > .osc-image-footer p{
     color: inherit;
-    padding: 1rem 1rem;
+    padding: var(--setImageFooterPadding, var(--imageFooterPadding, 1rem 1rem));
 }
 
 .osc .image-container > .osc-image-header {
@@ -40,9 +39,9 @@
     width: 100%;
     position: absolute;
     top: 0;
-    gap: 1rem;
+    gap: var(--setImageHeaderGap, var(--imageHeaderGap, 1rem));
     box-sizing: border-box;
-    padding: .5rem .5rem;
+    padding: var(--setImageHeaderPadding, var(--imageHeaderPadding, 0.5rem 0.5rem));
 }
 
 .osc .osc-image-footer > * {

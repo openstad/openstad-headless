@@ -1,8 +1,8 @@
 .account {
-  display: flex;
+  display: var(--setAccountDisplay, var(--accountDisplay, flex));
   flex-direction: column;
-  gap: 2rem;
-  margin: 0 auto;
+  gap: var(--setAccountContainerGap, var(--accountContainerGap, 2rem));
+  margin: var(--setAccountMargin, var(--accountMargin, 0 auto));
 }
 
 .account input {
@@ -11,18 +11,18 @@
 
 .account > div:not(.banner) {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 1rem;
+  grid-template-columns: var(--setAccountColumns, var(--accountColumns, 1fr 1fr));
+  grid-gap: var(--setAccountGap, var(--accountGap, 1rem));
   position: relative;
 }
 
 .account > div + div {
-  border-block-start: solid 1px hsla(0, 0%, 0%, 0.1);
-  padding-top: 2rem;
+  border-block-start: solid var(--setAccountBorderWidth, var(--accountBorderWidth, 1px)) var(--setAccountBorderColor, var(--accountBorderColor, hsla(0, 0%, 0%, 0.1)));
+  padding-top: var(--setAccountDivPaddingTop, var(--accountDivPaddingTop, 2rem));
 }
 
 .account > div:not(:has(h2)):has(.account-edit-button) {
-  padding-top: 5rem;
+  padding-top: var(--setAccountEditButtonPaddingTop, var(--accountEditButtonPaddingTop, 5rem));
 }
 
 .account h2,
@@ -38,7 +38,7 @@
 
 @media screen and (max-width: 700px) {
   .account > div {
-    grid-template-columns: 1fr;
+    grid-template-columns: var(--setAccountMobileColumns, var(--accountMobileColumns, 1fr));
   }
   
   .account .account-edit-button,

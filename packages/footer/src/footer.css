@@ -1,31 +1,31 @@
 #footer-container{
-  background: #fff;
-  padding-block-start: var(--nlds-footer-before-height, 0);
+  background: var(--setFooterBackground, var(--footerBackground, #fff));
+  padding-block-start: var(--setFooterPaddingBlockStart, var(--footerPaddingBlockStart, var(--nlds-footer-before-height, 0)));
 }
 
 #footer-container footer::before{
   content: '';
-  height: var(--nlds-footer-before-height, 0);
+  height: var(--setFooterBeforeHeight, var(--footerBeforeHeight, var(--nlds-footer-before-height, 0)));
   width: 100%;
   display: block;
-  background: var(--nlds-footer-before-background-color, var(--utrecht-button-primary-action-background-color));
-  top: calc(var(--nlds-footer-before-height, 0) * -1);
+  background: var(--setFooterBeforeBackground, var(--footerBeforeBackground, var(--nlds-footer-before-background-color, var(--utrecht-button-primary-action-background-color))));
+  top: calc(var(--setFooterBeforeHeight, var(--footerBeforeHeight, var(--nlds-footer-before-height, 0))) * -1);
   position: absolute;
 }
 
 #footer-container footer{
-  padding: 1rem 0;
-  margin-block-start: var(--nlds-footer-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem));
+  padding: var(--setFooterPadding, var(--footerPadding, 1rem 0));
+  margin-block-start: var(--setFooterMarginBlockStart, var(--footerMarginBlockStart, var(--nlds-footer-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem))));
   position: relative;
-  background-color: var(--nlds-footer-background-color, var(--nlds-default-background-color, #F0F4F8));
-  color: var(--nlds-footer-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+  background-color: var(--setFooterBackgroundColor, var(--footerBackgroundColor, var(--nlds-footer-background-color, var(--nlds-default-background-color, #F0F4F8))));
+  color: var(--setFooterColor, var(--footerColor, var(--nlds-footer-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)))));
 }
 
 #footer-container footer .container{
   display: grid;
-  padding: 20px;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  padding: var(--setFooterContainerPadding, var(--footerContainerPadding, 20px));
+  gap: var(--setFooterContainerGap, var(--footerContainerGap, 20px));
+  grid-template-columns: var(--setFooterContainerColumns, var(--footerContainerColumns, repeat(auto-fit, minmax(200px, 1fr))));
 }
 
 #footer-container footer .container .footer-section{
@@ -38,7 +38,7 @@
   margin: 0;
 }
 #footer-container footer .container ul li{
-  padding: .2rem 0;
+  padding: var(--setFooterListItemPadding, var(--footerListItemPadding, .2rem 0));
 }
 
 #footer-container footer h2,
@@ -52,6 +52,6 @@
 #footer-container footer .footer-logo img{
   width: 100%;
   height: 100%;
-  object-fit: scale-down;
-  object-position: top right;
+  object-fit: var(--setFooterLogoObjectFit, var(--footerLogoObjectFit, scale-down));
+  object-position: var(--setFooterLogoObjectPosition, var(--footerLogoObjectPosition, top right));
 }

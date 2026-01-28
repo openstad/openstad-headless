@@ -2,32 +2,30 @@
 .osc .osc-imageselect {
   display: flex;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--setImageSelectGap, var(--imageSelectGap, 0.5rem));
 }
 
 .osc .osc-imageselect p {
-    color: black !important;
+    color: var(--setImageSelectColor, var(--imageSelectColor, black)) !important;
   }
 
 .osc .osc-imageselect-item {
     display: flex;
     flex-direction: column;
-    background: white;
+    background: var(--setImageSelectItemBackground, var(--imageSelectItemBackground, white));
     width: 50%;
-    gap: 0.5rem;
-    padding: 0.2rem;
-    border-radius: 4px;
-    border: 2px solid transparent;
+    gap: var(--setImageSelectItemGap, var(--imageSelectItemGap, 0.5rem));
+    padding: var(--setImageSelectItemPadding, var(--imageSelectItemPadding, 0.2rem));
+    border-radius: var(--setImageSelectItemBorderRadius, var(--imageSelectItemBorderRadius, 4px));
+    border: var(--setImageSelectItemBorder, var(--imageSelectItemBorder, 2px solid transparent));
     cursor: pointer;
   }
 
 .osc .osc-imageselect-item-selected {
-  border: 2px solid var(--osc-secondary);
+  border: var(--setImageSelectItemSelectedBorder, var(--imageSelectItemSelectedBorder, 2px solid var(--osc-secondary, #1471EF)));
 }
 
-
 input[type="radio"].osc-imageselect-radio  {
-    /* hide radio button */
     -webkit-appearance: none;
     appearance: none;
     display: none;
@@ -35,5 +33,5 @@ input[type="radio"].osc-imageselect-radio  {
 
 .osc-imageselect-image {
     object-fit: cover;
-    border-radius: 0px;
+    border-radius: var(--setImageSelectImageBorderRadius, var(--imageSelectImageBorderRadius, 0px));
 }

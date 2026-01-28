@@ -2,12 +2,9 @@
   --utrecht-pointer-target-min-size: auto;
   align-items: stretch;
   display: flex;
-  padding: var(--nlds-budget-resources-filter-padding, 1rem);
-  gap: var(--nlds-budget-resources-filter-gap, 1rem);
-  background-color: var(
-    --nlds-budget-resources-filter-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
-  );
+  padding: var(--setResourceFilterPadding, var(--resourceFilterPadding, var(--nlds-budget-resources-filter-padding, 1rem)));
+  gap: var(--setResourceFilterGap, var(--resourceFilterGap, var(--nlds-budget-resources-filter-gap, 1rem)));
+  background-color: var(--setResourceFilterBackground, var(--resourceFilterBackground, var(--nlds-budget-resources-filter-background-color, var(--nlds-default-background-color, #f0f4f8))));
 }
 
 .osc-resources-filter > div,

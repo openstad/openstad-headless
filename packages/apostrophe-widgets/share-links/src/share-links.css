@@ -4,23 +4,23 @@
 }
 
 .utrecht-link-social.copy-link{
-    cursor: pointer;
+    cursor: var(--setApostropheShareLinksCursor, var(--apostropheShareLinksCursor, pointer));
 }
 
 
 .share-links .icon{
-    position: relative;
-    width: 50px;
-    height: 50px;
+    position: var(--setApostropheShareLinksPosition, var(--apostropheShareLinksPosition, relative));
+    width: var(--setApostropheShareLinksWidth, var(--apostrophesharelinksWidth, 50px));
+    height: var(--setApostropheShareLinksHeight, var(--apostrophesharelinksHeight, 50px));
 }
 
 .share-links .icon::before{
     content: '';
-    inset: 0;
+    inset: var(--setApostropheShareLinksInset, var(--apostropheShareLinksInset, 0));
     background: var(--utrecht-link-social-color);
-    position: absolute;
-    mask-repeat: no-repeat;
-    mask-position: center;
+    position: var(--setApostropheShareLinksAbsolutePosition, var(--apostropheShareLinksAbsolutePosition, absolute));
+    mask-repeat: var(--setApostropheShareLinksMaskRepeat, var(--apostropheShareLinksMaskRepeat, no-repeat));
+    mask-position: var(--setApostropheShareLinksMaskPosition, var(--apostropheShareLinksMaskPosition, center));
 }
 
 .share-links .icon.--facebook:before{
@@ -50,14 +50,14 @@
 
 .share-links .link-container{
     display: flex;
-    grid-gap: 5px;
+    grid-gap: var(--setApostropheShareLinksGap, var(--apostrophesharelinksGap, 5px));
     margin-top: 10px;
     flex-wrap: wrap;
 }
 
 .sr-only{
-    width: 0;
-    height: 0;
+    width: var(--setApostropheShareLinksWidth, var(--apostrophesharelinksWidth, 0));
+    height: var(--setApostropheShareLinksHeight, var(--apostrophesharelinksHeight, 0));
     overflow: hidden;
     display: block;
 }

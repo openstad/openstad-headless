@@ -1,17 +1,17 @@
 .osc-pill {
-    padding: .25rem 1rem;
-    background-color: var(--osc-muted);
-    color: var(--osc-muted-foreground);
-    border-radius: .125rem;
+    padding: var(--setPillPadding, var(--pillPadding, 0.25rem 1rem));
+    background-color: var(--setPillBackground, var(--pillBackground, var(--osc-muted, #59636d)));
+    color: var(--setPillColor, var(--pillColor, var(--osc-muted-foreground, #ffffff)));
+    border-radius: var(--setPillBorderRadius, var(--pillBorderRadius, 0.125rem));
 }
 
 .osc-pill-rounded {
-    border-radius: 1rem;
+    border-radius: var(--setPillRoundedBorderRadius, var(--pillRoundedBorderRadius, 1rem));
 }
 
 .osc-pill-light {
-    background-color: var(--osc-card-dark);
-    color: var(--osc-card-dark-foreground);
+    background-color: var(--setPillLightBackground, var(--pillLightBackground, var(--osc-card-dark, #DBDFE5)));
+    color: var(--setPillLightColor, var(--pillLightColor, var(--osc-foreground, #010D0A)));
 }
 
 .osc-pill > p {

@@ -1,28 +1,28 @@
 .video-slider {
     --videoSliderPrimaryColor: var(--setVideoSliderPrimaryColor, #f8d62d);
     --videoSliderSecondaryColor: var(--setVideoSliderSecondaryColor, #258641);
-    --videoSliderBorderRadius: var(--setVideoSliderBorderRadius, 10px);
+    --setVideoSliderBorderRadius: var(--videoSliderBorderRadius, 10px);
 
-    --titleBackgroundColor: var(--setTitleBackgroundColor, var(--videoSliderPrimaryColor));
-    --titleFontSize: var(--setTitleFontSize, 2rem);
-    --descriptionFontSize: var(--setDescriptionFontSize, 12px);
-    --swipeBackgroundColor: var(--setSwipeBackgroundColor, linear-gradient(153deg, rgb(238, 238, 238) 0%, rgb(220, 220, 220) 100%));
+    --setVideoSliderTitleBackgroundColor: var(--videoSliderTitleBackgroundColor, var(--setVideoSliderPrimaryColor, var(--videoSliderPrimaryColor, #f8d62d)));
+    --setVideoSliderTitleFontSize: var(--videoSliderTitleFontSize, 2rem);
+    --setVideoSliderDescriptionFontSize: var(--videoSliderDescriptionFontSize, 12px);
+    --setVideoSliderSwipeBackgroundColor: var(--videoSliderSwipeBackgroundColor, linear-gradient(153deg, rgb(238, 238, 238) 0%, rgb(220, 220, 220) 100%));
 
-    --checkedBackgroundColor: var(--setCheckedBackgroundColor, var(--videoSliderPrimaryColor));
-    --checkedColor: var(--setCheckedColor, #000);
+    --setVideoSliderCheckedBackgroundColor: var(--videoSliderCheckedBackgroundColor, var(--setVideoSliderPrimaryColor, var(--videoSliderPrimaryColor, #f8d62d)));
+    --setVideoSliderCheckedColor: var(--videoSliderCheckedColor, #000);
 
-    --inputBackgroundColor: var(--setInputBackgroundColor, rgba(0, 0, 0, 0.4));
-    --inputColor: var(--setInputColor, #fff);
-    --inputNumberColor: var(--setInputNumberColor, var(--videoSliderSecondaryColor));
+    --setVideoSliderInputBackgroundColor: var(--videoSliderInputBackgroundColor, rgba(0, 0, 0, 0.4));
+    --setVideoSliderInputColor: var(--videoSliderInputColor, #fff);
+    --setVideoSliderInputNumberColor: var(--videoSliderInputNumberColor, var(--setVideoSliderSecondaryColor, var(--videoSliderSecondaryColor, #258641)));
 
-    --animationSpeed: var(--setAnimationSpeed, 0.5s);
-    --animationDelay: var(--setAnimationDelay, 0.3s);
+    --setVideoSliderAnimationSpeed: var(--videoSliderAnimationSpeed, 0.5s);
+    --setVideoSliderAnimationDelay: var(--videoSliderAnimationDelay, 0.3s);
 
-    --nextButtonBackgroundColor: var(--setNextButtonBackgroundColor, var(--videoSliderPrimaryColor));
-    --nextButtonColor: var(--setNextButtonColor, #000);
+    --setVideoSliderNextButtonBackgroundColor: var(--videoSliderNextButtonBackgroundColor, var(--setVideoSliderPrimaryColor, var(--videoSliderPrimaryColor, #f8d62d)));
+    --setVideoSliderNextButtonColor: var(--videoSliderNextButtonColor, #000);
 
-    --submitButtonBackgroundColor: var(--setSubmitButtonBackgroundColor, var(--videoSliderPrimaryColor));
-    --submitButtonColor: var(--setSubmitButtonColor, #000);
+    --setVideoSliderSubmitButtonBackgroundColor: var(--videoSliderSubmitButtonBackgroundColor, var(--setVideoSliderPrimaryColor, var(--videoSliderPrimaryColor, #f8d62d)));
+    --setVideoSliderSubmitButtonColor: var(--videoSliderSubmitButtonColor, #000);
 
     height: 100dvh;
     max-width: 650px;
@@ -80,7 +80,7 @@
         height: 100%;
 
         .vid-container {
-            max-width: 900px;
+            max-width: var(--setVideoSliderVidContainerMaxWidth, var(--videoSliderVidContainerMaxWidth, 900px));
             overflow: hidden;
             position: absolute;
             inset: 0;
@@ -98,45 +98,45 @@
             position: absolute;
             inset: 0;
             display: flex;
-            gap: 30px;
+            gap: var(--setVideoSliderQuestionGap, var(--videoSliderQuestionGap, 30px));
             flex-direction: column;
             justify-content: space-between;
             z-index: 1;
-            padding: 3rem 4rem 3rem 2rem;
-            max-width: 600px;
+            padding: var(--setVideoSliderQuestionPadding, var(--videoSliderQuestionPadding, 3rem 4rem 3rem 2rem));
+            max-width: var(--setVideoSliderQuestionMaxWidth, var(--videoSliderQuestionMaxWidth, 600px));
             margin: 0 auto;
             text-align: left;
 
             h2 {
                 font-style: bold;
-                font-size: var(--titleFontSize);
+                font-size: var(--setVideoSliderTitleFontSize);
                 line-height: 120%;
             }
 
             p {
                 font-weight: 500;
-                font-size: var(--descriptionFontSize);
+                font-size: var(--setVideoSliderDescriptionFontSize);
                 line-height: 150%;
             }
 
             .--intro {
                 align-self: start;
-                padding: 1rem;
+                padding: var(--setVideoSliderIntroPadding, var(--videoSliderIntroPadding, 1rem));
                 position: relative;
                 text-align: left;
                 line-height: 150%;
-                animation: FadeIn var(--animationSpeed) ease-in-out;
-                animation-delay: var(--animationDelay);
+                animation: FadeIn var(--setVideoSliderAnimationSpeed) ease-in-out;
+                animation-delay: var(--setVideoSliderAnimationDelay);
                 animation-fill-mode: forwards;
                 margin: 0 auto;
-                max-width: 90%;
+                max-width: var(--setVideoSliderIntroMaxWidth, var(--videoSliderIntroMaxWidth, 90%));
 
-                transform: translateY(-100px);
-                opacity: 0;
+                transform: translateY(var(--setVideoSliderIntroTranslateY, var(--videoSliderIntroTranslateY, -100px)));
+                opacity: var(--setVideoSliderIntroOpacity, var(--videoSliderIntroOpacity, 0));
 
                 &:before {
                     content: '';
-                    background: var(--titleBackgroundColor);
+                    background: var(--setVideoSliderTitleBackgroundColor);
                     position: absolute;
                     inset: 0 -30px;
                     z-index: -1;
@@ -151,7 +151,7 @@
                     z-index: -1;
                     border-top: 30px solid transparent;
                     border-bottom: 30px solid transparent;
-                    border-left: 30px solid var(--titleBackgroundColor);
+                    border-left: 30px solid var(--setVideoSliderTitleBackgroundColor);
                     transform: skew(-10deg) translateX(-50%);
                 }
             }
@@ -162,13 +162,13 @@
                 margin: 0;
                 display: flex;
                 flex-direction: column;
-                gap: 1rem;
-                animation: FadeUp var(--animationSpeed) ease-in-out;
-                animation-delay: var(--animationDelay);
+                gap: var(--setVideoSliderListGap, var(--videoSliderListGap, 1rem));
+                animation: FadeUp var(--setVideoSliderAnimationSpeed) ease-in-out;
+                animation-delay: var(--setVideoSliderAnimationDelay);
                 animation-fill-mode: forwards;
 
-                transform: translateY(100px);
-                opacity: 0;
+                transform: translateY(var(--setVideoSliderListTranslateY, var(--videoSliderListTranslateY, 100px)));
+                opacity: var(--setVideoSliderListOpacity, var(--videoSliderListOpacity, 0));
 
                 &:has(.swipe-widget) {
                     height: 100%;
@@ -177,17 +177,17 @@
                 &.--radiofield {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 2rem 1rem;
+                    gap: var(--setVideoSliderRadioFieldGap, var(--videoSliderRadioFieldGap, 2rem 1rem));
 
                     label {
                         flex-direction: column;
                         text-align: center;
-                        padding: 0 20px 20px 20px;
+                        padding: var(--setVideoSliderRadioLabelPadding, var(--videoSliderRadioLabelPadding, 0 20px 20px 20px));
                         height: 100%;
                         justify-content: space-between;
 
                         span {
-                            margin-top: -20px;
+                            margin-top: var(--setVideoSliderRadioLabelSpanMarginTop, var(--videoSliderRadioLabelSpanMarginTop, -20px));
                         }
                     }
                 }
@@ -203,27 +203,27 @@
                         display: none;
 
                         &:checked+label {
-                            background-color: var(--checkedBackgroundColor);
-                            color: var(--checkedColor);
+                            background-color: var(--setVideoSliderCheckedBackgroundColor);
+                            color: var(--setVideoSliderCheckedColor);
                         }
                     }
 
                     label {
-                        color: var(--inputColor);
-                        font-size: 1.2rem;
-                        gap: 20px;
-                        border-radius: 3px;
-                        padding: 10px 20px;
-                        background: var(--inputBackgroundColor);
+                        color: var(--setVideoSliderInputColor);
+                        font-size: var(--setVideoSliderLabelFontSize, var(--videoSliderLabelFontSize, 1.2rem));
+                        gap: var(--setVideoSliderLabelGap, var(--videoSliderLabelGap, 20px));
+                        border-radius: var(--setVideoSliderLabelBorderRadius, var(--videoSliderLabelBorderRadius, 3px));
+                        padding: var(--setVideoSliderLabelPadding, var(--videoSliderLabelPadding, 10px 20px));
+                        background: var(--setVideoSliderInputBackgroundColor);
                         display: flex;
                         align-items: center;
                     }
 
                     span {
                         display: block;
-                        width: 40px;
-                        height: 40px;
-                        background: var(--inputNumberColor);
+                        width: var(--setVideoSliderSpanSize, var(--videoSliderSpanSize, 40px));
+                        height: var(--setVideoSliderSpanSize, var(--videoSliderSpanSize, 40px));
+                        background: var(--setVideoSliderInputNumberColor);
                         color: #fff;
                         border-radius: 50%;
                         display: flex;
@@ -241,7 +241,7 @@
 
     .swiper-video-content {
         height: 100%;
-        background: var(--swipeBackgroundColor);
+        background: var(--setVideoSliderSwipeBackgroundColor);
     }
 
     .video-slider-controls {
@@ -306,26 +306,26 @@
 
 
     .a-b-slider-container {
-        background: #fff;
-        padding: 2rem;
-        margin-right: 1rem;
-        border-radius: var(--videoSliderBorderRadius);
-        box-shadow: 0 0 20px 0px rgba(0, 0, 0, 0.075);
+        background: var(--setVideoSliderSliderContainerBackground, var(--videoSliderSliderContainerBackground, #fff));
+        padding: var(--setVideoSliderSliderContainerPadding, var(--videoSliderSliderContainerPadding, 2rem));
+        margin-right: var(--setVideoSliderSliderContainerMarginRight, var(--videoSliderSliderContainerMarginRight, 1rem));
+        border-radius: var(--setVideoSliderBorderRadius);
+        box-shadow: var(--setVideoSliderSliderContainerBoxShadow, var(--videoSliderSliderContainerBoxShadow, 0 0 20px 0px rgba(0, 0, 0, 0.075)));
         display: flex;
         flex-direction: column-reverse;
 
         .range-slider-labels {
             &.smiley-scale {
-                margin-bottom: 3.5rem;
+                margin-bottom: var(--setVideoSliderSmileyScaleMarginBottom, var(--videoSliderSmileyScaleMarginBottom, 3.5rem));
             }
         }
 
         span {
             display: block;
             text-align: center;
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
+            width: var(--setVideoSliderSpanSize, var(--videoSliderSpanSize, 40px));
+            height: var(--setVideoSliderSpanSize, var(--videoSliderSpanSize, 40px));
+            line-height: var(--setVideoSliderSpanLineHeight, var(--videoSliderSpanLineHeight, 40px));
             position: relative;
             pointer-events: none;
 
@@ -365,18 +365,18 @@
     }
 
     .video-slide--next {
-        border-radius: var(--videoSliderBorderRadius);
-        padding: 16px 20px;
+        border-radius: var(--setVideoSliderBorderRadius);
+        padding: var(--setVideoSliderNextButtonPadding, var(--videoSliderNextButtonPadding, 16px 20px));
         border: none;
-        background: var(--nextButtonBackgroundColor);
-        color: var(--nextButtonColor);
-        font-weight: 700;
+        background: var(--setVideoSliderNextButtonBackgroundColor);
+        color: var(--setVideoSliderNextButtonColor);
+        font-weight: var(--setVideoSliderNextButtonFontWeight, var(--videoSliderNextButtonFontWeight, 700));
         position: absolute;
-        bottom: 69px;
+        bottom: var(--setVideoSliderNextButtonBottom, var(--videoSliderNextButtonBottom, 69px));
         z-index: 1;
-        left: 2rem;
-        right: 4rem;
-        max-width: 500px;
+        left: var(--setVideoSliderNextButtonLeft, var(--videoSliderNextButtonLeft, 2rem));
+        right: var(--setVideoSliderNextButtonRight, var(--videoSliderNextButtonRight, 4rem));
+        max-width: var(--setVideoSliderNextButtonMaxWidth, var(--videoSliderNextButtonMaxWidth, 500px));
         margin: 0 auto;
     }
 }
@@ -385,23 +385,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    color: #000;
+    border-radius: var(--setVideoSliderFinalSlideBorderRadius, var(--videoSliderFinalSlideBorderRadius, 10px));
+    color: var(--setVideoSliderFinalSlideColor, var(--videoSliderFinalSlideColor, #000));
     text-align: center;
     height: 100%;
     width: 100%;
     flex-direction: column;
-    background: var(--swipeBackgroundColor);
-    padding: 0 15%;
+    background: var(--setVideoSliderSwipeBackgroundColor);
+    padding: var(--setVideoSliderFinalSlidePadding, var(--videoSliderFinalSlidePadding, 0 15%));
 
     button {
-        margin-top: 2rem;
-        border-radius: var(--videoSliderBorderRadius);
-        padding: 16px 20px;
+        margin-top: var(--setVideoSliderSubmitButtonMarginTop, var(--videoSliderSubmitButtonMarginTop, 2rem));
+        border-radius: var(--setVideoSliderBorderRadius);
+        padding: var(--setVideoSliderSubmitButtonPadding, var(--videoSliderSubmitButtonPadding, 16px 20px));
         border: none;
-        background: var(--submitButtonBackgroundColor);
-        color: var(--submitButtonColor);
-        font-weight: 700;
+        background: var(--setVideoSliderSubmitButtonBackgroundColor);
+        color: var(--setVideoSliderSubmitButtonColor);
+        font-weight: var(--setVideoSliderSubmitButtonFontWeight, var(--videoSliderSubmitButtonFontWeight, 700));
     }
 }
 

@@ -1,15 +1,15 @@
 .like-widget-container {
   display: grid;
-  margin-block-start: var(--nlds-likewidget-margin-block-start, var(--nlds-default-margin-block-start, 1.5rem));
-  margin-block-end: var(--nlds-likewidget-margin-block-end, var(--nlds-default-margin-block-end, 1.5rem));
-  padding: var(--nlds-likewidget-container-padding, 1.5rem);
-  gap: var(--nlds-likewidget-container-gap, 0.5rem);
-  background-color: var(--nlds-likewidget-container-background-color, var(--nlds-default-background-color, #F0F4F8));
+  margin-block-start: var(--setLikesMarginBlockStart, var(--likesMarginBlockStart, var(--nlds-likewidget-margin-block-start, var(--nlds-default-margin-block-start, 1.5rem))));
+  margin-block-end: var(--setLikesMarginBlockEnd, var(--likesMarginBlockEnd, var(--nlds-likewidget-margin-block-end, var(--nlds-default-margin-block-end, 1.5rem))));
+  padding: var(--setLikesPadding, var(--likesPadding, var(--nlds-likewidget-container-padding, 1.5rem)));
+  gap: var(--setLikesGap, var(--likesGap, var(--nlds-likewidget-container-gap, 0.5rem)));
+  background-color: var(--setLikesBackgroundColor, var(--likesBackgroundColor, var(--nlds-likewidget-container-background-color, var(--nlds-default-background-color, #F0F4F8))));
 }
 
 .like-option-container {
   display: grid;
-  gap: 0.5rem;
+  gap: var(--setLikesOptionGap, var(--likesOptionGap, 0.5rem));
 }
 
 .like-option-container button{
@@ -17,11 +17,11 @@
 }
 
 .like-widget-container.medium .like-option-container {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: var(--setLikesMediumGridColumns, var(--likesMediumGridColumns, 1fr 1fr));
 }
 
 .like-widget-container.medium .like-option-container .utrecht-button:first-of-type:last-of-type{
-  grid-column: span 2;
+  grid-column: var(--setLikesMediumButtonSpan, var(--likesMediumButtonSpan, span 2));
 }
 
 .like-widget-container.medium{
@@ -46,26 +46,26 @@
 }
 
 .like-widget-container.small .like-option {
-  grid-template-columns: 1fr 1fr;
-  gap: 0.125rem;
+  grid-template-columns: var(--setLikesSmallGridColumns, var(--likesSmallGridColumns, 1fr 1fr));
+  gap: var(--setLikesSmallGap, var(--likesSmallGap, 0.125rem));
 }
 
 .like-widget-container.small .like-option.osc-no-counter {
-  grid-template-columns: 1fr;
-  gap: 0.125rem;
+  grid-template-columns: var(--setLikesSmallNoCounterColumns, var(--likesSmallNoCounterColumns, 1fr));
+  gap: var(--setLikesSmallNoCounterGap, var(--likesSmallNoCounterGap, 0.125rem));
 }
 
 .like-kind {
   display: flex;
   flex-grow: 1;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  gap: var(--setLikesKindGap, var(--likesKindGap, 0.5rem));
+  padding: var(--setLikesKindPadding, var(--likesKindPadding, 0.5rem));
   align-items: center;
 }
 
 .like-kind .selected{
-  outline: 2px var(--utrecht-button-primary-action-background-color) dashed !important;
-  outline-offset: 1px;
+  outline: var(--setLikesSelectedOutline, var(--likesSelectedOutline, 2px var(--utrecht-button-primary-action-background-color) dashed)) !important;
+  outline-offset: var(--setLikesSelectedOutlineOffset, var(--likesSelectedOutlineOffset, 1px));
 }
 
 .like-widget-container.small .like-option > .like-kind {
@@ -75,13 +75,13 @@
 
 .progressbar-container {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: var(--setLikesProgressGridColumns, var(--likesProgressGridColumns, 1fr auto));
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--setLikesProgressGap, var(--likesProgressGap, 0.5rem));
 }
 
 .progressbar-container p {
-  font-size: 0.875rem;
+  font-size: var(--setLikesProgressFontSize, var(--likesProgressFontSize, 0.875rem));
 }
 
 .osc .like-widget-container p {
@@ -96,13 +96,13 @@
 /* Micro like widget */
 .like-widget-container.micro-score .like-option-container,
 .utrecht-button-group.variant-micro-score > div{
-  --microLikeBackground: var(--setMicroLikeBackground, var(--utrecht-button-primary-action-background-color));
-  --microLikeColor: var(--setMicroLikeColor, var(--utrecht-button-primary-action-color));
-  --microLikeBorderRadius: var(--setMicroLikeBorderRadius, var(--utrecht-button-border-radius, 0px));
+  --microLikeBackground: var(--setLikesMicroBackground, var(--likesMicroBackground, var(--setMicroLikeBackground, var(--microLikeBackground, var(--utrecht-button-primary-action-background-color)))));
+  --microLikeColor: var(--setLikesMicroColor, var(--likesMicroColor, var(--setMicroLikeColor, var(--microLikeColor, var(--utrecht-button-primary-action-color)))));
+  --microLikeBorderRadius: var(--setLikesMicroBorderRadius, var(--likesMicroBorderRadius, var(--setMicroLikeBorderRadius, var(--microLikeBorderRadius, var(--utrecht-button-border-radius, 0px)))));
 
-  --microLikeBackgroundHover: var(--setMicroLikeBackgroundHover, var(--utrecht-button-primary-action-background-color-hover));
-  --microLikeColorHover: var(--setMicroLikeColorHover, var(--utrecht-button-primary-action-hover-color));
-  
+  --microLikeBackgroundHover: var(--setLikesMicroBackgroundHover, var(--likesMicroBackgroundHover, var(--setMicroLikeBackgroundHover, var(--microLikeBackgroundHover, var(--utrecht-button-primary-action-background-color-hover)))));
+  --microLikeColorHover: var(--setLikesMicroColorHover, var(--likesMicroColorHover, var(--setMicroLikeColorHover, var(--microLikeColorHover, var(--utrecht-button-primary-action-hover-color)))));
+
 
   background: var(--microLikeBackground);
   display: grid;
@@ -116,7 +116,7 @@
 .like-widget-container.micro-score .like-option-container .like-counter,
 .utrecht-button-group.variant-micro-score > div .comment-reaction-score{
   text-align: center;
-  padding: 0 16px;
+  padding: var(--setLikesMicroCounterPadding, var(--likesMicroCounterPadding, 0 16px));
   color: var(--microLikeColor);
 }
 

@@ -1,6 +1,6 @@
 .osc-listview {
     display: grid;
-    gap: 2rem;
+    gap: var(--setListviewGap, var(--listviewGap, 2rem));
   }
 
 .osc-listview-template-columns-1 {
@@ -8,9 +8,9 @@
 }
 
 .osc-listview-template-columns-2 {
-    grid-template-columns: repeat( auto-fit, minmax(420px, 1fr) );
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
 }
 
 .osc-listview-template-columns-3 {
-    grid-template-columns: repeat( auto-fit, minmax(360px, 1fr) );
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
 }

@@ -9,21 +9,29 @@
 }
 
 #navbar .container #main-menu .level-1 {
-  padding: 10px;
+  padding: var(--setNavBarLevel1Padding, var(--navBarLevel1Padding, 10px));
   text-decoration: none;
-  color: var(--nlds-main-menu-item-color, #000);
-  border-bottom: solid 2px transparent;
+  color: var(--setNavBarLevel1Color, var(--navBarLevel1Color, var(--nlds-main-menu-item-color, #000)));
+  border-bottom: solid var(--setNavBarLevel1BorderWidth, var(--navBarLevel1BorderWidth, 2px)) transparent;
   white-space: nowrap;
 }
 #navbar .container #main-menu .level-1:hover,
 #navbar .container #main-menu .level-1:focus-visible {
   color: var(
-    --nlds-main-menu-item-color--hover,
-    var(--utrecht-link-hover-color)
+    --setNavBarLevel1HoverColor,
+    var(--navBarLevel1HoverColor,
+      var(--nlds-main-menu-item-color--hover,
+        var(--utrecht-link-hover-color)
+      )
+    )
   );
   border-color: var(
-    --nlds-main-menu-item-border-color--hover,
-    var(--utrecht-link-hover-color)
+    --setNavBarLevel1HoverBorderColor,
+    var(--navBarLevel1HoverBorderColor,
+      var(--nlds-main-menu-item-border-color--hover,
+        var(--utrecht-link-hover-color)
+      )
+    )
   );
 }
 
@@ -32,9 +40,9 @@
   inset: 0;
   flex-direction: column;
   text-align: left;
-  background: #fff;
-  padding: 1.5rem;
-  z-index: 9999;
+  background: var(--setNavBarMobileBackground, var(--navBarMobileBackground, #fff));
+  padding: var(--setNavBarMobilePadding, var(--navBarMobilePadding, 1.5rem));
+  z-index: var(--setNavBarMobileZIndex, var(--navBarMobileZIndex, 9999));
 }
 #navbar .container #main-menu.mobile-nav .level-1,
 #navbar .container #main-menu.mobile-nav button {
@@ -75,34 +83,34 @@
 #navbar .container #main-menu .toggle-submenu {
   border: none;
   background: none;
-  padding: 10px;
-  font-size: var(--utrecht-link-icon-size);
+  padding: var(--setNavBarTogglePadding, var(--navBarTogglePadding, 10px));
+  font-size: var(--setNavBarToggleSize, var(--navBarToggleSize, var(--utrecht-link-icon-size)));
   align-self: stretch;
-  margin-left: -20px;
+  margin-left: var(--setNavBarToggleMargin, var(--navBarToggleMargin, -20px));
   pointer-events: none;
 }
 #navbar .container #main-menu .submenu {
   position: absolute;
   top: 100%;
   left: 0;
-  width: 250px;
-  margin-block-start: 10px;
-  background-color: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  z-index: 999;
+  width: var(--setNavBarSubmenuWidth, var(--navBarSubmenuWidth, 250px));
+  margin-block-start: var(--setNavBarSubmenuMargin, var(--navBarSubmenuMargin, 10px));
+  background-color: var(--setNavBarSubmenuBgColor, var(--navBarSubmenuBgColor, #fff));
+  box-shadow: var(--setNavBarSubmenuShadow, var(--navBarSubmenuShadow, 0 1px 4px rgba(0, 0, 0, 0.2)));
+  z-index: var(--setNavBarSubmenuZIndex, var(--navBarSubmenuZIndex, 999));
 }
 
 #navbar .container #main-menu .submenu .level-2 {
   width: 100%;
   display: block;
   text-decoration: none;
-  padding: 1rem;
+  padding: var(--setNavBarLevel2Padding, var(--navBarLevel2Padding, 1rem));
   box-sizing: border-box;
-  color: var(--nlds-main-menu-item-color, #000);
+  color: var(--setNavBarLevel2Color, var(--navBarLevel2Color, var(--nlds-main-menu-item-color, #000)));
 }
 #navbar .container #main-menu .submenu .level-2:hover {
-  background-color: #f2f2f2;
+  background-color: var(--setNavBarLevel2HoverBg, var(--navBarLevel2HoverBg, #f2f2f2));
 }
 #navbar .container #main-menu .submenu .level-2 + .level-2 {
-  border-top: solid 1px #f2f2f2;
+  border-top: solid 1px var(--setNavBarLevel2BorderColor, var(--navBarLevel2BorderColor, #f2f2f2));
 }

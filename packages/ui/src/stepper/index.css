@@ -11,44 +11,44 @@
     white-space: nowrap;
 }   
 
-.step-container > .step-icon {    
+.step-container > .step-icon {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: var(--nlds-stepper-icon-width, .5rem);
-    height: var(--nlds-stepper-icon-height, .5rem);
-    padding: var(--nlds-stepper-icon-padding, .5rem);
-    margin-right: var(--nlds-stepper-icon-margin-right, .5rem);
-    border-width: var(--nlds-stepper-icon-border-width, 1px);
+    width: var(--setStepperIconWidth, var(--stepperIconWidth, 0.5rem));
+    height: var(--setStepperIconHeight, var(--stepperIconHeight, 0.5rem));
+    padding: var(--setStepperIconPadding, var(--stepperIconPadding, 0.5rem));
+    margin-right: var(--setStepperIconMarginRight, var(--stepperIconMarginRight, 0.5rem));
+    border-width: var(--setStepperIconBorderWidth, var(--stepperIconBorderWidth, 1px));
     border-style: solid;
-    border-color: var(--nlds-stepper-icon-border-color, var(--utrecht-button-primary-action-background-color));
-    border-radius: var(--nlds-stepper-icon-border-radius, 50%);
+    border-color: var(--setStepperIconBorderColor, var(--stepperIconBorderColor, var(--osc-primary, #12B886)));
+    border-radius: var(--setStepperIconBorderRadius, var(--stepperIconBorderRadius, 50%));
 }
 
 .stepper > .step-divider {
-    height: var(--nlds-stepper-divider-height, 1px);
+    height: var(--setStepperDividerHeight, var(--stepperDividerHeight, 1px));
     width: 100%;
-    margin-left: var(--nlds-stepper-divider-margin-left, 1rem);
-    margin-right: var(--nlds-stepper-divider-margin-right, 1rem);
-    background-color: var(--nlds-stepper-divider-color, #A9B2BA);
+    margin-left: var(--setStepperDividerMarginLeft, var(--stepperDividerMarginLeft, 1rem));
+    margin-right: var(--setStepperDividerMarginRight, var(--stepperDividerMarginRight, 1rem));
+    background-color: var(--setStepperDividerColor, var(--stepperDividerColor, var(--osc-border, #A9B2BA)));
 }
 
 .step-icon > p {
-    color: var(--nlds-stepper-icon-color, var(--utrecht-button-primary-action-background-color));
+    color: var(--setStepperIconColor, var(--stepperIconColor, var(--osc-primary, #12B886)));
 }
 
 .step-icon.active {
-    background-color: var(--nlds-stepper-icon-active-background-color, var(--utrecht-button-primary-action-background-color));
+    background-color: var(--setStepperIconActiveBackground, var(--stepperIconActiveBackground, var(--osc-primary, #12B886)));
 }
 
 .step-icon.done {
-    background-color: var(--nlds-stepper-icon-done-background-color, var(--utrecht-button-secondary-action-background-color));
-    border-color: var(--nlds-stepper-icon-done-border-color, var(--utrecht-button-secondary-action-background-color));
+    background-color: var(--setStepperIconDoneBackground, var(--stepperIconDoneBackground, var(--osc-secondary, #1471EF)));
+    border-color: var(--setStepperIconDoneBorderColor, var(--stepperIconDoneBorderColor, var(--osc-secondary, #1471EF)));
 }
 
 .step-icon.active > p{
-    color: var(--nlds-stepper-icon-active-color, var(--utrecht-button-primary-action-color));
+    color: var(--setStepperIconActiveColor, var(--stepperIconActiveColor, var(--osc-primary-foreground, #ffffff)));
 }
- .step-icon.done  > p{
-    color: var(--nlds-stepper-icon-active-color, var(--utrecht-button-secondary-action-color));
+.step-icon.done > p{
+    color: var(--setStepperIconDoneColor, var(--stepperIconDoneColor, var(--osc-secondary-foreground, #ffffff)));
 }

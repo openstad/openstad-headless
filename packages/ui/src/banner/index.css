@@ -3,17 +3,16 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: var(--nlds-banner-background-color, var(--nlds-default-background-color, #F0F4F8));
+    background-color: var(--setBannerBackground, var(--bannerBackground, var(--osc-primary, #12B886)));
 }
 
 .osc .banner > p {
-
-    color: var(--osc-card-foreground);
+    color: var(--setBannerColor, var(--bannerColor, var(--osc-primary-foreground, #ffffff)));
 }
 
 .osc .banner.big {
     justify-content: center;
-    padding: 3rem 2rem;
-    border: 1px solid var(--nlds-banner-border-color, var(--nlds-default-border-color, #F0F4F8));
-    border-radius: 0.5rem;
+    padding: var(--setBannerPadding, var(--bannerPadding, 3rem 2rem));
+    border: var(--setBannerBorder, var(--bannerBorder, 1px solid var(--osc-border, #A9B2BA)));
+    border-radius: var(--setBannerBorderRadius, var(--bannerBorderRadius, 0.5rem));
 }

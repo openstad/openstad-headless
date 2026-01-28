@@ -9,15 +9,15 @@
 }
 
 .resource-detail-side-column .aside--content {
-  background-color: var(--nlds-default-background-color, #f0f4f8);
+  background-color: var(--setResourceDetailAsideBackground, var(--resourceDetailAsideBackground, var(--nlds-default-background-color, #f0f4f8)));
 }
 
 .resource-detail-side-column .aside--content .like-widget-container {
-  margin-top: 0;
+  margin-top: var(--setResourceDetailLikeWidgetMarginTop, var(--resourceDetailLikeWidgetMarginTop, 0));
 }
 
 .aside--content + .aside--content {
-  margin-top: 1rem;
+  margin-top: var(--setResourceDetailAsideMarginTop, var(--resourceDetailAsideMarginTop, 1rem));
 }
 
 .resource-detail-side-section {
@@ -62,17 +62,13 @@
 }
 
 .osc-resource-detail-content-item-row {
-  background-color: var(
-    --nlds-resource-detail-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
-  );
-  color: var(--nlds-resource-detail-color, var(--utrecht-paragraph-color));
-  padding: 0.5rem 0.7rem;
+  background-color: var(--setResourceDetailItemBackground, var(--resourceDetailItemBackground, var(--nlds-resource-detail-background-color, var(--nlds-default-background-color, #f0f4f8))));
+  color: var(--setResourceDetailItemColor, var(--resourceDetailItemColor, var(--nlds-resource-detail-color, var(--utrecht-paragraph-color))));
+  padding: var(--setResourceDetailItemPadding, var(--resourceDetailItemPadding, 0.5rem 0.7rem));
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-
-  gap: 1rem;
-  border-radius: 4px;
+  gap: var(--setResourceDetailItemGap, var(--resourceDetailItemGap, 1rem));
+  border-radius: var(--setResourceDetailItemBorderRadius, var(--resourceDetailItemBorderRadius, 4px));
 }
 
 @media (max-width: 1366px) {

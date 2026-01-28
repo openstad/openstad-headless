@@ -1,9 +1,9 @@
 .swipe-progress {
   position: absolute;
-  top: 36px;
-  right: 24px;
+  top: var(--setSwipeProgressTop, var(--swipeProgressTop, 36px));
+  right: var(--setSwipeProgressRight, var(--swipeProgressRight, 24px));
   font-style: italic;
-  opacity: .5;
+  opacity: var(--setSwipeProgressOpacity, var(--swipeProgressOpacity, 0.5));
 }
 
 .swipe-back-button {
@@ -11,18 +11,18 @@
   border: unset;
   background: unset;
   position: absolute;
-  top: 48px;
-  left: 24px;
-  color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
+  top: var(--setSwipeBackButtonTop, var(--swipeBackButtonTop, 48px));
+  left: var(--setSwipeBackButtonLeft, var(--swipeBackButtonLeft, 24px));
+  color: var(--setSwipeBackButtonColor, var(--swipeBackButtonColor, var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81))));
   display: flex;
-  z-index: 99;
-  gap: 4px;
-  line-height: 21px;
-  background: #fff;
-  padding-right: 10px;
+  z-index: var(--setSwipeBackButtonZIndex, var(--swipeBackButtonZIndex, 99));
+  gap: var(--setSwipeBackButtonGap, var(--swipeBackButtonGap, 4px));
+  line-height: var(--setSwipeBackButtonLineHeight, var(--swipeBackButtonLineHeight, 21px));
+  background: var(--setSwipeBackButtonBackground, var(--swipeBackButtonBackground, #fff));
+  padding-right: var(--setSwipeBackButtonPaddingRight, var(--swipeBackButtonPaddingRight, 10px));
 
   &[disabled] {
-    opacity: 0;
+    opacity: var(--setSwipeBackButtonDisabledOpacity, var(--swipeBackButtonDisabledOpacity, 0));
     pointer-events: none;
   }
 
@@ -30,37 +30,38 @@
     content: "";
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
-    width: 20px;
-    height: 20px;
+    width: var(--setSwipeBackButtonIconWidth, var(--swipeBackButtonIconWidth, 20px));
+    height: var(--setSwipeBackButtonIconHeight, var(--swipeBackButtonIconHeight, 20px));
     -webkit-mask-size: contain;
     mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    background-color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
+    background-color: var(--setSwipeBackButtonIconColor, var(--swipeBackButtonIconColor, var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81))));
     display: block;
   }
 }
 
 .swipe-widget {
-  --swipe-active-background: var(--setSwipeActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886));
-  --swipe-progress-bar-background: var(--setSwipeProgressBarBackground, var(--utrecht-button-primary-action-background-color, #11B886));
-  --swipe-progress-bar-color: var(--setSwipeProgressBarColor, var(--utrecht-button-disabled-color, #d5e7d4));
+  --setSwipeActiveBackground: var(--swipeActiveBackground, var(--setSwipeActiveBackground, var(--utrecht-button-primary-action-background-color, #11B886)));
+  --setSwipeProgressBarBackground: var(--swipeProgressBarBackground, var(--setSwipeProgressBarBackground, var(--utrecht-button-primary-action-background-color, #11B886)));
+  --setSwipeProgressBarColor: var(--swipeProgressBarColor, var(--setSwipeProgressBarColor, var(--utrecht-button-disabled-color, #d5e7d4)));
+  --setSwipeLikeColor: var(--swipeLikeColor, var(--setSwipeLikeColor, var(--utrecht-button-primary-action-background-color, #11B886)));
+  --setSwipeDislikeColor: var(--swipeDislikeColor, var(--setSwipeDislikeColor, #CF1C08));
+  --setSwipeLikeFill: var(--swipeLikeFill, var(--setSwipeLikeFill, white));
+  --setSwipeDislikeFill: var(--swipeDislikeFill, var(--setSwipeDislikeFill, white));
+  --setSwipeAnswerActiveBackground: var(--swipeAnswerActiveBackground, var(--setSwipeAnswerActiveBackground, var(--utrecht-button-primary-action-background-color, #1260A1)));
+  --setSwipeWidgetWidth: var(--swipeWidgetWidth, 100%);
+  --setSwipeWidgetMarginTop: var(--swipeWidgetMarginTop, 20px);
+  --setSwipeWidgetGridGap: var(--swipeWidgetGridGap, 10px 0);
 
-  --swipe-like-color: var(--setSwipeLikeColor, var(--utrecht-button-primary-action-background-color, #11B886));
-  --swipe-dislike-color: var(--setSwipeDislikeColor, #CF1C08);
-
-  --swipe-like-fill: var(--setSwipeLikeFill, white);
-  --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
-
-  --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, var(--utrecht-button-primary-action-background-color, #1260A1));
-  width: 100%;
+  width: var(--setSwipeWidgetWidth);
   height: auto;
   margin: 0 auto;
   position: relative;
   display: flex;
   flex-direction: column;
-  grid-gap: 10px 0;
-  margin-top: 20px;
+  grid-gap: var(--setSwipeWidgetGridGap);
+  margin-top: var(--setSwipeWidgetMarginTop);
 
 
   .--previous-awnser {
@@ -75,26 +76,26 @@
 
   .swipe-counter {
     text-align: center;
-    font-size: 14px;
-    color: #666;
-    font-weight: 500;
+    font-size: var(--setSwipeCounterFontSize, var(--swipeCounterFontSize, 14px));
+    color: var(--setSwipeCounterColor, var(--swipeCounterColor, #666));
+    font-weight: var(--setSwipeCounterFontWeight, var(--swipeCounterFontWeight, 500));
 
     position: absolute;
-    top: -20px;
-    right: 0;
+    top: var(--setSwipeCounterTop, var(--swipeCounterTop, -20px));
+    right: var(--setSwipeCounterRight, var(--swipeCounterRight, 0));
   }
 
   .swipe-container {
     position: relative;
     max-height: unset;
-    width: 400px;
-    max-width: calc(100vw - 86px);
-    z-index: 999;
+    width: var(--setSwipeContainerWidth, var(--swipeContainerWidth, 400px));
+    max-width: var(--setSwipeContainerMaxWidth, var(--swipeContainerMaxWidth, calc(100vw - 86px)));
+    z-index: var(--setSwipeContainerZIndex, var(--swipeContainerZIndex, 999));
     margin: 0 auto;
     height: 100%;
 
     @media screen and (max-width: 400px) {
-      max-width: 290px;
+      max-width: var(--setSwipeContainerMaxWidthMobile, var(--swipeContainerMaxWidthMobile, 290px));
       max-height: unset;
       margin: 0 auto;
     }
@@ -112,54 +113,50 @@
   .swipe-card {
     position: absolute;
     width: 100%;
-    height: calc(100% - 25px);
+    height: var(--setSwipeCardHeight, var(--swipeCardHeight, calc(100% - 25px)));
     align-self: start;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0px 5.49px 6.27px 0px rgba(0, 0, 0, 0.15);
+    background: var(--setSwipeCardBackground, var(--swipeCardBackground, #fff));
+    border-radius: var(--setSwipeCardBorderRadius, var(--swipeCardBorderRadius, 10px));
+    box-shadow: var(--setSwipeCardBoxShadow, var(--swipeCardBoxShadow, 0px 5.49px 6.27px 0px rgba(0, 0, 0, 0.15)));
     display: flex;
     flex-direction: column;
-    cursor: grab;
+    cursor: var(--setSwipeCardCursor, var(--swipeCardCursor, grab));
     user-select: none;
     transform-origin: center;
-    transition:
-      opacity 0.3s cubic-bezier(.33, .05, .58, .98),
-      box-shadow 0.3s cubic-bezier(.33, .05, .58, .98);
+    transition: var(--setSwipeCardTransition, var(--swipeCardTransition, opacity 0.3s cubic-bezier(.33, .05, .58, .98), box-shadow 0.3s cubic-bezier(.33, .05, .58, .98)));
     will-change: transform;
-    border: solid 1px #BFBFBF;
+    border: var(--setSwipeCardBorder, var(--swipeCardBorder, solid 1px #BFBFBF));
 
     &:not(.swipe-card--top) .swipe-card-image img {
-      opacity: 0.5;
+      opacity: var(--setSwipeCardImageOpacityInactive, var(--swipeCardImageOpacityInactive, 0.5));
     }
 
     &:not(.swipe-card--top) .swipe-card-content {
-      opacity: 0;
-      transform: scale(1.1);
+      opacity: var(--setSwipeCardContentOpacityInactive, var(--swipeCardContentOpacityInactive, 0));
+      transform: var(--setSwipeCardContentTransformInactive, var(--swipeCardContentTransformInactive, scale(1.1)));
     }
 
     &--animating {
-      transition:
-        transform 0.2s cubic-bezier(.33, .05, .58, .98),
-        opacity 0.2s cubic-bezier(.33, .05, .58, .98) !important;
+      transition: var(--setSwipeCardAnimatingTransition, var(--swipeCardAnimatingTransition, transform 0.2s cubic-bezier(.33, .05, .58, .98), opacity 0.2s cubic-bezier(.33, .05, .58, .98))) !important;
 
       &.swipe-card--left {
-        transform: translateX(-150px) rotate(-10deg) !important;
-        opacity: 0 !important;
+        transform: var(--setSwipeCardAnimatingLeftTransform, var(--swipeCardAnimatingLeftTransform, translateX(-150px) rotate(-10deg))) !important;
+        opacity: var(--setSwipeCardAnimatingOpacity, var(--swipeCardAnimatingOpacity, 0)) !important;
       }
 
       &.swipe-card--right {
-        transform: translateX(150px) rotate(10deg) !important;
-        opacity: 0 !important;
+        transform: var(--setSwipeCardAnimatingRightTransform, var(--swipeCardAnimatingRightTransform, translateX(150px) rotate(10deg))) !important;
+        opacity: var(--setSwipeCardAnimatingOpacity, var(--swipeCardAnimatingOpacity, 0)) !important;
       }
 
       // Button-specific animation with smoother transition
       &.swipe-card--button {
-        transition: transform 0.4s cubic-bezier(.33, .05, .58, .98), opacity 0.4s cubic-bezier(.33, .05, .58, .98) !important;
+        transition: var(--setSwipeCardButtonAnimationTransition, var(--swipeCardButtonAnimationTransition, transform 0.4s cubic-bezier(.33, .05, .58, .98), opacity 0.4s cubic-bezier(.33, .05, .58, .98))) !important;
       }
 
       // Drag-specific animation with faster transition for swipe release
       &.swipe-card--drag {
-        transition: transform 0.2s cubic-bezier(.33, .05, .58, .98), opacity 0.2s cubic-bezier(.33, .05, .58, .98) !important;
+        transition: var(--setSwipeCardDragAnimationTransition, var(--swipeCardDragAnimationTransition, transform 0.2s cubic-bezier(.33, .05, .58, .98), opacity 0.2s cubic-bezier(.33, .05, .58, .98))) !important;
       }
     }
 
@@ -182,138 +179,138 @@
     }
 
     &:nth-child(1 of .swipe-card) {
-      transform: scale(1) translateY(0px);
-      z-index: 3;
+      transform: var(--setSwipeCardFirstChildTransform, var(--swipeCardFirstChildTransform, scale(1) translateY(0px)));
+      z-index: var(--setSwipeCardFirstChildZIndex, var(--swipeCardFirstChildZIndex, 3));
     }
 
     &:nth-child(2 of .swipe-card) {
-      transform: scale(0.95) translateY(20px);
-      z-index: 2;
+      transform: var(--setSwipeCardSecondChildTransform, var(--swipeCardSecondChildTransform, scale(0.95) translateY(20px)));
+      z-index: var(--setSwipeCardSecondChildZIndex, var(--swipeCardSecondChildZIndex, 2));
     }
 
     &:nth-child(3 of .swipe-card) {
-      transform: scale(0.9) translateY(45px);
-      z-index: 1;
+      transform: var(--setSwipeCardThirdChildTransform, var(--swipeCardThirdChildTransform, scale(0.9) translateY(45px)));
+      z-index: var(--setSwipeCardThirdChildZIndex, var(--swipeCardThirdChildZIndex, 1));
     }
 
     &:hover {
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--setSwipeCardHoverBoxShadow, var(--swipeCardHoverBoxShadow, 0 12px 40px rgba(0, 0, 0, 0.15)));
     }
 
     .swipe-card-image {
       flex: 1;
       overflow: hidden;
       position: relative;
-      border-radius: 10px;
+      border-radius: var(--setSwipeCardImageBorderRadius, var(--swipeCardImageBorderRadius, 10px));
 
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         pointer-events: none;
-        opacity: 1;
-        transition: all 0.2s ease-in-out;
+        opacity: var(--setSwipeCardImageOpacity, var(--swipeCardImageOpacity, 1));
+        transition: var(--setSwipeCardImageTransition, var(--swipeCardImageTransition, all 0.2s ease-in-out));
 
       }
     }
 
     &:hover .swipe-card-image img {
-      transform: scale(1.02);
+      transform: var(--setSwipeCardImageHoverTransform, var(--swipeCardImageHoverTransform, scale(1.02)));
     }
 
     .swipe-card-content {
-      padding: 20px;
-      background: var(--swipe-active-background);
+      padding: var(--setSwipeCardContentPadding, var(--swipeCardContentPadding, 20px));
+      background: var(--setSwipeActiveBackground);
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      color: white;
+      color: var(--setSwipeCardContentColor, var(--swipeCardContentColor, white));
       text-align: center;
-      opacity: 1;
-      transform: scale(1);
-      transition: all 0.3s cubic-bezier(.33, .05, .58, .98);
-      border-radius: 0 0 10px 10px;
+      opacity: var(--setSwipeCardContentOpacity, var(--swipeCardContentOpacity, 1));
+      transform: var(--setSwipeCardContentTransform, var(--swipeCardContentTransform, scale(1)));
+      transition: var(--setSwipeCardContentTransition, var(--swipeCardContentTransition, all 0.3s cubic-bezier(.33, .05, .58, .98)));
+      border-radius: var(--setSwipeCardContentBorderRadius, var(--swipeCardContentBorderRadius, 0 0 10px 10px));
       z-index: 1;
     }
 
     .swipe-card-header {
-      margin-bottom: 8px;
+      margin-bottom: var(--setSwipeCardHeaderMarginBottom, var(--swipeCardHeaderMarginBottom, 8px));
     }
 
     .swipe-card-title {
-      font-size: 24px;
-      font-weight: 700;
+      font-size: var(--setSwipeCardTitleFontSize, var(--swipeCardTitleFontSize, 24px));
+      font-weight: var(--setSwipeCardTitleFontWeight, var(--swipeCardTitleFontWeight, 700));
       margin: 0;
       display: flex;
       align-items: baseline;
-      gap: 4px;
+      gap: var(--setSwipeCardTitleGap, var(--swipeCardTitleGap, 4px));
     }
 
     .swipe-card-age {
-      font-weight: 400;
-      opacity: 0.9;
+      font-weight: var(--setSwipeCardAgeFontWeight, var(--swipeCardAgeFontWeight, 400));
+      opacity: var(--setSwipeCardAgeOpacity, var(--swipeCardAgeOpacity, 0.9));
     }
 
     .swipe-card-location {
-      font-size: 14px;
-      margin: 4px 0 0 0;
-      opacity: 0.8;
+      font-size: var(--setSwipeCardLocationFontSize, var(--swipeCardLocationFontSize, 14px));
+      margin: var(--setSwipeCardLocationMargin, var(--swipeCardLocationMargin, 4px 0 0 0));
+      opacity: var(--setSwipeCardLocationOpacity, var(--swipeCardLocationOpacity, 0.8));
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: var(--setSwipeCardLocationGap, var(--swipeCardLocationGap, 4px));
     }
 
     .swipe-card-description {
       margin: 0;
-      opacity: 0.9;
-      line-height: 1.4;
-      color: #fff;
-      font-family: var(--setSwipeFontFamily--3, inherit);
-      font-weight: 530;
+      opacity: var(--setSwipeCardDescriptionOpacity, var(--swipeCardDescriptionOpacity, 0.9));
+      line-height: var(--setSwipeCardDescriptionLineHeight, var(--swipeCardDescriptionLineHeight, 1.4));
+      color: var(--setSwipeCardDescriptionColor, var(--swipeCardDescriptionColor, #fff));
+      font-family: var(--setSwipeCardDescriptionFontFamily, var(--swipeCardDescriptionFontFamily, inherit));
+      font-weight: var(--setSwipeCardDescriptionFontWeight, var(--swipeCardDescriptionFontWeight, 530));
     }
   }
 
   .swipe-indicator {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+    top: var(--setSwipeIndicatorTop, var(--swipeIndicatorTop, 50%));
+    left: var(--setSwipeIndicatorLeft, var(--swipeIndicatorLeft, 50%));
+    transform: var(--setSwipeIndicatorTransform, var(--swipeIndicatorTransform, translate(-50%, -50%)));
+    width: var(--setSwipeIndicatorSize, var(--swipeIndicatorSize, 80px));
+    height: var(--setSwipeIndicatorSize, var(--swipeIndicatorSize, 80px));
+    border-radius: var(--setSwipeIndicatorBorderRadius, var(--swipeIndicatorBorderRadius, 50%));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    z-index: 10;
+    font-size: var(--setSwipeIndicatorFontSize, var(--swipeIndicatorFontSize, 24px));
+    font-weight: var(--setSwipeIndicatorFontWeight, var(--swipeIndicatorFontWeight, bold));
+    z-index: var(--setSwipeIndicatorZIndex, var(--swipeIndicatorZIndex, 10));
     pointer-events: none;
 
     &--left {
-      background: var(--swipe-dislike-color);
-      color: white;
-      opacity: 0.8;
+      background: var(--setSwipeDislikeColor);
+      color: var(--setSwipeIndicatorLeftColor, var(--swipeIndicatorLeftColor, white));
+      opacity: var(--setSwipeIndicatorOpacity, var(--swipeIndicatorOpacity, 0.8));
 
       svg {
-        transform: rotate(180deg);
-        fill: var(--swipe-dislike-fill);
+        transform: var(--setSwipeIndicatorLeftSvgTransform, var(--swipeIndicatorLeftSvgTransform, rotate(180deg)));
+        fill: var(--setSwipeDislikeFill);
       }
     }
 
     &--right {
-      background: var(--swipe-like-color);
-      color: white;
-      opacity: 0.8;
+      background: var(--setSwipeLikeColor);
+      color: var(--setSwipeIndicatorRightColor, var(--swipeIndicatorRightColor, white));
+      opacity: var(--setSwipeIndicatorOpacity, var(--swipeIndicatorOpacity, 0.8));
 
       svg {
-        fill: var(--swipe-like-fill);
+        fill: var(--setSwipeLikeFill);
       }
     }
 
     svg {
-      width: 32px;
-      height: 32px;
+      width: var(--setSwipeIndicatorSvgSize, var(--swipeIndicatorSvgSize, 32px));
+      height: var(--setSwipeIndicatorSvgSize, var(--swipeIndicatorSvgSize, 32px));
     }
   }
 
@@ -322,68 +319,68 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 50px;
-    padding: 0px 20px;
+    gap: var(--setSwipeActionsGap, var(--swipeActionsGap, 50px));
+    padding: var(--setSwipeActionsPadding, var(--swipeActionsPadding, 0px 20px));
     flex-shrink: 0;
-    color: #000;
-    z-index: 1;
+    color: var(--setSwipeActionsColor, var(--swipeActionsColor, #000));
+    z-index: var(--setSwipeActionsZIndex, var(--swipeActionsZIndex, 1));
   }
 
   .swipe-main-actions {
     display: flex;
     flex-direction: row;
-    gap: 30px;
+    gap: var(--setSwipeMainActionsGap, var(--swipeMainActionsGap, 30px));
     justify-content: center;
   }
 
   .swipe-middle-actions {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: var(--setSwipeMiddleActionsGap, var(--swipeMiddleActionsGap, 10px));
 
-    --button-size: 36px;
+    --setSwipeMiddleActionButtonSize: var(--swipeMiddleActionButtonSize, 36px);
 
     .swipe-info-btn,
     .swipe-skip-btn {
-      border-radius: 20px;
-      border: solid 1px #BFBFBF;
-      background: #fff;
-      min-width: var(--button-size);
-      height: var(--button-size);
-      transition: all 0.2s ease;
+      border-radius: var(--setSwipeMiddleActionButtonBorderRadius, var(--swipeMiddleActionButtonBorderRadius, 20px));
+      border: var(--setSwipeMiddleActionButtonBorder, var(--swipeMiddleActionButtonBorder, solid 1px #BFBFBF));
+      background: var(--setSwipeMiddleActionButtonBackground, var(--swipeMiddleActionButtonBackground, #fff));
+      min-width: var(--setSwipeMiddleActionButtonSize);
+      height: var(--setSwipeMiddleActionButtonSize);
+      transition: var(--setSwipeMiddleActionButtonTransition, var(--swipeMiddleActionButtonTransition, all 0.2s ease));
       line-height: 0;
       flex-shrink: 0;
-      color: #000;
+      color: var(--setSwipeMiddleActionButtonColor, var(--swipeMiddleActionButtonColor, #000));
       text-align: center;
-      padding: 0 20px;
+      padding: var(--setSwipeMiddleActionButtonPadding, var(--swipeMiddleActionButtonPadding, 0 20px));
 
       svg {
-        margin-left: 5px;
+        margin-left: var(--setSwipeMiddleActionButtonSvgMargin, var(--swipeMiddleActionButtonSvgMargin, 5px));
       }
 
       &:disabled {
-        opacity: 0.5;
+        opacity: var(--setSwipeMiddleActionButtonDisabledOpacity, var(--swipeMiddleActionButtonDisabledOpacity, 0.5));
       }
 
       &:hover:not(:disabled) {
         cursor: pointer;
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        transform: var(--setSwipeMiddleActionButtonHoverTransform, var(--swipeMiddleActionButtonHoverTransform, scale(1.05)));
+        box-shadow: var(--setSwipeMiddleActionButtonHoverBoxShadow, var(--swipeMiddleActionButtonHoverBoxShadow, 0 6px 20px rgba(0, 0, 0, 0.3)));
       }
     }
 
     .swipe-info-btn {
-      padding: 0;
+      padding: var(--setSwipeInfoButtonPadding, var(--swipeInfoButtonPadding, 0));
 
       svg {
-        width: 20px;
-        margin: 0;
+        width: var(--setSwipeInfoButtonSvgWidth, var(--swipeInfoButtonSvgWidth, 20px));
+        margin: var(--setSwipeInfoButtonSvgMargin, var(--swipeInfoButtonSvgMargin, 0));
       }
     }
 
     .swipe-skip-btn {
       svg {
-        width: 18px;
+        width: var(--setSwipeSkipButtonSvgWidth, var(--swipeSkipButtonSvgWidth, 18px));
       }
     }
 
@@ -396,68 +393,68 @@
 
 
   .swipe-btn {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
+    width: var(--setSwipeButtonSize, var(--swipeButtonSize, 56px));
+    height: var(--setSwipeButtonSize, var(--swipeButtonSize, 56px));
+    border-radius: var(--setSwipeButtonBorderRadius, var(--swipeButtonBorderRadius, 50%));
+    border: var(--setSwipeButtonBorder, var(--swipeButtonBorder, none));
+    cursor: var(--setSwipeButtonCursor, var(--swipeButtonCursor, pointer));
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: var(--setSwipeButtonTransition, var(--swipeButtonTransition, all 0.2s ease));
     position: relative;
     overflow: visible;
-    color: #000;
+    color: var(--setSwipeButtonColor, var(--swipeButtonColor, #000));
 
     &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      opacity: var(--setSwipeButtonDisabledOpacity, var(--swipeButtonDisabledOpacity, 0.5));
+      cursor: var(--setSwipeButtonDisabledCursor, var(--swipeButtonDisabledCursor, not-allowed));
       transform: none !important;
     }
 
     &:not(:disabled):hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      transform: var(--setSwipeButtonHoverTransform, var(--swipeButtonHoverTransform, scale(1.1)));
+      box-shadow: var(--setSwipeButtonHoverBoxShadow, var(--swipeButtonHoverBoxShadow, 0 6px 20px rgba(0, 0, 0, 0.2)));
     }
 
     &:not(:disabled):active {
-      transform: scale(0.95);
+      transform: var(--setSwipeButtonActiveTransform, var(--swipeButtonActiveTransform, scale(0.95)));
     }
 
     i {
-      font-size: 1.3rem;
-      transition: transform 0.2s ease;
+      font-size: var(--setSwipeButtonIconFontSize, var(--swipeButtonIconFontSize, 1.3rem));
+      transition: var(--setSwipeButtonIconTransition, var(--swipeButtonIconTransition, transform 0.2s ease));
     }
 
     span {
       display: block;
       position: absolute;
-      bottom: -30px;
+      bottom: var(--setSwipeButtonSpanBottom, var(--swipeButtonSpanBottom, -30px));
     }
 
     &-like {
-      background: var(--swipe-like-color);
+      background: var(--setSwipeLikeColor);
 
       &:hover {
-        transform: scale(1.1);
+        transform: var(--setSwipeButtonLikeHoverTransform, var(--swipeButtonLikeHoverTransform, scale(1.1)));
       }
 
 
       i {
-        color: var(--swipe-like-fill);
+        color: var(--setSwipeLikeFill);
       }
     }
 
     &-pass {
-      background: var(--swipe-dislike-color);
+      background: var(--setSwipeDislikeColor);
 
       &:hover {
-        transform: scale(1.1);
+        transform: var(--setSwipeButtonPassHoverTransform, var(--swipeButtonPassHoverTransform, scale(1.1)));
       }
 
 
       i {
-        color: var(--swipe-dislike-fill);
+        color: var(--setSwipeDislikeFill);
       }
     }
   }
@@ -466,60 +463,60 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    border: solid 1px rgba(0, 0, 0, 0.1);
-    color: #000;
+    border-radius: var(--setSwipeFinishedBorderRadius, var(--swipeFinishedBorderRadius, 10px));
+    border: var(--setSwipeFinishedBorder, var(--swipeFinishedBorder, solid 1px rgba(0, 0, 0, 0.1)));
+    color: var(--setSwipeFinishedColor, var(--swipeFinishedColor, #000));
     text-align: center;
     height: 100%;
-    min-height: 750px;
+    min-height: var(--setSwipeFinishedMinHeight, var(--swipeFinishedMinHeight, 750px));
 
     .swipe-finished-content {
       h2 {
-        font-size: 28px;
-        margin: 0 0 16px 0;
-        font-weight: 700;
+        font-size: var(--setSwipeFinishedHeadingFontSize, var(--swipeFinishedHeadingFontSize, 28px));
+        margin: var(--setSwipeFinishedHeadingMargin, var(--swipeFinishedHeadingMargin, 0 0 16px 0));
+        font-weight: var(--setSwipeFinishedHeadingFontWeight, var(--swipeFinishedHeadingFontWeight, 700));
         text-align: center;
       }
 
       p {
-        font-size: 16px;
-        margin: 0 0 24px 0;
-        opacity: 0.9;
+        font-size: var(--setSwipeFinishedParagraphFontSize, var(--swipeFinishedParagraphFontSize, 16px));
+        margin: var(--setSwipeFinishedParagraphMargin, var(--swipeFinishedParagraphMargin, 0 0 24px 0));
+        opacity: var(--setSwipeFinishedParagraphOpacity, var(--swipeFinishedParagraphOpacity, 0.9));
         text-align: center;
       }
     }
   }
 
   .swipe-reset-btn {
-    background: var(--swipe-active-background);
-    border: 2px solid var(--swipe-active-background);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    background: var(--setSwipeActiveBackground);
+    border: var(--setSwipeResetButtonBorder, var(--swipeResetButtonBorder, 2px solid var(--setSwipeActiveBackground)));
+    color: var(--setSwipeResetButtonColor, var(--swipeResetButtonColor, white));
+    padding: var(--setSwipeResetButtonPadding, var(--swipeResetButtonPadding, 12px 24px));
+    border-radius: var(--setSwipeResetButtonBorderRadius, var(--swipeResetButtonBorderRadius, 8px));
+    font-size: var(--setSwipeResetButtonFontSize, var(--swipeResetButtonFontSize, 16px));
+    font-weight: var(--setSwipeResetButtonFontWeight, var(--swipeResetButtonFontWeight, 600));
+    cursor: var(--setSwipeResetButtonCursor, var(--swipeResetButtonCursor, pointer));
+    transition: var(--setSwipeResetButtonTransition, var(--swipeResetButtonTransition, all 0.2s ease));
 
     &:hover {
-      background: rgba(35, 134, 65, 0.9);
-      border-color: rgba(35, 134, 65, 0.9);
-      transform: translateY(-2px);
+      background: var(--setSwipeResetButtonHoverBackground, var(--swipeResetButtonHoverBackground, rgba(35, 134, 65, 0.9)));
+      border-color: var(--setSwipeResetButtonHoverBorderColor, var(--swipeResetButtonHoverBorderColor, rgba(35, 134, 65, 0.9)));
+      transform: var(--setSwipeResetButtonHoverTransform, var(--swipeResetButtonHoverTransform, translateY(-2px)));
     }
   }
 
   .swipe-summary {
-    width: 100%;
-    margin: 24px 0;
+    width: var(--setSwipeSummaryWidth, var(--swipeSummaryWidth, 100%));
+    margin: var(--setSwipeSummaryMargin, var(--swipeSummaryMargin, 24px 0));
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 16px;
+    grid-template-columns: var(--setSwipeSummaryGridTemplateColumns, var(--swipeSummaryGridTemplateColumns, repeat(auto-fit, minmax(250px, 1fr))));
+    gap: var(--setSwipeSummaryGap, var(--swipeSummaryGap, 16px));
   }
 
   .swipe-summary-item {
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--setSwipeSummaryItemBorderRadius, var(--swipeSummaryItemBorderRadius, 8px));
+    border: var(--setSwipeSummaryItemBorder, var(--swipeSummaryItemBorder, 1px solid #e0e0e0));
+    box-shadow: var(--setSwipeSummaryItemBoxShadow, var(--swipeSummaryItemBoxShadow, 0 2px 4px rgba(0, 0, 0, 0.1)));
     overflow: hidden;
 
 
@@ -528,32 +525,32 @@
   .swipe-summary-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    background: white;
+    gap: var(--setSwipeSummaryContentGap, var(--swipeSummaryContentGap, 12px));
+    padding: var(--setSwipeSummaryContentPadding, var(--swipeSummaryContentPadding, 16px));
+    background: var(--setSwipeSummaryContentBackground, var(--swipeSummaryContentBackground, white));
 
     @media (min-width: 768px) {
       flex-direction: row;
       align-items: center;
-      gap: 20px;
+      gap: var(--setSwipeSummaryContentGapMedium, var(--swipeSummaryContentGapMedium, 20px));
     }
   }
 
   .swipe-summary-explanation {
-    background: #f0f0f0;
-    padding: 16px;
+    background: var(--setSwipeSummaryExplanationBackground, var(--swipeSummaryExplanationBackground, #f0f0f0));
+    padding: var(--setSwipeSummaryExplanationPadding, var(--swipeSummaryExplanationPadding, 16px));
 
     textarea {
       width: 100%;
-      border: none;
-      background: #fff;
-      font-family: inherit;
-      font-size: 16px;
-      resize: none;
-      padding: 8px;
-      border-radius: 6px;
+      border: var(--setSwipeSummaryTextareaBorder, var(--swipeSummaryTextareaBorder, none));
+      background: var(--setSwipeSummaryTextareaBackground, var(--swipeSummaryTextareaBackground, #fff));
+      font-family: var(--setSwipeSummaryTextareaFontFamily, var(--swipeSummaryTextareaFontFamily, inherit));
+      font-size: var(--setSwipeSummaryTextareaFontSize, var(--swipeSummaryTextareaFontSize, 16px));
+      resize: var(--setSwipeSummaryTextareaResize, var(--swipeSummaryTextareaResize, none));
+      padding: var(--setSwipeSummaryTextareaPadding, var(--swipeSummaryTextareaPadding, 8px));
+      border-radius: var(--setSwipeSummaryTextareaBorderRadius, var(--swipeSummaryTextareaBorderRadius, 6px));
       display: block;
-      height: 60px;
+      height: var(--setSwipeSummaryTextareaHeight, var(--swipeSummaryTextareaHeight, 60px));
     }
   }
 
@@ -561,25 +558,25 @@
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--setSwipeSummaryQuestionGap, var(--swipeSummaryQuestionGap, 12px));
 
     p {
       margin: 0;
-      font-size: 14px;
-      line-height: 1.4;
-      color: #333;
+      font-size: var(--setSwipeSummaryQuestionFontSize, var(--swipeSummaryQuestionFontSize, 14px));
+      line-height: var(--setSwipeSummaryQuestionLineHeight, var(--swipeSummaryQuestionLineHeight, 1.4));
+      color: var(--setSwipeSummaryQuestionColor, var(--swipeSummaryQuestionColor, #333));
 
       @media (min-width: 768px) {
-        font-size: 16px;
+        font-size: var(--setSwipeSummaryQuestionFontSizeMedium, var(--swipeSummaryQuestionFontSizeMedium, 16px));
       }
     }
   }
 
   .swipe-summary-image {
     flex-shrink: 0;
-    width: 60px;
-    height: 60px;
-    border-radius: 6px;
+    width: var(--setSwipeSummaryImageSize, var(--swipeSummaryImageSize, 60px));
+    height: var(--setSwipeSummaryImageSize, var(--swipeSummaryImageSize, 60px));
+    border-radius: var(--setSwipeSummaryImageBorderRadius, var(--swipeSummaryImageBorderRadius, 6px));
     overflow: hidden;
 
     img {
@@ -595,46 +592,46 @@
 
   .swipe-summary-buttons {
     display: flex;
-    gap: 8px;
+    gap: var(--setSwipeSummaryButtonsGap, var(--swipeSummaryButtonsGap, 8px));
   }
 
   .swipe-summary-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border: 2px solid #e0e0e0;
-    background: white;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 14px;
-    min-width: 90px;
+    gap: var(--setSwipeSummaryBtnGap, var(--swipeSummaryBtnGap, 6px));
+    padding: var(--setSwipeSummaryBtnPadding, var(--swipeSummaryBtnPadding, 8px 12px));
+    border: var(--setSwipeSummaryBtnBorder, var(--swipeSummaryBtnBorder, 2px solid #e0e0e0));
+    background: var(--setSwipeSummaryBtnBackground, var(--swipeSummaryBtnBackground, white));
+    border-radius: var(--setSwipeSummaryBtnBorderRadius, var(--swipeSummaryBtnBorderRadius, 6px));
+    cursor: var(--setSwipeSummaryBtnCursor, var(--swipeSummaryBtnCursor, pointer));
+    transition: var(--setSwipeSummaryBtnTransition, var(--swipeSummaryBtnTransition, all 0.2s ease));
+    font-size: var(--setSwipeSummaryBtnFontSize, var(--swipeSummaryBtnFontSize, 14px));
+    min-width: var(--setSwipeSummaryBtnMinWidth, var(--swipeSummaryBtnMinWidth, 90px));
     justify-content: center;
-    color: #000;
+    color: var(--setSwipeSummaryBtnColor, var(--swipeSummaryBtnColor, #000));
 
     &:hover {
-      border-color: #c0c0c0;
-      transform: translateY(-1px);
+      border-color: var(--setSwipeSummaryBtnHoverBorderColor, var(--swipeSummaryBtnHoverBorderColor, #c0c0c0));
+      transform: var(--setSwipeSummaryBtnHoverTransform, var(--swipeSummaryBtnHoverTransform, translateY(-1px)));
     }
 
     &.active {
-      border-color: var(--swipe-answer-active-background);
-      background: var(--swipe-answer-active-background);
-      color: white;
+      border-color: var(--setSwipeAnswerActiveBackground);
+      background: var(--setSwipeAnswerActiveBackground);
+      color: var(--setSwipeSummaryBtnActiveColor, var(--swipeSummaryBtnActiveColor, white));
     }
 
     i {
-      font-size: 16px;
+      font-size: var(--setSwipeSummaryBtnIconFontSize, var(--swipeSummaryBtnIconFontSize, 16px));
     }
 
     span {
-      font-weight: 500;
+      font-weight: var(--setSwipeSummaryBtnSpanFontWeight, var(--swipeSummaryBtnSpanFontWeight, 500));
     }
   }
 
   .swipe-summary-actions {
-    margin-top: 24px;
+    margin-top: var(--setSwipeSummaryActionsMarginTop, var(--swipeSummaryActionsMarginTop, 24px));
     text-align: center;
   }
 }
@@ -645,39 +642,39 @@
 .explanation-dialog {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.2);
-  z-index: 999999;
-  opacity: 0;
-  animation: dialogFadeIn 0.3s ease-out forwards;
+  background: var(--setExplanationDialogBackground, var(--explanationDialogBackground, rgba(0, 0, 0, 0.2)));
+  z-index: var(--setExplanationDialogZIndex, var(--explanationDialogZIndex, 999999));
+  opacity: var(--setExplanationDialogOpacity, var(--explanationDialogOpacity, 0));
+  animation: var(--setExplanationDialogAnimation, var(--explanationDialogAnimation, dialogFadeIn 0.3s ease-out forwards));
 
   .explanation-dialog-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 95%;
-    top: 100px;
+    background: var(--setExplanationDialogContentBackground, var(--explanationDialogContentBackground, #fff));
+    padding: var(--setExplanationDialogContentPadding, var(--explanationDialogContentPadding, 20px));
+    border-radius: var(--setExplanationDialogContentBorderRadius, var(--explanationDialogContentBorderRadius, 8px));
+    max-width: var(--setExplanationDialogContentMaxWidth, var(--explanationDialogContentMaxWidth, 400px));
+    width: var(--setExplanationDialogContentWidth, var(--explanationDialogContentWidth, 95%));
+    top: var(--setExplanationDialogContentTop, var(--explanationDialogContentTop, 100px));
     left: 0;
     right: 0;
     margin: 0 auto;
     position: absolute;
-    transform: translateY(20px) scale(0.95);
-    animation: dialogSlideUp 0.3s ease-out forwards;
+    transform: var(--setExplanationDialogContentTransform, var(--explanationDialogContentTransform, translateY(20px) scale(0.95)));
+    animation: var(--setExplanationDialogContentAnimation, var(--explanationDialogContentAnimation, dialogSlideUp 0.3s ease-out forwards));
 
     textarea {
       width: 100%;
-      margin: 20px 0;
-      padding: 20px;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      font-family: inherit;
-      resize: vertical;
-      min-height: 100px;
+      margin: var(--setExplanationDialogTextareaMargin, var(--explanationDialogTextareaMargin, 20px 0));
+      padding: var(--setExplanationDialogTextareaPadding, var(--explanationDialogTextareaPadding, 20px));
+      border: var(--setExplanationDialogTextareaBorder, var(--explanationDialogTextareaBorder, 1px solid #e0e0e0));
+      border-radius: var(--setExplanationDialogTextareaBorderRadius, var(--explanationDialogTextareaBorderRadius, 6px));
+      font-family: var(--setExplanationDialogTextareaFontFamily, var(--explanationDialogTextareaFontFamily, inherit));
+      resize: var(--setExplanationDialogTextareaResize, var(--explanationDialogTextareaResize, vertical));
+      min-height: var(--setExplanationDialogTextareaMinHeight, var(--explanationDialogTextareaMinHeight, 100px));
 
       &:focus {
         outline: none;
-        border-color: var(--swipe-active-background);
-        box-shadow: 0 0 0 2px rgba(35, 134, 65, 0.1);
+        border-color: var(--setSwipeActiveBackground);
+        box-shadow: var(--setExplanationDialogTextareaFocusBoxShadow, var(--explanationDialogTextareaFocusBoxShadow, 0 0 0 2px rgba(35, 134, 65, 0.1)));
       }
     }
 
@@ -686,57 +683,57 @@
       width: 100%;
 
       &+button {
-        margin-top: 16px;
+        margin-top: var(--setExplanationDialogButtonMarginTop, var(--explanationDialogButtonMarginTop, 16px));
       }
     }
   }
 
   &.explanation-dialog--closing {
-    animation: dialogFadeOut 0.2s ease-in forwards;
+    animation: var(--setExplanationDialogClosingAnimation, var(--explanationDialogClosingAnimation, dialogFadeOut 0.2s ease-in forwards));
 
     .explanation-dialog-content {
-      animation: dialogSlideDown 0.2s ease-in forwards;
+      animation: var(--setExplanationDialogContentClosingAnimation, var(--explanationDialogContentClosingAnimation, dialogSlideDown 0.2s ease-in forwards));
     }
   }
 }
 
 @keyframes dialogFadeIn {
   from {
-    opacity: 0;
+    opacity: var(--setDialogFadeInStartOpacity, var(--dialogFadeInStartOpacity, 0));
   }
 
   to {
-    opacity: 1;
+    opacity: var(--setDialogFadeInEndOpacity, var(--dialogFadeInEndOpacity, 1));
   }
 }
 
 @keyframes dialogFadeOut {
   from {
-    opacity: 1;
+    opacity: var(--setDialogFadeOutStartOpacity, var(--dialogFadeOutStartOpacity, 1));
   }
 
   to {
-    opacity: 0;
+    opacity: var(--setDialogFadeOutEndOpacity, var(--dialogFadeOutEndOpacity, 0));
   }
 }
 
 @keyframes dialogSlideUp {
   from {
-    transform: translateY(20px) scale(0.95);
+    transform: var(--setDialogSlideUpStartTransform, var(--dialogSlideUpStartTransform, translateY(20px) scale(0.95)));
   }
 
   to {
-    transform: translateY(0) scale(1);
+    transform: var(--setDialogSlideUpEndTransform, var(--dialogSlideUpEndTransform, translateY(0) scale(1)));
   }
 }
 
 @keyframes dialogSlideDown {
   from {
-    transform: translateY(0) scale(1);
+    transform: var(--setDialogSlideDownStartTransform, var(--dialogSlideDownStartTransform, translateY(0) scale(1)));
   }
 
   to {
-    transform: translateY(20px) scale(0.95);
+    transform: var(--setDialogSlideDownEndTransform, var(--dialogSlideDownEndTransform, translateY(20px) scale(0.95)));
   }
 }
 
@@ -745,39 +742,39 @@
   .osc.--fullscreen .osc-enquete-item-content.--youth {
 
     .question:not(:has(.dilemma-finished)):not(.question-type-video) {
-      padding: 75px 30px 20px;
+      padding: var(--setSwipeResponsiveQuestionPadding, var(--swipeResponsiveQuestionPadding, 75px 30px 20px));
     }
 
     .question.question-type-none {
-      height: calc(100% + 150px);
+      height: var(--setSwipeResponsiveQuestionHeight, var(--swipeResponsiveQuestionHeight, calc(100% + 150px)));
       justify-content: start;
     }
 
     .swipe-widget {
       .swipe-card-content {
-        padding: 10px 20px;
+        padding: var(--setSwipeResponsiveCardContentPadding, var(--swipeResponsiveCardContentPadding, 10px 20px));
       }
 
       .swipe-main-actions {
-        gap: 10px;
+        gap: var(--setSwipeResponsiveMainActionsGap, var(--swipeResponsiveMainActionsGap, 10px));
       }
 
       .swipe-actions {
-        gap: 20px;
+        gap: var(--setSwipeResponsiveActionsGap, var(--swipeResponsiveActionsGap, 20px));
       }
 
       .swipe-btn {
-        width: unset;
-        border-radius: 30px;
-        height: 40px;
+        width: var(--setSwipeResponsiveButtonWidth, var(--swipeResponsiveButtonWidth, unset));
+        border-radius: var(--setSwipeResponsiveButtonBorderRadius, var(--swipeResponsiveButtonBorderRadius, 30px));
+        height: var(--setSwipeResponsiveButtonHeight, var(--swipeResponsiveButtonHeight, 40px));
         display: flex;
-        gap: 8px;
-        padding: 0 16px;
+        gap: var(--setSwipeResponsiveButtonGap, var(--swipeResponsiveButtonGap, 8px));
+        padding: var(--setSwipeResponsiveButtonPadding, var(--swipeResponsiveButtonPadding, 0 16px));
 
         span {
           position: relative;
-          bottom: 0;
-          color: #fff;
+          bottom: var(--setSwipeResponsiveSpanBottom, var(--swipeResponsiveSpanBottom, 0));
+          color: var(--setSwipeResponsiveSpanColor, var(--swipeResponsiveSpanColor, #fff));
         }
       }
     }

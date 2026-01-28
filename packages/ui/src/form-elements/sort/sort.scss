@@ -1,16 +1,17 @@
 .sort-field-container {
-    --sort-text-color: var(--utrecht-document-color, #000);
-    --sort-font-size: var(--utrecht-form-label-font-size);
-    --sort-active-background: var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
-    --sort-border-color: var(--nlds-enquete-border-color, var(--nlds-default-border-color, #D1D9E6));
-    --sort-drag-active-background-color: var(--utrecht-button-primary-action-background-color);
-    --sort-drag-active-color: var(--utrecht-button-primary-action-color);
-    --sort-padding: 12px;
+    --setSortFieldTextColor: var(--sortFieldTextColor, var(--utrecht-document-color, #000));
+    --setSortFieldFontSize: var(--sortFieldFontSize, var(--utrecht-form-label-font-size));
+    --setSortFieldActiveBackground: var(--sortFieldActiveBackground, var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8)));
+    --setSortFieldBorderColor: var(--sortFieldBorderColor, var(--nlds-enquete-border-color, var(--nlds-default-border-color, #D1D9E6)));
+    --setSortFieldDragActiveBackgroundColor: var(--sortFieldDragActiveBackgroundColor, var(--utrecht-button-primary-action-background-color));
+    --setSortFieldDragActiveColor: var(--sortFieldDragActiveColor, var(--utrecht-button-primary-action-color));
+    --setSortFieldPadding: var(--sortFieldPadding, 12px);
+    --setSortFieldGap: var(--sortFieldGap, 0.5rem);
 
     display: flex;
     flex-direction: column;
-    gap: .5rem;
-    color: var(--sort-text-color);
+    gap: var(--setSortFieldGap);
+    color: var(--setSortFieldTextColor);
 
 
     &.--none {
@@ -23,10 +24,10 @@
     &.--decimal {
         ol {
             list-style: decimal;
-            padding-left: 32px;
+            padding-left: var(--setSortFieldListPadding, var(--sortFieldListPadding, 32px));
 
             li {
-                padding-left: 10px;
+                padding-left: var(--setSortFieldListItemPadding, var(--sortFieldListItemPadding, 10px));
             }
         }
     }
@@ -34,10 +35,10 @@
     &.--alphabetical {
         ol {
             list-style: lower-alpha;
-            padding-left: 32px;
+            padding-left: var(--setSortFieldListPadding, var(--sortFieldListPadding, 32px));
 
             li {
-                padding-left: 10px;
+                padding-left: var(--setSortFieldListItemPadding, var(--sortFieldListItemPadding, 10px));
             }
         }
     }
@@ -45,17 +46,17 @@
     &.--roman {
         ol {
             list-style: upper-roman;
-            padding-left: 32px;
+            padding-left: var(--setSortFieldListPadding, var(--sortFieldListPadding, 32px));
 
             li {
-                padding-left: 10px;
+                padding-left: var(--setSortFieldListItemPadding, var(--sortFieldListItemPadding, 10px));
             }
         }
     }
 
 
     .sortable-intro {
-        margin-bottom: .5rem;
+        margin-bottom: var(--setSortFieldIntroMarginBottom, var(--sortFieldIntroMarginBottom, 0.5rem));
     }
 
     .sortable-context {
@@ -64,52 +65,52 @@
         ul {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: var(--setSortFieldSortableContextGap, var(--sortFieldSortableContextGap, 8px));
             margin: 0;
         }
 
         li>div {
             display: flex;
             align-items: center;
-            gap: var(--sort-padding);
-            background: #ffffff;
+            gap: var(--setSortFieldPadding);
+            background: var(--setSortFieldItemBackground, var(--sortFieldItemBackground, #ffffff));
             color: inherit;
             margin: 0;
-            border: solid 1px var(--sort-border-color);
-            border-radius: 3px;
-            font-size: var(--sort-font-size);
+            border: solid 1px var(--setSortFieldBorderColor);
+            border-radius: var(--setSortFieldItemBorderRadius, var(--sortFieldItemBorderRadius, 3px));
+            font-size: var(--setSortFieldFontSize);
             cursor: default;
 
             .ri-draggable {
-                font-size: 1.3rem;
+                font-size: var(--setSortFieldDragIconFontSize, var(--sortFieldDragIconFontSize, 1.3rem));
                 color: inherit;
                 cursor: grab;
-                padding: var(--sort-padding);
+                padding: var(--setSortFieldPadding);
                 display: block;
-                transition: color .2s ease-in-out;
+                transition: var(--setSortFieldDragIconTransition, var(--sortFieldDragIconTransition, color 0.2s ease-in-out));
             }
 
             span:has(.ri-draggable) {
-                transition: background .2s ease-in-out;
+                transition: var(--setSortFieldDragSpanTransition, var(--sortFieldDragSpanTransition, background 0.2s ease-in-out));
             }
 
             span:has(.ri-draggable:hover) {
-                background: var(--sort-drag-active-background-color);
+                background: var(--setSortFieldDragActiveBackgroundColor);
 
                 .ri-draggable {
-                    color: var(--sort-drag-active-color);
+                    color: var(--setSortFieldDragActiveColor);
                 }
             }
 
             .sortable-item-title {
                 flex-grow: 1;
-                line-height: 1;
+                line-height: var(--setSortFieldItemTitleLineHeight, var(--sortFieldItemTitleLineHeight, 1));
             }
 
             div.sortable-item-actions {
                 display: flex;
-                gap: .5rem;
-                padding-right: var(--sort-padding);
+                gap: var(--setSortFieldItemActionsGap, var(--sortFieldItemActionsGap, 0.5rem));
+                padding-right: var(--setSortFieldPadding);
 
                 button {
                     background: none;
@@ -117,14 +118,14 @@
                     color: inherit;
                     cursor: pointer;
                     padding: 0;
-                    font-size: 1.2rem;
+                    font-size: var(--setSortFieldButtonFontSize, var(--sortFieldButtonFontSize, 1.2rem));
 
                     &:hover {
-                        color: var(--utrecht-link-hover-color, #005EA2);
+                        color: var(--setSortFieldButtonHoverColor, var(--sortFieldButtonHoverColor, var(--utrecht-link-hover-color, #005EA2)));
                     }
 
                     &:disabled {
-                        opacity: 0.4;
+                        opacity: var(--setSortFieldButtonDisabledOpacity, var(--sortFieldButtonDisabledOpacity, 0.4));
                         cursor: not-allowed;
                     }
                 }

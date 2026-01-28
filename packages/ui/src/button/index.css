@@ -1,61 +1,62 @@
 .osc .osc-button {
-    padding: 0.625rem 3rem 0.625rem 3rem;
-    border: none;
-    border-radius: 0.375rem;
-    gap: .5rem;
-    background-color: var(--osc-primary);
-    color: var(--osc-primary-foreground);
+    padding: var(--setButtonPadding, var(--buttonPadding, 0.625rem 3rem 0.625rem 3rem));
+    border: var(--setButtonBorder, var(--buttonBorder, none));
+    border-radius: var(--setButtonBorderRadius, var(--buttonBorderRadius, 0.375rem));
+    gap: var(--setButtonGap, var(--buttonGap, 0.5rem));
+    background-color: var(--setButtonBackground, var(--buttonBackground, var(--osc-primary, #12B886)));
+    color: var(--setButtonColor, var(--buttonColor, var(--osc-primary-foreground, #ffffff)));
     text-align: center;
 }
 
 .osc .osc-button.osc-secondary {
-    background-color: var(--osc-secondary);
+    background-color: var(--setButtonSecondaryBackground, var(--buttonSecondaryBackground, var(--osc-secondary, #1471EF)));
+    color: var(--setButtonSecondaryColor, var(--buttonSecondaryColor, var(--osc-secondary-foreground, #ffffff)));
 }
 
 .osc .osc-button.ghost {
-    padding: 0;
+    padding: var(--setButtonGhostPadding, var(--buttonGhostPadding, 0));
     display: inline-flex;
     align-items: center;
-    gap: .5rem;
-    border: none;
-    background-color: var(--osc-background);
-    color: var(--osc-foreground);
+    gap: var(--setButtonGhostGap, var(--buttonGhostGap, 0.5rem));
+    border: var(--setButtonGhostBorder, var(--buttonGhostBorder, none));
+    background-color: var(--setButtonGhostBackground, var(--buttonGhostBackground, var(--osc-background, #ffffff)));
+    color: var(--setButtonGhostColor, var(--buttonGhostColor, var(--osc-foreground, #010D0A)));
     cursor: pointer;
 }
 
 .osc .osc-button.osc-plain {
-    background-color: var(--osc-background);
-    border: 1px solid var(--osc-border);
-    color: var(--osc-muted);
+    background-color: var(--setButtonPlainBackground, var(--buttonPlainBackground, var(--osc-background, #ffffff)));
+    border: var(--setButtonPlainBorder, var(--buttonPlainBorder, 1px solid var(--osc-border, #A9B2BA)));
+    color: var(--setButtonPlainColor, var(--buttonPlainColor, var(--osc-muted, #59636d)));
 }
 
 .osc .osc-button.ghost.active i{
-    color: var(--osc-primary);
+    color: var(--setButtonGhostActiveIconColor, var(--buttonGhostActiveIconColor, var(--osc-primary, #12B886)));
 }
 
 .osc .osc-button > i {
-    font-size: 1.5rem;
+    font-size: var(--setButtonIconFontSize, var(--buttonIconFontSize, 1.5rem));
 }
 
 .osc .osc-button:hover {
-    background-color: var(--osc-primary-hover);
+    background-color: var(--setButtonHoverBackground, var(--buttonHoverBackground, var(--osc-primary-hover, #009F6D)));
 }
 
 .osc .osc-button.osc-secondary:hover {
-    background-color: var(--osc-secondary-hover);
+    background-color: var(--setButtonSecondaryHoverBackground, var(--buttonSecondaryHoverBackground, var(--osc-secondary-hover, #0058D6)));
 }
 
 .osc .osc-button.ghost:hover {
-    color: var(--osc-muted);
-    background-color: var(--osc-background);
+    color: var(--setButtonGhostHoverColor, var(--buttonGhostHoverColor, var(--osc-muted, #59636d)));
+    background-color: var(--setButtonGhostHoverBackground, var(--buttonGhostHoverBackground, var(--osc-background, #ffffff)));
 }
 
 .osc .osc-button.osc-plain:hover {
-    color: var(--osc-foreground);
-    background-color: var(--osc-background);
+    color: var(--setButtonPlainHoverColor, var(--buttonPlainHoverColor, var(--osc-foreground, #010D0A)));
+    background-color: var(--setButtonPlainHoverBackground, var(--buttonPlainHoverBackground, var(--osc-background, #ffffff)));
 }
 
 .osc .osc-button:disabled {
-    opacity: .5;
+    opacity: var(--setButtonDisabledOpacity, var(--buttonDisabledOpacity, 0.5));
     cursor: not-allowed;
 }

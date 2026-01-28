@@ -1,11 +1,11 @@
 .comments-title {
-  margin-bottom: 1rem;
+  margin-bottom: var(--setCommentsTitleMarginBottom, var(--commentsTitleMarginBottom, 1rem));
  }
 
  .form-container {
-   font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+   font-family: var(--setCommentsFormFontFamily, var(--commentsFormFontFamily, 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif));
    display: grid;
-   grid-gap: 1rem;
+   grid-gap: var(--setCommentsFormGridGap, var(--commentsFormGridGap, 1rem));
    justify-content: unset;
  }
 
@@ -24,11 +24,11 @@
  }
 
  .error-message {
-     color: red;
+     color: var(--setCommentsErrorColor, var(--commentsErrorColor, red));
  }
 
  .comment-description-inputfield {
-     padding: 0.75rem;
+     padding: var(--setCommentsInputfieldPadding, var(--commentsInputfieldPadding, 0.75rem));
  }
 
  .reaction-input-container {
@@ -44,11 +44,11 @@
 }
 
  .comment-item{
-  background-color: var(--nlds-comment-item-background-color, var(--nlds-default-background-color, #F0F4F8));
-  padding: 1rem;
+  background-color: var(--setCommentsItemBackground, var(--commentsItemBackground, var(--nlds-comment-item-background-color, var(--nlds-default-background-color, #F0F4F8))));
+  padding: var(--setCommentsItemPadding, var(--commentsItemPadding, 1rem));
  }
  .comment-item+.comment-item{
-  margin-top: 1rem;
+  margin-top: var(--setCommentsItemMarginTop, var(--commentsItemMarginTop, 1rem));
  }
  .comment-item-header{
   display: flex;
@@ -70,19 +70,19 @@
 
 
  article.comment-item.selected {
-  background: #fff4ce;
+  background: var(--setCommentsItemSelectedBackground, var(--commentsItemSelectedBackground, #fff4ce));
 }
 
 .reaction-container .comment-item{
-  border-top: solid 1px rgba(0, 0, 0, .1);
+  border-top: var(--setCommentsReactionItemBorderTop, var(--commentsReactionItemBorderTop, solid 1px rgba(0, 0, 0, 0.1)));
 }
 
 .--isAdmin{
-  color: #000;
-  font-weight: 300;
-  font-size: 10px;
-  padding-left: 5px;
-  letter-spacing: .5px;
+  color: var(--setCommentsAdminColor, var(--commentsAdminColor, #000));
+  font-weight: var(--setCommentsAdminFontWeight, var(--commentsAdminFontWeight, 300));
+  font-size: var(--setCommentsAdminFontSize, var(--commentsAdminFontSize, 10px));
+  padding-left: var(--setCommentsAdminPaddingLeft, var(--commentsAdminPaddingLeft, 5px));
+  letter-spacing: var(--setCommentsAdminLetterSpacing, var(--commentsAdminLetterSpacing, 0.5px));
   text-transform: capitalize;
 }
 

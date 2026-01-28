@@ -4,7 +4,7 @@
 @import '@radix-ui/colors/violet.css';
 
 .osc-DialogOverlay {
-  background-color: var(--black-a9);
+  background-color: var(--setDialogOverlayBackground, var(--dialogOverlayBackground, var(--black-a9, rgba(0, 0, 0, 0.5))));
   position: fixed;
   inset: 0;
   animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -12,16 +12,16 @@
 }
 
 .osc-DialogContent {
-  background-color: white;
-  border-radius: 6px;
-  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  background-color: var(--setDialogBackground, var(--dialogBackground, var(--osc-background, white)));
+  border-radius: var(--setDialogBorderRadius, var(--dialogBorderRadius, 6px));
+  box-shadow: var(--setDialogShadow, var(--dialogShadow, hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px));
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 90%;
   max-height: 75vh;
-  padding: 25px;
+  padding: var(--setDialogPadding, var(--dialogPadding, 25px));
   animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
   max-width: 82.5rem;
   overflow: auto;
@@ -41,16 +41,16 @@
 
 .osc-DialogTitle {
   margin: 0;
-  font-weight: 500;
-  color: var(--mauve-12);
-  font-size: 17px;
+  font-weight: var(--setDialogTitleFontWeight, var(--dialogTitleFontWeight, 500));
+  color: var(--setDialogTitleColor, var(--dialogTitleColor, var(--mauve-12, #11100f)));
+  font-size: var(--setDialogTitleFontSize, var(--dialogTitleFontSize, 17px));
 }
 
 .osc-DialogDescription {
-  margin: 10px 0 20px;
-  color: var(--mauve-11);
-  font-size: 15px;
-  line-height: 1.5;
+  margin: var(--setDialogDescriptionMargin, var(--dialogDescriptionMargin, 10px 0 20px));
+  color: var(--setDialogDescriptionColor, var(--dialogDescriptionColor, var(--mauve-11, #423f34)));
+  font-size: var(--setDialogDescriptionFontSize, var(--dialogDescriptionFontSize, 15px));
+  line-height: var(--setDialogDescriptionLineHeight, var(--dialogDescriptionLineHeight, 1.5));
 }
 
 @keyframes overlayShow {

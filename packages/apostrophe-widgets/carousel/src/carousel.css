@@ -1,31 +1,31 @@
 .carousel.--small {
-  --carousel-image-max-height: 200px;
+  --carousel-image-max-height: var(--setApostropheCarouselHeight, var(--apostrophecarouselHeight, 200px));
 }
 .carousel.--medium {
-  --carousel-image-max-height: 400px;
+  --carousel-image-max-height: var(--setApostropheCarouselHeight, var(--apostrophecarouselHeight, 400px));
 }
 .carousel.--large {
-  --carousel-image-max-height: 600px;
+  --carousel-image-max-height: var(--setApostropheCarouselHeight, var(--apostrophecarouselHeight, 600px));
 }
 .carousel.--autoHeight {
-  --carousel-image-max-height: unset;
+  --carousel-image-max-height: var(--setApostropheCarouselHeight, var(--apostrophecarouselHeight, unset));
 }
 
 .carousel.--cover {
-  --carousel-image-object-fit: cover;
+  --carousel-image-object-fit: var(--setApostropheCarouselObjectFit, var(--apostropheCarouselObjectFit, cover));
 }
 .carousel.--contain {
   --carousel-image-object-fit: contain;
 }
 
 .carousel .osc .image-container > img {
-  object-fit: var(--carousel-image-object-fit, cover);
-  max-height: var(--carousel-image-max-height, unset);
+  object-fit: var(--setApostropheCarouselImageObjectFit, var(--apostropheCarouselImageObjectFit, var(--carousel-image-object-fit, cover)));
+  max-height: var(--setApostropheCarouselHeight, var(--apostrophecarouselHeight, var(--carousel-image-max-height, unset)));
 }
 
 .carousel .osc .carousel-button-container {
   position: absolute;
-  top: 50%;
-  width: 100%;
-  margin-top: -26px;
+  top: var(--setApostropheCarouselButtonTop, var(--apostropheCarouselButtonTop, 50%));
+  width: var(--setApostropheCarouselWidth, var(--apostrophecarouselWidth, 100%));
+  margin-top: var(--setApostropheCarouselButtonMargin, var(--apostropheCarouselButtonMargin, -26px));
 }

@@ -1,29 +1,29 @@
 .dilemma-field {
-    --dilemmaOptionFigureAspectRatio: var(--set-dilemma-option-figure-aspect-ratio, 1 / 1.3);
+    --setDilemmaOptionFigureAspectRatio: var(--dilemmaOptionFigureAspectRatio, 1 / 1.3);
 
-    --dilemmaOptionOutlineColor: var(--set-dilemma-option-outline-color, #D2D2D2);
-    --dilemmaOptionOutlineWidth: var(--set-dilemma-option-outline-width, 1px);
-    --dilemmaOptionOutlineOffset: var(--set-dilemma-option-outline-offset, -1px);
+    --setDilemmaOptionOutlineColor: var(--dilemmaOptionOutlineColor, #D2D2D2);
+    --setDilemmaOptionOutlineWidth: var(--dilemmaOptionOutlineWidth, 1px);
+    --setDilemmaOptionOutlineOffset: var(--dilemmaOptionOutlineOffset, -1px);
 
-    --dilemmaOptionOutlineColorActive: var(--set-dilemma-option-outline-color--active, var(--utrecht-button-primary-action-background-color, #11B886));
-    --dilemmaOptionOutlineWidthActive: var(--set-dilemma-option-outline-width--active, 4px);
-    --dilemmaOptionOutlineOffsetActive: var(--set-dilemma-option-outline-offset--active, -4px);
+    --setDilemmaOptionOutlineColorActive: var(--dilemmaOptionOutlineColorActive, var(--utrecht-button-primary-action-background-color, #11B886));
+    --setDilemmaOptionOutlineWidthActive: var(--dilemmaOptionOutlineWidthActive, 4px);
+    --setDilemmaOptionOutlineOffsetActive: var(--dilemmaOptionOutlineOffsetActive, -4px);
 
-    --dilemmaImageBorderRadius: var(--set-dilemma-image-border-radius, 12px);
-    --dilemmaIntroHighLight: var(--set-dilemma-intro-highlight, var(--utrecht-button-primary-action-background-color, #11B886));
+    --setDilemmaImageBorderRadius: var(--dilemmaImageBorderRadius, 12px);
+    --setDilemmaIntroHighLight: var(--dilemmaIntroHighLight, var(--utrecht-button-primary-action-background-color, #11B886));
 
     height: auto;
     align-content: center;
 
     .dilemma-intro {
-        margin-bottom: 40px;
+        margin-bottom: var(--setDilemmaIntroMarginBottom, var(--dilemmaIntroMarginBottom, 40px));
 
         h2 {
             margin: 0;
             text-align: center;
 
             i {
-                color: var(--dilemmaIntroHighLight);
+                color: var(--setDilemmaIntroHighLight);
                 font-style: normal;
                 font-weight: inherit;
                 font-size: inherit;
@@ -33,10 +33,10 @@
 
         .dilemma-progress {
             position: absolute;
-            top: 36px;
-            right: 24px;
+            top: var(--setDilemmaProgressTop, var(--dilemmaProgressTop, 36px));
+            right: var(--setDilemmaProgressRight, var(--dilemmaProgressRight, 24px));
             font-style: italic;
-            opacity: .5;
+            opacity: var(--setDilemmaProgressOpacity, var(--dilemmaProgressOpacity, 0.5));
         }
     }
 
@@ -67,18 +67,18 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         grid-template-rows: 1fr auto;
-        gap: 8px;
+        gap: var(--setDilemmaOptionsGap, var(--dilemmaOptionsGap, 8px));
         position: relative;
 
         &:has(input:checked) {
             input:not(:checked)+label {
                 figure {
-                    scale: .98;
-                    opacity: .5;
+                    scale: var(--setDilemmaUncheckedScale, var(--dilemmaUncheckedScale, 0.98));
+                    opacity: var(--setDilemmaUncheckedOpacity, var(--dilemmaUncheckedOpacity, 0.5));
                 }
 
                 .dilemma-option-content {
-                    opacity: 0;
+                    opacity: var(--setDilemmaUncheckedContentOpacity, var(--dilemmaUncheckedContentOpacity, 0));
                 }
             }
         }
@@ -107,17 +107,18 @@
                     outline: none;
 
                     &:focus-visible+label figure {
-                        outline: 2px dashed var(--dilemmaOptionOutlineColorActive);
-                        outline-offset: 2px;
+                        outline: var(--setDilemmaFocusOutline, var(--dilemmaFocusOutline, 2px dashed));
+                        outline-color: var(--setDilemmaOptionOutlineColorActive);
+                        outline-offset: var(--setDilemmaFocusOutlineOffset, var(--dilemmaFocusOutlineOffset, 2px));
                     }
                 }
 
                 &:checked+label {
 
                     figure {
-                        outline-color: var(--dilemmaOptionOutlineColorActive);
-                        outline-width: var(--dilemmaOptionOutlineWidthActive);
-                        outline-offset: var(--dilemmaOptionOutlineOffsetActive);
+                        outline-color: var(--setDilemmaOptionOutlineColorActive);
+                        outline-width: var(--setDilemmaOptionOutlineWidthActive);
+                        outline-offset: var(--setDilemmaOptionOutlineOffsetActive);
                     }
                 }
             }
@@ -128,27 +129,27 @@
                 grid-template-rows: subgrid;
 
                 .dilemma-option-content {
-                    margin-top: 16px;
-                    transition: opacity .2s ease-in;
+                    margin-top: var(--setDilemmaOptionContentMarginTop, var(--dilemmaOptionContentMarginTop, 16px));
+                    transition: var(--setDilemmaOptionContentTransition, var(--dilemmaOptionContentTransition, opacity 0.2s ease-in));
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: var(--setDilemmaOptionContentGap, var(--dilemmaOptionContentGap, 8px));
                 }
             }
 
             figure {
                 margin: 0;
                 padding: 0;
-                aspect-ratio: var(--dilemmaOptionFigureAspectRatio);
+                aspect-ratio: var(--setDilemmaOptionFigureAspectRatio);
                 display: block;
                 cursor: pointer;
 
-                border-radius: var(--dilemmaImageBorderRadius);
+                border-radius: var(--setDilemmaImageBorderRadius);
                 overflow: hidden;
 
-                transition: all .2s ease-in;
-                outline: solid var(--dilemmaOptionOutlineWidth) var(--dilemmaOptionOutlineColor);
-                outline-offset: var(--dilemmaOptionOutlineOffset);
+                transition: var(--setDilemmaFigureTransition, var(--dilemmaFigureTransition, all 0.2s ease-in));
+                outline: solid var(--setDilemmaOptionOutlineWidth) var(--setDilemmaOptionOutlineColor);
+                outline-offset: var(--setDilemmaOptionOutlineOffset);
 
                 img {
                     width: 100%;
@@ -163,7 +164,7 @@
     }
 
     .dilemma-actions{
-        min-height: 70px;
+        min-height: var(--setDilemmaActionsMinHeight, var(--dilemmaActionsMinHeight, 70px));
     }
 
     .dilemma-back-button {
@@ -171,18 +172,18 @@
         border: unset;
         background: unset;
         position: absolute;
-        top: 48px;
-        left: 24px;
+        top: var(--setDilemmaBackButtonTop, var(--dilemmaBackButtonTop, 48px));
+        left: var(--setDilemmaBackButtonLeft, var(--dilemmaBackButtonLeft, 24px));
         color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
         display: flex;
-        z-index: 99;
-        gap: 4px;
-        line-height: 21px;
-        background: #fff;
-        padding-right: 10px;
+        z-index: var(--setDilemmaBackButtonZIndex, var(--dilemmaBackButtonZIndex, 99));
+        gap: var(--setDilemmaBackButtonGap, var(--dilemmaBackButtonGap, 4px));
+        line-height: var(--setDilemmaBackButtonLineHeight, var(--dilemmaBackButtonLineHeight, 21px));
+        background: var(--setDilemmaBackButtonBackground, var(--dilemmaBackButtonBackground, #fff));
+        padding-right: var(--setDilemmaBackButtonPaddingRight, var(--dilemmaBackButtonPaddingRight, 10px));
 
         &[disabled] {
-            opacity: 0;
+            opacity: var(--setDilemmaBackButtonDisabledOpacity, var(--dilemmaBackButtonDisabledOpacity, 0));
             pointer-events: none;
         }
 
@@ -190,8 +191,8 @@
             content: "";
             -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
             mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z'%3E%3C/path%3E%3C/svg%3E");
-            width: 20px;
-            height: 20px;
+            width: var(--setDilemmaBackButtonIconWidth, var(--dilemmaBackButtonIconWidth, 20px));
+            height: var(--setDilemmaBackButtonIconHeight, var(--dilemmaBackButtonIconHeight, 20px));
             -webkit-mask-size: contain;
             mask-size: contain;
             -webkit-mask-repeat: no-repeat;
@@ -204,22 +205,22 @@
     .dilemma-next-button {
         position: absolute;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--%3E%3Cpath d='M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z'/%3E%3C/svg%3E");
-        background-size: 26px;
+        background-size: var(--setDilemmaNextButtonBackgroundSize, var(--dilemmaNextButtonBackgroundSize, 26px));
         background-repeat: no-repeat;
         background-color: var(--youth-next-button-background-color);
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background-position: 20px 20px;
-        animation: nextPagePulse .8s infinite ease-in-out;
+        width: var(--setDilemmaNextButtonSize, var(--dilemmaNextButtonSize, 64px));
+        height: var(--setDilemmaNextButtonSize, var(--dilemmaNextButtonSize, 64px));
+        border-radius: var(--setDilemmaNextButtonBorderRadius, var(--dilemmaNextButtonBorderRadius, 50%));
+        background-position: var(--setDilemmaNextButtonBackgroundPosition, var(--dilemmaNextButtonBackgroundPosition, 20px 20px));
+        animation: var(--setDilemmaNextButtonAnimation, var(--dilemmaNextButtonAnimation, nextPagePulse 0.8s infinite ease-in-out));
         pointer-events: all;
         border: none;
-        right: 24px;
-        bottom: 24px;
-        z-index: 10;
+        right: var(--setDilemmaNextButtonRight, var(--dilemmaNextButtonRight, 24px));
+        bottom: var(--setDilemmaNextButtonBottom, var(--dilemmaNextButtonBottom, 24px));
+        z-index: var(--setDilemmaNextButtonZIndex, var(--dilemmaNextButtonZIndex, 10));
 
         &:disabled {
-            opacity: 0.5;
+            opacity: var(--setDilemmaNextButtonDisabledOpacity, var(--dilemmaNextButtonDisabledOpacity, 0.5));
             pointer-events: none;
             animation: unset;
         }
@@ -252,33 +253,33 @@
 
         .dilemma-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(var(--setDilemmaSummaryMinMaxWidth, var(--dilemmaSummaryMinMaxWidth, 250px)), 1fr));
+            gap: var(--setDilemmaSummaryGap, var(--dilemmaSummaryGap, 16px));
             width: 100%;
 
             &-item {
-                border-radius: 8px;
-                border: 1px solid #e0e0e0;
-                box-shadow: 0 2px 4px #0000001a;
+                border-radius: var(--setDilemmaSummaryItemBorderRadius, var(--dilemmaSummaryItemBorderRadius, 8px));
+                border: var(--setDilemmaSummaryItemBorder, var(--dilemmaSummaryItemBorder, 1px solid #e0e0e0));
+                box-shadow: var(--setDilemmaSummaryItemBoxShadow, var(--dilemmaSummaryItemBoxShadow, 0 2px 4px #0000001a));
                 overflow: hidden;
             }
 
             &-content {
-                padding: 16px;
+                padding: var(--setDilemmaSummaryContentPadding, var(--dilemmaSummaryContentPadding, 16px));
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: var(--setDilemmaSummaryContentGap, var(--dilemmaSummaryContentGap, 8px));
             }
 
             &-option {
-                border-radius: 8px;
-                border: 2px solid #e0e0e0;
-                background: #fff;
-                transition: all .2s ease-in-out;
+                border-radius: var(--setDilemmaSummaryOptionBorderRadius, var(--dilemmaSummaryOptionBorderRadius, 8px));
+                border: var(--setDilemmaSummaryOptionBorder, var(--dilemmaSummaryOptionBorder, 2px solid #e0e0e0));
+                background: var(--setDilemmaSummaryOptionBackground, var(--dilemmaSummaryOptionBackground, #fff));
+                transition: var(--setDilemmaSummaryOptionTransition, var(--dilemmaSummaryOptionTransition, all 0.2s ease-in-out));
 
                 &:has(.active) {
                     background: var(--setActiveOverviewBackground, var(--utrecht-button-primary-action-background-color, #094B81));
-                    border: 2px solid var(--setActiveOverviewBackground, var(--utrecht-button-primary-action-background-color, #094B81));
+                    border: var(--setDilemmaSummaryOptionActiveBorder, var(--dilemmaSummaryOptionActiveBorder, 2px solid)) var(--setActiveOverviewBackground, var(--utrecht-button-primary-action-background-color, #094B81));
 
                     .utrecht-heading-4,
                     .utrecht-paragraph {
@@ -288,7 +289,7 @@
 
                 .dilemma-summary-btn {
                     width: 100%;
-                    padding: 8px;
+                    padding: var(--setDilemmaSummaryBtnPadding, var(--dilemmaSummaryBtnPadding, 8px));
                     margin: 0;
                     border: none;
                     background-color: unset;
@@ -299,16 +300,16 @@
 
                     .utrecht-heading-4,
                     .utrecht-paragraph {
-                        font-size: 14px;
-                        transition: color .2s ease-in-out;
+                        font-size: var(--setDilemmaSummaryBtnFontSize, var(--dilemmaSummaryBtnFontSize, 14px));
+                        transition: var(--setDilemmaSummaryBtnTransition, var(--dilemmaSummaryBtnTransition, color 0.2s ease-in-out));
                     }
 
                     .dilemma-option-image {
-                        width: 60px;
-                        height: 60px;
-                        border-radius: var(--dilemmaImageBorderRadius);
+                        width: var(--setDilemmaOptionImageSize, var(--dilemmaOptionImageSize, 60px));
+                        height: var(--setDilemmaOptionImageSize, var(--dilemmaOptionImageSize, 60px));
+                        border-radius: var(--setDilemmaImageBorderRadius);
                         overflow: hidden;
-                        margin-right: 12px;
+                        margin-right: var(--setDilemmaOptionImageMarginRight, var(--dilemmaOptionImageMarginRight, 12px));
                         flex-shrink: 0;
 
                         img {
@@ -322,20 +323,20 @@
             }
 
             &-explanation {
-                background: #f0f0f0;
-                padding: 16px;
+                background: var(--setDilemmaSummaryExplanationBackground, var(--dilemmaSummaryExplanationBackground, #f0f0f0));
+                padding: var(--setDilemmaSummaryExplanationPadding, var(--dilemmaSummaryExplanationPadding, 16px));
 
                 textarea {
                     width: 100%;
                     border: none;
-                    background: #fff;
+                    background: var(--setDilemmaSummaryTextareaBackground, var(--dilemmaSummaryTextareaBackground, #fff));
                     font-family: inherit;
-                    font-size: 16px;
+                    font-size: var(--setDilemmaSummaryTextareaFontSize, var(--dilemmaSummaryTextareaFontSize, 16px));
                     resize: none;
-                    padding: 8px;
-                    border-radius: 6px;
+                    padding: var(--setDilemmaSummaryTextareaPadding, var(--dilemmaSummaryTextareaPadding, 8px));
+                    border-radius: var(--setDilemmaSummaryTextareaBorderRadius, var(--dilemmaSummaryTextareaBorderRadius, 6px));
                     display: block;
-                    height: 60px;
+                    height: var(--setDilemmaSummaryTextareaHeight, var(--dilemmaSummaryTextareaHeight, 60px));
                 }
             }
         }

@@ -2,13 +2,13 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    height: 1.5rem;
-    width: 1.5rem;
-    border: 1px solid var(--osc-secondary);
-    border-radius: .5rem;
+    height: var(--setCheckboxSize, var(--checkboxSize, 1.5rem));
+    width: var(--setCheckboxSize, var(--checkboxSize, 1.5rem));
+    border: var(--setCheckboxBorder, var(--checkboxBorder, 1px solid var(--osc-secondary, #1471EF)));
+    border-radius: var(--setCheckboxBorderRadius, var(--checkboxBorderRadius, 0.5rem));
 }
 
 .osc .checkbox.checked {
-   background-color: var(--osc-secondary);
-   color: var(--osc-secondary-foreground);
+   background-color: var(--setCheckboxCheckedBackground, var(--checkboxCheckedBackground, var(--osc-secondary, #1471EF)));
+   color: var(--setCheckboxCheckedColor, var(--checkboxCheckedColor, var(--osc-secondary-foreground, #ffffff)));
 }

@@ -1,13 +1,13 @@
 .osc-choiceguide-container {
-  width: 100%;
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: var(--setChoiceguideResultsColumns, var(--choiceguideResultsColumns, 3fr 1fr));
+  gap: var(--setChoiceguideResultsContainerGap, var(--choiceguideResultsContainerGap, 1.5rem));
 }
 
 @media screen and (max-width: 768px) {
   .osc-choiceguide-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: var(--setChoiceguideResultsMobileColumns, var(--choiceguideResultsMobileColumns, 1fr));
   }
 
   .osc-choiceguide-container .osc-choiceguide-form {
@@ -20,29 +20,29 @@
 }
 
 figure.info-image-container {
-  max-height: 300px;
+  max-height: var(--setChoiceguideResultsImageMaxHeight, var(--choiceguideResultsImageMaxHeight, 300px));
 }
 
 #choice-plane {
   position: relative;
-  width: 100%;
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   height: auto;
   display: grid;
-  grid-template-columns: repeat(2, 50%);
+  grid-template-columns: var(--setChoiceguideResultsPlaneColumns, var(--choiceguideResultsPlaneColumns, repeat(2, 50%)));
 }
 
 #choice-plane .osc-point {
   position: absolute;
-  margin: -11px 0 0 -11px;
+  margin: var(--setChoiceguideResultsPointMargin, var(--choiceguideResultsPointMargin, -11px 0 0 -11px));
   width: 20px;
   height: 20px;
-  border: 10px solid var(--utrecht-button-primary-action-background-color, #bed200);
+  border: var(--setChoiceguideResultsPointBorderWidth, var(--choiceguideResultsPointBorderWidth, 10px)) solid var(--setChoiceguideResultsPointBorderColor, var(--choiceguideResultsPointBorderColor, var(--utrecht-button-primary-action-background-color, #bed200)));
   border-radius: 10px;
 }
 
 #choice-plane .osc-choice-plane {
   position: relative;
-  width: 100%;
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   height: auto;
   float: left;
   display: inline-block;
@@ -50,7 +50,7 @@ figure.info-image-container {
 
 #choice-plane .osc-choice-plane-background-image {
   position: relative;
-  width: 100%;
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   height: 100%;
   object-fit: cover;
 }
@@ -61,16 +61,16 @@ figure.info-image-container {
 
 .osc-choiceguide-sidebar-container {
   position: sticky;
-  top: 1rem;
-  width: 100%;
+  top: var(--setChoiceguideResultsSidebarTop, var(--choiceguideResultsSidebarTop, 1rem));
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   align-self: start;
-  min-width: 200px;
+  min-width: var(--setChoiceguideResultsSidebarMinWidth, var(--choiceguideResultsSidebarMinWidth, 200px));
 }
 
 .osc-choices-container {
   position: relative;
   z-index: 50;
-  width: 100%;
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
 }
 
 @media only screen and (max-width: 600px) {
@@ -78,7 +78,7 @@ figure.info-image-container {
     position: relative;
     top: 0;
     left: 0px;
-    width: 100%;
+    width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   }
 
   .osc-choices-container.sticky {
@@ -105,7 +105,7 @@ figure.info-image-container {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  background: #fff;
+  background: var(--setChoiceguideResultsCardBg, var(--choiceguideResultsCardBg, #fff));
   border: 2px solid #e5e5e5;
 }
 
@@ -119,7 +119,7 @@ figure.info-image-container {
 
 .osc-choice .osc-minmax-labels {
   position: relative;
-  width: 100%;
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   margin-top: 3px;
   font-weight: 500;
   overflow: hidden;
@@ -136,7 +136,7 @@ figure.info-image-container {
 .osc-choice-default .osc-choice-bar {
   position: relative;
   height: 14px;
-  width: 100%;
+  width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));
   margin-top: 0px;
   background-color: #e5e5e5;
   border-radius: 7px;
@@ -190,21 +190,21 @@ figure.info-image-container {
 }
 .osc .osc-choiceguide-container .question-type-range .a-b-info-container {
   display: grid;
-  margin-top: 1rem;
+  margin-top: var(--setChoiceguideResultsSidebarTop, var(--choiceguideResultsSidebarTop, 1rem));
 }
 .osc .osc-choiceguide-container .question-type-range .label-b {
   text-align: revert;
 }
 .osc .osc-choiceguide-container .question-type-range .a-b-title .a-b-info {
   display: flex;
-  gap: 1rem;
+  gap: var(--setChoiceguideResultsGap, var(--choiceguideResultsGap, 1rem));
 }
 .osc
   .osc-choiceguide-container
   .question-type-range
   .a-b-label-container
   .label {
-  font-weight: bold;
+  font-weight: var(--setChoiceguideResultsFontWeight, var(--choiceguideResultsFontWeight, bold));
 }
 .osc
   .osc-choiceguide-container
@@ -341,7 +341,7 @@ figure.info-image-container {
 .osc-choice-default .osc-choice-bar-progress[data-score="97"] {width: 97%;}
 .osc-choice-default .osc-choice-bar-progress[data-score="98"] {width: 98%;}
 .osc-choice-default .osc-choice-bar-progress[data-score="99"] {width: 99%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="100"] {width: 100%;}
+.osc-choice-default .osc-choice-bar-progress[data-score="100"] {width: var(--setChoiceguideResultsWidth, var(--choiceguideResultsWidth, 100%));}
 
 #choice-plane .osc-point[data-score-x="0"] {left: 0%;}
 #choice-plane .osc-point[data-score-x="1"] {left: 1%;}

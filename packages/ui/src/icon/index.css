@@ -1,9 +1,9 @@
 .osc .icon {
-    display: inline-flex;  
+    display: inline-flex;
     justify-items: center;
     align-items: center;
-    gap: .25rem;
-    font-weight: 600;
+    gap: var(--setIconGap, var(--iconGap, 0.25rem));
+    font-weight: var(--setIconFontWeight, var(--iconFontWeight, 600));
   }
 
   .osc .icon.no-label {
@@ -16,15 +16,14 @@
     overflow: clip;
   }
 
-
   .osc .icon > i.big {
-    font-size: 24px;
+    font-size: var(--setIconBigFontSize, var(--iconBigFontSize, 24px));
   }
 
   .osc .icon > i.regular {
-    font-size: 16px;
+    font-size: var(--setIconRegularFontSize, var(--iconRegularFontSize, 16px));
   }
 
   .osc .icon > i.small {
-    font-size: 8px;
+    font-size: var(--setIconSmallFontSize, var(--iconSmallFontSize, 8px));
   }

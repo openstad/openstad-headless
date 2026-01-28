@@ -1,70 +1,70 @@
 .icon-section{
-  background-color: var(--nlds-iconsection-background-color, var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(--setApostropheIconSectionColor, var(--apostropheiconsectionColor, var(--setApostropheIconSectionBgColor, var(--apostropheiconsectionBgColor, var(--nlds-iconsection-background-color, var(--nlds-default-background-color, #F0F4F8))))));
 }
 
 .icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button{
-  background-color: var(--utrecht-button-primary-action-background-color);
-  color: var(--utrecht-button-primary-action-color);
-  border-radius: var(--nlds-iconsection-border-radius, 0);
-  justify-content: center !important;
-  grid-gap: 20px;
+  background-color: var(--setApostropheIconSectionColor, var(--apostropheiconsectionColor, var(--setApostropheIconSectionBgColor, var(--apostropheiconsectionBgColor, var(--utrecht-button-primary-action-background-color)))));
+  color: var(--setApostropheIconSectionColor, var(--apostropheiconsectionColor, var(--utrecht-button-primary-action-color)));
+  border-radius: var(--setApostropheIconSectionBorderRadius, var(--apostropheiconsectionBorderRadius, var(--nlds-iconsection-border-radius, 0)));
+  justify-content: var(--setApostropheIconSectionJustify, var(--apostropheIconSectionJustify, center)) !important;
+  grid-gap: var(--setApostropheIconSectionGap, var(--apostropheiconsectionGap, 20px));
 }
 .icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button *{
-  color: var(--utrecht-button-primary-action-color);
+  color: var(--setApostropheIconSectionColor, var(--apostropheiconsectionColor, var(--utrecht-button-primary-action-color)));
   fill: var(--utrecht-button-primary-action-color);
 }
 
 .icon-section .utrecht-accordion__panel{
-  padding: revert;
-  border: none;
+  padding: var(--setApostropheIconSectionPadding, var(--apostropheIconSectionPadding, revert));
+  border: var(--setApostropheIconSectionBorder, var(--apostropheiconsectionBorder, none));
 }
 
 .icon-section-container{
-  padding-block-start: var(--nlds-iconsection-padding-block-start, var(--nlds-default-padding-block-start, 3.5rem));
-  padding-block-end: var(--nlds-iconsection-padding-block-end, var(--nlds-default-padding-block-start, 3.5rem));
+  padding-block-start: var(--setApostropheIconSectionPaddingStart, var(--apostropheIconSectionPaddingStart, var(--nlds-iconsection-padding-block-start, var(--nlds-default-padding-block-start, 3.5rem));
+  padding-block-end: var(--setApostropheIconSectionPaddingEnd, var(--apostropheIconSectionPaddingEnd, var(--nlds-iconsection-padding-block-end, var(--nlds-default-padding-block-start, 3.5rem));
 }
 
 .icon-section .icon-section-grid .container{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, auto));
-  grid-gap: 2rem;
+  grid-template-columns: var(--setApostropheIconSectionColumns, var(--apostropheIconSectionColumns, repeat(auto-fit, minmax(230px, auto))));
+  grid-gap: var(--setApostropheIconSectionGap, var(--apostropheiconsectionGap, 2rem));
 }
 
 
 .icon-section .icon-section-content{
-  padding: 10px;
+  padding: var(--setApostropheIconSectionPadding, var(--apostropheiconsectionPadding, 10px));
   display: grid;
-  grid-gap: 10px;
+  grid-gap: var(--setApostropheIconSectionGap, var(--apostropheiconsectionGap, 10px));
 }
 
 
 .icon-section .icon-section-content h3{
-  color: var(--nlds-iconsection-color,var(--utrecht-heading-3-color, var(--utrecht-heading-color, var(--utrecht-document-color, inherit))));
+  color: var(--setApostropheIconSectionColor, var(--apostropheiconsectionColor, var(--nlds-iconsection-color,var(--utrecht-heading-3-color, var(--utrecht-heading-color, var(--utrecht-document-color, inherit))))));
 }
 
 .icon-section .icon-section-content p{
-  color: var(--nlds-iconsection-color,var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+  color: var(--setApostropheIconSectionColor, var(--apostropheiconsectionColor, var(--nlds-iconsection-color,var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)))));
 }
 
 .icon-section .icon-section-content a{
-  color: var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))));
-  font-weight: 600;
+  color: var(--setApostropheIconSectionColor, var(--apostropheiconsectionColor, var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))))));
+  font-weight: var(--setApostropheIconSectionFontWeight, var(--apostropheiconsectionFontWeight, 600));
 }
 
 .icon-section .icon-section-content a::before{
   content: '';
   aspect-ratio: 1;
-  width: 8px;
-  border: solid var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))));
+  width: var(--setApostropheIconSectionWidth, var(--apostropheiconsectionWidth, 8px));
+  border: var(--setApostropheIconSectionBorder, var(--apostropheiconsectionBorder, solid var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))))));
   display: inline-block;
   transform: rotate(45deg) translate(-1px, 0);
-  border-width: 2px 2px 0 0;
+  border-width: var(--setApostropheIconSectionWidth, var(--apostropheiconsectionWidth, 2px 2px 0 0));
   margin-right: 10px;
 }
 
 .icon-section .icon-section-card img{
-  width: 100%;
-  height: 120px;
+  width: var(--setApostropheIconSectionWidth, var(--apostropheiconsectionWidth, 100%));
+  height: var(--setApostropheIconSectionHeight, var(--apostropheiconsectionHeight, 120px));
   object-fit: contain;
   object-position: center center;
 }

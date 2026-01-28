@@ -17,12 +17,9 @@
 .osc-resource-overview-filters {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  gap: 1rem;
-  background-color: var(
-    --nlds-agenda-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
-  );
+  padding: var(--setResourceOverviewFiltersPadding, var(--resourceOverviewFiltersPadding, 1rem));
+  gap: var(--setResourceOverviewFiltersGap, var(--resourceOverviewFiltersGap, 1rem));
+  background-color: var(--setResourceOverviewFiltersBackground, var(--resourceOverviewFiltersBackground, var(--nlds-agenda-background-color, var(--nlds-default-background-color, #f0f4f8))));
 }
 
 .osc-resource-overview-resource-collection
@@ -95,10 +92,10 @@
   .osc-resource-overview-content-item-status {
   display: inline-block;
   margin: 0;
-  padding: 0.25rem 0.5rem;
-  border-radius: 2px;
-  background-color: transparent;
-  font-size: 14px;
+  padding: var(--setResourceOverviewStatusPadding, var(--resourceOverviewStatusPadding, 0.25rem 0.5rem));
+  border-radius: var(--setResourceOverviewStatusBorderRadius, var(--resourceOverviewStatusBorderRadius, 2px));
+  background-color: var(--setResourceOverviewStatusBackground, var(--resourceOverviewStatusBackground, transparent));
+  font-size: var(--setResourceOverviewStatusFontSize, var(--resourceOverviewStatusFontSize, 14px));
 }
 
 .osc-resource-overview-content-item-description {
@@ -122,12 +119,9 @@
 
 p.osc-searchtext {
   display: inline-block;
-  padding: 0.5rem;
-  border-radius: 4px;
-  background-color: var(
-    --nlds-agenda-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
-  );
+  padding: var(--setResourceOverviewSearchTextPadding, var(--resourceOverviewSearchTextPadding, 0.5rem));
+  border-radius: var(--setResourceOverviewSearchTextBorderRadius, var(--resourceOverviewSearchTextBorderRadius, 4px));
+  background-color: var(--setResourceOverviewSearchTextBackground, var(--resourceOverviewSearchTextBackground, var(--nlds-agenda-background-color, var(--nlds-default-background-color, #f0f4f8))));
 }
 
 .osc-resource-overview-paginator {
@@ -172,9 +166,9 @@ p.osc-searchtext {
 }
 
 .status-label {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-weight: bold;
+  padding: var(--setResourceOverviewStatusLabelPadding, var(--resourceOverviewStatusLabelPadding, 5px 10px));
+  border-radius: var(--setResourceOverviewStatusLabelBorderRadius, var(--resourceOverviewStatusLabelBorderRadius, 4px));
+  font-weight: var(--setResourceOverviewStatusLabelFontWeight, var(--resourceOverviewStatusLabelFontWeight, bold));
 }
 
 .osc .map-container {
@@ -307,25 +301,25 @@ p.osc-searchtext {
 }
 
 .osc-resource-overview-tabs-container > div[role='tablist'] {
-  margin-bottom: 20px;
+  margin-bottom: var(--setResourceOverviewTabsMarginBottom, var(--resourceOverviewTabsMarginBottom, 20px));
   align-items: center;
-  border-bottom: 2px solid rgb(226, 232, 240);
-  color: rgb(100, 116, 139);
+  border-bottom: var(--setResourceOverviewTabsBorderBottom, var(--resourceOverviewTabsBorderBottom, 2px solid rgb(226, 232, 240)));
+  color: var(--setResourceOverviewTabsColor, var(--resourceOverviewTabsColor, rgb(100, 116, 139)));
   display: flex;
   justify-content: flex-start;
-  padding: 4px;
+  padding: var(--setResourceOverviewTabsPadding, var(--resourceOverviewTabsPadding, 4px));
 }
 
 .osc-resource-overview-tabs-container
   > div[role='tablist']
   > button[type='button'] {
-  gap: 2px;
+  gap: var(--setResourceOverviewTabsButtonGap, var(--resourceOverviewTabsButtonGap, 2px));
   align-items: center;
-  background-color: rgb(255, 255, 255);
-  color: rgb(2, 8, 23);
+  background-color: var(--setResourceOverviewTabsButtonBackground, var(--resourceOverviewTabsButtonBackground, rgb(255, 255, 255)));
+  color: var(--setResourceOverviewTabsButtonColor, var(--resourceOverviewTabsButtonColor, rgb(2, 8, 23)));
   display: flex;
   justify-content: center;
-  padding: 6px 12px;
+  padding: var(--setResourceOverviewTabsButtonPadding, var(--resourceOverviewTabsButtonPadding, 6px 12px));
   row-gap: 2px;
   border: none;
 }
@@ -333,7 +327,7 @@ p.osc-searchtext {
 .osc-resource-overview-tabs-container
   > div[role='tablist']
   > button[type='button'][data-state='inactive'] {
-  color: rgb(100, 116, 139);
+  color: var(--setResourceOverviewTabsInactiveColor, var(--resourceOverviewTabsInactiveColor, rgb(100, 116, 139)));
 }
 
 .osc-resource-overview-content .resource-card--link_tagicon {
@@ -359,126 +353,126 @@ p.osc-searchtext {
 
 /* Text Colors */
 .color-FFFFFF {
-  color: #ffffff;
+  color: var(--setResourceOverviewColorFFFFFF, var(--resourceOverviewColorFFFFFF, #ffffff));
 }
 .color-000000 {
-  color: #000000;
+  color: var(--setResourceOverviewColor000000, var(--resourceOverviewColor000000, #000000));
 }
 .color-EC673E {
-  color: #ec673e;
+  color: var(--setResourceOverviewColorEC673E, var(--resourceOverviewColorEC673E, #ec673e));
 }
 .color-7DB47B {
-  color: #7db47b;
+  color: var(--setResourceOverviewColor7DB47B, var(--resourceOverviewColor7DB47B, #7db47b));
 }
 .color-98BFE6 {
-  color: #98bfe6;
+  color: var(--setResourceOverviewColor98BFE6, var(--resourceOverviewColor98BFE6, #98bfe6));
 }
 .color-FAE065 {
-  color: #fae065;
+  color: var(--setResourceOverviewColorFAE065, var(--resourceOverviewColorFAE065, #fae065));
 }
 .color-F59A02 {
-  color: #f59a02;
+  color: var(--setResourceOverviewColorF59A02, var(--resourceOverviewColorF59A02, #f59a02));
 }
 .color-B078AF {
-  color: #b078af;
+  color: var(--setResourceOverviewColorB078AF, var(--resourceOverviewColorB078AF, #b078af));
 }
 .color-E881B0 {
-  color: #e881b0;
+  color: var(--setResourceOverviewColorE881B0, var(--resourceOverviewColorE881B0, #e881b0));
 }
 .color-A52A2A {
-  color: #a52a2a;
+  color: var(--setResourceOverviewColorA52A2A, var(--resourceOverviewColorA52A2A, #a52a2a));
 }
 .color-D1D1D1 {
-  color: #d1d1d1;
+  color: var(--setResourceOverviewColorD1D1D1, var(--resourceOverviewColorD1D1D1, #d1d1d1));
 }
 .color-00FFFF {
-  color: #00ffff;
+  color: var(--setResourceOverviewColor00FFFF, var(--resourceOverviewColor00FFFF, #00ffff));
 }
 .color-FFD700 {
-  color: #ffd700;
+  color: var(--setResourceOverviewColorFFD700, var(--resourceOverviewColorFFD700, #ffd700));
 }
 .color-ADFF2F {
-  color: #adff2f;
+  color: var(--setResourceOverviewColorADFF2F, var(--resourceOverviewColorADFF2F, #adff2f));
 }
 .color-4B0082 {
-  color: #4b0082;
+  color: var(--setResourceOverviewColor4B0082, var(--resourceOverviewColor4B0082, #4b0082));
 }
 .color-8B4513 {
-  color: #8b4513;
+  color: var(--setResourceOverviewColor8B4513, var(--resourceOverviewColor8B4513, #8b4513));
 }
 .color-FA8072 {
-  color: #fa8072;
+  color: var(--setResourceOverviewColorFA8072, var(--resourceOverviewColorFA8072, #fa8072));
 }
 .color-20B2AA {
-  color: #20b2aa;
+  color: var(--setResourceOverviewColor20B2AA, var(--resourceOverviewColor20B2AA, #20b2aa));
 }
 .color-4682B4 {
-  color: #4682b4;
+  color: var(--setResourceOverviewColor4682B4, var(--resourceOverviewColor4682B4, #4682b4));
 }
 .color-D3D3D3 {
-  color: #d3d3d3;
+  color: var(--setResourceOverviewColorD3D3D3, var(--resourceOverviewColorD3D3D3, #d3d3d3));
 }
 
 /* Background Colors */
 .bgColor-FFFFFF {
-  background-color: #ffffff;
+  background-color: var(--setResourceOverviewBgColorFFFFFF, var(--resourceOverviewBgColorFFFFFF, #ffffff));
 }
 .bgColor-000000 {
-  background-color: #000000;
+  background-color: var(--setResourceOverviewBgColor000000, var(--resourceOverviewBgColor000000, #000000));
 }
 .bgColor-EC673E {
-  background-color: #ec673e;
+  background-color: var(--setResourceOverviewBgColorEC673E, var(--resourceOverviewBgColorEC673E, #ec673e));
 }
 .bgColor-7DB47B {
-  background-color: #7db47b;
+  background-color: var(--setResourceOverviewBgColor7DB47B, var(--resourceOverviewBgColor7DB47B, #7db47b));
 }
 .bgColor-98BFE6 {
-  background-color: #98bfe6;
+  background-color: var(--setResourceOverviewBgColor98BFE6, var(--resourceOverviewBgColor98BFE6, #98bfe6));
 }
 .bgColor-FAE065 {
-  background-color: #fae065;
+  background-color: var(--setResourceOverviewBgColorFAE065, var(--resourceOverviewBgColorFAE065, #fae065));
 }
 .bgColor-F59A02 {
-  background-color: #f59a02;
+  background-color: var(--setResourceOverviewBgColorF59A02, var(--resourceOverviewBgColorF59A02, #f59a02));
 }
 .bgColor-B078AF {
-  background-color: #b078af;
+  background-color: var(--setResourceOverviewBgColorB078AF, var(--resourceOverviewBgColorB078AF, #b078af));
 }
 .bgColor-E881B0 {
-  background-color: #e881b0;
+  background-color: var(--setResourceOverviewBgColorE881B0, var(--resourceOverviewBgColorE881B0, #e881b0));
 }
 .bgColor-A52A2A {
-  background-color: #a52a2a;
+  background-color: var(--setResourceOverviewBgColorA52A2A, var(--resourceOverviewBgColorA52A2A, #a52a2a));
 }
 .bgColor-D1D1D1 {
-  background-color: #d1d1d1;
+  background-color: var(--setResourceOverviewBgColorD1D1D1, var(--resourceOverviewBgColorD1D1D1, #d1d1d1));
 }
 .bgColor-00FFFF {
-  background-color: #00ffff;
+  background-color: var(--setResourceOverviewBgColor00FFFF, var(--resourceOverviewBgColor00FFFF, #00ffff));
 }
 .bgColor-FFD700 {
-  background-color: #ffd700;
+  background-color: var(--setResourceOverviewBgColorFFD700, var(--resourceOverviewBgColorFFD700, #ffd700));
 }
 .bgColor-ADFF2F {
-  background-color: #adff2f;
+  background-color: var(--setResourceOverviewBgColorADFF2F, var(--resourceOverviewBgColorADFF2F, #adff2f));
 }
 .bgColor-4B0082 {
-  background-color: #4b0082;
+  background-color: var(--setResourceOverviewBgColor4B0082, var(--resourceOverviewBgColor4B0082, #4b0082));
 }
 .bgColor-8B4513 {
-  background-color: #8b4513;
+  background-color: var(--setResourceOverviewBgColor8B4513, var(--resourceOverviewBgColor8B4513, #8b4513));
 }
 .bgColor-FA8072 {
-  background-color: #fa8072;
+  background-color: var(--setResourceOverviewBgColorFA8072, var(--resourceOverviewBgColorFA8072, #fa8072));
 }
 .bgColor-20B2AA {
-  background-color: #20b2aa;
+  background-color: var(--setResourceOverviewBgColor20B2AA, var(--resourceOverviewBgColor20B2AA, #20b2aa));
 }
 .bgColor-4682B4 {
-  background-color: #4682b4;
+  background-color: var(--setResourceOverviewBgColor4682B4, var(--resourceOverviewBgColor4682B4, #4682b4));
 }
 .bgColor-D3D3D3 {
-  background-color: #d3d3d3;
+  background-color: var(--setResourceOverviewBgColorD3D3D3, var(--resourceOverviewBgColorD3D3D3, #d3d3d3));
 }
 
 

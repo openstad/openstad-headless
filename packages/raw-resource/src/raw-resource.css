@@ -1,4 +1,4 @@
 .osc-raw-resource-container {
-  display: flex;
-  flex-direction: column;
+  display: var(--setRawResourceDisplay, var(--rawResourceDisplay, flex));
+  flex-direction: var(--setRawResourceFlexDirection, var(--rawResourceFlexDirection, column));
 }

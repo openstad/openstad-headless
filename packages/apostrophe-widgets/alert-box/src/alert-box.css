@@ -1,33 +1,33 @@
 .utrecht-alert.alert-box{
-    color: var(--nlds-alert-box-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
-    background-color: var(--nlds-alert-box-background-color, var(--_utrecht-alert-background-color, var(--utrecht-alert-background-color)));
-    display: block;
-    border: none;
+    color: var(--setApostropheAlertBoxColor, var(--apostrophealertboxColor, var(--nlds-alert-box-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)))));
+    background-color: var(--setApostropheAlertBoxColor, var(--apostrophealertboxColor, var(--setApostropheAlertBoxBgColor, var(--apostrophealertboxBgColor, var(--nlds-alert-box-background-color, var(--_utrecht-alert-background-color, var(--utrecht-alert-background-color)))))));
+    display: var(--setApostropheAlertBoxDisplay, var(--apostropheAlertBoxDisplay, block));
+    border: var(--setApostropheAlertBoxBorder, var(--apostrophealertboxBorder, none));
 }
 
 .utrecht-alert.alert-box > div{
-    display: flex;
-    grid-gap: 1rem;
+    display: var(--setApostropheAlertBoxFlexDisplay, var(--apostropheAlertBoxFlexDisplay, flex));
+    grid-gap: var(--setApostropheAlertBoxGap, var(--apostrophealertboxGap, 1rem));
 }
 
 .utrecht-alert.alert-box .utrecht-paragraph{
-    color: inherit;
+    color: var(--setApostropheAlertBoxColor, var(--apostrophealertboxColor, inherit));
 }
 
 .utrecht-alert.alert-box .icon{
-    flex-shrink: 0;
-    width: 1.45rem;
-    height: 1.45rem;
-    border-radius: 100%;
-    border: solid 2px var(--nlds-alert-box-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
-    position: relative;
+    flex-shrink: var(--setApostropheAlertBoxFlexShrink, var(--apostropheAlertBoxFlexShrink, 0));
+    width: var(--setApostropheAlertBoxWidth, var(--apostrophealertboxWidth, 1.45rem));
+    height: var(--setApostropheAlertBoxHeight, var(--apostrophealertboxHeight, 1.45rem));
+    border-radius: var(--setApostropheAlertBoxBorderRadius, var(--apostrophealertboxBorderRadius, 100%));
+    border: var(--setApostropheAlertBoxBorder, var(--apostrophealertboxBorder, solid 2px var(--nlds-alert-box-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)))));
+    position: var(--setApostropheAlertBoxPosition, var(--apostropheAlertBoxPosition, relative));
 
 }
 .utrecht-alert.alert-box .icon::before{
     content: '';
     inset: 0;
     background: var(--nlds-alert-box-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
-    position: absolute;
+    position: var(--setApostropheAlertBoxIconPosition, var(--apostropheAlertBoxIconPosition, absolute));
     mask-repeat: no-repeat;
     mask-position: center;
     mask-size: 5px;

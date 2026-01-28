@@ -1,6 +1,6 @@
 :root {
-  --basemap-map-width: 100%;
-  --basemap-map-height: 420px;
+  --basemap-map-width: var(--setLeafletMapWidth, var(--leafletMapWidth, 100%));
+  --basemap-map-height: var(--setLeafletMapHeight, var(--leafletMapHeight, 420px));
   --basemap-map-aspect-ratio: unset;
 }
 
@@ -19,16 +19,16 @@
 }
 
 .osc-base-map-widget-container .osc-map-marker-faded {
-  opacity: .35;
+  opacity: var(--setLeafletMapFadedOpacity, var(--leafletMapFadedOpacity, 0.35));
 }
 
 .osc-base-map-widget-container .osc-map-marker-cluster-faded {
-  opacity: .35;
+  opacity: var(--setLeafletMapFadedOpacity, var(--leafletMapFadedOpacity, 0.35));
 }
 
 .leaflet-container a {
   display: inline-block;
-  font-size: 18px;
+  font-size: var(--setLeafletLinkFontSize, var(--leafletLinkFontSize, 18px));
   color: var(--utrecht-button-primary-action-background-color);
 }
 .leaflet-bottom.leaflet-right{
@@ -39,7 +39,7 @@
 .leaflet-popup .leaflet-popup-content{
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: var(--setLeafletPopupGap, var(--leafletPopupGap, 0.5rem));
 }
 
 .skip-link {
@@ -103,7 +103,7 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: var(--setLeafletPopupGap, var(--leafletPopupGap, 0.5rem));
   bottom: 1rem;
   right: 1rem;
   left: auto;
