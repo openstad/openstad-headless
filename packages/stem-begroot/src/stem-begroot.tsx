@@ -126,6 +126,7 @@ function StemBegroot({
   displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
+ // Initialize storage instances with project ID
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(props.projectId),
     [props.projectId]
@@ -141,10 +142,7 @@ function StemBegroot({
     api: props.api,
   });
 
-   const { data: allTags } = datastore.useTags({
-    projectId: props.projectId,
-    type: '',
-  });
+   const { data: allTags } = useTags(props.projectId);
 
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
@@ -250,8 +248,11 @@ function StemBegroot({
 
   const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : undefined;
   const urlStatusIdsArray = urlStatusIds
+   
     ? stringToArray(urlStatusIds)
+   
     : undefined;
+
 
   const initTags =
     urlTagIdsArray && urlTagIdsArray.length > 0
@@ -269,6 +270,7 @@ function StemBegroot({
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
   const [tags, setTags] = useState<number[]>(initTags);
+
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
@@ -339,6 +341,16 @@ function StemBegroot({
 
   // Save selectedResources to storage whenever they change
   useEffect(() => {
+    if (
+      props.votes.voteType !== 'countPerTag' &&
+      props.votes.voteType !== 'budgetingPerTag'
+    ) {
+      selectedResourcesStorage.setSelectedResources(selectedResources);
+    }
+  }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
+
+  // Save selectedResources to storage whenever they change
+  useEffect(() => {
     if (props.votes.voteType !== "countPerTag" && props.votes.voteType !== "budgetingPerTag") {
       selectedResourcesStorage.setSelectedResources(selectedResources);
     }
@@ -362,7 +374,10 @@ function StemBegroot({
 
   // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
-    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+    if (
+      props.votes.voteType === 'countPerTag' ||
+      props.votes.voteType === 'budgetingPerTag'
+    ) {
       const pendingPerTag = votePendingStorage.getVotePendingPerTag();
 
       if (pendingPerTag) {
@@ -403,8 +418,14 @@ function StemBegroot({
       }
     } else {
       const pending = votePendingStorage.getVotePending();
-      if (pending && resources?.records?.length > 0 && selectedResources.length === 0) {
-        setSelectedResources(resources?.records?.filter((r: any) => pending[r.id]));
+      if (
+        pending &&
+        resources?.records?.length > 0 &&
+        selectedResources.length === 0
+      ) {
+        setSelectedResources(
+          resources?.records?.filter((r: any) => pending[r.id])
+        );
       }
     }
   }, [resources?.records, votePendingStorage]);
@@ -413,6 +434,11 @@ function StemBegroot({
   useEffect(() => {
     let pending;
 
+    if (
+      props.votes.voteType === 'countPerTag' ||
+      props.votes.voteType === 'budgetingPerTag'
+    ) {
+      pending = votePendingStorage.getVotePendingPerTag();
     if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
       pending = votePendingStorage.getVotePendingPerTag();
     } else {
@@ -433,6 +459,7 @@ function StemBegroot({
       } else {
         setCurrentStep(3);
       }
+     }
     }
   }, [currentUser, currentStep, selectedResources, tagCounter]);
 
@@ -443,7 +470,10 @@ function StemBegroot({
       }
       submitInProgressRef.current = true;
 
-      if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+      if (
+        props.votes.voteType === 'countPerTag' ||
+        props.votes.voteType === 'budgetingPerTag'
+      ) {
         let allResourcesToVote: any[] = [];
 
         for (const tagObj of tagCounter) {
@@ -465,16 +495,18 @@ function StemBegroot({
         ).map((id) => allResourcesToVote.find((r) => r.id === id));
 
         if (uniqueResourcesToVote.length > 0) {
+          votePendingStorage.clearVotePendingPerTag();
+
           await doVote(uniqueResourcesToVote);
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
         }
       } else {
-        await doVote(selectedResources);
-        votePendingStorage.clearVotePending();
-        selectedResourcesStorage.clearSelectedResources();
+        if (selectedResources.length > 0) {
+          votePendingStorage.clearVotePending();
+          return await doVote(selectedResources);
+        }
       }
-      setCurrentStep((prev) => prev + 1);
     } catch (err: any) {
       notifyVoteMessage(err.message, true);
     } finally {
@@ -511,6 +543,7 @@ function StemBegroot({
         });
       });
 
+      votePendingStorage.setVotePendingPerTag(resourcesToVoteForPerTag);
       votePendingStorage.setVotePendingPerTag(resourcesToVoteForPerTag);
     }
   }
@@ -921,8 +954,12 @@ function StemBegroot({
                 }
                 tagCounter={tagCounter}
                 step1MaxText={step1MaxText}
-                onSelectedResourceRemove={(resource: {id: number, budget: number}) => {
+                onSelectedResourceRemove={(resource: {
+                  id: number;
+                  budget: number;
+                }) => {
                   votePendingStorage.clearAllVotePending();
+                  selectedResourcesStorage.clearSelectedResources()
 
                   let newTagCounter = [...tagCounter];
 
@@ -1315,7 +1352,7 @@ function StemBegroot({
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 votePendingStorage.clearAllVotePending();
-
+                selectedResourcesStorage.clearSelectedResources()
                 let newTagCounter = [...tagCounter];
 
                 if (
