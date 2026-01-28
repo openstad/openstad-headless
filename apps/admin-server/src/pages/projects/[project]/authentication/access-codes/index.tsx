@@ -60,13 +60,17 @@ export default function ProjectCodes() {
             url: '/projects'
           },
           {
+            name: 'Authenticatie',
+            url: `/projects/${project}/authentication`,
+          },
+          {
             name: 'Toegangscodes',
-            url: `/projects/${project}/access-codes`,
+            url: `/projects/${project}/authentication/access-codes`,
           },
         ]}
         action={
           <div className='flex flex-row w-full md:w-auto my-auto gap-4'>
-            <Link href={`/projects/${project}/access-codes/create`}>
+            <Link href={`/projects/${project}/authentication/access-codes/create`}>
               <Button variant="default" className="text-xs p-2 w-fit">
                 <Plus size="20" className="hidden md:flex" />
                 Toegangscode toevoegen

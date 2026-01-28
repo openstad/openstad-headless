@@ -10,6 +10,7 @@ import {
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
 import { FormValue } from "@openstad-headless/form/src/form";
+import {InfoImage} from "../../infoImage";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
@@ -43,8 +44,18 @@ export type CheckboxFieldProps = {
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: { value: string; label: string }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
     randomizeItems?: boolean;
     value?: FormValue;
+    selectAll?: boolean;
+    selectAllLabel?: string;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -62,10 +73,15 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        maxChoices = '',
        maxChoicesMessage = '',
        randomId= '',
-       fieldInvalid= false,
+       fieldInvalid,
        randomizeItems = false,
        overrideDefaultValue,
-       defaultValue
+       defaultValue,
+       images = [],
+       createImageSlider = false,
+       imageClickable = false,
+       selectAll = false,
+       selectAllLabel = ''
 }) => {
     let initialValue = defaultValue || [];
     try {
@@ -84,6 +100,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
     const maxChoicesNum = parseInt(maxChoices, 10) || 0;
     const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
+
+    const checkFieldValidation = () => {
+        if (fieldRequired && selectedChoices.length === 0) {
+            return false;
+        }
+        return true;
+    }
 
     useEffect(() => {
         let normalizedChoices = choices ? choices.map(choice => typeof choice === 'string' ? {value: choice, label: choice} : choice) : [];
@@ -165,7 +188,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         <div className="question">
             <Fieldset
               role="group"
-              aria-invalid={fieldInvalid}
+              aria-invalid={checkFieldValidation() ? 'false' : 'true'}
               aria-describedby={`${randomId}_error`}
             >
                 {title && (
@@ -195,11 +218,39 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     </>
                 )}
 
-                {infoImage && (
-                    <figure className="info-image-container">
-                        <img src={infoImage} alt=""/>
-                        <Spacer size={.5} />
-                    </figure>
+                {InfoImage({
+                    imageFallback: infoImage || '',
+                    images: images,
+                    createImageSlider: createImageSlider,
+                    addSpacer: !!infoImage,
+                    imageClickable: imageClickable
+                })}
+
+                { selectAll && (
+                    <FormField type="checkbox" key="select_all">
+                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                            <FormLabel htmlFor={`${fieldKey}_select_all`} type="checkbox" className="--label-grid">
+                                <Checkbox
+                                    className="utrecht-form-field__input"
+                                    id={`${fieldKey}_select_all`}
+                                    name={fieldKey}
+                                    value="select_all"
+                                    required={fieldRequired}
+                                    checked={selectedChoices.length > 0 && selectedChoices.length === (displayChoices ? displayChoices.length : 0)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            const allValues = displayChoices ? displayChoices.map(choice => choice.value) : [];
+                                            setSelectedChoices(allValues);
+                                        } else {
+                                            setSelectedChoices([]);
+                                        }
+                                    }}
+                                    disabled={disabled}
+                                />
+                                <span>{selectAllLabel}</span>
+                            </FormLabel>
+                        </Paragraph>
+                    </FormField>
                 )}
 
                 {displayChoices?.map((choice, index) => (

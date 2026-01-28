@@ -25,7 +25,7 @@ import {
 import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { TabsContent, TabsList, TabsTrigger, Tabs } from "@openstad-headless/admin-server/src/components/ui/tabs";
-import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
+import {Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 
 // This function takes in latitude and longitude of two locations
 // and returns the distance between them as the crow flies (in kilometers)
@@ -71,7 +71,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     ) => React.JSX.Element; renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
-      onItemClick?: () => void
+      onItemClick?: () => void,
+      refreshLikes?: () => void,
     ) => React.JSX.Element;
     resourceType?: 'resource';
     displayPagination?: boolean;
@@ -103,7 +104,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any }>;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean; projectId?: any, inlineOptions?: boolean }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
@@ -162,6 +163,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     filterBehaviorInclude?: string;
     onlyShowTheseTagIds?: string;
     displayCollapsibleFilter?: boolean;
+    displayUser?: boolean;
+    displayCreatedAt?: boolean;
+    allowLikingInOverview?: boolean;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -203,7 +207,8 @@ const defaultHeaderRenderer = (
 const defaultItemRenderer = (
   resource: any,
   props: ResourceOverviewWidgetProps,
-  onItemClick?: () => void
+  onItemClick?: () => void,
+  refreshLikes?: () => void,
 ) => {
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
@@ -270,11 +275,15 @@ const defaultItemRenderer = (
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
-  const firstStatus = resource.statuses
-    ? resource.statuses
-      .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
-    : false;
+  let resourceFilteredStatuses = Array.isArray(resource?.statuses)
+    ? resource.statuses.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+        if (a.seqnr === undefined || a.seqnr === null) return 1;
+        if (b.seqnr === undefined || b.seqnr === null) return -1;
+        return a.seqnr - b.seqnr;
+      })
+    : [];
+
+  const firstStatus = resourceFilteredStatuses && resourceFilteredStatuses.length > 0 ? resourceFilteredStatuses[0] : null;
 
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
   const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
@@ -290,16 +299,62 @@ const defaultItemRenderer = (
   const overviewTagGroups = props.overviewTagGroups || [];
   const displayOverviewTagGroups = props.displayOverviewTagGroups || [];
 
-  const resourceFilteredTags = (overviewTagGroups && Array.isArray(overviewTagGroups) && Array.isArray(resource?.tags))
+  let resourceFilteredTags = (overviewTagGroups && Array.isArray(overviewTagGroups) && Array.isArray(resource?.tags))
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
     : resource?.tags || [];
 
-  const firstTag = resource?.tags
-    ? resource.tags
-      .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
-      .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
-    : false;
+  resourceFilteredTags = resourceFilteredTags?.length
+    ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+      if (a.seqnr === undefined || a.seqnr === null) return 1;
+      if (b.seqnr === undefined || b.seqnr === null) return -1;
+      return a.seqnr - b.seqnr;
+    })
+    : [];
+
+  const firstTag = resourceFilteredTags && resourceFilteredTags.length > 0 ? resourceFilteredTags[0] : null;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
+
+  const TileFooter = (
+    { doVote }: { doVote?: (value: string) => any }
+  ) => {
+    const vote = async (sentiment: string) => {
+      if (doVote) {
+        await doVote(sentiment)
+        refreshLikes && await refreshLikes();
+      }
+    }
+
+    return (
+      <div className={`osc-resource-overview-content-item-footer ${doVote ? 'liking-allowed' : ''}`}>
+        {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
+          <>
+            <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' onClick={() => vote('yes')}/>
+
+            {props.likeWidget?.displayDislike &&
+              <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' onClick={() => vote('no')}/>}
+          </>
+        )}
+
+        {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+          <div className="micro-score-container">
+            <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' onClick={() => vote('yes')}/>
+            <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+            {props.likeWidget?.displayDislike &&
+              <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' onClick={() => vote('no')}/>}
+          </div>
+        )}
+
+        {props.displayArguments ? (
+          <Icon
+            icon="ri-message-line"
+            variant="big"
+            text={resource.commentCount}
+            description='Aantal reacties'
+          />
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -338,32 +393,47 @@ const defaultItemRenderer = (
             ) : null}
           </div>
 
-          <div className="osc-resource-overview-content-item-footer">
-            {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
-              <>
-                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor' />
+          <div className="osc-resource-overview-content-date-user">
+            <Paragraph className="data-user-container">
+              {props.displayUser && resource.user && (
+                <span className="created-by">
+                  {resource.user.displayName}
+                </span>
+              )}
 
-                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen' />}
-              </>
-            )}
+              { props.displayCreatedAt && props.displayUser && (
+                <span className="join-text">{props.displayCreatedAt && (` op `)}</span>
+              )}
 
-            {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
-              <div className="micro-score-container">
-                <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' />
-                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
-                {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' />}
-              </div>
-            )}
-
-            {props.displayArguments ? (
-              <Icon
-                icon="ri-message-line"
-                variant="big"
-                text={resource.commentCount}
-                description='Aantal reacties'
-              />
-            ) : null}
+              {props.displayCreatedAt && resource.createdAt && (
+                <span className="created-at">
+                  {new Date(resource.createdAt).toLocaleDateString('nl-NL', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              )}
+            </Paragraph>
           </div>
+
+          { props.allowLikingInOverview ? (
+            <Likes
+              {...props.likeWidget}
+              resourceId={resource.id}
+              projectId={props.projectId}
+              {...props}
+              refreshResourceLikes={refreshLikes}
+            >
+              {(doVote) => (
+                <TileFooter
+                  doVote={doVote}
+                />
+              )}
+            </Likes>
+          ) : (
+            <TileFooter />
+          )}
 
           <Carousel
             items={resourceImages}
@@ -381,7 +451,7 @@ const defaultItemRenderer = (
                         {!!multiProjectLabel ? (
                           <span className="status-label">{multiProjectLabel}</span>
                         ) : (
-                          resource.statuses?.map((statusTag: any) => (
+                          resourceFilteredStatuses?.map((statusTag: any) => (
                             <span className="status-label" key={statusTag.label}>{statusTag.label}</span>
                           ))
                         )}
@@ -477,7 +547,7 @@ const defaultItemRenderer = (
                         {!!multiProjectLabel ? (
                           <span className="status-label">{multiProjectLabel}</span>
                         ) : (
-                          resource.statuses?.map((statusTag: any) => (
+                          resourceFilteredStatuses?.map((statusTag: any) => (
                             <span className="status-label">{statusTag.label}</span>
                           ))
                         )}
@@ -563,7 +633,7 @@ function ResourceOverviewInner({
   const tagIdsToLimitResourcesTo = stringToArray(onlyIncludeTagIds);
   const tagsLimitationArray = stringToArray(onlyShowTheseTagIds);
 
-  const { data: allTags } = datastore.useTags({
+  const { data: allTags, isLoading: tagsLoading } = datastore.useTags({
     projectId: props.projectId,
     type: ''
   });
@@ -594,6 +664,10 @@ function ResourceOverviewInner({
 
   const [open, setOpen] = React.useState(false);
   const initStatuses = urlStatusIdsArray && urlStatusIdsArray.length > 0 ? urlStatusIdsArray : statusIdsToLimitResourcesTo || [];
+
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
 
   useEffect(() => {
     const includeTags = includeOrExcludeTagIds === 'include' ? tagIdsToLimitResourcesTo : [];
@@ -901,6 +975,10 @@ function ResourceOverviewInner({
     }, 200);
   }
 
+  const refreshLikes = () => {
+    datastore.refresh()
+  }
+
   const overviewSection = (
     <section className="osc-resource-overview-resource-collection" id={randomId}>
       {filteredResources?.length === 0 ? (
@@ -919,7 +997,7 @@ function ResourceOverviewInner({
               <React.Fragment key={`resource-item-${resource?.id || resource?.uniqueId}`}>
                 {renderItem(resource, { ...props, displayType, selectedProjects, displayOverviewTagGroups, overviewTagGroups }, () => {
                   onResourceClick(resource, index);
-                })}
+                }, refreshLikes )}
               </React.Fragment>
             );
           })
@@ -927,7 +1005,9 @@ function ResourceOverviewInner({
     </section>
   );
 
-  return (
+  return tagsLoading ? (
+      <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
+    ) : (
     <>
       <Dialog
         open={open}
@@ -1013,7 +1093,7 @@ function ResourceOverviewInner({
                 setSearch(f.search.text);
                 setLocation(f.location)
               }}
-              preFilterTags={urlTagIdsArray}
+              preFilterTags={prefilterTagObj}
               displayCollapsibleFilter={displayCollapsibleFilter}
               autoApply={props?.autoApply || false}
             />

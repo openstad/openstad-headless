@@ -194,7 +194,9 @@ router.route('/')
 				    where: {id: submissionId, projectId: req.params.projectId}
 				})
 				.then(found => {
-					if ( !found ) throw new Error('Submission not found');
+					if (!found) {
+            return next(createError(404, 'Submission not found'));
+          }
 					req.results = found;
 					next();
 				})

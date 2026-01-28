@@ -4,8 +4,8 @@ import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { SessionStorage, hasRole } from '@openstad-headless/lib';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { hasRole } from '@openstad-headless/lib';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { StemBegrootBudgetList } from './step-1/begroot-budget-list/stem-begroot-budget-list';
 import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/stem-begroot-detail-dialog';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
@@ -125,7 +125,7 @@ function StemBegroot({
   displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
-  // Initialize storage instances with project ID
+ // Initialize storage instances with project ID
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(props.projectId),
     [props.projectId]
@@ -141,10 +141,78 @@ function StemBegroot({
     api: props.api,
   });
 
-  const { data: allTags } = datastore.useTags({
+   const { data: allTags } = datastore.useTags({
     projectId: props.projectId,
     type: '',
   });
+
+  const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
+
+  // Restore pending-budget-vote from server if UUID is in URL
+  useEffect(() => {
+
+    if (pendingVoteFetched) return;
+
+    const url = new URL(window.location.href);
+    const pendingUuidFromUrl = url.searchParams.get('pendingBudgetVote');
+
+    async function restoreFromServer(uuid: string) {
+      try {
+        if (!uuid) return;
+
+        setPendingVoteFetched(true);
+
+        if (!props.api || !props.api.url) return;
+
+        let apiUrl =`${props.api.url}/api/pending-budget-vote/${uuid}`;
+
+        const pendingBudgetVote = await fetch(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // Remove pendingBudgetVote from URL
+        url.searchParams.delete('pendingBudgetVote');
+        window.history.replaceState({}, document.title, url.toString());
+
+        if (!pendingBudgetVote.ok || !pendingBudgetVote) {
+          console.error('Failed to fetch pending budget vote from server', pendingBudgetVote.statusText);
+          return;
+        }
+
+        const pendingBudgetVoteData = await pendingBudgetVote.json();
+
+        if (!pendingBudgetVoteData || !pendingBudgetVoteData.data) {
+          console.error('No pending budget vote data found on server');
+          return;
+        }
+
+        const { data } = pendingBudgetVoteData;
+
+        if (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag') {
+          votePendingStorage.setVotePendingPerTag(data as any);
+        } else {
+          votePendingStorage.setVotePending(data as any);
+        }
+      } catch (e) {
+        console.error('Failed to restore pending budget vote from server', e);
+      }
+    }
+
+    if (pendingUuidFromUrl) {
+      restoreFromServer(pendingUuidFromUrl);
+      return;
+    }
+
+    const localPending = (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag')
+      ? votePendingStorage.getVotePendingPerTag()
+      : votePendingStorage.getVotePending();
+
+    if (localPending) {
+      setPendingVoteFetched(true);
+    }
+  }, [datastore, props.votes.voteType, votePendingStorage]);
 
   const startingStep =
     props?.votes?.voteType === 'countPerTag' ||
@@ -163,6 +231,7 @@ function StemBegroot({
 
   const [activeTagTab, setActiveTagTab] = useState<string>('');
   const [visitedTagTabs, setVisitedTagTabs] = useState<Array<string>>([]);
+  const submitInProgressRef = React.useRef(false);
 
   const stringToArray = (str: string) => {
     return str
@@ -193,6 +262,10 @@ function StemBegroot({
       ? urlStatusIdsArray
       : statusIdsToLimitResourcesTo || [];
 
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
+
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
   const [tags, setTags] = useState<number[]>(initTags);
@@ -220,8 +293,6 @@ function StemBegroot({
     const stored = selectedResourcesStorage.getSelectedResources();
     return stored || [];
   });
-
-  const session = new SessionStorage({ projectId: props.projectId });
 
   const selectedBudgets: Array<number> = (() => {
     if (props.votes.voteType === 'budgetingPerTag') {
@@ -272,6 +343,13 @@ function StemBegroot({
       props.votes.voteType !== 'countPerTag' &&
       props.votes.voteType !== 'budgetingPerTag'
     ) {
+      selectedResourcesStorage.setSelectedResources(selectedResources);
+    }
+  }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
+
+  // Save selectedResources to storage whenever they change
+  useEffect(() => {
+    if (props.votes.voteType !== "countPerTag" && props.votes.voteType !== "budgetingPerTag") {
       selectedResourcesStorage.setSelectedResources(selectedResources);
     }
   }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
@@ -359,6 +437,8 @@ function StemBegroot({
       props.votes.voteType === 'budgetingPerTag'
     ) {
       pending = votePendingStorage.getVotePendingPerTag();
+    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
+      pending = votePendingStorage.getVotePendingPerTag();
     } else {
       pending = votePendingStorage.getVotePending();
     }
@@ -371,7 +451,7 @@ function StemBegroot({
     ) {
       if (voteAfterLoggingIn) {
         if (selectedResources.length > 0 || tagCounter.length > 0) {
-          setCurrentStep(4);
+          setCurrentStep(3);
           submitVoteAndCleanup();
         }
       } else {
@@ -382,6 +462,11 @@ function StemBegroot({
 
   async function submitVoteAndCleanup() {
     try {
+      if (submitInProgressRef.current) {
+        return;
+      }
+      submitInProgressRef.current = true;
+
       if (
         props.votes.voteType === 'countPerTag' ||
         props.votes.voteType === 'budgetingPerTag'
@@ -410,6 +495,8 @@ function StemBegroot({
           votePendingStorage.clearVotePendingPerTag();
 
           await doVote(uniqueResourcesToVote);
+          votePendingStorage.clearVotePendingPerTag();
+          selectedResourcesStorage.clearSelectedResources();
         }
       } else {
         if (selectedResources.length > 0) {
@@ -419,10 +506,14 @@ function StemBegroot({
       }
     } catch (err: any) {
       notifyVoteMessage(err.message, true);
+    } finally {
+      submitInProgressRef.current = false;
     }
   }
 
-  function prepareForVote(e: React.MouseEvent<HTMLElement, MouseEvent> | null) {
+  async function prepareForVote(
+    e: React.MouseEvent<HTMLElement, MouseEvent> | null
+  ) {
     if (e) e.stopPropagation();
 
     if (
@@ -430,12 +521,9 @@ function StemBegroot({
       props.votes.voteType !== 'budgetingPerTag'
     ) {
       const resourcesToVoteFor: { [key: string]: any } = {};
-      (selectedResources.length ? selectedResources : []).forEach(
-        (resource: any) => {
-          resourcesToVoteFor[resource.id] = 'yes';
-        }
-      );
-
+      (selectedResources.length ? selectedResources : []).forEach((resource: any) => {
+        resourcesToVoteFor[resource.id] = 'yes';
+      });
       votePendingStorage.setVotePending(resourcesToVoteFor);
     } else {
       const resourcesToVoteForPerTag: {
@@ -452,6 +540,7 @@ function StemBegroot({
         });
       });
 
+      votePendingStorage.setVotePendingPerTag(resourcesToVoteForPerTag);
       votePendingStorage.setVotePendingPerTag(resourcesToVoteForPerTag);
     }
   }
@@ -709,6 +798,10 @@ function StemBegroot({
       prev.includes(activeTagTab) ? prev : [...prev, activeTagTab]
     );
   }, [activeTagTab]);
+
+  useEffect(() => {
+    console.log("Curr step", currentStep);
+  }, [currentStep]);
 
   return (
     <>
@@ -1004,6 +1097,9 @@ function StemBegroot({
               step3={props.step3 || ''}
               stemCodeTitle={props.stemCodeTitle}
               step3Title={step3Title || ''}
+              projectId={props.projectId}
+              voteType={props.votes.voteType}
+              apiUrl={props?.api?.url || ''}
             />
           ) : null}
 
@@ -1228,7 +1324,7 @@ function StemBegroot({
                         setSort(f.sort);
                         setSearch(f.search.text);
                       }}
-                      preFilterTags={urlTagIdsArray}
+                      preFilterTags={prefilterTagObj}
                     />
                   ) : null}
 

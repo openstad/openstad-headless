@@ -80,6 +80,22 @@ module.exports = (db, sequelize, Sequelize) => {
       },
     },
 
+    emailNotificationConsent: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
+      set: function (value) {
+        try {
+          if (typeof value === 'string') {
+            value = JSON.parse(value);
+          }
+        } catch (e) {}
+        value = value || {};
+
+        this.setDataValue('emailNotificationConsent', value);
+      }
+    },
+
     accessCode: {
       type: DataTypes.STRING,
       set: function (value) {

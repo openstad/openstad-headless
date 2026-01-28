@@ -10,8 +10,9 @@ import { Heading } from '@utrecht/component-library-react';
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { FieldProps } from '@openstad-headless/form/src/props';
 
-const getExistingValue = (fieldKey, resource) => {
+const getExistingValue = (fieldKey, resource, multiple) => {
     if (!!resource) {
         const field = resource[fieldKey] || null;
         const returnField = (!field && resource.extraData) ? resource.extraData[fieldKey] || null : field
@@ -23,9 +24,11 @@ const getExistingValue = (fieldKey, resource) => {
         if (fieldKey.startsWith('tags[') && resource.tags) {
             const tagType = fieldKey.substring(5, fieldKey.length - 1);
 
-            return resource.tags
-                ?.filter((tag) => tag.type === tagType)
-                .map((tag) => tag.id);
+            const filteredTags =  resource.tags
+              ?.filter((tag) => tag.type === tagType)
+              .map((tag) => String(tag.id));
+
+            return multiple ? filteredTags : (filteredTags.length > 0 ? filteredTags[0] : undefined);
         }
     }
     return undefined;
@@ -72,7 +75,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
         if (canEdit) {
             const updatedFormFields = initialFormFields.map((field) => {
-                const existingValue = getExistingValue(field.fieldKey, existingResource);
+                type FieldsWithMultiple = FieldProps & { multiple?: boolean };
+                const fieldWithMultiple = field as FieldsWithMultiple;
+
+                const existingValue = getExistingValue(field.fieldKey, existingResource, fieldWithMultiple?.multiple);
 
                 return existingValue ? { ...field, defaultValue: existingValue } : field;
             });

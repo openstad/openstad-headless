@@ -54,12 +54,16 @@ export default function ProjectCodeCreate() {
             url: '/projects'
           },
           {
+            name: 'Authenticatie',
+            url: `/projects/${project}/authentication`,
+          },
+          {
             name: 'Toegangscodes',
-            url: `/projects/${project}/access-codes`,
+            url: `/projects/${project}/authentication/access-codes`,
           },
           {
             name: 'Toegangscode toevoegen',
-            url: `/projects/${project}/access-codes/create`,
+            url: `/projects/${project}/authentication/access-codes/create`,
           },
         ]}>
         <div className="container py-6">

@@ -2,7 +2,7 @@ import { PageLayout } from '../../../../components/ui/page-layout';
 import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
 import { ChevronRight, Plus } from 'lucide-react';
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
@@ -14,40 +14,13 @@ import flattenObject from "@/lib/export-helpers/flattenObject";
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import {ConfirmActionDialog} from "@/components/dialog-confirm-action";
 import {Checkbox} from "@/components/ui/checkbox";
+import { ImportButton } from '@/components/importButton';
+import { keyMap } from '@/lib/keyMap';
+import { Paginator } from '@openstad-headless/ui/src';
 
-const keyMap: Record<string, string> = {
-  id: 'Inzending ID',
-  projectId: 'Project ID',
-  widgetId: 'Widget ID',
-  title: 'Titel',
-  summary: 'Samenvatting',
-  description: 'Beschrijving',
-  budget: 'Budget',
-  'location.lat': 'Locatie (lat)',
-  'location.lng': 'Locatie (lng)',
-  createDateHumanized: 'Datum aangemaakt (leesbaar)',
-  updatedAt: 'Laatst bijgewerkt',
-  deletedAt: 'Verwijderd op',
-  yes: 'Aantal likes',
-  no: 'Aantal dislikes',
-  score: 'Wilson score interval',
-  progress: 'Voortgang',
-  statuses: 'Statussen',
-  modBreak: 'Moderatie bericht',
-  modBreakDate: 'Moderatie bericht datum',
-  images: 'Afbeeldingen',
-  tags: 'Tags',
-  documents: 'Documenten',
-  extraData: 'Extra gegevens',
-  'user.id': 'Gebruiker ID',
-  'user.role': 'Gebruiker rol',
-  'user.name': 'Gebruiker naam',
-  'user.email': 'Gebruiker e-mailadres',
-  'user.phonenumber': 'Gebruiker telefoonnummer',
-  'user.address': 'Gebruiker adres',
-  'user.city': 'Gebruiker woonplaats',
-  'user.postcode': 'Gebruiker postcode',
-};
+interface ProjectResourcesProps {
+  BETA_FEATURE_FLAG_BULK_IMPORT: string;
+}
 
 const prepareDataForExport = (data: any[]) => {
   const allResources: any[] = [];
@@ -85,17 +58,37 @@ const prepareDataForExport = (data: any[]) => {
   return allResources;
 }
 
-export default function ProjectResources() {
+export async function getServerSideProps() {
+  return {
+    props: {
+      BETA_FEATURE_FLAG_BULK_IMPORT: process.env.BETA_FEATURE_FLAG_BULK_IMPORT,
+    },
+  };
+}
+
+export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: ProjectResourcesProps) {
   const router = useRouter();
   const { project } = router.query;
-  const { data, error, isLoading, remove, duplicate } = useResources(project as string);
 
-  function transform() {
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageLimit, setPageLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const { data, pagination, error, isLoading, remove, duplicate, fetchAll } = useResources(
+    project as string,
+    false,
+    page,
+    pageLimit
+  );
+
+  async function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
 
-    const preparedData = prepareDataForExport(data);
+    const allData = await fetchAll(totalCount, pageLimit);
+    const preparedData = prepareDataForExport(allData);
 
     exportToXLSX(preparedData, `${projectId}_resources_${formattedDate}.xlsx`, keyMap);
   }
@@ -107,14 +100,30 @@ export default function ProjectResources() {
   const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
 
   useEffect(() => {
+    if (pagination) {
+      const count = pagination.totalCount || 0;
+      const pageCount = Math.ceil(count / pageLimit);
+      setTotalPages(pageCount);
+      setTotalCount(count);
+    }
     setFilterData(data);
-  }, [data])
+  }, [data, pagination, pageLimit])
 
   if (!data) return null;
 
   return (
-    <div>
-      <PageLayout
+    <>
+      <style jsx global>{`
+        .osc-paginator {
+          justify-content: center;
+          margin-top: 30px;
+        }
+        .osc-paginator .osc-icon-button .icon p {
+          display: none;
+        }
+      `}</style>
+      <div>
+        <PageLayout
         pageHeader="Inzendingen"
         breadcrumbs={[
           {
@@ -138,6 +147,7 @@ export default function ProjectResources() {
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
               Exporteer inzendingen
             </Button>
+            {BETA_FEATURE_FLAG_BULK_IMPORT === "true" && <ImportButton project={project as string} />}
           </div>
         }>
         <div className="container py-6"><div className="float-left mb-4 flex gap-4">
@@ -340,9 +350,40 @@ export default function ProjectResources() {
                 </Link>
               ))}
             </ul>
+
+            {totalPages > 0 && (
+              <div className="flex flex-col items-center gap-4 mt-4">
+                <Paginator
+                  page={page || 0}
+                  totalPages={totalPages || 1}
+                  onPageChange={(newPage) => setPage(newPage)}
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Rijen per pagina:</span>
+                  <select
+                    className="p-2 rounded border"
+                    value={pageLimit}
+                    onChange={(e) => {
+                      setPageLimit(Number(e.target.value));
+                      setPage(0);
+                    }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={250}>250</option>
+                  </select>
+                  <span className="text-sm text-gray-500">
+                    ({totalCount} totaal)
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </PageLayout>
-    </div>
+      </div>
+    </>
   );
 }

@@ -23,6 +23,8 @@ import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import ArgumentsSorting from "@/pages/projects/[project]/widgets/comments/[id]/sorting";
 import ArgumentsExtraFields from "@/pages/projects/[project]/widgets/comments/[id]/extraFields";
 import ArgumentsInclude from "@/pages/projects/[project]/widgets/comments/[id]/include";
+import ArgumentsConfirmation from "@/pages/projects/[project]/widgets/comments/[id]/confirmation";
+import { useProject } from '@/hooks/use-project';
 export const getServerSideProps = withApiUrl;
 
 // Use these props in the widget tabs
@@ -41,6 +43,9 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
     useWidgetPreview<CommentsWidgetProps>({
       projectId,
     });
+
+  const { data: projectConfig } = useProject( ['includeConfig'] );
+  const requiredFieldsIncludesEmailNotificationConsent = projectConfig?.config?.auth?.provider?.openstad?.requiredUserFields?.includes('emailNotificationConsent');
 
   return (
     <div>
@@ -68,6 +73,7 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="form">Formulier</TabsTrigger>
               <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
               <TabsTrigger value="include">Inclusief / exclusief</TabsTrigger>
+              <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
@@ -159,6 +165,25 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
                       });
                     }
                   }}
+                />
+              ) : null}
+            </TabsContent>
+            <TabsContent value="confirmation" className="p-0">
+              {previewConfig ? (
+                <ArgumentsConfirmation
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                  requiredFieldsIncludesEmailNotificationConsent={requiredFieldsIncludesEmailNotificationConsent}
                 />
               ) : null}
             </TabsContent>

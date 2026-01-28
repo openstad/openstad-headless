@@ -86,7 +86,7 @@ export default function ProjectSettingsTags() {
           },
           {
             name: 'Instellingen',
-            url: `'/projects/${project}/settings'`,
+            url: `/projects/${project}/settings`,
           },
           {
             name: 'Tags',
