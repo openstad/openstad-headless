@@ -80,6 +80,8 @@ const formSchema = z.object({
     routingInitiallyHide: z.boolean().optional(),
     routingSelectedQuestion: z.string().optional(),
     routingSelectedAnswer: z.string().optional(),
+    selectAll: z.boolean().optional(),
+    selectAllLabel: z.string().optional(),
 });
 
 const matrixDefault = {
@@ -158,6 +160,8 @@ export default function WidgetResourceFormItems(
                     routingInitiallyHide: values.routingInitiallyHide || false,
                     routingSelectedQuestion: values.routingSelectedQuestion || '',
                     routingSelectedAnswer: values.routingSelectedAnswer || '',
+                    selectAll: values.selectAll || false,
+                    selectAllLabel: values.selectAllLabel || '',
                 },
             ]);
         }
@@ -270,6 +274,8 @@ export default function WidgetResourceFormItems(
         routingInitiallyHide: false,
         routingSelectedQuestion: '',
         routingSelectedAnswer: '',
+        selectAll: false,
+        selectAllLabel: '',
     });
 
     const form = useForm<FormData>({
@@ -315,6 +321,8 @@ export default function WidgetResourceFormItems(
                 routingInitiallyHide: selectedItem.routingInitiallyHide || false,
                 routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
                 routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
+                selectAll: selectedItem.selectAll || false,
+                selectAllLabel: typeof(selectedItem.selectAllLabel) === 'undefined' ? 'Selecteer alles' : selectedItem.selectAllLabel,
             });
             setOptions(selectedItem.options || []);
             setMatrixOptions(selectedItem.matrix || matrixDefault);
@@ -984,18 +992,19 @@ export default function WidgetResourceFormItems(
                                         />
 
                                         {form.watch('type') === 'title' && (
-                                            <FormField
-                                                control={form.control}
-                                                name="placeholder"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Placeholder</FormLabel>
-                                                        <Input {...field} />
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                          <FormField
+                                            control={form.control}
+                                            name="placeholder"
+                                            render={({ field }) => (
+                                              <FormItem>
+                                                  <FormLabel>Placeholder</FormLabel>
+                                                  <Input {...field} />
+                                                  <FormMessage />
+                                              </FormItem>
+                                            )}
+                                          />
                                         )}
+
                                         {form.watch('type') !== 'none' && (
                                             <FormField
                                                 control={form.control}
@@ -1094,6 +1103,53 @@ export default function WidgetResourceFormItems(
                                                         </FormItem>
                                                     )}
                                                 />
+
+                                                { form.watch('fieldType') === 'checkbox' && (
+                                                    <>
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="selectAll"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Voeg een &apos;Selecteer alles&apos; optie toe?
+                                                                    </FormLabel>
+                                                                    <Select
+                                                                      onValueChange={(e: string) => field.onChange(e === 'true')}
+                                                                      value={field.value ? 'true' : 'false'}
+                                                                    >
+                                                                        <FormControl>
+                                                                            <SelectTrigger>
+                                                                                <SelectValue placeholder="Kies een optie" />
+                                                                            </SelectTrigger>
+                                                                        </FormControl>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="true">Ja</SelectItem>
+                                                                            <SelectItem value="false">Nee</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+
+                                                        { !!form.watch('selectAll') && (
+                                                          <FormField
+                                                            control={form.control}
+                                                            name="selectAllLabel"
+                                                            render={({ field }) => (
+                                                              <FormItem>
+                                                                  <FormLabel>
+                                                                      Label voor de &apos;Selecteer alles&apos; optie
+                                                                  </FormLabel>
+                                                                  <Input {...field} />
+                                                                  <FormMessage />
+                                                              </FormItem>
+                                                            )}
+                                                          />
+                                                        )}
+                                                    </>
+                                                )}
                                             </>
                                         )}
                                         {form.watch('type') !== 'none' && (
@@ -1142,7 +1198,9 @@ export default function WidgetResourceFormItems(
                                                 }}
                                             />
                                         )}
-                                        {form.watch('fieldType') === 'text' || form.watch('type') === 'text' && (
+                                        {
+                                            ['description', 'text'].includes(form.watch('type') || '' ) &&
+                                          (
                                             <>
                                                 <FormField
                                                     control={form.control}
@@ -1160,7 +1218,7 @@ export default function WidgetResourceFormItems(
                                                     name="variant"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
+                                                            <FormLabel>Welke opmaak krijgt het tekstveld?</FormLabel>
                                                             <Select
                                                                 value={field.value || 'text input'}
                                                                 onValueChange={field.onChange}>
@@ -1172,6 +1230,7 @@ export default function WidgetResourceFormItems(
                                                                 <SelectContent>
                                                                     <SelectItem value="text input">1 regel</SelectItem>
                                                                     <SelectItem value="textarea">Tekstvak</SelectItem>
+                                                                    <SelectItem value="richtext">Tekstvak met opmaak</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                             <FormMessage />

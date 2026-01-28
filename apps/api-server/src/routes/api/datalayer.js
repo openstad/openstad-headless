@@ -66,7 +66,9 @@ router.route('/:datalayerId(\\d+)')
         where: { id: datalayerId },
       })
       .then(found => {
-        if (!found) throw new Error('datalayer not found');
+        if (!found) {
+          return next(createError(404, 'datalayer not found'));
+        }
 
         req.datalayer = found;
         req.results = req.datalayer;
@@ -111,7 +113,9 @@ router.route('/:datalayerId(\\d+)')
         // where: { id: datalayerInstance.id, projectId: req.params.projectId },
       })
       .then(found => {
-        if (!found) throw new Error('datalayer not found');
+        if (!found) {
+          return next(createError(404, 'datalayer not found'));
+        }
         req.results = found;
         next();
       })

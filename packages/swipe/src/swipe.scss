@@ -53,8 +53,6 @@
   --swipe-dislike-fill: var(--setSwipeDislikeFill, white);
 
   --swipe-answer-active-background: var(--setSwipeAnswerActiveBackground, var(--utrecht-button-primary-action-background-color, #1260A1));
-
-  max-width: 500px;
   width: 100%;
   height: auto;
   margin: 0 auto;
@@ -65,11 +63,11 @@
   margin-top: 20px;
 
 
-  .--previous-awnser{
+  .--previous-awnser {
     outline: 3px solid var(--swipe-like-color);
     outline-offset: 3px;
 
-    &.swipe-btn-pass{
+    &.swipe-btn-pass {
       outline: 3px solid var(--swipe-dislike-color);
     }
 
@@ -88,13 +86,12 @@
 
   .swipe-container {
     position: relative;
-    // perspective: 1000px;
-    aspect-ratio: 2 / 3;
-    max-height: 517px;
+    max-height: unset;
     width: 400px;
     max-width: calc(100vw - 86px);
     z-index: 999;
     margin: 0 auto;
+    height: 100%;
 
     @media screen and (max-width: 400px) {
       max-width: 290px;
@@ -322,38 +319,81 @@
 
   .swipe-actions {
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 30px;
-    padding: 0px 20px 20px 20px;
+    flex-direction: column;
+    gap: 50px;
+    padding: 0px 20px;
     flex-shrink: 0;
     color: #000;
     z-index: 1;
   }
 
-  .swipe-info-btn {
-    border-radius: 50%;
-    border: solid 1px #BFBFBF;
-    box-shadow: 0px 2.35px 6.27px 0px rgba(0, 0, 0, 0.149);
-    font-size: 1rem;
-    background: #fff;
-    width: 50px;
-    height: 50px;
-    margin-top: 4px;
-    transition: all 0.2s ease;
-    line-height: 49px;
-    flex-shrink: 0;
-    color: #000;
+  .swipe-main-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+  }
 
-    &:disabled {
-      opacity: 0.5;
+  .swipe-middle-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+
+    --button-size: 36px;
+
+    .swipe-info-btn,
+    .swipe-skip-btn {
+      border-radius: 20px;
+      border: solid 1px #BFBFBF;
+      background: #fff;
+      min-width: var(--button-size);
+      height: var(--button-size);
+      transition: all 0.2s ease;
+      line-height: 0;
+      flex-shrink: 0;
+      color: #000;
+      text-align: center;
+      padding: 0 20px;
+
+      svg {
+        margin-left: 5px;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+      }
+
+      &:hover:not(:disabled) {
+        cursor: pointer;
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
     }
 
-    &:hover:not(:disabled) {
-      cursor: pointer;
-      transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    .swipe-info-btn {
+      padding: 0;
+
+      svg {
+        width: 20px;
+        margin: 0;
+      }
+    }
+
+    .swipe-skip-btn {
+      svg {
+        width: 18px;
+      }
+    }
+
+    .swipe-info-btn svg,
+    .swipe-skip-btn svg {
+      display: inline-block;
     }
   }
+
+
 
   .swipe-btn {
     width: 56px;
@@ -470,10 +510,9 @@
 
   .swipe-summary {
     width: 100%;
-    max-width: 600px;
     margin: 24px 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 16px;
   }
 
@@ -698,5 +737,49 @@
 
   to {
     transform: translateY(20px) scale(0.95);
+  }
+}
+
+
+@media screen and (max-height: 690px) {
+  .osc.--fullscreen .osc-enquete-item-content.--youth {
+
+    .question:not(:has(.dilemma-finished)):not(.question-type-video) {
+      padding: 75px 30px 20px;
+    }
+
+    .question.question-type-none {
+      height: calc(100% + 150px);
+      justify-content: start;
+    }
+
+    .swipe-widget {
+      .swipe-card-content {
+        padding: 10px 20px;
+      }
+
+      .swipe-main-actions {
+        gap: 10px;
+      }
+
+      .swipe-actions {
+        gap: 20px;
+      }
+
+      .swipe-btn {
+        width: unset;
+        border-radius: 30px;
+        height: 40px;
+        display: flex;
+        gap: 8px;
+        padding: 0 16px;
+
+        span {
+          position: relative;
+          bottom: 0;
+          color: #fff;
+        }
+      }
+    }
   }
 }

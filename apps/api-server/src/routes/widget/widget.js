@@ -116,7 +116,9 @@ router
       include: [db.Project.scope('includeAreas')],
     })
       .then((found) => {
-        if (!found) throw new Error('Widget not found');
+        if (!found) {
+          return next(createError(404, 'Widget not found'));
+        }
         req.widget = found;
         next();
       })

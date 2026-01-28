@@ -118,6 +118,7 @@ services:
       - RATE_LIMIT=${RATE_LIMIT}
       - HASH_IP_ADDRESSES=${HASH_IP_ADDRESSES}
       - HASH_IP_SALT=${HASH_IP_SALT}
+      - USER_ID_SALT=${USER_ID_SALT}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -271,6 +272,7 @@ services:
       - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
       - NEXT_PUBLIC_HASH_IP_ADDRESSES=${NEXT_PUBLIC_HASH_IP_ADDRESSES}
       - HASH_IP_SALT=${HASH_IP_SALT}
+      - BETA_FEATURE_FLAG_BULK_IMPORT=${BETA_FEATURE_FLAG_BULK_IMPORT}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:

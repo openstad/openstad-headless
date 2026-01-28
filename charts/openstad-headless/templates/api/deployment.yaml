@@ -64,6 +64,12 @@ spec:
                 name: {{ template "openstad.api.secret.fullname" . }}
                 key: {{ .Values.secrets.api.dbNameKey | default "database" }}
 
+          - name: USER_ID_SALT
+            valueFrom:
+              secretKeyRef:
+                key: userIdSalt
+                name: {{ template "openstad.api.secret.fullname" . }}
+
           - name: EMAILADDRESS
             value: {{ .Values.api.emailAddress }}
 
@@ -333,6 +339,12 @@ spec:
                 secretKeyRef:
                   name: {{ template "openstad.api.secret.fullname" . }}
                   key: {{ .Values.secrets.api.dbNameKey | default "database" }}
+
+            - name: USER_ID_SALT
+              valueFrom:
+                secretKeyRef:
+                  key: userIdSalt
+                  name: {{ template "openstad.api.secret.fullname" . }}
 
             - name: EMAILADDRESS
               value: {{ .Values.api.emailAddress }}

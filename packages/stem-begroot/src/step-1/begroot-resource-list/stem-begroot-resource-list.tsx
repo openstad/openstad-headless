@@ -262,8 +262,13 @@ export const StemBegrootResourceList = ({
                       Tags
                     </Heading>
                     <div className="pill-grid stembegroot">
-                      {(resource.tags as Array<{ type: string; name: string }>)
+                      {(resource.tags as Array<{ type: string; name: string, seqnr?: number }>)
                         ?.filter((t) => t.type !== 'status')
+                        ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                          if (a.seqnr === undefined || a.seqnr === null) return 1;
+                          if (b.seqnr === undefined || b.seqnr === null) return -1;
+                          return a.seqnr - b.seqnr;
+                        })
                         ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
                     </div>
                   </div>

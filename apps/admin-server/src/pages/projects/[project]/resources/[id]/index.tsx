@@ -10,6 +10,7 @@ import {
 import ProjectResourceCreate from "./info";
 import ProjectResourceVotes from "./votes";
 import ProjectResourceArguments from "./comments";
+import ProjectResourceCreateArgument from "@/pages/projects/[project]/resources/[id]/createComment";
 
 export default function ProjectResource() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function ProjectResource() {
               <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="votes">Stemmen</TabsTrigger>
               <TabsTrigger value="comments">Reacties</TabsTrigger>
+              <TabsTrigger value="createComment">Reactie plaatsen</TabsTrigger>
             </TabsList>
             <TabsContent value="info" className="p-0">
               <ProjectResourceCreate />
@@ -49,6 +51,9 @@ export default function ProjectResource() {
             </TabsContent>
             <TabsContent value="comments" className="p-0">
               <ProjectResourceArguments />
+            </TabsContent>
+            <TabsContent value="createComment" className="p-0">
+              <ProjectResourceCreateArgument />
             </TabsContent>
           </Tabs>
 

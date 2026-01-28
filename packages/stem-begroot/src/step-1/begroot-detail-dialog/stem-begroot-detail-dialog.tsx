@@ -322,16 +322,14 @@ export const StemBegrootResourceDetailDialog = ({
                         <Heading4>Tags</Heading4>
                         <Spacer size={0.5} />
                         <div className="pill-grid">
-                          {(
-                            resource?.tags as Array<{
-                              type: string;
-                              name: string;
-                            }>
-                          )
+                          {(resource?.tags as Array<{ type: string; name: string, seqnr?: number }>)
                             ?.filter((t) => t.type !== 'status')
-                            ?.map((t) => (
-                              <Pill text={t.name || 'Geen thema'} />
-                            ))}
+                            ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                              if (a.seqnr === undefined || a.seqnr === null) return 1;
+                              if (b.seqnr === undefined || b.seqnr === null) return -1;
+                              return a.seqnr - b.seqnr;
+                            })
+                            ?.map((t) => <Pill text={t.name || 'Geen thema'}/>)}
                         </div>
                       </div>
                     )}

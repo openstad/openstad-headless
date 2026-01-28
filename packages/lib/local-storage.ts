@@ -1,4 +1,4 @@
-export default class SessionStorage {
+export default class LocalStorage {
   private projectId?: string;
 
   constructor(props: { projectId?: string }) {
@@ -6,7 +6,7 @@ export default class SessionStorage {
   }
 
   private getData() {
-    const storedData = window.sessionStorage.getItem('openstad');
+    const storedData = window.localStorage.getItem('openstad');
     let data: { [key: string]: any } = {};
 
     try {
@@ -44,7 +44,7 @@ export default class SessionStorage {
     let { data, target } = this.getData();
     target[name] = value;
 
-    window.sessionStorage.setItem('openstad', JSON.stringify(data));
+    window.localStorage.setItem('openstad', JSON.stringify(data));
   }
 
   remove(name: string) {
@@ -54,13 +54,13 @@ export default class SessionStorage {
 
     delete target[name];
 
-    window.sessionStorage.setItem('openstad', JSON.stringify(data));
+    window.localStorage.setItem('openstad', JSON.stringify(data));
   }
 
   destroy() {
-    window.sessionStorage.setItem('openstad', JSON.stringify({}));
+    window.localStorage.setItem('openstad', JSON.stringify({}));
   }
 
 }
 
-export { SessionStorage };
+export { LocalStorage };
