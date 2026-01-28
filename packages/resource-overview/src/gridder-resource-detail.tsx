@@ -64,9 +64,17 @@ export const GridderResourceDetail = ({
 }: GridderResourceDetailProps) => {
   // When resource is correctly typed the we will not need :any
 
-  const resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
+  let resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
     ? resource?.tags.filter((tag: { type: string }) => dialogTagGroups.includes(tag.type))
     : resource?.tags;
+
+  resourceFilteredTags = resourceFilteredTags?.length
+    ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+      if (a.seqnr === undefined || a.seqnr === null) return 1;
+      if (b.seqnr === undefined || b.seqnr === null) return -1;
+      return a.seqnr - b.seqnr;
+    })
+    : [];
 
   const resourceUserId = resource?.userId || null;
   const canDelete = hasRole(currentUser, ['moderator', 'owner'], resourceUserId);

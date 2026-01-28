@@ -79,7 +79,9 @@ router.route('/:templateId(\\d+)')
 				where: { id: templateId }
 			})
 			.then(found => {
-				if ( !found ) throw new Error('NotificationTemplate not found');
+				if (!found) {
+          return next(createError(404, 'NotificationTemplate not found'));
+        }
 		    req.results = found;
 				next();
 			})

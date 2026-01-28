@@ -1,5 +1,5 @@
 import DataStore from '@openstad-headless/data-store/src';
-import { Comments } from '@openstad-headless/comments/src/comments';
+import {Comments, CommentsWidgetProps} from '@openstad-headless/comments/src/comments';
 import hasRole from '../../lib/has-role';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
@@ -76,6 +76,10 @@ export type DocumentMapProps = BaseProps &
     infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
+    commentsWidget?: Omit<
+      CommentsWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     largeDoc?: boolean;
@@ -221,6 +225,10 @@ function DocumentMap({
 
   const [selectedTags, setSelectedTags] = useState<Array<number>>(urlTagIdsArray);
   const [selectedTagsString, setSelectedTagsString] = useState<string>( urlTagIdsArray?.join(',') || '' );
+
+  const prefilterTagObj = urlTagIdsArray && allTags
+    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+    : [];
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -1075,7 +1083,7 @@ function DocumentMap({
               sorting={ sorting || [] }
               tagGroups={tagGroups}
               tagsLimitation={filteredTagIdsArray}
-              preFilterTags={urlTagIdsArray}
+              preFilterTags={prefilterTagObj}
             />
           ) : null}
 

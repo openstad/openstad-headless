@@ -125,6 +125,8 @@ module.exports = ( db, sequelize, DataTypes ) => {
             'new enquete - user',
             'new published resource - admin update',
             'updated resource - admin update',
+            'notification comment - user',
+            'notification comment reply - user',
             'login email', 'login sms',
             'user account about to expire',
             'project issues warning',

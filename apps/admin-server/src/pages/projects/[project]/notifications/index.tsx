@@ -15,7 +15,9 @@ export default function ProjectNotifications() {
       | 'updated resource - user feedback'
       | 'user account about to expire'
       | 'new enquete - admin'
-      | 'new enquete - user';
+      | 'new enquete - user'
+      | 'notification comment - user'
+      | 'notification comment reply - user';
 
   const defaultDefinitions: { [type in NotificationType]: any[] } = {
     "login email": [],
@@ -25,7 +27,9 @@ export default function ProjectNotifications() {
     "updated resource - user feedback": [],
     "user account about to expire": [],
     "new enquete - admin": [],
-    "new enquete - user": []
+    "new enquete - user": [],
+    "notification comment - user": [],
+    "notification comment reply - user": [],
   };
 
   const [typeDefinitions, setTypeDefinitions] = React.useState<{ [type in NotificationType]: any[] }>(defaultDefinitions);
@@ -129,14 +133,6 @@ export default function ProjectNotifications() {
               </p>
               <br />
               <p>
-                comment:<br />
-                -sentiment<br />
-                -description<br />
-                -label<br />
-                -createDateHumanized
-              </p>
-              <br />
-              <p>
                 submission:<br />
                 -status<br />
                 -submittedData
@@ -151,6 +147,22 @@ export default function ProjectNotifications() {
                 Voor een overzicht van ingevulde waardes van een enquete kan dit gebruikt worden:<br />
                 &#123;&#123; enqueteContent | safe &#125;&#125;
               </p>
+
+              <br />
+                <p>
+                  Voor het invoegen van een reactie kan dit gebruikt worden:<br />
+                </p>
+                    <p>
+                      unsubscribeUrl<br /><br />
+                      comment:<br />
+                      -description<br />
+                      -sentiment<br />
+                      -parentId<br />
+                      -parentComment<br />
+                      -createDateHumanized<br />
+                      -userName<br />
+                      -userEmail<br />
+                    </p>
 
             <br />
                 </>)

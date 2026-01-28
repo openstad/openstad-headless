@@ -16,6 +16,7 @@ import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choi
 import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import SwipeField from "@openstad-headless/swipe/src/swipe";
 import DilemmaField from '@openstad-headless/dilemma/src/dilemma';
+import VideoField from '@openstad-headless/video/src/video';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import MatrixField from "@openstad-headless/ui/src/form-elements/matrix";
 import SortField from "@openstad-headless/ui/src/form-elements/sort";
@@ -179,7 +180,8 @@ function Form({
     }, [formValues]);
 
     const scrollTop = () => {
-        const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth)');
+        // const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth)');
+        const formWidget = document.querySelector('.osc-enquete-item-content');
         if (formWidget) {
             const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
             window.scrollTo({
@@ -207,6 +209,7 @@ function Form({
         none: InfoField as React.ComponentType<ComponentFieldProps>,
         sort: SortField as React.ComponentType<ComponentFieldProps>,
         dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
+        video: VideoField as React.ComponentType<ComponentFieldProps>,
     };
 
     const renderField = (field: ComponentFieldProps, index: number, randomId: string, fieldInvalid: boolean) => {
@@ -273,9 +276,12 @@ function Form({
                         if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
                             return null;
                         }
+
+                        const uniqueKey = `${field.fieldKey || currentPage }_${index}`;
+
                         return field.type === 'pagination' ? null : (
                             // @ts-ignore
-                            <div className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`} key={index}>
+                            <div className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`} key={uniqueKey}>
                                 {renderField(field, index, randomId, fieldInvalid)}
                                 <FormFieldErrorMessage className="error-message">
                                     {field.fieldKey && formErrors[field.fieldKey] &&

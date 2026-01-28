@@ -139,6 +139,8 @@ service.updateUser = async function({ authConfig, userData = {} }) {
     delete userData.role;
   }
 
+  userData.clientId = authConfig.clientId;
+
   let url = `${authConfig.serverUrlInternal}/api/admin/user/${userData.id}?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
 
@@ -383,7 +385,7 @@ service.updateClient = async function({ authConfig, project }) {
   
 }
 
-service.fetchUniqueCode = async function({ authConfig }) {
+service.fetchUniqueCode = async function({ authConfig, isExport = false }) {
 
   let clientId = authConfig.clientId;
   if (!clientId) {
@@ -392,7 +394,12 @@ service.fetchUniqueCode = async function({ authConfig }) {
 
   try {
 
-    let url = `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${clientId}&amount=3`;
+    let url = `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${clientId}`;
+
+    if (isExport) {
+      url += '&export=true';
+    }
+    
     let response = await fetch(url, {
 	    headers: {
         Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,

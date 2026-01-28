@@ -542,6 +542,7 @@ secrets:
       emailFrom:
       adminEmailFrom:
       requireSsl:
+      userIdSalt:
   ipAddress:
     hashIpAddresses: "false"
     hashIpSalt:
