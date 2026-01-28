@@ -65,14 +65,6 @@ export const GridderResourceDetail = ({
   let resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
     ? resource?.tags.filter((tag: { type: string }) => dialogTagGroups.includes(tag.type))
     : resource?.tags;
-  const resourceFilteredTags =
-    dialogTagGroups &&
-    Array.isArray(dialogTagGroups) &&
-    Array.isArray(resource?.tags)
-      ? resource?.tags.filter((tag: { type: string }) =>
-          dialogTagGroups.includes(tag.type)
-        )
-      : resource?.tags;
 
   resourceFilteredTags = resourceFilteredTags?.length
     ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
