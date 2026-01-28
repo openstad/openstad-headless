@@ -52,7 +52,7 @@ export const BegrotenSelectedOverview = ({
     <>
       {typeIsPerTag ? (
         <div className="begroot-step-2-instruction-budget-status-panel per-tag">
-          <Paragraph>{introText}</Paragraph>
+          <div dangerouslySetInnerHTML={{ __html: introText }} />
           <Spacer size={1}/>
 
           {tagCounter.map((tagObj) => {
@@ -123,7 +123,7 @@ export const BegrotenSelectedOverview = ({
         </div>
       ) : (
         <div className="begroot-step-2-instruction-budget-status-panel">
-          <Paragraph>{introText}</Paragraph>
+          <div dangerouslySetInnerHTML={{ __html: introText }} />
           {showInfoMenu ? (
             <BudgetStatusPanel
               typeIsBudgeting={typeIsBudgeting}

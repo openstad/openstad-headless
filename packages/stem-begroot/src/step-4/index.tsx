@@ -1,6 +1,6 @@
-import { SecondaryButton, Spacer } from '@openstad-headless/ui/src';
+import { Spacer } from '@openstad-headless/ui/src';
 import React from 'react';
-import { Heading3, Paragraph, Button } from "@utrecht/component-library-react";
+import { Heading3 } from "@utrecht/component-library-react";
 
 type Props = {
   loginUrl: string;
@@ -15,7 +15,7 @@ export const Step4 = ({
     <>
       <Spacer size={1.5} />
       <Heading3>{voteMessage}</Heading3>
-      <Paragraph>{thankMessage}</Paragraph>
+      <div dangerouslySetInnerHTML={{ __html: thankMessage }} />
     </>
   );
 };
