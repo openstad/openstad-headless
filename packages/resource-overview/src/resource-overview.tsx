@@ -283,8 +283,8 @@ const defaultItemRenderer = (
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
-  let resourceFilteredStatuses = resource?.statuses
-    ? resource.statuses?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+  let resourceFilteredStatuses = Array.isArray(resource?.statuses)
+    ? resource.statuses.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
         if (a.seqnr === undefined || a.seqnr === null) return 1;
         if (b.seqnr === undefined || b.seqnr === null) return -1;
         return a.seqnr - b.seqnr;
@@ -311,7 +311,7 @@ const defaultItemRenderer = (
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
     : resource?.tags || [];
 
-  resourceFilteredTags = resourceFilteredTags.length
+  resourceFilteredTags = resourceFilteredTags?.length
     ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
       if (a.seqnr === undefined || a.seqnr === null) return 1;
       if (b.seqnr === undefined || b.seqnr === null) return -1;

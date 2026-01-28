@@ -21,7 +21,8 @@ export type CounterProps = {
   | 'static'
   | 'argument'
   | 'enqueteResults'
-  | 'choiceGuideResults';
+  | 'choiceGuideResults'
+  | 'votedUsersPerProject';
   label?: string;
   url?: string;
   opinion?: string;
@@ -45,8 +46,13 @@ function Counter({
 }: CounterWidgetProps) {
   let amountDisplayed = 0;
   const urlParams = new URLSearchParams(window.location.search);
-  const resourceId =
-    urlParams.get('openstadResourceId') || props.resourceId || '';
+  const resourceId = urlParams.get('openstadResourceId') || props.resourceId || '';
+
+  if (counterType === 'votedUsers' && !resourceId) {
+    console.error(
+      'Error: counterType "votedUsers" requires a resourceId. Please provide a resourceId prop or ensure the page has an "openstadResourceId" query parameter.'
+    );
+  }
 
   const datastore: any = new DataStore({
     projectId: props.projectId,
@@ -110,6 +116,12 @@ function Counter({
       counterType === 'enqueteResults' ? props.widgetToFetchId : undefined,
   });
 
+  const {
+    data: projectVotedUsersCount
+  } = datastore.useProjectVotedUsersCount({
+    projectId: props.projectId,
+  });
+
   if (counterType === 'resource') {
     amountDisplayed = (filteredResources || []).length;
   }
@@ -125,15 +137,11 @@ function Counter({
   }
 
   if (counterType === 'votedUsers') {
-    votes = votes || {};
-    if ( votes.submitVote ) {
-      delete votes.submitVote;
-    }
+    amountDisplayed = votes.length || 0;
+  }
 
-    let uniqueUserIds = Object.values(votes).map((vote: any) => vote.userId);
-    uniqueUserIds = Array.from(new Set(uniqueUserIds));
-
-    amountDisplayed = uniqueUserIds.length || 0;
+  if (counterType === 'votedUsersPerProject') {
+    amountDisplayed = projectVotedUsersCount || 0;
   }
 
   if (counterType === 'static') {

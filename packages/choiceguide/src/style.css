@@ -24,6 +24,16 @@
   gap: 1.5rem;
 }
 
+.osc-choiceguide-container.osc-choiceguide-container {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+}
+
+.osc-choiceguide-container.osc-choiceguide-container > .osc-choiceguide-sidebar-container {
+  order: -1;
+  top: 1rem;
+}
+
 @media screen and (max-width: 768px) {
   .osc-choiceguide-container {
     grid-template-columns: 1fr;
