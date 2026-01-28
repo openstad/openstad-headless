@@ -22,6 +22,9 @@ export type LikeWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
     resourceIdRelativePath?: string;
+    children?:
+      | React.ReactNode
+      | ((doVote: (value: string) => void) => React.ReactNode);
   };
 
 export type LikeProps = {
