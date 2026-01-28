@@ -140,7 +140,7 @@ export default function ProjectSettingsDesign() {
           },
           {
             name: 'Instellingen',
-            url: `'/projects/${project}/settings'`,
+            url: `/projects/${project}/settings`,
           },
           {
             name: 'Vormgeving',

@@ -19,6 +19,7 @@ import useUserActivity from './hooks/use-user-activity';
 import useWidget from "./hooks/use-widget";
 import useChoiceGuideResultCount from './hooks/use-choiceguide-result-count';
 import useEnqueteResultCount from "./hooks/use-enquete-result-count";
+import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -45,6 +46,7 @@ function DataStore(props = {}) {
   self.useChoiceGuideResults = useChoiceGuideResults.bind(self);
   self.useEnqueteResultCount = useEnqueteResultCount.bind(self);
   self.useChoiceGuideResultCount = useChoiceGuideResultCount.bind(self);
+  self.useProjectVotedUsersCount = useProjectVotedUsersCount.bind(self);
   self.useUserActivity = useUserActivity.bind(self);
   self.useWidget = useWidget.bind(self);
 

@@ -1,0 +1,18 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+  <div class="upper-box card-body unsubscribe-box">
+    <h1>
+      Je bent uitgeschreven
+    </h1>
+    <p>
+      {% if title %}
+        Je hebt je succesvol uitgeschreven voor e-mails van het project "{{ title }}".
+      {% else %}
+        Je hebt je succesvol uitgeschreven voor e-mails van het desbetreffende project.
+      {% endif %}
+    </p>
+  </div>
+</div>
+{% endblock %}

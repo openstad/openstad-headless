@@ -87,6 +87,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 			type         : DataTypes.VIRTUAL
 		},
 
+		confirmationSent: {
+			type         : DataTypes.VIRTUAL
+		},
+
 		createDateHumanized: {
 			type         : DataTypes.VIRTUAL,
 			get          : function() {
@@ -148,34 +152,6 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 				});
 
-			},
-
-			afterCreate: function(instance, options) {
-				db.Resource.findByPk(instance.resourceId)
-					.then( resource => {
-            db.Notification.create({
-              type: "new or updated comment - admin update",
-			        projectId: resource.projectId,
-              data: {
-                "resourceId": resource.id,
-                "commentId": instance.id
-              }
-					  })
-					})
-			},
-
-			afterUpdate: function(instance, options) {
-				db.Resource.findByPk(instance.resourceId)
-					.then( resource => {
-            db.Notification.create({
-              type: "new or updated comment - admin update",
-			        projectId: resource.projectId,
-              data: {
-                "resourceId": resource.id,
-                "commentId": instance.id
-              }
-					  })
-					})
 			},
 
 		},
@@ -262,7 +238,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 						as         : 'replies',
 						required   : false,
             // force attribs because the automatic list is incomplete
-					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized', 'hasUserLiked', 'hasUserDisliked', 'yes']
+					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized', 'hasUserLiked', 'hasUserDisliked', 'confirmationSent', 'yes']
 					}],
 					where: {
 						parentId: null

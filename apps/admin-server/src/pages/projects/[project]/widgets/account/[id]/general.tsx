@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,6 +26,7 @@ const formSchema = z.object({
   loginButtonText: z.string().optional(),
   loginRequiredText: z.string().optional(),
   showLogoutButton: z.boolean().optional(),
+  showEmailConsentField: z.boolean().optional(),
 });
 type Formdata = z.infer<typeof formSchema>;
 
@@ -44,6 +45,7 @@ export default function AccountDisplay(
       showLogoutButton: props.showLogoutButton || false,
       loginButtonText: typeof(props.loginButtonText) === 'undefined' ? 'Inloggen' : props.loginButtonText,
       loginRequiredText: typeof(props.loginRequiredText) === 'undefined' ? 'Je moet ingelogd zijn om verder te gaan.' : props.loginRequiredText,
+      showEmailConsentField: props.showEmailConsentField || false,
     },
   });
 
@@ -77,6 +79,23 @@ export default function AccountDisplay(
           render={({ field }) => (
             <FormItem className="col-span-1">
               <FormLabel>Bewerken toestaan</FormLabel>
+              {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="showEmailConsentField"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>
+                Toon veld voor e-mail toestemming
+              </FormLabel>
+              <FormDescription>
+                Hiermee kan een gebruiker aangeven e-mails te willen ontvangen wanneer iemand reageert op zijn of haar inzending of reactie. Dit werkt alleen als e-mailnotificaties ook zijn ingeschakeld in de instellingen van de inzending- en reactie-widgets.
+              </FormDescription>
               {YesNoSelect(field, props)}
               <FormMessage />
             </FormItem>

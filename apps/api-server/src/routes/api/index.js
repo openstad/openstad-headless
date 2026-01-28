@@ -30,6 +30,9 @@ router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/poll', requ
 router.use( '/project/:projectId(\\d+)/tag', require('./tag') );
 router.use( '/project/0/tag', require('./tag') );
 
+// pending budget votes (cross-device stem-begroot selections)
+router.use( '/pending-budget-vote', require('./pending-budget-vote') );
+
 // statuses
 router.use( '/project/:projectId(\\d+)/status', require('./status') );
 

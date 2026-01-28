@@ -8,23 +8,27 @@ import "@utrecht/design-tokens/dist/root.css";
 import { Button, Checkbox, FormLabel, Paragraph, FormField } from "@utrecht/component-library-react";
 
 export function MultiSelect({
-  label,
+  label = 'Selecteer optie',
   onItemSelected,
   defaultOpen,
   options,
+  inlineOptions = false,
   id
 }: {
-  label: string;
+  label?: string;
   options: Array<{ value: string; label: string; checked?: boolean }>;
   defaultOpen?: boolean;
   id: string;
   onItemSelected: (optionValue: string, optionLabel?: string) => void;
+  inlineOptions?: boolean;
 }) {
 
   const [isOpen, setOpen] = useState<boolean>(defaultOpen || false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if ( inlineOptions ) return;
+
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false);
@@ -37,31 +41,40 @@ export function MultiSelect({
     };
   }, []);
 
+  const checkedOptions = options?.filter(option => option.checked) || [];
+  let openButtonLabel = label;
+  if (checkedOptions.length > 1) {
+    openButtonLabel = `${checkedOptions.length} optie${checkedOptions.length !== 1 ? 's' : ''} geselecteerd`;
+  } else if (checkedOptions.length === 1) {
+    openButtonLabel = checkedOptions[0].label;
+  }
 
   return (
-    <div className="multi-select" ref={containerRef}>
-      <Button
-        appearance='default-button'
-        onClick={() => {
-          setOpen(!isOpen);
-        }}
-        test-id="multi-select-button"
-        aria-labelledby={id}
-        aria-expanded={isOpen}
-        role="combobox"
-        aria-haspopup="listbox"
-      >
-        {label}
-        <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
-      </Button>
+    <div className={`multi-select ${inlineOptions ? 'multiselect-container--inline' : ''}`} ref={containerRef}>
+      { !inlineOptions && (
+        <Button
+          appearance='default-button'
+          onClick={() => {
+            setOpen(!isOpen);
+          }}
+          test-id="multi-select-button"
+          aria-labelledby={id}
+          aria-expanded={isOpen}
+          role="combobox"
+          aria-haspopup="listbox"
+        >
+          {openButtonLabel}
+          <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
+        </Button>
+      )}
 
       {isOpen &&
         <section
-          className="multiselect-container"
+          className={`multiselect-container ${inlineOptions ? 'multiselect-container--inline' : ''}`}
           role="listbox"
           aria-multiselectable="true"
         >
-          {options.map((option, index) => {
+          {options?.map((option, index) => {
             return (
               <div
                 role="option"

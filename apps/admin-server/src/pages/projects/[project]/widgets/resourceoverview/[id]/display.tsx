@@ -69,6 +69,9 @@ const formSchema = z.object({
   dialogTagGroups: z.array(z.string()).optional(),
   displayTagIcon: z.boolean().optional(),
   displayCollapsibleFilter: z.boolean().optional(),
+  displayUser: z.boolean().optional(),
+  displayCreatedAt: z.boolean().optional(),
+  allowLikingInOverview: z.boolean().optional(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -118,6 +121,9 @@ export default function WidgetResourceOverviewDisplay(
       dialogTagGroups: props?.dialogTagGroups || [],
       displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
       autoApply: props?.autoApply || false,
+      displayUser: props?.displayUser || false,
+      displayCreatedAt: props?.displayCreatedAt || false,
+      allowLikingInOverview: props?.allowLikingInOverview || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -704,6 +710,48 @@ export default function WidgetResourceOverviewDisplay(
                 <FormDescription>
                   Bij de tags kun je een &apos;Icoon voor de kaart&apos; uploaden. Als je dit aanvinkt, wordt dit icoon ook in de tegels getoond.
                 </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayUser"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Gebruikersnaam weergeven in de tegels
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayCreatedAt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Aanmaakdatum weergeven in de tegels
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="allowLikingInOverview"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Stemmen toestaan in het overzicht
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

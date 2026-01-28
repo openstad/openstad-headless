@@ -1,12 +1,25 @@
 import useSWR from 'swr';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useResources(projectId?: string, includeGlobalTags?: boolean) {
+export default function useResources(
+  projectId?: string,
+  includeGlobalTags?: boolean,
+  page?: number,
+  pageSize?: number
+) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const url = `/api/openstad/api/project/${projectNumber}/resource?includeUser=1&includeVoteCount=1&includeTags=1`;
+  const baseUrl = `/api/openstad/api/project/${projectNumber}/resource?includeUser=1&includeVoteCount=1&includeTags=1`;
+
+  let url = baseUrl;
+  if (page !== undefined && pageSize !== undefined) {
+    url += `&page=${page}&pageSize=${pageSize}`;
+  }
 
   const resourcesListSwr = useSWR(projectNumber ? url : null);
+
+  const records = resourcesListSwr.data?.records || resourcesListSwr.data || [];
+  const pagination = resourcesListSwr.data?.metadata || null;
 
   async function create(body: any) {
     const res = await fetch(url, {
@@ -97,5 +110,17 @@ export default function useResources(projectId?: string, includeGlobalTags?: boo
     }
   }
 
-  return { ...resourcesListSwr, create, update, remove, duplicate };
+  async function fetchAll(totalCount: number, pageSizeLimit: number) {
+    let allData: any[] = [];
+    const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
+
+    for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
+      const response = await fetch(`${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`);
+      const results = await response.json();
+      allData = allData.concat(results?.records || []);
+    }
+    return allData;
+  }
+
+  return { ...resourcesListSwr, data: records, pagination, create, update, remove, duplicate, fetchAll };
 }

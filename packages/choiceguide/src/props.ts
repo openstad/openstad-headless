@@ -46,6 +46,8 @@ export type ChoiceGuideGeneralSettings = {
     loginText?: string;
     loginTextButton?: string;
     loginRequired?: boolean;
+    stickyBarAtTop?: boolean;
+    stickyBarDefaultOpen?: boolean;
 };
 
 export type ChoiceGuideSidebarProps = {
@@ -66,6 +68,7 @@ export type ChoiceGuideSidebarProps = {
     widgetId?: string;
     hiddenFields?: string[];
     items?: Array<Item>;
+    stickyBarDefaultOpen?: boolean;
 }
 
 export type Score = {
@@ -104,7 +107,6 @@ export type Item = {
     showMoreInfo: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
-    infoImage?: string;
     labelA?: string;
     labelB?: string;
     imageA?: string;
@@ -123,6 +125,17 @@ export type Item = {
     routingSelectedAnswer?: string;
     imageOptionUpload?: string;
     placeholder?: string;
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
+
+    // Keeping this for backwards compatibility
+    infoImage?: string;
 };
 
 export type Option = {

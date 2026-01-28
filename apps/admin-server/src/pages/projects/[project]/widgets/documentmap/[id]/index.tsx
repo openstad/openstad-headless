@@ -24,6 +24,9 @@ import DocumentExtraFields from './extraFields';
 import DocumentFilters from './filters';
 import DocumentContent from './content';
 import DocumentSorting from './sorting';
+import ArgumentsConfirmation from "@/pages/projects/[project]/widgets/comments/[id]/confirmation";
+import {ArgumentWidgetTabProps} from "@/pages/projects/[project]/widgets/comments/[id]";
+import {useProject} from "@/hooks/use-project";
 
 export const getServerSideProps = withApiUrl;
 
@@ -54,6 +57,9 @@ export default function WidgetDateCountdownBar({
     projectId,
   };
 
+  const { data: projectConfig } = useProject( ['includeConfig'] );
+  const requiredFieldsIncludesEmailNotificationConsent = projectConfig?.config?.auth?.provider?.openstad?.requiredUserFields?.includes('emailNotificationConsent');
+
   return (
     <div>
       <PageLayout
@@ -83,6 +89,7 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
               <TabsTrigger value="text">Content</TabsTrigger>
+              <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -133,6 +140,22 @@ export default function WidgetDateCountdownBar({
                     updateConfig,
                     updatePreview,
                   })}
+                />
+              )}
+            </TabsContent>
+            <TabsContent value="confirmation" className="p-0">
+              {previewConfig && (
+                <ArgumentsConfirmation
+                  {...extractConfig<
+                    DocumentMapProps,
+                    ArgumentWidgetTabProps
+                  >({
+                    subWidgetKey: 'commentsWidget',
+                    previewConfig: previewConfig,
+                    updateConfig,
+                    updatePreview,
+                  })}
+                  requiredFieldsIncludesEmailNotificationConsent={ requiredFieldsIncludesEmailNotificationConsent }
                 />
               )}
             </TabsContent>

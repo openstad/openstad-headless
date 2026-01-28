@@ -1,20 +1,8 @@
-const config    = require('config');
-const dbConfig  = config.get('database');
-const mysql = require('mysql2');
 const express = require('express');
 const createError = require('http-errors')
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
-
-const pool = mysql.createPool({
-    host: dbConfig.host,
-    user: dbConfig.user,
-    password: dbConfig.password,
-    database: dbConfig.database,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+const { sequelize } = require('../../../src/db');
 
 let router = express.Router({mergeParams: true});
 
@@ -29,8 +17,7 @@ router
 router.route('/total')
 
     // count votes
-    // -----------
-    .get( rateLimiter(), function(req, res, next) {
+    .get( rateLimiter(), async function(req, res, next) {
 
         let isViewable = req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable;
         isViewable = isViewable || hasRole( req.user, 'editor')
@@ -44,42 +31,42 @@ router.route('/total')
             bindvars.push(req.query.opinion);
         }
 
-        pool
-            .promise()
-            .query(query, bindvars)
-            .then( ([rows,fields]) => {
-                console.log(rows);
-                let counted = rows && rows[0] && rows[0].counted || -1;
-                res.json({count: counted})
+        try {
+            const [rows] = await sequelize.query(query, {
+                replacements: bindvars,
+                type: sequelize.QueryTypes.SELECT
             })
-            .catch(err => {
-                next(err);
-            })
+            
+            let counted = rows?.counted ?? 0;
+
+            res.json({ count: counted })
+        } catch (err) {
+            next(err)
+        }
 
     })
 
 
 router.route('/no-of-users')
 
-    // count votes
-    // -----------
-    .get( rateLimiter(), function(req, res, next) {
+    // count unique users who voted
+    .get( rateLimiter(), async function(req, res, next) {
 
-        let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE resources.projectId=? AND votes.deletedAt  IS NULL AND  (votes.checked IS NULL OR votes.checked = 1)  AND resources.deletedAt IS NULL GROUP BY votes.userId";
+        let query = "SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE resources.projectId=? AND votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL";
         let bindvars = [req.params.projectId]
 
-        pool
-            .promise()
-            .query(query, bindvars)
-            .then( ([rows,fields]) => {
-                console.log(rows);
-                let counted = rows && rows.length || -1;
-                res.json({count: counted})
-            })
-            .catch(err => {
-                next(err);
+        try{
+            const [rows] = await sequelize.query(query, {
+                replacements: bindvars,
+                type: sequelize.QueryTypes.SELECT
             })
 
+            let counted = rows?.counted ?? 0
+
+            res.json({ count: counted })
+        } catch (err) {
+            next(err)
+        }
     })
 
 module.exports = router;
