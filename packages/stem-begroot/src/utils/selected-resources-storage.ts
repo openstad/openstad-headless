@@ -14,7 +14,12 @@ class SelectedResourcesStorage {
    */
   getSelectedResources(): any[] | null {
     const stored = localStorage.getItem(this.storageKey);
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
   }
 
   /**
