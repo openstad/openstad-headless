@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image, Spacer } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 
 import '@utrecht/component-library-css';
@@ -58,7 +59,10 @@ export const BegrotenSelectedOverview = ({
     <>
       {typeIsPerTag ? (
         <div className="begroot-step-2-instruction-budget-status-panel per-tag">
-          <div dangerouslySetInnerHTML={{ __html: introText }} />
+          <div
+            className="rte"
+            dangerouslySetInnerHTML={{ __html: RenderContent(introText) }}
+          />
           <Spacer size={1} />
 
           {tagCounter.map((tagObj) => {
@@ -147,7 +151,10 @@ export const BegrotenSelectedOverview = ({
         </div>
       ) : (
         <div className="begroot-step-2-instruction-budget-status-panel">
-          <div dangerouslySetInnerHTML={{ __html: introText }} />
+          <div
+            className="rte"
+            dangerouslySetInnerHTML={{ __html: RenderContent(introText) }}
+          />
           {showInfoMenu ? (
             <BudgetStatusPanel
               typeIsBudgeting={typeIsBudgeting}

@@ -1,4 +1,5 @@
 import { Spacer } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import React from 'react';
 
 import '@utrecht/component-library-css';
@@ -24,7 +25,10 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
   return (
     <>
       <Heading3>{step3Title}</Heading3>
-      <div dangerouslySetInnerHTML={{ __html: step3 }} />
+      <div
+        className="rte"
+        dangerouslySetInnerHTML={{ __html: RenderContent(step3) }}
+      />
       <Spacer size={2} />
       <Button
         appearance='primary-action-button'

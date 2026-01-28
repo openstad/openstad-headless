@@ -2,6 +2,7 @@ import './stem-begroot-budget-list.css';
 import React, { Dispatch, SetStateAction } from 'react';
 import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
@@ -80,7 +81,10 @@ export const StemBegrootBudgetList = ({
           {!!introText && (
             <div className="stem-begroot-budget-list-used-budgets">
               <div className="stem-begroot-helptext-and-budget-section-helptext">
-                <div dangerouslySetInnerHTML={{ __html: introText }} />
+                <div
+                  className="rte"
+                  dangerouslySetInnerHTML={{ __html: RenderContent(introText) }}
+                />
               </div>
             </div>
           )}

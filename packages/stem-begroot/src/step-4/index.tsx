@@ -1,4 +1,5 @@
 import { Spacer } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import React from 'react';
 import { Heading3 } from '@utrecht/component-library-react';
 
@@ -12,7 +13,10 @@ export const Step4 = ({ thankMessage, voteMessage }: Props) => {
     <>
       <Spacer size={1.5} />
       <Heading3>{voteMessage}</Heading3>
-      <div dangerouslySetInnerHTML={{ __html: thankMessage }} />
+      <div
+        className="rte"
+        dangerouslySetInnerHTML={{ __html: RenderContent(thankMessage) }}
+      />
     </>
   );
 };
