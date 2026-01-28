@@ -798,6 +798,9 @@ router
                 : synchronizedUpdatedUserData;
 
             if (req.user.can('update', apiUser)) {
+              if (data?.idpUser && !data.idpUser.accesstoken && apiUser?.idpUser?.accesstoken) {
+                data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
+              }
               apiUser
                 .authorizeData(data, 'update', req.user)
                 .update(data)
