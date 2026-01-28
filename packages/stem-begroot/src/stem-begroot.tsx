@@ -33,11 +33,9 @@ type TagTypeSingle = {
   current: number;
   selectedResources: Array<any>;
 };
-};
 
 export type TagType = {
   [key: string]: TagTypeSingle;
-};
 };
 
 export type StemBegrootWidgetProps = BaseProps &
@@ -144,10 +142,7 @@ function StemBegroot({
     api: props.api,
   });
 
-   const { data: allTags } = datastore.useTags({
-    projectId: props.projectId,
-    type: '',
-  });
+   const { data: allTags } = useTags(props.projectId);
 
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
