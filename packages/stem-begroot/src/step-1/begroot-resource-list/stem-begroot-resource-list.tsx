@@ -39,6 +39,9 @@ export const StemBegrootResourceList = ({
   currentPage = 0,
   pageSize = 999,
   filterBehavior = 'or',
+  showOriginalResource = true,
+  displayTitle = true,
+  displaySummary = true,
   header
 }: {
   resourceListColumns?: number;
@@ -70,6 +73,8 @@ export const StemBegrootResourceList = ({
   currentPage: number;
   pageSize: number;
   filterBehavior?: string;
+  displayTitle?: boolean;
+  displaySummary?: boolean;
 }) => {
   // @ts-ignore
   const intTags = tags.map(tag => parseInt(tag, 10));
@@ -153,6 +158,7 @@ export const StemBegrootResourceList = ({
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);
         const primaryBtnDisabled = !resourceBtnEnabled(resource);
+        const originalUrl = defineOriginalUrl(resource);
 
         let defaultImage = '';
 
@@ -198,8 +204,20 @@ export const StemBegrootResourceList = ({
                   </div>
                 </section>
               )}
-              <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
-              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
+              {displayTitle ? (
+                <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
+              ) : null}
+              {displaySummary ? (
+                <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
+              ) : null}
+              {showOriginalResource && originalUrl ? (
+                <Paragraph className="strong">
+                  Dit is een vervolg op plan:&nbsp;
+                  <Link target="_blank" href={originalUrl}>
+                    {originalUrl}
+                  </Link>
+                </Paragraph>
+              ) : null}
 
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (
