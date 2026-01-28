@@ -12,6 +12,8 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import useResources from "@/hooks/use-resources";
 import { exportComments } from '@/lib/export-helpers/comments-export';
 import { Paginator } from '@openstad-headless/ui/src';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 
 export default function ProjectComments() {
   const router = useRouter();
@@ -100,6 +102,7 @@ export default function ProjectComments() {
   const [filterData, setFilterData] = useState(comments);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [activeResource, setActiveResource] = useState("0");
   const [allResources, setAllResources] = useState<{ id: number; name: string }[]>([]);
@@ -142,12 +145,35 @@ export default function ProjectComments() {
     setActiveResource(value);
   }
 
+  function getAllCommentIds(comments: any[]): number[] {
+    let ids: number[] = [];
+    comments.forEach((comment: any) => {
+      ids.push(comment.id);
+      if (comment.replies && comment.replies.length > 0) {
+        ids = ids.concat(getAllCommentIds(comment.replies));
+      }
+    });
+    return ids;
+  }
+
   function renderComments(comments: any, pre = '') {
     return (
         <ul>
           {comments.map((comment: any) => (
               <React.Fragment key={comment.id}>
-                <li className={`grid grid-cols-3 lg:grid-cols-12 items-center py-3 px-2`}>
+                <li className={`grid grid-cols-4 lg:grid-cols-13 items-center py-3 px-2`}>
+                  <div className="col-span-1 flex items-center">
+                    <Checkbox
+                      checked={selectedItems.includes(comment.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedItems(prev => [...prev, comment.id]);
+                        } else {
+                          setSelectedItems(prev => prev.filter(id => id !== comment.id));
+                        }
+                      }}
+                    />
+                  </div>
                   <div className="col-span-1 truncate">
                     <Paragraph>{comment.id}</Paragraph>
                   </div>
@@ -185,7 +211,7 @@ export default function ProjectComments() {
                         onDeleteAccepted={() =>
                             removeComment(comment.id)
                                 .then(() => toast.success('Reactie succesvol verwijderd'))
-                                .catch((e) => toast.error('Reactie kon niet worden verwijderd'))
+                                .catch(() => toast.error('Reactie kon niet worden verwijderd'))
                         }
                     />
                   </div>
@@ -249,30 +275,77 @@ export default function ProjectComments() {
           </div>
         }>
         <div className="container py-6">
-
-          <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
-            <select
-                className="p-2 rounded"
-                onChange={(e) => setFilterSearchType(e.target.value)}
-            >
-              <option value="">Alles</option>
-              <option value="id">Reactie ID</option>
-              <option value="resourceId">Inzending ID</option>
-              <option value="description">Reactie</option>
-              <option value="createdAt">Geplaatst op</option>
-              <option value="sentiment">Sentiment</option>
-            </select>
-            <input
-                type="text"
-                className='p-2 rounded'
-              placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, comments)}
-            />
+          <div className="mb-2">
+            <span className="text-sm text-gray-500">
+              {selectedItems.length > 0
+                ? `${selectedItems.length} van ${totalCount} ${totalCount === 1 ? 'reactie' : 'reacties'} geselecteerd`
+                : `${totalCount} ${totalCount === 1 ? 'reactie' : 'reacties'}`}
+            </span>
+          </div>
+          <div className="flex justify-between mb-4 gap-4">
+            <div className="flex gap-4">
+              <Button
+                variant={'destructive'}
+                className="flex items-center gap-2"
+                onClick={(e) => e.preventDefault()}
+                disabled={selectedItems.length === 0}
+              >
+                <ConfirmActionDialog
+                  buttonText="Verwijderen"
+                  header="Reacties verwijderen"
+                  message="Weet je zeker dat je de geselecteerde reacties wilt verwijderen?"
+                  confirmButtonText="Verwijderen"
+                  cancelButtonText="Annuleren"
+                  onConfirmAccepted={() => {
+                    removeComment(0, true, selectedItems)
+                      .then(() => {
+                        toast.success('Reacties succesvol verwijderd');
+                        setSelectedItems([]);
+                      })
+                      .catch(() =>
+                        toast.error('Reacties konden niet worden verwijderd')
+                      )
+                  }}
+                  confirmButtonVariant="destructive"
+                />
+              </Button>
+            </div>
+            <div className="flex gap-4">
+              <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+              <select
+                  className="p-2 rounded"
+                  onChange={(e) => setFilterSearchType(e.target.value)}
+              >
+                <option value="">Alles</option>
+                <option value="id">Reactie ID</option>
+                <option value="resourceId">Inzending ID</option>
+                <option value="description">Reactie</option>
+                <option value="createdAt">Geplaatst op</option>
+                <option value="sentiment">Sentiment</option>
+              </select>
+              <input
+                  type="text"
+                  className='p-2 rounded'
+                placeholder="Zoeken..."
+                onChange={(e) => debouncedSearchTable(e.target.value, filterData, comments)}
+              />
+            </div>
           </div>
 
-          <div className="p-6 bg-white rounded-md clear-right">
-            <div className="grid grid-cols-1 lg:grid-cols-12 items-center py-2 px-2 border-b border-border">
+          <div className="p-6 bg-white rounded-md">
+            <div className="grid grid-cols-2 lg:grid-cols-13 items-center py-2 px-2 border-b border-border">
+              <Checkbox
+                className="col-span-1"
+                checked={filterData?.length > 0 && getAllCommentIds(filterData).every((id: number) => selectedItems.includes(id))}
+                onCheckedChange={(checked) => {
+                  const currentPageIds = getAllCommentIds(filterData);
+                  if (checked) {
+                    setSelectedItems(prev => Array.from(new Set([...prev, ...currentPageIds])));
+                  } else {
+                    setSelectedItems(prev => prev.filter(id => !currentPageIds.includes(id)));
+                  }
+                }}
+              />
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button className="filter-button" onClick={(e) => {
                   const sortedData = sortTable('id', e, filterData);

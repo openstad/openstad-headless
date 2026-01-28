@@ -11,6 +11,8 @@ import useUsers from "@/hooks/use-users";
 import {useWidgetsHook} from "@/hooks/use-widgets";
 import {exportSubmissionsToCSV} from "@/lib/export-helpers/submissions-export";
 import {Select, SelectTrigger, SelectContent, SelectValue, SelectItem} from "@/components/ui/select";
+import { Checkbox } from '@/components/ui/checkbox';
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 
 export default function ProjectSubmissions() {
   const router = useRouter();
@@ -20,11 +22,14 @@ export default function ProjectSubmissions() {
   const [filterData, setFilterData] = useState(data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [activeWidget, setActiveWidget] = useState("0");
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
   const [selectedWidget, setSelectedWidget] = useState<any>(null);
+
+  const totalCount = data?.length || 0;
 
   useEffect(() => {
     let loadedSubmissions = (data || []) as { createdAt: string }[];
@@ -117,32 +122,78 @@ export default function ProjectSubmissions() {
           </div>
         }>
         <div className="container py-6">
-
-        <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
-            <select
-              className="p-2 rounded"
-              onChange={(e) => setFilterSearchType(e.target.value)}
-            >
-              <option value="">Alles</option>
-              <option value="id">Widget ID</option>
-              <option value="user">Gebruiker ID</option>
-              <option value="submittedData">Ingezonden Data</option>
-              <option value="createdAt">Datum aangemaakt</option>
-            </select>
-            <input
-              type="text"
-              className='p-2 rounded'
-              placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
-            />
+          <div className="mb-2">
+            <span className="text-sm text-gray-500">
+              {selectedItems.length > 0
+                ? `${selectedItems.length} van ${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'} geselecteerd`
+                : `${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'}`}
+            </span>
+          </div>
+          <div className="flex justify-between mb-4 gap-4">
+            <div className="flex gap-4">
+              <Button
+                variant={'destructive'}
+                className="flex items-center gap-2"
+                onClick={(e) => e.preventDefault()}
+                disabled={selectedItems.length === 0}
+              >
+                <ConfirmActionDialog
+                  buttonText="Verwijderen"
+                  header="Inzendingen verwijderen"
+                  message="Weet je zeker dat je de geselecteerde inzendingen wilt verwijderen?"
+                  confirmButtonText="Verwijderen"
+                  cancelButtonText="Annuleren"
+                  onConfirmAccepted={() => {
+                    remove(0, true, selectedItems)
+                      .then(() => {
+                        toast.success('Inzendingen succesvol verwijderd');
+                        setSelectedItems([]);
+                      })
+                      .catch(() =>
+                        toast.error('Inzendingen konden niet worden verwijderd')
+                      )
+                  }}
+                  confirmButtonVariant="destructive"
+                />
+              </Button>
+            </div>
+            <div className="flex gap-4">
+              <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+              <select
+                className="p-2 rounded"
+                onChange={(e) => setFilterSearchType(e.target.value)}
+              >
+                <option value="">Alles</option>
+                <option value="id">Widget ID</option>
+                <option value="user">Gebruiker ID</option>
+                <option value="submittedData">Ingezonden Data</option>
+                <option value="createdAt">Datum aangemaakt</option>
+              </select>
+              <input
+                type="text"
+                className='p-2 rounded'
+                placeholder="Zoeken..."
+                onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+              />
+            </div>
           </div>
 
-          <div className="p-6 bg-white rounded-md clear-right">
+          <div className="p-6 bg-white rounded-md">
             <div
-              className="grid grid-cols-2 lg:grid-cols-5 items-center py-2 px-2 border-b border-border"
-              style={{gridTemplateColumns: "1fr 1fr 2fr 1fr 1fr"}}
+              className="grid grid-cols-3 lg:grid-cols-6 items-center py-2 px-2 border-b border-border"
+              style={{gridTemplateColumns: "50px 1fr 1fr 2fr 1fr 1fr"}}
             >
+              <Checkbox
+                checked={filterData?.length > 0 && filterData.every((s: any) => selectedItems.includes(s.id))}
+                onCheckedChange={(checked) => {
+                  const currentPageIds = filterData?.map((s: any) => s.id) || [];
+                  if (checked) {
+                    setSelectedItems(prev => Array.from(new Set([...prev, ...currentPageIds])));
+                  } else {
+                    setSelectedItems(prev => prev.filter(id => !currentPageIds.includes(id)));
+                  }
+                }}
+              />
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('widgetId', e, filterData))}>
                   Widget ID | Naam
@@ -179,9 +230,20 @@ export default function ProjectSubmissions() {
                 return (
                   <li
                     key={submission.id}
-                    className="grid grid-cols-2 lg:grid-cols-5 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
-                    style={{gridTemplateColumns: "1fr 1fr 2fr 1fr 1fr"}}
+                    className="grid grid-cols-3 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                    style={{gridTemplateColumns: "50px 1fr 1fr 2fr 1fr 1fr"}}
                   >
+                    <Checkbox
+                      className="my-auto"
+                      checked={selectedItems.includes(submission.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedItems(prev => [...prev, submission.id]);
+                        } else {
+                          setSelectedItems(prev => prev.filter(id => id !== submission.id));
+                        }
+                      }}
+                    />
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       <a
                         style={{textDecoration: 'underline'}}
@@ -223,9 +285,9 @@ export default function ProjectSubmissions() {
                         onDeleteAccepted={() =>
                           remove(submission.id)
                             .then(() =>
-                              toast.success('Inzending successvol verwijderd')
+                              toast.success('Inzending succesvol verwijderd')
                             )
-                            .catch((e) =>
+                            .catch(() =>
                               toast.error('Inzending kon niet worden verwijderd')
                             )
                         }
