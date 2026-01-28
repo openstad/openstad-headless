@@ -161,7 +161,7 @@ export default function ProjectComments() {
         <ul>
           {comments.map((comment: any) => (
               <React.Fragment key={comment.id}>
-                <li className={`grid grid-cols-4 lg:grid-cols-13 items-center py-3 px-2`}>
+                <li className={`grid grid-cols-4 lg:grid-cols-12 items-center py-3 px-2`}>
                   <div className="col-span-1 flex items-center">
                     <Checkbox
                       checked={selectedItems.includes(comment.id)}
@@ -186,7 +186,7 @@ export default function ProjectComments() {
                         style={{ textDecoration: 'underline', zIndex: '1' }}>{comment.resourceId}
                     </a>
                   </Paragraph>
-                  <Paragraph className="hidden lg:flex truncate lg:col-span-3" style={{marginRight: '1rem'}}>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-2" style={{marginRight: '1rem'}}>
                     {pre && (<span style={{paddingRight: '15px'}}>{pre}</span>)} {comment.description}
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-2">
@@ -333,7 +333,7 @@ export default function ProjectComments() {
           </div>
 
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-2 lg:grid-cols-13 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-2 lg:grid-cols-12 items-center py-2 px-2 border-b border-border">
               <Checkbox
                 className="col-span-1"
                 checked={filterData?.length > 0 && getAllCommentIds(filterData).every((id: number) => selectedItems.includes(id))}
@@ -362,7 +362,7 @@ export default function ProjectComments() {
                   Inzending ID
                 </button>
               </ListHeading>
-              <ListHeading className="hidden lg:flex lg:col-span-3">
+              <ListHeading className="hidden lg:flex lg:col-span-2">
                 <button className="filter-button" onClick={(e) => {
                   const sortedData = sortTable('description', e, filterData);
                   setFilterData(sortedData ? sortedData : []);
