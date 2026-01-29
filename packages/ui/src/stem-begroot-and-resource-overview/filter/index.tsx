@@ -118,6 +118,18 @@ export function Filters({
     }
   }, [filtersVisible, disableTransition]);
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (tagsReadyForParameter.length > 0) {
+      const tagString = tagsReadyForParameter.join(',');
+      url.searchParams.set('tagIds', tagString);
+    } else {
+      url.searchParams.delete('tagIds');
+    }
+    
+    window.history.replaceState(null, '', url);
+  }, [tagsReadyForParameter]);
+
   const search = useDebounce(setSearch, 300);
 
   function updateFilter(newFilter: Filter) {
@@ -166,19 +178,6 @@ export function Filters({
     if (autoApply) {
       handleSubmit(undefined, { ...filter, location }, activeTags);
     }
-  }
-
-  const updateParameter = () => {
-    const url = new URL(window.location.href);
-
-    if (tagsReadyForParameter.length > 0) {
-      const tagString = tagsReadyForParameter.join(',');
-      url.searchParams.set('tagIds', tagString);
-    } else {
-      url.searchParams.delete('tagIds');
-    }
-
-    window.history.replaceState(null, '', url);
   }
 
   const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel: string, forceSelected?: boolean) => {
@@ -310,8 +309,6 @@ export function Filters({
     } else {
       setActiveTags(newActiveTagsDraft);
     }
-
-    updateParameter();
   };
 
 
@@ -431,7 +428,6 @@ export function Filters({
               updateFilter(defaultFilter);
               setTagState({});
               onUpdateFilter && onUpdateFilter(defaultFilter);
-              updateParameter();
               setLocation(undefined);
               handleSubmit(undefined, defaultFilter, []);
               setResetCounter(currCount => currCount + 1);
