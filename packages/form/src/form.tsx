@@ -180,7 +180,7 @@ function Form({
     }, [formValues]);
 
     const scrollTop = () => {
-        const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth)');
+        const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth), .osc-resource-form-item-content');
         if (formWidget) {
             const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
             window.scrollTo({

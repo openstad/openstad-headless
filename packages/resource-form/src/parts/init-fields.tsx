@@ -72,6 +72,11 @@ export const InitializeFormFields = (items, data) => {
 
 
             switch (item.type) {
+                case 'pagination':
+                    fieldData['type'] = 'pagination';
+                    fieldData['prevPageText'] = item?.prevPageText || '';
+                    fieldData['nextPageText'] = item?.nextPageText || '';
+                    break;
                 case 'checkbox':
                 case 'select':
                 case 'radiobox':

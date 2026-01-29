@@ -55,6 +55,8 @@ export type Item = {
     description?: string;
     type?: string;
     fieldType?: string;
+    prevPageText?: string;
+    nextPageText?: string;
     tags?: string;
     fieldKey: string;
     fieldRequired?: boolean;

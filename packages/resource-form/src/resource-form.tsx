@@ -69,6 +69,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     type FormField = { fieldKey?: string; [key: string]: any };
     const [formFields, setFormFields] = useState<FormField[]>([]);
     const [fillDefaults, setFillDefaults] = useState(false);
+    const [currentPage, setCurrentPage] = useState<number>(0);
 
     useEffect(() => {
         if (isLoading) return;
@@ -249,6 +250,22 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         window.history.replaceState(null, '', url.toString());
     }, [params]);
 
+    const paginationFields = formFields.filter((field) => field.type === 'pagination');
+    const totalPages = paginationFields.length + 1 || 1;
+    const paginationFieldPositions = formFields
+        .map((field, idx) => field.type === 'pagination' ? idx : -1)
+        .filter(idx => idx !== -1);
+    const pageFieldStartPositions = [0, ...paginationFieldPositions.map(idx => idx + 1)];
+    const pageFieldEndPositions = [...paginationFieldPositions, formFields.length];
+    const prevPageText = paginationFields[currentPage]?.prevPageText || 'Vorige';
+    const nextPageText = paginationFields[currentPage]?.nextPageText || 'Volgende';
+    const totalFieldCount = formFields.filter((field) => field.type !== 'pagination').length || 0;
+
+    useEffect(() => {
+        if (currentPage > totalPages - 1) {
+            setCurrentPage(0);
+        }
+    }, [currentPage, totalPages]);
 
     const formOnlyVisibleForUsers = !allowAnonymousSubmissions;
 
@@ -280,10 +297,17 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         fields={formFields}
                         secondaryLabel={saveConceptButton || ""}
                         submitHandler={onSubmit}
-                        submitText={submitButtonText}
+                        submitText={currentPage < totalPages - 1 ? nextPageText : submitButtonText}
                         title=""
                         submitDisabled={disableSubmit}
                         allowResetAfterSubmit={editMode}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        prevPageText={prevPageText}
+                        pageFieldStartPositions={pageFieldStartPositions}
+                        pageFieldEndPositions={pageFieldEndPositions}
+                        totalPages={totalPages}
+                        totalFieldCount={totalFieldCount}
                         {...props}
                     />
                 )}
