@@ -58,8 +58,8 @@ module.exports = function (db, sequelize, DataTypes) {
         auth: {
           updateableBy: 'editor',
         },
-        allowNull: false,
-        defaultValue: 0,
+        allowNull: true,
+        defaultValue: null,
       },
 
       startDate: {
@@ -928,7 +928,7 @@ module.exports = function (db, sequelize, DataTypes) {
   Resource.auth = Resource.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
-    createableBy: 'member',
+    createableBy: 'all',
     updateableBy: ['admin', 'editor', 'owner', 'moderator'],
     deleteableBy: ['admin', 'editor', 'owner', 'moderator'],
     canView: function (user, self) {

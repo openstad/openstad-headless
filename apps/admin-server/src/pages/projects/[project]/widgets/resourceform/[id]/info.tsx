@@ -26,7 +26,7 @@ import * as Switch from '@radix-ui/react-switch';
 
 
 const formSchema = z.object({
-  viewable: z.enum(['users', 'all']),
+  allowAnonymousSubmissions: z.boolean(),
   nameInHeader: z.boolean(),
   loginText: z.string(),
   loginButtonText: z.string(),
@@ -45,7 +45,7 @@ export default function WidgetResourceFormInfo() {
 
   const defaults = useCallback(
     () => ({
-      viewable: widget?.config?.[category]?.viewable || 'users',
+      allowAnonymousSubmissions: widget?.config?.[category]?.allowAnonymousSubmissions || false,
       nameInHeader: widget?.config?.[category]?.nameInHeader || false,
       loginText: widget?.config?.[category]?.loginText || '',
       loginButtonText: widget?.config?.[category]?.loginButtonText || '',
@@ -80,23 +80,18 @@ export default function WidgetResourceFormInfo() {
           className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
-            name="viewable"
+            name="allowAnonymousSubmissions"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Wie kan dit formulier te zien krijgen?</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Alleen gebruikers" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="users">Alleen gebruikers</SelectItem>
-                    <SelectItem value="all">Iedereen</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Mogen niet‑ingelogde gebruikers inzenden?</FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}

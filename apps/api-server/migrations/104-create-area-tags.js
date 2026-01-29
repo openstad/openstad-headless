@@ -26,11 +26,22 @@ module.exports = {
       },
     });
 
-    await queryInterface.addConstraint('area_tags', {
-      fields: ['areaId', 'tagId', 'location'],
-      type: 'primary key',
-      name: 'area_tags_pkey',
-    });
+    const [[primaryKeyResult]] = await queryInterface.sequelize.query(
+      `SELECT COUNT(*) as count
+       FROM information_schema.table_constraints
+       WHERE table_schema = DATABASE()
+         AND table_name = 'area_tags'
+         AND constraint_type = 'PRIMARY KEY'`
+    );
+    const hasPrimaryKey = Number(primaryKeyResult?.count || 0) > 0;
+
+    if (!hasPrimaryKey) {
+      await queryInterface.addConstraint('area_tags', {
+        fields: ['areaId', 'tagId', 'location'],
+        type: 'primary key',
+        name: 'area_tags_pkey',
+      });
+    }
 
     await queryInterface.addConstraint('area_tags', {
       fields: ['areaId'],

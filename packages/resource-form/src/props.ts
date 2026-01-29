@@ -43,6 +43,7 @@ export type Submit = {
 };
 
 export type Info = {
+    allowAnonymousSubmissions?: boolean;
     loginText?: string;
     loginButtonText?: string;
     nameInHeader?: boolean;

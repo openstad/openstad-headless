@@ -36,7 +36,7 @@ const getExistingValue = (fieldKey, resource, multiple) => {
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton, defaultAddedTags } = props.submit || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
-    const { loginText, loginButtonText } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+    const { loginText, loginButtonText, allowAnonymousSubmissions } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
     const { confirmationUser, confirmationAdmin } = props.confirmation || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
 
@@ -250,6 +250,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     }, [params]);
 
 
+    const formOnlyVisibleForUsers = !allowAnonymousSubmissions;
+
     return (isLoading || !fillDefaults) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
@@ -258,7 +260,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                     {props.displayDescription && props.description ? <p>{props.description}</p> : null}
                 </div>
 
-                {!hasRole(currentUser, 'member') ? (
+                {formOnlyVisibleForUsers && !hasRole(currentUser, 'member') ? (
                     <>
                         <Banner className="big">
                             <Heading level={4} appearance='utrecht-heading-6'>{loginText || 'Inloggen om deel te nemen.'}</Heading>
