@@ -46,6 +46,7 @@ type Props = {
   preFilterTags?: Array<{ id: number; type: string; label: string; name: string }>;
   displayLocationFilter?: boolean;
   displayCollapsibleFilter?: boolean;
+  closeFiltersOnAutoApply?: boolean;
 };
 
 export function Filters({
@@ -312,6 +313,10 @@ export function Filters({
     }
 
     updateParameter();
+
+    if (autoApply && displayCollapsibleFilter && props.closeFiltersOnAutoApply) {
+      setFiltersVisible(false);
+    }
   };
 
 

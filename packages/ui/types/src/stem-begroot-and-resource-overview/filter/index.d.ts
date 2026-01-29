@@ -54,6 +54,7 @@ type Props = {
     }>;
     displayLocationFilter?: boolean;
     displayCollapsibleFilter?: boolean;
+    closeFiltersOnAutoApply?: boolean;
 };
 export declare function Filters({ dataStore, resources, sorting, tagGroups, tagsLimitation, onUpdateFilter, className, showActiveTags, preFilterTags, displayCollapsibleFilter, autoApply, ...props }: Props): React.JSX.Element | null;
 export {};

@@ -163,6 +163,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     filterBehaviorInclude?: string;
     onlyShowTheseTagIds?: string;
     displayCollapsibleFilter?: boolean;
+    closeFiltersOnAutoApply?: boolean;
     displayUser?: boolean;
     displayCreatedAt?: boolean;
     allowLikingInOverview?: boolean;
@@ -1096,6 +1097,7 @@ function ResourceOverviewInner({
               preFilterTags={prefilterTagObj}
               displayCollapsibleFilter={displayCollapsibleFilter}
               autoApply={props?.autoApply || false}
+              closeFiltersOnAutoApply={props?.closeFiltersOnAutoApply || false}
             />
           ) : null}
 

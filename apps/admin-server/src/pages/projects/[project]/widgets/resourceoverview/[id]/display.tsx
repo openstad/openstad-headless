@@ -69,6 +69,7 @@ const formSchema = z.object({
   dialogTagGroups: z.array(z.string()).optional(),
   displayTagIcon: z.boolean().optional(),
   displayCollapsibleFilter: z.boolean().optional(),
+  closeFiltersOnAutoApply: z.boolean().optional(),
   displayUser: z.boolean().optional(),
   displayCreatedAt: z.boolean().optional(),
   allowLikingInOverview: z.boolean().optional(),
@@ -121,6 +122,7 @@ export default function WidgetResourceOverviewDisplay(
       dialogTagGroups: props?.dialogTagGroups || [],
       displayCollapsibleFilter: props?.displayCollapsibleFilter || false,
       autoApply: props?.autoApply || false,
+      closeFiltersOnAutoApply: props?.closeFiltersOnAutoApply || false,
       displayUser: props?.displayUser || false,
       displayCreatedAt: props?.displayCreatedAt || false,
       allowLikingInOverview: props?.allowLikingInOverview || false,
@@ -139,6 +141,8 @@ export default function WidgetResourceOverviewDisplay(
   const displayAsTabs = watch('displayAsTabs');
   const displayOverviewTagGroups = watch('displayOverviewTagGroups');
   const displayTags = watch('displayTags');
+  const displayCollapsibleFilter = watch('displayCollapsibleFilter');
+  const autoApply = watch('autoApply');
 
   const { data: tags } = useTags(props.projectId);
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
@@ -967,6 +971,23 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           />
+
+          {displayCollapsibleFilter && autoApply && (
+            <FormField
+              control={form.control}
+              name="closeFiltersOnAutoApply"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Filters automatisch sluiten na selectie</FormLabel>
+                  <FormDescription>
+                    Alleen van toepassing bij automatisch toepassen en een inklapbaar filtermenu.
+                  </FormDescription>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
 
           <Button className="w-fit col-span-full" type="submit">
