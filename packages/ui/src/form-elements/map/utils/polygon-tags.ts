@@ -2,6 +2,7 @@ type AreaLike = {
     id?: string | number;
     polygon?: any;
     tags?: any[];
+    outsideTags?: any[];
 };
 
 export const resolvePolygonTags = ({
@@ -23,10 +24,19 @@ export const resolvePolygonTags = ({
 
     const tagIds = safeAreas.reduce<number[]>((acc, area: any) => {
         if (!targetAreaIds.includes(Number(area.id))) return acc;
-        if (!Array.isArray(area?.polygon) || !Array.isArray(area?.tags)) return acc;
-        if (isPointInArea(area.polygon, location as any)) {
-            area.tags.forEach((tag: any) => acc.push(tag.id));
+        if (!Array.isArray(area?.polygon)) return acc;
+
+        const isInside = isPointInArea(area.polygon, location as any);
+        if (isInside) {
+            if (Array.isArray(area?.tags)) {
+                area.tags.forEach((tag: any) => acc.push(tag.id));
+            }
+        } else {
+            if (Array.isArray(area?.outsideTags)) {
+                area.outsideTags.forEach((tag: any) => acc.push(tag.id));
+            }
         }
+
         return acc;
     }, []);
 

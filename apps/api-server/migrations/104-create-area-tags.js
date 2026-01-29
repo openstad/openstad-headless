@@ -11,6 +11,11 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      location: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'inside',
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -22,7 +27,7 @@ module.exports = {
     });
 
     await queryInterface.addConstraint('area_tags', {
-      fields: ['areaId', 'tagId'],
+      fields: ['areaId', 'tagId', 'location'],
       type: 'primary key',
       name: 'area_tags_pkey',
     });

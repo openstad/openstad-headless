@@ -59,7 +59,10 @@ router.route('/')
       .create(req.body)
       .then(async (result) => {
         if (Array.isArray(req.body.tagIds) && req.body.tagIds.length > 0) {
-          await result.setTags(req.body.tagIds);
+          await result.setTags(req.body.tagIds, { through: { location: 'inside' } });
+        }
+        if (Array.isArray(req.body.tagIdsOutside)) {
+          await result.setOutsideTags(req.body.tagIdsOutside, { through: { location: 'outside' } });
         }
         res.json({ success: true, id: result.id });
       })
@@ -121,7 +124,10 @@ router.route('/:areaId(\\d+)')
       })
       .then(async (result) => {
         if (Array.isArray(req.body.tagIds)) {
-          await result.setTags(req.body.tagIds);
+          await result.setTags(req.body.tagIds, { through: { location: 'inside' } });
+        }
+        if (Array.isArray(req.body.tagIdsOutside)) {
+          await result.setOutsideTags(req.body.tagIdsOutside, { through: { location: 'outside' } });
         }
         req.results = result;
         next();

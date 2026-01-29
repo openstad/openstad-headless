@@ -53,8 +53,20 @@ module.exports = function( db, sequelize, DataTypes ) {
   Area.associate = function( models ) {
     this.hasMany(models.Project);
     this.belongsToMany(models.Tag, {
-      through: 'area_tags',
+      through: {
+        model: models.area_tags,
+        scope: { location: 'inside' },
+      },
       as: 'tags',
+      foreignKey: 'areaId',
+      otherKey: 'tagId',
+    });
+    this.belongsToMany(models.Tag, {
+      through: {
+        model: models.area_tags,
+        scope: { location: 'outside' },
+      },
+      as: 'outsideTags',
       foreignKey: 'areaId',
       otherKey: 'tagId',
     });
@@ -67,6 +79,10 @@ module.exports = function( db, sequelize, DataTypes ) {
           {
             model: db.Tag,
             as: 'tags',
+          },
+          {
+            model: db.Tag,
+            as: 'outsideTags',
           },
         ],
       },

@@ -12,7 +12,8 @@ export default function useArea(areaId?: string) {
     name: string,
     geoJSON: string,
     hidePolygon = false,
-    tagIds: number[] = []
+    tagIds: number[] = [],
+    tagIdsOutside: number[] = []
   ) {
     const res = await fetch(url, {
       method: 'PUT',
@@ -24,6 +25,7 @@ export default function useArea(areaId?: string) {
         geoJSON: JSON.parse(geoJSON),
         hidePolygon,
         tagIds,
+        tagIdsOutside,
       }),
     });
 
