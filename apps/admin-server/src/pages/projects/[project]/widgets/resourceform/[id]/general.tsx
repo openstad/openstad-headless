@@ -60,6 +60,10 @@ const formSchema = z.object({
     .string()
     .optional()
     .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+  showMinMaxAfterBlur: z
+    .boolean()
+    .optional()
+    .default(false),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -91,6 +95,8 @@ export default function WidgetResourceFormGeneral() {
       maxCharactersError:
         widget?.config?.[category]?.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      showMinMaxAfterBlur:
+        widget?.config?.[category]?.showMinMaxAfterBlur || false,
     }),
     [widget?.config]
   );
@@ -119,7 +125,7 @@ export default function WidgetResourceFormGeneral() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="resource"
@@ -267,6 +273,29 @@ export default function WidgetResourceFormGeneral() {
                   {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters boven de maximum waarde ligt na het versturen van het formulier. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
                 <Input {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showMinMaxAfterBlur"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon min/max waarschuwing na verlaten van het veld
+                </FormLabel>
+
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+
                 <FormMessage />
               </FormItem>
             )}

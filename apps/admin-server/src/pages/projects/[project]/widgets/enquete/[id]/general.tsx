@@ -56,6 +56,10 @@ const formSchema = z.object({
     .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
   enableDraftPersistence: z.boolean().optional(),
   draftRetentionHours: z.coerce.number().optional(),
+  showMinMaxAfterBlur: z
+    .boolean()
+    .optional()
+    .default(false),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -84,6 +88,7 @@ export default function WidgetEnqueteGeneral(
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
       enableDraftPersistence: props.enableDraftPersistence ?? false,
       draftRetentionHours: props.draftRetentionHours ?? 24,
+      showMinMaxAfterBlur: props.showMinMaxAfterBlur || false,
     },
   });
 
@@ -266,6 +271,21 @@ export default function WidgetEnqueteGeneral(
                   {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters boven de maximum waarde ligt na het versturen van het formulier. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
                 <Input {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showMinMaxAfterBlur"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon min/max waarschuwing na verlaten van het veld
+                </FormLabel>
+                {/*@ts-ignore*/}
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}

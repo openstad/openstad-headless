@@ -77,6 +77,10 @@ const formSchema = z.object({
     .string()
     .optional()
     .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+  showMinMaxAfterBlur: z
+    .boolean()
+    .optional()
+    .default(false),
 });
 
 export default function ChoicesSelectorForm(
@@ -130,6 +134,8 @@ export default function ChoicesSelectorForm(
       maxCharactersError:
         widget?.config?.[category]?.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      showMinMaxAfterBlur:
+        widget?.config?.[category]?.showMinMaxAfterBlur || false,
     }),
     [widget?.config]
   );
@@ -268,6 +274,19 @@ export default function ChoicesSelectorForm(
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="showMinMaxAfterBlur"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Toon min/max waarschuwing na verlaten van het veld
+                    </FormLabel>
+                    {/*@ts-ignore*/}
+                    {YesNoSelect(field, props)}
                   </FormItem>
                 )}
               />

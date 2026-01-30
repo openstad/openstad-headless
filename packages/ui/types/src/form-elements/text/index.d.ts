@@ -54,6 +54,7 @@ export type TextInputProps = {
     }>;
     createImageSlider?: boolean;
     imageClickable?: boolean;
+    showMinMaxAfterBlur?: boolean;
 };
 declare const TrixEditor: React.FC<{
     value: string;

@@ -70,6 +70,7 @@ export type TextInputProps = {
   }>;
   createImageSlider?: boolean;
   imageClickable?: boolean;
+  showMinMaxAfterBlur?: boolean;
 };
 
 const TrixEditor: React.FC<{
@@ -192,6 +193,7 @@ const TextInput: FC<TextInputProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  showMinMaxAfterBlur = false,
 }) => {
   const variantMap = {
     'text input': Textbox,
@@ -214,6 +216,7 @@ const TextInput: FC<TextInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [helpText, setHelpText] = useState('');
   const [value, setValue] = useState(initialValue);
+  const [hasBlurred, setHasBlurred] = useState(false);
 
   const hasInitialValue = !!initialValue;
   const [checkInvalid, setCheckInvalid] = useState(
@@ -269,6 +272,16 @@ const TextInput: FC<TextInputProps> = ({
     }
   };
 
+  useEffect(() => {
+      if (reset) {
+          reset(() => setValue(initialValue));
+      }
+  }, [reset, defaultValue]);
+
+  useEffect(() => {
+      value && setCheckInvalid(false);
+  }, [])
+
   const getAutocomplete = (fieldKey: string) => {
     switch (fieldKey?.toLocaleLowerCase()) {
       case 'mail':
@@ -317,82 +330,81 @@ const TextInput: FC<TextInputProps> = ({
         </>
       )}
 
-      {showMoreInfo && (
-        <>
-          <AccordionProvider
-            sections={[
-              {
-                headingLevel: 3,
-                body: <HtmlContent html={moreInfoContent} />,
-                expanded: undefined,
-                label: moreInfoButton,
-              },
-            ]}
-          />
-          <Spacer size={1.5} />
-        </>
-      )}
+      {
+        showMoreInfo && (
+          <>
+            <AccordionProvider
+              sections={[
+                {
+                  headingLevel: 3,
+                  body: <HtmlContent html={moreInfoContent}/>,
+                  expanded: undefined,
+                  label: moreInfoButton,
+                }
+              ]}
+            />
+            <Spacer size={1.5}/>
+          </>
+        )
+      }
 
-      {InfoImage({
-        imageFallback: infoImage || '',
-        images: images,
-        createImageSlider: createImageSlider,
-        addSpacer: !!infoImage,
-        imageClickable: imageClickable,
-      })}
+      {
+        InfoImage({
+          imageFallback: infoImage || '',
+          images: images,
+          createImageSlider: createImageSlider,
+          addSpacer: !!infoImage,
+          imageClickable: imageClickable
+        })
+      }
 
-      <div
-        className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}
-        aria-invalid={checkInvalid}>
-        <InputComponent
-          id={randomId}
-          name={fieldKey}
-          required={fieldRequired}
-          type={getType(fieldKey)}
-          placeholder={placeholder}
-          value={value}
-          onChange={(
-            e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-          ) => {
-            setValue(e.target.value);
-            if (
-              Number(minCharacters) > 0 &&
-              e.target.value.length >= Number(minCharacters) &&
-              maxCharacters > 0 &&
-              e.target.value.length <= maxCharacters
-            ) {
-              setCheckInvalid(false);
-            } else {
-              if (fieldRequired && e.target.value.length === 0) {
-                setCheckInvalid(true);
-              } else {
-                setCheckInvalid(false);
+      <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}
+           aria-invalid={checkInvalid}>
+              <InputComponent
+                id={randomId}
+                name={fieldKey}
+                required={fieldRequired}
+                type={getType(fieldKey)}
+                placeholder={placeholder}
+                value={value}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                  setValue(e.target.value);
+                  if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
+                    setCheckInvalid(false);
+                  } else {
+                    if (fieldRequired && e.target.value.length === 0) {
+                      setCheckInvalid(true);
+                    } else {
+                      setCheckInvalid(false);
+                    }
+                  }
+
+                  if (onChange) {
+                    onChange({
+                      name: fieldKey,
+                      value: e.target.value,
+                    });
+                  }
+                  characterHelpText(e.target.value.length);
+
+                }}
+                disabled={disabled}
+                rows={rows}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => {
+                  setIsFocused(false);
+                  setHasBlurred(true);
+                }}
+                autoComplete={getAutocomplete(fieldKey)}
+                aria-describedby={`${randomId}_error`}
+              />
+              {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText &&
+                <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
               }
-            }
+            </div>
 
-            if (onChange) {
-              onChange({
-                name: fieldKey,
-                value: e.target.value,
-              });
-            }
-            characterHelpText(e.target.value.length);
-          }}
-          disabled={disabled}
-          rows={rows}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          autoComplete={getAutocomplete(fieldKey)}
-          aria-describedby={`${randomId}_error`}
-        />
-        {isFocused && helpText && (
-          <FormFieldDescription className="help-text">
-            {helpText}
-          </FormFieldDescription>
-        )}
-      </div>
-    </FormField>
-  );
+        </FormField>
+    );
 };
 
 export { TrixEditor };
