@@ -1,43 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useDebouncedValue } from 'rooks';
 import { PageLayout } from '../../components/ui/page-layout';
 import { ListHeading, Paragraph } from '../../components/ui/typography';
 import Link from 'next/link';
 import { useUsers, type userType } from '@/hooks/use-users';
-import { Plus, ChevronRight } from 'lucide-react';
+import { Plus, ChevronRight, ChevronLeft, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { sortTable, searchTable } from '@/components/ui/sortTable';
+import { sortTable } from '@/components/ui/sortTable';
 import { useRouter } from 'next/router';
 import * as XLSX from 'xlsx';
 
-type mergedType = {
+const PAGE_SIZE = 20;
+const SEARCH_DEBOUNCE_MS = 600;
+
+type MergedType = {
   [key: string]: userType & { key?: string };
 }
 
 export default function Users() {
   const router = useRouter();
-  const { data } = useUsers();
-  const [ users, setUsers ] = useState<userType[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [apiSearch] = useDebouncedValue(searchQuery, SEARCH_DEBOUNCE_MS);
+
+  const { data, metadata, isValidating } = useUsers({ page: currentPage, pageSize: PAGE_SIZE, q: apiSearch || undefined });
+  const lastDataRef = useRef<userType[] | null>(null);
+  const [users, setUsers] = useState<userType[]>([]);
 
   useEffect(() => {
-    // merge users
     if (!data) return;
-    let merged:mergedType = {};
-    data.map((user:userType) => {
-      let key = user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user.id?.toString() || 'unknown' );
+    lastDataRef.current = data;
+    const merged: MergedType = {};
+    data.forEach((user: userType) => {
+      const key = user.idpUser?.identifier && user.idpUser?.provider
+        ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
+        : (user.id?.toString() || 'unknown');
       merged[key] = user;
-    })
-    setUsers( Object.keys(merged).map(key => ({ ...merged[key], key })) );
+    });
+    setUsers(Object.keys(merged).map((key) => ({ ...merged[key], key })));
   }, [data]);
 
-  const [filterData, setFilterData] = useState(data);
-  const [filterSearchType, setFilterSearchType] = useState<string>('');
-  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [apiSearch]);
+
+  const [filterData, setFilterData] = useState<userType[]>([]);
 
   useEffect(() => {
     setFilterData(users);
-  }, [users])
+  }, [users]);
 
-  if (!data) return null;
+  if (!data && !lastDataRef.current) return null;
 
   const exportData = (data: any[], fileName: string) => {
     const workbook = XLSX.utils.book_new();
@@ -80,25 +93,23 @@ export default function Users() {
         <div className="container py-6">
 
           <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
-            <select
-              className="p-2 rounded"
-              onChange={(e) => setFilterSearchType(e.target.value)}
-            >
-              <option value="">Alles</option>
-              <option value="email">E-mail</option>
-              <option value="name">Naam</option>
-              <option value="postcode">Postcode</option>
-            </select>
+            <p className="text-xs font-medium text-muted-foreground self-center">Zoeken (naam, e-mail, postcode):</p>
             <input
               type="text"
-              className='p-2 rounded'
+              className="p-2 rounded"
               placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, users)}
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <div className="p-6 bg-white rounded-md clear-right">
+          <div className="p-6 bg-white rounded-md clear-right relative">
+            {isValidating && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-md z-10">
+                <Loader className="animate-spin" size={32} strokeWidth={2} />
+              </div>
+            )}
             <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('email', e, filterData))}>
@@ -139,6 +150,36 @@ export default function Users() {
                 </Link>
               ))}
             </ul>
+
+            {metadata && metadata.pageCount > 1 && (
+              <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
+                <Paragraph className="text-sm text-muted-foreground">
+                  Pagina {metadata.page + 1} van {metadata.pageCount} ({metadata.totalCount} gebruikers)
+                </Paragraph>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((currentPage) => Math.max(0, currentPage - 1))}
+                    disabled={metadata.page <= 0}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Vorige
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((currentPage) => Math.min(metadata.pageCount - 1, currentPage + 1))}
+                    disabled={metadata.page >= metadata.pageCount - 1}
+                  >
+                    Volgende
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </PageLayout>
