@@ -413,6 +413,7 @@ const defaultItemRenderer = (
       ? resourceFilteredTags[0]
       : null;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
+  const selectedOpinion = resource?.userVote?.opinion;
 
   const TileFooter = ({ doVote }: { doVote?: (value: string) => any }) => {
     const vote = async (sentiment: string) => {
@@ -431,19 +432,21 @@ const defaultItemRenderer = (
               icon="ri-thumb-up-line"
               variant="big"
               text={resource.yes}
-              description="Stemmen voor"
+              description='Stemmen voor'
               onClick={() => vote('yes')}
+              className={selectedOpinion === 'yes' ? 'selected' : ''}
             />
 
-            {props.likeWidget?.displayDislike && (
+            {props.likeWidget?.displayDislike &&
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
                 text={resource.no}
-                description="Stemmen tegen"
+                description='Stemmen tegen'
                 onClick={() => vote('no')}
+                className={selectedOpinion === 'no' ? 'selected' : ''}
               />
-            )}
+            }
           </>
         )}
 
@@ -452,18 +455,19 @@ const defaultItemRenderer = (
             <Icon
               icon="ri-thumb-up-line"
               variant="big"
-              description="Stemmen voor"
+              description='Stemmen voor'
               onClick={() => vote('yes')}
+              className={selectedOpinion === 'yes' ? 'selected' : ''}
             />
-            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
-            {props.likeWidget?.displayDislike && (
+            <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+            {props.likeWidget?.displayDislike &&
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
-                description="Stemmen tegen"
+                description='Stemmen tegen'
                 onClick={() => vote('no')}
-              />
-            )}
+                className={selectedOpinion === 'no' ? 'selected' : ''}
+              />}
           </div>
         )}
 
@@ -695,36 +699,42 @@ const defaultItemRenderer = (
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
-            {props.likeWidget?.variant != 'micro-score' &&
-              props.displayVote && (
-                <>
+            {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
+              <>
+                <Icon
+                  icon="ri-thumb-up-line"
+                  variant="big"
+                  text={resource.yes}
+                  className={selectedOpinion === 'yes' ? 'selected' : ''}
+                />
+                {props.likeWidget?.displayDislike && (
                   <Icon
-                    icon="ri-thumb-up-line"
+                    icon="ri-thumb-down-line"
                     variant="big"
-                    text={resource.yes}
+                    text={resource.no}
+                    className={selectedOpinion === 'no' ? 'selected' : ''}
                   />
-                  {props.likeWidget?.displayDislike && (
-                    <Icon
-                      icon="ri-thumb-down-line"
-                      variant="big"
-                      text={resource.no}
-                    />
-                  )}
-                </>
-              )}
+                )}
+              </>
+            )}
 
-            {props.likeWidget?.variant == 'micro-score' &&
-              props.displayVote && (
-                <>
-                  <Icon icon="ri-thumb-up-line" variant="big" />
-                  <Paragraph className="votes-score">
-                    {resource.netVotes}
-                  </Paragraph>
-                  {props.likeWidget?.displayDislike && (
-                    <Icon icon="ri-thumb-down-line" variant="big" />
-                  )}
-                </>
-              )}
+            {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+              <>
+                <Icon
+                  icon="ri-thumb-up-line"
+                  variant="big"
+                  className={selectedOpinion === 'yes' ? 'selected' : ''}
+                />
+                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                {props.likeWidget?.displayDislike && (
+                  <Icon
+                    icon="ri-thumb-down-line"
+                    variant="big"
+                    className={selectedOpinion === 'no' ? 'selected' : ''}
+                  />
+                )}
+              </>
+            )}
 
             {props.displayArguments ? (
               <Icon

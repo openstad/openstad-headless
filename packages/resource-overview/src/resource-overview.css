@@ -359,6 +359,14 @@ p.osc-searchtext {
   aspect-ratio: 3 / 4;
 }
 
+.selected > .ri-thumb-up-line:before {
+  content: "\f206";
+}
+
+.selected > .ri-thumb-down-line:before {
+  content: "\f204";
+}
+
 /* Text Colors */
 .color-FFFFFF {
   color: #ffffff;
