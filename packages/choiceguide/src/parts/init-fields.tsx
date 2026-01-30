@@ -43,6 +43,7 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 minCharactersWarning: data?.choiceGuide?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.choiceGuide?.minCharactersError|| 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.choiceGuide?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+                showMinMaxAfterBlur: data?.choiceGuide?.showMinMaxAfterBlur || false,
                 routingInitiallyHide: item?.routingInitiallyHide || false,
                 routingSelectedQuestion: item?.routingSelectedQuestion || '',
                 routingSelectedAnswer: item?.routingSelectedAnswer || '',

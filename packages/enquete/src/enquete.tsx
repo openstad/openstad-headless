@@ -209,6 +209,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['minCharactersWarning'] = props?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens';
                     fieldData['maxCharactersError'] = props?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
                     fieldData['minCharactersError'] = props?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten';
+                    fieldData['showMinMaxAfterBlur'] = props?.showMinMaxAfterBlur || false;
                     break;
                 case 'multiplechoice':
                 case 'multiple':

@@ -26,6 +26,7 @@ export type ChoiceGuide = {
     maxCharactersWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
+    showMinMaxAfterBlur?: boolean;
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
     showBackButtonInTopOfPage?: boolean;

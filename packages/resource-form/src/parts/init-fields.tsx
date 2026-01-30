@@ -52,6 +52,7 @@ export const InitializeFormFields = (items, data) => {
                 minCharactersWarning: data?.general?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.general?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.general?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+                showMinMaxAfterBlur: data?.general?.showMinMaxAfterBlur || false,
                 routingInitiallyHide: item?.routingInitiallyHide || false,
                 routingSelectedQuestion: item?.routingSelectedQuestion || '',
                 routingSelectedAnswer: item?.routingSelectedAnswer || '',

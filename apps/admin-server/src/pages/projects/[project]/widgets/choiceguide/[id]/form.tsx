@@ -46,6 +46,7 @@ const formSchema = z.object({
   maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
   minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
   maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+  showMinMaxAfterBlur: z.boolean().optional().default(false),
 });
 
 export default function ChoicesSelectorForm(
@@ -79,6 +80,7 @@ export default function ChoicesSelectorForm(
       maxCharactersWarning: widget?.config?.[category]?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError: widget?.config?.[category]?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
       maxCharactersError: widget?.config?.[category]?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      showMinMaxAfterBlur: widget?.config?.[category]?.showMinMaxAfterBlur || false,
     }),
     [widget?.config]
   );
@@ -205,14 +207,27 @@ export default function ChoicesSelectorForm(
                 control={form.control}
                 name="choicesNoPreferenceYetTitle"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel boven de keuzes, nog geen voorkeur</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <FormItem>
+                <FormLabel>Titel boven de keuzes, nog geen voorkeur</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="showMinMaxAfterBlur"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon min/max waarschuwing na verlaten van het veld
+                </FormLabel>
+                {/*@ts-ignore*/}
+                {YesNoSelect(field, props)}
+              </FormItem>
+            )}
+          />
               {watchChoicesType === 'plane' && (
                 <FormField
                   control={form.control}

@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useForm } from 'react-hook-form';
@@ -27,6 +28,7 @@ const formSchema = z.object({
   maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
   minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
   maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+  showMinMaxAfterBlur: z.boolean().optional().default(false),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -47,6 +49,7 @@ export default function WidgetEnqueteGeneral(
       maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError: props.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
       maxCharactersError: props.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      showMinMaxAfterBlur: props.showMinMaxAfterBlur || false,
     },
   });
 
@@ -193,6 +196,21 @@ export default function WidgetEnqueteGeneral(
                 <Input
                   {...field}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showMinMaxAfterBlur"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Toon min/max waarschuwing na verlaten van het veld
+                </FormLabel>
+                {/*@ts-ignore*/}
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}

@@ -27,6 +27,7 @@ export type General = {
     formName?: string,
     redirectUrl?: string,
     hideAdmin?: boolean,
+    showMinMaxAfterBlur?: boolean,
 };
 
 export type Confirmation = {

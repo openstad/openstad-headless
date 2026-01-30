@@ -17,6 +17,7 @@ export type EnqueteProps = {
   maxCharactersWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
+  showMinMaxAfterBlur?: boolean;
   datalayer?: DataLayer[];
   enableOnOffSwitching?: boolean;
   infoBlockStyle?: string;

@@ -33,6 +33,7 @@ export type TextInputProps = {
     minCharactersWarning?: string;
     maxCharacters?: number;
     maxCharactersWarning?: string;
+    showMinMaxAfterBlur?: boolean;
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
@@ -162,6 +163,7 @@ const TextInput: FC<TextInputProps> = ({
     minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
     maxCharacters = 0,
     maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
+    showMinMaxAfterBlur = false,
     rows,
     reset,
     showMoreInfo = false,
@@ -192,6 +194,7 @@ const TextInput: FC<TextInputProps> = ({
     const initialValue = overrideDefaultValue ? (overrideDefaultValue as string) : defaultValue;
 
     const [isFocused, setIsFocused] = useState(false);
+    const [hasBlurred, setHasBlurred] = useState(false);
     const [helpText, setHelpText] = useState('');
     const [value, setValue] = useState(initialValue);
     const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
@@ -328,12 +331,15 @@ const TextInput: FC<TextInputProps> = ({
                     disabled={disabled}
                     rows={rows}
                     onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
+                    onBlur={() => {
+                        setIsFocused(false);
+                        setHasBlurred(true);
+                    }}
                     autoComplete={getAutocomplete(fieldKey)}
 
                     aria-describedby={`${randomId}_error`}
                 />
-                {isFocused && helpText &&
+                {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText &&
                     <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
                 }
             </div>
