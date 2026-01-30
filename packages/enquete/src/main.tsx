@@ -770,6 +770,7 @@ const config: EnqueteWidgetProps = {
   minCharactersError: "Tekst moet minimaal {minCharacters} karakters bevatten",
   infoBlockShareButton: true,
   maxCharactersWarning: "Je hebt nog {maxCharacters} tekens over",
+  maxCharactersOverWarning: "Je hebt {overCharacters} tekens teveel",
   minCharactersWarning: "Nog minimaal {minCharacters} tekens"
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(

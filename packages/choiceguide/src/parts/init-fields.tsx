@@ -40,6 +40,7 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                 showLabels: false,
                 disabled: !showForm,
                 maxCharactersWarning: data?.choiceGuide?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+                maxCharactersOverWarning: data?.choiceGuide?.maxCharactersOverWarning || 'Je hebt {overCharacters} tekens teveel',
                 minCharactersWarning: data?.choiceGuide?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.choiceGuide?.minCharactersError|| 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.choiceGuide?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',

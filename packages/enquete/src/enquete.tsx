@@ -206,6 +206,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['placeholder'] = item.placeholder || '';
                     fieldData['defaultValue'] = item.defaultValue || '';
                     fieldData['maxCharactersWarning'] = props?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over';
+                    fieldData['maxCharactersOverWarning'] = props?.maxCharactersOverWarning || 'Je hebt {overCharacters} tekens teveel';
                     fieldData['minCharactersWarning'] = props?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens';
                     fieldData['maxCharactersError'] = props?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
                     fieldData['minCharactersError'] = props?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten';

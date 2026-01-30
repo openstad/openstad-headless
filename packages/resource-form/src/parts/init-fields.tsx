@@ -49,6 +49,7 @@ export const InitializeFormFields = (items, data) => {
                 rows: 5,
                 placeholder: item.placeholder,
                 maxCharactersWarning: data?.general?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+                maxCharactersOverWarning: data?.general?.maxCharactersOverWarning || 'Je hebt {overCharacters} tekens teveel',
                 minCharactersWarning: data?.general?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
                 minCharactersError: data?.general?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
                 maxCharactersError: data?.general?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',

@@ -18,6 +18,7 @@ export type TextInputProps = {
     minCharactersWarning?: string;
     maxCharacters?: number;
     maxCharactersWarning?: string;
+    maxCharactersOverWarning?: string;
     showMinMaxAfterBlur?: boolean;
     fieldRequired?: boolean;
     requiredWarning?: string;

@@ -24,6 +24,7 @@ export type ChoiceGuide = {
     introDescription?: string;
     minCharactersWarning?: string;
     maxCharactersWarning?: string;
+    maxCharactersOverWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
     showMinMaxAfterBlur?: boolean;

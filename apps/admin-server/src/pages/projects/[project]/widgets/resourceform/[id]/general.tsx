@@ -43,6 +43,7 @@ const formSchema = z.object({
   hideAdmin: z.boolean(),
   minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
   maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
+  maxCharactersOverWarning: z.string().optional().default("Je hebt {overCharacters} tekens teveel"),
   minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
   maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
   showMinMaxAfterBlur: z.boolean().optional().default(false),
@@ -67,6 +68,7 @@ export default function WidgetResourceFormGeneral() {
       hideAdmin: widget?.config?.[category]?.hideAdmin || false,
       minCharactersWarning: widget?.config?.[category]?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning: widget?.config?.[category]?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+      maxCharactersOverWarning: widget?.config?.[category]?.maxCharactersOverWarning || 'Je hebt {overCharacters} tekens teveel',
       minCharactersError: widget?.config?.[category]?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
       maxCharactersError: widget?.config?.[category]?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
       showMinMaxAfterBlur: widget?.config?.[category]?.showMinMaxAfterBlur || false,
@@ -211,6 +213,25 @@ export default function WidgetResourceFormGeneral() {
                 </FormLabel>
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="maxCharactersOverWarning"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Waarschuwing bij overschrijden maximaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst die getoond wordt als het aantal karakters over de maximum waarde heen gaat. Gebruik {overCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
                 <Input
                   {...field}

@@ -33,6 +33,7 @@ export type TextInputProps = {
     minCharactersWarning?: string;
     maxCharacters?: number;
     maxCharactersWarning?: string;
+    maxCharactersOverWarning?: string;
     showMinMaxAfterBlur?: boolean;
     fieldRequired?: boolean;
     requiredWarning?: string;
@@ -163,6 +164,7 @@ const TextInput: FC<TextInputProps> = ({
     minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
     maxCharacters = 0,
     maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
+    maxCharactersOverWarning = 'Je hebt {overCharacters} tekens teveel',
     showMinMaxAfterBlur = false,
     rows,
     reset,
@@ -215,8 +217,10 @@ const TextInput: FC<TextInputProps> = ({
 
         if (!!minCharacters && count < minCharacters) {
             helpText = minCharactersWarning?.replace('{minCharacters}', (minCharacters - count).toString());
-        } else if (!!maxCharacters && count < maxCharacters) {
+        } else if (!!maxCharacters && count <= maxCharacters) {
             helpText = maxCharactersWarning?.replace('{maxCharacters}', (maxCharacters - count).toString());
+        } else if (!!maxCharacters && count > maxCharacters) {
+            helpText = maxCharactersOverWarning?.replace('{overCharacters}', (count - maxCharacters).toString());
         }
 
         setHelpText(helpText);
@@ -261,6 +265,7 @@ const TextInput: FC<TextInputProps> = ({
     }
 
     const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
+    const helpTextId = `${randomId}_help`;
     return (
         <FormField type="text">
             {title && (
@@ -309,14 +314,16 @@ const TextInput: FC<TextInputProps> = ({
                     value={value}
                     onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                         setValue(e.target.value);
-                        if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
-                            setCheckInvalid(false);
+                        const valueLength = e.target.value.length;
+                        const hasMax = maxCharacters > 0;
+                        const exceedsMax = hasMax && valueLength > maxCharacters;
+
+                        if (fieldRequired && valueLength === 0) {
+                            setCheckInvalid(true);
+                        } else if (exceedsMax) {
+                            setCheckInvalid(true);
                         } else {
-                            if(fieldRequired && e.target.value.length === 0){
-                                setCheckInvalid(true);
-                            }else{
-                                setCheckInvalid(false);
-                            }
+                            setCheckInvalid(false);
                         }
 
                         if (onChange) {
@@ -325,7 +332,7 @@ const TextInput: FC<TextInputProps> = ({
                                 value: e.target.value,
                             });
                         }
-                        characterHelpText(e.target.value.length);
+                        characterHelpText(valueLength);
 
                     }}
                     disabled={disabled}
@@ -337,11 +344,14 @@ const TextInput: FC<TextInputProps> = ({
                     }}
                     autoComplete={getAutocomplete(fieldKey)}
 
-                    aria-describedby={`${randomId}_error`}
+                    aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
+                    aria-invalid={checkInvalid}
                 />
-                {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText &&
-                    <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
-                }
+                {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
+                    <FormFieldDescription className="help-text" id={helpTextId} aria-live="polite" aria-atomic="true">
+                        {helpText}
+                    </FormFieldDescription>
+                )}
             </div>
         </FormField>
     );
