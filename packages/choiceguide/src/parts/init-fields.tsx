@@ -60,6 +60,10 @@ export const InitializeFormFields = (items, data, showForm = true) => {
         maxCharactersError:
           data?.choiceGuide?.maxCharactersError ||
           'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        maxCharactersOverWarning:
+          data?.choiceGuide?.maxCharactersOverWarning ||
+          'Je hebt {overCharacters} tekens teveel',
+        showMinMaxAfterBlur: data?.choiceGuide?.showMinMaxAfterBlur || false,
         routingInitiallyHide: item?.routingInitiallyHide || false,
         routingSelectedQuestion: item?.routingSelectedQuestion || '',
         routingSelectedAnswer: item?.routingSelectedAnswer || '',

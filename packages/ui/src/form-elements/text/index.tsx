@@ -71,6 +71,7 @@ export type TextInputProps = {
   createImageSlider?: boolean;
   imageClickable?: boolean;
   showMinMaxAfterBlur?: boolean;
+  maxCharactersOverWarning?: string;
 };
 
 const TrixEditor: React.FC<{
@@ -194,6 +195,7 @@ const TextInput: FC<TextInputProps> = ({
   createImageSlider = false,
   imageClickable = false,
   showMinMaxAfterBlur = false,
+  maxCharactersOverWarning = 'Je hebt {overCharacters} tekens teveel',
 }) => {
   const variantMap = {
     'text input': Textbox,
@@ -241,24 +243,6 @@ const TextInput: FC<TextInputProps> = ({
     value && setCheckInvalid(false);
   }, []);
 
-  const characterHelpText = (count: number) => {
-    let helpText = '';
-
-    if (!!minCharacters && count < minCharacters) {
-      helpText = minCharactersWarning?.replace(
-        '{minCharacters}',
-        (minCharacters - count).toString()
-      );
-    } else if (!!maxCharacters && count < maxCharacters) {
-      helpText = maxCharactersWarning?.replace(
-        '{maxCharacters}',
-        (maxCharacters - count).toString()
-      );
-    }
-
-    setHelpText(helpText);
-  };
-
   const getType = (fieldKey: string) => {
     switch (fieldKey) {
       case 'email':
@@ -270,6 +254,30 @@ const TextInput: FC<TextInputProps> = ({
       default:
         return 'text';
     }
+  }
+
+    useEffect(() => {
+        if (reset) {
+            reset(() => setValue(initialValue));
+        }
+    }, [reset, defaultValue]);
+
+    useEffect(() => {
+        value && setCheckInvalid(false);
+    }, [])
+
+    const characterHelpText = (count: number) => {
+      let helpText = '';
+
+      if (!!minCharacters && count < minCharacters) {
+          helpText = minCharactersWarning?.replace('{minCharacters}', (minCharacters - count).toString());
+      } else if (!!maxCharacters && count <= maxCharacters) {
+          helpText = maxCharactersWarning?.replace('{maxCharacters}', (maxCharacters - count).toString());
+      } else if (!!maxCharacters && count > maxCharacters) {
+          helpText = maxCharactersOverWarning?.replace('{overCharacters}', (count - maxCharacters).toString());
+      }
+
+      setHelpText(helpText);
   };
 
   useEffect(() => {
@@ -308,6 +316,7 @@ const TextInput: FC<TextInputProps> = ({
   };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
+  const helpTextId = `${randomId}_help`;
   return (
     <FormField type="text">
       {title && (
@@ -330,77 +339,78 @@ const TextInput: FC<TextInputProps> = ({
         </>
       )}
 
-      {
-        showMoreInfo && (
-          <>
-            <AccordionProvider
-              sections={[
-                {
-                  headingLevel: 3,
-                  body: <HtmlContent html={moreInfoContent}/>,
-                  expanded: undefined,
-                  label: moreInfoButton,
-                }
-              ]}
-            />
-            <Spacer size={1.5}/>
-          </>
-        )
-      }
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={1.5} />
+                </>
+            )}
 
-      {
-        InfoImage({
-          imageFallback: infoImage || '',
-          images: images,
-          createImageSlider: createImageSlider,
-          addSpacer: !!infoImage,
-          imageClickable: imageClickable
-        })
-      }
+            {InfoImage({
+                imageFallback: infoImage || '',
+                images: images,
+                createImageSlider: createImageSlider,
+                addSpacer: !!infoImage,
+                imageClickable: imageClickable
+            })}
 
-      <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}
-           aria-invalid={checkInvalid}>
-              <InputComponent
-                id={randomId}
-                name={fieldKey}
-                required={fieldRequired}
-                type={getType(fieldKey)}
-                placeholder={placeholder}
-                value={value}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                  setValue(e.target.value);
-                  if ((Number(minCharacters) > 0 && e.target.value.length >= Number(minCharacters)) && (maxCharacters > 0 && e.target.value.length <= maxCharacters)) {
-                    setCheckInvalid(false);
-                  } else {
-                    if (fieldRequired && e.target.value.length === 0) {
-                      setCheckInvalid(true);
-                    } else {
-                      setCheckInvalid(false);
-                    }
-                  }
+            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`} aria-invalid={checkInvalid}>
+                <InputComponent
+                    id={randomId}
+                    name={fieldKey}
+                    required={fieldRequired}
+                    type={getType(fieldKey)}
+                    placeholder={placeholder}
+                    value={value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                        setValue(e.target.value);
+                        const valueLength = e.target.value.length;
+                        const hasMax = maxCharacters > 0;
+                        const exceedsMax = hasMax && valueLength > maxCharacters;
 
-                  if (onChange) {
-                    onChange({
-                      name: fieldKey,
-                      value: e.target.value,
-                    });
-                  }
-                  characterHelpText(e.target.value.length);
+                        if (fieldRequired && valueLength === 0) {
+                            setCheckInvalid(true);
+                        } else if (exceedsMax) {
+                            setCheckInvalid(true);
+                        } else {
+                            setCheckInvalid(false);
+                        }
 
-                }}
-                disabled={disabled}
-                rows={rows}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => {
-                  setIsFocused(false);
-                  setHasBlurred(true);
-                }}
-                autoComplete={getAutocomplete(fieldKey)}
-                aria-describedby={`${randomId}_error`}
-              />
-              {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText &&
-                <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
-              }
+                        if (onChange) {
+                            onChange({
+                                name: fieldKey,
+                                value: e.target.value,
+                            });
+                        }
+                        characterHelpText(valueLength);
+
+                    }}
+                    disabled={disabled}
+                    rows={rows}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => {
+                        setIsFocused(false);
+                        setHasBlurred(true);
+                    }}
+                    autoComplete={getAutocomplete(fieldKey)}
+
+                    aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
+                    aria-invalid={checkInvalid}
+                />
+                {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
+                    <FormFieldDescription className="help-text" id={helpTextId} aria-live="polite" aria-atomic="true">
+                        {helpText}
+                    </FormFieldDescription>
+                )}
             </div>
 
         </FormField>

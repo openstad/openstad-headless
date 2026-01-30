@@ -60,6 +60,10 @@ const formSchema = z.object({
     .boolean()
     .optional()
     .default(false),
+  maxCharactersOverWarning: z
+    .string()
+    .optional()
+    .default("Je hebt {overCharacters} tekens teveel"),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -88,6 +92,9 @@ export default function WidgetEnqueteGeneral(
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
       enableDraftPersistence: props.enableDraftPersistence ?? false,
       draftRetentionHours: props.draftRetentionHours ?? 24,
+      maxCharactersOverWarning:
+        props.maxCharactersOverWarning ||
+        'Je hebt {overCharacters} tekens teveel',
       showMinMaxAfterBlur: props.showMinMaxAfterBlur || false,
     },
   });
@@ -237,6 +244,25 @@ export default function WidgetEnqueteGeneral(
                   {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
                 <Input {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="maxCharactersOverWarning"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Waarschuwing bij overschrijden maximaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst die getoond wordt als het aantal karakters over de maximum waarde heen gaat. Gebruik {overCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input
+                  {...field}
+                />
                 <FormMessage />
               </FormItem>
             )}

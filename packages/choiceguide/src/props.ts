@@ -30,6 +30,8 @@ export type ChoiceGuide = {
   enableOnOffSwitching?: boolean;
   showBackButtonInTopOfPage?: boolean;
   allowedPolygons?: Array<{ id: number; name: string }>;
+  maxCharactersOverWarning?: string;
+  showMinMaxAfterBlur?: boolean;
 };
 
 type ExtraProjectSettings = {
