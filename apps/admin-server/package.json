@@ -67,7 +67,7 @@
     "lodash": "^4.17.23",
     "lucide-react": "^0.276.0",
     "mjml-browser": "^5.0.0-alpha.6",
-    "next": "^14.2.35",
+    "next": "^16.1.5",
     "nunjucks": "^3.2.4",
     "pino": "^10.1.0",
     "postcss": "^8.4.38",
