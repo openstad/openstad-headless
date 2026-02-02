@@ -244,6 +244,7 @@ const MapField: FC<MapProps> = ({
                   autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
                   area={polygon}
                   renderArea={renderPolygon}
+                  areaRenderMode={props.areaRenderMode || (allowedPolygonIds.length && allowedPolygonIds.length > 1) ? 'polygons' : 'cutout'}
                   adminOnlyPolygons={ !!props.showHiddenPolygonsForAdmin ? adminOnlyPolygons : undefined}
                   {...zoom}
                   dataLayerSettings={dataLayerSettings}

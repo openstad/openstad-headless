@@ -6,6 +6,7 @@ export type AreaProps = {
   areas?: any,
   areaPolygonStyle?: any,
   interactionType?: 'default' | 'direct',
+  areaRenderMode?: 'cutout' | 'polygons',
   showHiddenPolygonsForAdmin?: boolean,
   adminOnlyPolygons?: any,
 };

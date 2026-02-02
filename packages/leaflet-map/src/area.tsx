@@ -80,6 +80,7 @@ export function Area({
     fillOpacity: 0.15,
   },
   interactionType = 'default',
+  areaRenderMode = 'cutout',
   showHiddenPolygonsForAdmin = false,
   ...props
 }: BaseProps & AreaProps) {
@@ -97,6 +98,11 @@ export function Area({
   const [poly, setPoly] = useState<any>([]);
 
   useEffect(() => {
+    if (areaRenderMode !== 'cutout') {
+      setPoly([]);
+      return;
+    }
+
     if (area && area.length > 0) {
       let validPolygons: LatLng[][] = [];
 
@@ -112,7 +118,7 @@ export function Area({
 
       setPoly(cutout);
     }
-  }, [area]);
+  }, [area, areaRenderMode]);
 
   const multiPolygon: any[] = [];
   const areaIds = areas?.map((item: Area) => item.id);
@@ -186,6 +192,15 @@ export function Area({
               </Tooltip>
             )}
           </Polygon>
+        ))
+      ) : areaRenderMode === 'polygons' ? (
+        (isMultiPolygon(area) ? area : [area]).map((polygon, index) => (
+          <Polygon
+            key={`area-${index}`}
+            {...props}
+            pathOptions={areaPolygonStyle}
+            positions={polygon}
+          />
         ))
       ) : (
         poly && (
