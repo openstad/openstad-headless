@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import dynamic from "next/dynamic";
-import { CodeEditor } from '@/components/ui/code-editor';
+// import { CodeEditor } from '@/components/ui/code-editor';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
@@ -236,6 +236,36 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     [existingData]
   );
   const [extraData, setExtraData] = useState(existingData?.extraData || '');
+  const [targetUser, setTargetUser] = useState<{ name?: string; email?: string; displayName?: string } | null>(null);
+  const [isLoadingTargetUser, setIsLoadingTargetUser] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!pendingUserId || !project || pendingUserId === existingData?.userId) {
+      setTargetUser(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoadingTargetUser(true);
+      try {
+        const res = await fetch(`/api/openstad/api/project/${project}/user/${pendingUserId}`);
+        if (res.ok) {
+          const userData = await res.json();
+          setTargetUser(userData);
+        } else {
+          setTargetUser(null);
+        }
+      } catch {
+        setTargetUser(null);
+      } finally {
+        setIsLoadingTargetUser(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingUserId, project, existingData?.userId]);
+
   const form = useForm<FormType>({
     resolver: zodResolver<any>(formSchema(titleLimits, summaryLimits, descriptionLimits)),
     defaultValues: defaults(),
@@ -538,8 +568,35 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   <Input
                     placeholder="1"
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      const value = parseInt(e.target.value);
+                      setPendingUserId(value || null);
+                    }}
                   />
                 </FormControl>
+                {existingData?.user && (
+                  <FormDescription className="text-sm text-gray-600">
+                    Huidige gebruiker: {existingData.user.displayName || existingData.user.name || 'Onbekend'}
+                    {existingData.user.email && ` (${existingData.user.email})`}
+                  </FormDescription>
+                )}
+                {isLoadingTargetUser && (
+                  <FormDescription className="text-sm text-gray-500">
+                    Gebruiker zoeken...
+                  </FormDescription>
+                )}
+                {targetUser && !isLoadingTargetUser && (
+                  <FormDescription className="text-sm text-blue-600">
+                    Nieuwe gebruiker: {targetUser.displayName || targetUser.name || 'Onbekend'}
+                    {targetUser.email && ` (${targetUser.email})`}
+                  </FormDescription>
+                )}
+                {pendingUserId && !isLoadingTargetUser && !targetUser && pendingUserId !== existingData?.userId && (
+                  <FormDescription className="text-sm text-red-600">
+                    Gebruiker niet gevonden
+                  </FormDescription>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -719,17 +776,17 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                     Extra data
                   </FormLabel>
                   <FormControl>
-                    <CodeEditor
-                      initValue={existingData?.extraData}
-                      onValueChange={(value) => {
-                        try {
-                          const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
-                          form.setValue('extraData', parsedValue); // Set the value of the field
-                          setExtraData(JSON.stringify(parsedValue));
-                        } catch (error) {
-                        }
-                      }}
-                    />
+                    {/*<CodeEditor*/}
+                    {/*  initValue={existingData?.extraData}*/}
+                    {/*  onValueChange={(value) => {*/}
+                    {/*    try {*/}
+                    {/*      const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid*/}
+                    {/*      form.setValue('extraData', parsedValue); // Set the value of the field*/}
+                    {/*      setExtraData(JSON.stringify(parsedValue));*/}
+                    {/*    } catch (error) {*/}
+                    {/*    }*/}
+                    {/*  }}*/}
+                    {/*/>*/}
                   </FormControl>
                 </FormItem>
               )}
