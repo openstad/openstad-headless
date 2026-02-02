@@ -180,7 +180,8 @@ function Form({
     }, [formValues]);
 
     const scrollTop = () => {
-        const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth), .osc-resource-form-item-content');
+        const formWidget = document.querySelector('.osc-enquete-item-content, .osc-resource-form-item-content');
+
         if (formWidget) {
             const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
             window.scrollTo({
@@ -275,9 +276,12 @@ function Form({
                         if (field.fieldKey && routingHiddenFields.includes(field.fieldKey)) {
                             return null;
                         }
+
+                        const uniqueKey = `${field.fieldKey || currentPage }_${index}`;
+
                         return field.type === 'pagination' ? null : (
                             // @ts-ignore
-                            <div className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`} key={index}>
+                            <div className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`} key={uniqueKey}>
                                 {renderField(field, index, randomId, fieldInvalid)}
                                 <FormFieldErrorMessage className="error-message">
                                     {field.fieldKey && formErrors[field.fieldKey] &&

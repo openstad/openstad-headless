@@ -34,7 +34,8 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
     document.documentElement.style.setProperty('--choiceguide-score-y', `${score.y}%`);
   }, [score]);
 
-  const [expanded, setExpanded] = useState(true);
+  const defaultExpanded = props.stickyBarDefaultOpen !== undefined ? props.stickyBarDefaultOpen : true;
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
     <div className="osc-choices-container" role="status" id={`osc-choice-container-${props.widgetId || ""}`} >
