@@ -23,7 +23,6 @@ import { Step4 } from './step-4';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Heading, ButtonLink } from '@utrecht/component-library-react';
-import useTags from '@openstad-headless/admin-server/src/hooks/use-tag';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 
@@ -142,7 +141,7 @@ function StemBegroot({
     api: props.api,
   });
 
-   const { data: allTags } = useTags(props.projectId);
+   const { data: allTags } = datastore.useTags({ projectId: props.projectId, type: 'tag' });
 
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
