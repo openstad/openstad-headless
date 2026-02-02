@@ -195,9 +195,9 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6>
-                  {props.progressBarDescription}
-                </Heading6>
+                <Heading6
+                  dangerouslySetInnerHTML={{ __html: props.progressBarDescription }}
+                />
               )}
           </div>
         </div>
@@ -250,9 +250,9 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6>
-                  {props.progressBarDescription}
-                </Heading6>
+                <Heading6
+                  dangerouslySetInnerHTML={{ __html: props.progressBarDescription }}
+                />
               )}
           </div>
         </div>
