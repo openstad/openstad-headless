@@ -1,7 +1,14 @@
 // Drag-and-drop sort field using @dnd-kit/core
 
 import React, { FC, useState, ReactNode, useEffect } from "react";
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-react";
@@ -87,6 +94,20 @@ const SortField: FC<SortFieldProps> = ({
 
     const [items, setItems] = useState(options);
 
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Prevents accidental drags; requires 8px movement to start
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250, // 250ms hold before drag starts (allows scrolling)
+                tolerance: 5, // 5px movement allowed during delay
+            },
+        })
+    );
+
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (active.id !== over?.id) {
@@ -127,7 +148,7 @@ const SortField: FC<SortFieldProps> = ({
                 })}
             </div>
             <div className="sortable-context">
-                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext
                         items={items.map(opt => opt.titles?.[0]?.key || "")}
                         strategy={verticalListSortingStrategy}
