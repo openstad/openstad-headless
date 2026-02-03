@@ -47,6 +47,8 @@ export type ChoiceGuideGeneralSettings = {
     loginText?: string;
     loginTextButton?: string;
     loginRequired?: boolean;
+    stickyBarAtTop?: boolean;
+    stickyBarDefaultOpen?: boolean;
 };
 
 export type ChoiceGuideSidebarProps = {
@@ -67,6 +69,7 @@ export type ChoiceGuideSidebarProps = {
     widgetId?: string;
     hiddenFields?: string[];
     items?: Array<Item>;
+    stickyBarDefaultOpen?: boolean;
 }
 
 export type Score = {

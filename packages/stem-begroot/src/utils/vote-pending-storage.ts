@@ -1,8 +1,8 @@
 const STORAGE_KEY_PREFIX_REGULAR = 'oscBegrootVotePending';
 const STORAGE_KEY_PREFIX_PER_TAG = 'oscBegrootVotePendingPerTag';
 
-export type VotePendingData = { [key: string]: any };
-export type VotePendingPerTagData = { [tag: string]: { [key: string]: any } };
+export type VotePendingData = { [resourceId: string]: string };
+export type VotePendingPerTagData = { [tag: string]: { [resourceId: string]: string } };
 
 class VotePendingStorage {
   private storageKeyRegular: string;
@@ -21,12 +21,22 @@ class VotePendingStorage {
 
   getVotePending(): VotePendingData | null {
     const stored = localStorage.getItem(this.storageKeyRegular);
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
   }
 
   getVotePendingPerTag(): VotePendingPerTagData | null {
     const stored = localStorage.getItem(this.storageKeyPerTag);
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
   }
 
   setVotePending(data: VotePendingData): void {

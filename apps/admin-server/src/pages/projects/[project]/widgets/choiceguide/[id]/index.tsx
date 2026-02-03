@@ -107,7 +107,21 @@ export default function WidgetChoiceGuide({
               <WidgetChoiceGuideChoiceOptions />
             </TabsContent>
             <TabsContent value="generalSettings" className="p-0">
-              <WidgetChoiceGuideGeneralSettings />
+              <WidgetChoiceGuideGeneralSettings
+                {...previewConfig}
+                updateConfig={(config) =>
+                  // @ts-ignore
+                  updateConfig({ ...widget.config, ...config })
+                }
+                onFieldChanged={(key: string, value: any) => {
+                  if (previewConfig) {
+                    updatePreview({
+                      ...previewConfig,
+                      [key]: value,
+                    });
+                  }
+                }}
+              />
             </TabsContent>
             <TabsContent value="datalayers" className="p-0">
               {previewConfig && (
