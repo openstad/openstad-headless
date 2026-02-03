@@ -60,6 +60,15 @@ type Point = {
     lng: number;
 }
 
+const flattenAreaPoints = (input: any): Point[] => {
+    if (!Array.isArray(input) || input.length === 0) return [];
+    const first = input[0];
+    if (first && typeof first.lat === 'number' && typeof first.lng === 'number') {
+        return input as Point[];
+    }
+    return input.flatMap((entry: any) => flattenAreaPoints(entry));
+};
+
 const MapField: FC<MapProps> = ({
     title,
     description,
@@ -141,9 +150,7 @@ const MapField: FC<MapProps> = ({
 
     const currentCenter = useMemo(() => {
         if (!polygon || polygon.length === 0) return undefined;
-        const flatPoints = Array.isArray(polygon[0])
-            ? (polygon as Point[][]).flat()
-            : (polygon as Point[]);
+        const flatPoints = flattenAreaPoints(polygon);
         return calculateCenter(flatPoints);
     }, [polygon]);
 

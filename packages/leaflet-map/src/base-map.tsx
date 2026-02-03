@@ -164,6 +164,26 @@ interface MapDataLayer {
   };
 }
 
+const isLatLngLike = (value: any): value is { lat?: number; lng?: number } =>
+  !!value && typeof value === 'object' && ('lat' in value || 'lng' in value);
+
+const normalizeAreaLocations = (input: any): any => {
+  if (!Array.isArray(input) || input.length === 0) return [];
+  if (isLatLngLike(input[0])) return input.map(parseLocation);
+  return input.map((entry) => normalizeAreaLocations(entry));
+};
+
+const collectAreaRings = (input: any): Array<Array<LocationType>> => {
+  if (!Array.isArray(input) || input.length === 0) return [];
+  if (isLatLngLike(input[0])) {
+    const ring = input
+      .map(parseLocation)
+      .filter((point) => point?.lat != null && point?.lng != null) as LocationType[];
+    return ring.length ? [ring] : [];
+  }
+  return input.flatMap((entry) => collectAreaRings(entry));
+};
+
 const BaseMap = ({
   iconCreateFunction = undefined,
   defaultIcon = undefined,
@@ -300,26 +320,9 @@ const BaseMap = ({
   let [mapRef] = useMapRef(mapId);
 
   const setBoundsAndCenter = useCallback(
-    (polygons: Array<Array<LocationType>>, focus: "area" | "markers", depth: number) => {
+    (polygons: any, focus: "area" | "markers", depth: number) => {
       if (focus === 'area') {
-        let allPolygons: LocationType[][] = [];
-
-        if (polygons && Array.isArray(polygons)) {
-          polygons.forEach((points: Array<LocationType>) => {
-            let poly: LocationType[] = [];
-            if (points && Array.isArray(points)) {
-              points.forEach((point: LocationType) => {
-                parseLocation(point);
-                if (point.lat) {
-                  poly.push(point);
-                }
-              });
-            }
-            if (poly.length > 0) {
-              allPolygons.push(poly);
-            }
-          });
-        }
+        const allPolygons = collectAreaRings(polygons);
 
         if (allPolygons.length == 0) {
           mapRef.panTo(
@@ -772,7 +775,7 @@ const BaseMap = ({
 };
 
 type MapEventsListenerProps = {
-  area?: Array<LocationType> | Array<Array<LocationType>>;
+  area?: Array<LocationType> | Array<Array<LocationType>> | Array<Array<Array<LocationType>>>;
   onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void;
   onMarkerClick?: (e: LeafletMouseEvent, map: any) => void,
 };
@@ -799,7 +802,7 @@ function MapEventsListener({
         return;
       }
 
-      const areaLatLngs = area.map(parseLocation) as LatLng[];
+      const areaLatLngs = normalizeAreaLocations(area);
       let isInArea = !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
 
       let customEvent = new CustomEvent("osc-map-click", {

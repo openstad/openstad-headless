@@ -7,10 +7,20 @@ type AreaLike = {
 export const toSafeAreas = (areas: unknown): AreaLike[] =>
     Array.isArray(areas) ? (areas as AreaLike[]) : [];
 
+const normalizePolygon = (polygon: any) => {
+    if (!Array.isArray(polygon) || polygon.length === 0) return [];
+    const first = polygon[0];
+    if (first && typeof first.lat === 'number' && typeof first.lng === 'number') {
+        return [polygon];
+    }
+    return polygon;
+};
+
 const pickPolygons = (list: AreaLike[]) =>
-    list.flatMap((area) =>
-        Array.isArray(area?.polygon) && area.polygon.length ? [area.polygon] : []
-    );
+    list.flatMap((area) => {
+        const normalized = normalizePolygon(area?.polygon);
+        return Array.isArray(normalized) && normalized.length ? [normalized] : [];
+    });
 
 export const resolveMapPolygons = ({
     areas,
@@ -32,7 +42,7 @@ export const resolveMapPolygons = ({
     const projectArea = areaId
         ? safeAreas.find((area) => area.id?.toString() === areaId)
         : undefined;
-    const projectPolygon = projectArea?.polygon || [];
+    const projectPolygon = normalizePolygon(projectArea?.polygon || []);
     const isVisible = (area: AreaLike | undefined) =>
         !area || showHiddenPolygonsForAdmin || area.hidePolygon !== true;
     const projectPolygonVisible =

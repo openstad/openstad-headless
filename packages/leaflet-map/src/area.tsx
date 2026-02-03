@@ -3,12 +3,45 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { LatLng } from 'leaflet';
 import { Polygon, Popup, Tooltip } from 'react-leaflet';
-import type { AreaProps } from './types/area-props';
+import type { AreaProps, AreaShape, AreaRing, AreaPolygon, AreaMultiPolygon } from './types/area-props';
 
 import { difference, polygon as tPolygon } from 'turf';
 import { BaseProps } from '@openstad-headless/types/base-props';
 
-function createCutoutPolygonMulti(areas: any) {
+type LatLngLike = { lat: number; lng: number };
+
+const isLatLngLike = (value: any): value is LatLngLike =>
+  !!value && typeof value.lat === 'number' && typeof value.lng === 'number';
+
+const isRing = (value: unknown): value is AreaRing =>
+  Array.isArray(value) && value.length > 0 && isLatLngLike((value as AreaRing)[0]);
+
+const isPolygonWithRings = (value: unknown): value is AreaPolygon =>
+  Array.isArray(value) && value.length > 0 && isRing((value as AreaPolygon)[0]);
+
+const isMultiPolygonWithRings = (value: unknown): value is AreaMultiPolygon =>
+  Array.isArray(value) &&
+  value.length > 0 &&
+  Array.isArray((value as AreaMultiPolygon)[0]) &&
+  isRing((value as AreaMultiPolygon)[0][0]);
+
+const isMultiPolygonMixed = (value: unknown): value is AreaMultiPolygon => {
+  if (!Array.isArray(value) || value.length === 0) return false;
+  return (value as unknown[]).every((entry) => isRing(entry) || isPolygonWithRings(entry));
+};
+
+const normalizeAreaToPolygons = (area?: AreaShape): AreaMultiPolygon => {
+  if (!area || !Array.isArray(area) || area.length === 0) return [];
+  if (isRing(area)) return [[area]];
+  if (isMultiPolygonWithRings(area)) return area as AreaMultiPolygon;
+  if (isMultiPolygonMixed(area)) {
+    return (area as unknown[]).map((entry) => (isRing(entry) ? [entry] : (entry as AreaPolygon)));
+  }
+  if (isPolygonWithRings(area)) return [area as AreaPolygon];
+  return [];
+};
+
+function createCutoutPolygonMulti(areas: AreaMultiPolygon) {
   const outerBoxCoordinates = [
     [-180, -90],
     [180, -90],
@@ -21,8 +54,9 @@ function createCutoutPolygonMulti(areas: any) {
 
   let cutOutCoordinates = [outerBoxCoordinates];
 
-  areas.forEach((area: any) => {
-    const innerPolygon = tPolygon([area.map(({ lat, lng }: { lat: number, lng: number }) => [lng, lat])]);
+  areas.forEach((area) => {
+    const rings = area.map((ring) => ring.map(({ lat, lng }) => [lng, lat]));
+    const innerPolygon = tPolygon(rings);
     const newCutOut = difference(outerBox, innerPolygon) || outerBox;
 
     if (newCutOut?.geometry?.coordinates && newCutOut?.geometry?.coordinates.length > 1) {
@@ -33,24 +67,23 @@ function createCutoutPolygonMulti(areas: any) {
   return cutOutCoordinates;
 }
 
-const isMultiPolygon = (
-  value: Array<LatLng> | Array<Array<LatLng>>
-): value is Array<Array<LatLng>> => Array.isArray(value[0]);
-
-export function isPointInArea(area: Array<Array<LatLng>> | Array<LatLng>, point: LatLng) {
+export function isPointInArea(area: AreaShape, point: LatLng) {
   if (!point) return false;
   if (!area) return true;
 
-  if (isMultiPolygon(area)) {
-    for (let poly of area) {
-      if (isPointInSinglePolygon(Array.isArray(poly) ? poly : [poly], point)) {
-        return true;
-      }
-    }
-    return false;
-  } else {
-    return isPointInSinglePolygon(area as Array<LatLng>, point);
+  const polygons = normalizeAreaToPolygons(area);
+  for (let polygon of polygons) {
+    if (polygon.length === 0) continue;
+    const outerRing = polygon[0];
+    if (!isPointInSinglePolygon(outerRing, point)) continue;
+
+    if (polygon.length === 1) return true;
+
+    const inHole = polygon.slice(1).some((ring) => isPointInSinglePolygon(ring, point));
+    if (!inHole) return true;
   }
+
+  return false;
 }
 
 function isPointInSinglePolygon(area: Array<LatLng>, point: LatLng) {
@@ -96,27 +129,30 @@ export function Area({
   }
 
   const [poly, setPoly] = useState<any>([]);
+  const [cutoutFailed, setCutoutFailed] = useState(false);
 
   useEffect(() => {
     if (areaRenderMode !== 'cutout') {
       setPoly([]);
+      setCutoutFailed(false);
       return;
     }
 
-    if (area && area.length > 0) {
-      let validPolygons: LatLng[][] = [];
+    const polygons = normalizeAreaToPolygons(area);
+    if (polygons.length === 0) return;
 
-      if (isMultiPolygon(area)) {
-        validPolygons = area.map((polygon) =>
-          polygon.map((point) => new LatLng(point.lat, point.lng))
-        );
-      } else {
-        validPolygons = [area.map((point) => new LatLng(point.lat, point.lng))];
-      }
+    const latLngPolygons = polygons.map((polygon) =>
+      polygon.map((ring) => ring.map((point) => new LatLng(point.lat, point.lng)))
+    );
 
-      const cutout = createCutoutPolygonMulti(validPolygons);
-
+    try {
+      const cutout = createCutoutPolygonMulti(latLngPolygons);
       setPoly(cutout);
+      setCutoutFailed(false);
+    } catch (error) {
+      console.warn('Failed to create cutout polygon, falling back to polygon render.', error);
+      setPoly(null);
+      setCutoutFailed(true);
     }
   }, [area, areaRenderMode]);
 
@@ -193,8 +229,8 @@ export function Area({
             )}
           </Polygon>
         ))
-      ) : areaRenderMode === 'polygons' ? (
-        (isMultiPolygon(area) ? area : [area]).map((polygon, index) => (
+      ) : areaRenderMode === 'polygons' || (areaRenderMode === 'cutout' && cutoutFailed) ? (
+        normalizeAreaToPolygons(area).map((polygon, index) => (
           <Polygon
             key={`area-${index}`}
             {...props}
