@@ -97,13 +97,13 @@ const SortField: FC<SortFieldProps> = ({
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 8, // Prevents accidental drags; requires 8px movement to start
+                distance: 8,
             },
         }),
         useSensor(TouchSensor, {
             activationConstraint: {
-                delay: 250, // 250ms hold before drag starts (allows scrolling)
-                tolerance: 5, // 5px movement allowed during delay
+                delay: 250,
+                tolerance: 5,
             },
         })
     );
