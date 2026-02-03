@@ -41,6 +41,7 @@ const formSchema = z.object({
     'vote',
     'votedUsers',
     'static',
+    'votedUsersPerProject',
     'argument',
     'choiceGuideResults',
     'enqueteResults',
@@ -87,8 +88,8 @@ export default function CounterDisplay(
       label: props?.label || 'Hoeveelheid',
       url: props?.url || '',
       opinion: props?.opinion || '',
-      widgetToFetchId: props?.widgetToFetchId,
-      resourceId: props?.resourceId,
+      widgetToFetchId: props?.widgetToFetchId || '',
+      resourceId: props?.resourceId || '',
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
       rigCounter: props?.rigCounter || '0',
@@ -166,7 +167,10 @@ export default function CounterDisplay(
                   </SelectItem>
                   <SelectItem value="vote">Aantal stemmen</SelectItem>
                   <SelectItem value="votedUsers">
-                    Aantal gestemde gebruikers
+                    Aantal gestemde gebruikers per plan
+                  </SelectItem>
+                  <SelectItem value="votedUsersPerProject">
+                    Aantal gestemde gebruikers van dit project
                   </SelectItem>
                   <SelectItem value="argument">Aantal reacties</SelectItem>
                   <SelectItem value="choiceGuideResults">

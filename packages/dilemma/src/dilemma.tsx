@@ -89,8 +89,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   const handleOptionSelect = useCallback((option: 'a' | 'b') => {
     if (!currentDilemma) return;
-    setSelectedOption(option);
-  }, [currentDilemma]);
+
+    const optionToSet = option === selectedOption ? null : option;
+    setSelectedOption(optionToSet);
+  }, [currentDilemma, selectedOption]);
 
 const moveToNext = useCallback(() => {
   let newAnswers = dilemmaAnswers;
@@ -377,6 +379,7 @@ const handleNextClick = useCallback(() => {
             value="a"
             checked={selectedOption === 'a' || (!selectedOption && previousAnswers[currentDilemma.id] === 'a')}
             onChange={() => handleOptionSelect('a')}
+            onClick={() => handleOptionSelect('a')}
           />
           <label htmlFor={`option-${currentDilemma.id}-a`}>
             <figure className="dilemma-option-image">
@@ -397,6 +400,7 @@ const handleNextClick = useCallback(() => {
             value="b"
             checked={selectedOption === 'b' || (!selectedOption && previousAnswers[currentDilemma.id] === 'b')}
             onChange={() => handleOptionSelect('b')}
+            onClick={() => handleOptionSelect('b')}
           />
           <label htmlFor={`option-${currentDilemma.id}-b`}>
             <figure className="dilemma-option-image">

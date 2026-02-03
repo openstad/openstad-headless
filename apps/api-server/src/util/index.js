@@ -9,10 +9,16 @@ var util = module.exports = {
 	
 	relativePath: function( dirName ) {
 		// Is `dirName` relative?
+		if (dirName.includes('..')) {
+			throw new Error('Invalid directory path');
+		}
 		if( path.normalize(dirName) !== path.resolve(dirName) ){
 			// make `dirName` relative to the caller.
 			var callerFilename = util.stack()[2].getFileName()
 			  , callerPath     = path.dirname(callerFilename);
+			if (dirName.startsWith('/')) {
+				throw new Error('Invalid directory path');
+			}
 			dirName = path.resolve(callerPath, dirName);
 		}
 		return dirName;
@@ -33,6 +39,9 @@ var util = module.exports = {
 function _invokeDir( dirName, fn, ctx ) {
 	var dir = fs.readdirSync(dirName);
 	for( let fileName of dir ) {
+		if (fileName.includes('..')) {
+			throw new Error('Invalid file name');
+		}
 		var fullPath = path.join(dirName, fileName)
 			, isDir    = fs.lstatSync(fullPath).isDirectory();
 		

@@ -22,6 +22,9 @@ export type LikeWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
     resourceIdRelativePath?: string;
+    children?:
+      | React.ReactNode
+      | ((doVote: (value: string) => void) => React.ReactNode);
   };
 
 export type LikeProps = {
@@ -41,20 +44,21 @@ function Likes({
   title = '',
   variant = 'large',
   hideCounters,
-  yesLabel = 'Voor',
-  noLabel = 'Tegen',
+  yesLabel = 'Ja',
+  noLabel = 'Nee',
   displayDislike = false,
   showProgressBar = true,
   disabled = false,
   refreshResourceLikes,
   ...props
-}: LikeWidgetProps & { children?: (doVote: (value: string) => void) => React.ReactNode }) {
-
-  let resourceId = String(getResourceId({
-    resourceId: parseInt(props.resourceId || ''),
-    url: document.location.href,
-    targetUrl: props.resourceIdRelativePath,
-  })); // todo: make it a number throughout the code
+}: LikeWidgetProps) {
+  let resourceId = String(
+    getResourceId({
+      resourceId: parseInt(props.resourceId || ''),
+      url: document.location.href,
+      targetUrl: props.resourceIdRelativePath,
+    })
+  ); // todo: make it a number throughout the code
 
   const necessaryVotes = props.resources?.minimumYesVotes || 50;
 
@@ -84,9 +88,8 @@ function Likes({
   ];
 
   if (!displayDislike) {
-      supportedLikeTypes.pop();
+    supportedLikeTypes.pop();
   }
-
 
   useEffect(() => {
     let pending = storage.get('osc-resource-vote-pending');
