@@ -246,6 +246,10 @@ function ResourceDetail({
     })
   : [];
 
+  const canLike = Array.isArray(resource?.statuses)
+    ? !resource.statuses.some((status: { canLike?: boolean }) => status?.canLike === false)
+    : true;
+
   const firstStatus = statuses && statuses.length > 0 ? statuses[0] : false;
 
   const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
@@ -504,6 +508,7 @@ function ResourceDetail({
                 <>
                   <Likes
                     {...props}
+                    disabled={!canLike}
                     title={props.likeWidget?.title}
                     yesLabel={props.likeWidget?.yesLabel}
                     noLabel={props.likeWidget?.noLabel}

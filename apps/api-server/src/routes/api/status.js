@@ -60,6 +60,7 @@ router
       name: req.body.name,
       seqnr: req.body.seqnr,
       addToNewResources: req.body.addToNewResources,
+      canLike: typeof req.body.canLike === 'boolean' ? req.body.canLike : true,
       projectId: req.params.projectId,
     };
 

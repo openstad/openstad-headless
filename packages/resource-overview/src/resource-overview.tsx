@@ -210,6 +210,11 @@ const defaultItemRenderer = (
   onItemClick?: () => void,
   refreshLikes?: () => void,
 ) => {
+  const canLike = Array.isArray(resource?.statuses)
+    ? !resource.statuses.some((status: { canLike?: boolean }) => status?.canLike === false)
+    : true;
+  const allowLikingInOverview = !!props.allowLikingInOverview;
+
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
       return <Paragraph>Template is nog niet ingesteld</Paragraph>;
@@ -417,12 +422,13 @@ const defaultItemRenderer = (
             </Paragraph>
           </div>
 
-          { props.allowLikingInOverview ? (
+          { allowLikingInOverview ? (
             <Likes
               {...props.likeWidget}
               resourceId={resource.id}
               projectId={props.projectId}
               {...props}
+              disabled={!canLike}
               refreshResourceLikes={refreshLikes}
             >
               {(doVote) => (

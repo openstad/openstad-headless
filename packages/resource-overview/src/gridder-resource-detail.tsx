@@ -100,6 +100,9 @@ export const GridderResourceDetail = ({
 
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
+  const canLike = Array.isArray(resource?.statuses)
+    ? !resource.statuses.some((status: { canLike?: boolean }) => status?.canLike === false)
+    : true;
 
   const renderImage = (image: string, clickableImage: boolean) => {
     const imageComponent = (
@@ -190,6 +193,7 @@ export const GridderResourceDetail = ({
             { displayLikeButton && (
               <Likes
                 {...props}
+                disabled={!canLike}
                 title={props.likeWidget?.title}
                 yesLabel={props.likeWidget?.yesLabel}
                 noLabel={props.likeWidget?.noLabel}

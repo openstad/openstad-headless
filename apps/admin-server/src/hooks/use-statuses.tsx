@@ -8,13 +8,24 @@ export default function useStatus(projectId?: string) {
 
   const statusListSwr = useSWR(projectNumber ? url : null);
 
-  async function createStatus(name: string, seqnr: number, addToNewResources: boolean) {
+  async function createStatus(
+    name: string,
+    seqnr: number,
+    addToNewResources: boolean,
+    canLike: boolean
+  ) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId: projectNumber, name, seqnr, addToNewResources }),
+      body: JSON.stringify({
+        projectId: projectNumber,
+        name,
+        seqnr,
+        addToNewResources,
+        canLike,
+      }),
     });
 
     return await res.json();
