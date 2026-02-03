@@ -178,7 +178,7 @@ const collectAreaRings = (input: any): Array<Array<LocationType>> => {
   if (isLatLngLike(input[0])) {
     const ring = input
       .map(parseLocation)
-      .filter((point) => point?.lat != null && point?.lng != null) as LocationType[];
+      .filter((point): point is LatLng => !Array.isArray(point) && point?.lat != null && point?.lng != null) as LocationType[];
     return ring.length ? [ring] : [];
   }
   return input.flatMap((entry) => collectAreaRings(entry));
