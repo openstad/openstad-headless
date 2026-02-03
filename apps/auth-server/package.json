@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "es6-promisify": "^5.0.x",
-    "eslint": "^8.22.0",
+    "eslint": "^9.26.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.6.1",
