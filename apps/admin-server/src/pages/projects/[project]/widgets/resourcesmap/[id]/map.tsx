@@ -115,42 +115,6 @@ export default function WidgetResourcesMapMap(
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
 
-          {!hideOverviewFields && (
-            <FormField
-              control={form.control}
-              name="markerHref"
-              render={({field}) => (
-                <FormItem>
-                  <FormLabel>
-                    Link naar de specifieke inzending
-                  </FormLabel>
-                  <FormControl>
-                    {!!props?.widgetName && props?.widgetName === 'multiprojectresourceoverview' ? (
-                      <div style={{backgroundColor: 'goldenrod', padding: '15px 20px', margin: '10px 0 20px'}}>
-                        <FormDescription
-                          style={{color: 'black', textAlign: 'center'}}
-                        >
-                          Deze optie is instelbaar per project bij het tabblad &apos;Instellingen multi project&apos;.
-                        </FormDescription>
-                      </div>
-                    ) : (
-                      <Input
-                        placeholder="Bijv: /resource?openstadResourceId=[id]"
-                        type="text"
-                        {...field}
-                        onChange={(e) => {
-                          onFieldChange(field.name, e.target.value);
-                          field.onChange(e);
-                        }}
-                      />
-                    )}
-                  </FormControl>
-                  <FormMessage/>
-                </FormItem>
-              )}
-            />
-          )}
-
           <FormField
             control={form.control}
             name="autoZoomAndCenter"
