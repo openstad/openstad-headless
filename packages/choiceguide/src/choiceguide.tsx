@@ -162,10 +162,10 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                   )}
 
                   <div className="osc-choiceguide-intro">
-                      {introTitle && <Heading4>{introTitle}</Heading4>}
+                      {introTitle && <Heading4 dangerouslySetInnerHTML={{ __html: introTitle }} />}
                       <div className="osc-choiceguide-intro-description">
                           {introDescription && (
-                            <Paragraph>{introDescription}</Paragraph>
+                            <Paragraph dangerouslySetInnerHTML={{ __html: introDescription }} />
                           )}
                       </div>
                   </div>

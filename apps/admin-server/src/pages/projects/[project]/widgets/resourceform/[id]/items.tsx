@@ -31,6 +31,18 @@ import { useRouter } from "next/router";
 import InfoDialog from '@/components/ui/info-hover';
 import {YesNoSelect} from "@/lib/form-widget-helpers";
 import { Matrix, MatrixOption } from '@openstad-headless/enquete/src/types/enquete-props';
+import dynamic from "next/dynamic";
+
+const TrixEditor = dynamic(
+  () =>
+    import("@openstad-headless/ui/src/form-elements/text/index").then(
+      (mod) => mod.TrixEditor
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded border" />
+  }
+);
 
 const formSchema = z.object({
     trigger: z.string(),
@@ -580,7 +592,7 @@ export default function WidgetResourceFormItems(
                                                             setMatrixOptions(matrixDefault);
                                                             setSettingOptions(false);
                                                         }}>
-                                                        {`${item.title || 'Geen titel'}`}
+                                                        <span dangerouslySetInnerHTML={{ __html: item.title || 'Geen titel' }} />
                                                     </span>
                                                     <span className="gap-2 py-3 px-2">
                                                         <X
@@ -925,7 +937,7 @@ export default function WidgetResourceFormItems(
                                 <div>
                                     <Heading size="xl">Inzending Formulier items</Heading>
                                     <Separator className="my-4" />
-                                    <div className="w-full lg:w-2/3 flex flex-col gap-y-4">
+                                    <div className="w-full flex flex-col gap-y-4">
                                         <FormField
                                             control={form.control}
                                             name="type"
@@ -974,7 +986,12 @@ export default function WidgetResourceFormItems(
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Titel/Vraag</FormLabel>
-                                                    <Input {...field} />
+                                                    <FormControl>
+                                                        <TrixEditor
+                                                            value={field.value || ''}
+                                                            onChange={(val) => field.onChange(val)}
+                                                        />
+                                                    </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -985,7 +1002,12 @@ export default function WidgetResourceFormItems(
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Beschrijving</FormLabel>
-                                                    <Textarea rows={6} {...field} />
+                                                    <FormControl>
+                                                        <TrixEditor
+                                                            value={field.value || ''}
+                                                            onChange={(val) => field.onChange(val)}
+                                                        />
+                                                    </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}

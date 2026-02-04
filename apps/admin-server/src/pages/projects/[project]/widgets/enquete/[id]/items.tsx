@@ -33,6 +33,18 @@ import InfoDialog from '@/components/ui/info-hover';
 import { useRouter } from 'next/router';
 import { YesNoSelect } from "@/lib/form-widget-helpers";
 import ImageGalleryStyle from '@/components/image-gallery-style';
+import dynamic from "next/dynamic";
+
+const TrixEditor = dynamic(
+  () =>
+    import("@openstad-headless/ui/src/form-elements/text/index").then(
+      (mod) => mod.TrixEditor
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded border" />
+  }
+);
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -1309,7 +1321,12 @@ export default function WidgetEnqueteItems(
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Titel/Vraag</FormLabel>
-                              <Input {...field} />
+                              <FormControl>
+                                <TrixEditor
+                                  value={field.value || ''}
+                                  onChange={(val) => field.onChange(val)}
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -1342,7 +1359,12 @@ export default function WidgetEnqueteItems(
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Beschrijving</FormLabel>
-                                <Textarea rows={6} {...field} />
+                                <FormControl>
+                                  <TrixEditor
+                                    value={field.value || ''}
+                                    onChange={(val) => field.onChange(val)}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}

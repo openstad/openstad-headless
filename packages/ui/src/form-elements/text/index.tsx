@@ -94,9 +94,9 @@ const TrixEditor: React.FC<{
 
     const handleTrixInitialize = () => {
       editorInstance.current = (editorEl as any).editor;
-
+        
       // Remove the file attachment button from the toolbar
-      const toolbar = document.querySelector('trix-toolbar');
+      const toolbar = editorEl.parentElement?.querySelector('trix-toolbar');
       if (toolbar) {
         const fileButton = toolbar.querySelector('[data-trix-action="attachFiles"]');
         if (fileButton) {

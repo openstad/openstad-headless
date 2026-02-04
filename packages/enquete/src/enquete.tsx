@@ -15,7 +15,6 @@ import { useEffect, useRef, useState } from 'react';
 import Form, { FormValue } from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
-    Paragraph,
     Heading2,
     Heading6,
 } from '@utrecht/component-library-react';
@@ -653,14 +652,19 @@ function Enquete(props: EnqueteWidgetProps) {
                 )}
 
                 <div className={`osc-enquete-item-content --${props.formStyle}`}>
-                    {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
+                    {props.displayTitle && props.title && (
+                        <Heading2>
+                            <div dangerouslySetInnerHTML={{ __html: props.title }} />
+                        </Heading2>
+                    )}
                     <div className="osc-enquete-item-description">
                         {props.displayDescription && props.description && (
-                            <Paragraph>{props.description}</Paragraph>
+                            <div dangerouslySetInnerHTML={{ __html: props.description }} />
                         )}
                     </div>
                     {draftChecked && (
                         <Form
+                            {...props}
                             fields={formFields}
                             formStyle={props.formStyle || 'default'}
                             getValuesOnChange={handleValuesChange}
@@ -677,10 +681,8 @@ function Enquete(props: EnqueteWidgetProps) {
                             totalFieldCount={totalFieldCount}
                             totalPages={totalPages}
                             initialValues={initialValues}
-                            {...props}
                         />
                     )}
-
                 </div>
 
                 <NotificationProvider />
