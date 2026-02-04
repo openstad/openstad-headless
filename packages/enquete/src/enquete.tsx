@@ -10,8 +10,9 @@ import {
 } from '@openstad-headless/ui/src';
 import hasRole from '../../lib/has-role';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
-import React, { useState, useEffect } from 'react';
-import Form from "@openstad-headless/form/src/form";
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Form, { FormValue } from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
     Heading2,
@@ -19,6 +20,83 @@ import {
 } from '@utrecht/component-library-react';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+
+// Helper types and functions for draft persistence
+
+type EnqueteDraft = {
+    data: Record<string, any>;
+    updatedAt: number;
+    version?: number;
+};
+
+function getStorageKey(projectId: string | number | undefined, widgetId: number | undefined, pathname: string): string {
+    const projectPart = typeof projectId !== 'undefined' ? String(projectId) : 'unknown-project';
+    const widgetPart = typeof widgetId !== 'undefined' ? String(widgetId) : 'unknown-widget';
+    return `enquete-draft:${projectPart}:${widgetPart}:${pathname}`;
+}
+
+function loadDraft(key: string, retentionHours: number): EnqueteDraft | null {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+        return null;
+    }
+
+    try {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw) as EnqueteDraft | null;
+        if (!parsed || typeof parsed.updatedAt !== 'number') {
+            window.localStorage.removeItem(key);
+            return null;
+        }
+
+        const maxAgeMs = retentionHours * 60 * 60 * 1000;
+        const age = Date.now() - parsed.updatedAt;
+        if (age > maxAgeMs) {
+            window.localStorage.removeItem(key);
+            return null;
+        }
+
+        return parsed;
+    } catch {
+        try {
+            window.localStorage.removeItem(key);
+        } catch {
+            // ignore
+        }
+        return null;
+    }
+}
+
+function saveDraft(key: string, data: Record<string, any>): void {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+        return;
+    }
+
+    const draft: EnqueteDraft = {
+        data,
+        updatedAt: Date.now(),
+        version: 1,
+    };
+
+    try {
+        window.localStorage.setItem(key, JSON.stringify(draft));
+    } catch {
+        // ignore storage failures
+    }
+}
+
+function clearDraft(key: string): void {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+        return;
+    }
+
+    try {
+        window.localStorage.removeItem(key);
+    } catch {
+        // ignore
+    }
+}
 
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
@@ -28,6 +106,34 @@ export type EnqueteWidgetProps = BaseProps &
 function Enquete(props: EnqueteWidgetProps) {
     const datastore = new DataStore(props);
     const notifyCreate = () => NotificationService.addNotification("Enquete ingediend", "success");
+
+    const [savedDraft, setSavedDraft] = useState<Record<string, unknown> | null>(null);
+    const [draftChecked, setDraftChecked] = useState(false);
+    const latestValuesRef = useRef<Record<string, unknown> | null>(null);
+    const saveTimeoutRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            setDraftChecked(true);
+            return;
+        }
+
+        const pathname = window.location.pathname;
+        const storageKey = getStorageKey(props.projectId, props.widgetId, pathname);
+
+        if (props.enableDraftPersistence !== true) {
+            setDraftChecked(true);
+            return;
+        }
+
+        const retentionHours = props.draftRetentionHours ?? 24;
+        const draft = loadDraft(storageKey, retentionHours);
+        if (draft && draft.data) {
+            setSavedDraft(draft.data);
+            latestValuesRef.current = draft.data;
+        }
+        setDraftChecked(true);
+    }, [props.projectId, props.widgetId, props.enableDraftPersistence, props.draftRetentionHours]);
 
     // Confetti function for youth outro page
     const fireConfetti = () => {
@@ -121,8 +227,8 @@ function Enquete(props: EnqueteWidgetProps) {
 
     const {
         data: currentUser,
-        error: currentUserError,
-        isLoading: currentUserIsLoading,
+        // error: currentUserError,
+        // isLoading: currentUserIsLoading,
     } = datastore.useCurrentUser({ ...props });
 
     const formOnlyVisibleForUsers = (
@@ -130,7 +236,7 @@ function Enquete(props: EnqueteWidgetProps) {
         || !props.formVisibility
     );
 
-    async function onSubmit(formData: any) {
+    async function onSubmit(formData: Record<string, unknown>) {
         // Filter out pagination fields
         const nonPaginationFields = formFields.filter(field => field.type !== 'pagination');
 
@@ -143,7 +249,7 @@ function Enquete(props: EnqueteWidgetProps) {
         if (getUserEmailFromField) {
             const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
 
-            if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
+            if (userEmailAddressFieldKey && formData.hasOwnProperty(userEmailAddressFieldKey)) {
                 formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
             }
         }
@@ -166,6 +272,13 @@ function Enquete(props: EnqueteWidgetProps) {
         const result = await createSubmission(formData, props.widgetId);
 
         if (result) {
+            if (typeof window !== 'undefined' && props.enableDraftPersistence === true) {
+                const pathname = window.location.pathname;
+                const storageKey = getStorageKey(props.projectId, props.widgetId, pathname);
+                clearDraft(storageKey);
+                latestValuesRef.current = null;
+            }
+
             if (props.afterSubmitUrl) {
                 location.href = props.afterSubmitUrl.replace("[id]", result.id)
             } else {
@@ -195,6 +308,9 @@ function Enquete(props: EnqueteWidgetProps) {
                 routingSelectedAnswer: item.routingSelectedAnswer || '',
                 trigger: item.trigger || '',
             };
+            const draftValue = item.fieldKey && savedDraft && savedDraft[item.fieldKey] !== undefined
+                ? savedDraft[item.fieldKey]
+                : undefined;
             switch (item.questionType) {
                 case 'open':
                     fieldData['type'] = 'text';
@@ -203,26 +319,25 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['maxCharacters'] = item.maxCharacters || '';
                     fieldData['rows'] = 5;
                     fieldData['placeholder'] = item.placeholder || '';
-                    fieldData['defaultValue'] = item.defaultValue || '';
+                    fieldData['defaultValue'] = draftValue !== undefined
+                        ? draftValue
+                        : (item.defaultValue || '');
                     fieldData['maxCharactersWarning'] = props?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over';
                     fieldData['minCharactersWarning'] = props?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens';
                     fieldData['maxCharactersError'] = props?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
                     fieldData['minCharactersError'] = props?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten';
                     break;
                 case 'multiplechoice':
-                case 'multiple':
+                case 'multiple': {
                     fieldData['type'] = item.questionType === 'multiplechoice' ? 'radiobox' : 'checkbox';
                     fieldData['randomizeItems'] = item.randomizeItems || false;
 
-                    const defaultValue: string[] = [];
+                    const configuredDefault: string[] = [];
 
-                    if (
-                        item.options &&
-                        item.options.length > 0
-                    ) {
+                    if (item.options && item.options.length > 0) {
                         fieldData['choices'] = item.options.map((option) => {
                             if (option.titles[0].defaultValue) {
-                                defaultValue.push(option.titles[0].key);
+                                configuredDefault.push(option.titles[0].key);
                             }
 
                             return {
@@ -235,8 +350,13 @@ function Enquete(props: EnqueteWidgetProps) {
                         });
                     }
 
-                    if (defaultValue.length > 0) {
-                        fieldData['defaultValue'] = defaultValue;
+                    if (draftValue !== undefined) {
+                        // For radiobox, draftValue is a single string; for checkbox, array of strings.
+                        fieldData['defaultValue'] = draftValue;
+                    } else if (configuredDefault.length > 0) {
+                        fieldData['defaultValue'] = item.questionType === 'multiplechoice'
+                            ? configuredDefault[0]
+                            : configuredDefault;
                     }
 
                     if (item.maxChoices) {
@@ -247,6 +367,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     }
 
                     break;
+                }
                 case 'images':
                     fieldData['type'] = 'imageChoice';
                     fieldData['multiple'] = item.multiple || false;
@@ -290,7 +411,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['type'] = 'documentUpload';
                     fieldData['multiple'] = item.multiple;
                     break;
-                case 'scale':
+                case 'scale': {
                     fieldData['type'] = 'tickmark-slider';
                     fieldData['showSmileys'] = item.showSmileys;
 
@@ -300,38 +421,38 @@ function Enquete(props: EnqueteWidgetProps) {
                         <Icon icon="ri-emotion-normal-line" key={3} />,
                         <Icon icon="ri-emotion-happy-line" key={4} />,
                         <Icon icon="ri-emotion-laugh-line" key={5} />
-                    ]
+                    ];
 
-                    {
-                        props.formStyle === 'youth' && (
-                            labelOptions[0] = <span key={1}>😡</span>,
-                            labelOptions[1] = <span key={2}>🙁</span>,
-                            labelOptions[2] = <span key={3}>😐</span>,
-                            labelOptions[3] = <span key={4}>😀</span>,
-                            labelOptions[4] = <span key={5}>😍</span>
-                        )
+                    if (props.formStyle === 'youth') {
+                        labelOptions[0] = <span key={1}>😡</span>;
+                        labelOptions[1] = <span key={2}>🙁</span>;
+                        labelOptions[2] = <span key={3}>😐</span>;
+                        labelOptions[3] = <span key={4}>😀</span>;
+                        labelOptions[4] = <span key={5}>😍</span>;
                     }
-
 
                     fieldData['fieldOptions'] = labelOptions.map((label, index) => {
                         const currentValue = index + 1;
                         return {
-                            value: currentValue,
+                            value: currentValue.toString(),
                             label: item.showSmileys ? label : currentValue,
-                        }
+                        };
                     });
+
+                    // TickmarkSlider uses overrideDefaultValue (string) for its initial value
+                    if (draftValue !== undefined && draftValue !== null && draftValue !== '') {
+                        fieldData['overrideDefaultValue'] = String(draftValue);
+                    }
                     break;
+                }
                 case 'map':
                     fieldData['type'] = 'map';
-
                     if (!!props?.datalayer) {
                         fieldData['datalayer'] = props?.datalayer;
                     }
-
                     if (typeof (props?.enableOnOffSwitching) === 'boolean') {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
-
                     break;
                 case 'pagination':
                     fieldData['type'] = 'pagination';
@@ -370,6 +491,11 @@ function Enquete(props: EnqueteWidgetProps) {
                             explanationRequired: card.titles[0].explanationRequired || false,
                         };
                     });
+                    // The swipe component usually manages its own state, but if it supports
+                    // an initial selection prop, we can pass draftValue through defaultValue.
+                    if (draftValue !== undefined) {
+                        fieldData['defaultValue'] = draftValue;
+                    }
                     break;
                 case 'dilemma':
                     fieldData['type'] = 'dilemma';
@@ -406,13 +532,25 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['type'] = 'matrix';
                     fieldData['matrix'] = item?.matrix || undefined;
                     fieldData['matrixMultiple'] = item?.matrixMultiple || false;
-                    fieldData['defaultValue'] = [];
+                    fieldData['defaultValue'] = draftValue !== undefined
+                        ? draftValue
+                        : [];
                     break;
             }
 
             formFields.push(fieldData);
         }
     }
+
+    const initialValues: { [p: string]: FormValue } = {};
+    if (savedDraft) {
+        for (const [key, value] of Object.entries(savedDraft)) {
+            if (value !== undefined && value !== null && value !== '') {
+                initialValues[key] = value;
+            }
+        }
+    }
+
     const totalFieldCount = props.items?.filter(item => item.questionType !== 'pagination').length || 0;
 
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -431,30 +569,35 @@ function Enquete(props: EnqueteWidgetProps) {
     const getNextPageTitle = formFields.filter(field => field.type === 'pagination')[currentPage]?.nextPageText || 'Volgende';
 
     const [isFullscreen, setIsFullscreen] = useState(false);
-    useEffect(() => {
-        const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
-        };
 
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape' && isFullscreen) {
-                setIsFullscreen(false);
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
+    const handleValuesChange = (values: Record<string, unknown>) => {
+        if (typeof window === 'undefined') return;
+        if (props.enableDraftPersistence !== true) return;
+
+        latestValuesRef.current = values;
+
+        if (saveTimeoutRef.current !== null) {
+            window.clearTimeout(saveTimeoutRef.current);
+        }
+
+        const pathname = window.location.pathname;
+        const storageKey = getStorageKey(props.projectId, props.widgetId, pathname);
+        const delay = 750; // ms debounce between saves
+
+        saveTimeoutRef.current = window.setTimeout(() => {
+            if (latestValuesRef.current) {
+                saveDraft(storageKey, latestValuesRef.current);
+            }
+        }, delay);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current !== null && typeof window !== 'undefined') {
+                window.clearTimeout(saveTimeoutRef.current);
             }
         };
-
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        window.addEventListener('keydown', handleEscape);
-
-        return () => {
-            document.removeEventListener('fullscreenchange', handleFullscreenChange);
-            window.removeEventListener('keydown', handleEscape);
-        };
-    }, [isFullscreen]);
-
-
+    }, []);
 
     return (
         <div className={`osc${isFullscreen ? ' --fullscreen' : ''}`}>
@@ -519,23 +662,27 @@ function Enquete(props: EnqueteWidgetProps) {
                             <div dangerouslySetInnerHTML={{ __html: props.description }} />
                         )}
                     </div>
-                    <Form
-                        {...props}
-                        fields={formFields}
-                        submitHandler={onSubmit}
-                        title=""
-                        submitText={currentPage < totalPages - 1 ? getNextPageTitle : ("Versturen")}
-                        submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        totalPages={totalPages}
-                        prevPage={currentPage > 0 ? currentPage - 1 : null}
-                        prevPageText={getPrevPageTitle}
-                        pageFieldStartPositions={pageFieldStartPositions}
-                        pageFieldEndPositions={pageFieldEndPositions}
-                        totalFieldCount={totalFieldCount}
-                        formStyle={props.formStyle || 'default'}
-                    />
+                    {draftChecked && (
+                        <Form
+                            {...props}
+                            fields={formFields}
+                            formStyle={props.formStyle || 'default'}
+                            getValuesOnChange={handleValuesChange}
+                            submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
+                            submitHandler={onSubmit}
+                            submitText={currentPage < totalPages - 1 ? getNextPageTitle : 'Versturen'}
+                            title=""
+                            currentPage={currentPage}
+                            pageFieldEndPositions={pageFieldEndPositions}
+                            pageFieldStartPositions={pageFieldStartPositions}
+                            prevPage={currentPage > 0 ? currentPage - 1 : null}
+                            prevPageText={getPrevPageTitle}
+                            setCurrentPage={setCurrentPage}
+                            totalFieldCount={totalFieldCount}
+                            totalPages={totalPages}
+                            initialValues={initialValues}
+                        />
+                    )}
                 </div>
 
                 <NotificationProvider />

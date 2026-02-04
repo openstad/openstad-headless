@@ -13,6 +13,7 @@ import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useForm } from 'react-hook-form';
@@ -38,6 +39,8 @@ const formSchema = z.object({
   maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
   minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
   maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+  enableDraftPersistence: z.boolean().optional(),
+  draftRetentionHours: z.coerce.number().optional(),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -58,6 +61,8 @@ export default function WidgetEnqueteGeneral(
       maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError: props.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
       maxCharactersError: props.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      enableDraftPersistence: props.enableDraftPersistence ?? false,
+      draftRetentionHours: props.draftRetentionHours ?? 24,
     },
   });
 
@@ -121,6 +126,46 @@ export default function WidgetEnqueteGeneral(
                 <FormControl>
                   <TrixEditor
                     value={field.value || ''}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="enableDraftPersistence"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Concept automatisch opslaan</FormLabel>
+                <FormDescription>
+                  Sla ingevulde antwoorden automatisch op in de browser, zodat gebruikers later kunnen verdergaan.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="draftRetentionHours"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bewaartijd concept (uren)</FormLabel>
+                <FormDescription>
+                  Aantal uren dat een concept bewaard blijft in de browser.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={1}
+                    {...field}
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);

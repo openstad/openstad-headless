@@ -114,7 +114,14 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
     const ChoiceComponent = multiple ? Checkbox : RadioButton;
 
-    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+    const hasInitialSelection = selectedChoices.length > 0;
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired && !hasInitialSelection);
+
+    useEffect(() => {
+        if (fieldRequired && selectedChoices.length > 0) {
+            setCheckInvalid(false);
+        }
+    }, [fieldRequired, selectedChoices]);
 
     return (
         <div className={`question`}>

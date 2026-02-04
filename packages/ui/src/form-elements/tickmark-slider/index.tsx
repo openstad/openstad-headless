@@ -77,8 +77,17 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         }
     }
 
-    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
+    // Consider a field with an overrideDefaultValue as already answered when required
+    const hasInitialValue = !!overrideDefaultValue;
+    const [checkInvalid, setCheckInvalid] = useState<boolean>(fieldRequired && !hasInitialValue);
 
+    useEffect(() => {
+        // If Form updates overrideDefaultValue later (e.g. when loading a draft),
+        // clear invalid state for required fields that now have a value.
+        if (fieldRequired && overrideDefaultValue) {
+            setCheckInvalid(false);
+        }
+    }, [fieldRequired, overrideDefaultValue]);
 
     return (
         <div className="a-b-slider-container">

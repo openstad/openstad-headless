@@ -1,9 +1,9 @@
 import { PageLayout } from '../../../../components/ui/page-layout';
-import { Button } from '../../../../components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
+import { ExportSettingsDialog, ExportSettings } from '@/components/dialog-export-settings';
 import { toast } from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import useSubmissions from "@/hooks/use-submission";
@@ -106,14 +106,12 @@ export default function ProjectSubmissions() {
               </SelectContent>
             </Select>
 
-            <Button
-              className="text-xs p-2"
-              type="submit"
-              onClick={() => exportSubmissionsToCSV(filterData, activeWidget, selectedWidget)}
+            <ExportSettingsDialog
               disabled={activeWidget === "0"}
-            >
-              Exporteer inzendingen
-            </Button>
+              onExport={(settings: ExportSettings) =>
+                exportSubmissionsToCSV(filterData, activeWidget, selectedWidget, settings)
+              }
+            />
           </div>
         }>
         <div className="container py-6">
