@@ -74,7 +74,7 @@ export const StemBegrootBudgetList = ({
           {!!introText && (
             <div className="stem-begroot-budget-list-used-budgets">
               <div className="stem-begroot-helptext-and-budget-section-helptext">
-                <Paragraph>{introText}</Paragraph>
+                <div dangerouslySetInnerHTML={{ __html: introText }} />
               </div>
             </div>
           )}
