@@ -11,19 +11,33 @@ import { Button } from '../../../../components/ui/button';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import useResources from "@/hooks/use-resources";
 import { exportComments } from '@/lib/export-helpers/comments-export';
+import { Paginator } from '@openstad-headless/ui/src';
 
 export default function ProjectComments() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, removeComment } = useComments(project as string, '?includeAllComments=1&includeVoteCount=1&includeTags', true);
+
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageLimit, setPageLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const { data, pagination, removeComment, fetchAll } = useComments(
+    project as string,
+    '?includeAllComments=1&includeVoteCount=1&includeTags',
+    true,
+    page,
+    pageLimit
+  );
   const { data: resources } = useResources(project as string);
   const [comments, setComments] = useState<any[]>([]);
 
-  function transform() {
+  async function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportComments(filterData, `${projectId}_reacties_${formattedDate}.xlsx`);
+    const allData = await fetchAll(totalCount, pageLimit);
+    exportComments(allData, `${projectId}_reacties_${formattedDate}.xlsx`);
   }
 
   function categorizeTags(tags: { type: string, name: string }[] ) {
@@ -36,6 +50,15 @@ export default function ProjectComments() {
       return acc;
     }, {});
   }
+
+  useEffect(() => {
+    if (pagination) {
+      const count = pagination.totalCount || 0;
+      const pageCount = Math.ceil(count / pageLimit);
+      setTotalPages(pageCount);
+      setTotalCount(count);
+    }
+  }, [pagination, pageLimit]);
 
   useEffect(() => {
     if (data) {
@@ -178,9 +201,19 @@ export default function ProjectComments() {
   }
 
   return (
-    <div>
-      <PageLayout
-        pageHeader="Projecten"
+    <>
+      <style jsx global>{`
+        .osc-paginator {
+          justify-content: center;
+          margin-top: 30px;
+        }
+        .osc-paginator .osc-icon-button .icon p {
+          display: none;
+        }
+      `}</style>
+      <div>
+        <PageLayout
+          pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -297,9 +330,40 @@ export default function ProjectComments() {
               </ListHeading>
             </div>
             {renderComments(filterData)}
+
+            {totalPages > 0 && (
+              <div className="flex flex-col items-center gap-4 mt-4">
+                <Paginator
+                  page={page || 0}
+                  totalPages={totalPages || 1}
+                  onPageChange={(newPage) => setPage(newPage)}
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Rijen per pagina:</span>
+                  <select
+                    className="p-2 rounded border"
+                    value={pageLimit}
+                    onChange={(e) => {
+                      setPageLimit(Number(e.target.value));
+                      setPage(0);
+                    }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={250}>250</option>
+                  </select>
+                  <span className="text-sm text-gray-500">
+                    ({totalCount} totaal)
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </PageLayout>
-    </div>
+      </div>
+    </>
   );
 }

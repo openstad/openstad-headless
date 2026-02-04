@@ -16,6 +16,7 @@ import choiceGuideResults from './choiceGuideResults';
 import userActivity from './user-activity';
 import choiceGuideResultCount from './choiceGuideResultCount';
 import enqueteResultCount from './enqueteResultCount';
+import projectVotedUsersCount from './projectVotedUsersCount';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -58,6 +59,10 @@ function API(props = {}) {
     fetch: enqueteResultCount.fetch.bind(self)
   }
 
+  self.projectVotedUsersCount = {
+    fetch: projectVotedUsersCount.fetch.bind(self)
+  }
+  
   self.comments = {
     fetch: comments.fetch.bind(self),
     create: comments.create.bind(self),

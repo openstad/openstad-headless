@@ -31,7 +31,9 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         nextButtonText,
         loginRequired,
         loginText,
-        loginTextButton
+        loginTextButton,
+        stickyBarAtTop,
+        stickyBarDefaultOpen
     } = generalSettings;
 
     const datastore: any = new DataStore({
@@ -139,7 +141,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
 
     return (
       <div className="osc">
-          <div className="osc-choiceguide-container" ref={containerRef}>
+          <div className={`osc-choiceguide-container ${ stickyBarAtTop ? 'sticky-top-bar' : '' }`} ref={containerRef}>
               <div className="osc-choiceguide-form">
 
                   { !showForm && (
@@ -198,6 +200,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                         widgetId={widgetId}
                         hiddenFields={hiddenFields}
                         items={formFields}
+                        stickyBarDefaultOpen={stickyBarDefaultOpen}
                       />
                   )}
               </div>
