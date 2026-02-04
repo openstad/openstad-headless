@@ -37,6 +37,7 @@ export type FormProps = {
     showBackButtonInTopOfPage?: boolean;
     totalFieldCount?: number;
     formStyle?: string;
+    initialValues?: { [p: string]: FormValue };
 }
 
 type PaginationFieldProps = {

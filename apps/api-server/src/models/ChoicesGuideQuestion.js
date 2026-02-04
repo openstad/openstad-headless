@@ -201,8 +201,9 @@ module.exports = function( db, sequelize, DataTypes ) {
       forProjectId: function( projectId ) {
         return {
           where: {
-            questionGroupId: [sequelize.literal(`select choicesGuideQuestionGroups.id FROM choicesGuideQuestionGroups INNER JOIN choicesGuides ON choicesGuides.id = choicesGuideQuestionGroups.choicesGuideId WHERE projectId = ${projectId}`)]
-          }
+            questionGroupId: [sequelize.literal(`select choicesGuideQuestionGroups.id FROM choicesGuideQuestionGroups INNER JOIN choicesGuides ON choicesGuides.id = choicesGuideQuestionGroups.choicesGuideId WHERE projectId = :projectId`)]
+          },
+          replacements: { projectId: projectId }
         };
       },
 
