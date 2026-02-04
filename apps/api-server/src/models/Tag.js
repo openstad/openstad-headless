@@ -157,6 +157,27 @@ module.exports = function (db, sequelize, DataTypes) {
       constraints: false,
     });
 
+    this.belongsToMany(models.Area, {
+      through: {
+        model: models.area_tags,
+        scope: { location: 'inside' },
+      },
+      as: 'areas',
+      foreignKey: 'tagId',
+      otherKey: 'areaId',
+      constraints: false,
+    });
+    this.belongsToMany(models.Area, {
+      through: {
+        model: models.area_tags,
+        scope: { location: 'outside' },
+      },
+      as: 'areasOutside',
+      foreignKey: 'tagId',
+      otherKey: 'areaId',
+      constraints: false,
+    });
+
     this.belongsToMany(models.Comment, {
       through: 'comment_tags',
       as: 'comments',

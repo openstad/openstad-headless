@@ -37,6 +37,7 @@ const config: ResourceFormWidgetProps = {
         saveConceptButton: 'Opslaan als concept',
     },
     info: {
+        allowAnonymousSubmissions: false,
         loginText: 'Inloggen om deel te nemen.',
         loginButtonText: 'Inloggen',
         nameInHeader: false,

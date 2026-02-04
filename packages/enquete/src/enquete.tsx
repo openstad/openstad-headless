@@ -333,6 +333,10 @@ function Enquete(props: EnqueteWidgetProps) {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
 
+                    if (Array.isArray(props?.allowedPolygons)) {
+                        fieldData['allowedPolygons'] = props.allowedPolygons;
+                    }
+
                     break;
                 case 'pagination':
                     fieldData['type'] = 'pagination';

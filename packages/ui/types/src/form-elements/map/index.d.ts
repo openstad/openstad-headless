@@ -25,6 +25,10 @@ export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
     defaultValue?: FormValue;
+    allowedPolygons?: Array<{
+        id: number;
+        name: string;
+    }>;
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {
@@ -39,6 +43,8 @@ export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
     }>;
     createImageSlider?: boolean;
     imageClickable?: boolean;
+    enablePolygonTags?: boolean;
+    showHiddenPolygonsForAdmin?: boolean;
 };
 declare const MapField: FC<MapProps>;
 export default MapField;

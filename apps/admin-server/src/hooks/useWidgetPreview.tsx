@@ -13,7 +13,8 @@ export function useWidgetPreview<T extends {[key:string]:any}>(widgetSettings: P
   // Set the preview the first time the widget config is loaded
   useEffect(() => {
     if (!previewConfig) {
-      const config = widget?.config;
+      const config = widget?.config ;
+      if ( typeof config === 'object' ) (config as any).showAdminHiddenPolygonStyling = true;
 
       if (config) {
         setPreviewConfig({

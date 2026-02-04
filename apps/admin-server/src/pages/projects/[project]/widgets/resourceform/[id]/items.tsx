@@ -48,6 +48,8 @@ const formSchema = z.object({
     maxChoicesMessage: z.string().optional(),
     variant: z.string().optional(),
     multiple: z.boolean().optional(),
+    prevPageText: z.string().optional(),
+    nextPageText: z.string().optional(),
     placeholder: z.string().optional(),
     defaultValue: z.string().optional(),
     images: z
@@ -154,6 +156,8 @@ export default function WidgetResourceFormItems(
                     maxChoicesMessage: values.maxChoicesMessage || '',
                     variant: values.variant || 'text input',
                     multiple: values.multiple || false,
+                    prevPageText: values.prevPageText || '',
+                    nextPageText: values.nextPageText || '',
                     options: values.options || [],
                     matrix: values.matrix || matrixDefault,
                     matrixMultiple: values.matrixMultiple || false,
@@ -268,6 +272,8 @@ export default function WidgetResourceFormItems(
         maxChoicesMessage: '',
         variant: 'text input',
         multiple: false,
+        prevPageText: '',
+        nextPageText: '',
         options: [],
         matrix: matrixDefault,
         matrixMultiple: false,
@@ -316,6 +322,8 @@ export default function WidgetResourceFormItems(
                 maxChoicesMessage: selectedItem.maxChoicesMessage || '',
                 variant: selectedItem.variant || '',
                 multiple: selectedItem.multiple || false,
+                prevPageText: selectedItem.prevPageText || '',
+                nextPageText: selectedItem.nextPageText || '',
                 matrix: selectedItem.matrix || matrixDefault,
                 matrixMultiple: selectedItem.matrixMultiple || false,
                 routingInitiallyHide: selectedItem.routingInitiallyHide || false,
@@ -508,6 +516,11 @@ export default function WidgetResourceFormItems(
                 const variant = (defaultFormItem.type === 'summary' || defaultFormItem.type === 'description') ? 'textarea' : 'text input';
                 form.setValue('variant', variant);
             }
+        } else if (form.watch("type") === 'pagination') {
+            form.setValue('fieldType', 'pagination');
+            form.setValue('fieldKey', '');
+            form.setValue('title', '');
+            form.setValue('description', '');
         } else if (form.watch("type") === 'documentUpload' || form.watch("type") === 'imageUpload') {
             const recommendedFieldKey =
                 form.watch("type") === 'documentUpload'
@@ -524,6 +537,12 @@ export default function WidgetResourceFormItems(
     }, [form.watch("type")]);
 
     useEffect(() => {
+        const type = form.watch("type");
+        if (type === 'pagination' || type === 'none') {
+            setIsFieldKeyUnique(true);
+            return;
+        }
+
         const key = form.watch("fieldKey");
 
         if (key) {
@@ -532,8 +551,10 @@ export default function WidgetResourceFormItems(
             );
 
             setIsFieldKeyUnique(isUnique);
+        } else {
+            setIsFieldKeyUnique(false);
         }
-    }, [form.watch("fieldKey"), selectedItem]);
+    }, [form.watch("fieldKey"), form.watch("type"), selectedItem]);
 
     return (
         <div>
@@ -580,7 +601,9 @@ export default function WidgetResourceFormItems(
                                                             setMatrixOptions(matrixDefault);
                                                             setSettingOptions(false);
                                                         }}>
-                                                        {`${item.title || 'Geen titel'}`}
+                                                        {item.type === 'pagination'
+                                                            ? '--- Nieuwe pagina ---'
+                                                            : `${item.title || 'Geen titel'}`}
                                                     </span>
                                                     <span className="gap-2 py-3 px-2">
                                                         <X
@@ -950,6 +973,7 @@ export default function WidgetResourceFormItems(
                                                             <SelectItem value="documentUpload">Document upload</SelectItem>
                                                             <SelectItem value="select">Dropdown</SelectItem>
                                                             <SelectItem value="matrix">Matrix vraag</SelectItem>
+                                                            <SelectItem value="pagination">Voeg pagina toe</SelectItem>
 
                                                             <SelectItem value="title">Inzending: Titel</SelectItem>
                                                             <SelectItem value="summary">Inzending: Samenvatting</SelectItem>
@@ -968,28 +992,59 @@ export default function WidgetResourceFormItems(
                                                     <FormMessage />
                                                 </FormItem>
                                             )}></FormField>
-                                        <FormField
-                                            control={form.control}
-                                            name="title"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Titel/Vraag</FormLabel>
-                                                    <Input {...field} />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="description"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Beschrijving</FormLabel>
-                                                    <Textarea rows={6} {...field} />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                                        {form.watch('type') !== 'pagination' && (
+                                            <>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="title"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Titel/Vraag</FormLabel>
+                                                            <Input {...field} />
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="description"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Beschrijving</FormLabel>
+                                                            <Textarea rows={6} {...field} />
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </>
+                                        )}
+
+                                        {form.watch('type') === 'pagination' && (
+                                            <>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="prevPageText"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Tekst voor: Vorige pagina</FormLabel>
+                                                            <Input {...field} />
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="nextPageText"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Tekst voor: Volgende pagina</FormLabel>
+                                                            <Input {...field} />
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </>
+                                        )}
 
                                         {form.watch('type') === 'title' && (
                                           <FormField
@@ -1005,12 +1060,12 @@ export default function WidgetResourceFormItems(
                                           />
                                         )}
 
-                                        {form.watch('type') !== 'none' && (
+                                        {form.watch('type') !== 'none' && form.watch('type') !== 'pagination' && (
                                             <FormField
                                                 control={form.control}
                                                 name="fieldKey"
                                                 render={({ field }) => {
-                                                    const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'imageUpload', 'documentUpload', 'select', 'matrix'];
+                                                    const nonStaticType = ['none', 'pagination', 'radiobox', 'text', 'checkbox', 'map', 'imageUpload', 'documentUpload', 'select', 'matrix'];
                                                     const type = form.watch('type');
                                                     const fieldKey = !nonStaticType.includes(type || '') ? type : '';
 
@@ -1152,7 +1207,7 @@ export default function WidgetResourceFormItems(
                                                 )}
                                             </>
                                         )}
-                                        {form.watch('type') !== 'none' && (
+                                        {form.watch('type') !== 'none' && form.watch('type') !== 'pagination' && (
                                             <FormField
                                                 control={form.control}
                                                 name="fieldRequired"
@@ -1356,34 +1411,36 @@ export default function WidgetResourceFormItems(
                                             />
                                         )}
 
-                                        <FormField
-                                            control={form.control}
-                                            name="onlyForModerator"
-                                            render={({ field }) => {
-                                                const type = form.watch('type');
+                                        {form.watch('type') !== 'pagination' && (
+                                            <FormField
+                                                control={form.control}
+                                                name="onlyForModerator"
+                                                render={({ field }) => {
+                                                    const type = form.watch('type');
 
-                                                return (
-                                                    <FormItem>
-                                                        <FormLabel>Is dit veld zichtbaar voor iedereen of alleen admin gebruikers?</FormLabel>
-                                                        <Select
-                                                            onValueChange={(e: string) => field.onChange(e === 'true')}
-                                                            value={field.value ? 'true' : 'false'}
-                                                        >
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Kies een optie" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="false">Iedereen</SelectItem>
-                                                                <SelectItem value="true">Alleen admin gebruikers</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )
-                                            }}
-                                        />
+                                                    return (
+                                                        <FormItem>
+                                                            <FormLabel>Is dit veld zichtbaar voor iedereen of alleen admin gebruikers?</FormLabel>
+                                                            <Select
+                                                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                                                value={field.value ? 'true' : 'false'}
+                                                            >
+                                                                <FormControl>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue placeholder="Kies een optie" />
+                                                                    </SelectTrigger>
+                                                                </FormControl>
+                                                                <SelectContent>
+                                                                    <SelectItem value="false">Iedereen</SelectItem>
+                                                                    <SelectItem value="true">Alleen admin gebruikers</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        )}
 
                                         { ['text', 'title', 'summary', 'description', 'estimate', 'role', 'phone', 'advice', 'budget'].includes(form.watch('type') || '') && (
                                           <FormField
@@ -1399,7 +1456,7 @@ export default function WidgetResourceFormItems(
                                           />
                                         )}
 
-                                        { !['title', 'summary', 'description'].includes(form.watch('type') || '') && (
+                                        { !['title', 'summary', 'description', 'pagination'].includes(form.watch('type') || '') && (
                                             <FormField
                                               control={form.control}
                                               name="routingInitiallyHide"
@@ -1597,14 +1654,14 @@ export default function WidgetResourceFormItems(
                                         <Button
                                             className="w-fit mt-4"
                                             type="submit"
-                                            disabled={(form.watch('type') === 'tags' && allTags.length === 0) || ((!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('type') !== 'none')}
+                                            disabled={(form.watch('type') === 'tags' && allTags.length === 0) || ((!form.watch('fieldKey') || !isFieldKeyUnique) && !['none', 'pagination'].includes(form.watch('type') || ''))}
                                         >
                                             {selectedItem
                                                 ? 'Sla wijzigingen op'
                                                 : 'Voeg item toe aan lijst'}
                                         </Button>
                                     </div>
-                                    {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
+                                    {(!form.watch('fieldKey') || !isFieldKeyUnique) && !['none', 'pagination'].includes(form.watch('type') || '') && (
                                         <FormMessage>
                                             {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
                                         </FormMessage>

@@ -46,6 +46,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         body: JSON.stringify({
           widgetType: type,
           ...config,
+          showHiddenPolygonsForAdmin: true,
         }),
       })
         .then((v) => {

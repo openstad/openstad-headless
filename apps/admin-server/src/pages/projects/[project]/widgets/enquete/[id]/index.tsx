@@ -21,6 +21,7 @@ import WidgetEnqueteItems from './items';
 import React from "react";
 import WidgetEnqueteConfirmation from "./confirmation";
 import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
+import WidgetEnquetePolygons from "./polygons";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export const getServerSideProps = withApiUrl;
@@ -62,6 +63,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="display">Weergave</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
+              <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -145,6 +147,24 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
                     }}
                   />
                 </>
+              )}
+            </TabsContent>
+            <TabsContent value="polygons" className="p-0">
+              {previewConfig && (
+                <WidgetEnquetePolygons
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
               )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">

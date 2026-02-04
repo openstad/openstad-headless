@@ -72,6 +72,11 @@ export const InitializeFormFields = (items, data) => {
 
 
             switch (item.type) {
+                case 'pagination':
+                    fieldData['type'] = 'pagination';
+                    fieldData['prevPageText'] = item?.prevPageText || '';
+                    fieldData['nextPageText'] = item?.nextPageText || '';
+                    break;
                 case 'checkbox':
                 case 'select':
                 case 'radiobox':
@@ -134,6 +139,13 @@ export const InitializeFormFields = (items, data) => {
                     if (typeof (data?.enableOnOffSwitching) === 'boolean') {
                         fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
                     }
+
+                    if (Array.isArray(data?.allowedPolygons)) {
+                        fieldData['allowedPolygons'] = data.allowedPolygons;
+                    }
+
+                    fieldData['enablePolygonTags'] = true;
+
                     break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';
