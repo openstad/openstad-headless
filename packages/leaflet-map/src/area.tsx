@@ -55,12 +55,23 @@ function createCutoutPolygonMulti(areas: AreaMultiPolygon) {
   let cutOutCoordinates = [outerBoxCoordinates];
 
   areas.forEach((area) => {
-    const rings = area.map((ring) => ring.map(({ lat, lng }) => [lng, lat]));
-    const innerPolygon = tPolygon(rings);
-    const newCutOut = difference(outerBox, innerPolygon) || outerBox;
+    // Filter out invalid rings (must have at least 4 points for a valid LinearRing)
+    const rings = area
+      .map((ring) => ring.map(({ lat, lng }) => [lng, lat]))
+      .filter((ring) => ring.length >= 4);
 
-    if (newCutOut?.geometry?.coordinates && newCutOut?.geometry?.coordinates.length > 1) {
-      cutOutCoordinates.push(newCutOut?.geometry?.coordinates[1]);
+    // Skip if no valid rings remain (need at least outer boundary)
+    if (rings.length === 0) return;
+
+    try {
+      const innerPolygon = tPolygon(rings);
+      const newCutOut = difference(outerBox, innerPolygon) || outerBox;
+
+      if (newCutOut?.geometry?.coordinates && newCutOut?.geometry?.coordinates.length > 1) {
+        cutOutCoordinates.push(newCutOut?.geometry?.coordinates[1]);
+      }
+    } catch (error) {
+      console.warn('Failed to create cutout for polygon, skipping:', error);
     }
   });
 
