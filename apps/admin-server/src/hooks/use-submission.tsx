@@ -9,19 +9,22 @@ export default function useSubmissions(projectId?: string) {
 
   const { data, isLoading, error, mutate } = useSWR(projectNumber ? url : null);
 
-  async function remove(id: string|number) {
-    const res = await fetch(`${baseUrl}/${id}`, {
+  async function remove(id: string|number, multiple?: boolean, ids?: number[]) {
+    const deleteUrl = multiple
+      ? `${baseUrl}/delete`
+      : `${baseUrl}/${id}`;
+
+    const res = await fetch(deleteUrl, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: multiple ? JSON.stringify({ ids }) : undefined,
     });
 
     if (res.ok) {
-      const existingData = [...data];
-      const updatedList = existingData.filter((ed) => ed.id !== id);
-      mutate(updatedList);
-      return updatedList;
+      await mutate();
+      return true;
     } else {
       throw new Error('Could not remove the submission');
     }

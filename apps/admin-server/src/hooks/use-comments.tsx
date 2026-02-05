@@ -27,21 +27,22 @@ export default function useComments(
   const records = commentListSwr.data?.records || commentListSwr.data || [];
   const pagination = commentListSwr.data?.metadata || null;
 
-  async function removeComment(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectNumber}/comment/${id}`;
+  async function removeComment(id: number, multiple?: boolean, ids?: number[]) {
+    const deleteUrl = multiple
+      ? `/api/openstad/api/project/${projectNumber}/comment/delete`
+      : `/api/openstad/api/project/${projectNumber}/comment/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: multiple ? JSON.stringify({ ids }) : undefined,
     });
 
     if (res.ok) {
-      const existingData = [...commentListSwr.data];
-      const updatedList = existingData.filter((ed) => ed.id !== id);
-      commentListSwr.mutate(updatedList);
-      return updatedList;
+      await commentListSwr.mutate();
+      return true;
     } else {
       throw new Error('Could not remove this comment');
     }
