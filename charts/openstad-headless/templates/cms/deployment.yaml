@@ -112,13 +112,21 @@ spec:
         {{- end }}
         resources:
 {{ toYaml .Values.cms.resources | indent 12 }}
-{{- if ne .Values.cms.useS3 "true" }}
         volumeMounts:
+          - mountPath: /tmp
+            name: tmp-dir
+          - mountPath: /opt/openstad-headless/apps/cms-server/data/temp
+            name: temp-dir
+{{- if ne .Values.cms.useS3 "true" }}
           - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/attachments" }}
             name: data-vol
 {{- end }}
-{{- if ne .Values.cms.useS3 "true" }}
       volumes:
+        - name: tmp-dir
+          emptyDir: {}
+        - name: temp-dir
+          emptyDir: {}
+{{- if ne .Values.cms.useS3 "true" }}
         - name: data-vol
           persistentVolumeClaim:
             claimName: cms-data-claim
