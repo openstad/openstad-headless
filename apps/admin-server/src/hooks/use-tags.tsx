@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {validateProjectNumber} from "../lib/validateProjectNumber";
 
 export default function useTag(projectId?: string, includeGlobalTags?: boolean) {
   const projectNumber: number | undefined = validateProjectNumber(projectId, true);
