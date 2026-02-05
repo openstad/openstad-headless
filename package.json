@@ -56,7 +56,7 @@
   "overrides": {
     "vega-lite": "^5.23.0",
     "tar": ">=7.5.7",
-    "@isaacs/brace-expansion": "5.0.0",
+    "@isaacs/brace-expansion": "5.0.1",
     "node-gyp": "^12.2.0",
     "xml2js@<=0.5.0": "0.5.0",
     "pino@<=10.1.1": "10.1.1",
