@@ -112,17 +112,23 @@ spec:
         {{- end }}
         resources:
 {{ toYaml .Values.image.resources | indent 12 }}
-{{- if ne .Values.image.useS3 "true" }}
         volumeMounts:
+          - mountPath: /tmp
+            name: tmp-dir
+{{- if ne .Values.image.useS3 "true" }}
           - mountPath: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
             name: data-vol
           - mountPath: {{ .Values.image.volumes.data.documentMountPath | default "/opt/openstad-headless/apps/image-server/documents" }}
             name: data-docs-vol
+{{- end }}
       volumes:
+        - name: tmp-dir
+          emptyDir: {}
+{{- if ne .Values.image.useS3 "true" }}
         - name: data-vol
           persistentVolumeClaim:
             claimName: image-data-claim
         - name: data-docs-vol
           persistentVolumeClaim:
             claimName: docs-data-claim
-{{- end}}
+{{- end }}
