@@ -21,6 +21,7 @@
   },
   "exclude": [
     "cypress",
-    "types"
+    "types",
+    "vite.config.ts"
   ]
 }
