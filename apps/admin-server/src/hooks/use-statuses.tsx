@@ -12,7 +12,6 @@ export default function useStatus(projectId?: string) {
     name: string,
     seqnr: number,
     addToNewResources: boolean,
-    canLike: boolean
   ) {
     const res = await fetch(url, {
       method: 'POST',
@@ -24,7 +23,7 @@ export default function useStatus(projectId?: string) {
         name,
         seqnr,
         addToNewResources,
-        canLike,
+        canLike: true,
       }),
     });
 
