@@ -255,7 +255,7 @@ label.utrecht-form-label {
     transform: translate(0, 0);
 
     &:has(.question-type-none),
-  
+
     &:has([aria-invalid="true"]),
     &:has(.utrecht-textbox--required),
     &:has(.swipe-finished) {
@@ -548,7 +548,7 @@ label.utrecht-form-label {
     .question {
       padding: 95px 30px 119px 30px;
       background: unset;
-      min-height: 700px;
+      min-height: unset !important;
       position: relative;
 
       &:before {
@@ -565,7 +565,7 @@ label.utrecht-form-label {
       }
 
       @media screen and (max-width: 400px) {
-        min-height: unset;
+        min-height: unset !important;
       }
 
       .question {
@@ -618,6 +618,7 @@ label.utrecht-form-label {
             max-height: unset;
             object-position: center;
             object-fit: scale-down;
+            margin: 0 auto;
           }
         }
       }
@@ -905,6 +906,7 @@ label.utrecht-form-label {
       padding-bottom: 32px;
       height: 100%;
       display: flex;
+      justify-content: center;
 
       // &:not(:has(.swipe-finished)):has([data-required="true"]) {
       &:not(:has(.swipe-finished)) {
@@ -914,7 +916,13 @@ label.utrecht-form-label {
       }
 
       .swipe-widget:not(.swipe-finished) {
-        justify-content: start;
+        justify-content: center;
+        height: 100%;
+
+        display: grid;
+        grid-template-rows: 3fr 1fr;
+        max-height: 700px;
+        container-type: inline-size;
       }
 
       .swipe-finished-content {
@@ -937,6 +945,10 @@ label.utrecht-form-label {
       height: 100%;
       display: flex;
 
+      @media screen and (max-height: 550px) {
+        justify-content: start !important;
+      }
+
       .dilemma-field>.utrecht-button--primary-action {
         @include utrecht-button-appearance;
         position: fixed;
@@ -950,15 +962,17 @@ label.utrecht-form-label {
       padding: 0;
       aspect-ratio: 9 / 16;
       width: 100%;
-      &:before{
+
+      &:before {
         display: none;
       }
 
-      + .button-group .utrecht-button--secondary-action{
+      +.button-group .utrecht-button--secondary-action {
         background-color: #fff;
         color: #000;
         padding: 0 10px;
-        span{
+
+        span {
           color: #000;
         }
       }
@@ -1216,7 +1230,15 @@ label.utrecht-form-label {
 
       .question {
         height: 100%;
-        justify-content: start;
+        justify-content: center;
+
+        @media screen and (max-height:550px) {
+
+          &:has(.dilemma-finished),
+          &:has(.swipe-finished) {
+            justify-content: start;
+          }
+        }
 
         @container (min-height: 900px) and (min-width: 768px) {
           justify-content: center;
