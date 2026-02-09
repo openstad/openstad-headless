@@ -142,7 +142,7 @@ function StemBegroot({
     api: props.api,
   });
 
-   const { data: allTags } = useTags(props.projectId);
+   const { data: allTags = [] } = useTags(props.projectId);
 
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
