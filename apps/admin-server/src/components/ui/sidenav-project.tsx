@@ -87,6 +87,20 @@ export function SidenavProject({ className }: { className?: string }) {
               </Button>
             </Link>
             {HasAccess(sessionData) && (
+              <Link href={`/projects/${project}/settings/users`}>
+                <Button
+                  variant={
+                    location.includes('/settings/users')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">Gebruikers</span>
+                </Button>
+              </Link>
+            )}
+            {HasAccess(sessionData) && (
               <Link href={`/projects/${project}/settings/anonymization`}>
                 <Button
                   variant={
