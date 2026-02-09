@@ -91,7 +91,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     const [isInfoVisible, setIsInfoVisible] = useState(false);
 
     const maxChoicesNum = parseInt(maxChoices || '', 10) || 0;
-    const maxReached = maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
+    const maxReached = multiple && maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
 
     const handleChoiceChange = (choiceValue: string) => {
         if (!multiple) {
