@@ -1,4 +1,4 @@
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {validateProjectNumber} from "../lib/validateProjectNumber";
 
 function prepareDocument(document: any) {
   const formData = new FormData();

@@ -1,6 +1,6 @@
 import { WidgetDefinition } from '@/lib/widget-definitions';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {validateProjectNumber} from "../lib/validateProjectNumber";
 
 export function useWidgetsHook(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);

@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {validateProjectNumber} from "../lib/validateProjectNumber";
 
 export default function useUniqueCodes(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);

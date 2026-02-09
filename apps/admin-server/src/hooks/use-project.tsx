@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {validateProjectNumber} from "../lib/validateProjectNumber";
 
 export function useProject(scopes?: Array<string>) {
   const router = useRouter();

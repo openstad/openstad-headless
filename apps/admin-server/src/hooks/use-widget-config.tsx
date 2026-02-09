@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import {validateProjectNumber} from "../lib/validateProjectNumber";
 
 export function useWidgetConfig<R>() {
   const router = useRouter();
