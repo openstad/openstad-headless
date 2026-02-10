@@ -265,6 +265,15 @@ spec:
           - name: EXTERNAL_CERTIFICATES_ENABLED
             value: "{{ .Values.api.externalCertificates.enabled }}"
 
+          - name: EXTERNAL_CERT_SECRET_PREFIX
+            value: "{{ .Values.api.externalCertificates.secretPrefix }}"
+
+          - name: EXTERNAL_CERT_SECRET_STORE
+            value: "{{ .Values.api.externalCertificates.secretStoreName }}"
+
+          - name: EXTERNAL_CERT_RETRY_COOLDOWN
+            value: "{{ .Values.api.externalCertificates.retryCooldownSeconds }}"
+
           - name: RATE_LIMIT
             valueFrom:
               secretKeyRef:

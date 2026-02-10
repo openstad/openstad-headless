@@ -286,6 +286,12 @@ api:
   # to load TLS certificates from an external secret store (e.g. Google Secret Manager via ESO)
   externalCertificates:
     enabled: false
+    # Prefix pattern for auto-generated secret names. {orgName} is replaced at runtime.
+    secretPrefix: "tls-openstad-prod-{orgName}"
+    # Name of the ClusterSecretStore to reference in ExternalSecret resources
+    secretStoreName: "gcp-secret-store"
+    # Cooldown in seconds between manual retry triggers per project
+    retryCooldownSeconds: 60
   # Inject extra environment variables
   extraEnvVars: []
   disableProjectIssueWarnings: "false"
