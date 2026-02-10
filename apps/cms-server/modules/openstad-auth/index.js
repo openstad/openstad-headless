@@ -278,6 +278,10 @@ module.exports = {
       get: {
         // GET /api/v1/openstad-auth/logout
         async logout(req, res) {
+          // If there is no session we can redirect back safely
+          if (!req.session) {
+            return res.redirect('/');
+          }
           req.session.openStadlastJWTCheck = 0;
           req.session.save(() => {
             return res.redirect('/');
