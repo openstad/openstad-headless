@@ -1,5 +1,6 @@
 const dns = require('dns');
 const db = require('../db');
+const externalCertificates = require('./externalCertificates');
 
 const getK8sApi = async () => {
   const k8s = await import('@kubernetes/client-node');
@@ -213,7 +214,13 @@ const checkHostStatus = async (conditions) => {
       const tlsSecretName = project.config?.tlsSecretName ? project.config.tlsSecretName : project.config.uniqueId;
       const tlsExtraDomains = project.config?.tlsExtraDomains ? project.config.tlsExtraDomains : [];
       const tlsUseClusterIssuer = project.config?.tlsSecretName ? false : process.env.KUBERNETES_INGRESS_USE_CLUSTER_ISSUER === 'true';
-      
+
+      // External certificates: per-project cert method choice
+      // When global flag is on AND project is configured for external certs,
+      // external cert logic runs instead of cert-manager logic.
+      // Phase 2 will add the per-project config check and ExternalSecret creation here.
+      const useExternalCerts = externalCertificates.isEnabled() && project.config?.certificateMethod === 'external';
+
       // if ip issset but not ingress try to create one
       if (!ingress) {
         try {
