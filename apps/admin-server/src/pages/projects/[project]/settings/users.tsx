@@ -23,7 +23,6 @@ import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   canCreateNewUsers: z.boolean().optional(),
-  allowUseOfNicknames: z.boolean().optional(),
 });
 
 export default function ProjectSettingsUsers() {
@@ -34,7 +33,6 @@ export default function ProjectSettingsUsers() {
   const defaults = useCallback(
     () => ({
       canCreateNewUsers: data?.config?.users?.canCreateNewUsers !== false,
-      allowUseOfNicknames: data?.config?.users?.allowUseOfNicknames || false,
     }),
     [data?.config]
   );
@@ -53,7 +51,6 @@ export default function ProjectSettingsUsers() {
       const project = await updateProject({
         users: {
           canCreateNewUsers: values.canCreateNewUsers,
-          allowUseOfNicknames: values.allowUseOfNicknames,
         },
       });
       if (project) {
@@ -115,28 +112,7 @@ export default function ProjectSettingsUsers() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="allowUseOfNicknames"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Gebruik van bijnamen toestaan
-                    </FormLabel>
-                    <Switch.Root
-                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
-                      onCheckedChange={(e: boolean) => {
-                        field.onChange(e);
-                      }}
-                      checked={field.value}>
-                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                    </Switch.Root>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" className="w-fit col-span-full">
+              <Button type="submit" className="w-fit col-span-full mt-4">
                 Opslaan
               </Button>
             </form>
