@@ -153,6 +153,12 @@ function StemBegroot({
 
     const url = new URL(window.location.href);
     const pendingUuidFromUrl = url.searchParams.get('pendingBudgetVote');
+    console.log('[pending-vote-debug][widget][restore] effect start', {
+      pendingVoteFetched,
+      pendingUuidFromUrl,
+      currentUrl: window.location.href,
+      voteType: props.votes.voteType,
+    });
 
     async function restoreFromServer(uuid: string) {
       try {
@@ -163,16 +169,29 @@ function StemBegroot({
         if (!props.api || !props.api.url) return;
 
         let apiUrl =`${props.api.url}/api/pending-budget-vote/${uuid}`;
+        console.log('[pending-vote-debug][widget][restore] fetching pending vote', {
+          uuid,
+          apiUrl,
+        });
 
         const pendingBudgetVote = await fetch(apiUrl, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
+        console.log('[pending-vote-debug][widget][restore] fetch response', {
+          uuid,
+          status: pendingBudgetVote.status,
+          ok: pendingBudgetVote.ok,
+        });
 
         // Remove pendingBudgetVote from URL
         url.searchParams.delete('pendingBudgetVote');
         window.history.replaceState({}, document.title, url.toString());
+        console.log('[pending-vote-debug][widget][restore] removed pending uuid from URL', {
+          uuid,
+          newUrl: url.toString(),
+        });
 
         if (!pendingBudgetVote.ok || !pendingBudgetVote) {
           console.error('Failed to fetch pending budget vote from server', pendingBudgetVote.statusText);
@@ -180,6 +199,10 @@ function StemBegroot({
         }
 
         const pendingBudgetVoteData = await pendingBudgetVote.json();
+        console.log('[pending-vote-debug][widget][restore] fetch json payload', {
+          uuid,
+          hasData: !!(pendingBudgetVoteData && pendingBudgetVoteData.data),
+        });
 
         if (!pendingBudgetVoteData || !pendingBudgetVoteData.data) {
           console.error('No pending budget vote data found on server');
@@ -193,7 +216,16 @@ function StemBegroot({
         } else {
           votePendingStorage.setVotePending(data as any);
         }
+        console.log('[pending-vote-debug][widget][restore] pending vote restored into storage', {
+          uuid,
+          restoredKeys: data && typeof data === 'object' ? Object.keys(data).length : 0,
+          voteType: props.votes.voteType,
+        });
       } catch (e) {
+        console.log('[pending-vote-debug][widget][restore] exception', {
+          uuid,
+          message: e instanceof Error ? e.message : 'unknown',
+        });
         console.error('Failed to restore pending budget vote from server', e);
       }
     }
@@ -209,6 +241,9 @@ function StemBegroot({
 
     if (localPending) {
       setPendingVoteFetched(true);
+      console.log('[pending-vote-debug][widget][restore] local pending found, no server restore needed', {
+        hasLocalPending: true,
+      });
     }
   }, [datastore, props.votes.voteType, votePendingStorage]);
 

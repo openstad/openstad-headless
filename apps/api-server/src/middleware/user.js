@@ -5,6 +5,18 @@ const db = require('../db');
 const authSettings = require('../util/auth-settings');
 
 let adapters = {};
+const DEBUG_PATH_RE = /^\/api\/pending-budget-vote(\/|$)/;
+
+function shouldDebugRequest(req) {
+  return DEBUG_PATH_RE.test(req.path || '');
+}
+
+function shortToken(authorizationHeader) {
+  if (!authorizationHeader || typeof authorizationHeader !== 'string') return 'none';
+  const token = authorizationHeader.replace(/^bearer /i, '');
+  if (token.length <= 12) return token;
+  return `${token.slice(0, 8)}...${token.slice(-4)}`;
+}
 
 /**
  * Get user from jwt or fixed token and validate with auth server
@@ -16,8 +28,20 @@ let adapters = {};
 module.exports = async function getUser( req, res, next ) {
 
   try {
+    const debug = shouldDebugRequest(req);
+    if (debug) {
+      console.log('[pending-vote-debug][user-mw] start', {
+        method: req.method,
+        path: req.path,
+        hasAuthorization: !!req.headers['authorization'],
+        tokenPreview: shortToken(req.headers['authorization']),
+        origin: req.headers.origin,
+        projectId: req.project && req.project.id,
+      });
+    }
 
     if (!req.headers['authorization']) {
+      if (debug) console.log('[pending-vote-debug][user-mw] no authorization header, using empty user');
       return nextWithEmptyUser(req, res, next);
     } else {
       const allowedUploadPaths = [
@@ -37,24 +61,56 @@ module.exports = async function getUser( req, res, next ) {
         const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
 
         req.headers['authorization'] = `Bearer ${uploadJwt}`;
+        if (debug) console.log('[pending-vote-debug][user-mw] upload request, injected temporary jwt');
       }
     }
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['authorization']);
+    if (debug) {
+      console.log('[pending-vote-debug][user-mw] parsed auth header', {
+        userId,
+        isFixed: !!isFixed,
+        authProvider: authProvider || 'none',
+      });
+    }
     let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider })
+    if (debug) {
+      console.log('[pending-vote-debug][user-mw] resolved auth config', {
+        provider: authConfig && authConfig.provider,
+        adapter: authConfig && authConfig.adapter,
+        hasProjectContext: !!req.project,
+        projectId: req.project && req.project.id,
+        clientId: authConfig && authConfig.clientId,
+        serverUrlInternal: authConfig && authConfig.serverUrlInternal,
+      });
+    }
 
     if(userId === null || typeof userId === 'undefined') {
+      if (debug) console.log('[pending-vote-debug][user-mw] no userId parsed, using empty user');
       return nextWithEmptyUser(req, res, next);
     }
 
     let projectId = req.project && req.project.id;
 
     const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) || {};
+    if (debug) {
+      console.log('[pending-vote-debug][user-mw] getUserInstance result', {
+        hasUserEntity: !!(userEntity && userEntity.id),
+        userId: userEntity && userEntity.id,
+        role: userEntity && userEntity.role,
+      });
+    }
 
     req.user = userEntity
     
     return next();
     
   } catch(error) {
+    if (shouldDebugRequest(req)) {
+      console.log('[pending-vote-debug][user-mw] error', {
+        message: error && error.message,
+        stackTop: error && error.stack && error.stack.split('\n')[0],
+      });
+    }
     console.error(error);
     next(error);
   }
@@ -183,6 +239,14 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     return mergedUser;
     
   } catch(err) {
+    console.log('[pending-vote-debug][user-mw] auth-server fetch failed in getUserInstance', {
+      message: err && err.message,
+      userId,
+      projectId,
+      authProvider: authConfig && authConfig.provider,
+      clientId: authConfig && authConfig.clientId,
+      serverUrlInternal: authConfig && authConfig.serverUrlInternal,
+    });
     console.log(err);
     return await resetUserToken(dbUser);
   }

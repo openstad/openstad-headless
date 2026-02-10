@@ -5,7 +5,6 @@ const config = require('config');
 const db = require('../../db');
 
 let service = {};
-
 service.fetchUserData = async function fetchUserData({ authConfig, userId, email, accessToken, raw = false }) {
 
   let path = '';
@@ -26,12 +25,30 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
   }
 
   let url = `${authConfig.serverUrlInternal}${path}`;
+  const debug = true;
 
   try {
+    if (debug) {
+      console.log('[pending-vote-debug][openstad-service] fetchUserData request', {
+        url,
+        provider: authConfig && authConfig.provider,
+        clientId: authConfig && authConfig.clientId,
+        hasAccessToken: !!accessToken,
+        hasUserId: !!userId,
+        hasEmail: !!email,
+      });
+    }
 
     let response = await fetch(url, {
 	    headers,
     })
+    if (debug) {
+      console.log('[pending-vote-debug][openstad-service] fetchUserData response', {
+        url,
+        status: response.status,
+        ok: response.ok,
+      });
+    }
     if (!response.ok) {
       throw new Error('Fetch failed')
     }
@@ -56,6 +73,12 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
     return mappedUserData;
 
   } catch(err) {
+    if (debug) {
+      console.log('[pending-vote-debug][openstad-service] fetchUserData error', {
+        url,
+        message: err && err.message,
+      });
+    }
     throw new Error('Cannot connect to auth server');
   }
 
