@@ -401,6 +401,13 @@ function Enquete(props: EnqueteWidgetProps) {
                         ];
                     }
 
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'imageUpload':
                     fieldData['type'] = 'imageUpload';
