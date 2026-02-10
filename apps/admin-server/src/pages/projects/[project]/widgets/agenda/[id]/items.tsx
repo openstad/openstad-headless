@@ -508,7 +508,7 @@ export default function WidgetAgendaItems(
                           name="activeFrom"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Actief vanaf</FormLabel>
+                              <FormLabel>Actief vanaf — laat leeg om direct te starten</FormLabel>
                               <Input type="datetime-local" {...field} />
                               <FormMessage />
                             </FormItem>
@@ -519,7 +519,7 @@ export default function WidgetAgendaItems(
                           name="activeTo"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Actief tot</FormLabel>
+                              <FormLabel>Actief tot — laat leeg voor geen einddatum</FormLabel>
                               <Input type="datetime-local" {...field} />
                               <FormMessage />
                             </FormItem>

@@ -69,7 +69,7 @@ function Agenda({
     return false;
   };
 
-  const now = props.useActiveDates ? new Date() : null;
+  const now = props.useActiveDates ? new Date(props.serverTime || Date.now()) : null;
   const itemsSorted = [...(props.items ?? [])]
     .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
     .map((item) => {
