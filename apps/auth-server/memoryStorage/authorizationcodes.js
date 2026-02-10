@@ -1,6 +1,7 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
+const utils = require('../utils');
 
 // The authorization codes.
 // You will use these to get the access codes to get to the data in your endpoints as outlined
@@ -19,7 +20,8 @@ let codes = Object.create(null);
  */
 exports.find = (token) => {
   try {
-    const id = jwt.decode(token).jti;
+    const decoded = utils.verifyToken(token);
+    const id = decoded.jti;
     return Promise.resolve(codes[id]);
   } catch (error) {
     return Promise.resolve(undefined);
@@ -38,7 +40,13 @@ exports.find = (token) => {
  * @returns {Promise} resolved with the saved token
  */
 exports.save = (code, clientID, redirectURI, userID, scope) => {
-  const id = jwt.decode(code).jti;
+  let decoded;
+  try {
+    decoded = utils.verifyToken(code);
+  } catch (error) {
+    return Promise.reject(new Error('Invalid authorization code'));
+  }
+  const id = decoded.jti;
   codes[id] = { clientID, redirectURI, userID, scope };
   return Promise.resolve(codes[id]);
 };
@@ -50,7 +58,8 @@ exports.save = (code, clientID, redirectURI, userID, scope) => {
  */
 exports.delete = (token) => {
   try {
-    const id = jwt.decode(token).jti;
+    const decoded = utils.verifyToken(token);
+    const id = decoded.jti;
     const deletedToken = codes[id];
     delete codes[id];
     return Promise.resolve(deletedToken);
