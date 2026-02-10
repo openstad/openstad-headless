@@ -70,18 +70,25 @@ function analyzeSpamPayload(payload = {}) {
   const timeToSubmitMs = Number(payload.__timeToSubmitMs);
   const veryFastSubmit =
     Number.isFinite(timeToSubmitMs) && timeToSubmitMs > 0 && timeToSubmitMs < 2500;
+  const candidateCount = textCandidates.length;
+  const suspiciousCount = Math.max(randomLikeCount, compactMixedCaseCount);
+  const suspiciousRatio =
+    candidateCount > 0 ? suspiciousCount / candidateCount : 0;
+
+  const hasEnoughEvidence = suspiciousCount >= 2;
+  const passesRatioThreshold = suspiciousRatio >= 0.35;
 
   const isProbablySpam =
-    randomLikeCount >= 2 ||
-    compactMixedCaseCount >= 2 ||
+    (hasEnoughEvidence && passesRatioThreshold) ||
     (randomLikeCount >= 1 && veryFastSubmit && textCandidates.length >= 2);
 
   return {
     isProbablySpam,
     randomLikeCount,
     compactMixedCaseCount,
+    suspiciousRatio,
     veryFastSubmit,
-    candidateCount: textCandidates.length,
+    candidateCount,
   };
 }
 
