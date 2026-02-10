@@ -34,12 +34,6 @@ module.exports = function (db, sequelize, DataTypes) {
         default: false,
       },
 
-      canLike: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        default: true,
-      },
-
       label: {
         type: DataTypes.STRING,
         allowNull: true,
