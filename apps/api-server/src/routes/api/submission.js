@@ -6,6 +6,11 @@ const searchInResults = require('../../middleware/search-in-results');
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
 const createError = require("http-errors");
 const crypto = require('crypto');
+const {
+	analyzeSpamPayload,
+	logProbablySpam,
+	removeSpamMetaFields,
+} = require('../../services/spam-detector');
 
 let router = express.Router({mergeParams: true});
 
@@ -86,10 +91,17 @@ router.route('/')
 
 // create submission
 // ---------------
-  .post(auth.can('Submission', 'create'))
+	.post(auth.can('Submission', 'create'))
 	.post( rateLimiter(), function(req, res, next) {
+		const analysis = analyzeSpamPayload(req.body.submittedData || {});
+		if (analysis.isProbablySpam) {
+			logProbablySpam({ routeName: 'submission', req, analysis });
+			return res.status(202).json({ probablySpam: true, ignored: true });
+		}
+
+		const sanitizedSubmittedData = removeSpamMetaFields(req.body.submittedData || {});
 		let data = {
-			submittedData: req.body.submittedData,
+			submittedData: sanitizedSubmittedData,
 			projectId: req.params.projectId,
 			widgetId: req.body.widgetId || null,
 			userId: req.user.id,
