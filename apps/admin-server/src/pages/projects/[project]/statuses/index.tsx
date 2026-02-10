@@ -100,7 +100,7 @@ export default function ProjectStatuses() {
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{status.id || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{status.name || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{status.addToNewResources ? 'Ja' : 'Nee'}</Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto">{status.canLike === false ? 'Nee' : 'Ja'}</Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">{status.extraFunctionality?.canLike === false ? 'Nee' : 'Ja'}</Paragraph>
                     <div
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>

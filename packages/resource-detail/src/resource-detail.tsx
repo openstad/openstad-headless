@@ -247,7 +247,10 @@ function ResourceDetail({
   : [];
 
   const canLike = Array.isArray(resource?.statuses)
-    ? !resource.statuses.some((status: { canLike?: boolean }) => status?.canLike === false)
+    ? !resource.statuses.some(
+        (status: { extraFunctionality?: { canLike?: boolean } }) =>
+          status?.extraFunctionality?.canLike === false
+      )
     : true;
 
   const firstStatus = statuses && statuses.length > 0 ? statuses[0] : false;

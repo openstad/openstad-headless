@@ -18,8 +18,11 @@ export default function useStatuses(projectId?: string, id?: string) {
     label: string | undefined,
     mapIcon: string | undefined,
     listIcon: string | undefined,
-    canLike: boolean | undefined,
-    extraFunctionality: { editableByUser: boolean | undefined, canComment: boolean | undefined }
+    extraFunctionality: {
+      editableByUser: boolean | undefined;
+      canComment: boolean | undefined;
+      canLike: boolean | undefined;
+    }
   ) {
     const res = await fetch(url, {
       method: 'PUT',
@@ -37,7 +40,6 @@ export default function useStatuses(projectId?: string, id?: string) {
         label,
         mapIcon,
         listIcon,
-        canLike,
         extraFunctionality,
       }),
     });

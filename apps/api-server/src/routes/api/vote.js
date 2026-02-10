@@ -258,14 +258,8 @@ router.route('/*')
 					}
 
 					const ids = votes.map(entry => entry.resourceId).sort((a, b) => a - b);
-					const include = [];
-					if (req.project.config.votes.voteType == 'likes') {
-						include.push({ model: db.Status, through: { attributes: [] } });
-					}
-
 					const resources = await db.Resource.findAll({
 						where: { id: ids, projectId: req.project.id },
-						include,
 						transaction,
 						lock: true,
 						order: [['id', 'ASC']],
@@ -275,13 +269,15 @@ router.route('/*')
 						throw createError(400, 'Resource niet gevonden');
 					}
 
-					if (req.project.config.votes.voteType == 'likes') {
-						for (const resource of resources) {
-							if (Array.isArray(resource.statuses) &&
-								resource.statuses.some((status) => status?.canLike === false)
-							) {
-								throw createError(403, 'Je kunt deze inzending niet liken');
-							}
+					for (const resource of resources) {
+						if (
+							Array.isArray(resource.statuses) &&
+							resource.statuses.some(
+								(status) =>
+									status?.extraFunctionality?.canLike === false
+							)
+						) {
+							throw createError(403, 'Je kunt niet stemmen op deze inzending');
 						}
 					}
 

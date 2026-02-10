@@ -153,6 +153,12 @@ export const StemBegrootResourceList = ({
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);
         const primaryBtnDisabled = !resourceBtnEnabled(resource);
+        const canVoteByStatus = Array.isArray(resource?.statuses)
+          ? !resource.statuses.some(
+              (status: { extraFunctionality?: { canLike?: boolean } }) =>
+                status?.extraFunctionality?.canLike === false
+            )
+          : true;
         const originalUrl = defineOriginalUrl(resource);
 
         let defaultImage = '';
@@ -173,7 +179,9 @@ export const StemBegrootResourceList = ({
 
         return (
           <>
-            <article className={`stem-begroot--container ${hasImages}`}>
+            <article
+              className={`stem-begroot--container ${hasImages} ${!canVoteByStatus ? 'resource-vote-disabled' : ''}`.trim()}
+            >
 
               <Carousel
                 items={resourceImages}

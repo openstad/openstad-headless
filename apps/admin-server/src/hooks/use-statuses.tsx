@@ -23,7 +23,9 @@ export default function useStatus(projectId?: string) {
         name,
         seqnr,
         addToNewResources,
-        canLike: true,
+        extraFunctionality: {
+          canLike: true,
+        },
       }),
     });
 

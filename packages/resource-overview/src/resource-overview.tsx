@@ -211,7 +211,10 @@ const defaultItemRenderer = (
   refreshLikes?: () => void,
 ) => {
   const canLike = Array.isArray(resource?.statuses)
-    ? !resource.statuses.some((status: { canLike?: boolean }) => status?.canLike === false)
+    ? !resource.statuses.some(
+        (status: { extraFunctionality?: { canLike?: boolean } }) =>
+          status?.extraFunctionality?.canLike === false
+      )
     : true;
   const allowLikingInOverview = !!props.allowLikingInOverview;
 

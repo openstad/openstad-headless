@@ -593,8 +593,25 @@ function StemBegroot({
       : null;
   };
 
+  const canVoteByStatus = (resource: {
+    statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
+  }) => {
+    if (!Array.isArray(resource?.statuses)) return true;
+    return !resource.statuses.some(
+      (status) => status?.extraFunctionality?.canLike === false
+    );
+  };
+
   // For now only support budgeting and count
-  const resourceSelectable = (resource: { id: number; budget: number }) => {
+  const resourceSelectable = (resource: {
+    id: number;
+    budget: number;
+    statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
+  }) => {
+    if (!canVoteByStatus(resource)) {
+      return isInSelected(resource);
+    }
+
     if (
       props.votes.voteType === 'countPerTag' ||
       props.votes.voteType === 'budgetingPerTag'

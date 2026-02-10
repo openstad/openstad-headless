@@ -66,7 +66,7 @@ export default function ProjectStatusEdit() {
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
-      canLike: data?.canLike ?? true,
+      canLike: data?.extraFunctionality?.canLike ?? true,
       editableByUser: data?.extraFunctionality?.editableByUser ?? true,
       canComment: data?.extraFunctionality?.canComment ?? true,
     }),
@@ -88,8 +88,7 @@ export default function ProjectStatusEdit() {
       values.label,
       values.mapIcon,
       values.listIcon,
-      values.canLike,
-      { editableByUser: values.editableByUser, canComment: values.canComment }
+      { editableByUser: values.editableByUser, canComment: values.canComment, canLike: values.canLike }
     );
     if (status) {
       toast.success('Status aangepast!');

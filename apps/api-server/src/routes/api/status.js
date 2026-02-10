@@ -56,11 +56,18 @@ router
   // ---------------
   .post(auth.can('Status', 'create'))
   .post( rateLimiter(), function (req, res, next) {
+    const extraFunctionality = {
+      ...(req.body.extraFunctionality || {}),
+    };
+    if (typeof extraFunctionality.canLike !== 'boolean') {
+      extraFunctionality.canLike = true;
+    }
+
     const data = {
       name: req.body.name,
       seqnr: req.body.seqnr,
       addToNewResources: req.body.addToNewResources,
-      canLike: typeof req.body.canLike === 'boolean' ? req.body.canLike : true,
+      extraFunctionality,
       projectId: req.params.projectId,
     };
 
@@ -111,6 +118,16 @@ router
     const status = req.results;
     if (!(status && status.can && status.can('update')))
       return next(new Error('You cannot update this status'));
+
+    const extraFunctionality = {
+      ...(status.extraFunctionality || {}),
+      ...(req.body.extraFunctionality || {}),
+    };
+    if (typeof extraFunctionality.canLike !== 'boolean') {
+      extraFunctionality.canLike = true;
+    }
+    req.body.extraFunctionality = extraFunctionality;
+
     status
       .authorizeData(req.body, 'update')
       .update(req.body)
