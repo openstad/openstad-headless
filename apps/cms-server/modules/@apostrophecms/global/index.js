@@ -85,6 +85,21 @@ module.exports = {
         def: true,
       },
 
+      archiveStatus: {
+        type: 'boolean',
+        label: 'Zet de site in archief modus',
+        def: false,
+      },
+
+      archiveStatusText: {
+        type: 'string',
+        label: 'Tekst die getoond wordt als de site in archief modus staat',
+        def: 'Dit project is afgerond.',
+        if: {
+          archiveStatus: true,
+        },
+      },
+
       siteLogo: {
         type: 'attachment',
         label: 'Site logo',
@@ -373,7 +388,7 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle', 'siteLogo', 'logoAltText'],
+        fields: ['siteTitle', 'hideSiteTitle', 'siteLogo', 'logoAltText', 'archiveStatus', 'archiveStatusText'],
       },
       css: {
         label: 'Vormgeving',
