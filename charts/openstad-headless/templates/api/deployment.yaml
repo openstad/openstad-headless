@@ -262,6 +262,9 @@ spec:
           - name: KUBERNETES_INGRESS_TLS_MANAGED_BY_OPENSTAD
             value: "{{ .Values.api.createdIngresses.tlsManagedByOpenstad }}"
 
+          - name: EXTERNAL_CERTIFICATES_ENABLED
+            value: "{{ .Values.api.externalCertificates.enabled }}"
+
           - name: RATE_LIMIT
             valueFrom:
               secretKeyRef:
