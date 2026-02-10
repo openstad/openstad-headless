@@ -1,6 +1,7 @@
 const dns = require('dns');
 const db = require('../db');
 const externalCertificates = require('./externalCertificates');
+const externalCertificatesManager = require('./externalCertificatesManager');
 
 const getK8sApi = async () => {
   const k8s = await import('@kubernetes/client-node');
@@ -81,12 +82,17 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace, tlsSecret
   
   // Set TLS hosts if managed by OpenStad
   if (process.env.KUBERNETES_INGRESS_TLS_MANAGED_BY_OPENSTAD === 'true') {
-    const hosts = getIngressHosts(domain, tlsExtraDomains);
-    
-    ingress.spec.tls = [{
-      secretName: tlsSecretName,
-      hosts
-    }];
+    if (tlsSecretName) {
+      const hosts = getIngressHosts(domain, tlsExtraDomains);
+
+      ingress.spec.tls = [{
+        secretName: tlsSecretName,
+        hosts
+      }];
+    } else {
+      // Remove TLS section if secret is not ready (for external certs)
+      delete ingress.spec.tls;
+    }
   }
   
   return k8sApi.replaceNamespacedIngress({
@@ -97,9 +103,9 @@ const updateIngress = async (ingress, k8sApi, name, domain, namespace, tlsSecret
 }
 
 
-const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tlsExtraDomains, useClusterIssuer) => {
-  
-  const prodIssuerName = useClusterIssuer ? (process.env.KUBERNETES_INGRESS_ISSUER_NAME || 'openstad-letsencrypt-prod') : null;
+const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tlsExtraDomains, useClusterIssuer, useExternalCerts = false) => {
+
+  const prodIssuerName = (useClusterIssuer && !useExternalCerts) ? (process.env.KUBERNETES_INGRESS_ISSUER_NAME || 'openstad-letsencrypt-prod') : null;
   
   const defaultAnnotations = process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS ? JSON.parse(process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS) :
     {
@@ -113,6 +119,11 @@ const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tls
         more_set_headers "Referrer-Policy: same-origin";`,
     };
   
+  // Remove cert-manager annotations when using external certs
+  if (useExternalCerts) {
+    delete defaultAnnotations['cert-manager.io/cluster-issuer'];
+  }
+
   // Set the cluster issuer if not already set in the default annotations
   if (useClusterIssuer && !!prodIssuerName && !defaultAnnotations['cert-manager.io/cluster-issuer']) {
     defaultAnnotations['cert-manager.io/cluster-issuer'] = prodIssuerName;
@@ -144,11 +155,15 @@ const createIngress = async (k8sApi, name, domain, namespace, tlsSecretName, tls
         }],
       },
     }],
-    tls:   [{
+  };
+
+  // Only add TLS if tlsSecretName is provided (for external certs, null means pending)
+  if (tlsSecretName) {
+    spec.tls = [{
       secretName: tlsSecretName,
       hosts,
-    }],
-  };
+    }];
+  }
   
   if (process.env.KUBERNETES_INGRESS_CLASS_NAME) {
     spec.ingressClassName = process.env.KUBERNETES_INGRESS_CLASS_NAME;
@@ -218,8 +233,58 @@ const checkHostStatus = async (conditions) => {
       // External certificates: per-project cert method choice
       // When global flag is on AND project is configured for external certs,
       // external cert logic runs instead of cert-manager logic.
-      // Phase 2 will add the per-project config check and ExternalSecret creation here.
       const useExternalCerts = externalCertificates.isEnabled() && project.config?.certificateMethod === 'external';
+
+      // External certificate branching: create ExternalSecret and dual-check readiness
+      if (useExternalCerts) {
+        const slugOverride = project.config?.externalCertSlug || null;
+        const secretName = externalCertificatesManager.generateSecretName(
+          project.url, namespace, slugOverride
+        );
+
+        try {
+          await externalCertificatesManager.ensureExternalSecret(secretName, namespace);
+        } catch (error) {
+          console.error(`[external-certificates] Failed to ensure ExternalSecret for project ${project.id}: ${error.message}`);
+          hostStatus.externalCert = { state: 'error', secretName, lastChecked: new Date().toISOString() };
+          await project.update({ hostStatus });
+          return;
+        }
+
+        const certStatus = await externalCertificatesManager.checkSecretReady(secretName, namespace);
+        hostStatus.externalCert = {
+          state: certStatus.state,
+          secretName,
+          lastChecked: new Date().toISOString()
+        };
+
+        if (!ingress) {
+          try {
+            if (certStatus.ready) {
+              await createIngress(k8sApi, project.config.uniqueId, project.url, namespace, secretName, tlsExtraDomains, false, true);
+            } else {
+              await createIngress(k8sApi, project.config.uniqueId, project.url, namespace, null, tlsExtraDomains, false, true);
+            }
+            hostStatus.ingress = true;
+          } catch (error) {
+            console.error(`Error creating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`);
+          }
+        } else {
+          try {
+            hostStatus.ingress = true;
+            if (certStatus.ready) {
+              await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace, secretName, tlsExtraDomains);
+            } else {
+              await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace, null, tlsExtraDomains);
+            }
+          } catch (error) {
+            console.error(`Error updating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`);
+          }
+        }
+
+        await project.update({ hostStatus });
+        return; // Skip the default cert-manager path below
+      }
 
       // if ip issset but not ingress try to create one
       if (!ingress) {
