@@ -22,7 +22,8 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { ChoiceGuide } from '@openstad-headless/choiceguide/src/props';
-import {YesNoSelect} from "@/lib/form-widget-helpers";
+import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
+import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
 
 const formSchema = z.object({
   submitButtonText: z.string().optional(),
@@ -30,9 +31,13 @@ const formSchema = z.object({
   loginText: z.string().optional(),
   loginTextButton: z.string().optional(),
   loginRequired: z.boolean().optional(),
+  stickyBarAtTop: z.boolean().optional(),
+  stickyBarDefaultOpen: z.boolean().optional(),
 });
 
-export default function WidgetChoiceGuideGeneralSettings(props: ChoiceGuide) {
+export default function WidgetChoiceGuideGeneralSettings(
+  props: ChoiceGuide & EditFieldProps<ChoiceGuide>
+) {
   const category = 'generalSettings';
 
   const {
@@ -48,6 +53,8 @@ export default function WidgetChoiceGuideGeneralSettings(props: ChoiceGuide) {
       loginText: widget?.config?.[category]?.loginText || "Inloggen om deel te nemen.",
       loginTextButton: widget?.config?.[category]?.loginTextButton || "Inloggen",
       loginRequired: widget?.config?.[category]?.loginRequired || false,
+      stickyBarAtTop: widget?.config?.[category]?.stickyBarAtTop || false,
+      stickyBarDefaultOpen: undefinedToTrueOrProp(widget?.config?.[category]?.stickyBarDefaultOpen),
     }),
     [widget?.config]
   );
@@ -158,6 +165,28 @@ export default function WidgetChoiceGuideGeneralSettings(props: ChoiceGuide) {
               />
             </>
           )}
+
+          <FormField
+            control={form.control}
+            name="stickyBarAtTop"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moet de balk met de voortgang van de keuzewijzer bovenaan getoond worden?</FormLabel>
+                {YesNoSelect(field, props)}
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="stickyBarDefaultOpen"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moet de balk met de voortgang van de keuzewijzer standaard geopend zijn?</FormLabel>
+                {YesNoSelect(field, props)}
+              </FormItem>
+            )}
+          />
 
           <Button type="submit" className="w-fit col-span-full">
             Opslaan

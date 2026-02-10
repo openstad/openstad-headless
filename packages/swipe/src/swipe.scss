@@ -86,13 +86,12 @@
 
   .swipe-container {
     position: relative;
-    // perspective: 1000px;
-    aspect-ratio: 2 / 3;
-    max-height: 517px;
+    max-height: unset;
     width: 400px;
     max-width: calc(100vw - 86px);
     z-index: 999;
     margin: 0 auto;
+    height: 100%;
 
     @media screen and (max-width: 400px) {
       max-width: 290px;
@@ -346,17 +345,21 @@
 
     .swipe-info-btn,
     .swipe-skip-btn {
-      border-radius: 50%;
+      border-radius: 20px;
       border: solid 1px #BFBFBF;
       background: #fff;
-      width: var(--button-size);
+      min-width: var(--button-size);
       height: var(--button-size);
       transition: all 0.2s ease;
       line-height: 0;
       flex-shrink: 0;
       color: #000;
       text-align: center;
-      padding: 0;
+      padding: 0 20px;
+
+      svg {
+        margin-left: 5px;
+      }
 
       &:disabled {
         opacity: 0.5;
@@ -370,8 +373,11 @@
     }
 
     .swipe-info-btn {
+      padding: 0;
+
       svg {
         width: 20px;
+        margin: 0;
       }
     }
 
@@ -506,7 +512,7 @@
     width: 100%;
     margin: 24px 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 16px;
   }
 
@@ -731,5 +737,49 @@
 
   to {
     transform: translateY(20px) scale(0.95);
+  }
+}
+
+
+@media screen and (max-height: 690px) {
+  .osc.--fullscreen .osc-enquete-item-content.--youth {
+
+    .question:not(:has(.dilemma-finished)):not(.question-type-video) {
+      padding: 75px 30px 20px;
+    }
+
+    .question.question-type-none {
+      height: calc(100% + 150px);
+      justify-content: start;
+    }
+
+    .swipe-widget {
+      .swipe-card-content {
+        padding: 10px 20px;
+      }
+
+      .swipe-main-actions {
+        gap: 10px;
+      }
+
+      .swipe-actions {
+        gap: 20px;
+      }
+
+      .swipe-btn {
+        width: unset;
+        border-radius: 30px;
+        height: 40px;
+        display: flex;
+        gap: 8px;
+        padding: 0 16px;
+
+        span {
+          position: relative;
+          bottom: 0;
+          color: #fff;
+        }
+      }
+    }
   }
 }
