@@ -23,11 +23,14 @@ export type AgendaWidgetProps = BaseProps &
   } & {
     displayTitle?: boolean;
     title?: string;
+    useActiveDates?: boolean;
     items?: Array<{
       trigger: string;
       title?: string;
       description: string;
       active: boolean;
+      activeFrom?: string;
+      activeTo?: string;
       links?: Array<{
         trigger: string;
         title: string;
@@ -66,8 +69,16 @@ function Agenda({
     return false;
   };
 
-  const itemsSorted = (props.items ?? [])
-    .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
+  const now = props.useActiveDates ? new Date() : null;
+  const itemsSorted = [...(props.items ?? [])]
+    .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
+    .map((item) => {
+      if (!now) return item;
+      const from = item.activeFrom ? new Date(item.activeFrom) : null;
+      const to = item.activeTo ? new Date(item.activeTo) : null;
+      const isActive = (!from || now >= from) && (!to || now <= to);
+      return { ...item, active: isActive };
+    });
 
   let startIdx = isNaN(parseInt(toggleStart)) ? 0 : parseInt(toggleStart);
   let endIdx = isNaN(parseInt(toggleEnd)) ? itemsSorted.length - 1 : parseInt(toggleEnd);
