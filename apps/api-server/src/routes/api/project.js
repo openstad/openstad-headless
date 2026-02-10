@@ -9,6 +9,8 @@ const searchInResults = require('../../middleware/search-in-results');
 // TODO-AUTH
 const checkHostStatus = require('../../services/checkHostStatus')
 const projectsWithIssues = require('../../services/projects-with-issues');
+const externalCertificatesManager = require('../../services/externalCertificatesManager');
+const externalCertificates = require('../../services/externalCertificates');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
@@ -22,6 +24,10 @@ const createError = require('http-errors');
 let router = express.Router({mergeParams: true});
 const {Op} = require("sequelize");
 const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+
+// In-memory cooldown map for certificate retry (projectId -> lastTriggerTime)
+const certRetryCooldowns = new Map();
+const CERT_RETRY_COOLDOWN_MS = (parseInt(process.env.EXTERNAL_CERT_RETRY_COOLDOWN) || 60) * 1000;
 
 async function getProject(req, res, next, include = []) {
 	const projectId = req.params.projectId;
@@ -883,5 +889,75 @@ async function getValidTags(projectId, tags) {
   });
   return validTags.map(tag => tag.id);
 }
+
+// Certificate retry endpoint
+// -------------------------
+router.route('/:projectId(\\d+)/certificate-retry')
+  .post(auth.can('Project', 'update'))
+  .post(async function(req, res, next) {
+    try {
+      // Feature gate
+      if (!externalCertificates.isEnabled()) {
+        return res.status(400).json({ error: 'External certificates feature is not enabled' });
+      }
+
+      const project = await db.Project.findByPk(req.params.projectId);
+      if (!project) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+
+      // Check project is configured for external certs
+      if (project.config?.certificateMethod !== 'external') {
+        return res.status(400).json({ error: 'Project is not configured for external certificates' });
+      }
+
+      // Cooldown check
+      const projectId = parseInt(req.params.projectId);
+      const lastTrigger = certRetryCooldowns.get(projectId);
+      if (lastTrigger && (Date.now() - lastTrigger) < CERT_RETRY_COOLDOWN_MS) {
+        const remainingSeconds = Math.ceil((CERT_RETRY_COOLDOWN_MS - (Date.now() - lastTrigger)) / 1000);
+        return res.status(429).json({
+          error: `Retry cooldown active. Try again in ${remainingSeconds} seconds.`,
+          retryAfter: remainingSeconds
+        });
+      }
+
+      // Set cooldown
+      certRetryCooldowns.set(projectId, Date.now());
+
+      const namespace = process.env.KUBERNETES_NAMESPACE;
+      const slugOverride = project.config?.externalCertSlug || null;
+      const secretName = externalCertificatesManager.generateSecretName(
+        project.url, namespace, slugOverride
+      );
+
+      // Full retry: ensure ExternalSecret exists, check status, update Ingress
+      await externalCertificatesManager.ensureExternalSecret(secretName, namespace);
+      const certStatus = await externalCertificatesManager.checkSecretReady(secretName, namespace);
+
+      // Update hostStatus
+      let hostStatus = project.hostStatus || {};
+      hostStatus.externalCert = {
+        state: certStatus.state,
+        secretName,
+        lastChecked: new Date().toISOString()
+      };
+      await project.update({ hostStatus });
+
+      // If ready, trigger full checkHostStatus to attach TLS to Ingress
+      if (certStatus.ready) {
+        await checkHostStatus({ id: projectId });
+      }
+
+      return res.json({
+        state: certStatus.state,
+        secretName,
+        ready: certStatus.ready
+      });
+    } catch (error) {
+      console.error(`[external-certificates] Retry failed for project ${req.params.projectId}:`, error.message);
+      return res.status(500).json({ error: 'Certificate retry failed' });
+    }
+  });
 
 module.exports = router;
