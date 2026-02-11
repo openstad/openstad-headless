@@ -401,6 +401,13 @@ function Enquete(props: EnqueteWidgetProps) {
                         ];
                     }
 
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'imageUpload':
                     fieldData['type'] = 'imageUpload';
@@ -454,6 +461,11 @@ function Enquete(props: EnqueteWidgetProps) {
                     if (typeof (props?.enableOnOffSwitching) === 'boolean') {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
+
+                    if (Array.isArray(props?.allowedPolygons)) {
+                        fieldData['allowedPolygons'] = props.allowedPolygons;
+                    }
+
                     break;
                 case 'pagination':
                     fieldData['type'] = 'pagination';

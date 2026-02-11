@@ -17,7 +17,6 @@ export default function Marker({
   iconCreateFunction = undefined,
   defaultIcon = undefined,
   href = undefined,
-  onClick = undefined,
   onMouseDown = undefined,
   onMouseUp = undefined,
   onDragStart = undefined,

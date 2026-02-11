@@ -64,6 +64,7 @@ export type ResourceDetailWidgetProps = {
   displayDescriptionExpandable_expandBeforeText?: string;
   displayDescriptionExpandable_expandAfterText?: string;
   displayDescriptionExpandable_visibleLines?: string;
+  selectedSocialShareOptions?: Array<'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink'>;
 } &
   BaseProps &
   ProjectSettingProps & {
@@ -135,6 +136,7 @@ function ResourceDetail({
   urlWithResourceFormForEditing = '',
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
+  selectedSocialShareOptions = ['facebook', 'x', 'mail', 'whatsapp', 'linkedin', 'copylink'],
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
@@ -558,7 +560,10 @@ function ResourceDetail({
 
               {displaySocials ? (
                 <div className="resource-detail-side-section">
-                  <ShareLinks title={'Deel dit'} />
+                  <ShareLinks
+                    title={'Deel dit'}
+                    selectedSocialShareOptions={selectedSocialShareOptions}
+                  />
                 </div>
               ) : null}
             </div>

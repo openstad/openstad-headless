@@ -126,6 +126,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
+    onMarkerResourceClick?: (resource: any, index: number) => void;
     displayLikeButton?: boolean;
     displayDislike?: boolean;
     clickableImage?: boolean;
@@ -193,6 +194,13 @@ const defaultHeaderRenderer = (
           givenResources={resources}
           selectedProjects={selectedProjects}
           locationProx={location}
+          onMarkerClick={
+            widgetProps.displayType === 'cardgrid'
+              ? (resource, index) => {
+                  widgetProps.onMarkerResourceClick?.(resource, index);
+                }
+              : undefined
+          }
         />
       }
       {displayHeader &&
@@ -1008,7 +1016,9 @@ function ResourceOverviewInner({
       }
     </section>
   );
-
+const validFilteredResources = filteredResources?.filter(
+  r => r && (r.id || r.uniqueId) // only real resources or projects
+) || [];
   return tagsLoading ? (
       <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
     ) : (
@@ -1019,7 +1029,7 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            items={validFilteredResources}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
@@ -1053,7 +1063,22 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel || '4') : null}
+      {displayBanner || displayMap
+        ? renderHeader(
+            {
+              ...props,
+              displayType,
+              onMarkerResourceClick: onResourceClick,
+            },
+            filteredResources || [],
+            bannerText,
+            displayBanner,
+            displayMap && !displayAsTabs,
+            selectedProjects,
+            location,
+            props.headingLevel || '4'
+          )
+        : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''

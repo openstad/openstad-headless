@@ -2019,7 +2019,7 @@ export default function WidgetChoiceGuideItems(
                         />
                       )}
 
-                      {form.watch('type') === 'checkbox' && (
+                      {(form.watch('type') === 'checkbox' || (form.watch('type') === 'images' && form.watch('multiple'))) && (
                         <>
                           <FormField
                             control={form.control}

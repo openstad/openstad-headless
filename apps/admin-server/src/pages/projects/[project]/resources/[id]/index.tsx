@@ -11,6 +11,7 @@ import ProjectResourceCreate from "./info";
 import ProjectResourceVotes from "./votes";
 import ProjectResourceArguments from "./comments";
 import ProjectResourceCreateArgument from "@/pages/projects/[project]/resources/[id]/createComment";
+import ProjectResourcePreview from "./preview";
 
 export default function ProjectResource() {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function ProjectResource() {
               <TabsTrigger value="votes">Stemmen</TabsTrigger>
               <TabsTrigger value="comments">Reacties</TabsTrigger>
               <TabsTrigger value="createComment">Reactie plaatsen</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
             <TabsContent value="info" className="p-0">
               <ProjectResourceCreate />
@@ -54,6 +56,9 @@ export default function ProjectResource() {
             </TabsContent>
             <TabsContent value="createComment" className="p-0">
               <ProjectResourceCreateArgument />
+            </TabsContent>
+            <TabsContent value="preview" className="p-0">
+              <ProjectResourcePreview />
             </TabsContent>
           </Tabs>
 
