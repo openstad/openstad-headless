@@ -7,6 +7,16 @@ const {
 } = spamDetector;
 
 describe('spam-detector', () => {
+  it('analyzeSpamPayload returns minimal shape by default', () => {
+    const payload = {
+      field1: 'TzqVDdSFJVpgHYymZvrD',
+      field2: 'MelgkXhrEYcgMVqpUhpQXTJl',
+    };
+
+    const analysis = analyzeSpamPayload(payload);
+    expect(analysis).toEqual({ isProbablySpam: true });
+  });
+
   it('isLikelyRandomText flags gibberish-like text', () => {
     const samples = [
       'TzqVDdSFJVpgHYymZvrD',
@@ -46,7 +56,7 @@ describe('spam-detector', () => {
       bericht: 'IK BEN HEEL BOOS!!! DIT DUURT AL 3 WEKEN!!!',
     };
 
-    const analysis = analyzeSpamPayload(payload);
+    const analysis = analyzeSpamPayload(payload, { withDetails: true });
     expect(analysis.isProbablySpam).toBe(false);
   });
 
@@ -56,7 +66,7 @@ describe('spam-detector', () => {
       bericht: 'Mijn lantaarnpaal werkt niet meer sinds zaterdagavond.',
     };
 
-    const analysis = analyzeSpamPayload(payload);
+    const analysis = analyzeSpamPayload(payload, { withDetails: true });
     expect(analysis.isProbablySpam).toBe(false);
   });
 
@@ -67,7 +77,7 @@ describe('spam-detector', () => {
       __timeToSubmitMs: 900,
     };
 
-    const analysis = analyzeSpamPayload(payload);
+    const analysis = analyzeSpamPayload(payload, { withDetails: true });
     expect(analysis.isProbablySpam).toBe(true);
     expect(analysis.randomLikeCount).toBeGreaterThanOrEqual(2);
   });
@@ -79,7 +89,7 @@ describe('spam-detector', () => {
       __timeToSubmitMs: 4300,
     };
 
-    const analysis = analyzeSpamPayload(payload);
+    const analysis = analyzeSpamPayload(payload, { withDetails: true });
     expect(analysis.isProbablySpam).toBe(false);
   });
 
@@ -97,7 +107,7 @@ describe('spam-detector', () => {
       f10: 'MelgkXhrEYcgMVqpUhpQXTJl',
     };
 
-    const analysis = analyzeSpamPayload(payload);
+    const analysis = analyzeSpamPayload(payload, { withDetails: true });
     expect(analysis.isProbablySpam).toBe(false);
     expect(analysis.suspiciousRatio).toBeLessThan(0.35);
   });
@@ -116,7 +126,7 @@ describe('spam-detector', () => {
       f10: 'Met vriendelijke groet',
     };
 
-    const analysis = analyzeSpamPayload(payload);
+    const analysis = analyzeSpamPayload(payload, { withDetails: true });
     expect(analysis.isProbablySpam).toBe(true);
     expect(analysis.suspiciousRatio).toBeGreaterThanOrEqual(0.35);
   });
@@ -130,7 +140,7 @@ describe('spam-detector', () => {
       telefoonnummer: '7701166855',
     };
 
-    const analysis = analyzeSpamPayload(payload);
+    const analysis = analyzeSpamPayload(payload, { withDetails: true });
     expect(analysis.isProbablySpam).toBe(true);
   });
 });

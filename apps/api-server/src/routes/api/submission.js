@@ -8,7 +8,7 @@ const createError = require("http-errors");
 const crypto = require('crypto');
 const {
 	analyzeSpamPayload,
-	logProbablySpam,
+	logSpamAnalysis,
 	removeSpamMetaFields,
 } = require('../../services/spam-detector');
 
@@ -93,11 +93,9 @@ router.route('/')
 // ---------------
 	.post(auth.can('Submission', 'create'))
 	.post( rateLimiter(), function(req, res, next) {
-		const analysis = analyzeSpamPayload(req.body.submittedData || {});
+		const analysis = analyzeSpamPayload(req.body.submittedData || {}, { withDetails: true });
+		logSpamAnalysis({ routeName: 'submission', req, analysis });
 		req.isSpamSubmission = analysis.isProbablySpam;
-		if (req.isSpamSubmission) {
-			logProbablySpam({ routeName: 'submission', req, analysis });
-		}
 
 		const sanitizedSubmittedData = removeSpamMetaFields(req.body.submittedData || {});
 		let data = {
