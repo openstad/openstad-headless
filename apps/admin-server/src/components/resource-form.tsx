@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import dynamic from "next/dynamic";
-// import { CodeEditor } from '@/components/ui/code-editor';
+import { CodeEditor } from '@/components/ui/code-editor';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
@@ -776,17 +776,17 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                     Extra data
                   </FormLabel>
                   <FormControl>
-                    {/*<CodeEditor*/}
-                    {/*  initValue={existingData?.extraData}*/}
-                    {/*  onValueChange={(value) => {*/}
-                    {/*    try {*/}
-                    {/*      const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid*/}
-                    {/*      form.setValue('extraData', parsedValue); // Set the value of the field*/}
-                    {/*      setExtraData(JSON.stringify(parsedValue));*/}
-                    {/*    } catch (error) {*/}
-                    {/*    }*/}
-                    {/*  }}*/}
-                    {/*/>*/}
+                    <CodeEditor
+                      initValue={existingData?.extraData}
+                      onValueChange={(value) => {
+                        try {
+                          const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
+                          form.setValue('extraData', parsedValue); // Set the value of the field
+                          setExtraData(JSON.stringify(parsedValue));
+                        } catch (error) {
+                        }
+                      }}
+                    />
                   </FormControl>
                 </FormItem>
               )}
