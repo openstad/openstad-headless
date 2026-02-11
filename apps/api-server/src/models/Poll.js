@@ -147,10 +147,11 @@ module.exports = function (db, sequelize, DataTypes) {
           where: {
             resourceId: [
               sequelize.literal(
-                `select id FROM resources WHERE projectId = ${projectId}`
+                `select id FROM resources WHERE projectId = :projectId`
               ),
             ],
           },
+          replacements: { projectId: projectId },
         };
       },
 

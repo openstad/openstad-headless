@@ -19,6 +19,7 @@ type Props = {
   zipCodeAutofillApiUrl?: string;
   zipCodeApiUrl?: string;
   proximityOptions?: { label: string; value: string }[];
+  proximityDefault?: string;
 };
 
 type Suggestion = {
@@ -35,17 +36,17 @@ type FullSuggestion = Suggestion & {
   longitude: string;
 };
 
-export default function PostcodeAutoFill({
-  onValueChange,
-  locationDefault,
-  proximityOptions = proximityDefaultOptions,
-  ...props
-}: Props) {
+export default function PostcodeAutoFill({ onValueChange, locationDefault, ...props }: Props) {
+  const options = props.proximityOptions || proximityOptions;
+  const defaultProximity = props.proximityDefault || (options.length === 1
+      ? options[0].value
+      : options[Math.floor((options.length / 2) - 1)]?.value || "0.5");
+
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<FullSuggestion | null>(null);
-  const [proximity, setProximity] = useState("0.5");
+  const [proximity, setProximity] = useState(defaultProximity);
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
@@ -54,9 +55,9 @@ export default function PostcodeAutoFill({
   useEffect(() => {
     if ( !locationDefault && input !== '' ) {
       reset();
-      setProximity("0.5");
+      setProximity(defaultProximity);
     }
-  }, [ locationDefault ]);
+  }, [ locationDefault, defaultProximity ]);
 
   useEffect(() => {
     if (input.length < 3) {
@@ -223,7 +224,7 @@ export default function PostcodeAutoFill({
         <FormLabel htmlFor={'proximityField'}>Selecteer straal</FormLabel>
         <Select
           onValueChange={(value) => setProximity(value)}
-          options={proximityOptions}
+          options={options}
           id="proximityField"
           value={proximity}
           disableDefaultOption={true}

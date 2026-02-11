@@ -1,17 +1,31 @@
 import useSWR from 'swr';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
-export default function useComments(projectId?: string, includes?: string, getFromComments?: boolean) {
+export default function useComments(
+  projectId?: string,
+  includes?: string,
+  getFromComments?: boolean,
+  page?: number,
+  pageSize?: number
+) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
   const includeString = includes ? includes : '?includeComments=1&includeRepliesOnComments=1';
   getFromComments = getFromComments ? getFromComments : false;
 
-  const url = getFromComments
+  const baseUrl = getFromComments
       ? `/api/openstad/api/project/${projectNumber}/comment${includeString}`
       : `/api/openstad/api/project/${projectNumber}/resource${includeString}`;
 
+  let url = baseUrl;
+  if (page !== undefined && pageSize !== undefined) {
+    url += `&page=${page}&pageSize=${pageSize}`;
+  }
+
   const commentListSwr = useSWR(projectNumber ? url : null);
+
+  const records = commentListSwr.data?.records || commentListSwr.data || [];
+  const pagination = commentListSwr.data?.metadata || null;
 
   async function removeComment(id: number) {
     const deleteUrl = `/api/openstad/api/project/${projectNumber}/comment/${id}`;
@@ -82,5 +96,17 @@ export default function useComments(projectId?: string, includes?: string, getFr
     }
   }
 
-  return {...commentListSwr, removeComment, createComment}
+  async function fetchAll(totalCount: number, pageSizeLimit: number) {
+    let allData: any[] = [];
+    const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
+
+    for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
+      const response = await fetch(`${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`);
+      const results = await response.json();
+      allData = allData.concat(results?.records || []);
+    }
+    return allData;
+  }
+
+  return {...commentListSwr, data: records, pagination, removeComment, createComment, fetchAll}
 }

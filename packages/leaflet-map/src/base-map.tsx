@@ -545,11 +545,16 @@ const BaseMap = ({
       const processedMarkers = result.map(marker => {
         parseLocation(marker);
 
+        const mergedOnClick = [
+          ...(marker.onClick ?? []),
+          ...(onMarkerClick ? [onMarkerClick] : []),
+        ];
+
         const markerData: MarkerProps = {
           ...marker,
           markerId: marker.markerId || `marker-${marker.lat}-${marker.lng}`,
           iconCreateFunction: marker.iconCreateFunction || iconCreateFunction,
-          onClick: marker.onClick ? [...marker.onClick, onMarkerClick] : [onMarkerClick],
+          onClick: mergedOnClick,
           isVisible: true,
           isClustered: clustering?.isActive && !marker.doNotCluster ? false : undefined
         };
