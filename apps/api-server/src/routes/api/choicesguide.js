@@ -182,10 +182,10 @@ router.route('/')
 	  .post( rateLimiter(), function( req, res, next ) {
 	    const sanitizedSubmittedData = removeSpamMetaFields(req.body.submittedData || {});
 	    const analysis = analyzeSpamPayload(req.body.submittedData || {});
+      const isSpamSubmission = analysis.isProbablySpam;
 
-	    if (analysis.isProbablySpam) {
+	    if (isSpamSubmission) {
         logProbablySpam({ routeName: 'choicesguide', req, analysis });
-	      return res.status(202).json({ probablySpam: true, ignored: true });
 	    }
 
     let data = {
@@ -193,6 +193,7 @@ router.route('/')
       result: sanitizedSubmittedData,
 			widgetId: req.body.widgetId,
 			projectId: req.params.projectId,
+      isSpam: isSpamSubmission,
 			createdAt: new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Amsterdam' })),
     };
 

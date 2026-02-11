@@ -228,9 +228,10 @@ router
 
     req.body = removeSpamMetaFields(req.body);
     const analysis = analyzeSpamPayload(req.body);
-    if (analysis.isProbablySpam) {
+    req.isSpamSubmission = analysis.isProbablySpam;
+    if (req.isSpamSubmission) {
       logProbablySpam({ routeName: 'resource', req, analysis });
-      return res.status(202).json({ probablySpam: true, ignored: true });
+      req.body.publishDate = null;
     }
 
     const data = {
@@ -239,6 +240,7 @@ router
       userId,
       startDate: req.body.startDate || new Date(),
       widgetId: req.body.widgetId || null,
+      isSpam: req.isSpamSubmission,
     };
 
     // Check if resource has images and if so, check their domains
@@ -359,6 +361,8 @@ router
     const sendConfirmationToAdmin = typeof(req.body['confirmationAdmin']) !== 'undefined' ? req.body['confirmationAdmin'] : false;
 
     res.json(req.results);
+    if (req.isSpamSubmission) return;
+
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
       if(tags && tags.length > 0){

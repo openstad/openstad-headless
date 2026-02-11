@@ -329,6 +329,11 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.DATE,
         allowNull: true,
       },
+      isSpam: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
 
       publishDateHumanized: {
         type: DataTypes.VIRTUAL,

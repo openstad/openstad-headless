@@ -14,6 +14,7 @@ export const keyMap: Record<string, string> = {
   yes: 'Aantal likes',
   no: 'Aantal dislikes',
   progress: 'Voortgang',
+  isSpam: 'Waarschijnlijk spam',
   statuses: 'Statussen',
   modBreak: 'Moderatie bericht',
   modBreakDate: 'Moderatie bericht datum',

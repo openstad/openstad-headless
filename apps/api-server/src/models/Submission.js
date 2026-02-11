@@ -30,6 +30,11 @@ module.exports = function (db, sequelize, DataTypes) {
         default: {},
         allowNull: false,
       },
+      isSpam: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     }
   );
 

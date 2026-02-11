@@ -94,9 +94,9 @@ router.route('/')
 	.post(auth.can('Submission', 'create'))
 	.post( rateLimiter(), function(req, res, next) {
 		const analysis = analyzeSpamPayload(req.body.submittedData || {});
-		if (analysis.isProbablySpam) {
+		req.isSpamSubmission = analysis.isProbablySpam;
+		if (req.isSpamSubmission) {
 			logProbablySpam({ routeName: 'submission', req, analysis });
-			return res.status(202).json({ probablySpam: true, ignored: true });
 		}
 
 		const sanitizedSubmittedData = removeSpamMetaFields(req.body.submittedData || {});
@@ -105,6 +105,7 @@ router.route('/')
 			projectId: req.params.projectId,
 			widgetId: req.body.widgetId || null,
 			userId: req.user.id,
+			isSpam: req.isSpamSubmission,
 		};
 
 		req.sendConfirmationToUser = data.submittedData.confirmationUser || false;
@@ -139,6 +140,8 @@ router.route('/')
 			});
 	})
 	.post(async function (req, res, next) {
+		if (req.isSpamSubmission) return next();
+
 		const sendConfirmationToUser = req.sendConfirmationToUser;
 		const userEmailAddress = req.userEmailAddress;
 		const sendConfirmationToAdmin = req.sendConfirmationToAdmin;

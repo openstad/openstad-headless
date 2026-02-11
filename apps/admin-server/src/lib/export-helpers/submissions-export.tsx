@@ -137,6 +137,7 @@ export const exportSubmissionsToCSV = (
       'Aangemaakt op': row.createdAt || ' ',
       'Project ID': row.projectId || ' ',
       'Widget': widgetName || ' ',
+      'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee',
       'Gebruikers ID': row.userId || ' ',
       'Gebruikers rol': row.user?.role || ' ',
       'Gebruikers naam': row.user?.name || ' ',
