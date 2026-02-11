@@ -24,6 +24,15 @@ type Point = {
   lng: number;
 };
 
+const flattenAreaPoints = (input: any): Point[] => {
+  if (!Array.isArray(input) || input.length === 0) return [];
+  const first = input[0];
+  if (first && typeof first.lat === 'number' && typeof first.lng === 'number') {
+    return input as Point[];
+  }
+  return input.flatMap((entry: any) => flattenAreaPoints(entry));
+};
+
 const ResourceOverviewMap = ({
   categorize = undefined,
   markerHref = undefined,
@@ -217,14 +226,12 @@ const ResourceOverviewMap = ({
       ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
       : [];
 
-  function calculateCenter(polygon: Point[] | Point[][]) {
+  function calculateCenter(polygon: Point[] | Point[][] | Point[][][]) {
     if (!polygon || polygon.length === 0) {
       return undefined;
     }
 
-    const flatPolygon = Array.isArray(polygon[0])
-      ? (polygon as Point[][]).flat()
-      : (polygon as Point[]);
+    const flatPolygon = flattenAreaPoints(polygon);
 
     let minX = Infinity;
     let maxX = -Infinity;

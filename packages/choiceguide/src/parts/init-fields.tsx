@@ -158,6 +158,11 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                     if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
                         fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
                     }
+
+                    if (Array.isArray(data?.allowedPolygons)) {
+                        fieldData['allowedPolygons'] = data.allowedPolygons;
+                    }
+
                     break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';
