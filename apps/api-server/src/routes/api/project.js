@@ -535,6 +535,23 @@ router.route('/')
         delete user.id;
         user.projectId = project.id;
         await db.User.create(user);
+
+        // Sync user role to auth server so user_roles entry is created
+        try {
+          const authConfig = await authSettings.config({ project, useAuth: 'default' });
+          const adapter = await authSettings.adapter({ authConfig });
+          if (user.idpUser?.identifier && adapter.service.updateUser) {
+            await adapter.service.updateUser({
+              authConfig,
+              userData: {
+                id: user.idpUser.identifier,
+                role: user.role,
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to sync user role to auth server for new project:', err);
+        }
       }
 
       return next()
