@@ -15,6 +15,10 @@ import ImportRowCount from './import-row-count-line';
 import countFailedImportRows from './countFailedImportRows';
 import ImportUseIdCheckboxLine from './import-use-id-checkbox-line';
 import { translateHeaders } from './translate-headers';
+import useStatus from '../../hooks/use-statuses';
+import useTag from '../../hooks/use-tags';
+import { processStatuses } from './utils/status-import-helper';
+import { processTags } from './utils/tags-import-helper';
 
 const ideaSchema = {
     title: 'string',
@@ -42,6 +46,10 @@ export const ImportButton = ({ project }: { project: string }) => {
     const [useId, setUseId] = React.useState<boolean>(true);
     const [dialogStatus, setDialogStatus] = React.useState<'base' | 'importFinished'>('base');
     const [fileValidationNotifications, setFileValidationNotifications] = React.useState<FileValidationNotification[]>([]);
+
+    const { data: statuses, createStatus } = useStatus(open ? project : undefined);
+    const { data: tags, createTag } = useTag(open ? project : undefined);
+
 
     const openImportDialog = () => {
         setOpen(true);
@@ -142,9 +150,14 @@ export const ImportButton = ({ project }: { project: string }) => {
         const callback = async (value: any) => {
             // translate headers
             value = translateHeaders(value);
-            // add Id key to remove
+            
+            // Pass the data and create functions from hooks to the helpers
+            const statusIds = await processStatuses(value, statuses || [], createStatus);
+            const tagIds = await processTags(value, tags || [], createTag);
+            
             value = prepareData(value, ['id']);
-            value.tags = value.tags ? value.tags.split(",").map((name: string) => name.trim()) : [];
+            value.statuses = statusIds;
+            value.tags = tagIds;
 
             const response = await fetch(`/api/openstad/api/project/${project}/resource`, {
                 method: 'POST',
@@ -175,9 +188,15 @@ export const ImportButton = ({ project }: { project: string }) => {
     const handleSubmitOverwrite = async () => {
         const callback = async (value: any) => {
             value = translateHeaders(value);
+            
+            // Pass the data and create functions from hooks to the helpers
+            const statusIds = await processStatuses(value, statuses || [], createStatus);
+            const tagIds = await processTags(value, tags || [], createTag);
+            
             value = prepareData(value);
-
-            value.tags = value.tags ? value.tags.split(",").map((name: string) => name.trim()) : [];
+            value.statuses = statusIds;
+            value.tags = tagIds;
+            
             const response = await fetch(`/api/openstad/api/project/${project}/resource/${value.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },

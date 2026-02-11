@@ -18,21 +18,30 @@ import { ImportButton } from '@/components/importButton';
 import { keyMap } from '@/lib/keyMap';
 import { Paginator } from '@openstad-headless/ui/src';
 
-interface ProjectResourcesProps {
-  BETA_FEATURE_FLAG_BULK_IMPORT: string;
-}
-
 const prepareDataForExport = (data: any[]) => {
   const allResources: any[] = [];
 
   data.forEach((resource) => {
     for (const [key, values] of Object.entries(resource)) {
-      if ( (key.startsWith('tags') || key.startsWith('statuses')) && Array.isArray(values)) {
+      if (key === "tags" && Array.isArray(values)) {
+        const tagsByType: Record<string, string[]> = {};
+        
+        values.forEach((tag: any) => {
+          const columnName = `tags.${tag.type}`;
+          if (!tagsByType[columnName]) {
+            tagsByType[columnName] = [];
+          }
+          tagsByType[columnName].push(tag.name);
+        });
+        
+        Object.entries(tagsByType).forEach(([columnName, names]) => {
+          resource[columnName] = names.join(' | ');
+        });
+      }
+      if (key.startsWith('statuses') && Array.isArray(values)) {
         try {
           const createString = values.map((value: any) => {
-            return key.startsWith('tags')
-            ? `${value.name} (type: ${value.type})`
-            : value.name
+            return value.name
           }).filter(Boolean).join(' | ');
 
           resource[key] = createString || '';
@@ -58,15 +67,7 @@ const prepareDataForExport = (data: any[]) => {
   return allResources;
 }
 
-export async function getServerSideProps() {
-  return {
-    props: {
-      BETA_FEATURE_FLAG_BULK_IMPORT: process.env.BETA_FEATURE_FLAG_BULK_IMPORT,
-    },
-  };
-}
-
-export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: ProjectResourcesProps) {
+export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
 
@@ -147,7 +148,7 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
               Exporteer inzendingen
             </Button>
-            {BETA_FEATURE_FLAG_BULK_IMPORT === "true" && <ImportButton project={project as string} />}
+            <ImportButton project={project as string} />
           </div>
         }>
         <div className="container py-6"><div className="float-left mb-4 flex gap-4">
