@@ -302,7 +302,7 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
       
-      // Field that calculates net votes based on yes and no votes, ensuring it doesn't go below zero
+      // Field that calculates net votes based on yes and no votes
       netVotes: {
         type: DataTypes.VIRTUAL,
         get: function () {
