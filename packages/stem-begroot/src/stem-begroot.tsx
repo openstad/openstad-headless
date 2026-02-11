@@ -141,7 +141,7 @@ function StemBegroot({
     api: props.api,
   });
 
-   const { data: allTags } = datastore.useTags({ projectId: props.projectId, type: 'tag' });
+   const { data: allTags } = datastore.useTags({ projectId: props.projectId, type: '' });
 
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
