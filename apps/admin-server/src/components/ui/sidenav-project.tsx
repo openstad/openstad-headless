@@ -18,7 +18,7 @@ export function SidenavProject({ className }: { className?: string }) {
   useEffect(() => {
     setLocation(router.pathname);
   }, [router]);
-  
+
   const sessionData = useContext(SessionContext);
 
   return (
@@ -176,6 +176,18 @@ export function SidenavProject({ className }: { className?: string }) {
                 size="default"
                 className="w-full flex justify-start pl-8">
                 <span className="truncate">Tags</span>
+              </Button>
+            </Link>
+            <Link href={`/projects/${project}/settings/certificates`}>
+              <Button
+                variant={
+                  location.includes('/settings/certificates')
+                    ? 'secondary'
+                    : 'ghost'
+                }
+                size="default"
+                className="w-full flex justify-start pl-8">
+                <span className="truncate">TLS Certificaat (SSL)</span>
               </Button>
             </Link>
           </>

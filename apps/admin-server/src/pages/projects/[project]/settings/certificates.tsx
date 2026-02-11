@@ -117,7 +117,7 @@ export default function ProjectSettingsCertificates() {
             url: `/projects/${project}/settings`,
           },
           {
-            name: 'TLS Certificaat',
+            name: 'TLS Certificaat (SSL)',
             url: `/projects/${project}/settings/certificates`,
           },
         ]}
@@ -125,7 +125,7 @@ export default function ProjectSettingsCertificates() {
         <div className="container py-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 bg-white rounded-md">
-              <Heading size="xl">TLS Certificaat</Heading>
+              <Heading size="xl">TLS Certificaat (SSL)</Heading>
               <Separator className="my-4" />
 
               {/* Certificate Method */}
