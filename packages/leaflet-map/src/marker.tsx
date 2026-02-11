@@ -6,6 +6,7 @@ import type { MarkerProps } from './types/marker-props';
 // @ts-ignore
 import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
 import MarkerIcon from './marker-icon';
+import React from 'react';
 
 export default function Marker({
 	lat = undefined,
