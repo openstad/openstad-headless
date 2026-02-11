@@ -415,7 +415,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
             {imageFields.length > 0 && (
               <div className="grid">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2">Afbeeldingen</label>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-1">Afbeeldingen</label>
+                <p className="text-sm text-muted-foreground mb-2">Klik op een afbeelding om het beschrijvingsveld te openen.</p>
                 <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
                   {imageFields.map(({ id, url }, index) => {
                     return (
