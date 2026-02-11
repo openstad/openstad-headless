@@ -30,7 +30,7 @@ export default function ProjectSubmissions() {
 
   const [selectedWidget, setSelectedWidget] = useState<any>(null);
 
-  const totalCount = data?.length || 0;
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     let loadedSubmissions = (data || []) as { createdAt: string }[];
@@ -38,6 +38,7 @@ export default function ProjectSubmissions() {
     const sortedData = loadedSubmissions.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 
     setFilterData(sortedData);
+    setTotalCount(data?.length || 0);
   }, [data]);
 
   const { data: usersData } = useUsers();
@@ -145,6 +146,8 @@ export default function ProjectSubmissions() {
                   onConfirmAccepted={() => {
                     remove(0, true, selectedItems)
                       .then(() => {
+                        setFilterData((prev) => prev.filter((item: any) => !selectedItems.includes(item.id)));
+                        setTotalCount((prev) => prev - selectedItems.length);
                         toast.success('Inzendingen succesvol verwijderd');
                         setSelectedItems([]);
                       })
@@ -283,9 +286,11 @@ export default function ProjectSubmissions() {
                         message="Weet je zeker dat je deze inzending wilt verwijderen?"
                         onDeleteAccepted={() =>
                           remove(submission.id)
-                            .then(() =>
-                              toast.success('Inzending succesvol verwijderd')
-                            )
+                            .then(() => {
+                              setFilterData((prev) => prev.filter((item: any) => item.id !== submission.id));
+                              setTotalCount((prev) => prev - 1);
+                              toast.success('Inzending succesvol verwijderd');
+                            })
                             .catch(() =>
                               toast.error('Inzending kon niet worden verwijderd')
                             )

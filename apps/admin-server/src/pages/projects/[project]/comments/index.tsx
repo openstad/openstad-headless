@@ -210,7 +210,10 @@ export default function ProjectComments() {
                         message="Weet je zeker dat je deze reactie wilt verwijderen?"
                         onDeleteAccepted={() =>
                             removeComment(comment.id)
-                                .then(() => toast.success('Reactie succesvol verwijderd'))
+                                .then(() => {
+                                  setTotalCount((prev) => prev - 1);
+                                  toast.success('Reactie succesvol verwijderd');
+                                })
                                 .catch(() => toast.error('Reactie kon niet worden verwijderd'))
                         }
                     />
@@ -299,6 +302,7 @@ export default function ProjectComments() {
                   onConfirmAccepted={() => {
                     removeComment(0, true, selectedItems)
                       .then(() => {
+                        setTotalCount((prev) => prev - selectedItems.length);
                         toast.success('Reacties succesvol verwijderd');
                         setSelectedItems([]);
                       })

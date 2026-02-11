@@ -66,6 +66,7 @@ export default function ProjectChoiceGuideResults() {
       await remove(id);
 
       setFilterData((prevData) => prevData.filter((item) => item.id !== id));
+      setTotalCount((prev) => prev - 1);
 
       toast.success('Resultaat succesvol verwijderd');
     } catch (error) {
@@ -77,6 +78,7 @@ export default function ProjectChoiceGuideResults() {
     try {
       await remove(0, true, selectedItems);
       setFilterData((prevData) => prevData.filter((item) => !selectedItems.includes(Number(item.id))));
+      setTotalCount((prev) => prev - selectedItems.length);
       toast.success('Resultaten succesvol verwijderd');
       setSelectedItems([]);
     } catch (error) {
