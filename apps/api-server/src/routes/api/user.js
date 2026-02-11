@@ -139,6 +139,16 @@ router.route('/')
     };
     if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
 
+    const q = req.query.q && typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    if (q) {
+      const like = '%' + String(q).replace(/[\\%_]/g, (m) => (m === '\\' ? '\\\\' : '\\' + m)) + '%';
+      dbQuery.where[Op.or] = [
+        { name: { [Op.like]: like } },
+        { email: { [Op.like]: like } },
+        { postcode: { [Op.like]: like } },
+      ];
+    }
+
     db.User
       .scope(...req.scope)
       .findAndCountAll(dbQuery)
