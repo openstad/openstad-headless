@@ -26,6 +26,7 @@ import {
   Heading,
 } from '@utrecht/component-library-react';
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
+import { deterministicRandomSort } from '@openstad-headless/lib';
 
 export const StemBegrootResourceDetailDialog = ({
   openDetailDialog,
@@ -55,6 +56,7 @@ export const StemBegrootResourceDetailDialog = ({
   currentPage = 0,
   pageSize = 999,
   filterBehavior = 'or',
+  randomSortSeed = 1,
   displayModBreak = false,
   modBreakTitle = '',
   displayTitle = true,
@@ -89,12 +91,16 @@ export const StemBegrootResourceDetailDialog = ({
   currentPage: number;
   pageSize: number;
   filterBehavior?: string;
+  randomSortSeed?: number;
   modBreakTitle?: string;
   displayModBreak?: boolean;
   displayTitle?: boolean;
   displaySummary?: boolean;
   displayDescription?: boolean;
 }) => {
+  const getResourceStableKey = (resource: any) =>
+    String(resource?.id || `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`);
+
   const [carouselIndexSetter, setCarouselIndexSetter] = useState<
     ((index: number) => void) | null
   >(null);
@@ -185,6 +191,9 @@ export const StemBegrootResourceDetailDialog = ({
           }
           if (sort === 'title') {
             return a.title.localeCompare(b.title);
+          }
+          if (sort === 'random') {
+            return deterministicRandomSort(a, b, randomSortSeed, getResourceStableKey);
           }
           return 0;
         })

@@ -4,7 +4,7 @@ import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { hasRole } from '@openstad-headless/lib';
+import { hasRole, getScopedSessionRandomSortSeed } from '@openstad-headless/lib';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { StemBegrootBudgetList } from './step-1/begroot-budget-list/stem-begroot-budget-list';
 import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/stem-begroot-detail-dialog';
@@ -281,6 +281,12 @@ function StemBegroot({
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
+  const randomSortSeed = React.useMemo(() => {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const search = typeof window !== 'undefined' ? window.location.search : '';
+    const seedScope = `${props.projectId || 'project'}:${pathname}:${search}`;
+    return getScopedSessionRandomSortSeed(seedScope, 'stemBegrootRandomSortSeed');
+  }, [props.projectId]);
   const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
   const [itemsPerPage, setPageSize] = useState<number>(
@@ -291,7 +297,7 @@ function StemBegroot({
   const { data: resources, submitVotes } = datastore.useResources({
     projectId: props.projectId,
     tags,
-    sort,
+    sort: sort === 'random' ? undefined : sort,
     search,
     pageSize: 999,
   });
@@ -891,6 +897,7 @@ function StemBegroot({
         voteType={props?.votes?.voteType || 'likes'}
         typeSelector={typeSelector}
         activeTagTab={activeTagTab}
+        randomSortSeed={randomSortSeed}
         currentPage={page}
         pageSize={itemsPerPage}
         filterBehavior={filterBehavior}
@@ -1419,6 +1426,7 @@ function StemBegroot({
               filteredResources={filteredResources}
               voteType={props?.votes?.voteType || 'likes'}
               typeSelector={typeSelector}
+              randomSortSeed={randomSortSeed}
               hideTagsForResources={hideTagsForResources}
               hideReadMore={hideReadMore}
               currentPage={page}
