@@ -52,8 +52,11 @@ export type StemBegrootWidgetProps = BaseProps &
     displayRanking: boolean;
     displayPriceLabel: boolean;
     showVoteCount: boolean;
-    showOriginalResource: boolean;
+    showOriginalResource?: boolean;
     originalResourceUrl?: string;
+    displayTitle?: boolean;
+    displaySummary?: boolean;
+    displayDescription?: boolean;
     displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
@@ -813,8 +816,11 @@ function StemBegroot({
         displayPriceLabel={props.displayPriceLabel}
         displayRanking={props.displayRanking}
         showVoteCount={props.showVoteCount}
-        showOriginalResource={props.showOriginalResource}
+        showOriginalResource={props.showOriginalResource ?? true}
         originalResourceUrl={props.originalResourceUrl}
+        displayTitle={props.displayTitle ?? true}
+        displaySummary={props.displaySummary ?? true}
+        displayDescription={props.displayDescription ?? true}
         resources={resourcesToUse}
         resourceBtnEnabled={resourceSelectable}
         resourceBtnTextHandler={createItemBtnString}
@@ -1347,8 +1353,10 @@ function StemBegroot({
               displayPriceLabel={props.displayPriceLabel}
               displayRanking={props.displayRanking}
               showVoteCount={props.showVoteCount}
-              showOriginalResource={props.showOriginalResource}
+              showOriginalResource={props.showOriginalResource ?? true}
               originalResourceUrl={props.originalResourceUrl}
+              displayTitle={props.displayTitle ?? true}
+              displaySummary={props.displaySummary ?? true}
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 votePendingStorage.clearAllVotePending();

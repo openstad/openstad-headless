@@ -15,10 +15,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import * as Switch from '@radix-ui/react-switch';
 
 
 const formSchema = z.object({
   title: z.string(),
+  useActiveDates: z.boolean(),
 });
 
 export default function WidgetAgendaGeneral(
@@ -33,6 +35,7 @@ export default function WidgetAgendaGeneral(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       title: props?.title || '',
+      useActiveDates: props?.useActiveDates || false,
     },
   });
 
@@ -59,6 +62,25 @@ export default function WidgetAgendaGeneral(
                     onFieldChange(field.name, e.target.value);
                   }}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="useActiveDates"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Actief op basis van datum</FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}

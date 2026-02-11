@@ -633,7 +633,11 @@ router.route('/:projectId') //(\\d+)
     try {
       let providers = await authSettings.providers({ project });
       const configData = req.body.config?.auth?.provider?.openstad?.config || {};
-      const allowedDomains = req.body.config?.allowedDomains || false;
+      let allowedDomains = req.body.config?.allowedDomains || false;
+      if (Array.isArray(allowedDomains)) {
+        allowedDomains = allowedDomains.map((d) => (typeof d === 'string' ? d.trim() : d));
+        req.body.config.allowedDomains = allowedDomains;
+      }
       const twoFactorRoles = req.body.config?.auth?.provider?.openstad?.twoFactorRoles;
 
       for (let provider of providers) {

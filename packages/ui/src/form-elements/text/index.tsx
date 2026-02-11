@@ -194,14 +194,24 @@ const TextInput: FC<TextInputProps> = ({
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
     const [value, setValue] = useState(initialValue);
-    const [checkInvalid, setCheckInvalid] = useState(fieldRequired);
- 
+
+    const hasInitialValue = !!initialValue;
+    const [checkInvalid, setCheckInvalid] = useState(fieldRequired && !hasInitialValue);
+
 
     useEffect(() => {
         if (reset) {
             reset(() => setValue(initialValue));
         }
-    }, [reset, defaultValue]);
+    }, [reset, defaultValue, initialValue]);
+
+    useEffect(() => {
+        // If a value is provided later (e.g. via overrideDefaultValue from a draft),
+        // clear invalid state for required fields.
+        if (fieldRequired && (overrideDefaultValue || value)) {
+            setCheckInvalid(false);
+        }
+    }, [fieldRequired, overrideDefaultValue, value]);
 
     useEffect(() => {
         value && setCheckInvalid(false);

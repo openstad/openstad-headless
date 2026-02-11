@@ -90,6 +90,7 @@
             }
 
             span:has(.ri-draggable) {
+                touch-action: none;
                 transition: background .2s ease-in-out;
             }
 
