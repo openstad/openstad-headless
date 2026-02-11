@@ -45,7 +45,10 @@ export const StemBegrootResourceList = ({
   currentPage = 0,
   pageSize = 999,
   filterBehavior = 'or',
-  header,
+  showOriginalResource = true,
+  displayTitle = true,
+  displaySummary = true,
+  header
 }: {
   resourceListColumns?: number;
   resources: Array<any>;
@@ -76,6 +79,8 @@ export const StemBegrootResourceList = ({
   currentPage: number;
   pageSize: number;
   filterBehavior?: string;
+  displayTitle?: boolean;
+  displaySummary?: boolean;
 }) => {
   // Memoize intTags to avoid creating new array on every render
   const intTags = useMemo(() => {
@@ -274,32 +279,22 @@ export const StemBegrootResourceList = ({
                   </div>
                 </section>
               )}
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
-                dangerouslySetInnerHTML={{ __html: resource.title }}
-              />
-              <Paragraph
-                dangerouslySetInnerHTML={{
-                  __html: elipsizeHTML(resource.summary, 100),
-                }}
-              />
-              <Paragraph
-                dangerouslySetInnerHTML={{
-                  __html: elipsizeHTML(resource.description, 200),
-                }}
-              />
-
-              {originalUrl ? (
-                <>
-                  <Paragraph className="strong">
-                    Dit een vervolg op plan:&nbsp;
-                    <Link target="_blank" href={originalUrl}>
-                      {originalUrl}
-                    </Link>
-                  </Paragraph>
-                </>
+              {displayTitle ? (
+                <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
               ) : null}
+              {displaySummary ? (
+                <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
+              ) : null}
+              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, 200)}}/>
+              {showOriginalResource && originalUrl ? (
+                <Paragraph className="strong">
+                  Dit is een vervolg op plan:&nbsp;
+                  <Link target="_blank" href={originalUrl}>
+                    {originalUrl}
+                  </Link>
+                </Paragraph>
+              ) : null}
+
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (
                   <div className="price">

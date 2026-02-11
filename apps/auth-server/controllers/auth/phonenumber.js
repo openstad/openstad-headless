@@ -38,6 +38,7 @@ exports.index = (req, res) => {
 exports.login = (req, res) => {
   const config = req.client.config ? req.client.config : {};
   const configAuthType = config.authTypes && config.authTypes['Phonenumber'] ? config.authTypes['Phonenumber'] : {};
+  const contactEmail = config.contactEmail || '';
 
   res.render('auth/phonenumber/login', {
     loginUrl: authPhonenumberConfig.loginUrl,
@@ -48,7 +49,7 @@ exports.login = (req, res) => {
     subtitle: configAuthType.loginSubtitle || authPhonenumberConfig.loginSubtitle,
     description: configAuthType.loginDescription || configAuthType.description || authPhonenumberConfig.loginDescription || authPhonenumberConfig.description,
     label: configAuthType.loginLabel || configAuthType.label || authPhonenumberConfig.loginLabel || authPhonenumberConfig.label,
-    helpText: configAuthType.loginHelpText || configAuthType.helpText || authPhonenumberConfig.loginHelpText || authPhonenumberConfig.helpText,
+    helpText: (configAuthType.loginHelpText || configAuthType.helpText || authPhonenumberConfig.loginHelpText || authPhonenumberConfig.helpText).replace(/\[\[contactEmail\]\]/g, contactEmail),
     buttonText: configAuthType.loginButtonText || configAuthType.buttonText || authPhonenumberConfig.loginButtonText || authPhonenumberConfig.buttonText,
   });
 };
@@ -138,6 +139,7 @@ exports.postLogin = async(req, res, next) => {
 exports.smsCode = (req, res) => {
   const config = req.client.config ? req.client.config : {};
   const configAuthType = config.authTypes && config.authTypes['Phonenumber'] ? config.authTypes['Phonenumber'] : {};
+  const contactEmail = config.contactEmail || '';
 
   res.render('auth/phonenumber/sms-code', {
     loginUrl: authPhonenumberConfig.smsCodeUrl,
@@ -148,7 +150,7 @@ exports.smsCode = (req, res) => {
     subtitle: configAuthType.smsCodeSubtitle || authPhonenumberConfig.smsCodeSubtitle,
     description: configAuthType.smsCodeDescription || configAuthType.description || authPhonenumberConfig.smsCodeDescription || authPhonenumberConfig.description,
     label: configAuthType.smsCodeLabel || configAuthType.label || authPhonenumberConfig.smsCodeLabel || authPhonenumberConfig.label,
-    helpText: configAuthType.smsCodeHelpText || configAuthType.helpText || authPhonenumberConfig.smsCodeHelpText || authPhonenumberConfig.helpText,
+    helpText: (configAuthType.smsCodeHelpText || configAuthType.helpText || authPhonenumberConfig.smsCodeHelpText || authPhonenumberConfig.helpText).replace(/\[\[contactEmail\]\]/g, contactEmail),
     buttonText: configAuthType.smsCodeButtonText || configAuthType.buttonText || authPhonenumberConfig.smsCodeButtonText || authPhonenumberConfig.buttonText,
   });
 };

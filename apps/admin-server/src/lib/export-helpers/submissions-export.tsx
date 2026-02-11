@@ -1,8 +1,18 @@
 import * as XLSX from "xlsx";
 import { fetchMatrixData } from "./fetch-matrix-data";
+import { normalizeToArray } from "./normalize-to-array";
 import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
 
-export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWidget: any) => {
+export interface ExportSettings {
+  splitMultipleChoice: boolean;
+}
+
+export const exportSubmissionsToCSV = (
+  data: any,
+  widgetName: string,
+  selectedWidget: any,
+  settings?: ExportSettings
+) => {
   function transformString() {
     widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
     widgetName = widgetName.replace(/[^a-z0-9-]/g, '');
@@ -57,6 +67,7 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
   };
 
   const fieldKeyToTitleMap = new Map();
+  const multipleChoiceOptionsMap = new Map<string, { title: string; options: string[] }>();
 
   if (selectedWidget?.config?.items?.length > 0) {
     selectedWidget.config.items.forEach((item: any) => {
@@ -70,6 +81,31 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
         });
       } else if (title && item.questionType !== 'pagination') {
         fieldKeyToTitleMap.set(item.fieldKey || title, title);
+      }
+
+      if (
+        settings?.splitMultipleChoice &&
+        (item.questionType === 'multiplechoice' || item.questionType === 'multiple') &&
+        item.options &&
+        Array.isArray(item.options)
+      ) {
+        const optionLabels: string[] = [];
+        item.options.forEach((option: any) => {
+          const optionTitle = option.titles?.[0]?.key ||
+            option.titles?.[0]?.title ||
+            option.value ||
+            option.label ||
+            '';
+          if (optionTitle) {
+            optionLabels.push(optionTitle);
+          }
+        });
+        if (optionLabels.length > 0) {
+          multipleChoiceOptionsMap.set(item.fieldKey, {
+            title: stripHtmlTags(title),
+            options: optionLabels,
+          });
+        }
       }
 
       if (item.options && Array.isArray(item.options)) {
@@ -143,6 +179,20 @@ export const exportSubmissionsToCSV = (data: any, widgetName: string, selectedWi
             header = `${title}: ${header}`;
             rowData[stripHtmlTags(header)] = returnText;
           }
+        });
+        return;
+      }
+
+      if (multipleChoiceOptionsMap.has(key)) {
+        const mcConfig = multipleChoiceOptionsMap.get(key)!;
+        const selectedValues = normalizeToArray(rawValue);
+
+        mcConfig.options.forEach((optionLabel) => {
+          const columnHeader = `${mcConfig.title}: ${stripHtmlTags(optionLabel)}`;
+          const isSelected = selectedValues.some(
+            (val) => val.toLowerCase() === optionLabel.toLowerCase()
+          );
+          rowData[columnHeader] = isSelected ? 'Ja' : 'Nee';
         });
         return;
       }

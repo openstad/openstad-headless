@@ -39,7 +39,7 @@ export const StemBegrootResourceDetailDialog = ({
   displayPriceLabel,
   displayRanking,
   showVoteCount,
-  showOriginalResource,
+  showOriginalResource = true,
   originalResourceUrl,
   isSimpleView,
   areaId,
@@ -57,6 +57,9 @@ export const StemBegrootResourceDetailDialog = ({
   filterBehavior = 'or',
   displayModBreak = false,
   modBreakTitle = '',
+  displayTitle = true,
+  displaySummary = true,
+  displayDescription = true,
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -69,7 +72,7 @@ export const StemBegrootResourceDetailDialog = ({
   displayPriceLabel: boolean;
   displayRanking: boolean;
   showVoteCount: boolean;
-  showOriginalResource: boolean;
+  showOriginalResource?: boolean;
   originalResourceUrl?: string;
   isSimpleView: boolean;
   areaId: string;
@@ -88,6 +91,9 @@ export const StemBegrootResourceDetailDialog = ({
   filterBehavior?: string;
   modBreakTitle?: string;
   displayModBreak?: boolean;
+  displayTitle?: boolean;
+  displaySummary?: boolean;
+  displayDescription?: boolean;
 }) => {
   const [carouselIndexSetter, setCarouselIndexSetter] = useState<
     ((index: number) => void) | null
@@ -331,6 +337,14 @@ export const StemBegrootResourceDetailDialog = ({
                             })
                             ?.map((t) => <Pill text={t.name || 'Geen thema'}/>)}
                         </div>
+                        {showOriginalResource && originalUrl ? (
+                          <>
+                            <Spacer size={1}/>
+                            <Link target="_blank" href={originalUrl} className="ams-standalone-link">
+                              {originalUrl}
+                            </Link>
+                          </>
+                        ) : null}
                       </div>
                     )}
                   </section>
@@ -339,22 +353,15 @@ export const StemBegrootResourceDetailDialog = ({
                     <div>
                       <div>
                         <div>
-                          <Heading1
-                            dangerouslySetInnerHTML={{
-                              __html: resource?.title,
-                            }}
-                          />
-                          <Paragraph
-                            className="strong"
-                            dangerouslySetInnerHTML={{
-                              __html: resource?.summary,
-                            }}
-                          />
-                          <Paragraph
-                            dangerouslySetInnerHTML={{
-                              __html: resource?.description,
-                            }}
-                          />
+                          {displayTitle ? (
+                            <Heading1 dangerouslySetInnerHTML={{__html: resource?.title}}/>
+                          ) : null}
+                          {displaySummary ? (
+                            <Paragraph className="strong" dangerouslySetInnerHTML={{__html: resource?.summary}}/>
+                          ) : null}
+                          {displayDescription ? (
+                            <Paragraph dangerouslySetInnerHTML={{__html: resource?.description}}/>
+                          ) : null}
 
                           {displayModBreak && resource.modBreak && (
                             <div className="resource-detail-modbreak-banner">
@@ -381,7 +388,7 @@ export const StemBegrootResourceDetailDialog = ({
 
                       <Spacer size={2} />
 
-                      {originalUrl ? (
+                      {originalUrl && showOriginalResource ? (
                         <>
                           <Paragraph className="strong">
                             Dit een vervolg op het volgende plan:&nbsp;
@@ -389,6 +396,7 @@ export const StemBegrootResourceDetailDialog = ({
                               {originalUrl}
                             </Link>
                           </Paragraph>
+
                         </>
                       ) : null}
 

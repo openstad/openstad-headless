@@ -24,6 +24,8 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   active: z.boolean(),
+  activeFrom: z.string().optional(),
+  activeTo: z.string().optional(),
   links: z
     .array(
       z.object({
@@ -67,6 +69,8 @@ export default function WidgetAgendaItems(
           title: values.title,
           description: values.description,
           active: values.active,
+          activeFrom: values.activeFrom,
+          activeTo: values.activeTo,
           links: values.links || [],
         },
       ]);
@@ -116,6 +120,8 @@ export default function WidgetAgendaItems(
     title: '',
     description: '',
     active: true,
+    activeFrom: '',
+    activeTo: '',
     links: [],
   });
 
@@ -129,6 +135,8 @@ export default function WidgetAgendaItems(
     title?: string;
     description: string;
     active: boolean;
+    activeFrom?: string;
+    activeTo?: string;
     links?: Array<Link>;
   };
 
@@ -157,6 +165,8 @@ export default function WidgetAgendaItems(
         title: selectedItem.title || '',
         description: selectedItem.description,
         active: selectedItem.active,
+        activeFrom: selectedItem.activeFrom || '',
+        activeTo: selectedItem.activeTo || '',
         links: selectedItem.links || [],
       });
       setLinks(selectedItem.links || []);
@@ -468,27 +478,55 @@ export default function WidgetAgendaItems(
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="active"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Actief</FormLabel>
-                          <Switch.Root
-                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                            onCheckedChange={(e: boolean) => {
-                              field.onChange(e);
-                              if (props.onFieldChanged) {
-                                props.onFieldChanged(field.name, e);
-                              }
-                            }}
-                            checked={field.value}>
-                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                          </Switch.Root>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {!props.useActiveDates && (
+                      <FormField
+                        control={form.control}
+                        name="active"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Actief</FormLabel>
+                            <Switch.Root
+                              className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                              onCheckedChange={(e: boolean) => {
+                                field.onChange(e);
+                                if (props.onFieldChanged) {
+                                  props.onFieldChanged(field.name, e);
+                                }
+                              }}
+                              checked={field.value}>
+                              <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                            </Switch.Root>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    {props.useActiveDates && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="activeFrom"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Actief vanaf — laat leeg om direct te starten</FormLabel>
+                              <Input type="datetime-local" {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="activeTo"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Actief tot — laat leeg voor geen einddatum</FormLabel>
+                              <Input type="datetime-local" {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
 
                     <FormItem>
                       <Button

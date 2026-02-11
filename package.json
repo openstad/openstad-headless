@@ -44,6 +44,9 @@
     "prettier": "3.0.3",
     "vitest": "^3.2.3"
   },
+  "overrides": {
+    "vega-lite": "^5.23.0"
+  },
   "dependencies": {
     "@aikidosec/safe-chain": "^1.1.10",
     "@aws-sdk/client-s3": "3.919.0",
@@ -52,5 +55,16 @@
     "knox": "file:vendor/knox-0.9.3.tar.gz",
     "react-leaflet": "^4.2.1",
     "uuid": "^10.0.0"
+  },
+  "overrides": {
+    "xml2js@<=0.5.0": "0.5.0",
+    "pino@<=10.1.1": "10.1.1",
+    "mariadb@<=3.4.3": "3.4.3",
+    "i18next@<=24.1.2": "24.1.2",
+    "glob@<=10.5.0": "10.5.0",
+    "tar@<=7.5.3": "7.5.3",
+    "cjs-module-lexer@<=2.2.0": "2.2.0",
+    "cookie@<=0.7.0": "0.7.0",
+    "on-headers@<=1.1.0": "1.1.0"
   }
 }
