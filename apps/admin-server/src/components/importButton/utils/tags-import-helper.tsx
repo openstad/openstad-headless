@@ -46,6 +46,7 @@ export async function processTags(
     }
     
     const tagNames = tagValue
+      .trim()
       .split('|')
       .map((name: string) => name.trim())
       .filter((name: string) => name.length > 0)

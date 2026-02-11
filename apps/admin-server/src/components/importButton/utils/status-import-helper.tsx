@@ -29,6 +29,7 @@ export async function processStatuses(
   }
 
   const statusNames = value.statuses
+    .trim()
     .split('|')
     .map((name: string) => name.trim())
     .filter((name: string) => name.length > 0)
