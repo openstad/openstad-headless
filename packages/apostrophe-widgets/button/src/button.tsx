@@ -5,7 +5,7 @@ import "./button.css";
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { ButtonLink, ButtonGroup } from "@utrecht/component-library-react";
+import { ButtonLink, ActionGroup } from "@utrecht/component-library-react";
 
 interface Item {
   direction: string;
@@ -20,7 +20,7 @@ const renderButtons = (buttons) => {
 
 function Button ({ buttons, direction }: Item ) {
   if(buttons.length > 1){
-    return <ButtonGroup direction={direction}>{renderButtons(buttons)}</ButtonGroup>;
+    return <ActionGroup direction={direction}>{renderButtons(buttons)}</ActionGroup>;
   }else{
     return renderButtons(buttons);
   }

@@ -53,7 +53,7 @@ export function MultiSelect({
     <div className={`multi-select ${inlineOptions ? 'multiselect-container--inline' : ''}`} ref={containerRef}>
       { !inlineOptions && (
         <Button
-          appearance='default-button'
+          appearance='secondary-action-button'
           onClick={() => {
             setOpen(!isOpen);
           }}

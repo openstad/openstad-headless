@@ -17,6 +17,9 @@
     "@openstad-headless/swipe": "^0.0.0",
     "@openstad-headless/types": "*",
     "@openstad-headless/ui": "*",
+    "@utrecht/component-library-css": "^9.0.1",
+    "@utrecht/component-library-react": "^13.0.0",
+    "@utrecht/design-tokens": "^5.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1"

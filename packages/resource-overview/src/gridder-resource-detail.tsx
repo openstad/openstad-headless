@@ -12,7 +12,7 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
   Button,
-  ButtonGroup,
+  ActionGroup,
   ButtonLink,
   Heading,
   Heading1,
@@ -195,7 +195,7 @@ export const GridderResourceDetail = ({
                   )}
                   {!!documentsDesc && <Paragraph>{documentsDesc}</Paragraph>}
                   <Spacer size={2} />
-                  <ButtonGroup>
+                  <ActionGroup>
                     {resource.documents?.map(
                       (document: DocumentType, index: number) => (
                         <ButtonLink
@@ -209,7 +209,7 @@ export const GridderResourceDetail = ({
                         </ButtonLink>
                       )
                     )}
-                  </ButtonGroup>
+                  </ActionGroup>
                 </div>
               </>
             )}

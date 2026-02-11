@@ -17,9 +17,9 @@
     "@openstad-headless/ui": "file:../ui",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
-    "@utrecht/component-library-css": "^4.2.0",
-    "@utrecht/component-library-react": "^4.2.0",
-    "@utrecht/design-tokens": "^1.0.0-alpha.631",
+    "@utrecht/component-library-css": "^9.0.1",
+    "@utrecht/component-library-react": "^13.0.0",
+    "@utrecht/design-tokens": "^5.0.1",
     "eslint-config-custom": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

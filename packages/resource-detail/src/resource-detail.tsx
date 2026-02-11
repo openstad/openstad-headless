@@ -14,7 +14,7 @@ import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
-  Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
+  Paragraph, Link, Heading, Heading2, ActionGroup, ButtonLink,
 } from '@utrecht/component-library-react';
 import React, { useEffect, useState, useId } from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -334,7 +334,7 @@ function ResourceDetail({
   } : {};
 
   const GroupButtonDeleteEdit = () => (
-    <ButtonGroup>
+    <ActionGroup>
       {(canDelete && displayDeleteButton) && (
         <>
           <Spacer size={2} />
@@ -366,7 +366,7 @@ function ResourceDetail({
           </Button>
         </>
       )}
-    </ButtonGroup>
+    </ActionGroup>
   )
 
   return (
@@ -565,7 +565,7 @@ function ResourceDetail({
                 <div className='document-download-container'>
                   {!!documentsTitle && (<Heading level={2} appearance="utrecht-heading-4">{documentsTitle}</Heading>)}
                   {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
-                  <ButtonGroup>
+                  <ActionGroup>
                     {resource.documents?.map((document: DocumentType, index: number) => (
                       <ButtonLink
                         appearance="primary-action-button"
@@ -580,7 +580,7 @@ function ResourceDetail({
                         {document.name}
                       </ButtonLink>
                     ))}
-                  </ButtonGroup>
+                  </ActionGroup>
                 </div>
               </div>
             )}

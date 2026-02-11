@@ -130,7 +130,6 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
             {props.placeholder|| 'Selecteer item'}
             {!!valueSelected && (
               <SubtleButton
-                appearance="link"
                 onClick={() => {
                   setStopUsingDefaultValueAfterReset(true);
                   setResetCounter(resetCounter + 1);

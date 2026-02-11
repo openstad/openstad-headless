@@ -9,7 +9,7 @@ import hasRole from '../../../lib/has-role';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Paragraph, Heading, Button, ButtonGroup } from "@utrecht/component-library-react";
+import { Paragraph, Heading, Button, ActionGroup } from "@utrecht/component-library-react";
 import { CommentProps } from '../types/comment-props';
 import { CommentWidgetContext } from '../comments';
 
@@ -152,7 +152,7 @@ function Comment({
 
             {isOpen && (
               <div className="DropdownMenuContent">
-                <ButtonGroup direction='column'>
+                <ActionGroup direction='column'>
                   <Button
                     appearance='secondary-action-button'
                     className="DropdownMenuItem"
@@ -173,7 +173,7 @@ function Comment({
                   >
                     Verwijderen
                   </Button>
-                </ButtonGroup>
+                </ActionGroup>
               </div>
             )}
           </div>
@@ -211,7 +211,7 @@ function Comment({
           <Paragraph className="comment-reaction-strong-text">
             {args.comment.createDateHumanized}
           </Paragraph>
-          <ButtonGroup className={`variant-${variant}`}>
+          <ActionGroup className={`variant-${variant}`}>
             <div>
               {widgetContext.canLike && (
                 canLike() ? (
@@ -259,7 +259,7 @@ function Comment({
                 Reageren
               </Button>
             ) : null}
-          </ButtonGroup>
+          </ActionGroup>
         </section>
       )}
 
@@ -269,7 +269,7 @@ function Comment({
             <Paragraph className="comment-reaction-strong-text">
               {args.comment.createDateHumanized}
             </Paragraph>
-            <ButtonGroup className={`variant-${variant}`}>
+            <ActionGroup className={`variant-${variant}`}>
               <div>
                 {widgetContext.canLike && (
                   canLike() ? (
@@ -311,7 +311,7 @@ function Comment({
                   )
                 )}
               </div>
-            </ButtonGroup>
+            </ActionGroup>
           </section>
         </>
       )}

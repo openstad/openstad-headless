@@ -17,7 +17,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   (props, ref) => {
     return (
       <Button
-        appearance={props.className}
+        appearance={props.className as "primary-action-button" | "secondary-action-button" | "subtle-button" | undefined}
         ref={ref}
         {...props}
         className={`osc-icon-button`}>

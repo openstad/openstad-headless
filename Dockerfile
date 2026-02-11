@@ -22,7 +22,7 @@ RUN npm update -g npm
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
 
 # Install app dependencies
-COPY --chown=node:node package*.json .
+COPY --chown=node:node package*.json .npmrc ./
 # Bundle all packages during build, only the installed ones will persist
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/ ./apps

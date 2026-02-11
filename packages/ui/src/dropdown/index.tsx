@@ -5,7 +5,7 @@ import './index.css';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, ButtonGroup } from "@utrecht/component-library-react";
+import { Button, ActionGroup } from "@utrecht/component-library-react";
 
 type Props = {
   items: Array<{ label: string; onClick: () => void }>;
@@ -34,7 +34,7 @@ export const DropDownMenu = ({
 
             <DropdownMenu.Portal>
                 <DropdownMenu.Content className="DropdownMenuContent" sideOffset={5}>
-                    <ButtonGroup direction='column'>
+                    <ActionGroup direction='column'>
                         {items.map((item) => (
                             <Button
                                 appearance='secondary-action-button'
@@ -44,7 +44,7 @@ export const DropDownMenu = ({
                                 {item.label}
                             </Button>
                         ))}
-                    </ButtonGroup>
+                    </ActionGroup>
                 </DropdownMenu.Content>
             </DropdownMenu.Portal>
         </DropdownMenu.Root>
