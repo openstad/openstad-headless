@@ -194,8 +194,13 @@ export const ImportButton = ({ project }: { project: string }) => {
             const tagIds = await processTags(value, tags || [], createTag);
             
             value = prepareData(value);
-            value.statuses = statusIds;
-            value.tags = tagIds;
+            
+            if (statusIds.length > 0) {
+                value.statuses = statusIds;
+            }
+            if (tagIds.length > 0) {
+                value.tags = tagIds;
+            }
             
             const response = await fetch(`/api/openstad/api/project/${project}/resource/${value.id}`, {
                 method: 'PUT',
