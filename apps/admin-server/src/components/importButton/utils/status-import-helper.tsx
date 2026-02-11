@@ -1,14 +1,12 @@
-import type { Status } from '@openstad-headless/types';
-
 export async function getOrCreateStatus(
   statusName: string,
   seqnr: number,
-  existingStatuses: Status[],
-  createStatusFn: (name: string, seqnr: number, addToNewResources: boolean) => Promise<Status>
+  existingStatuses: any[],
+  createStatusFn: (name: string, seqnr: number, addToNewResources: boolean) => Promise<any>
 ): Promise<number> {
   // Case-insensitive matching to avoid duplicates
   const existing = existingStatuses.find(
-    (s) => s.name.toLowerCase() === statusName.toLowerCase()
+    (s: any) => s.name.toLowerCase() === statusName.toLowerCase()
   )
   
   if (existing) {
@@ -20,9 +18,9 @@ export async function getOrCreateStatus(
 }
 
 export async function processStatuses(
-  value: { statuses?: string },
-  existingStatuses: Status[],
-  createStatusFn: (name: string, seqnr: number, addToNewResources: boolean) => Promise<Status>
+  value: any,
+  existingStatuses: any[],
+  createStatusFn: (name: string, seqnr: number, addToNewResources: boolean) => Promise<any>
 ): Promise<number[]> {
   if (!value.statuses) {
     return []

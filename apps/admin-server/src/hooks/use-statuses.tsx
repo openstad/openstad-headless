@@ -1,5 +1,4 @@
 import useSWR from 'swr';
-import type { Status } from '@openstad-headless/types';
 import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useStatus(projectId?: string) {
@@ -7,9 +6,9 @@ export default function useStatus(projectId?: string) {
 
   const url = `/api/openstad/api/project/${projectNumber}/status`;
 
-  const statusListSwr = useSWR<Status[] | undefined>(projectNumber ? url : null);
+  const statusListSwr = useSWR(projectNumber ? url : null);
 
-  async function createStatus(name: string, seqnr: number, addToNewResources: boolean): Promise<Status> {
+  async function createStatus(name: string, seqnr: number, addToNewResources: boolean) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -21,7 +20,7 @@ export default function useStatus(projectId?: string) {
     return await res.json();
   }
 
-  async function removeStatus(id: number): Promise<Status[]> {
+  async function removeStatus(id: number) {
     const deleteUrl = `/api/openstad/api/project/${projectNumber}/status/${id}`;
 
     const res = await fetch(deleteUrl, {
@@ -32,7 +31,7 @@ export default function useStatus(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...(statusListSwr.data ?? [])];
+      const existingData = [...statusListSwr.data];
       const updatedList = existingData.filter((ed) => ed.id !== id);
       statusListSwr.mutate(updatedList);
       return updatedList;
