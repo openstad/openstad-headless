@@ -19,6 +19,7 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
       label?: string;
       href?: string;
     }
+    itemLink?: string;
     givenResources?: Array<any>;
     resourceOverviewMapWidget?: dataLayerArray;
     selectedProjects?: Array<any>;
@@ -27,6 +28,7 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
     displayDislike?: boolean;
+    onMarkerClick?: (resource: any, index: number) => void;
   };
 
 export type dataLayerArray = {

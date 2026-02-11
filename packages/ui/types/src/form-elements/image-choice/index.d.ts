@@ -37,6 +37,8 @@ export type ImageChoiceFieldProps = {
     createImageSlider?: boolean;
     imageClickable?: boolean;
     infoField?: string;
+    maxChoices?: string;
+    maxChoicesMessage?: string;
 };
 export type ChoiceItem = {
     label: string;

@@ -1,4 +1,4 @@
-import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
+import type { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
 
 export type EnqueteProps = {
   widgetId?: number;
@@ -17,10 +17,12 @@ export type EnqueteProps = {
   maxCharactersWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
-  datalayer?: DataLayer[];
+  datalayer?: Array<DataLayer>;
   enableOnOffSwitching?: boolean;
   infoBlockStyle?: string;
   allowedPolygons?: Array<{ id: number; name: string }>;
+  enableDraftPersistence?: boolean;
+  draftRetentionHours?: number;
 };
 
 export type Item = {
