@@ -7,6 +7,7 @@ import {
   Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
+import { canLikeResource } from '@openstad-headless/lib';
 
 import {elipsizeHTML} from '@openstad-headless/lib/ui-helpers';
 
@@ -153,12 +154,7 @@ export const StemBegrootResourceList = ({
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);
         const primaryBtnDisabled = !resourceBtnEnabled(resource);
-        const canVoteByStatus = Array.isArray(resource?.statuses)
-          ? !resource.statuses.some(
-              (status: { extraFunctionality?: { canLike?: boolean } }) =>
-                status?.extraFunctionality?.canLike === false
-            )
-          : true;
+        const canVoteByStatus = canLikeResource(resource);
         const originalUrl = defineOriginalUrl(resource);
 
         let defaultImage = '';

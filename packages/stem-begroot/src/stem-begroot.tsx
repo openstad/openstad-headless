@@ -4,7 +4,7 @@ import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { hasRole } from '@openstad-headless/lib';
+import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { StemBegrootBudgetList } from './step-1/begroot-budget-list/stem-begroot-budget-list';
 import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/stem-begroot-detail-dialog';
@@ -596,10 +596,7 @@ function StemBegroot({
   const canVoteByStatus = (resource: {
     statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
   }) => {
-    if (!Array.isArray(resource?.statuses)) return true;
-    return !resource.statuses.some(
-      (status) => status?.extraFunctionality?.canLike === false
-    );
+    return canLikeResource(resource);
   };
 
   // For now only support budgeting and count

@@ -23,7 +23,7 @@ import { Icon } from "../../ui/src/icon"
 import {Likes, LikeWidgetProps} from '@openstad-headless/likes/src/likes';
 import { BaseProps } from '@openstad-headless/types/base-props';
 import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props';
-import {hasRole} from "../../lib";
+import { canLikeResource, hasRole } from "../../lib";
 
 export type GridderResourceDetailProps =
     BaseProps &
@@ -100,12 +100,7 @@ export const GridderResourceDetail = ({
 
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
-  const canLike = Array.isArray(resource?.statuses)
-    ? !resource.statuses.some(
-        (status: { extraFunctionality?: { canLike?: boolean } }) =>
-          status?.extraFunctionality?.canLike === false
-      )
-    : true;
+  const canLike = canLikeResource(resource);
 
   const renderImage = (image: string, clickableImage: boolean) => {
     const imageComponent = (
