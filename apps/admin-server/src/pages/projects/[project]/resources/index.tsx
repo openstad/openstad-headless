@@ -108,7 +108,7 @@ export default function ProjectResources() {
       setTotalCount(count);
     }
     setFilterData(data);
-  }, [data, pagination, pageLimit])
+  }, [pagination, pageLimit])
 
   if (!data) return null;
 
