@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const crypto = require('crypto');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
@@ -93,6 +94,14 @@ const imageSteamConfig = {
     },
     supportWebP: !disableWebpSupport,
     hqOriginalMaxPixels: process.env.HQ_ORIGINAL_MAX_PIXELS || 160000,  // default value of image-steam is 400 * 400 = 160000 px
+  },
+  processor: {
+    sharp: {
+      defaults: {
+        // Fix for Samsung S9 JPG's
+        failOnError: false,
+      },
+    },
   },
 };
 
@@ -489,7 +498,9 @@ app.use((req, res, next) => {
   const secret = process.env.IMAGE_VERIFICATION_TOKEN;
   
   // Check that the token is correct
-  if (token !== secret) {
+  const actual = crypto.createHash('sha256').update(token).digest();
+  const expected = crypto.createHash('sha256').update(secret).digest();
+  if (!crypto.timingSafeEqual(actual, expected)) {
     return res.status(401).send('Unauthorized');
   }
   

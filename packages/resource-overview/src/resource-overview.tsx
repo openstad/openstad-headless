@@ -126,6 +126,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
+    onMarkerResourceClick?: (resource: any, index: number) => void;
     displayLikeButton?: boolean;
     displayDislike?: boolean;
     clickableImage?: boolean;
@@ -193,6 +194,13 @@ const defaultHeaderRenderer = (
           givenResources={resources}
           selectedProjects={selectedProjects}
           locationProx={location}
+          onMarkerClick={
+            widgetProps.displayType === 'cardgrid'
+              ? (resource, index) => {
+                  widgetProps.onMarkerResourceClick?.(resource, index);
+                }
+              : undefined
+          }
         />
       }
       {displayHeader &&
@@ -275,8 +283,8 @@ const defaultItemRenderer = (
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
-  let resourceFilteredStatuses = resource?.statuses
-    ? resource.statuses?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+  let resourceFilteredStatuses = Array.isArray(resource?.statuses)
+    ? resource.statuses.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
         if (a.seqnr === undefined || a.seqnr === null) return 1;
         if (b.seqnr === undefined || b.seqnr === null) return -1;
         return a.seqnr - b.seqnr;
@@ -303,7 +311,7 @@ const defaultItemRenderer = (
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
     : resource?.tags || [];
 
-  resourceFilteredTags = resourceFilteredTags.length
+  resourceFilteredTags = resourceFilteredTags?.length
     ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
       if (a.seqnr === undefined || a.seqnr === null) return 1;
       if (b.seqnr === undefined || b.seqnr === null) return -1;
@@ -1004,7 +1012,9 @@ function ResourceOverviewInner({
       }
     </section>
   );
-
+const validFilteredResources = filteredResources?.filter(
+  r => r && (r.id || r.uniqueId) // only real resources or projects
+) || [];
   return tagsLoading ? (
       <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
     ) : (
@@ -1015,7 +1025,7 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            items={validFilteredResources}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
@@ -1049,7 +1059,22 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel || '4') : null}
+      {displayBanner || displayMap
+        ? renderHeader(
+            {
+              ...props,
+              displayType,
+              onMarkerResourceClick: onResourceClick,
+            },
+            filteredResources || [],
+            bannerText,
+            displayBanner,
+            displayMap && !displayAsTabs,
+            selectedProjects,
+            location,
+            props.headingLevel || '4'
+          )
+        : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''

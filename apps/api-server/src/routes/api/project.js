@@ -535,6 +535,23 @@ router.route('/')
         delete user.id;
         user.projectId = project.id;
         await db.User.create(user);
+
+        // Sync user role to auth server so user_roles entry is created
+        try {
+          const authConfig = await authSettings.config({ project, useAuth: 'default' });
+          const adapter = await authSettings.adapter({ authConfig });
+          if (user.idpUser?.identifier && adapter.service.updateUser) {
+            await adapter.service.updateUser({
+              authConfig,
+              userData: {
+                id: user.idpUser.identifier,
+                role: user.role,
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to sync user role to auth server for new project:', err);
+        }
       }
 
       return next()
@@ -632,7 +649,13 @@ router.route('/:projectId') //(\\d+)
     if (!hasRole( req.user, 'admin')) return next();
     try {
       let providers = await authSettings.providers({ project });
-      const allowedDomains = req.body.config?.allowedDomains || false;
+      const configData = req.body.config?.auth?.provider?.openstad?.config || {};
+      let allowedDomains = req.body.config?.allowedDomains || false;
+      if (Array.isArray(allowedDomains)) {
+        allowedDomains = allowedDomains.map((d) => (typeof d === 'string' ? d.trim() : d));
+        req.body.config.allowedDomains = allowedDomains;
+      }
+      const twoFactorRoles = req.body.config?.auth?.provider?.openstad?.twoFactorRoles;
 
       for (let provider of providers) {
         // Get provider-specific config data

@@ -123,6 +123,13 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                         ];
                     }
 
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'imageUpload':
                     fieldData['allowedTypes'] = item.allowedTypes || ["image/*"];
@@ -151,6 +158,11 @@ export const InitializeFormFields = (items, data, showForm = true) => {
                     if ( typeof(data?.enableOnOffSwitching) === 'boolean' ) {
                         fieldData['enableOnOffSwitching'] = data?.enableOnOffSwitching;
                     }
+
+                    if (Array.isArray(data?.allowedPolygons)) {
+                        fieldData['allowedPolygons'] = data.allowedPolygons;
+                    }
+
                     break;
                 case 'matrix':
                     fieldData['type'] = 'matrix';

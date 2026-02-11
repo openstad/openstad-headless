@@ -2,7 +2,7 @@ import { PageLayout } from '../../../../components/ui/page-layout';
 import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
 import { ChevronRight, Plus } from 'lucide-react';
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
@@ -16,6 +16,7 @@ import {ConfirmActionDialog} from "@/components/dialog-confirm-action";
 import {Checkbox} from "@/components/ui/checkbox";
 import { ImportButton } from '@/components/importButton';
 import { keyMap } from '@/lib/keyMap';
+import { Paginator } from '@openstad-headless/ui/src';
 
 interface ProjectResourcesProps {
   BETA_FEATURE_FLAG_BULK_IMPORT: string;
@@ -68,14 +69,26 @@ export async function getServerSideProps() {
 export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: ProjectResourcesProps) {
   const router = useRouter();
   const { project } = router.query;
-  const { data, error, isLoading, remove, duplicate } = useResources(project as string);
 
-  function transform() {
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageLimit, setPageLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const { data, pagination, error, isLoading, remove, duplicate, fetchAll } = useResources(
+    project as string,
+    false,
+    page,
+    pageLimit
+  );
+
+  async function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
 
-    const preparedData = prepareDataForExport(data);
+    const allData = await fetchAll(totalCount, pageLimit);
+    const preparedData = prepareDataForExport(allData);
 
     exportToXLSX(preparedData, `${projectId}_resources_${formattedDate}.xlsx`, keyMap);
   }
@@ -87,14 +100,30 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
   const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
 
   useEffect(() => {
+    if (pagination) {
+      const count = pagination.totalCount || 0;
+      const pageCount = Math.ceil(count / pageLimit);
+      setTotalPages(pageCount);
+      setTotalCount(count);
+    }
     setFilterData(data);
-  }, [data])
+  }, [data, pagination, pageLimit])
 
   if (!data) return null;
 
   return (
-    <div>
-      <PageLayout
+    <>
+      <style jsx global>{`
+        .osc-paginator {
+          justify-content: center;
+          margin-top: 30px;
+        }
+        .osc-paginator .osc-icon-button .icon p {
+          display: none;
+        }
+      `}</style>
+      <div>
+        <PageLayout
         pageHeader="Inzendingen"
         breadcrumbs={[
           {
@@ -321,9 +350,40 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
                 </Link>
               ))}
             </ul>
+
+            {totalPages > 0 && (
+              <div className="flex flex-col items-center gap-4 mt-4">
+                <Paginator
+                  page={page || 0}
+                  totalPages={totalPages || 1}
+                  onPageChange={(newPage) => setPage(newPage)}
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Rijen per pagina:</span>
+                  <select
+                    className="p-2 rounded border"
+                    value={pageLimit}
+                    onChange={(e) => {
+                      setPageLimit(Number(e.target.value));
+                      setPage(0);
+                    }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={250}>250</option>
+                  </select>
+                  <span className="text-sm text-gray-500">
+                    ({totalCount} totaal)
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </PageLayout>
-    </div>
+      </div>
+    </>
   );
 }

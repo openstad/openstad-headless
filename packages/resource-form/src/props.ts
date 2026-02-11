@@ -20,6 +20,7 @@ export type ResourceFormWidget = {
     placeholder?: string,
     datalayer?: DataLayer[],
     enableOnOffSwitching?: boolean;
+    allowedPolygons?: Array<{ id: number; name: string }>;
 };
 
 export type General = {
@@ -42,6 +43,7 @@ export type Submit = {
 };
 
 export type Info = {
+    allowAnonymousSubmissions?: boolean;
     loginText?: string;
     loginButtonText?: string;
     nameInHeader?: boolean;
@@ -53,6 +55,8 @@ export type Item = {
     description?: string;
     type?: string;
     fieldType?: string;
+    prevPageText?: string;
+    nextPageText?: string;
     tags?: string;
     fieldKey: string;
     fieldRequired?: boolean;

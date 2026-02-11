@@ -12,8 +12,9 @@ const authCodeConfig    = require('../../config/auth').get(authType);
 
 exports.login = (req, res, next) => {
   const config = req.client.config ? req.client.config : {};
-  const backUrl = config && config.backUrl ? config.backUrl : req.client.redirectUrl;
+  const backUrl = config && config.backUrl ? config.backUrl : false;
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+  const contactEmail = config.contactEmail || '';
 
   res.render('auth/code/login', {
     client: req.client,
@@ -21,7 +22,7 @@ exports.login = (req, res, next) => {
     title: configAuthType.title ? configAuthType.title : authCodeConfig.title,
     description: configAuthType.description ?  configAuthType.description : authCodeConfig.description,
     label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
-    helpText: configAuthType.helpText ? configAuthType.helpText : authCodeConfig.helpText,
+    helpText: (configAuthType.helpText ? configAuthType.helpText : authCodeConfig.helpText).replace(/\[\[contactEmail\]\]/g, contactEmail),
     buttonText: configAuthType.buttonText ? configAuthType.buttonText : authCodeConfig.buttonText,
     displaySidebar: configAuthType.displaySidebar ? configAuthType.displaySidebar : authCodeConfig.displaySidebar,
     backUrl: authCodeConfig.displayBackbutton ? backUrl : false,
