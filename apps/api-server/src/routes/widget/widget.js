@@ -218,6 +218,7 @@ function getDefaultConfig(project, widgetType) {
     imageUrl: config.url + `/api/project/${project.id}/upload`,
     zipCodeApiUrl: zipCodeApiUrl || '',
     zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
+    serverTime: new Date().toISOString(),
   };
 
   if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {
