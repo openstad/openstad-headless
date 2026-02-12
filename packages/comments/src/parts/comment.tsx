@@ -53,7 +53,7 @@ function Comment({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [yesVotes, setYesVotes] = useState<number>(args.comment.yes || 0);
   const [noVotes, setNoVotes] = useState<number>(args.comment.no || 0);
-  const [netPositiveVotes, setNetPositiveVotes] = useState<number>(args.comment.netPositiveVotes || 0);
+  const [netVotes, setNetVotes] = useState<number>(args.comment.netVotes || 0);
   const [hasUserLiked, setHasUserLiked] = useState<boolean>(args.comment.hasUserLiked || false);
   const [hasUserDisliked, setHasUserDisliked] = useState<boolean>(args.comment.hasUserDisliked || false);
 
@@ -120,7 +120,7 @@ function Comment({
     setHasUserDisliked(newData.hasUserDisliked || false);
     setYesVotes(newData.yes || 0);
     setNoVotes(newData.no || 0);
-    setNetPositiveVotes(newData.netPositiveVotes || 0);
+    setNetVotes(newData.netVotes || 0);
   }
 
   async function handleDislike() {
@@ -130,7 +130,7 @@ function Comment({
     setHasUserDisliked(newData.hasUserDisliked || false);
     setYesVotes(newData.yes || 0);
     setNoVotes(newData.no || 0);
-    setNetPositiveVotes(newData.netPositiveVotes || 0);
+    setNetVotes(newData.netVotes || 0);
   }
 
 
@@ -232,7 +232,7 @@ function Comment({
                 )
               )}
               {variant == 'micro-score' && (
-                <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netPositiveVotes}</Paragraph>
+                <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netVotes}</Paragraph>
               )}
               {widgetContext.canDislike && (
                 canLike() ? (
@@ -290,7 +290,7 @@ function Comment({
                   )
                 )}
                 {variant == 'micro-score' && (
-                  <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netPositiveVotes}</Paragraph>
+                  <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netVotes}</Paragraph>
                 )}
                 {widgetContext.canDislike && (
                   canLike() ? (

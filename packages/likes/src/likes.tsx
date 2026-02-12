@@ -233,7 +233,7 @@ function Likes({
                 </Button>
                 {!hideCounters && index === 0 ? (
                   <section className="like-counter">
-                    <span className="sr-only">Score</span> {resource['netPositiveVotes'] ? resource['netPositiveVotes']  : '0'}
+                    <span className="sr-only">Score</span> {resource['netVotes'] ? resource['netVotes']  : '0'}
                   </section>
                 ) : null}
               </>
@@ -242,9 +242,9 @@ function Likes({
 
           {props?.resources?.minimumYesVotes && showProgressBar ? (
             <div className="progressbar-container">
-              <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
+              <ProgressBar progress={(resource.netVotes / necessaryVotes) * 100} />
               <Paragraph className="progressbar-counter">
-                {resource.yes || 0} /{necessaryVotes}
+                {resource.netVotes || 0} /{necessaryVotes}
               </Paragraph>
             </div>
           ) : null}
