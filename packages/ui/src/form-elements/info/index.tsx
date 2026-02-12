@@ -3,6 +3,7 @@ import { AccordionProvider, Paragraph, Strong } from "@utrecht/component-library
 import { Spacer } from "../../spacer";
 import { FormValue } from "@openstad-headless/form/src/form";
 import { InfoImage } from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 export type InfoFieldProps = {
   overrideDefaultValue?: FormValue;
@@ -52,15 +53,17 @@ const InfoField: FC<InfoFieldProps> = ({
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
       let { html } = this.props;
-      return <div dangerouslySetInnerHTML={{ __html: html }} />;
+      return <RteContent content={html} unwrapSingleRootDiv={true} />;
     }
   }
 
   return (
     <div className="info-field-container">
-      {title && <Paragraph className="info-field-title"><Strong dangerouslySetInnerHTML={{ __html: title }}></Strong></Paragraph>}
+      {title && <Paragraph className="info-field-title"><RteContent content={title} inlineComponent={Strong} unwrapSingleRootDiv={true} forceInline={true} /></Paragraph>}
       {description &&
-        <Paragraph className="info-field-description" dangerouslySetInnerHTML={{ __html: description }} />
+        <Paragraph className="info-field-description">
+          <RteContent content={description} inlineComponent="span" unwrapSingleRootDiv={true} forceInline={true} />
+        </Paragraph>
       }
 
       {showMoreInfo && (

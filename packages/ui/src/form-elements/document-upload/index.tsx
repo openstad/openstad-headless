@@ -22,6 +22,7 @@ import NotificationService from '@openstad-headless/lib/NotificationProvider/not
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 const filePondSettings = {
     labelIdle: "Sleep document(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
@@ -159,7 +160,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            return <RteContent content={html} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -241,12 +242,16 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
             {title && (
                 <Paragraph className="utrecht-form-field__label">
-                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                    <FormLabel htmlFor={randomId}>
+                        <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+                    </FormLabel>
                 </Paragraph>
             )}
 
             {description &&
-              <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+              <FormFieldDescription>
+                <RteContent content={description} unwrapSingleRootDiv={true} />
+              </FormFieldDescription>
             }
             {showMoreInfo && (
                 <AccordionProvider

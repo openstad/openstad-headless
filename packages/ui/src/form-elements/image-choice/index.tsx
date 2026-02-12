@@ -12,6 +12,7 @@ import {
 import { Spacer } from "../../spacer";
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 export type ImageChoiceFieldProps = {
     title: string;
@@ -108,7 +109,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let { html } = this.props;
-            return <div dangerouslySetInnerHTML={{ __html: html }} />;
+            return <RteContent content={html} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -130,11 +131,15 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 aria-describedby={`${randomId}_error`}
             >
                 {title && (
-                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                    <FieldsetLegend>
+                        <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+                    </FieldsetLegend>
                 )}
 
                 {description &&
-                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
+                    <FormFieldDescription>
+                        <RteContent content={description} unwrapSingleRootDiv={true} />
+                    </FormFieldDescription>
                 }
 
                 {showMoreInfo && (
@@ -189,7 +194,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                                         <Heading level={4}>
                                                             {choice.label}
                                                         </Heading>
-                                                        <Paragraph dangerouslySetInnerHTML={{ __html: choice.description }}></Paragraph>
+                                                        <RteContent content={choice.description} inlineComponent={Paragraph} unwrapSingleRootDiv={true} />
                                                     </>
 
                                                 )}

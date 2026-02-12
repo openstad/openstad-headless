@@ -20,6 +20,7 @@ import {
 } from '@utrecht/component-library-react';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import RteContent from '../../ui/src/rte-formatting/rte-content';
 
 // Helper types and functions for draft persistence
 
@@ -653,13 +654,11 @@ function Enquete(props: EnqueteWidgetProps) {
 
                 <div className={`osc-enquete-item-content --${props.formStyle}`}>
                     {props.displayTitle && props.title && (
-                        <Heading2>
-                            <div dangerouslySetInnerHTML={{ __html: props.title }} />
-                        </Heading2>
+                        <RteContent content={props.title} inlineComponent={Heading2} unwrapSingleRootDiv={true} />
                     )}
                     <div className="osc-enquete-item-description">
                         {props.displayDescription && props.description && (
-                            <div dangerouslySetInnerHTML={{ __html: props.description }} />
+                            <RteContent content={props.description} unwrapSingleRootDiv={true} />
                         )}
                     </div>
                     {draftChecked && (

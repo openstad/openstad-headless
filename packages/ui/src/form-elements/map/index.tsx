@@ -17,6 +17,7 @@ import {Spacer} from "../../spacer";
 import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 export type MapProps = BaseProps &
     AreaProps &
@@ -80,7 +81,7 @@ const MapField: FC<MapProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            return <RteContent content={html} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -144,12 +145,16 @@ const MapField: FC<MapProps> = ({
 
           {title && (
               <Paragraph className="utrecht-form-field__label">
-                  <FormLabel htmlFor={randomID} dangerouslySetInnerHTML={{ __html: title }} />
+                  <FormLabel htmlFor={randomID}>
+                      <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+                  </FormLabel>
               </Paragraph>
           )}
 
           {description &&
-            <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+            <FormFieldDescription>
+                <RteContent content={description} unwrapSingleRootDiv={true} />
+            </FormFieldDescription>
           }
 
           {showMoreInfo && (

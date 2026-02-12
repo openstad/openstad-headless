@@ -14,6 +14,7 @@ import NotificationService from "../../lib/NotificationProvider/notification-ser
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
 import hasRole from '../../lib/has-role';
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src";
+import RteContent from '../../ui/src/rte-formatting/rte-content'
 
 function ChoiceGuide(props: ChoiceGuideProps) {
     const { choiceGuide = {}, items, choiceOption, widgetId, generalSettings = {} } = props;
@@ -162,11 +163,9 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                   )}
 
                   <div className="osc-choiceguide-intro">
-                      {introTitle && <Heading4 dangerouslySetInnerHTML={{ __html: introTitle }} />}
+                      {introTitle && <RteContent content={introTitle} inlineComponent={Heading4} unwrapSingleRootDiv={true} />}
                       <div className="osc-choiceguide-intro-description">
-                          {introDescription && (
-                            <Paragraph dangerouslySetInnerHTML={{ __html: introDescription }} />
-                          )}
+                          {introDescription && <RteContent content={introDescription} inlineComponent={Paragraph} unwrapSingleRootDiv={true} />}
                       </div>
                   </div>
                   <Form

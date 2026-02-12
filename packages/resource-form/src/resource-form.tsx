@@ -11,6 +11,7 @@ import NotificationService from '@openstad-headless/lib/NotificationProvider/not
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { FieldProps } from '@openstad-headless/form/src/props';
+import RteContent from "../../ui/src/rte-formatting/rte-content";
 
 const getExistingValue = (fieldKey, resource, multiple) => {
     if (!!resource) {
@@ -236,9 +237,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     return (isLoading || !fillDefaults) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
-                {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}
+                {props.displayTitle && props.title ? <RteContent content={props.title} inlineComponent="h4" unwrapSingleRootDiv={true} /> : null}
                 <div className="osc-resource-form-item-description">
-                    {props.displayDescription && props.description ? <p>{props.description}</p> : null}
+                    {props.displayDescription && props.description ? <RteContent content={props.description} inlineComponent="p" unwrapSingleRootDiv={true} /> : null}
                 </div>
 
                 {!hasRole(currentUser, 'member') ? (

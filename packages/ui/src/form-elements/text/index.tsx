@@ -12,6 +12,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 // Temporary TypeScript declaration for 'trix-editor'
 declare global {
@@ -82,6 +83,12 @@ const TrixEditor: React.FC<{
         await import("trix");
         // @ts-expect-error: trix has no types
         await import("trix/dist/trix.css");
+
+        // Use semantic paragraphs for new blocks created with Enter.
+        const trix = (window as any).Trix;
+        if (trix?.config?.blockAttributes?.default) {
+          trix.config.blockAttributes.default.tagName = "p";
+        }
       }
     })();
   }, []);
@@ -185,7 +192,7 @@ const TextInput: FC<TextInputProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let { html } = this.props;
-            return <div dangerouslySetInnerHTML={{ __html: html }} />;
+            return <RteContent content={html} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -272,12 +279,16 @@ const TextInput: FC<TextInputProps> = ({
         <FormField type="text">
             {title && (
                 <Paragraph className="utrecht-form-field__label">
-                    <FormLabel htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                    <FormLabel htmlFor={randomId}>
+                        <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+                    </FormLabel>
                 </Paragraph>
             )}
             {description &&
                 <>
-                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
+                    <FormFieldDescription>
+                        <RteContent content={description} unwrapSingleRootDiv={true} />
+                    </FormFieldDescription>
                     <Spacer size={.5} />
                 </>
             }
