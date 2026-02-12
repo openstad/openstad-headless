@@ -11,7 +11,6 @@ import { Filters, PostcodeAutoFillLocation } from '@openstad-headless/ui/src/ste
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
-import { hasRole } from '@openstad-headless/lib';
 import { deterministicRandomSort, getScopedSessionRandomSortSeed, canLikeResource, hasRole } from '@openstad-headless/lib';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
