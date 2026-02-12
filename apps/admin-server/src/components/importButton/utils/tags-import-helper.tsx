@@ -5,7 +5,6 @@ export async function getOrCreateTag(
   existingTags: any[],
   createTagFn: (name: string, type: string, seqnr: number, addToNewResources: boolean) => Promise<any>
 ): Promise<number> {
-  // Case-insensitive matching on both name AND type
   const existing = existingTags.find(
     (t: any) => 
       t.name.toLowerCase() === tagName.toLowerCase() && 
@@ -33,7 +32,7 @@ export async function processTags(
     return []
   }
 
-  // Find highest seqnr across ALL tags
+  // Find highest seqnr across all tags
   const maxSeqnr = existingTags.length > 0
     ? Math.max(...existingTags.map((t: any) => t.seqnr || 0))
     : 0
@@ -66,4 +65,45 @@ export async function processTags(
   delete value['tags.*']
   
   return tagIds
+}
+
+export function extractUniqueTags(values: any[]): Map<string, Set<string>> {
+  const unique = new Map<string, Set<string>>();
+  
+  values.forEach(row => {
+    const tagsObject = row['tags.*'];
+    if (tagsObject && typeof tagsObject === 'object') {
+      Object.entries(tagsObject).forEach(([type, value]) => {
+        if (!unique.has(type)) {
+          unique.set(type, new Set());
+        }
+        const names = String(value).trim().split('|').map((n: string) => n.trim());
+        names.forEach(n => n && unique.get(type)!.add(n));
+      });
+    }
+  });
+  
+  return unique;
+}
+
+export async function prepareTags(
+  uniqueTags: Map<string, Set<string>>,
+  existingTags: any[],
+  createTagFn: (name: string, type: string, seqnr: number, addToNewResources: boolean) => Promise<any>
+): Promise<Map<string, number>> {
+  const mapping = new Map<string, number>();
+  const maxSeqnr = existingTags.length > 0
+    ? Math.max(...existingTags.map((t: any) => t.seqnr || 0))
+    : 0;
+  
+  let index = 1;
+  for (const [type, names] of Array.from(uniqueTags)) {
+    for (const name of Array.from(names)) {
+      const tagId = await getOrCreateTag(name, type, maxSeqnr + index, existingTags, createTagFn);
+      mapping.set(`${type.toLowerCase()}.${name.toLowerCase()}`, tagId);
+      index++;
+    }
+  }
+  
+  return mapping;
 }
