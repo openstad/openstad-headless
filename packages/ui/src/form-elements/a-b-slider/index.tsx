@@ -12,6 +12,7 @@ import { Spacer } from "../../spacer";
 import TextInput from "../text";
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 export type RangeSliderProps = {
     title: string;
@@ -110,11 +111,9 @@ const RangeSlider: FC<RangeSliderProps> = ({
     class HtmlContent extends React.Component<{ html: any, bold?: boolean }> {
         render() {
             let { html, bold = false } = this.props;
-
-            if (bold) {
-                html = `<strong>${html}</strong>`;
-            }
-            return <Paragraph dangerouslySetInnerHTML={{ __html: html }} />;
+            return bold
+                ? <RteContent content={html} inlineComponent={Strong} unwrapSingleRootDiv={true} />
+                : <RteContent content={html} inlineComponent={Paragraph} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -160,7 +159,9 @@ const RangeSlider: FC<RangeSliderProps> = ({
             {title && (
                 <Paragraph>
                     <Strong>
-                        <label htmlFor={randomId} dangerouslySetInnerHTML={{ __html: title }} />
+                        <label htmlFor={randomId}>
+                            <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+                        </label>
                     </Strong>
                 </Paragraph>
             )}

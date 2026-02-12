@@ -10,7 +10,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
-import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
@@ -19,6 +18,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import dynamic from "next/dynamic";
+
+const TrixEditor = dynamic(
+  () =>
+    import("@openstad-headless/ui/src/form-elements/text/index").then(
+      (mod) => mod.TrixEditor
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded border" />
+  }
+);
 
 const formSchema = z.object({
   title: z.string(),
@@ -71,13 +82,15 @@ export default function WidgetEnqueteGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Enquête titel</FormLabel>
-                <Input
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
+                <FormControl>
+                  <TrixEditor
+                    value={field.value || ''}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -111,9 +124,8 @@ export default function WidgetEnqueteGeneral(
               <FormItem>
                 <FormLabel>Enquête beschrijving</FormLabel>
                 <FormControl>
-                  <Textarea
-                    rows={6}
-                    {...field}
+                  <TrixEditor
+                    value={field.value || ''}
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);

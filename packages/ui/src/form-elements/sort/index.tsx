@@ -16,6 +16,7 @@ import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-rea
 import "./sort.css";
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 type OptionTitle = {
     key: string;
@@ -132,11 +133,13 @@ const SortField: FC<SortFieldProps> = ({
             <div className="sortable-intro">
                 {title && (
                     <Paragraph className="utrecht-form-field__label">
-                        <strong dangerouslySetInnerHTML={{ __html: title }} />
+                        <RteContent content={title} inlineComponent="strong" unwrapSingleRootDiv={true} forceInline={true} />
                     </Paragraph>
                 )}
                 {description &&
-                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
+                    <FormFieldDescription>
+                        <RteContent content={description} unwrapSingleRootDiv={true} />
+                    </FormFieldDescription>
                 }
 
                 {InfoImage({

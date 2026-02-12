@@ -13,6 +13,7 @@ import TextInput from "../text";
 import { useEffect } from "react";
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
@@ -89,7 +90,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            return <RteContent content={html} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -172,12 +173,16 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                 aria-describedby={`${randomId}_error`}
             >
                 {title && (
-                    <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+                    <FieldsetLegend>
+                        <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+                    </FieldsetLegend>
                 )}
 
                 {description &&
                     <>
-                        <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+                        <FormFieldDescription>
+                            <RteContent content={description} unwrapSingleRootDiv={true} />
+                        </FormFieldDescription>
                         <Spacer size={.5} />
                     </>
                 }

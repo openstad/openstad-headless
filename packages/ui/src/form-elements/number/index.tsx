@@ -10,6 +10,7 @@ import {Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 export type NumberInputProps = {
     title: string;
@@ -112,12 +113,16 @@ const NumberInput: FC<NumberInputProps> = ({
     <FormField type="text">
       {title && (
         <Paragraph className="utrecht-form-field__label">
-          <FormLabel htmlFor={randomID} dangerouslySetInnerHTML={{ __html: title }} />
+          <FormLabel htmlFor={randomID}>
+            <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+          </FormLabel>
         </Paragraph>
       )}
       {description && (
         <>
-          <FormFieldDescription dangerouslySetInnerHTML={{__html: description}}/>
+          <FormFieldDescription>
+            <RteContent content={description} unwrapSingleRootDiv={true} />
+          </FormFieldDescription>
           <Spacer size={0.5}/>
         </>
       )}

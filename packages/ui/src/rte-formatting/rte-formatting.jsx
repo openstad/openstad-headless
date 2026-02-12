@@ -6,8 +6,74 @@ import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Heading1, Heading2, Heading3, Heading4, Paragraph, Link, Strong, OrderedList, OrderedListItem, UnorderedList, UnorderedListItem } from "@utrecht/component-library-react";
 
-export default function RenderContent(content) {
-  const htmlInput = `<div>${content}</div>`;
+function unwrapSingleRootDiv(content) {
+  if (typeof content !== 'string') return content;
+  const trimmed = content.trim();
+  if (!trimmed) return trimmed;
+
+  if (typeof document === 'undefined' || typeof document.createElement !== 'function') {
+    return content;
+  }
+
+  const template = document.createElement('template');
+  template.innerHTML = trimmed;
+
+  const meaningfulNodes = Array.from(template.content.childNodes).filter((node) => {
+    return node.nodeType !== 3 || (node.textContent && node.textContent.trim() !== '');
+  });
+
+  if (meaningfulNodes.length !== 1) return content;
+
+  const root = meaningfulNodes[0];
+  if (root.nodeType !== 1 || root.nodeName.toLowerCase() !== 'div') return content;
+
+  return root.innerHTML;
+}
+
+function convertTextDivsToParagraphs(content) {
+  if (typeof content !== 'string' || !content) return content;
+  if (typeof document === 'undefined' || typeof document.createElement !== 'function') {
+    return content;
+  }
+
+  const template = document.createElement('template');
+  template.innerHTML = content;
+
+  const blockTags = new Set([
+    'address', 'article', 'aside', 'blockquote', 'details', 'dialog', 'div', 'dl', 'dt', 'dd',
+    'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'header', 'hgroup', 'hr', 'li', 'main', 'menu', 'nav', 'ol', 'p', 'pre', 'section', 'table',
+    'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'ul'
+  ]);
+
+  const divs = Array.from(template.content.querySelectorAll('div'));
+  divs.forEach((divEl) => {
+    if (divEl.attributes.length > 0) return;
+
+    const hasNestedBlock = Array.from(divEl.children).some((child) => {
+      const tag = child.tagName.toLowerCase();
+      return tag !== 'br' && blockTags.has(tag);
+    });
+    if (hasNestedBlock) return;
+
+    const p = document.createElement('p');
+    while (divEl.firstChild) p.appendChild(divEl.firstChild);
+    divEl.replaceWith(p);
+  });
+
+  const paragraphs = Array.from(template.content.querySelectorAll('p'));
+  paragraphs.forEach((paragraph) => {
+    if (!paragraph.classList.contains('utrecht-paragraph')) {
+      paragraph.classList.add('utrecht-paragraph');
+    }
+  });
+
+  return template.innerHTML;
+}
+
+export default function RenderContent(content, options = {}) {
+  const { unwrapSingleRootDiv: shouldUnwrapSingleRootDiv = false } = options;
+  const htmlInput = `<div>${content || ''}</div>`;
 
   const isValidNode = function () {
     return true;
@@ -112,8 +178,14 @@ export default function RenderContent(content) {
     }
   ];
   const htmlToReactParser = new HtmlToReactParser();
-  const reactComponent = htmlToReactParser.parseWithInstructions(htmlInput, isValidNode,
-    processingInstructions);
+  const reactComponent = htmlToReactParser.parseWithInstructions(htmlInput, isValidNode, processingInstructions);
+  const rendered = ReactDOMServer.renderToStaticMarkup(reactComponent);
+  const output = rendered.startsWith('<div>') && rendered.endsWith('</div>')
+    ? rendered.slice(5, -6)
+    : rendered;
 
-  return ReactDOMServer.renderToStaticMarkup(reactComponent).substring(5, ReactDOMServer.renderToStaticMarkup(reactComponent).length - 6)
+  if (!shouldUnwrapSingleRootDiv) return output;
+
+  const unwrapped = unwrapSingleRootDiv(output);
+  return convertTextDivsToParagraphs(unwrapped);
 }
