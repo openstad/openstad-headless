@@ -9,14 +9,18 @@ kind: Ingress
 
 metadata:
 
-{{- if .Values.auth.ingress.annotations }}
   annotations:
-    nginx.ingress.kubernetes.io/x-forwarded-proto: https
     {{- if .Values.clusterIssuer.enabled }}
     cert-manager.io/cluster-issuer: {{ template "openstad.clusterIssuer.name" . }}
     {{- end }}
-{{ toYaml .Values.auth.ingress.annotations | indent 4 }}
-{{- end }}
+    {{- if eq (include "openstad.ingress.type" .) "traefik" }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ include "openstad.traefik.middlewares.auth" . }}
+    {{- else }}
+    nginx.ingress.kubernetes.io/x-forwarded-proto: https
+    {{- with .Values.auth.ingress.annotations }}
+{{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- end }}
 
   labels:
   {{- include "openstad.labels" . | nindent 4 }}
@@ -29,7 +33,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 
 spec:
-  ingressClassName: {{ .Values.auth.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.auth.ingress.ingressClassName | default (include "openstad.ingress.type" .) }}
   rules:
 {{- range $host := .Values.auth.ingress.hosts }}
     - host: {{ $host }}

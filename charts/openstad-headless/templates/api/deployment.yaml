@@ -254,10 +254,10 @@ spec:
             value: "{{ .Values.clusterIssuer.prodIssuerName }}"
 
           - name: KUBERNETES_INGRESS_CLASS_NAME
-            value: "{{ .Values.api.createdIngresses.className | default "" }}"
+            value: "{{ .Values.api.createdIngresses.className | default (include "openstad.ingress.type" .) }}"
 
           - name: KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS
-            value: '{{ .Values.api.createdIngresses.annotations | default "{}" | toJson }}'
+            value: '{{ include "openstad.createdIngresses.annotations" . }}'
 
           - name: KUBERNETES_INGRESS_TLS_MANAGED_BY_OPENSTAD
             value: "{{ .Values.api.createdIngresses.tlsManagedByOpenstad }}"
