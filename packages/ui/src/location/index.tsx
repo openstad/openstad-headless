@@ -4,7 +4,7 @@ import { PostcodeAutoFillLocation } from '../stem-begroot-and-resource-overview/
 import {Select} from "../select";
 import {FormLabel} from "@utrecht/component-library-react";
 
-const proximityDefaultOptions = [
+const proximityOptions = [
   { label: '100 meter', value: "0.1" },
   { label: '250 meter', value: "0.25" },
   { label: '500 meter', value: "0.5" },
