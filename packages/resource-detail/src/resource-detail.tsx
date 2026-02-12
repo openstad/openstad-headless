@@ -27,7 +27,7 @@ import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { Button } from '@utrecht/component-library-react';
-import { hasRole } from '../../lib';
+import { canLikeResource, hasRole } from '../../lib';
 import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting'
@@ -247,6 +247,8 @@ function ResourceDetail({
       return a.seqnr - b.seqnr;
     })
   : [];
+
+  const canLike = canLikeResource(resource);
 
   const firstStatus = statuses && statuses.length > 0 ? statuses[0] : false;
 
@@ -506,6 +508,7 @@ function ResourceDetail({
                 <>
                   <Likes
                     {...props}
+                    disabled={!canLike}
                     title={props.likeWidget?.title}
                     yesLabel={props.likeWidget?.yesLabel}
                     noLabel={props.likeWidget?.noLabel}

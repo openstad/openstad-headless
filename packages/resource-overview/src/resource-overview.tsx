@@ -11,7 +11,7 @@ import { Filters, PostcodeAutoFillLocation } from '@openstad-headless/ui/src/ste
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
-import { hasRole } from '@openstad-headless/lib';
+import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
 import '@utrecht/component-library-css';
@@ -218,6 +218,9 @@ const defaultItemRenderer = (
   onItemClick?: () => void,
   refreshLikes?: () => void,
 ) => {
+  const canLike = canLikeResource(resource);
+  const allowLikingInOverview = !!props.allowLikingInOverview;
+
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
       return <Paragraph>Template is nog niet ingesteld</Paragraph>;
@@ -425,12 +428,13 @@ const defaultItemRenderer = (
             </Paragraph>
           </div>
 
-          { props.allowLikingInOverview ? (
+          { allowLikingInOverview ? (
             <Likes
               {...props.likeWidget}
               resourceId={resource.id}
               projectId={props.projectId}
               {...props}
+              disabled={!canLike}
               refreshResourceLikes={refreshLikes}
             >
               {(doVote) => (

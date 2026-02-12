@@ -700,19 +700,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
       selectStatuses: function (statuses) {
         return {
-          include: [
-            {
-              model: db.Status,
-              as: 'statuses',
-              attributes: ['id', 'name'],
-              through: { attributes: [] },
-              where: {
-                id: {
-                  [db.Sequelize.Op.in]: statuses,
-                },
-              },
+          where: {
+            id: {
+              [db.Sequelize.Op.in]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_statuses
+                WHERE statusId IN (${statuses.map(status => `'${status}'`).join(', ')}))
+              `),
             },
-          ],
+          },
         };
       },
 
