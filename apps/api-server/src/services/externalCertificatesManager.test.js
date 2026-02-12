@@ -268,22 +268,13 @@ describe('externalCertificatesManager', () => {
       expect(result).toEqual({ created: true, secretName: 'my-secret' });
     });
 
-    test('handles 409 Conflict by patching existing resource', async () => {
+    test('returns { created: false } on 409 Conflict (resource already exists)', async () => {
       mockCreateNamespacedCustomObject.mockRejectedValue(make409Error());
-      mockPatchNamespacedCustomObject.mockResolvedValue({});
 
       const result = await ensureExternalSecret('my-secret', 'ns');
 
       expect(result).toEqual({ created: false, secretName: 'my-secret' });
-      expect(mockPatchNamespacedCustomObject).toHaveBeenCalledWith(
-        expect.objectContaining({
-          group: 'external-secrets.io',
-          version: 'v1',
-          namespace: 'ns',
-          plural: 'externalsecrets',
-          name: 'my-secret',
-        })
-      );
+      expect(mockPatchNamespacedCustomObject).not.toHaveBeenCalled();
     });
 
     test('falls back to v1beta1 when v1 create returns 404', async () => {

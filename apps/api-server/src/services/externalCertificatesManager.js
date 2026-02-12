@@ -138,8 +138,6 @@ async function ensureExternalSecret(secretName, namespace) {
   // Try v1 first, fallback to v1beta1 for ESO version compatibility
   for (const version of ['v1', 'v1beta1']) {
     try {
-      // Try to create
-      console.log(`[external-certificates] Trying create ExternalSecret ${secretName} via ${version} in namespace ${namespace}`);
       await customObjects.createNamespacedCustomObject({
         group: 'external-secrets.io',
         version: version,
@@ -153,32 +151,10 @@ async function ensureExternalSecret(secretName, namespace) {
 
     } catch (error) {
       const status = getErrorStatusCode(error);
-      console.log(`[external-certificates] Create ${version} failed: status=${status}, code=${error.code}, statusCode=${error.statusCode}`);
       if (status === 409) {
-        // Resource already exists, try to update it
-        try {
-          console.log(`[external-certificates] Trying patch ExternalSecret ${secretName} via ${version}`);
-          await customObjects.patchNamespacedCustomObject({
-            group: 'external-secrets.io',
-            version: version,
-            namespace: namespace,
-            plural: 'externalsecrets',
-            name: secretName,
-            body: { ...externalSecretSpec, apiVersion: `external-secrets.io/${version}` },
-            headers: { 'Content-Type': 'application/merge-patch+json' }
-          });
-
-          console.log(`[external-certificates] Updated ExternalSecret: ${secretName}`);
-          return { created: false, secretName };
-
-        } catch (patchError) {
-          const patchStatus = getErrorStatusCode(patchError);
-          console.log(`[external-certificates] Patch ${version} failed: status=${patchStatus}, message=${patchError.message?.substring(0, 120)}`);
-          // If patch fails, continue to next version
-          if (version === 'v1beta1') {
-            throw patchError;
-          }
-        }
+        // Resource already exists — this is the desired state
+        console.log(`[external-certificates] ExternalSecret already exists: ${secretName}`);
+        return { created: false, secretName };
       } else if (status === 404 && version === 'v1') {
         // v1 not found, try v1beta1
         console.log(`[external-certificates] ${version} API not available, falling back to v1beta1`);
