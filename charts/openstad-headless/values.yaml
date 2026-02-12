@@ -281,6 +281,17 @@ api:
     # You can then set the project.config.tlsSecretName of a project, and it will be set in the ingress.tls
     # Allowing you to have per-project TLS certificates, managed through secrets (e.g. externalSecret operator)
     tlsManagedByOpenstad: false
+  # External certificates feature flag
+  # When enabled, the api-server can create ExternalSecret resources
+  # to load TLS certificates from an external secret store (e.g. Google Secret Manager via ESO)
+  externalCertificates:
+    enabled: false
+    # Prefix pattern for auto-generated secret names. {orgName} is replaced at runtime.
+    secretPrefix: "tls-openstad-prod-{orgName}"
+    # Name of the ClusterSecretStore to reference in ExternalSecret resources
+    secretStoreName: "gcp-secret-store"
+    # Cooldown in seconds between manual retry triggers per project
+    retryCooldownSeconds: 60
   # Inject extra environment variables
   extraEnvVars: []
   disableProjectIssueWarnings: "false"
