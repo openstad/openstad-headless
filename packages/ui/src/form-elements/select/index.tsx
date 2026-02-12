@@ -12,6 +12,7 @@ import {FC} from "react";
 import {MultiSelect, Spacer} from '@openstad-headless/ui/src';
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 export type SelectFieldProps = {
     overrideDefaultValue?: FormValue;
@@ -79,7 +80,7 @@ const SelectField: FC<SelectFieldProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            return <RteContent content={html} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -96,11 +97,15 @@ const SelectField: FC<SelectFieldProps> = ({
     return (
         <FormField type="select">
           {title && (
-            <FormLabel htmlFor={fieldKey} dangerouslySetInnerHTML={{ __html: title }} />
+            <FormLabel htmlFor={fieldKey}>
+              <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+            </FormLabel>
           )}
             {description &&
                 <>
-                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+                    <FormFieldDescription>
+                        <RteContent content={description} unwrapSingleRootDiv={true} />
+                    </FormFieldDescription>
                     <Spacer size={.5} />
                 </>
             }

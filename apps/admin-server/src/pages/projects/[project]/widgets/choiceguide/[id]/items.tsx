@@ -32,6 +32,18 @@ import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/
 import {YesNoSelect} from "@/lib/form-widget-helpers";
 import { Matrix, MatrixOption } from '@openstad-headless/enquete/src/types/enquete-props';
 import ImageGalleryStyle from "@/components/image-gallery-style";
+import dynamic from "next/dynamic";
+
+const TrixEditor = dynamic(
+  () =>
+    import("@openstad-headless/ui/src/form-elements/text/index").then(
+      (mod) => mod.TrixEditor
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded border" />
+  }
+);
 
 const weightSchema: z.ZodSchema = z.object({
   weightX: z.any().optional(),
@@ -869,7 +881,7 @@ export default function WidgetChoiceGuideItems(
                               setMatrixOptions(matrixDefault);
                               setSettingOptions(false);
                             }}>
-                                                        {`${item.title || 'Geen titel'}`}
+                                                        <span dangerouslySetInnerHTML={{ __html: item.title || 'Geen titel' }} />
                                                     </span>
                           <span className="gap-2 py-3 px-2">
                                                         <X
@@ -1339,7 +1351,12 @@ export default function WidgetChoiceGuideItems(
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Titel/Vraag</FormLabel>
-                            <Input {...field} />
+                            <FormControl>
+                              <TrixEditor
+                                value={field.value || ''}
+                                onChange={(val) => field.onChange(val)}
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -1350,7 +1367,12 @@ export default function WidgetChoiceGuideItems(
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Beschrijving</FormLabel>
-                            <Textarea rows={6} {...field} />
+                            <FormControl>
+                              <TrixEditor
+                                value={field.value || ''}
+                                onChange={(val) => field.onChange(val)}
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -2019,7 +2041,7 @@ export default function WidgetChoiceGuideItems(
                         />
                       )}
 
-                      {form.watch('type') === 'checkbox' && (
+                      {(form.watch('type') === 'checkbox' || (form.watch('type') === 'images' && form.watch('multiple'))) && (
                         <>
                           <FormField
                             control={form.control}

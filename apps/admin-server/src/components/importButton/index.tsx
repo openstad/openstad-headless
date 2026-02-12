@@ -15,6 +15,12 @@ import ImportRowCount from './import-row-count-line';
 import countFailedImportRows from './countFailedImportRows';
 import ImportUseIdCheckboxLine from './import-use-id-checkbox-line';
 import { translateHeaders } from './translate-headers';
+import useStatus from '../../hooks/use-statuses';
+import useTag from '../../hooks/use-tags';
+import useUsers from '../../hooks/use-users';
+import { extractUniqueStatuses, prepareStatuses, processStatuses } from './utils/status-import-helper';
+import { extractUniqueTags, prepareTags, processTags } from './utils/tags-import-helper';
+import { extractUniqueUserIds, prepareUsers, processUserId } from './utils/user-import-helper';
 
 const ideaSchema = {
     title: 'string',
@@ -42,6 +48,11 @@ export const ImportButton = ({ project }: { project: string }) => {
     const [useId, setUseId] = React.useState<boolean>(true);
     const [dialogStatus, setDialogStatus] = React.useState<'base' | 'importFinished'>('base');
     const [fileValidationNotifications, setFileValidationNotifications] = React.useState<FileValidationNotification[]>([]);
+
+    const { data: statuses, createStatus } = useStatus(open ? project : undefined);
+    const { data: tags, createTag } = useTag(open ? project : undefined);
+    const { createUser } = useUsers();
+
 
     const openImportDialog = () => {
         setOpen(true);
@@ -115,7 +126,6 @@ export const ImportButton = ({ project }: { project: string }) => {
         const exceptionsObjectKeys = ['location'];
 
         const removeKeys = addRemoveKeys ? standardRemoveKeys.concat(addRemoveKeys) : standardRemoveKeys;
-        const arrayKeys = ['images'];
 
         const cleanUp = function (
         value: any,
@@ -138,13 +148,66 @@ export const ImportButton = ({ project }: { project: string }) => {
         return value;
     }
 
+    const prepareSubmit = async () => {
+        const translatedValues = values.map(v => translateHeaders(v));
+        
+        const uniqueStatuses = extractUniqueStatuses(translatedValues);
+        const uniqueTags = extractUniqueTags(translatedValues);
+        const uniqueUserIds = extractUniqueUserIds(translatedValues);
+        
+        const statusMapping = await prepareStatuses(uniqueStatuses, statuses || [], createStatus);
+        const tagMapping = await prepareTags(uniqueTags, tags || [], createTag);
+        const userMapping = await prepareUsers(uniqueUserIds, project, createUser);
+        
+        return { statusMapping, tagMapping, userMapping };
+    };
+
+    const getStatusIdsFromMapping = (value: any, mapping: Map<string, number>): number[] => {
+        if (!value.statuses) return [];
+        
+        const names = value.statuses.trim().split('|').map((n: string) => n.trim());
+        return names.map((n: string) => mapping.get(n.toLowerCase())).filter(Boolean) as number[];
+    };
+
+    const getTagIdsFromMapping = (value: any, mapping: Map<string, number>): number[] => {
+        const tagIds: number[] = [];
+        const tagsObject = value['tags.*'];
+        
+        if (tagsObject && typeof tagsObject === 'object') {
+            Object.entries(tagsObject).forEach(([type, val]) => {
+                const names = String(val).trim().split('|').map((n: string) => n.trim());
+                names.forEach(n => {
+                    const id = mapping.get(`${type.toLowerCase()}.${n.toLowerCase()}`);
+                    if (id) tagIds.push(id);
+                });
+            });
+            delete value['tags.*'];
+        }
+        
+        return tagIds;
+    };
+
+    const getUserIdFromMapping = (value: any, mapping: Map<number, number>): number | undefined => {
+        const originalUserId = value['user.id'] || value?.user?.id;
+        return originalUserId ? mapping.get(originalUserId) : undefined;
+    };
+
     const handleSubmitCreate = async () => {
+        // Prepare all statuses, tags, and user ids
+        const { statusMapping, tagMapping, userMapping } = await prepareSubmit();
+        
         const callback = async (value: any) => {
-            // translate headers
             value = translateHeaders(value);
-            // add Id key to remove
-            value = prepareData(value, ['id']);
-            value.tags = value.tags ? value.tags.split(",").map((name: string) => name.trim()) : [];
+            delete value.id;
+            
+            const statusIds = getStatusIdsFromMapping(value, statusMapping);
+            const tagIds = getTagIdsFromMapping(value, tagMapping);
+            const userId = getUserIdFromMapping(value, userMapping);
+
+            value = prepareData(value);
+            value.statuses = statusIds;
+            value.tags = tagIds;
+            value.userId = userId;
 
             const response = await fetch(`/api/openstad/api/project/${project}/resource`, {
                 method: 'POST',
@@ -173,11 +236,28 @@ export const ImportButton = ({ project }: { project: string }) => {
     };
 
     const handleSubmitOverwrite = async () => {
+          // Prepare all statuses, tags, and user ids
+        const { statusMapping, tagMapping, userMapping } = await prepareSubmit();
+
         const callback = async (value: any) => {
             value = translateHeaders(value);
-            value = prepareData(value);
 
-            value.tags = value.tags ? value.tags.split(",").map((name: string) => name.trim()) : [];
+            const statusIds = getStatusIdsFromMapping(value, statusMapping);
+            const tagIds = getTagIdsFromMapping(value, tagMapping);
+            const userId = getUserIdFromMapping(value, userMapping);
+            
+            value = prepareData(value);
+            
+            if (statusIds.length > 0) {
+                value.statuses = statusIds;
+            }
+            if (tagIds.length > 0) {
+                value.tags = tagIds;
+            }
+            if (userId) {
+                value.userId = userId;
+            }
+
             const response = await fetch(`/api/openstad/api/project/${project}/resource/${value.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },

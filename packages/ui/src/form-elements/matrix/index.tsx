@@ -20,6 +20,7 @@ import { Matrix } from "@openstad-headless/enquete/src/types/enquete-props";
 import './matrix.css';
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 export type MatrixFieldProps = {
     title: string;
@@ -96,7 +97,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            return <RteContent content={html} unwrapSingleRootDiv={true} />;
         }
     }
 
@@ -126,12 +127,16 @@ const MatrixField: FC<MatrixFieldProps> = ({
           >
 
             {title && (
-              <FieldsetLegend dangerouslySetInnerHTML={{ __html: title }} />
+              <FieldsetLegend>
+                <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+              </FieldsetLegend>
             )}
 
             {description &&
                 <>
-                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}}/>
+                    <FormFieldDescription>
+                      <RteContent content={description} unwrapSingleRootDiv={true} />
+                    </FormFieldDescription>
                     <Spacer size={.5}/>
                 </>
             }

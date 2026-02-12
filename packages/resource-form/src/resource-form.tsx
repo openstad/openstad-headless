@@ -11,6 +11,7 @@ import NotificationService from '@openstad-headless/lib/NotificationProvider/not
 import NotificationProvider from "@openstad-headless/lib/NotificationProvider/notification-provider";
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { FieldProps } from '@openstad-headless/form/src/props';
+import RteContent from "../../ui/src/rte-formatting/rte-content";
 
 const getExistingValue = (fieldKey, resource, multiple) => {
     if (!!resource) {
@@ -36,7 +37,7 @@ const getExistingValue = (fieldKey, resource, multiple) => {
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton, defaultAddedTags } = props.submit || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
-    const { loginText, loginButtonText } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+    const { loginText, loginButtonText, allowAnonymousSubmissions } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
     const { confirmationUser, confirmationAdmin } = props.confirmation || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
     const formStartTimeRef = useRef<number>(Date.now());
@@ -70,6 +71,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     type FormField = { fieldKey?: string; [key: string]: any };
     const [formFields, setFormFields] = useState<FormField[]>([]);
     const [fillDefaults, setFillDefaults] = useState(false);
+    const [currentPage, setCurrentPage] = useState<number>(0);
 
     useEffect(() => {
         if (isLoading) return;
@@ -125,6 +127,23 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         delete formData[key];
                     }
                 }
+            }
+        }
+
+        for (const key in formData) {
+            if (formData.hasOwnProperty(key) && key.endsWith('__polygonTagIds')) {
+                const value = formData[key];
+
+                if (Array.isArray(value)) {
+                    value.forEach((tagId) => {
+                        const tagNumber = Number(tagId);
+                        if (!isNaN(tagNumber)) {
+                            tags.push(tagNumber);
+                        }
+                    });
+                }
+
+                delete formData[key];
             }
         }
 
@@ -234,16 +253,34 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         window.history.replaceState(null, '', url.toString());
     }, [params]);
 
+    const paginationFields = formFields.filter((field) => field.type === 'pagination');
+    const totalPages = paginationFields.length + 1 || 1;
+    const paginationFieldPositions = formFields
+        .map((field, idx) => field.type === 'pagination' ? idx : -1)
+        .filter(idx => idx !== -1);
+    const pageFieldStartPositions = [0, ...paginationFieldPositions.map(idx => idx + 1)];
+    const pageFieldEndPositions = [...paginationFieldPositions, formFields.length];
+    const prevPageText = paginationFields[currentPage]?.prevPageText || 'Vorige';
+    const nextPageText = paginationFields[currentPage]?.nextPageText || 'Volgende';
+    const totalFieldCount = formFields.filter((field) => field.type !== 'pagination').length || 0;
+
+    useEffect(() => {
+        if (currentPage > totalPages - 1) {
+            setCurrentPage(0);
+        }
+    }, [currentPage, totalPages]);
+
+    const formOnlyVisibleForUsers = !allowAnonymousSubmissions;
 
     return (isLoading || !fillDefaults) ? null : (
         <div className="osc">
             <div className="osc-resource-form-item-content">
-                {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}
+                {props.displayTitle && props.title ? <RteContent content={props.title} inlineComponent="h4" unwrapSingleRootDiv={true} /> : null}
                 <div className="osc-resource-form-item-description">
-                    {props.displayDescription && props.description ? <p>{props.description}</p> : null}
+                    {props.displayDescription && props.description ? <RteContent content={props.description} inlineComponent="p" unwrapSingleRootDiv={true} /> : null}
                 </div>
 
-                {!hasRole(currentUser, 'member') ? (
+                {formOnlyVisibleForUsers && !hasRole(currentUser, 'member') ? (
                     <>
                         <Banner className="big">
                             <Heading level={4} appearance='utrecht-heading-6'>{loginText || 'Inloggen om deel te nemen.'}</Heading>
@@ -263,10 +300,17 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         fields={formFields}
                         secondaryLabel={saveConceptButton || ""}
                         submitHandler={onSubmit}
-                        submitText={submitButtonText}
+                        submitText={currentPage < totalPages - 1 ? nextPageText : submitButtonText}
                         title=""
                         submitDisabled={disableSubmit}
                         allowResetAfterSubmit={editMode}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        prevPageText={prevPageText}
+                        pageFieldStartPositions={pageFieldStartPositions}
+                        pageFieldEndPositions={pageFieldEndPositions}
+                        totalPages={totalPages}
+                        totalFieldCount={totalFieldCount}
                         {...props}
                     />
                 )}

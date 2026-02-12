@@ -300,6 +300,34 @@ router.route('/')
     res.json(req.results);
   });
 
+// bulk delete comments
+// ---------
+router.route('/delete')
+  .delete(auth.can('Comment', 'delete'))
+  .delete(async function(req, res, next) {
+    const ids = req.body.ids;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return next(createError(400, 'No ids provided'));
+    }
+    try {
+      const comments = await db.Comment
+        .scope('defaultScope', { method: ['forProjectId', req.params.projectId] })
+        .findAll({ where: { id: ids } });
+
+      for (const comment of comments) {
+        await comment.destroy();
+        const childComments = await db.Comment.findAll({ where: { parentId: comment.id } });
+        for (const childComment of childComments) {
+          await childComment.destroy();
+        }
+      }
+
+      res.json({ message: `${comments.length} comment(s) deleted successfully.` });
+    } catch (err) {
+      next(err);
+    }
+  });
+
 router.route('/:commentId(\\d+)')
 
   // view comment

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect, createContext, useMemo } from 'react';
 import './index.css';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../lib/has-role';
@@ -16,6 +16,7 @@ import { CommentFormProps } from './types/comment-form-props';
 import {Filters} from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import { deterministicRandomSort, getScopedSessionRandomSortSeed } from '@openstad-headless/lib';
 
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
@@ -226,6 +227,12 @@ function CommentsInner({
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || "createdAt_asc"
   );
+  const randomSortSeed = useMemo(() => {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const search = typeof window !== 'undefined' ? window.location.search : '';
+    const scope = `${props.projectId || 'project'}:${resourceId}:${pathname}:${search}`;
+    return getScopedSessionRandomSortSeed(scope, 'commentsRandomSortSeed');
+  }, [props.projectId, resourceId]);
 
   const [canComment, setCanComment] = useState(args.canComment)
   const [disableSubmit, setDisableSubmit] = useState(false);
@@ -456,10 +463,15 @@ function CommentsInner({
             if (sortMethod === 'votes_asc') {
               return a.yes - b.yes;
             }
-            if (sort === 'random') {
-              return Math.random() - 0.5;
+            if (sortMethod === 'random') {
+              return deterministicRandomSort(
+                a,
+                b,
+                randomSortSeed,
+                (comment: any) => String(comment?.id || comment?.createdAt || comment?.description || '')
+              );
             }
-            if (sort === 'score') {
+            if (sortMethod === 'score') {
               return (b.score || 0) - (a.score || 0);
             }
 

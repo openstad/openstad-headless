@@ -1,2 +1,2 @@
-export { DilemmaField } from './dilemma';
-export type { DilemmaFieldProps } from './dilemma';
+export { VideoField } from './video';
+export type { VideoFieldProps } from './video';

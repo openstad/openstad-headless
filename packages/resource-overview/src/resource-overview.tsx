@@ -11,7 +11,7 @@ import { Filters, PostcodeAutoFillLocation } from '@openstad-headless/ui/src/ste
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
-import { hasRole } from '@openstad-headless/lib';
+import { deterministicRandomSort, getScopedSessionRandomSortSeed, canLikeResource, hasRole } from '@openstad-headless/lib';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
 import '@utrecht/component-library-css';
@@ -49,6 +49,14 @@ function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLo
   var d = R * c;
   return d;
 }
+
+const getResourceStableKey = (resource: any) => {
+  return String(
+    resource?.uniqueId ||
+    resource?.id ||
+    `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+  );
+};
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -126,6 +134,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
+    onMarkerResourceClick?: (resource: any, index: number) => void;
     displayLikeButton?: boolean;
     displayDislike?: boolean;
     clickableImage?: boolean;
@@ -193,6 +202,13 @@ const defaultHeaderRenderer = (
           givenResources={resources}
           selectedProjects={selectedProjects}
           locationProx={location}
+          onMarkerClick={
+            widgetProps.displayType === 'cardgrid'
+              ? (resource, index) => {
+                  widgetProps.onMarkerResourceClick?.(resource, index);
+                }
+              : undefined
+          }
         />
       }
       {displayHeader &&
@@ -210,6 +226,9 @@ const defaultItemRenderer = (
   onItemClick?: () => void,
   refreshLikes?: () => void,
 ) => {
+  const canLike = canLikeResource(resource);
+  const allowLikingInOverview = !!props.allowLikingInOverview;
+
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
       return <Paragraph>Template is nog niet ingesteld</Paragraph>;
@@ -338,7 +357,7 @@ const defaultItemRenderer = (
         {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
           <div className="micro-score-container">
             <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' onClick={() => vote('yes')}/>
-            <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
             {props.likeWidget?.displayDislike &&
               <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' onClick={() => vote('no')}/>}
           </div>
@@ -417,12 +436,13 @@ const defaultItemRenderer = (
             </Paragraph>
           </div>
 
-          { props.allowLikingInOverview ? (
+          { allowLikingInOverview ? (
             <Likes
               {...props.likeWidget}
               resourceId={resource.id}
               projectId={props.projectId}
               {...props}
+              disabled={!canLike}
               refreshResourceLikes={refreshLikes}
             >
               {(doVote) => (
@@ -517,7 +537,7 @@ const defaultItemRenderer = (
             {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" />
-                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
                 {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big"  />}
               </>
             )}
@@ -695,6 +715,12 @@ function ResourceOverviewInner({
 
   const [resources, setResources] = useState<Array<any>>([]);
   const [filteredResources, setFilteredResources] = useState<Array<any>>([]);
+  const randomSortSeed = useMemo(() => {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const search = typeof window !== 'undefined' ? window.location.search : '';
+    const seedScope = `${props.projectId || 'project'}:${pathname}:${search}`;
+    return getScopedSessionRandomSortSeed(seedScope, 'resourceOverviewRandomSortSeed');
+  }, [props.projectId]);
 
   const projectIds = selectedProjects
     ?.filter(project => !project?.excludeResourcesInOverview)
@@ -877,7 +903,7 @@ function ResourceOverviewInner({
           return a.yes - b.yes;
         }
         if (sort === 'random') {
-          return Math.random() - 0.5;
+          return deterministicRandomSort(a, b, randomSortSeed, getResourceStableKey);
         }
         if (sort === 'score') {
           return (b.score || 0) - (a.score || 0);
@@ -887,7 +913,7 @@ function ResourceOverviewInner({
       });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location, groupedTags]);
+  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location, groupedTags, randomSortSeed]);
 
   useEffect(() => {
     if (filteredResources) {
@@ -1004,7 +1030,9 @@ function ResourceOverviewInner({
       }
     </section>
   );
-
+const validFilteredResources = filteredResources?.filter(
+  r => r && (r.id || r.uniqueId) // only real resources or projects
+) || [];
   return tagsLoading ? (
       <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
     ) : (
@@ -1015,7 +1043,7 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            items={validFilteredResources}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
@@ -1049,7 +1077,22 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel || '4') : null}
+      {displayBanner || displayMap
+        ? renderHeader(
+            {
+              ...props,
+              displayType,
+              onMarkerResourceClick: onResourceClick,
+            },
+            filteredResources || [],
+            bannerText,
+            displayBanner,
+            displayMap && !displayAsTabs,
+            selectedProjects,
+            location,
+            props.headingLevel || '4'
+          )
+        : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''

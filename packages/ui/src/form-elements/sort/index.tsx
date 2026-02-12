@@ -1,7 +1,14 @@
 // Drag-and-drop sort field using @dnd-kit/core
 
 import React, { FC, useState, ReactNode, useEffect } from "react";
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-react";
@@ -9,6 +16,7 @@ import { FormFieldDescription, Paragraph, } from "@utrecht/component-library-rea
 import "./sort.css";
 import { FormValue } from "@openstad-headless/form/src/form";
 import {InfoImage} from "../../infoImage";
+import RteContent from "../../rte-formatting/rte-content";
 
 type OptionTitle = {
     key: string;
@@ -87,6 +95,20 @@ const SortField: FC<SortFieldProps> = ({
 
     const [items, setItems] = useState(options);
 
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5,
+            },
+        })
+    );
+
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (active.id !== over?.id) {
@@ -111,11 +133,13 @@ const SortField: FC<SortFieldProps> = ({
             <div className="sortable-intro">
                 {title && (
                     <Paragraph className="utrecht-form-field__label">
-                        <strong dangerouslySetInnerHTML={{ __html: title }} />
+                        <RteContent content={title} inlineComponent="strong" unwrapSingleRootDiv={true} forceInline={true} />
                     </Paragraph>
                 )}
                 {description &&
-                    <FormFieldDescription dangerouslySetInnerHTML={{ __html: description }} />
+                    <FormFieldDescription>
+                        <RteContent content={description} unwrapSingleRootDiv={true} />
+                    </FormFieldDescription>
                 }
 
                 {InfoImage({
@@ -127,7 +151,7 @@ const SortField: FC<SortFieldProps> = ({
                 })}
             </div>
             <div className="sortable-context">
-                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext
                         items={items.map(opt => opt.titles?.[0]?.key || "")}
                         strategy={verticalListSortingStrategy}

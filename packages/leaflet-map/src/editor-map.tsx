@@ -85,7 +85,7 @@ const EditorMap = ({
       doNotCluster: true,
     });
     if (onChange) {
-      onChange({ name: fieldName, value: '' });
+      onChange({ name: fieldName, value: {} });
     }
   }
 
@@ -105,7 +105,12 @@ const EditorMap = ({
         name={fieldName}
         required={fieldRequired}
         type="hidden"
-        value={`{"lat":${currentEditorMarker.lat},"lng":${currentEditorMarker.lng}}`}
+        value={
+          typeof currentEditorMarker.lat === 'number' &&
+          typeof currentEditorMarker.lng === 'number'
+            ? `{"lat":${currentEditorMarker.lat},"lng":${currentEditorMarker.lng}}`
+            : ''
+        }
       />
     </>
   );

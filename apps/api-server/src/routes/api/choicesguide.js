@@ -214,6 +214,24 @@ router.route('/')
 			.catch(next);
   });
 
+// bulk delete choiceguide results
+// ---------
+router.route('/delete')
+	.delete(auth.can('ChoicesGuideResult', 'delete'))
+	.delete(function(req, res, next) {
+		const ids = req.body.ids;
+		if (!Array.isArray(ids) || ids.length === 0) {
+			return next(createError(400, 'No ids provided'));
+		}
+		db.ChoicesGuideResult.destroy({
+			where: { id: ids, projectId: req.params.projectId }
+		})
+			.then((count) => {
+				res.json({ message: `${count} ChoiceGuide result(s) deleted successfully.` });
+			})
+			.catch(next);
+	});
+
 // delete choiceguide result
 // ---------
 router.route('/:choicesGuideId(\\d+)')

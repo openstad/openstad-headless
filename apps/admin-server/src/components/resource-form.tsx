@@ -28,9 +28,10 @@ import { DocumentUploader } from './document-uploader';
 import useTags from '@/hooks/use-tags';
 import useStatuses from '@/hooks/use-statuses';
 import { CheckboxList } from './checkbox-list';
-import { X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 import { useProject } from '@/hooks/use-project';
 import MapInput from '@/components/maps/leaflet-input';
+import ImageGalleryStyle from '@/components/image-gallery-style';
 
 const TrixEditor = dynamic(
   () =>
@@ -236,6 +237,38 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     [existingData]
   );
   const [extraData, setExtraData] = useState(existingData?.extraData || '');
+  const [imageIndexOpen, setImageIndexOpen] = useState<number>(-1);
+    
+  const [targetUser, setTargetUser] = useState<{ name?: string; email?: string; displayName?: string } | null>(null);
+  const [isLoadingTargetUser, setIsLoadingTargetUser] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!pendingUserId || !project || pendingUserId === existingData?.userId) {
+      setTargetUser(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoadingTargetUser(true);
+      try {
+        const res = await fetch(`/api/openstad/api/project/${project}/user/${pendingUserId}`);
+        if (res.ok) {
+          const userData = await res.json();
+          setTargetUser(userData);
+        } else {
+          setTargetUser(null);
+        }
+      } catch {
+        setTargetUser(null);
+      } finally {
+        setIsLoadingTargetUser(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingUserId, project, existingData?.userId]);
+
   const form = useForm<FormType>({
     resolver: zodResolver<any>(formSchema(titleLimits, summaryLimits, descriptionLimits)),
     defaultValues: defaults(),
@@ -293,7 +326,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     }
   }, [existingData, form, defaults, projectData?.config?.resources?.defaultTagIds, projectData?.config?.resources?.defaultStatusIds]);
 
-  const { fields: imageFields, remove: removeImage } = useFieldArray({
+  const { fields: imageFields, remove: removeImage, swap: swapImage } = useFieldArray({
     control: form.control,
     name: 'images',
   });
@@ -302,6 +335,16 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     control: form.control,
     name: 'documents',
   });
+
+  const moveUpImage = (index: number) => {
+    if (index <= 0) return;
+    swapImage(index, index - 1);
+  };
+
+  const moveDownImage = (index: number) => {
+    if (index >= imageFields.length - 1) return;
+    swapImage(index, index + 1);
+  };
 
   const handleLocationSelect = useCallback((location: string) => {
     if (location !== '') {
@@ -312,6 +355,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
   return (
     <div className="p-6 bg-white rounded-md">
+      <ImageGalleryStyle />
       <Form {...form}>
         <Heading size="xl">{id ? 'Aanpassen' : 'Toevoegen'}</Heading>
         <Separator className="my-4" />
@@ -401,13 +445,30 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
           <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
             {imageFields.length > 0 && (
-              <>
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
-                <section className="grid col-span-full grid-cols-1 gap-y-4">
+              <div className="grid">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-1">Afbeeldingen</label>
+                <p className="text-sm text-muted-foreground mb-2">Klik op een afbeelding om het beschrijvingsveld te openen.</p>
+                <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
                   {imageFields.map(({ id, url }, index) => {
                     return (
-                      <div key={id} className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
-                        <img src={url} alt={url} />
+                      <div
+                        key={id}
+                        className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                        style={{gridTemplateColumns: index === imageIndexOpen ? "1fr 2fr 40px" : "1fr"}}
+                      >
+                        <div className="image-container">
+                          <img
+                            src={url}
+                            alt={url}
+                            onClick={() => {
+                              if (index === imageIndexOpen) {
+                                setImageIndexOpen(-1);
+                              } else {
+                                setImageIndexOpen(index);
+                              }
+                            }}
+                          />
+                        </div>
                         <Button
                           color="red"
                           onClick={() => {
@@ -417,28 +478,42 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                           <X size={24} />
                         </Button>
 
-                        <FormField
-                          control={form.control}
-                          name={`images.${index}.description`}
-                          render={({ field }) => (
-                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
-                              <FormLabel>Beschrijving</FormLabel>
-                              <FormDescription>Op de detailpagina van de inzending is er een optie waarmee je deze beschrijving kunt tonen.</FormDescription>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <div
+                          className="grid gap-y-4 items-center"
+                          style={{display: index === imageIndexOpen ? 'grid' : 'none'}}
+                        >
+                          <FormField
+                            control={form.control}
+                            name={`images.${index}.description`}
+                            render={({ field }) => (
+                              <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                <FormLabel>Beschrijving</FormLabel>
+                                <FormDescription>Op de detailpagina van de inzending is er een optie waarmee je deze beschrijving kunt tonen.</FormDescription>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                          <button type="button" onClick={() => moveUpImage(index)} aria-label="Move image left">
+                            <ArrowLeft className="cursor-pointer" />
+                          </button>
+                          <button type="button" onClick={() => moveDownImage(index)} aria-label="Move image right">
+                            <ArrowRight className="cursor-pointer" />
+                          </button>
+                        </span>
 
                       </div>
                     );
                   })}
                 </section>
-              </>
+              </div>
             )}
           </div>
 
@@ -538,8 +613,35 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   <Input
                     placeholder="1"
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      const value = parseInt(e.target.value);
+                      setPendingUserId(value || null);
+                    }}
                   />
                 </FormControl>
+                {existingData?.user && (
+                  <FormDescription className="text-sm text-gray-600">
+                    Huidige gebruiker: {existingData.user.displayName || existingData.user.name || 'Onbekend'}
+                    {existingData.user.email && ` (${existingData.user.email})`}
+                  </FormDescription>
+                )}
+                {isLoadingTargetUser && (
+                  <FormDescription className="text-sm text-gray-500">
+                    Gebruiker zoeken...
+                  </FormDescription>
+                )}
+                {targetUser && !isLoadingTargetUser && (
+                  <FormDescription className="text-sm text-blue-600">
+                    Nieuwe gebruiker: {targetUser.displayName || targetUser.name || 'Onbekend'}
+                    {targetUser.email && ` (${targetUser.email})`}
+                  </FormDescription>
+                )}
+                {pendingUserId && !isLoadingTargetUser && !targetUser && pendingUserId !== existingData?.userId && (
+                  <FormDescription className="text-sm text-red-600">
+                    Gebruiker niet gevonden
+                  </FormDescription>
+                )}
                 <FormMessage />
               </FormItem>
             )}

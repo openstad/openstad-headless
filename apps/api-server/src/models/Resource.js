@@ -58,8 +58,8 @@ module.exports = function (db, sequelize, DataTypes) {
         auth: {
           updateableBy: 'editor',
         },
-        allowNull: false,
-        defaultValue: 0,
+        allowNull: true,
+        defaultValue: null,
       },
 
       startDate: {
@@ -302,13 +302,13 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
       
-      // Field that calculates net positive votes based on yes and no votes, ensuring it doesn't go below zero
-      netPositiveVotes: {
+      // Field that calculates net votes based on yes and no votes
+      netVotes: {
         type: DataTypes.VIRTUAL,
         get: function () {
           const yes = this.getDataValue('yes') || 0;
           const no = this.getDataValue('no') || 0;
-          return Math.max(yes - no, 0);
+          return yes - no;
         }
       },
 
@@ -705,19 +705,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
       selectStatuses: function (statuses) {
         return {
-          include: [
-            {
-              model: db.Status,
-              as: 'statuses',
-              attributes: ['id', 'name'],
-              through: { attributes: [] },
-              where: {
-                id: {
-                  [db.Sequelize.Op.in]: statuses,
-                },
-              },
+          where: {
+            id: {
+              [db.Sequelize.Op.in]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_statuses
+                WHERE statusId IN (${statuses.map(status => `'${status}'`).join(', ')}))
+              `),
             },
-          ],
+          },
         };
       },
 
@@ -933,7 +928,7 @@ module.exports = function (db, sequelize, DataTypes) {
   Resource.auth = Resource.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
-    createableBy: 'member',
+    createableBy: 'all',
     updateableBy: ['admin', 'editor', 'owner', 'moderator'],
     deleteableBy: ['admin', 'editor', 'owner', 'moderator'],
     canView: function (user, self) {

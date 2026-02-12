@@ -29,6 +29,7 @@ export type ChoiceGuide = {
     datalayer?: DataLayer[];
     enableOnOffSwitching?: boolean;
     showBackButtonInTopOfPage?: boolean;
+    allowedPolygons?: Array<{ id: number; name: string }>;
 };
 
 type ExtraProjectSettings = {

@@ -1,5 +1,9 @@
+{% if data.global.archiveStatus %}
+<div class="archive-status-banner">
+  <p>{{ data.global.archiveStatusText }}</p>
+</div>
+{% endif %}
 <header class="{{ 'amsterdam-header' if data.global.siteLogo === 'amsterdam' }} {{ '--compact' if data.global.compactMenu }}">
-
       <div class="header-top-bar">
         <div class="container">
           <div class="topmenu-dynamic-container">

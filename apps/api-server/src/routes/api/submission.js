@@ -190,6 +190,24 @@ router.route('/')
 		}
 	});
 
+// bulk delete submissions
+// ---------
+router.route('/delete')
+	.delete(auth.can('Submission', 'delete'))
+	.delete(function(req, res, next) {
+		const ids = req.body.ids;
+		if (!Array.isArray(ids) || ids.length === 0) {
+			return next(createError(400, 'No ids provided'));
+		}
+		db.Submission.destroy({
+			where: { id: ids, projectId: req.params.projectId }
+		})
+			.then((count) => {
+				res.json({ message: `${count} submission(s) deleted successfully.` });
+			})
+			.catch(next);
+	});
+
 	// with one existing submission
 	// --------------------------
 	router.route('/:submissionId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})')

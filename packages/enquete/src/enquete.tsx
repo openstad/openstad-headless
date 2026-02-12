@@ -15,12 +15,12 @@ import { useEffect, useRef, useState } from 'react';
 import Form, { FormValue } from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
-    Paragraph,
     Heading2,
     Heading6,
 } from '@utrecht/component-library-react';
 import NotificationService from "../../lib/NotificationProvider/notification-service";
 import NotificationProvider from "../../lib/NotificationProvider/notification-provider";
+import RteContent from '../../ui/src/rte-formatting/rte-content';
 
 // Helper types and functions for draft persistence
 
@@ -403,6 +403,13 @@ function Enquete(props: EnqueteWidgetProps) {
                         ];
                     }
 
+                    if (item.maxChoices) {
+                        fieldData['maxChoices'] = item.maxChoices;
+                    }
+                    if (item.maxChoicesMessage) {
+                        fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+                    }
+
                     break;
                 case 'imageUpload':
                     fieldData['type'] = 'imageUpload';
@@ -456,6 +463,11 @@ function Enquete(props: EnqueteWidgetProps) {
                     if (typeof (props?.enableOnOffSwitching) === 'boolean') {
                         fieldData['enableOnOffSwitching'] = props?.enableOnOffSwitching;
                     }
+
+                    if (Array.isArray(props?.allowedPolygons)) {
+                        fieldData['allowedPolygons'] = props.allowedPolygons;
+                    }
+
                     break;
                 case 'pagination':
                     fieldData['type'] = 'pagination';
@@ -655,14 +667,17 @@ function Enquete(props: EnqueteWidgetProps) {
                 )}
 
                 <div className={`osc-enquete-item-content --${props.formStyle}`}>
-                    {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
+                    {props.displayTitle && props.title && (
+                        <RteContent content={props.title} inlineComponent={Heading2} unwrapSingleRootDiv={true} />
+                    )}
                     <div className="osc-enquete-item-description">
                         {props.displayDescription && props.description && (
-                            <Paragraph>{props.description}</Paragraph>
+                            <RteContent content={props.description} unwrapSingleRootDiv={true} />
                         )}
                     </div>
                     {draftChecked && (
                         <Form
+                            {...props}
                             fields={formFields}
                             formStyle={props.formStyle || 'default'}
                             getValuesOnChange={handleValuesChange}
@@ -679,10 +694,8 @@ function Enquete(props: EnqueteWidgetProps) {
                             totalFieldCount={totalFieldCount}
                             totalPages={totalPages}
                             initialValues={initialValues}
-                            {...props}
                         />
                     )}
-
                 </div>
 
                 <NotificationProvider />

@@ -37,3 +37,10 @@
     max-height: 100%;
     max-width: 100%;
 }
+
+.map-hidden-polygons-message {
+    margin: 8px 0 12px;
+    padding: 8px 12px;
+    border-inline-start: 4px solid #d00;
+    background: #fff3f3;
+}
