@@ -10,6 +10,7 @@ import {
 import { canLikeResource } from '@openstad-headless/lib';
 
 import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
+import { deterministicRandomSort } from '@openstad-headless/lib';
 
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
@@ -46,6 +47,7 @@ export const StemBegrootResourceList = ({
   currentPage = 0,
   pageSize = 999,
   filterBehavior = 'or',
+  randomSortSeed = 1,
   showOriginalResource = true,
   displayTitle = true,
   displaySummary = true,
@@ -80,9 +82,13 @@ export const StemBegrootResourceList = ({
   currentPage: number;
   pageSize: number;
   filterBehavior?: string;
+  randomSortSeed?: number;
   displayTitle?: boolean;
   displaySummary?: boolean;
 }) => {
+  const getResourceStableKey = (resource: any) =>
+    String(resource?.id || `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`);
+
   // Memoize intTags to avoid creating new array on every render
   const intTags = useMemo(() => {
     // @ts-ignore
@@ -178,6 +184,9 @@ export const StemBegrootResourceList = ({
           }
           if (sort === 'title') {
             return a.title.localeCompare(b.title);
+          }
+          if (sort === 'random') {
+            return deterministicRandomSort(a, b, randomSortSeed, getResourceStableKey);
           }
           return 0;
         })

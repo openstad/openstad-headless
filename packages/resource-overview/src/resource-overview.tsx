@@ -11,7 +11,7 @@ import { Filters, PostcodeAutoFillLocation } from '@openstad-headless/ui/src/ste
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
-import { canLikeResource, hasRole } from '@openstad-headless/lib';
+import { deterministicRandomSort, getScopedSessionRandomSortSeed, canLikeResource, hasRole } from '@openstad-headless/lib';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
 import '@utrecht/component-library-css';
@@ -49,6 +49,14 @@ function calcCrow(coords1: PostcodeAutoFillLocation, coords2: PostcodeAutoFillLo
   var d = R * c;
   return d;
 }
+
+const getResourceStableKey = (resource: any) => {
+  return String(
+    resource?.uniqueId ||
+    resource?.id ||
+    `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+  );
+};
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -707,6 +715,12 @@ function ResourceOverviewInner({
 
   const [resources, setResources] = useState<Array<any>>([]);
   const [filteredResources, setFilteredResources] = useState<Array<any>>([]);
+  const randomSortSeed = useMemo(() => {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const search = typeof window !== 'undefined' ? window.location.search : '';
+    const seedScope = `${props.projectId || 'project'}:${pathname}:${search}`;
+    return getScopedSessionRandomSortSeed(seedScope, 'resourceOverviewRandomSortSeed');
+  }, [props.projectId]);
 
   const projectIds = selectedProjects
     ?.filter(project => !project?.excludeResourcesInOverview)
@@ -889,7 +903,7 @@ function ResourceOverviewInner({
           return a.yes - b.yes;
         }
         if (sort === 'random') {
-          return Math.random() - 0.5;
+          return deterministicRandomSort(a, b, randomSortSeed, getResourceStableKey);
         }
         if (sort === 'score') {
           return (b.score || 0) - (a.score || 0);
@@ -899,7 +913,7 @@ function ResourceOverviewInner({
       });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location, groupedTags]);
+  }, [resources, tags, statuses, search, sort, allTags, excludeTags, includeTags, location, groupedTags, randomSortSeed]);
 
   useEffect(() => {
     if (filteredResources) {
