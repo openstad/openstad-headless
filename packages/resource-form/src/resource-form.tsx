@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import hasRole from '../../lib/has-role';
 import type { ResourceFormWidgetProps } from "./props.js";
 import { Banner, Button, Spacer } from "@openstad-headless/ui/src/index.js";
@@ -40,6 +40,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { loginText, loginButtonText, allowAnonymousSubmissions } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
     const { confirmationUser, confirmationAdmin } = props.confirmation || {};
     const [disableSubmit, setDisableSubmit] = useState(false);
+    const formStartTimeRef = useRef<number>(Date.now());
 
     let resourceId: string | undefined = String(getResourceId({
         url: document.location.href
@@ -206,6 +207,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
     async function onSubmit(formData: any) {
         setDisableSubmit(true);
+        formData.__timeToSubmitMs = Math.max(Date.now() - formStartTimeRef.current, 0);
 
         const finalFormData = configureFormData(formData, true);
 

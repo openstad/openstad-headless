@@ -322,8 +322,8 @@ const defaultItemRenderer = (
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
     : (Array.isArray(resource?.tags) ? resource.tags : []);
 
-  resourceFilteredTags = resourceFilteredTags?.length
-    ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+  resourceFilteredTags = resourceFilteredTags.length
+    ? resourceFilteredTags.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
       if (a.seqnr === undefined || a.seqnr === null) return 1;
       if (b.seqnr === undefined || b.seqnr === null) return -1;
       return a.seqnr - b.seqnr;

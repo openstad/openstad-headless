@@ -57,6 +57,11 @@ module.exports = function( db, sequelize, DataTypes ) {
 
       }
     },
+    isSpam: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
 
   });
 
