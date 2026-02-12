@@ -359,7 +359,14 @@ export default function ProjectResources() {
                       {resource.id}
                     </Paragraph>
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
-                      {resource.title}
+                      <span className="inline-flex items-center gap-2">
+                        {resource.title}
+                        {resource.isSpam ? (
+                          <span className="inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                            Waarschijnlijk spam
+                          </span>
+                        ) : null}
+                      </span>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
                       {resource.yes || 0}
