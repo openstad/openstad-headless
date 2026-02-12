@@ -6,6 +6,7 @@ import {PostcodeAutoFillLocation} from "@openstad-headless/ui/src/stem-begroot-a
 export type BaseMapWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
+    adminOnlyPolygons?: any;
     customPolygon?: any;
     interactionType?: 'default' | 'direct';
     mapDataLayers?: any;

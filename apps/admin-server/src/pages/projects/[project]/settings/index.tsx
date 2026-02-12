@@ -111,7 +111,7 @@ export default function ProjectSettings() {
       setBasicAuthActive(data?.config?.basicAuth?.active)
       setBasicAuthInitial(false)
     }
-  }, [data, checkboxInitial]);
+  }, [data, checkboxInitial, basicAuthInitial, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -494,7 +494,7 @@ export default function ProjectSettings() {
                 <div className="space-y-4">
                   <div>
                     Wanneer je het project beëindigt, sluiten automatisch de mogelijkheden om plannen in te dienen,
-                    reacties te plaatsen en te stemmen.
+                    reacties te plaatsen en te stemmen. Ook wordt automatisch het aanmaken van nieuwe gebruikers uitgeschakeld.
                   </div>
                   <div>
                     Project beëindigen

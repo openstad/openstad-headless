@@ -20,6 +20,7 @@ export type EnqueteProps = {
   datalayer?: Array<DataLayer>;
   enableOnOffSwitching?: boolean;
   infoBlockStyle?: string;
+  allowedPolygons?: Array<{ id: number; name: string }>;
   enableDraftPersistence?: boolean;
   draftRetentionHours?: number;
 };

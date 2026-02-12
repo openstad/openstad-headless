@@ -16,6 +16,34 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Input } from "@/components/ui/input";
 import { useFieldDebounce } from "@/hooks/useFieldDebounce";
+import {CheckboxList} from "@/components/checkbox-list";
+import React from "react";
+
+type ShareOption = 'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink';
+const shareOptions: [ShareOption, ...ShareOption[]] = [
+  'facebook',
+  'x',
+  'mail',
+  'whatsapp',
+  'linkedin',
+  'copylink',
+];
+
+const shareOptionLabels: Record<ShareOption, string> = {
+  facebook: 'Facebook',
+  x: 'X',
+  mail: 'E-mail',
+  whatsapp: 'WhatsApp',
+  linkedin: 'LinkedIn',
+  copylink: 'Kopieer link',
+};
+
+type ShareItem = { value: ShareOption; label: string };
+
+const shareItems: ShareItem[] = shareOptions.map((value) => ({
+  value,
+  label: shareOptionLabels[value],
+}));
 
 const formSchema = z.object({
   displayImage: z.boolean(),
@@ -45,7 +73,10 @@ const formSchema = z.object({
   urlWithResourceFormForEditing: z.string().optional(),
   displayDeleteButton: z.boolean().optional(),
   displayDeleteEditButtonOnTop: z.boolean().optional(),
+  selectedSocialShareOptions: z.array(z.enum(shareOptions)).optional(),
 });
+
+const defaultShareValues: ShareOption[] = [...shareOptions];
 
 export default function WidgetResourceDetailDisplay(
   props: ResourceDetailWidgetProps & EditFieldProps<ResourceDetailWidgetProps>
@@ -90,6 +121,9 @@ export default function WidgetResourceDetailDisplay(
       displayDeleteButton: undefinedToTrueOrProp(props?.displayDeleteButton),
       urlWithResourceFormForEditing: props?.urlWithResourceFormForEditing || '',
       displayDeleteEditButtonOnTop: props?.displayDeleteEditButtonOnTop || false,
+      selectedSocialShareOptions: typeof props?.selectedSocialShareOptions === 'undefined'
+        ? defaultShareValues
+        : props?.selectedSocialShareOptions || []
     },
   });
 
@@ -479,6 +513,42 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          { form.watch("displaySocials") && (
+            <FormField
+              control={form.control}
+              name="selectedSocialShareOptions"
+              render={({ field }) => (
+                <FormItem>
+                  <CheckboxList<ShareItem>
+                    form={form}
+                    fieldName="selectedSocialShareOptions"
+                    fieldLabel="Gedeelde social media opties"
+                    label={(t) => t.label}
+                    keyPerItem={(t) => `${t.value}`}
+                    layout={'vertical'}
+                    items={shareItems}
+                    selectedPredicate={(t) =>
+                      // @ts-ignore
+                      form
+                        ?.getValues('selectedSocialShareOptions')
+                        ?.findIndex((tg) => tg === `${t.value}`) > -1
+                    }
+                    onValueChange={(share: { value: ShareOption, label: string }, checked) => {
+                      const ids = form.getValues('selectedSocialShareOptions') ?? [];
+
+                      const idsToSave = (checked
+                        ? [...ids, share.value]
+                        : ids.filter((id) => id !== `${share.value}`));
+
+                      form.setValue('selectedSocialShareOptions', idsToSave);
+                      props.onFieldChanged("selectedSocialShareOptions", idsToSave);
+                    }}
+                  />
+                </FormItem>
+              )}
+            />
+          )}
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

@@ -18,6 +18,7 @@ import WidgetChoiceGuideChoiceOptions from "@/pages/projects/[project]/widgets/c
 import WidgetChoiceGuideGeneralSettings from "@/pages/projects/[project]/widgets/choiceguide/[id]/settings";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
+import WidgetChoiceGuidePolygons from "@/pages/projects/[project]/widgets/choiceguide/[id]/polygons";
 import {ChoiceGuideProps} from "../../../../../../../../../packages/choiceguide/src/props";
 
 export const getServerSideProps = withApiUrl;
@@ -59,6 +60,7 @@ export default function WidgetChoiceGuide({
               <TabsTrigger value="choiceOptions">Keuze opties</TabsTrigger>
               <TabsTrigger value="generalSettings">Algemene instellingen</TabsTrigger>
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
+              <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
@@ -145,6 +147,24 @@ export default function WidgetChoiceGuide({
                     }}
                   />
                 </>
+              )}
+            </TabsContent>
+            <TabsContent value="polygons" className="p-0">
+              {previewConfig && (
+                <WidgetChoiceGuidePolygons
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
               )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">

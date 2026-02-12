@@ -68,7 +68,7 @@ module.exports = async function getUser( req, res, next ) {
  * @returns {*}
  */
 function nextWithEmptyUser(req, res, next) {
-  req.user = {};
+  req.user = { role: 'anonymous', id: null };
   return next();
 }
 
