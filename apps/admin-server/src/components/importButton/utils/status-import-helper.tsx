@@ -55,3 +55,34 @@ export async function processStatuses(
   
   return statusIds
 }
+
+export function extractUniqueStatuses(values: any[]): Set<string> {
+  const unique = new Set<string>();
+  values.forEach(row => {
+    if (row.statuses) {
+      const names = row.statuses.trim().split('|').map((n: string) => n.trim());
+      names.forEach((n: string) => n && unique.add(n));
+    }
+  });
+  return unique;
+}
+
+export async function prepareStatuses(
+  uniqueStatuses: Set<string>,
+  existingStatuses: any[],
+  createStatusFn: (name: string, seqnr: number, addToNewResources: boolean) => Promise<any>
+): Promise<Map<string, number>> {
+  const mapping = new Map<string, number>();
+  const maxSeqnr = existingStatuses.length > 0 
+    ? Math.max(...existingStatuses.map((s: any) => s.seqnr || 0))
+    : 0;
+  
+  let index = 1;
+  for (const statusName of Array.from(uniqueStatuses)) {
+    const statusId = await getOrCreateStatus(statusName, maxSeqnr + index, existingStatuses, createStatusFn);
+    mapping.set(statusName.toLowerCase(), statusId);
+    index++;
+  }
+  
+  return mapping;
+}
