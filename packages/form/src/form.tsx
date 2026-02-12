@@ -399,8 +399,8 @@ function Form({
             const uniqueKey = `${field.fieldKey || currentPage}_${index}`;
 
             return field.type === 'pagination' ? null : (
-              // @ts-ignore
               <div
+                // @ts-ignore
                 className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`}
                 key={uniqueKey}>
                 {renderField(field, index, randomId, fieldInvalid)}
