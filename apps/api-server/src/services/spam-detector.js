@@ -50,6 +50,8 @@ function removeSpamMetaFields(payload = {}) {
 }
 
 function analyzeSpamPayload(payload = {}, options = {}) {
+  // Only evaluate non-trivial text fields. Very short values generate noise
+  // (e.g. names or short answers) and are not useful for this detector.
   const textCandidates = Object.entries(payload)
     .filter(([, value]) => typeof value === 'string')
     .map(([, value]) => getStringValue(value))
@@ -58,7 +60,12 @@ function analyzeSpamPayload(payload = {}, options = {}) {
       if (value.length < 12) return false;
       return true;
     });
+
+  // Primary signal: fields that statistically look like generated/gibberish text.
   const randomLikeCount = textCandidates.filter(isLikelyRandomText).length;
+
+  // Secondary signal: long, compact strings with unusual mixed casing.
+  // These often show up in automated spam payloads and random token-like input.
   const compactMixedCaseCount = textCandidates.filter((value) => {
     const lettersOnly = value.replace(/[^a-zA-Z]/g, '');
     if (lettersOnly.length < 14) return false;
@@ -67,13 +74,25 @@ function analyzeSpamPayload(payload = {}, options = {}) {
     const uppercaseRatio = uppercaseCount / lettersOnly.length;
     return uppercaseRatio > 0.2 && uppercaseRatio < 0.95;
   }).length;
+
+  // Metadata signal: submissions sent very quickly after form load are more likely bot traffic.
+  // __timeToSubmitMs is injected upstream and removed before persistence.
   const timeToSubmitMs = Number(payload.__timeToSubmitMs);
   const veryFastSubmit =
     Number.isFinite(timeToSubmitMs) && timeToSubmitMs > 0 && timeToSubmitMs < 2500;
+
   const candidateCount = textCandidates.length;
   const suspiciousCount = Math.max(randomLikeCount, compactMixedCaseCount);
+
+  // Ratio keeps scoring fair across large and small forms.
+  // A single suspicious field in a very large form should weigh less heavily.
   const suspiciousRatio =
     candidateCount > 0 ? suspiciousCount / candidateCount : 0;
+
+  // Scoring model:
+  // - random-like text is weighted strongest
+  // - mixed-case compact text is a weaker indicator
+  // - high suspicious ratio and very fast submit add context points
   const scoreBreakdown = {
     randomLikePoints: randomLikeCount * 2,
     compactMixedCasePoints: compactMixedCaseCount,
@@ -81,6 +100,8 @@ function analyzeSpamPayload(payload = {}, options = {}) {
     veryFastSubmitPoints: veryFastSubmit ? 1 : 0,
   };
   const spamScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+
+  // Tuned thresholds for high-confidence spam classification.
   const thresholds = {
     minEvidence: 2,
     suspiciousRatio: 0.25,
@@ -91,6 +112,9 @@ function analyzeSpamPayload(payload = {}, options = {}) {
   const passesRatioThreshold = suspiciousRatio >= thresholds.suspiciousRatio;
   const passesScoreThreshold = spamScore >= thresholds.spamScore;
 
+  // Decision rule:
+  // 1) Main path requires enough evidence + ratio + score.
+  // 2) Fallback catches obvious "fast bot" behavior in shorter forms.
   const isProbablySpam =
     (hasEnoughEvidence && passesRatioThreshold && passesScoreThreshold) ||
     (randomLikeCount >= 1 && veryFastSubmit && textCandidates.length >= 2);
@@ -134,14 +158,14 @@ function logSpamAnalysis({ routeName, req, analysis }) {
     widgetId: req?.body?.widgetId,
     ip: req?.ip,
     isProbablySpam: !!analysis?.isProbablySpam,
-    totaleSpamscore: `${analysis?.spamScore || 0}/${scoreThreshold}`,
-    scoreSignalen: {
-      'Aantal velden met willekeurige tekst': `${randomLikeCount}/${randomLikeThreshold} -> ${scoreBreakdown.randomLikePoints || 0} punten`,
-      'Aantal velden met verdacht hoofdletter-/kleineletterpatroon': `${compactMixedCaseCount}/${randomLikeThreshold} -> ${scoreBreakdown.compactMixedCasePoints || 0} punten`,
-      'Verdachte verhouding van signalen': `${suspiciousRatio.toFixed(3)}/${ratioThreshold} -> ${scoreBreakdown.ratioPoints || 0} punten`,
-      'Tijd tot verzenden (ms)': `${timeToSubmitMs ?? 'n.v.t.'}/${timeThresholdMs} -> ${scoreBreakdown.veryFastSubmitPoints || 0} punten`,
+    totalSpamScore: `${analysis?.spamScore || 0}/${scoreThreshold}`,
+    scoreSignals: {
+      'Fields with random-like text': `${randomLikeCount}/${randomLikeThreshold} -> ${scoreBreakdown.randomLikePoints || 0} points`,
+      'Fields with suspicious upper/lowercase pattern': `${compactMixedCaseCount}/${randomLikeThreshold} -> ${scoreBreakdown.compactMixedCasePoints || 0} points`,
+      'Suspicious signal ratio': `${suspiciousRatio.toFixed(3)}/${ratioThreshold} -> ${scoreBreakdown.ratioPoints || 0} points`,
+      'Time to submit (ms)': `${timeToSubmitMs ?? 'n/a'}/${timeThresholdMs} -> ${scoreBreakdown.veryFastSubmitPoints || 0} points`,
     },
-    aantalBeoordeeldeVelden: candidateCount,
+    evaluatedFieldCount: candidateCount,
     timestamp: new Date().toISOString(),
   });
 }
