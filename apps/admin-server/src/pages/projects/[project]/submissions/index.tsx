@@ -15,12 +15,23 @@ import {Select, SelectTrigger, SelectContent, SelectValue, SelectItem} from "@/c
 import { Checkbox } from '@/components/ui/checkbox';
 import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 
+interface Submission {
+  id: string;
+  projectId: number;
+  userId: number | null;
+  widgetId: number;
+  status: 'approved' | 'pending' | 'unapproved';
+  submittedData: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function ProjectSubmissions() {
   const router = useRouter();
   const { project } = router.query;
   const { data, remove } = useSubmissions(project as string);
 
-  const [filterData, setFilterData] = useState(data);
+  const [filterData, setFilterData] = useState<Submission[]>(data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
@@ -33,7 +44,7 @@ export default function ProjectSubmissions() {
   const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
-    let loadedSubmissions = (data || []) as { createdAt: string }[];
+    let loadedSubmissions = (data || []) as Submission[];
 
     const sortedData = loadedSubmissions.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 
