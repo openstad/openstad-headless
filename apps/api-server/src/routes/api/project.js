@@ -711,7 +711,13 @@ router.route('/:projectId') //(\\d+)
         req.results = result;
 				return checkHostStatus({id: result.id});
 			})
-			.then(() => {
+			.then(async () => {
+				// Re-read so response includes hostStatus written by checkHostStatus
+				const fresh = await db.Project.scope('includeConfig').findByPk(req.results.id);
+				if (fresh) {
+					fresh.auth = req.results.auth;
+					req.results = fresh;
+				}
 				next();
         return null;
 			})

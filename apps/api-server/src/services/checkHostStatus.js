@@ -195,9 +195,9 @@ const checkHostStatus = async (conditions) => {
         return;
       }
       
-      let hostStatus = project.hostStatus;
-      //ensure it's an object so we dont have to worry about checks later
-      hostStatus     = hostStatus ? hostStatus : {};          //
+      // Clone to avoid Sequelize JSON mutation trap: mutating the
+      // original reference in-place makes Sequelize think nothing changed.
+      let hostStatus = project.hostStatus ? { ...project.hostStatus } : {};
       
       const k8sApi = await getK8sApi();
       let ingress = '';
