@@ -1,12 +1,14 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -26,7 +28,6 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Input} from "@/components/ui/input";
 
 const formSchema = z.object({
   resourceId: z.string(),
@@ -85,7 +86,11 @@ export default function WidgetRawGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource</FormLabel>
-                <FormDescription>Als er geen resource gekoppeld is, wordt gecontroleerd of er een resource aanwezig is in de URL. In dat geval wordt deze resource automatisch gekoppeld.</FormDescription>
+                <FormDescription>
+                  Als er geen resource gekoppeld is, wordt gecontroleerd of er
+                  een resource aanwezig is in de URL. In dat geval wordt deze
+                  resource automatisch gekoppeld.
+                </FormDescription>
                 <Select
                   onValueChange={(e) => {
                     field.onChange(e);
@@ -111,21 +116,26 @@ export default function WidgetRawGeneral(
             )}
           />
 
-          { form.watch('resourceId') === '' ? (
+          {form.watch('resourceId') === '' ? (
             <FormField
               control={form.control}
               name="resourceIdRelativePath"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Geen specifieke inzending gekoppeld?
-                  </FormLabel>
-                  <em className="text-xs">Beschrijf hoe de inzending gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                  <FormLabel>Geen specifieke inzending gekoppeld?</FormLabel>
+                  <em className="text-xs">
+                    Beschrijf hoe de inzending gehaald wordt uit de url:
+                    (/pad/naar/[id]) of laat leeg om terug te vallen op
+                    ?openstadResourceId
+                  </em>
                   <FormControl>
-                    <Input {...field} onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }} />
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -161,32 +171,24 @@ export default function WidgetRawGeneral(
                     <li className="ml-4">{`{{currentUser}} -> Bevat gegevens van de ingelogde gebruiker. Bijvoorbeeld: {{currentUser.name}} of {{currentUser.email}}`}</li>
                     <li className="ml-4">{`{{resource}} -> Bevat alle data van de resource`}</li>
                   </ul>
-                  <br/>
+                  <br />
                   <h2>Te gebruiken filters:</h2>
                   <ul className="list-disc">
                     <li className="ml-4">{`{{ variable | dump }}: Laat de inhoud van een object zien.`}</li>
-                    <li
-                      className="ml-4">{`{{ variable | cleanArray }}: Maakt van een lijst een tekst met de waardes gescheiden door komma's. Bijvoorbeeld: "['Optie 1', 'Optie 2']" wordt omgezet naar: Optie 1, Optie 2`}</li>
-                    <li
-                      className="ml-4">{`{{ variable | capitalize }}: Zet de eerste letter in hoofdletters.`}</li>
-                    <li
-                      className="ml-4">{`{{ variable | truncate(10) }}: Kort een tekst in tot de opgegeven lengte. Na deze lengte wordt er '...' toegevoegd.`}</li>
+                    <li className="ml-4">{`{{ variable | cleanArray }}: Maakt van een lijst een tekst met de waardes gescheiden door komma's. Bijvoorbeeld: "['Optie 1', 'Optie 2']" wordt omgezet naar: Optie 1, Optie 2`}</li>
+                    <li className="ml-4">{`{{ variable | capitalize }}: Zet de eerste letter in hoofdletters.`}</li>
+                    <li className="ml-4">{`{{ variable | truncate(10) }}: Kort een tekst in tot de opgegeven lengte. Na deze lengte wordt er '...' toegevoegd.`}</li>
                     <li className="ml-4">{`{{ variable | lowercase }}: Zet een tekst om naar kleine letters.`}</li>
                     <li className="ml-4">{`{{ variable | uppercase }}: Zet een tekst om naar hoofdletters.`}</li>
-                    <li
-                      className="ml-4">{`{{ variable | replace('zoek', 'vervang') }}: Vervangt een deel van de tekst door iets anders.`}</li>
+                    <li className="ml-4">{`{{ variable | replace('zoek', 'vervang') }}: Vervangt een deel van de tekst door iets anders.`}</li>
                   </ul>
-                  <br/>
+                  <br />
                   <h2>Overige functies:</h2>
                   <ul className="list-disc">
-                    <li
-                      className="ml-4">{`{{ resource | tags }}: Laat alle gekoppelde tags zien gescheiden met komma's`}</li>
-                    <li
-                      className="ml-4">{`{{ resource | tagGroup('[group]') }}: Laat alle gekoppelde tags van de taggroep [group] zien gescheiden met komma's. [group] dient vervangen te worden door de naam van de taggroep.`}</li>
-                    <li
-                      className="ml-4">{`{{ resource | status }}: Laat alle gekoppelde statussen zien gescheiden met komma's`}</li>
-                   <li
-                      className="ml-4">{`window.openstadLogout(): JavaScript functie om uit te loggen. Voorbeeld: <a href="#" onclick="window.openstadLogout(); return false;">Uitloggen</a>`}</li>                       
+                    <li className="ml-4">{`{{ resource | tags }}: Laat alle gekoppelde tags zien gescheiden met komma's`}</li>
+                    <li className="ml-4">{`{{ resource | tagGroup('[group]') }}: Laat alle gekoppelde tags van de taggroep [group] zien gescheiden met komma's. [group] dient vervangen te worden door de naam van de taggroep.`}</li>
+                    <li className="ml-4">{`{{ resource | status }}: Laat alle gekoppelde statussen zien gescheiden met komma's`}</li>
+                    <li className="ml-4">{`window.openstadLogout(): JavaScript functie om uit te loggen. Voorbeeld: <a href="#" onclick="window.openstadLogout(); return false;">Uitloggen</a>`}</li>
                   </ul>
                 </div>
                 <FormControl>

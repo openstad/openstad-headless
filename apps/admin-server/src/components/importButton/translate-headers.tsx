@@ -1,4 +1,4 @@
-import { reverseKeyMap } from "@/lib/keyMap";
+import { reverseKeyMap } from '@/lib/keyMap';
 
 export const translateHeaders = (row: Record<string, any>) => {
   const translated: Record<string, any> = {};

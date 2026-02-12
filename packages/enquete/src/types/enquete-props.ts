@@ -1,4 +1,4 @@
-import type { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
+import type { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 export type EnqueteProps = {
   widgetId?: number;
@@ -49,8 +49,8 @@ export type Item = {
   infoBlockExtraButton?: string;
   infoBlockExtraButtonTitle?: string;
   fieldRequired?: boolean;
-  maxChoices?: string,
-  maxChoicesMessage?: string,
+  maxChoices?: string;
+  maxChoicesMessage?: string;
   showSmileys?: boolean;
   placeholder?: string;
   defaultValue?: string;
@@ -118,9 +118,9 @@ export type Confirmation = {
 export type Matrix = {
   columns: Array<MatrixOption>;
   rows: Array<MatrixOption>;
-}
+};
 
 export type MatrixOption = {
   trigger: string;
   text?: string;
-}
+};

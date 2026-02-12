@@ -1,13 +1,13 @@
 var db = require('../db').sequelize;
 
 module.exports = {
-  up: function() {
+  up: function () {
     try {
       return db.query(`
         ALTER TABLE clients DROP siteUrl;
       `);
-    } catch(e) {
+    } catch (e) {
       return true;
     }
   },
-}
+};

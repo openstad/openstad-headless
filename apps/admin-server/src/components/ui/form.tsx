@@ -1,6 +1,8 @@
-import * as React from 'react';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
+import * as React from 'react';
 import {
   Controller,
   ControllerProps,
@@ -10,9 +12,6 @@ import {
   useForm,
   useFormContext,
 } from 'react-hook-form';
-
-import { cn } from '@/lib/utils';
-import { Label } from '@/components/ui/label';
 
 const Form = ({
   className,
@@ -92,7 +91,14 @@ const FormItem = React.forwardRef<
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} className={cn('space-y-2 col-span-full md:col-span-1 flex flex-col', className)} {...props} />
+      <div
+        ref={ref}
+        className={cn(
+          'space-y-2 col-span-full md:col-span-1 flex flex-col',
+          className
+        )}
+        {...props}
+      />
     </FormItemContext.Provider>
   );
 });
@@ -163,9 +169,13 @@ const FormMessage = React.forwardRef<
   let body: string | React.ReactNode = '';
 
   if (error && Array.isArray(error)) {
-    body = error.map((e) => {
-      return Object.keys(e).map((key) => `${key}: ${e[key]?.message}`).join(', ');
-    }).join(', ');
+    body = error
+      .map((e) => {
+        return Object.keys(e)
+          .map((key) => `${key}: ${e[key]?.message}`)
+          .join(', ');
+      })
+      .join(', ');
   } else {
     body = error ? String(error?.message) : children;
   }

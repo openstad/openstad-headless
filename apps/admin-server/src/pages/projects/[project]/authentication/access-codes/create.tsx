@@ -1,10 +1,4 @@
-import { PageLayout } from '@/components/ui/page-layout';
-import React from 'react';
-import * as z from 'zod';
-
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/router';
 import {
   Form,
   FormControl,
@@ -13,21 +7,26 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Heading } from '@/components/ui/typography';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '@/components/ui/input';
+import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
-import toast from 'react-hot-toast';
+import { Heading } from '@/components/ui/typography';
 import useAccessCodes from '@/hooks/use-access-codes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
   accessCode: z.string(),
-})
+});
 
 export default function ProjectCodeCreate() {
-    const router = useRouter();
-    const { project } = router.query;
-    const { createAccessCode } = useAccessCodes(project as string);
+  const router = useRouter();
+  const { project } = router.query;
+  const { createAccessCode } = useAccessCodes(project as string);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -35,23 +34,23 @@ export default function ProjectCodeCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const codes = await createAccessCode(values.accessCode)
+    const codes = await createAccessCode(values.accessCode);
     if (codes) {
       toast.success('De toegangscode is aangemaakt!');
       router.push(`/projects/${project}/access-codes`);
     } else {
-      toast.error('Er is helaas iets mis gegaan.')
+      toast.error('Er is helaas iets mis gegaan.');
     }
   }
-    
+
   return (
     <div>
       <PageLayout
-        pageHeader='Projecten'
+        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
-            url: '/projects'
+            url: '/projects',
           },
           {
             name: 'Authenticatie',
@@ -78,11 +77,9 @@ export default function ProjectCodeCreate() {
                 name="accessCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Toegangscode
-                    </FormLabel>
+                    <FormLabel>Toegangscode</FormLabel>
                     <FormControl>
-                      <Input placeholder='' {...field} />
+                      <Input placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

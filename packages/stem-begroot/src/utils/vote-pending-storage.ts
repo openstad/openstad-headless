@@ -2,7 +2,9 @@ const STORAGE_KEY_PREFIX_REGULAR = 'oscBegrootVotePending';
 const STORAGE_KEY_PREFIX_PER_TAG = 'oscBegrootVotePendingPerTag';
 
 export type VotePendingData = { [resourceId: string]: string };
-export type VotePendingPerTagData = { [tag: string]: { [resourceId: string]: string } };
+export type VotePendingPerTagData = {
+  [tag: string]: { [resourceId: string]: string };
+};
 
 class VotePendingStorage {
   private storageKeyRegular: string;
@@ -69,4 +71,3 @@ export const createVotePendingStorage = (
 ): VotePendingStorage => {
   return new VotePendingStorage(projectId);
 };
-

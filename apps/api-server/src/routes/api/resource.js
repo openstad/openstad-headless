@@ -11,11 +11,11 @@ const c = require('config');
 
 const { Op } = require('sequelize');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
-const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
-  return hasRole( user, 'editor')
+  return hasRole(user, 'editor');
 };
 
 // scopes: for all get requests
@@ -105,7 +105,11 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeUser');
   }
 
-  if (req?.query?.projectIds && (typeof req?.query?.projectIds === "object" || typeof req?.query?.projectIds === "string")) {
+  if (
+    req?.query?.projectIds &&
+    (typeof req?.query?.projectIds === 'object' ||
+      typeof req?.query?.projectIds === 'string')
+  ) {
     let projectIds = req.query.projectIds;
 
     if (!Array.isArray(projectIds)) projectIds = [projectIds];
@@ -140,8 +144,11 @@ router
 
     let projectIds = req?.query?.projectIds || [];
 
-    if (!Array.isArray(projectIds) || ( Array.isArray(projectIds) && projectIds.length === 0 ) ) {
-        dbQuery.where.projectId = req.params.projectId;
+    if (
+      !Array.isArray(projectIds) ||
+      (Array.isArray(projectIds) && projectIds.length === 0)
+    ) {
+      dbQuery.where.projectId = req.params.projectId;
     }
 
     if (dbQuery.hasOwnProperty('order')) {
@@ -193,7 +200,7 @@ router
     }
     return next();
   })
-  .post( rateLimiter(), function (req, res, next) {
+  .post(rateLimiter(), function (req, res, next) {
     try {
       req.body.location = req.body.location
         ? JSON.parse(req.body.location)
@@ -209,7 +216,7 @@ router
     }
 
     let userId = req.user.id;
-    if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
+    if (hasRole(req.user, 'admin') && req.body.userId) userId = req.body.userId;
 
     if (!!req.body.submittedData) {
       req.body = {
@@ -231,23 +238,31 @@ router
     // Check if resource has images and if so, check their domains
     let imageServer = process.env.IMAGE_APP_URL;
     if (!imageServer) {
-      console.log ('Error: No image server found, please provide IMAGE_APP_URL environment variable.');
+      console.log(
+        'Error: No image server found, please provide IMAGE_APP_URL environment variable.'
+      );
       return next(createError(500, 'No image server found'));
     }
     // Add protocol to IMAGE_APP_URL for `new URL` to work correctly.
-    if (!imageServer.startsWith('http://') && !imageServer.startsWith('https://')) {
+    if (
+      !imageServer.startsWith('http://') &&
+      !imageServer.startsWith('https://')
+    ) {
       imageServer = 'https://' + imageServer;
     }
     const hostname = new URL(imageServer).hostname;
-    if(data.images && Array.isArray(data.images) && data.images.length > 0) {
-      data.images.forEach(image => {
-        try{
+    if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+      data.images.forEach((image) => {
+        try {
           // Add protocol to image URL for `new URL` to work correctly.
-          if (!image.url.startsWith('http://') && !image.url.startsWith('https://')) {
+          if (
+            !image.url.startsWith('http://') &&
+            !image.url.startsWith('https://')
+          ) {
             image.url = 'https://' + image.url;
           }
           const url = new URL(image.url);
-          if(url.hostname !== hostname) {
+          if (url.hostname !== hostname) {
             return next(createError(400, 'Invalid image url'));
           }
         } catch (err) {
@@ -303,10 +318,14 @@ router
     // statuses
     let statuses = req.body.statuses || [];
     if (!Array.isArray(statuses)) statuses = [statuses];
-    statuses = statuses.filter(status => Number.isInteger(status));
-    let defaultStatusses = await db.Status.findAll({ where: { projectId: req.project.id, addToNewResources: true } });
-    statuses = statuses.concat( defaultStatusses.map( status => status.id ) );
-    statuses = statuses.filter( (value, index) => statuses.indexOf(value) === index ) // unique
+    statuses = statuses.filter((status) => Number.isInteger(status));
+    let defaultStatusses = await db.Status.findAll({
+      where: { projectId: req.project.id, addToNewResources: true },
+    });
+    statuses = statuses.concat(defaultStatusses.map((status) => status.id));
+    statuses = statuses.filter(
+      (value, index) => statuses.indexOf(value) === index
+    ); // unique
     if (statuses.length) {
       await req.results.setStatuses(statuses);
       req.scope.push('includeStatuses');
@@ -317,11 +336,13 @@ router
     // tags
     let tags = req.body.tags || [];
     if (!Array.isArray(tags)) tags = [tags];
-    tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
-    let defaultTags = await db.Tag.findAll({ where: { projectId: req.project.id, addToNewResources: true } });
-    tags = tags.map( tag => parseInt(tag) );
-    tags = tags.concat( defaultTags.map( status => status.id ) );
-    tags = tags.filter( (value, index) => tags.indexOf(value) === index ) // unique
+    tags = tags.filter((tag) => !Number.isNaN(parseInt(tag)));
+    let defaultTags = await db.Tag.findAll({
+      where: { projectId: req.project.id, addToNewResources: true },
+    });
+    tags = tags.map((tag) => parseInt(tag));
+    tags = tags.concat(defaultTags.map((status) => status.id));
+    tags = tags.filter((value, index) => tags.indexOf(value) === index); // unique
     if (tags.length) {
       await req.results.setTags(tags);
       req.scope.push('includeTags');
@@ -342,66 +363,81 @@ router
 
   // TODO: Add notifications
   .post(async function (req, res, next) {
-    const sendConfirmationToUser = typeof(req.body['confirmationUser']) !== 'undefined' ? req.body['confirmationUser'] : false;
-    const sendConfirmationToAdmin = typeof(req.body['confirmationAdmin']) !== 'undefined' ? req.body['confirmationAdmin'] : false;
+    const sendConfirmationToUser =
+      typeof req.body['confirmationUser'] !== 'undefined'
+        ? req.body['confirmationUser']
+        : false;
+    const sendConfirmationToAdmin =
+      typeof req.body['confirmationAdmin'] !== 'undefined'
+        ? req.body['confirmationAdmin']
+        : false;
 
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
-      if(tags && tags.length > 0){
+      if (tags && tags.length > 0) {
         // Convert to csv string
-        const emailReceivers = (await Promise.all(tags.flatMap(async (tag) => {
-          const {useDifferentSubmitAddress, newSubmitAddress} = await tag.dataValues;
-          if(useDifferentSubmitAddress && newSubmitAddress !== null){
-            return useDifferentSubmitAddress ? newSubmitAddress.split(',') : [];
-          }
-          return [];
-        }))).filter(data => data !== null && data.length > 0).flat();
+        const emailReceivers = (
+          await Promise.all(
+            tags.flatMap(async (tag) => {
+              const { useDifferentSubmitAddress, newSubmitAddress } =
+                await tag.dataValues;
+              if (useDifferentSubmitAddress && newSubmitAddress !== null) {
+                return useDifferentSubmitAddress
+                  ? newSubmitAddress.split(',')
+                  : [];
+              }
+              return [];
+            })
+          )
+        )
+          .filter((data) => data !== null && data.length > 0)
+          .flat();
 
-        if(emailReceivers.length > 0){
+        if (emailReceivers.length > 0) {
           db.Notification.create({
-            type: "new published resource - admin update",
+            type: 'new published resource - admin update',
             projectId: req.project.id,
             data: {
               userId: req.user.id,
               resourceId: req.results.id,
-              emailReceivers: emailReceivers
-            }
-          })
+              emailReceivers: emailReceivers,
+            },
+          });
         }
       }
 
       if (sendConfirmationToAdmin) {
         db.Notification.create({
-          type: "new published resource - admin update",
+          type: 'new published resource - admin update',
           projectId: req.project.id,
           data: {
             userId: req.user.id,
             resourceId: req.results.id,
-          }
-        })
+          },
+        });
       }
-      
+
       if (sendConfirmationToUser) {
         db.Notification.create({
-          type: "new published resource - user feedback",
+          type: 'new published resource - user feedback',
           projectId: req.project.id,
           data: {
             userId: req.user.id,
-            resourceId: req.results.id
-          }
-        })
+            resourceId: req.results.id,
+          },
+        });
       }
     } else if (!req.query.nomail && !req.body['publishDate']) {
       if (sendConfirmationToUser) {
         db.Notification.create({
-          type: "new concept resource - user feedback",
+          type: 'new concept resource - user feedback',
           projectId: req.project.id,
           data: {
             userId: req.user.id,
-            resourceId: req.results.id
-          }
-        })
+            resourceId: req.results.id,
+          },
+        });
       }
     }
   });
@@ -480,7 +516,7 @@ router
     req.changedToPublished = wasConcept && willNowBePublished;
     next();
   })
-  .put( rateLimiter(), function (req, res, next) {
+  .put(rateLimiter(), function (req, res, next) {
     var resource = req.results;
 
     if (!(resource && resource.can && resource.can('update')))
@@ -537,7 +573,7 @@ router
     const projectId = req.params.projectId;
     const canBeGlobal = req?.query?.includeGlobalTags === 'true';
     const tagEntities = await getValidTags(projectId, tags, canBeGlobal);
-    
+
     const resourceInstance = req.results;
     resourceInstance.setTags(tagEntities).then((result) => {
       // refetch. now with tags
@@ -580,7 +616,11 @@ router
     }
 
     const projectId = req.params.projectId;
-    const statusEntities = await getValidStatuses(projectId, statuses, req.user);
+    const statusEntities = await getValidStatuses(
+      projectId,
+      statuses,
+      req.user
+    );
 
     const resourceInstance = req.results;
     resourceInstance.setStatuses(statusEntities).then((result) => {
@@ -648,129 +688,136 @@ router
       .catch(next);
   });
 
-
 // Multiple resource routes
 // -------------------------
 
 // Delete multiple resources
 router
-    .route ('/delete')
-    .delete(auth.useReqUser)
-    .delete( rateLimiter(), async function (req, res, next)  {
-      let ids = req.body.ids;
+  .route('/delete')
+  .delete(auth.useReqUser)
+  .delete(rateLimiter(), async function (req, res, next) {
+    let ids = req.body.ids;
 
-      if (!ids || !Array.isArray(ids)) {
-        return next(new Error('Invalid request: ids must be an array'));
+    if (!ids || !Array.isArray(ids)) {
+      return next(new Error('Invalid request: ids must be an array'));
+    }
+
+    ids = ids.filter((id) => Number.isInteger(id));
+    if (ids.length === 0) {
+      return next(new Error('Invalid request: no valid ids provided'));
+    }
+
+    try {
+      const resources = await db.Resource.scope(...req.scope).findAll({
+        where: { id: ids },
+      });
+
+      if (resources.length === 0) {
+        return res
+          .status(404)
+          .json({ error: 'No resources found for the provided IDs' });
       }
 
-      ids = ids.filter((id) => Number.isInteger(id));
-      if (ids.length === 0) {
-        return next(new Error('Invalid request: no valid ids provided'));
-      }
-
-      try {
-        const resources = await db.Resource.scope(...req.scope).findAll({
-          where: { id: ids }
-        });
-
-        if (resources.length === 0) {
-          return res.status(404).json({ error: 'No resources found for the provided IDs' });
+      for (const resource of resources) {
+        if (!resource.can || !resource.can('delete')) {
+          return next(
+            new Error(`You cannot delete resource with ID ${resource.id}`)
+          );
         }
-
-        for (const resource of resources) {
-          if (!resource.can || !resource.can('delete')) {
-            return next(new Error(`You cannot delete resource with ID ${resource.id}`));
-          }
-        }
-
-        await db.Resource.destroy({
-          where: { id: ids }
-        });
-
-        res.json({ message: 'Resources deleted successfully' });
-      } catch (error) {
-        next(error);
       }
-    })
+
+      await db.Resource.destroy({
+        where: { id: ids },
+      });
+
+      res.json({ message: 'Resources deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  });
 
 // Duplicate multiple resources
 router
-    .route('/duplicate')
-    .post(auth.useReqUser)
-    .post(rateLimiter(), async function (req, res, next) {
-      let ids = req.body.ids;
-      const projectId = req.params.projectId;
+  .route('/duplicate')
+  .post(auth.useReqUser)
+  .post(rateLimiter(), async function (req, res, next) {
+    let ids = req.body.ids;
+    const projectId = req.params.projectId;
 
-      if (!ids || !Array.isArray(ids)) {
-        return next(new Error('Invalid request: ids must be an array'));
+    if (!ids || !Array.isArray(ids)) {
+      return next(new Error('Invalid request: ids must be an array'));
+    }
+
+    ids = ids.filter((id) => Number.isInteger(id));
+    if (ids.length === 0) {
+      return next(new Error('Invalid request: no valid ids provided'));
+    }
+
+    try {
+      req.scope.push('includeTags', 'includeStatuses');
+      const resources = await db.Resource.scope(...req.scope).findAll({
+        where: { id: ids },
+      });
+
+      if (resources.length === 0) {
+        return res
+          .status(404)
+          .json({ error: 'No resources found for the provided IDs' });
       }
 
-      ids = ids.filter((id) => Number.isInteger(id));
-      if (ids.length === 0) {
-        return next(new Error('Invalid request: no valid ids provided'));
-      }
-
-      try {
-        req.scope.push('includeTags', 'includeStatuses');
-        const resources = await db.Resource.scope(...req.scope).findAll({
-          where: { id: ids }
-        });
-
-        if (resources.length === 0) {
-          return res.status(404).json({ error: 'No resources found for the provided IDs' });
+      for (const resource of resources) {
+        if (!resource.can || !resource.can('create')) {
+          return next(
+            new Error(`You cannot duplicate resource with ID ${resource.id}`)
+          );
         }
+      }
 
-        for (const resource of resources) {
-          if (!resource.can || !resource.can('create')) {
-            return next(new Error(`You cannot duplicate resource with ID ${resource.id}`));
+      const duplicatedResources = await Promise.all(
+        resources.map(async (resource) => {
+          const resourceData = resource.dataValues;
+          const { id, createdAt, updatedAt, deletedAt, ...newResourceData } =
+            resourceData;
+          newResourceData.startDate = newResourceData.publishDate = new Date();
+
+          let statuses = newResourceData.statuses || [];
+          let tags = newResourceData.tags || [];
+
+          tags = getOnlyIds(tags);
+          statuses = getOnlyIds(statuses);
+
+          let finalTags = [];
+          if (Array.isArray(tags) && tags.length > 0) {
+            const projectId = req.params.projectId;
+
+            finalTags = await getValidTags(projectId, tags, true);
           }
-        }
 
-        const duplicatedResources = await Promise.all(
-            resources.map(async (resource) => {
-              const resourceData = resource.dataValues;
-              const { id, createdAt, updatedAt, deletedAt, ...newResourceData } = resourceData;
-              newResourceData.startDate = newResourceData.publishDate = new Date();
+          let finalStatuses = [];
+          if (Array.isArray(statuses) && statuses.length > 0) {
+            const projectId = req.params.projectId;
 
-              let statuses = newResourceData.statuses || [];
-              let tags = newResourceData.tags || [];
+            finalStatuses = await getValidStatuses(projectId, statuses);
+          }
 
-              tags = getOnlyIds(tags);
-              statuses = getOnlyIds(statuses);
+          return db.Resource.create(newResourceData).then((result) => {
+            if (Array.isArray(finalTags) && finalTags.length > 0) {
+              result.setTags(finalTags);
+            }
+            if (Array.isArray(finalStatuses) && finalStatuses.length > 0) {
+              result.setStatuses(finalStatuses);
+            }
 
-              let finalTags = [];
-              if (Array.isArray(tags) && tags.length > 0) {
-                const projectId = req.params.projectId;
+            return result;
+          });
+        })
+      );
 
-                finalTags = await getValidTags(projectId, tags, true);
-              }
-
-              let finalStatuses = [];
-              if (Array.isArray(statuses) && statuses.length > 0) {
-                const projectId = req.params.projectId;
-
-                finalStatuses = await getValidStatuses(projectId, statuses);
-              }
-
-              return db.Resource.create(newResourceData).then((result) => {
-                if (Array.isArray(finalTags) && finalTags.length > 0) {
-                  result.setTags(finalTags);
-                }
-                if (Array.isArray(finalStatuses) && finalStatuses.length > 0) {
-                  result.setStatuses(finalStatuses);
-                }
-
-                return result;
-              });
-            })
-        );
-
-        res.json(duplicatedResources);
-      } catch (error) {
-        next(error);
-      }
-    });
-
+      res.json(duplicatedResources);
+    } catch (error) {
+      next(error);
+    }
+  });
 
 // Get all valid tags of the project based on given ids
 async function getValidTags(projectId, tags, canBeGlobal) {
@@ -801,17 +848,19 @@ async function getValidStatuses(projectId, statuses) {
 
 // Get all ids from an array of objects
 function getOnlyIds(objArr) {
-  return objArr.map((obj) => {
-    if (typeof obj === 'object' && obj?.id ) {
-      let objId = obj?.id;
-      if (typeof objId === 'string') {
-        objId = parseInt(objId);
-      }
+  return objArr
+    .map((obj) => {
+      if (typeof obj === 'object' && obj?.id) {
+        let objId = obj?.id;
+        if (typeof objId === 'string') {
+          objId = parseInt(objId);
+        }
 
-      return objId;
-    }
-    return false;
-  }).filter((obj) => obj !== false);
+        return objId;
+      }
+      return false;
+    })
+    .filter((obj) => obj !== false);
 }
 
 module.exports = router;

@@ -147,7 +147,10 @@
     display: flex;
     flex-direction: column;
   }
-  .resourceOverviewWithMap-container .osc-resource-overview-content #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
+  .resourceOverviewWithMap-container
+    .osc-resource-overview-content
+    #stem-begroot-filter
+    .osc-resources-filter.osc-flex-columned {
     grid-template-columns: 1fr;
   }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import './index.css';
 
 export function Icon({
@@ -19,12 +20,14 @@ export function Icon({
   return (
     <div
       className={`icon ${text === undefined || iconOnly === true ? 'no-label' : ''}`}
-      aria-hidden={iconOnly ? "true" : "false"}
+      aria-hidden={iconOnly ? 'true' : 'false'}
       onClick={onClick}
-      data-description={description ? description : undefined}
-    >
+      data-description={description ? description : undefined}>
       <i className={`${icon} ${variant}`}></i>
-      <p>{description ? <span className='sr-only'>{description}</span>: null}{text}</p>
+      <p>
+        {description ? <span className="sr-only">{description}</span> : null}
+        {text}
+      </p>
     </div>
   );
 }

@@ -45,4 +45,3 @@ export const createSelectedResourcesStorage = (
 ): SelectedResourcesStorage => {
   return new SelectedResourcesStorage(projectId);
 };
-

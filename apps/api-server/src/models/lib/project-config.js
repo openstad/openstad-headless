@@ -1,10 +1,7 @@
 module.exports = {
-
   allowedDomains: {
     type: 'arrayOfStrings',
-    default: [
-      'api.openstad.org'
-    ]
+    default: ['api.openstad.org'],
   },
 
   project: {
@@ -47,7 +44,7 @@ module.exports = {
       anonymizeUserName: {
         type: 'string',
         default: 'Gebruiker is geanonimiseerd',
-      }
+      },
     },
   },
 
@@ -65,7 +62,7 @@ module.exports = {
       provider: {
         type: 'object',
         default: {},
-      }
+      },
     },
   },
 
@@ -132,7 +129,8 @@ module.exports = {
       },
       closedText: {
         type: 'string',
-        default: 'De reactiemogelijkheid is gesloten, u kunt niet meer reageren',
+        default:
+          'De reactiemogelijkheid is gesloten, u kunt niet meer reageren',
       },
       canReply: {
         type: 'boolean',
@@ -154,7 +152,7 @@ module.exports = {
         type: 'number',
         default: 500,
       },
-    }
+    },
   },
 
   users: {
@@ -208,7 +206,15 @@ module.exports = {
       },
       voteType: {
         type: 'enum',
-        values: ['likes', 'count', 'budgeting', 'countPerTag', 'budgetingPerTag', 'countPerTheme', 'budgetingPerTheme'],
+        values: [
+          'likes',
+          'count',
+          'budgeting',
+          'countPerTag',
+          'budgetingPerTag',
+          'countPerTheme',
+          'budgetingPerTheme',
+        ],
         default: 'likes',
       },
       voteValues: {
@@ -216,11 +222,11 @@ module.exports = {
         default: [
           {
             label: 'voor',
-            value: 'yes'
+            value: 'yes',
           },
           {
             label: 'tegen',
-            value: 'no'
+            value: 'no',
           },
         ],
       },
@@ -251,7 +257,7 @@ module.exports = {
             type: 'int',
             default: undefined,
           },
-        }
+        },
       },
     },
   },
@@ -271,48 +277,47 @@ module.exports = {
   },
 
   widgets: {
-    type: "object",
+    type: 'object',
     subset: {
       beta: {
-        type: "boolean",
-        default: false
+        type: 'boolean',
+        default: false,
       },
       deprecated: {
-        type: "boolean",
-        default: false
+        type: 'boolean',
+        default: false,
       },
       visibleWidgets: {
-        type: "arrayOfStrings",
-        default: []
-      }
-    }
+        type: 'arrayOfStrings',
+        default: [],
+      },
+    },
   },
 
   map: {
-    type: "object",
+    type: 'object',
     subset: {
       minZoom: {
-        type: "string",
+        type: 'string',
         default: '7',
       },
       maxZoom: {
-        type: "string",
+        type: 'string',
         default: '20',
       },
       areaId: {
         type: 'string',
         default: '0',
-      }
-    }
+      },
+    },
   },
-  
+
   host: {
     status: null,
   },
 
   ignoreBruteForce: {
     type: 'arrayOfStrings',
-    default: []
+    default: [],
   },
-
 };

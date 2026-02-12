@@ -1,8 +1,3 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -12,14 +7,18 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
+import { Heading } from '@/components/ui/typography';
 import useStatus from '@/hooks/use-statuses';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -38,12 +37,16 @@ export default function ProjectStatusCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const status = await createStatus(values.name, values.seqnr, values.addToNewResources);
+    const status = await createStatus(
+      values.name,
+      values.seqnr,
+      values.addToNewResources
+    );
     if (status?.id) {
       toast.success('Status aangemaakt!');
       router.push(`/projects/${project}/statuses`);
     } else {
-      toast.error('Er is helaas iets mis gegaan.')
+      toast.error('Er is helaas iets mis gegaan.');
     }
   }
 

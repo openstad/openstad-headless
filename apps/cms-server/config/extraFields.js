@@ -37,5 +37,5 @@ exports.fields = [
     label: '',
     extraData: true,
     key: 'advice',
-  }
+  },
 ];

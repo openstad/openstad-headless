@@ -1,6 +1,5 @@
-import './stem-begroot-detail-dialog.css';
-
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
+import { deterministicRandomSort } from '@openstad-headless/lib';
 import {
   Icon,
   IconButton,
@@ -9,24 +8,23 @@ import {
   SecondaryButton,
   Spacer,
 } from '@openstad-headless/ui/src';
-
 import { Carousel } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
-
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
   Button,
+  Heading,
+  Heading1,
+  Heading4,
+  Heading5,
+  Link,
   Paragraph,
   Strong,
-  Link,
-  Heading5,
-  Heading4,
-  Heading1,
-  Heading,
 } from '@utrecht/component-library-react';
-import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
-import { deterministicRandomSort } from '@openstad-headless/lib';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import './stem-begroot-detail-dialog.css';
 
 export const StemBegrootResourceDetailDialog = ({
   openDetailDialog,
@@ -99,7 +97,10 @@ export const StemBegrootResourceDetailDialog = ({
   displayDescription?: boolean;
 }) => {
   const getResourceStableKey = (resource: any) =>
-    String(resource?.id || `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`);
+    String(
+      resource?.id ||
+        `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+    );
 
   const [carouselIndexSetter, setCarouselIndexSetter] = useState<
     ((index: number) => void) | null
@@ -193,7 +194,12 @@ export const StemBegrootResourceDetailDialog = ({
             return a.title.localeCompare(b.title);
           }
           if (sort === 'random') {
-            return deterministicRandomSort(a, b, randomSortSeed, getResourceStableKey);
+            return deterministicRandomSort(
+              a,
+              b,
+              randomSortSeed,
+              getResourceStableKey
+            );
           }
           return 0;
         })
@@ -337,19 +343,37 @@ export const StemBegrootResourceDetailDialog = ({
                         <Heading4>Tags</Heading4>
                         <Spacer size={0.5} />
                         <div className="pill-grid">
-                          {(resource?.tags as Array<{ type: string; name: string, seqnr?: number }>)
+                          {(
+                            resource?.tags as Array<{
+                              type: string;
+                              name: string;
+                              seqnr?: number;
+                            }>
+                          )
                             ?.filter((t) => t.type !== 'status')
-                            ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
-                              if (a.seqnr === undefined || a.seqnr === null) return 1;
-                              if (b.seqnr === undefined || b.seqnr === null) return -1;
-                              return a.seqnr - b.seqnr;
-                            })
-                            ?.map((t) => <Pill text={t.name || 'Geen thema'}/>)}
+                            ?.sort(
+                              (
+                                a: { seqnr?: number },
+                                b: { seqnr?: number }
+                              ) => {
+                                if (a.seqnr === undefined || a.seqnr === null)
+                                  return 1;
+                                if (b.seqnr === undefined || b.seqnr === null)
+                                  return -1;
+                                return a.seqnr - b.seqnr;
+                              }
+                            )
+                            ?.map((t) => (
+                              <Pill text={t.name || 'Geen thema'} />
+                            ))}
                         </div>
                         {showOriginalResource && originalUrl ? (
                           <>
-                            <Spacer size={1}/>
-                            <Link target="_blank" href={originalUrl} className="ams-standalone-link">
+                            <Spacer size={1} />
+                            <Link
+                              target="_blank"
+                              href={originalUrl}
+                              className="ams-standalone-link">
                               {originalUrl}
                             </Link>
                           </>
@@ -363,13 +387,26 @@ export const StemBegrootResourceDetailDialog = ({
                       <div>
                         <div>
                           {displayTitle ? (
-                            <Heading1 dangerouslySetInnerHTML={{__html: resource?.title}}/>
+                            <Heading1
+                              dangerouslySetInnerHTML={{
+                                __html: resource?.title,
+                              }}
+                            />
                           ) : null}
                           {displaySummary ? (
-                            <Paragraph className="strong" dangerouslySetInnerHTML={{__html: resource?.summary}}/>
+                            <Paragraph
+                              className="strong"
+                              dangerouslySetInnerHTML={{
+                                __html: resource?.summary,
+                              }}
+                            />
                           ) : null}
                           {displayDescription ? (
-                            <Paragraph dangerouslySetInnerHTML={{__html: resource?.description}}/>
+                            <Paragraph
+                              dangerouslySetInnerHTML={{
+                                __html: resource?.description,
+                              }}
+                            />
                           ) : null}
 
                           {displayModBreak && resource.modBreak && (
@@ -405,7 +442,6 @@ export const StemBegrootResourceDetailDialog = ({
                               {originalUrl}
                             </Link>
                           </Paragraph>
-
                         </>
                       ) : null}
 

@@ -1,4 +1,12 @@
+import Preview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,23 +14,18 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetMapGeneral from './general';
-import WidgetMapMap from './map';
 import WidgetMapContent from './content';
-import WidgetMapSort from './sort';
-import WidgetMapImage from './images';
 import WidgetMapDetails from './details';
 import WidgetMapFilter from './filter';
+import WidgetMapGeneral from './general';
+import WidgetMapImage from './images';
+import WidgetMapMap from './map';
 import WidgetMapReaction from './reaction';
-import { useRouter } from 'next/router';
-import Preview from '@/components/widget-preview';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
+import WidgetMapSort from './sort';
+
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetMap({
-  apiUrl,
-}: WithApiUrlProps) {
+export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;

@@ -1,15 +1,20 @@
 import useSWR from 'swr';
-import {validateProjectNumber} from "../lib/validateProjectNumber";
+
+import { validateProjectNumber } from '../lib/validateProjectNumber';
 
 export default function useTags(projectId?: string, id?: string) {
-
   // Global tags have projectId = 0, therefore this check is different from the others
-  const projectNumber: number | undefined = validateProjectNumber(projectId, true);
+  const projectNumber: number | undefined = validateProjectNumber(
+    projectId,
+    true
+  );
   const useId: number | undefined = validateProjectNumber(id);
 
   const url = `/api/openstad/api/project/${projectNumber}/tag/${useId}`;
 
-  const tagSwr = useSWR((projectNumber || projectNumber === 0) && useId ? url : null);
+  const tagSwr = useSWR(
+    (projectNumber || projectNumber === 0) && useId ? url : null
+  );
 
   async function updateTag(
     name: string | undefined,
@@ -46,12 +51,12 @@ export default function useTags(projectId?: string, id?: string) {
         useDifferentSubmitAddress,
         newSubmitAddress,
         defaultResourceImage,
-        documentMapIconColor
+        documentMapIconColor,
       }),
     });
 
     return await res.json();
   }
 
-  return { ...tagSwr, updateTag }
+  return { ...tagSwr, updateTag };
 }

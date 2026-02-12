@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from "react";
-import NotificationService from "./notification-service";
-import "./style.css";
+import React, { useEffect, useState } from 'react';
+
+import NotificationService from './notification-service';
+import './style.css';
 
 // Notificatie type
-type NotificationType = "success" | "error";
+type NotificationType = 'success' | 'error';
 
 const NotificationProvider = () => {
-  const [notifications, setNotifications] = useState<{ id: number; message: string; type: NotificationType; fadeOut: boolean }[]>([]);
+  const [notifications, setNotifications] = useState<
+    { id: number; message: string; type: NotificationType; fadeOut: boolean }[]
+  >([]);
 
   useEffect(() => {
     const unregister = NotificationService.registerListener((message, type) => {
       const id = Date.now();
 
-      setNotifications((prev) => [...prev, { id, message, type, fadeOut: false }]);
+      setNotifications((prev) => [
+        ...prev,
+        { id, message, type, fadeOut: false },
+      ]);
 
       setTimeout(() => {
         setNotifications((prev) =>
@@ -31,10 +37,12 @@ const NotificationProvider = () => {
   return (
     <div className="notification-container openstad">
       {notifications.map(({ id, message, type, fadeOut }) => (
-        <div key={id} className={`notification ${fadeOut ? "fade-out" : ""} ${type}`}>
-                <span className="notification-icon">
-                        {type === "success" ? "✅️" : "❌"}
-                    </span>
+        <div
+          key={id}
+          className={`notification ${fadeOut ? 'fade-out' : ''} ${type}`}>
+          <span className="notification-icon">
+            {type === 'success' ? '✅️' : '❌'}
+          </span>
           <span className="notification-message">{message}</span>
         </div>
       ))}

@@ -1,13 +1,24 @@
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ChoiceGuide } from '@openstad-headless/choiceguide/src/props';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+
 import { Button } from '../../../../../../components/ui/button';
-import { Input } from '../../../../../../components/ui/input';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
 } from '../../../../../../components/ui/form';
+import { Input } from '../../../../../../components/ui/input';
 import {
   Select,
   SelectContent,
@@ -15,15 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../../../../components/ui/select';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { ChoiceGuide } from '@openstad-headless/choiceguide/src/props';
-import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
-import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
 
 const formSchema = z.object({
   submitButtonText: z.string().optional(),
@@ -48,13 +50,18 @@ export default function WidgetChoiceGuideGeneralSettings(
 
   const defaults = useCallback(
     () => ({
-      submitButtonText: widget?.config?.[category]?.submitButtonText || "Versturen",
-      nextButtonText: widget?.config?.[category]?.nextButtonText || "Volgende",
-      loginText: widget?.config?.[category]?.loginText || "Inloggen om deel te nemen.",
-      loginTextButton: widget?.config?.[category]?.loginTextButton || "Inloggen",
+      submitButtonText:
+        widget?.config?.[category]?.submitButtonText || 'Versturen',
+      nextButtonText: widget?.config?.[category]?.nextButtonText || 'Volgende',
+      loginText:
+        widget?.config?.[category]?.loginText || 'Inloggen om deel te nemen.',
+      loginTextButton:
+        widget?.config?.[category]?.loginTextButton || 'Inloggen',
       loginRequired: widget?.config?.[category]?.loginRequired || false,
       stickyBarAtTop: widget?.config?.[category]?.stickyBarAtTop || false,
-      stickyBarDefaultOpen: undefinedToTrueOrProp(widget?.config?.[category]?.stickyBarDefaultOpen),
+      stickyBarDefaultOpen: undefinedToTrueOrProp(
+        widget?.config?.[category]?.stickyBarDefaultOpen
+      ),
     }),
     [widget?.config]
   );
@@ -104,7 +111,9 @@ export default function WidgetChoiceGuideGeneralSettings(
               <FormItem>
                 <FormLabel>Volgende vraag tekst</FormLabel>
                 <FormDescription>
-                  Tekst die wordt getoond op de knop om naar de volgende vraag te gaan. Alleen van toepassing als er meerdere pagina&apos;s met vragen zijn.
+                  Tekst die wordt getoond op de knop om naar de volgende vraag
+                  te gaan. Alleen van toepassing als er meerdere pagina&apos;s
+                  met vragen zijn.
                 </FormDescription>
                 <FormControl>
                   <Input {...field} />
@@ -119,7 +128,8 @@ export default function WidgetChoiceGuideGeneralSettings(
               <FormItem>
                 <FormLabel>Login vereist</FormLabel>
                 <FormDescription>
-                  Moet de gebruiker ingelogd zijn om de keuzewijzer in te vullen?
+                  Moet de gebruiker ingelogd zijn om de keuzewijzer in te
+                  vullen?
                 </FormDescription>
                 {/*@ts-ignore*/}
                 {YesNoSelect(field, props)}
@@ -134,9 +144,7 @@ export default function WidgetChoiceGuideGeneralSettings(
                 name="loginText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Login tekst
-                    </FormLabel>
+                    <FormLabel>Login tekst</FormLabel>
                     <FormDescription>
                       Tekst die wordt getoond als de gebruiker niet is ingelogd.
                     </FormDescription>
@@ -151,9 +159,7 @@ export default function WidgetChoiceGuideGeneralSettings(
                 name="loginTextButton"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Login tekst knop
-                    </FormLabel>
+                    <FormLabel>Login tekst knop</FormLabel>
                     <FormDescription>
                       Tekst die wordt getoond op de knop om in te loggen.
                     </FormDescription>
@@ -171,7 +177,10 @@ export default function WidgetChoiceGuideGeneralSettings(
             name="stickyBarAtTop"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Moet de balk met de voortgang van de keuzewijzer bovenaan getoond worden?</FormLabel>
+                <FormLabel>
+                  Moet de balk met de voortgang van de keuzewijzer bovenaan
+                  getoond worden?
+                </FormLabel>
                 {YesNoSelect(field, props)}
               </FormItem>
             )}
@@ -182,7 +191,10 @@ export default function WidgetChoiceGuideGeneralSettings(
             name="stickyBarDefaultOpen"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Moet de balk met de voortgang van de keuzewijzer standaard geopend zijn?</FormLabel>
+                <FormLabel>
+                  Moet de balk met de voortgang van de keuzewijzer standaard
+                  geopend zijn?
+                </FormLabel>
                 {YesNoSelect(field, props)}
               </FormItem>
             )}

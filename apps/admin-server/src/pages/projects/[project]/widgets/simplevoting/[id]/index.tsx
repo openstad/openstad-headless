@@ -1,4 +1,18 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import BegrootmoduleDisplay from '@/pages/projects/[project]/widgets/begrootmodule/[id]/display';
+import WidgetStemBegrootInclude from '@/pages/projects/[project]/widgets/begrootmodule/[id]/include';
+import BegrootmoduleText from '@/pages/projects/[project]/widgets/begrootmodule/[id]/text';
+import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,26 +20,13 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
-export const getServerSideProps = withApiUrl;
-import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
-
-import WidgetPreview from '@/components/widget-preview';
 import BegrootmoduleExplanation from '../../begrootmodule/[id]/explanation';
-import WidgetStemBegrootSearch from '../../begrootmodule/[id]/search';
-import WidgetStemBegrootOverviewTags from '../../begrootmodule/[id]/tags';
-import WidgetStemBegrootSorting from '../../begrootmodule/[id]/sorting';
 import WidgetStemBegrootPagination from '../../begrootmodule/[id]/pagination';
-import BegrootmoduleText from "@/pages/projects/[project]/widgets/begrootmodule/[id]/text";
-import WidgetStemBegrootInclude from "@/pages/projects/[project]/widgets/begrootmodule/[id]/include";
-import BegrootmoduleDisplay from "@/pages/projects/[project]/widgets/begrootmodule/[id]/display";
+import WidgetStemBegrootSearch from '../../begrootmodule/[id]/search';
+import WidgetStemBegrootSorting from '../../begrootmodule/[id]/sorting';
+import WidgetStemBegrootOverviewTags from '../../begrootmodule/[id]/tags';
+
+export const getServerSideProps = withApiUrl;
 
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
@@ -90,7 +91,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
 
             {previewConfig ? (
               <>
-              <TabsContent value="display" className="p-0">
+                <TabsContent value="display" className="p-0">
                   <BegrootmoduleDisplay {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="text" className="p-0">

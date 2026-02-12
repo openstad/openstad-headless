@@ -1,4 +1,6 @@
-import React from 'react';
+import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
+import { BaseProps } from '@openstad-headless/types/base-props';
+import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props';
 import {
   IconButton,
   Image,
@@ -6,10 +8,7 @@ import {
   SecondaryButton,
   Spacer,
 } from '@openstad-headless/ui/src';
-import './gridder-resource-detail.css';
-
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
   Button,
   ButtonGroup,
@@ -19,11 +18,12 @@ import {
   Heading4,
   Paragraph,
 } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React from 'react';
+
+import { canLikeResource, hasRole } from '../../lib';
 import { Icon } from '../../ui/src/icon';
-import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
-import { BaseProps } from '@openstad-headless/types/base-props';
-import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props';
-import { canLikeResource, hasRole } from "../../lib";
+import './gridder-resource-detail.css';
 
 export type GridderResourceDetailProps = BaseProps &
   ProjectSettingProps & {
@@ -62,16 +62,25 @@ export const GridderResourceDetail = ({
 }: GridderResourceDetailProps) => {
   // When resource is correctly typed the we will not need :any
 
-  let resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
-    ? resource.tags.filter((tag: { type: string }) => dialogTagGroups.includes(tag.type))
-    : (Array.isArray(resource?.tags) ? resource.tags : []);
+  let resourceFilteredTags =
+    dialogTagGroups &&
+    Array.isArray(dialogTagGroups) &&
+    Array.isArray(resource?.tags)
+      ? resource.tags.filter((tag: { type: string }) =>
+          dialogTagGroups.includes(tag.type)
+        )
+      : Array.isArray(resource?.tags)
+        ? resource.tags
+        : [];
 
   resourceFilteredTags = resourceFilteredTags.length
-    ? resourceFilteredTags.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
-      if (a.seqnr === undefined || a.seqnr === null) return 1;
-      if (b.seqnr === undefined || b.seqnr === null) return -1;
-      return a.seqnr - b.seqnr;
-    })
+    ? resourceFilteredTags.sort(
+        (a: { seqnr?: number }, b: { seqnr?: number }) => {
+          if (a.seqnr === undefined || a.seqnr === null) return 1;
+          if (b.seqnr === undefined || b.seqnr === null) return -1;
+          return a.seqnr - b.seqnr;
+        }
+      )
     : [];
 
   const resourceUserId = resource?.userId || null;
@@ -84,7 +93,7 @@ export const GridderResourceDetail = ({
   type DocumentType = {
     name?: string;
     url?: string;
-  }
+  };
 
   let defaultImage = '';
 
@@ -158,7 +167,9 @@ export const GridderResourceDetail = ({
                     }>
                   )
                     ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => <Pill text={t.name} />)}
+                    ?.map((t) => (
+                      <Pill text={t.name} />
+                    ))}
                 </div>
               </>
             )}

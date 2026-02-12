@@ -7,7 +7,7 @@ let Tasks = {};
 
 /**
  * Task data is stored in memory only
- * Purpose is only to be able to send information about background tasks. 
+ * Purpose is only to be able to send information about background tasks.
  * Currently the only available task is the creation of unique tokens
  *
  * The structure of this file is similar to tat of other files here; I think it should work as an object instead of this but then maybe so should the rest
@@ -40,7 +40,10 @@ Tasks.find = (taskId) => {
 Tasks.save = (taskId, newData) => {
   taskId = taskId || parseInt(Math.random() * 10000000) + 10000000;
   let oldData = tasks[taskId] || {};
-  tasks[taskId] = merge.recursive(oldData, newData, {taskId, lastUpdateDate: Date.now()});
+  tasks[taskId] = merge.recursive(oldData, newData, {
+    taskId,
+    lastUpdateDate: Date.now(),
+  });
   return Promise.resolve(tasks[taskId]);
 };
 
@@ -83,6 +86,5 @@ Tasks.cleanUp = async () => {
   }
   return Promise.resolve(undefined);
 };
-
 
 module.exports = exports = Tasks;

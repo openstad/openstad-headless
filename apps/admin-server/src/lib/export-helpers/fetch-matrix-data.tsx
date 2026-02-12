@@ -1,4 +1,9 @@
-export const fetchMatrixData = (key: string, allItems: any, results: any, isChoiceGuide = true) => {
+export const fetchMatrixData = (
+  key: string,
+  allItems: any,
+  results: any,
+  isChoiceGuide = true
+) => {
   const parts = key.split('_');
 
   if (parts.length !== 2 && isChoiceGuide) {
@@ -17,7 +22,9 @@ export const fetchMatrixData = (key: string, allItems: any, results: any, isChoi
 
     const itemTrigger = itemParts[1];
 
-    item = allItems.find((i: any) => i.type === 'matrix' && i.trigger === itemTrigger);
+    item = allItems.find(
+      (i: any) => i.type === 'matrix' && i.trigger === itemTrigger
+    );
   } else {
     fieldKey = key.replace('matrix_', '');
 
@@ -30,7 +37,9 @@ export const fetchMatrixData = (key: string, allItems: any, results: any, isChoi
     fieldKeyParts.pop();
     fieldKey = fieldKeyParts.join('_');
 
-    item = allItems.find((i: any) => i.questionType === 'matrix' && i.fieldKey === fieldKey);
+    item = allItems.find(
+      (i: any) => i.questionType === 'matrix' && i.fieldKey === fieldKey
+    );
   }
 
   const rowTrigger = isChoiceGuide ? parts[1] : key.split('_').pop();
@@ -43,21 +52,25 @@ export const fetchMatrixData = (key: string, allItems: any, results: any, isChoi
     return null;
   }
 
-  const allResults = resultRow?.filter((r: string) => {
-    const resParts = r.split('_');
-    return resParts.length === 2 && resParts[0] === rowTrigger;
-  }) || [];
+  const allResults =
+    resultRow?.filter((r: string) => {
+      const resParts = r.split('_');
+      return resParts.length === 2 && resParts[0] === rowTrigger;
+    }) || [];
 
-  const returnValue = allResults.length > 0 ? allResults.reduce((acc: string[], res: string) => {
-    const resParts = res.split('_');
+  const returnValue =
+    allResults.length > 0
+      ? allResults.reduce((acc: string[], res: string) => {
+          const resParts = res.split('_');
 
-    const returnValue = answers.find((a: any) => a.trigger === resParts[1])?.text || null;
-    if (returnValue) {
-      acc.push(returnValue);
-    }
-    return acc;
-
-  }, []) : null;
+          const returnValue =
+            answers.find((a: any) => a.trigger === resParts[1])?.text || null;
+          if (returnValue) {
+            acc.push(returnValue);
+          }
+          return acc;
+        }, [])
+      : null;
 
   return returnValue ? JSON.stringify(returnValue) : null;
-}
+};

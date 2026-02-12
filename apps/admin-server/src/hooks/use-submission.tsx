@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useSubmissions(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -9,10 +9,12 @@ export default function useSubmissions(projectId?: string) {
 
   const { data, isLoading, error, mutate } = useSWR(projectNumber ? url : null);
 
-  async function remove(id: string|number, multiple?: boolean, ids?: number[]) {
-    const deleteUrl = multiple
-      ? `${baseUrl}/delete`
-      : `${baseUrl}/${id}`;
+  async function remove(
+    id: string | number,
+    multiple?: boolean,
+    ids?: number[]
+  ) {
+    const deleteUrl = multiple ? `${baseUrl}/delete` : `${baseUrl}/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',

@@ -6,7 +6,8 @@ export const WidgetDefinitions = {
   },
   choiceguide: {
     name: 'Keuzewijzer',
-    description: 'Een vragenlijst waarbij je directe gevolgen kunt communiceren van je keuzes.',
+    description:
+      'Een vragenlijst waarbij je directe gevolgen kunt communiceren van je keuzes.',
     image: '/widget_preview/keuzewijzer_preview.png',
   },
   choiceguideResults: {
@@ -26,7 +27,8 @@ export const WidgetDefinitions = {
   },
   simplevoting: {
     name: 'Stemmodule',
-    description: 'De versimpelde begrootmodule - richt snel een stemproject in.',
+    description:
+      'De versimpelde begrootmodule - richt snel een stemproject in.',
     image: '/widget_preview/stemmodule_preview.png',
   },
   enquete: {
@@ -76,7 +78,8 @@ export const WidgetDefinitions = {
   },
   resourceform: {
     name: 'Inzending',
-    description: 'Laat inwoners inzendingen versturen die openbaar getoond kunnen worden',
+    description:
+      'Laat inwoners inzendingen versturen die openbaar getoond kunnen worden',
     image: '/widget_preview/resource_form_preview.png',
   },
   resourceoverview: {
@@ -86,7 +89,8 @@ export const WidgetDefinitions = {
   },
   resourcewithmap: {
     name: 'Interactieve kaart',
-    description: 'Toon bewonersinzendingen op een kaart, en laad kaartlagen in.',
+    description:
+      'Toon bewonersinzendingen op een kaart, en laad kaartlagen in.',
     image: '/widget_preview/resource_with_map_preview.png',
   },
   resourcedetailwithmap: {
@@ -116,7 +120,8 @@ export const WidgetDefinitions = {
   },
   multiprojectresourceoverview: {
     name: 'Multi project inzending overzicht',
-    description: 'Toon inzendingen en project-tegels van verschillende projecten in één widget.',
+    description:
+      'Toon inzendingen en project-tegels van verschillende projecten in één widget.',
     image: '/widget_preview/multiproject-inzendingenoverzicht-preview.png',
   },
   // videoSlider: {
@@ -127,7 +132,6 @@ export const WidgetDefinitions = {
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;
-
 
 // export const WidgetDefinitions = {
 //   agenda: 'Agenda',

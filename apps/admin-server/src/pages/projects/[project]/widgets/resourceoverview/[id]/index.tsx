@@ -1,4 +1,18 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { extractConfig } from '@/lib/sub-widget-helper';
+import { LikeWidgetTabProps } from '@/pages/projects/[project]/widgets/likes/[id]';
+import LikesDisplay from '@/pages/projects/[project]/widgets/likes/[id]/weergave';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,32 +20,19 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetResourceOverviewGeneral from './general';
-import WidgetResourceOverviewDisplay from './display';
-import WidgetResourceOverviewSorting from './sorting';
-import WidgetResourceOverviewPagination from './pagination';
-import WidgetResourceOverviewSearch from './search';
-import WidgetResourceOverviewTags from './tags';
-import WidgetResourceOverviewInclude from './include';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
-import WidgetPreview from '@/components/widget-preview';
-import WidgetPublish from '@/components/widget-publish';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
-import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
-import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
-import { extractConfig } from '@/lib/sub-widget-helper';
-import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
-import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
+import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
 import WidgetResourcesMapDatalayers from '../../resourcesmap/[id]/datalayers';
+import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
+import WidgetResourceOverviewDisplay from './display';
+import WidgetResourceOverviewGeneral from './general';
+import WidgetResourceOverviewInclude from './include';
+import WidgetResourceOverviewPagination from './pagination';
+import WidgetResourceOverviewSearch from './search';
+import WidgetResourceOverviewSorting from './sorting';
+import WidgetResourceOverviewTags from './tags';
 
 export const getServerSideProps = withApiUrl;
 
@@ -187,23 +188,40 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 <TabsContent value="likes" className="p-0">
                   {previewConfig && (
                     <>
-                    <p style={{backgroundColor: 'orange', color: 'white', fontSize: '14px',  fontWeight: 'bold', marginBottom: '5px', padding: '5px 10px', width: 'auto', display: 'inline-block', borderRadius: '6px'}}>
-                      Let op! Deze instellingen zijn voor het type weergave &apos;Inzendingen op de huidige pagina tonen, in een dialog.&apos;<br />
-                      Bij het tabje &apos;Weergave&apos; moet je ook aangevinkt hebben dat je likes wilt tonen.
-                      Als beide niet zo zijn ingesteld, dan zullen de likes niet getoond worden.
-                    </p>
+                      <p
+                        style={{
+                          backgroundColor: 'orange',
+                          color: 'white',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          marginBottom: '5px',
+                          padding: '5px 10px',
+                          width: 'auto',
+                          display: 'inline-block',
+                          borderRadius: '6px',
+                        }}>
+                        Let op! Deze instellingen zijn voor het type weergave
+                        &apos;Inzendingen op de huidige pagina tonen, in een
+                        dialog.&apos;
+                        <br />
+                        Bij het tabje &apos;Weergave&apos; moet je ook
+                        aangevinkt hebben dat je likes wilt tonen. Als beide
+                        niet zo zijn ingesteld, dan zullen de likes niet getoond
+                        worden.
+                      </p>
                       <LikesDisplay
-                          omitSchemaKeys={['resourceId']}
-                          {...extractConfig<
-                              MultiProjectResourceOverviewProps,
-                              LikeWidgetTabProps
-                          >({
-                            subWidgetKey: 'likeWidget',
-                            previewConfig: previewConfig,
-                            updateConfig,
-                            updatePreview,
-                          })}
-                      /></>
+                        omitSchemaKeys={['resourceId']}
+                        {...extractConfig<
+                          MultiProjectResourceOverviewProps,
+                          LikeWidgetTabProps
+                        >({
+                          subWidgetKey: 'likeWidget',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </>
                   )}
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">

@@ -1,8 +1,3 @@
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -14,11 +9,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
+import { zodResolver } from '@hookform/resolvers/zod';
 import router from 'next/router';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
   projectName: z.string().min(6, {
@@ -70,7 +69,7 @@ export default function CreateProject() {
 
       router.push(`/projects/${projectId}/settings`);
     } else {
-      toast.error('Er is helaas iets mis gegaan.')
+      toast.error('Er is helaas iets mis gegaan.');
     }
   }
 

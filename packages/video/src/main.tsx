@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { VideoProps, VideoField } from './video.js';
+
+import { VideoField, VideoProps } from './video.js';
 
 const config: VideoProps = {
   api: {
@@ -18,8 +19,8 @@ const config: VideoProps = {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <div className="openstad" style={{height: '100vh'}}>
-    <VideoField {...config} />
+    <div className="openstad" style={{ height: '100vh' }}>
+      <VideoField {...config} />
     </div>
   </React.StrictMode>
 );

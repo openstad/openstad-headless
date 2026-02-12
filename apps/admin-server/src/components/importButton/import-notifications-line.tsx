@@ -1,5 +1,5 @@
-import React from 'react';
 import { Info } from 'lucide-react';
+import React from 'react';
 
 interface ValidationNotification {
   message: string;
@@ -33,8 +33,9 @@ const ImportNotifications: React.FC<ImportNotificationsProps> = ({
     return null;
   }
 
-  const color =
-    fileValidationNotifications.some((n) => n.color === 'red') ? 'red' : 'blue';
+  const color = fileValidationNotifications.some((n) => n.color === 'red')
+    ? 'red'
+    : 'blue';
 
   // Prepare tooltip content
   const tooltipContent = fileValidationNotifications
@@ -42,9 +43,17 @@ const ImportNotifications: React.FC<ImportNotificationsProps> = ({
     .join('\n');
 
   return (
-    <div style={{ marginBottom: '0px', color, display: 'flex', alignItems: 'center', gap: '4px' }}>
+    <div
+      style={{
+        marginBottom: '0px',
+        color,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+      }}>
       <span>
-        Import validation alerts: <strong>{fileValidationNotifications.length}</strong>
+        Import validation alerts:{' '}
+        <strong>{fileValidationNotifications.length}</strong>
       </span>
 
       <span
@@ -54,8 +63,7 @@ const ImportNotifications: React.FC<ImportNotificationsProps> = ({
           padding: '4px',
           cursor: 'pointer',
           whiteSpace: 'pre',
-        }}
-      >
+        }}>
         <Info className="inline-block mr-2 h-5 w-5" />
       </span>
     </div>

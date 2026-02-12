@@ -1,8 +1,3 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useWidgetsHook, Widget } from '@/hooks/use-widgets';
-import { WidgetDefinitions, WidgetDefinition } from '@/lib/widget-definitions';
-import WidgetPreview from '@/components/widget-preview';
 import {
   Select,
   SelectContent,
@@ -10,6 +5,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import WidgetPreview from '@/components/widget-preview';
+import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
+import { WidgetDefinition, WidgetDefinitions } from '@/lib/widget-definitions';
+import { useRouter } from 'next/router';
+import React, { useEffect, useMemo, useState } from 'react';
 
 const RESOURCE_DETAIL_TYPES: WidgetDefinition[] = ['resourcedetail'];
 
@@ -71,9 +71,7 @@ export default function ProjectResourcePreview() {
         <label className="text-sm font-medium mb-2 block">
           Selecteer een widget om de inzending te previewen
         </label>
-        <Select
-          onValueChange={setSelectedWidgetId}
-          value={selectedWidgetId}>
+        <Select onValueChange={setSelectedWidgetId} value={selectedWidgetId}>
           <SelectTrigger className="w-full max-w-md">
             <SelectValue placeholder="Kies een widget..." />
           </SelectTrigger>

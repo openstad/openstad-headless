@@ -4,12 +4,12 @@ exports.index = (req, res, next) => {
   let requiredUserFields = req.client.requiredUserFields;
 
   requiredUserFields = requiredUserFields.map((field) => {
-    return userFields.find(userField => userField.key === field);
-  })
+    return userFields.find((userField) => userField.key === field);
+  });
 
-  requiredUserFields = requiredUserFields.filter(field => {
+  requiredUserFields = requiredUserFields.filter((field) => {
     // Consent field is a special case since it can contain multiple client IDs
-    if ( field?.key === 'emailNotificationConsent' ) {
+    if (field?.key === 'emailNotificationConsent') {
       const clientId = String(req?.client?.id);
 
       const currentValue = req?.user?.emailNotificationConsent || {};
@@ -20,13 +20,15 @@ exports.index = (req, res, next) => {
       }
     }
 
-    return !req.user[field.key]
+    return !req.user[field.key];
   });
 
   const config = req.client.config ? req.client.config : {};
-  const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
+  const configRequiredFields =
+    config && config.requiredFields ? config.requiredFields : {};
 
-  const requiredUserFieldsLabels = config && config.requiredFields?.requiredUserFieldsLabels || {};
+  const requiredUserFieldsLabels =
+    (config && config.requiredFields?.requiredUserFieldsLabels) || {};
 
   // Replace field labels with labels defined in the client config (if provided)
   if (Object.keys(requiredUserFieldsLabels).length > 0) {
@@ -49,17 +51,19 @@ exports.index = (req, res, next) => {
     description: configRequiredFields.description,
     title: configRequiredFields.title,
     buttonText: configRequiredFields.buttonText,
-    redirect_uri: encodeURIComponent(req.query.redirect_uri)
+    redirect_uri: encodeURIComponent(req.query.redirect_uri),
   });
-}
+};
 
 exports.post = (req, res, next) => {
   const clientRequiredUserFields = req.client.requiredUserFields;
-  const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
+  const redirectUrl = req.query.redirect_uri
+    ? encodeURIComponent(req.query.redirect_uri)
+    : req.client.redirectUrl;
 
   let data = {};
   clientRequiredUserFields.forEach((field) => {
-    if ( field === 'emailNotificationConsent' ) {
+    if (field === 'emailNotificationConsent') {
       const clientId = String(req?.client?.id);
       const currentValue = req?.user?.emailNotificationConsent || {};
       const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
@@ -70,10 +74,10 @@ exports.post = (req, res, next) => {
         const newValue = req.body[field] === 'on' ? true : false;
         data[field] = {
           ...currentValue,
-          [clientId]: newValue
+          [clientId]: newValue,
         };
       }
-    } else if (field === 'email' && !!req.user.email)  {
+    } else if (field === 'email' && !!req.user.email) {
       //break;
     } else if (req.body[field]) {
       data[field] = req.body[field];
@@ -89,4 +93,4 @@ exports.post = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-}
+};

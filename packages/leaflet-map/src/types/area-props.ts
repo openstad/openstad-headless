@@ -6,12 +6,12 @@ export type AreaMultiPolygon = Array<AreaPolygon>;
 export type AreaShape = AreaRing | AreaPolygon | AreaMultiPolygon;
 
 export type AreaProps = {
-  area?: AreaShape,
-  renderArea?: AreaShape,
-  areas?: any,
-  areaPolygonStyle?: any,
-  interactionType?: 'default' | 'direct',
-  areaRenderMode?: 'cutout' | 'polygons',
-  showHiddenPolygonsForAdmin?: boolean,
-  adminOnlyPolygons?: any,
+  area?: AreaShape;
+  renderArea?: AreaShape;
+  areas?: any;
+  areaPolygonStyle?: any;
+  interactionType?: 'default' | 'direct';
+  areaRenderMode?: 'cutout' | 'polygons';
+  showHiddenPolygonsForAdmin?: boolean;
+  adminOnlyPolygons?: any;
 };

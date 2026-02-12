@@ -250,7 +250,7 @@
     }
   }
 
-  &[type="reset"] {
+  &[type='reset'] {
     @extend %button-reset;
   }
 
@@ -258,7 +258,7 @@
     cursor: not-allowed;
 
     .value {
-      opacity: .5;
+      opacity: 0.5;
     }
   }
 
@@ -287,7 +287,7 @@
 // Toggle
 %toggle-base {
   .caret {
-    background-image: url("#{$core-svg-path}close-icon-black.svg");
+    background-image: url('#{$core-svg-path}close-icon-black.svg');
     background-position: 50%;
     background-repeat: no-repeat;
     background-size: 16px;
@@ -298,23 +298,23 @@
 %appear-base {
   max-height: 0;
   overflow: hidden;
-  transition: max-height .5s ease-in;
+  transition: max-height 0.5s ease-in;
 }
 
 %appearing {
   max-height: 4em;
-  transition: max-height .5s ease-in;
+  transition: max-height 0.5s ease-in;
 }
 
 %disappear-base {
   max-height: 4em;
   overflow: hidden;
-  transition: max-height .5s ease-in;
+  transition: max-height 0.5s ease-in;
 }
 
 %disappearing {
   max-height: 0;
-  transition: max-height .5s ease-in;
+  transition: max-height 0.5s ease-in;
 }
 
 // List
@@ -426,7 +426,7 @@
         }
 
         .caret {
-          background-image: url("#{$core-sprites-path}sprite_bullets_small.png");
+          background-image: url('#{$core-sprites-path}sprite_bullets_small.png');
           background-position: 0 -29800px;
           background-repeat: no-repeat;
           float: right;
@@ -434,7 +434,6 @@
           margin-right: 12px;
           margin-top: 5px;
           width: 11px;
-
         }
 
         &.expanded {
@@ -469,7 +468,7 @@
           }
 
           a {
-            background-image: url("#{$core-sprites-path}sprite_bullets_small.png");
+            background-image: url('#{$core-sprites-path}sprite_bullets_small.png');
             background-position: 7px -1984px;
             padding: 14px 0 12px 20px;
           }

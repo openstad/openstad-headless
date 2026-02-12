@@ -1,8 +1,3 @@
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -12,6 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
@@ -21,50 +17,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
-import toast from 'react-hot-toast';
+import { Heading } from '@/components/ui/typography';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
-import InfoDialog from '@/components/ui/info-hover';
+import { useRouter } from 'next/router';
+import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
 
-const formSchema = z.object({
-  isViewable: z.boolean().optional(),
-  isActive: z.boolean().optional(),
-  withExisting: z.enum(['error', 'replace', 'merge']).optional(),
-  requiredUserRole: z.enum(['anonymous', 'member']).optional(),
-  voteType: z.enum([
-    'likes',
-    'count',
-    'budgeting',
-    'countPerTag',
-    'budgetingPerTag',
-    'countPerTheme',
-    'budgetingPerTheme',
-  ]).optional(),
-  minResources: z.coerce.number().gt(-1).optional(),
-  maxResources: z.coerce.number().gt(-1).optional(),
-  minBudget: z.coerce.number().gt(-1).optional(),
-  maxBudget: z.coerce.number().gt(-1).optional()
-}).refine((data) => {
-  if (data.maxResources !== 0 && data.minResources !== undefined && data.maxResources !== undefined) {
-    return data.maxResources > data.minResources;
-  }
-  return true;
-}, {
-  message: "De maximale hoeveelheid resources moet groter zijn dan de minimale hoeveelheid.",
-  path: ["maxResources"]
-}).refine((data) => {
-  if (data.maxBudget !== undefined && data.minBudget !== undefined && data.maxBudget !== 0) {
-    return data.maxBudget > data.minBudget;
-  }
-  return true;
-}, {
-  message: "De maximale budget moet groter zijn dan het minimale budget.",
-  path: ["maxBudget"]
-});
+import { useProject } from '../../../../hooks/use-project';
+
+const formSchema = z
+  .object({
+    isViewable: z.boolean().optional(),
+    isActive: z.boolean().optional(),
+    withExisting: z.enum(['error', 'replace', 'merge']).optional(),
+    requiredUserRole: z.enum(['anonymous', 'member']).optional(),
+    voteType: z
+      .enum([
+        'likes',
+        'count',
+        'budgeting',
+        'countPerTag',
+        'budgetingPerTag',
+        'countPerTheme',
+        'budgetingPerTheme',
+      ])
+      .optional(),
+    minResources: z.coerce.number().gt(-1).optional(),
+    maxResources: z.coerce.number().gt(-1).optional(),
+    minBudget: z.coerce.number().gt(-1).optional(),
+    maxBudget: z.coerce.number().gt(-1).optional(),
+  })
+  .refine(
+    (data) => {
+      if (
+        data.maxResources !== 0 &&
+        data.minResources !== undefined &&
+        data.maxResources !== undefined
+      ) {
+        return data.maxResources > data.minResources;
+      }
+      return true;
+    },
+    {
+      message:
+        'De maximale hoeveelheid resources moet groter zijn dan de minimale hoeveelheid.',
+      path: ['maxResources'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        data.maxBudget !== undefined &&
+        data.minBudget !== undefined &&
+        data.maxBudget !== 0
+      ) {
+        return data.maxBudget > data.minBudget;
+      }
+      return true;
+    },
+    {
+      message: 'De maximale budget moet groter zijn dan het minimale budget.',
+      path: ['maxBudget'],
+    }
+  );
 
 export default function ProjectSettingsVoting() {
   const category = 'votes';
@@ -90,16 +110,16 @@ export default function ProjectSettingsVoting() {
     return {
       isViewable: data?.config?.[category]?.isViewable || false,
       isActive: data?.config?.[category]?.isActive || false,
-      withExisting: data?.config?.[category]?.withExisting || "error",
-      requiredUserRole: data?.config?.[category]?.requiredUserRole || "anonymous",
+      withExisting: data?.config?.[category]?.withExisting || 'error',
+      requiredUserRole:
+        data?.config?.[category]?.requiredUserRole || 'anonymous',
       voteType: correctedVoteType,
       minResources: data?.config?.[category]?.minResources || 0,
       maxResources: data?.config?.[category]?.maxResources || 0,
       minBudget: data?.config?.[category]?.minBudget || 0,
       maxBudget: data?.config?.[category]?.maxBudget || 0,
-    }},
-    [data?.config]
-  );
+    };
+  }, [data?.config]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -110,9 +130,9 @@ export default function ProjectSettingsVoting() {
     form.reset(defaults());
   }, [form, defaults]);
 
-useEffect(() => {
-  setFieldValue(data?.config?.[category]?.voteType);
-}, [data]);
+  useEffect(() => {
+    setFieldValue(data?.config?.[category]?.voteType);
+  }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -132,7 +152,7 @@ useEffect(() => {
       if (project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('could not update', error);
@@ -189,7 +209,9 @@ useEffect(() => {
                 name="isActive"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Kunnen bezoekers stemmen op een inzending?</FormLabel>
+                    <FormLabel>
+                      Kunnen bezoekers stemmen op een inzending?
+                    </FormLabel>
                     <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                       onCheckedChange={(e: boolean) => {
@@ -208,7 +230,8 @@ useEffect(() => {
                 render={({ field }) => (
                   <FormItem className="col-span-full">
                     <FormLabel>
-                      Wat moet er gebeuren als iemand twee keer stemt op dezelfde inzending?
+                      Wat moet er gebeuren als iemand twee keer stemt op
+                      dezelfde inzending?
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -217,7 +240,9 @@ useEffect(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="error">Toon een foutmelding</SelectItem>
+                        <SelectItem value="error">
+                          Toon een foutmelding
+                        </SelectItem>
                         <SelectItem value="replace">
                           Vervang de vorige stem
                         </SelectItem>
@@ -232,9 +257,7 @@ useEffect(() => {
                 name="requiredUserRole"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>
-                      Welke gebruikers mogen stemmen?
-                    </FormLabel>
+                    <FormLabel>Welke gebruikers mogen stemmen?</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -262,10 +285,11 @@ useEffect(() => {
                     <FormLabel>
                       Wat voor soort stem kunnen bezoekers uitbrengen?
                     </FormLabel>
-                    <Select onValueChange={(e) => {
-                      field.onChange(e);
-                      setFieldValue(e);
-                    }}
+                    <Select
+                      onValueChange={(e) => {
+                        field.onChange(e);
+                        setFieldValue(e);
+                      }}
                       value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -295,8 +319,16 @@ useEffect(() => {
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is de minimum hoeveelheid inzendingen{form.watch("voteType") === "countPerTag" ? " per tag(groep) " : " "}waar iemand op kan stemmen?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep)'} />
+                        Wat is de minimum hoeveelheid inzendingen
+                        {form.watch('voteType') === 'countPerTag'
+                          ? ' per tag(groep) '
+                          : ' '}
+                        waar iemand op kan stemmen?
+                        <InfoDialog
+                          content={
+                            'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep)'
+                          }
+                        />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="1" {...field} />
@@ -313,8 +345,16 @@ useEffect(() => {
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is de maximum hoeveelheid inzendingen{form.watch("voteType") === "countPerTag" ? " per tag(groep) " : " "}waar iemand op kan stemmen?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep'} />
+                        Wat is de maximum hoeveelheid inzendingen
+                        {form.watch('voteType') === 'countPerTag'
+                          ? ' per tag(groep) '
+                          : ' '}
+                        waar iemand op kan stemmen?
+                        <InfoDialog
+                          content={
+                            'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Aantallen, Aantal per tag(groep) of Begroten per tag(groep'
+                          }
+                        />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100" {...field} />
@@ -324,15 +364,24 @@ useEffect(() => {
                   )}
                 />
               )}
-              {(fieldValue === 'budgetingPerTag' || fieldValue === 'budgeting') && (
+              {(fieldValue === 'budgetingPerTag' ||
+                fieldValue === 'budgeting') && (
                 <FormField
                   control={form.control}
                   name="minBudget"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is het minimum budget{form.watch("voteType") === "budgetingPerTag" ? " per tag(groep)" : " "}?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting, Begroten per tag(groep) '} />
+                        Wat is het minimum budget
+                        {form.watch('voteType') === 'budgetingPerTag'
+                          ? ' per tag(groep)'
+                          : ' '}
+                        ?
+                        <InfoDialog
+                          content={
+                            'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting, Begroten per tag(groep) '
+                          }
+                        />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="1" {...field} />
@@ -342,15 +391,24 @@ useEffect(() => {
                   )}
                 />
               )}
-              {(fieldValue === 'budgetingPerTag' || fieldValue === 'budgeting') && (
+              {(fieldValue === 'budgetingPerTag' ||
+                fieldValue === 'budgeting') && (
                 <FormField
                   control={form.control}
                   name="maxBudget"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <FormLabel>
-                        Wat is het maximum budget{form.watch("voteType") === "budgetingPerTag" ? " per tag(groep)" : " "}?
-                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting, Begroten per tag(groep) '} />
+                        Wat is het maximum budget
+                        {form.watch('voteType') === 'budgetingPerTag'
+                          ? ' per tag(groep)'
+                          : ' '}
+                        ?
+                        <InfoDialog
+                          content={
+                            'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting, Begroten per tag(groep) '
+                          }
+                        />
                       </FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100" {...field} />

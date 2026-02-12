@@ -1,4 +1,15 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,26 +17,17 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
-import WidgetPreview from '@/components/widget-preview';
-import WidgetPublish from '@/components/widget-publish';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import CountdownBarGeneral from './general';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetDateCountdownBar({
-  apiUrl,
-}:WithApiUrlProps) {
+export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
 
-  const { data: widget, updateConfig } = useWidgetConfig<DateCountdownBarWidgetProps>();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<DateCountdownBarWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<DateCountdownBarWidgetProps>({});
 
@@ -34,7 +36,7 @@ export default function WidgetDateCountdownBar({
     updateConfig: (config: DateCountdownBarWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key:string, value: any) => {
+    onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,
@@ -70,9 +72,9 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-                {previewConfig?
-                    <CountdownBarGeneral {...totalPropPackage} {...previewConfig} />
-                :null}
+              {previewConfig ? (
+                <CountdownBarGeneral {...totalPropPackage} {...previewConfig} />
+              ) : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

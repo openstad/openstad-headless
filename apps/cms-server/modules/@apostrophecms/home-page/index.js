@@ -8,19 +8,16 @@ module.exports = {
         type: 'area',
         options: {
           widgets: {
-            'openstad-section': {}
-          }
-        }
-      }
+            'openstad-section': {},
+          },
+        },
+      },
     },
     group: {
       basics: {
         label: 'Basics',
-        fields: [
-          'title',
-          'main'
-        ]
-      }
-    }
-  }
+        fields: ['title', 'main'],
+      },
+    },
+  },
 };

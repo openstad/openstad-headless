@@ -1,7 +1,7 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useWidgetConfig<R>() {
   const router = useRouter();
@@ -17,8 +17,7 @@ export function useWidgetConfig<R>() {
       : null
   );
 
-  async function updateConfig<R extends {[key:string]:any}>(config: R) {
-
+  async function updateConfig<R extends { [key: string]: any }>(config: R) {
     // these are added by the preview but should not be saved
     if (config.login?.url) delete config.login?.url;
     if (config.logout?.url) delete config.logout?.url;
@@ -47,5 +46,5 @@ export function useWidgetConfig<R>() {
     }
   }
 
-  return { ...swr, data: swr.data as {config: R}, updateConfig };
+  return { ...swr, data: swr.data as { config: R }, updateConfig };
 }

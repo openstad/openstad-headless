@@ -7,7 +7,7 @@ type userType = {
     identifier: string | number;
     provider: string;
   };
-}
+};
 
 export type UsersPaginationOptions = {
   page?: number;
@@ -36,7 +36,7 @@ function useUsers(options?: UsersPaginationOptions) {
   const data = res?.records ?? res;
   const metadata = res?.metadata;
 
-  async function createUser(user:userType) {
+  async function createUser(user: userType) {
     let url = `/api/openstad/api/project/${user.projectId}/user`;
 
     const res = await fetch(url, {
@@ -46,17 +46,12 @@ function useUsers(options?: UsersPaginationOptions) {
       },
       body: JSON.stringify(user),
     });
-    if (!res.ok) throw new Error('User update failed')
+    if (!res.ok) throw new Error('User update failed');
 
     return await res.json();
-
   }
 
   return { ...usersSwr, data, metadata, createUser };
 }
 
-export {
-  useUsers as default,
-  useUsers,
-  type userType,
-}
+export { useUsers as default, useUsers, type userType };

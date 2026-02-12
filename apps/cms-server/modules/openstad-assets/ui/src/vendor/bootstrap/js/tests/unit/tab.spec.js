@@ -1,43 +1,42 @@
-import Tab from '../../src/tab'
-
+import Tab from '../../src/tab';
 /** Test helpers */
-import { getFixture, clearFixture, jQueryMock } from '../helpers/fixture'
+import { clearFixture, getFixture, jQueryMock } from '../helpers/fixture';
 
 describe('Tab', () => {
-  let fixtureEl
+  let fixtureEl;
 
   beforeAll(() => {
-    fixtureEl = getFixture()
-  })
+    fixtureEl = getFixture();
+  });
 
   afterEach(() => {
-    clearFixture()
-  })
+    clearFixture();
+  });
 
   describe('VERSION', () => {
     it('should return plugin version', () => {
-      expect(Tab.VERSION).toEqual(jasmine.any(String))
-    })
-  })
+      expect(Tab.VERSION).toEqual(jasmine.any(String));
+    });
+  });
 
   describe('constructor', () => {
     it('should take care of element either passed as a CSS selector or DOM element', () => {
       fixtureEl.innerHTML = [
         '<ul class="nav"><li><a href="#home" role="tab">Home</a></li></ul>',
-        '<ul><li id="home"></li></ul>'
-      ].join('')
+        '<ul><li id="home"></li></ul>',
+      ].join('');
 
-      const tabEl = fixtureEl.querySelector('[href="#home"]')
-      const tabBySelector = new Tab('[href="#home"]')
-      const tabByElement = new Tab(tabEl)
+      const tabEl = fixtureEl.querySelector('[href="#home"]');
+      const tabBySelector = new Tab('[href="#home"]');
+      const tabByElement = new Tab(tabEl);
 
-      expect(tabBySelector._element).toEqual(tabEl)
-      expect(tabByElement._element).toEqual(tabEl)
-    })
-  })
+      expect(tabBySelector._element).toEqual(tabEl);
+      expect(tabByElement._element).toEqual(tabEl);
+    });
+  });
 
   describe('show', () => {
-    it('should activate element by tab id (using buttons, the preferred semantic way)', done => {
+    it('should activate element by tab id (using buttons, the preferred semantic way)', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav" role="tablist">',
         '  <li><button type="button" data-bs-target="#home" role="tab">Home</button></li>',
@@ -46,22 +45,24 @@ describe('Tab', () => {
         '<ul>',
         '  <li id="home" role="tabpanel"></li>',
         '  <li id="profile" role="tabpanel"></li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile')
-      const tab = new Tab(profileTriggerEl)
+      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile');
+      const tab = new Tab(profileTriggerEl);
 
       profileTriggerEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelector('#profile').classList.contains('active')).toEqual(true)
-        expect(profileTriggerEl.getAttribute('aria-selected')).toEqual('true')
-        done()
-      })
+        expect(
+          fixtureEl.querySelector('#profile').classList.contains('active')
+        ).toEqual(true);
+        expect(profileTriggerEl.getAttribute('aria-selected')).toEqual('true');
+        done();
+      });
 
-      tab.show()
-    })
+      tab.show();
+    });
 
-    it('should activate element by tab id (using links for tabs - not ideal, but still supported)', done => {
+    it('should activate element by tab id (using links for tabs - not ideal, but still supported)', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav" role="tablist">',
         '  <li><a href="#home" role="tab">Home</a></li>',
@@ -70,22 +71,24 @@ describe('Tab', () => {
         '<ul>',
         '  <li id="home" role="tabpanel"></li>',
         '  <li id="profile" role="tabpanel"></li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile')
-      const tab = new Tab(profileTriggerEl)
+      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile');
+      const tab = new Tab(profileTriggerEl);
 
       profileTriggerEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelector('#profile').classList.contains('active')).toEqual(true)
-        expect(profileTriggerEl.getAttribute('aria-selected')).toEqual('true')
-        done()
-      })
+        expect(
+          fixtureEl.querySelector('#profile').classList.contains('active')
+        ).toEqual(true);
+        expect(profileTriggerEl.getAttribute('aria-selected')).toEqual('true');
+        done();
+      });
 
-      tab.show()
-    })
+      tab.show();
+    });
 
-    it('should activate element by tab id in ordered list', done => {
+    it('should activate element by tab id in ordered list', (done) => {
       fixtureEl.innerHTML = [
         '<ol class="nav nav-pills">',
         '  <li><button type="button" data-bs-target="#home" role="tab">Home</button></li>',
@@ -94,85 +97,91 @@ describe('Tab', () => {
         '<ol>',
         '  <li id="home" role="tabpanel"></li>',
         '  <li id="profile" role="tabpanel"></li>',
-        '</ol>'
-      ].join('')
+        '</ol>',
+      ].join('');
 
-      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile')
-      const tab = new Tab(profileTriggerEl)
+      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile');
+      const tab = new Tab(profileTriggerEl);
 
       profileTriggerEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelector('#profile').classList.contains('active')).toEqual(true)
-        done()
-      })
+        expect(
+          fixtureEl.querySelector('#profile').classList.contains('active')
+        ).toEqual(true);
+        done();
+      });
 
-      tab.show()
-    })
+      tab.show();
+    });
 
-    it('should activate element by tab id in nav list', done => {
+    it('should activate element by tab id in nav list', (done) => {
       fixtureEl.innerHTML = [
         '<nav class="nav">',
         '  <button type="button" data-bs-target="#home" role="tab">Home</button>',
         '  <button type="button" id="triggerProfile" data-bs-target="#profile" role="tab">Profile</a>',
         '</nav>',
-        '<div><div id="home" role="tabpanel"></div><div id="profile" role="tabpanel"></div></div>'
-      ].join('')
+        '<div><div id="home" role="tabpanel"></div><div id="profile" role="tabpanel"></div></div>',
+      ].join('');
 
-      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile')
-      const tab = new Tab(profileTriggerEl)
+      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile');
+      const tab = new Tab(profileTriggerEl);
 
       profileTriggerEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelector('#profile').classList.contains('active')).toEqual(true)
-        done()
-      })
+        expect(
+          fixtureEl.querySelector('#profile').classList.contains('active')
+        ).toEqual(true);
+        done();
+      });
 
-      tab.show()
-    })
+      tab.show();
+    });
 
-    it('should activate element by tab id in list group', done => {
+    it('should activate element by tab id in list group', (done) => {
       fixtureEl.innerHTML = [
         '<div class="list-group" role="tablist">',
         '  <button type="button" data-bs-target="#home" role="tab">Home</button>',
         '  <button type="button" id="triggerProfile" data-bs-target="#profile" role="tab">Profile</button>',
         '</div>',
-        '<div><div id="home" role="tabpanel"></div><div id="profile" role="tabpanel"></div></div>'
-      ].join('')
+        '<div><div id="home" role="tabpanel"></div><div id="profile" role="tabpanel"></div></div>',
+      ].join('');
 
-      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile')
-      const tab = new Tab(profileTriggerEl)
+      const profileTriggerEl = fixtureEl.querySelector('#triggerProfile');
+      const tab = new Tab(profileTriggerEl);
 
       profileTriggerEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelector('#profile').classList.contains('active')).toEqual(true)
-        done()
-      })
+        expect(
+          fixtureEl.querySelector('#profile').classList.contains('active')
+        ).toEqual(true);
+        done();
+      });
 
-      tab.show()
-    })
+      tab.show();
+    });
 
-    it('should not fire shown when show is prevented', done => {
-      fixtureEl.innerHTML = '<div class="nav"></div>'
+    it('should not fire shown when show is prevented', (done) => {
+      fixtureEl.innerHTML = '<div class="nav"></div>';
 
-      const navEl = fixtureEl.querySelector('div')
-      const tab = new Tab(navEl)
+      const navEl = fixtureEl.querySelector('div');
+      const tab = new Tab(navEl);
       const expectDone = () => {
         setTimeout(() => {
-          expect().nothing()
-          done()
-        }, 30)
-      }
+          expect().nothing();
+          done();
+        }, 30);
+      };
 
-      navEl.addEventListener('show.bs.tab', ev => {
-        ev.preventDefault()
-        expectDone()
-      })
+      navEl.addEventListener('show.bs.tab', (ev) => {
+        ev.preventDefault();
+        expectDone();
+      });
 
       navEl.addEventListener('shown.bs.tab', () => {
-        throw new Error('should not trigger shown event')
-      })
+        throw new Error('should not trigger shown event');
+      });
 
-      tab.show()
-    })
+      tab.show();
+    });
 
-    it('should not fire shown when tab is already active', done => {
+    it('should not fire shown when tab is already active', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation"><button type="button" data-bs-target="#home" class="nav-link active" role="tab" aria-selected="true">Home</button></li>',
@@ -181,24 +190,24 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div class="tab-pane active" id="home" role="tabpanel"></div>',
         '  <div class="tab-pane" id="profile" role="tabpanel"></div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const triggerActive = fixtureEl.querySelector('button.active')
-      const tab = new Tab(triggerActive)
+      const triggerActive = fixtureEl.querySelector('button.active');
+      const tab = new Tab(triggerActive);
 
       triggerActive.addEventListener('shown.bs.tab', () => {
-        throw new Error('should not trigger shown event')
-      })
+        throw new Error('should not trigger shown event');
+      });
 
-      tab.show()
+      tab.show();
       setTimeout(() => {
-        expect().nothing()
-        done()
-      }, 30)
-    })
+        expect().nothing();
+        done();
+      }, 30);
+    });
 
-    it('show and shown events should reference correct relatedTarget', done => {
+    it('show and shown events should reference correct relatedTarget', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation"><button type="button" data-bs-target="#home" class="nav-link active" role="tab" aria-selected="true">Home</button></li>',
@@ -207,92 +216,104 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div class="tab-pane active" id="home" role="tabpanel"></div>',
         '  <div class="tab-pane" id="profile" role="tabpanel"></div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const secondTabTrigger = fixtureEl.querySelector('#triggerProfile')
-      const secondTab = new Tab(secondTabTrigger)
+      const secondTabTrigger = fixtureEl.querySelector('#triggerProfile');
+      const secondTab = new Tab(secondTabTrigger);
 
-      secondTabTrigger.addEventListener('show.bs.tab', ev => {
-        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual('#home')
-      })
+      secondTabTrigger.addEventListener('show.bs.tab', (ev) => {
+        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual(
+          '#home'
+        );
+      });
 
-      secondTabTrigger.addEventListener('shown.bs.tab', ev => {
-        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual('#home')
-        expect(secondTabTrigger.getAttribute('aria-selected')).toEqual('true')
-        expect(fixtureEl.querySelector('button:not(.active)').getAttribute('aria-selected')).toEqual('false')
-        done()
-      })
+      secondTabTrigger.addEventListener('shown.bs.tab', (ev) => {
+        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual(
+          '#home'
+        );
+        expect(secondTabTrigger.getAttribute('aria-selected')).toEqual('true');
+        expect(
+          fixtureEl
+            .querySelector('button:not(.active)')
+            .getAttribute('aria-selected')
+        ).toEqual('false');
+        done();
+      });
 
-      secondTab.show()
-    })
+      secondTab.show();
+    });
 
-    it('should fire hide and hidden events', done => {
+    it('should fire hide and hidden events', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav" role="tablist">',
         '  <li><button type="button" data-bs-target="#home" role="tab">Home</button></li>',
         '  <li><button type="button" data-bs-target="#profile">Profile</button></li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      const triggerList = fixtureEl.querySelectorAll('button')
-      const firstTab = new Tab(triggerList[0])
-      const secondTab = new Tab(triggerList[1])
+      const triggerList = fixtureEl.querySelectorAll('button');
+      const firstTab = new Tab(triggerList[0]);
+      const secondTab = new Tab(triggerList[1]);
 
-      let hideCalled = false
+      let hideCalled = false;
       triggerList[0].addEventListener('shown.bs.tab', () => {
-        secondTab.show()
-      })
+        secondTab.show();
+      });
 
-      triggerList[0].addEventListener('hide.bs.tab', ev => {
-        hideCalled = true
-        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual('#profile')
-      })
+      triggerList[0].addEventListener('hide.bs.tab', (ev) => {
+        hideCalled = true;
+        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual(
+          '#profile'
+        );
+      });
 
-      triggerList[0].addEventListener('hidden.bs.tab', ev => {
-        expect(hideCalled).toEqual(true)
-        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual('#profile')
-        done()
-      })
+      triggerList[0].addEventListener('hidden.bs.tab', (ev) => {
+        expect(hideCalled).toEqual(true);
+        expect(ev.relatedTarget.getAttribute('data-bs-target')).toEqual(
+          '#profile'
+        );
+        done();
+      });
 
-      firstTab.show()
-    })
+      firstTab.show();
+    });
 
-    it('should not fire hidden when hide is prevented', done => {
+    it('should not fire hidden when hide is prevented', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav" role="tablist">',
         '  <li><button type="button" data-bs-target="#home" role="tab">Home</button></li>',
         '  <li><button type="button" data-bs-target="#profile" role="tab">Profile</button></li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      const triggerList = fixtureEl.querySelectorAll('button')
-      const firstTab = new Tab(triggerList[0])
-      const secondTab = new Tab(triggerList[1])
+      const triggerList = fixtureEl.querySelectorAll('button');
+      const firstTab = new Tab(triggerList[0]);
+      const secondTab = new Tab(triggerList[1]);
       const expectDone = () => {
         setTimeout(() => {
-          expect().nothing()
-          done()
-        }, 30)
-      }
+          expect().nothing();
+          done();
+        }, 30);
+      };
 
       triggerList[0].addEventListener('shown.bs.tab', () => {
-        secondTab.show()
-      })
+        secondTab.show();
+      });
 
-      triggerList[0].addEventListener('hide.bs.tab', ev => {
-        ev.preventDefault()
-        expectDone()
-      })
+      triggerList[0].addEventListener('hide.bs.tab', (ev) => {
+        ev.preventDefault();
+        expectDone();
+      });
 
       triggerList[0].addEventListener('hidden.bs.tab', () => {
-        throw new Error('should not trigger hidden')
-      })
+        throw new Error('should not trigger hidden');
+      });
 
-      firstTab.show()
-    })
+      firstTab.show();
+    });
 
-    it('should handle removed tabs', done => {
+    it('should handle removed tabs', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation">',
@@ -315,148 +336,148 @@ describe('Tab', () => {
         '  <div role="tabpanel" class="tab-pane fade show active" id="profile">test 1</div>',
         '  <div role="tabpanel" class="tab-pane fade" id="buzz">test 2</div>',
         '  <div role="tabpanel" class="tab-pane fade" id="references">test 3</div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const secondNavEl = fixtureEl.querySelector('#secondNav')
-      const btnCloseEl = fixtureEl.querySelector('#btnClose')
-      const secondNavTab = new Tab(secondNavEl)
+      const secondNavEl = fixtureEl.querySelector('#secondNav');
+      const btnCloseEl = fixtureEl.querySelector('#btnClose');
+      const secondNavTab = new Tab(secondNavEl);
 
       secondNavEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelectorAll('.nav-tab').length).toEqual(2)
-        done()
-      })
+        expect(fixtureEl.querySelectorAll('.nav-tab').length).toEqual(2);
+        done();
+      });
 
       btnCloseEl.addEventListener('click', () => {
-        const linkEl = btnCloseEl.parentNode
-        const liEl = linkEl.parentNode
-        const tabId = linkEl.getAttribute('href')
-        const tabIdEl = fixtureEl.querySelector(tabId)
+        const linkEl = btnCloseEl.parentNode;
+        const liEl = linkEl.parentNode;
+        const tabId = linkEl.getAttribute('href');
+        const tabIdEl = fixtureEl.querySelector(tabId);
 
-        liEl.remove()
-        tabIdEl.remove()
-        secondNavTab.show()
-      })
+        liEl.remove();
+        tabIdEl.remove();
+        secondNavTab.show();
+      });
 
-      btnCloseEl.click()
-    })
-  })
+      btnCloseEl.click();
+    });
+  });
 
   describe('dispose', () => {
     it('should dispose a tab', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const el = fixtureEl.querySelector('div')
-      const tab = new Tab(fixtureEl.querySelector('div'))
+      const el = fixtureEl.querySelector('div');
+      const tab = new Tab(fixtureEl.querySelector('div'));
 
-      expect(Tab.getInstance(el)).not.toBeNull()
+      expect(Tab.getInstance(el)).not.toBeNull();
 
-      tab.dispose()
+      tab.dispose();
 
-      expect(Tab.getInstance(el)).toBeNull()
-    })
-  })
+      expect(Tab.getInstance(el)).toBeNull();
+    });
+  });
 
   describe('jQueryInterface', () => {
     it('should create a tab', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const div = fixtureEl.querySelector('div')
+      const div = fixtureEl.querySelector('div');
 
-      jQueryMock.fn.tab = Tab.jQueryInterface
-      jQueryMock.elements = [div]
+      jQueryMock.fn.tab = Tab.jQueryInterface;
+      jQueryMock.elements = [div];
 
-      jQueryMock.fn.tab.call(jQueryMock)
+      jQueryMock.fn.tab.call(jQueryMock);
 
-      expect(Tab.getInstance(div)).not.toBeNull()
-    })
+      expect(Tab.getInstance(div)).not.toBeNull();
+    });
 
     it('should not re create a tab', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const div = fixtureEl.querySelector('div')
-      const tab = new Tab(div)
+      const div = fixtureEl.querySelector('div');
+      const tab = new Tab(div);
 
-      jQueryMock.fn.tab = Tab.jQueryInterface
-      jQueryMock.elements = [div]
+      jQueryMock.fn.tab = Tab.jQueryInterface;
+      jQueryMock.elements = [div];
 
-      jQueryMock.fn.tab.call(jQueryMock)
+      jQueryMock.fn.tab.call(jQueryMock);
 
-      expect(Tab.getInstance(div)).toEqual(tab)
-    })
+      expect(Tab.getInstance(div)).toEqual(tab);
+    });
 
     it('should call a tab method', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const div = fixtureEl.querySelector('div')
-      const tab = new Tab(div)
+      const div = fixtureEl.querySelector('div');
+      const tab = new Tab(div);
 
-      spyOn(tab, 'show')
+      spyOn(tab, 'show');
 
-      jQueryMock.fn.tab = Tab.jQueryInterface
-      jQueryMock.elements = [div]
+      jQueryMock.fn.tab = Tab.jQueryInterface;
+      jQueryMock.elements = [div];
 
-      jQueryMock.fn.tab.call(jQueryMock, 'show')
+      jQueryMock.fn.tab.call(jQueryMock, 'show');
 
-      expect(Tab.getInstance(div)).toEqual(tab)
-      expect(tab.show).toHaveBeenCalled()
-    })
+      expect(Tab.getInstance(div)).toEqual(tab);
+      expect(tab.show).toHaveBeenCalled();
+    });
 
     it('should throw error on undefined method', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const div = fixtureEl.querySelector('div')
-      const action = 'undefinedMethod'
+      const div = fixtureEl.querySelector('div');
+      const action = 'undefinedMethod';
 
-      jQueryMock.fn.tab = Tab.jQueryInterface
-      jQueryMock.elements = [div]
+      jQueryMock.fn.tab = Tab.jQueryInterface;
+      jQueryMock.elements = [div];
 
       expect(() => {
-        jQueryMock.fn.tab.call(jQueryMock, action)
-      }).toThrowError(TypeError, `No method named "${action}"`)
-    })
-  })
+        jQueryMock.fn.tab.call(jQueryMock, action);
+      }).toThrowError(TypeError, `No method named "${action}"`);
+    });
+  });
 
   describe('getInstance', () => {
     it('should return null if there is no instance', () => {
-      expect(Tab.getInstance(fixtureEl)).toEqual(null)
-    })
+      expect(Tab.getInstance(fixtureEl)).toEqual(null);
+    });
 
     it('should return this instance', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const divEl = fixtureEl.querySelector('div')
-      const tab = new Tab(divEl)
+      const divEl = fixtureEl.querySelector('div');
+      const tab = new Tab(divEl);
 
-      expect(Tab.getInstance(divEl)).toEqual(tab)
-      expect(Tab.getInstance(divEl)).toBeInstanceOf(Tab)
-    })
-  })
+      expect(Tab.getInstance(divEl)).toEqual(tab);
+      expect(Tab.getInstance(divEl)).toBeInstanceOf(Tab);
+    });
+  });
 
   describe('getOrCreateInstance', () => {
     it('should return tab instance', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const div = fixtureEl.querySelector('div')
-      const tab = new Tab(div)
+      const div = fixtureEl.querySelector('div');
+      const tab = new Tab(div);
 
-      expect(Tab.getOrCreateInstance(div)).toEqual(tab)
-      expect(Tab.getInstance(div)).toEqual(Tab.getOrCreateInstance(div, {}))
-      expect(Tab.getOrCreateInstance(div)).toBeInstanceOf(Tab)
-    })
+      expect(Tab.getOrCreateInstance(div)).toEqual(tab);
+      expect(Tab.getInstance(div)).toEqual(Tab.getOrCreateInstance(div, {}));
+      expect(Tab.getOrCreateInstance(div)).toBeInstanceOf(Tab);
+    });
 
     it('should return new instance when there is no tab instance', () => {
-      fixtureEl.innerHTML = '<div></div>'
+      fixtureEl.innerHTML = '<div></div>';
 
-      const div = fixtureEl.querySelector('div')
+      const div = fixtureEl.querySelector('div');
 
-      expect(Tab.getInstance(div)).toEqual(null)
-      expect(Tab.getOrCreateInstance(div)).toBeInstanceOf(Tab)
-    })
-  })
+      expect(Tab.getInstance(div)).toEqual(null);
+      expect(Tab.getOrCreateInstance(div)).toBeInstanceOf(Tab);
+    });
+  });
 
   describe('data-api', () => {
-    it('should create dynamically a tab', done => {
+    it('should create dynamically a tab', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation"><button type="button" data-bs-target="#home" class="nav-link active" role="tab" aria-selected="true">Home</button></li>',
@@ -465,19 +486,21 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div class="tab-pane active" id="home" role="tabpanel"></div>',
         '  <div class="tab-pane" id="profile" role="tabpanel"></div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const secondTabTrigger = fixtureEl.querySelector('#triggerProfile')
+      const secondTabTrigger = fixtureEl.querySelector('#triggerProfile');
 
       secondTabTrigger.addEventListener('shown.bs.tab', () => {
-        expect(secondTabTrigger.classList.contains('active')).toEqual(true)
-        expect(fixtureEl.querySelector('#profile').classList.contains('active')).toEqual(true)
-        done()
-      })
+        expect(secondTabTrigger.classList.contains('active')).toEqual(true);
+        expect(
+          fixtureEl.querySelector('#profile').classList.contains('active')
+        ).toEqual(true);
+        done();
+      });
 
-      secondTabTrigger.click()
-    })
+      secondTabTrigger.click();
+    });
 
     it('selected tab should deactivate previous selected link in dropdown', () => {
       fixtureEl.innerHTML = [
@@ -491,16 +514,22 @@ describe('Tab', () => {
         '      <a class="dropdown-item" href="#dropdown2" id="dropdown2-tab" data-bs-toggle="tab">@mdo</a>',
         '    </div>',
         '  </li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      const firstLiLinkEl = fixtureEl.querySelector('li:first-child a')
+      const firstLiLinkEl = fixtureEl.querySelector('li:first-child a');
 
-      firstLiLinkEl.click()
-      expect(firstLiLinkEl.classList.contains('active')).toEqual(true)
-      expect(fixtureEl.querySelector('li:last-child a').classList.contains('active')).toEqual(false)
-      expect(fixtureEl.querySelector('li:last-child .dropdown-menu a:first-child').classList.contains('active')).toEqual(false)
-    })
+      firstLiLinkEl.click();
+      expect(firstLiLinkEl.classList.contains('active')).toEqual(true);
+      expect(
+        fixtureEl.querySelector('li:last-child a').classList.contains('active')
+      ).toEqual(false);
+      expect(
+        fixtureEl
+          .querySelector('li:last-child .dropdown-menu a:first-child')
+          .classList.contains('active')
+      ).toEqual(false);
+    });
 
     it('selecting a dropdown tab does not activate another', () => {
       const nav1 = [
@@ -512,8 +541,8 @@ describe('Tab', () => {
         '      <a class="dropdown-item" href="#dropdown1" id="dropdown1-tab" data-bs-toggle="tab">@fat</a>',
         '    </div>',
         '  </li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
       const nav2 = [
         '<ul class="nav nav-tabs" id="nav2">',
         '  <li class="nav-item active"><a class="nav-link" href="#home" data-bs-toggle="tab">Home</a></li>',
@@ -523,19 +552,31 @@ describe('Tab', () => {
         '      <a class="dropdown-item" href="#dropdown1" id="dropdown1-tab" data-bs-toggle="tab">@fat</a>',
         '    </div>',
         '  </li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      fixtureEl.innerHTML = nav1 + nav2
+      fixtureEl.innerHTML = nav1 + nav2;
 
-      const firstDropItem = fixtureEl.querySelector('#nav1 .dropdown-item')
+      const firstDropItem = fixtureEl.querySelector('#nav1 .dropdown-item');
 
-      firstDropItem.click()
-      expect(firstDropItem.classList.contains('active')).toEqual(true)
-      expect(fixtureEl.querySelector('#nav1 .dropdown-toggle').classList.contains('active')).toEqual(true)
-      expect(fixtureEl.querySelector('#nav2 .dropdown-toggle').classList.contains('active')).toEqual(false)
-      expect(fixtureEl.querySelector('#nav2 .dropdown-item').classList.contains('active')).toEqual(false)
-    })
+      firstDropItem.click();
+      expect(firstDropItem.classList.contains('active')).toEqual(true);
+      expect(
+        fixtureEl
+          .querySelector('#nav1 .dropdown-toggle')
+          .classList.contains('active')
+      ).toEqual(true);
+      expect(
+        fixtureEl
+          .querySelector('#nav2 .dropdown-toggle')
+          .classList.contains('active')
+      ).toEqual(false);
+      expect(
+        fixtureEl
+          .querySelector('#nav2 .dropdown-item')
+          .classList.contains('active')
+      ).toEqual(false);
+    });
 
     it('should support li > .dropdown-item', () => {
       fixtureEl.innerHTML = [
@@ -549,17 +590,19 @@ describe('Tab', () => {
         '      <li><a class="dropdown-item" href="#dropdown2" id="dropdown2-tab" data-bs-toggle="tab">@mdo</a></li>',
         '    </ul>',
         '  </li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      const firstDropItem = fixtureEl.querySelector('.dropdown-item')
+      const firstDropItem = fixtureEl.querySelector('.dropdown-item');
 
-      firstDropItem.click()
-      expect(firstDropItem.classList.contains('active')).toEqual(true)
-      expect(fixtureEl.querySelector('.nav-link').classList.contains('active')).toEqual(false)
-    })
+      firstDropItem.click();
+      expect(firstDropItem.classList.contains('active')).toEqual(true);
+      expect(
+        fixtureEl.querySelector('.nav-link').classList.contains('active')
+      ).toEqual(false);
+    });
 
-    it('should handle nested tabs', done => {
+    it('should handle nested tabs', (done) => {
       fixtureEl.innerHTML = [
         '<nav class="nav nav-tabs" role="tablist">',
         '  <button type="button" id="tab1" data-bs-target="#x-tab1" class="nav-link" data-bs-toggle="tab" role="tab" aria-controls="x-tab1">Tab 1</button>',
@@ -579,27 +622,27 @@ describe('Tab', () => {
         '  </div>',
         '  <div class="tab-pane active" id="x-tab2" role="tabpanel">Tab2 Content</div>',
         '  <div class="tab-pane" id="x-tab3" role="tabpanel">Tab3 Content</div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const tab1El = fixtureEl.querySelector('#tab1')
-      const tabNested2El = fixtureEl.querySelector('#tabNested2')
-      const xTab1El = fixtureEl.querySelector('#x-tab1')
+      const tab1El = fixtureEl.querySelector('#tab1');
+      const tabNested2El = fixtureEl.querySelector('#tabNested2');
+      const xTab1El = fixtureEl.querySelector('#x-tab1');
 
       tabNested2El.addEventListener('shown.bs.tab', () => {
-        expect(xTab1El.classList.contains('active')).toEqual(true)
-        done()
-      })
+        expect(xTab1El.classList.contains('active')).toEqual(true);
+        done();
+      });
 
       tab1El.addEventListener('shown.bs.tab', () => {
-        expect(xTab1El.classList.contains('active')).toEqual(true)
-        tabNested2El.click()
-      })
+        expect(xTab1El.classList.contains('active')).toEqual(true);
+        tabNested2El.click();
+      });
 
-      tab1El.click()
-    })
+      tab1El.click();
+    });
 
-    it('should not remove fade class if no active pane is present', done => {
+    it('should not remove fade class if no active pane is present', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation"><button type="button" id="tab-home" data-bs-target="#home" class="nav-link" data-bs-toggle="tab" role="tab">Home</button></li>',
@@ -608,35 +651,35 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div class="tab-pane fade" id="home" role="tabpanel"></div>',
         '  <div class="tab-pane fade" id="profile" role="tabpanel"></div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const triggerTabProfileEl = fixtureEl.querySelector('#tab-profile')
-      const triggerTabHomeEl = fixtureEl.querySelector('#tab-home')
-      const tabProfileEl = fixtureEl.querySelector('#profile')
-      const tabHomeEl = fixtureEl.querySelector('#home')
+      const triggerTabProfileEl = fixtureEl.querySelector('#tab-profile');
+      const triggerTabHomeEl = fixtureEl.querySelector('#tab-home');
+      const tabProfileEl = fixtureEl.querySelector('#profile');
+      const tabHomeEl = fixtureEl.querySelector('#home');
 
       triggerTabProfileEl.addEventListener('shown.bs.tab', () => {
-        expect(tabProfileEl.classList.contains('fade')).toEqual(true)
-        expect(tabProfileEl.classList.contains('show')).toEqual(true)
+        expect(tabProfileEl.classList.contains('fade')).toEqual(true);
+        expect(tabProfileEl.classList.contains('show')).toEqual(true);
 
         triggerTabHomeEl.addEventListener('shown.bs.tab', () => {
-          expect(tabProfileEl.classList.contains('fade')).toEqual(true)
-          expect(tabProfileEl.classList.contains('show')).toEqual(false)
+          expect(tabProfileEl.classList.contains('fade')).toEqual(true);
+          expect(tabProfileEl.classList.contains('show')).toEqual(false);
 
-          expect(tabHomeEl.classList.contains('fade')).toEqual(true)
-          expect(tabHomeEl.classList.contains('show')).toEqual(true)
+          expect(tabHomeEl.classList.contains('fade')).toEqual(true);
+          expect(tabHomeEl.classList.contains('show')).toEqual(true);
 
-          done()
-        })
+          done();
+        });
 
-        triggerTabHomeEl.click()
-      })
+        triggerTabHomeEl.click();
+      });
 
-      triggerTabProfileEl.click()
-    })
+      triggerTabProfileEl.click();
+    });
 
-    it('should not add show class to tab panes if there is no `.fade` class', done => {
+    it('should not add show class to tab panes if there is no `.fade` class', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation">',
@@ -649,20 +692,20 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div role="tabpanel" class="tab-pane" id="home">test 1</div>',
         '  <div role="tabpanel" class="tab-pane" id="profile">test 2</div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const secondNavEl = fixtureEl.querySelector('#secondNav')
+      const secondNavEl = fixtureEl.querySelector('#secondNav');
 
       secondNavEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelectorAll('.show').length).toEqual(0)
-        done()
-      })
+        expect(fixtureEl.querySelectorAll('.show').length).toEqual(0);
+        done();
+      });
 
-      secondNavEl.click()
-    })
+      secondNavEl.click();
+    });
 
-    it('should add show class to tab panes if there is a `.fade` class', done => {
+    it('should add show class to tab panes if there is a `.fade` class', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation">',
@@ -675,40 +718,40 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div role="tabpanel" class="tab-pane fade" id="home">test 1</div>',
         '  <div role="tabpanel" class="tab-pane fade" id="profile">test 2</div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const secondNavEl = fixtureEl.querySelector('#secondNav')
+      const secondNavEl = fixtureEl.querySelector('#secondNav');
 
       secondNavEl.addEventListener('shown.bs.tab', () => {
-        expect(fixtureEl.querySelectorAll('.show').length).toEqual(1)
-        done()
-      })
+        expect(fixtureEl.querySelectorAll('.show').length).toEqual(1);
+        done();
+      });
 
-      secondNavEl.click()
-    })
+      secondNavEl.click();
+    });
 
-    it('should prevent default when the trigger is <a> or <area>', done => {
+    it('should prevent default when the trigger is <a> or <area>', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav" role="tablist">',
         '  <li><a type="button" href="#test"  class="active" role="tab" data-bs-toggle="tab">Home</a></li>',
         '  <li><a type="button" href="#test2" role="tab" data-bs-toggle="tab">Home</a></li>',
-        '</ul>'
-      ].join('')
+        '</ul>',
+      ].join('');
 
-      const tabEl = fixtureEl.querySelector('[href="#test2"]')
-      spyOn(Event.prototype, 'preventDefault').and.callThrough()
+      const tabEl = fixtureEl.querySelector('[href="#test2"]');
+      spyOn(Event.prototype, 'preventDefault').and.callThrough();
 
       tabEl.addEventListener('shown.bs.tab', () => {
-        expect(tabEl.classList.contains('active')).toEqual(true)
-        expect(Event.prototype.preventDefault).toHaveBeenCalled()
-        done()
-      })
+        expect(tabEl.classList.contains('active')).toEqual(true);
+        expect(Event.prototype.preventDefault).toHaveBeenCalled();
+        done();
+      });
 
-      tabEl.click()
-    })
+      tabEl.click();
+    });
 
-    it('should not fire shown when tab has disabled attribute', done => {
+    it('should not fire shown when tab has disabled attribute', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation"><button type="button" data-bs-target="#home" class="nav-link active" role="tab" aria-selected="true">Home</button></li>',
@@ -717,22 +760,22 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div class="tab-pane active" id="home" role="tabpanel"></div>',
         '  <div class="tab-pane" id="profile" role="tabpanel"></div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const triggerDisabled = fixtureEl.querySelector('button[disabled]')
+      const triggerDisabled = fixtureEl.querySelector('button[disabled]');
       triggerDisabled.addEventListener('shown.bs.tab', () => {
-        throw new Error('should not trigger shown event')
-      })
+        throw new Error('should not trigger shown event');
+      });
 
-      triggerDisabled.click()
+      triggerDisabled.click();
       setTimeout(() => {
-        expect().nothing()
-        done()
-      }, 30)
-    })
+        expect().nothing();
+        done();
+      }, 30);
+    });
 
-    it('should not fire shown when tab has disabled class', done => {
+    it('should not fire shown when tab has disabled class', (done) => {
       fixtureEl.innerHTML = [
         '<ul class="nav nav-tabs" role="tablist">',
         '  <li class="nav-item" role="presentation"><a href="#home" class="nav-link active" role="tab" aria-selected="true">Home</a></li>',
@@ -741,20 +784,20 @@ describe('Tab', () => {
         '<div class="tab-content">',
         '  <div class="tab-pane active" id="home" role="tabpanel"></div>',
         '  <div class="tab-pane" id="profile" role="tabpanel"></div>',
-        '</div>'
-      ].join('')
+        '</div>',
+      ].join('');
 
-      const triggerDisabled = fixtureEl.querySelector('a.disabled')
+      const triggerDisabled = fixtureEl.querySelector('a.disabled');
 
       triggerDisabled.addEventListener('shown.bs.tab', () => {
-        throw new Error('should not trigger shown event')
-      })
+        throw new Error('should not trigger shown event');
+      });
 
-      triggerDisabled.click()
+      triggerDisabled.click();
       setTimeout(() => {
-        expect().nothing()
-        done()
-      }, 30)
-    })
-  })
-})
+        expect().nothing();
+        done();
+      }, 30);
+    });
+  });
+});

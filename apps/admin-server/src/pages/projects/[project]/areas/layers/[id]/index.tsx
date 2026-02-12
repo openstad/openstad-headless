@@ -1,8 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {useFieldArray, useForm} from 'react-hook-form';
-
+import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,15 +9,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
 import useDatalayer from '@/hooks/use-datalayer';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
+import { useRouter } from 'next/router';
+import React, { useCallback, useEffect } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import {ImageUploader} from "@/components/image-uploader";
-import {X} from "lucide-react";
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -37,9 +36,7 @@ const formSchema = z.object({
 export default function ProjectDatalayerEdit() {
   const router = useRouter();
   const { project, id } = router.query;
-  const { data, isLoading, updateDatalayer } = useDatalayer(
-    id as string
-  );
+  const { data, isLoading, updateDatalayer } = useDatalayer(id as string);
 
   const defaults = useCallback(
     () => ({
@@ -57,13 +54,19 @@ export default function ProjectDatalayerEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const datalayer = await updateDatalayer(values.name, values.layer, values.icon);
+    const datalayer = await updateDatalayer(
+      values.name,
+      values.layer,
+      values.icon
+    );
 
     if (datalayer) {
       toast.success('Kaartlaag aangepast!');
       // router.push(`/projects/${project}/areas`);
     } else {
-      toast.error('De kaartlaag die is meegegeven lijkt niet helemaal te kloppen.')
+      toast.error(
+        'De kaartlaag die is meegegeven lijkt niet helemaal te kloppen.'
+      );
     }
   }
 
@@ -104,13 +107,13 @@ export default function ProjectDatalayerEdit() {
               <FormField
                 control={form.control}
                 name="name"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Naam</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -131,20 +134,21 @@ export default function ProjectDatalayerEdit() {
               <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
                 {iconField.length > 0 && (
                   <>
-                    <label
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Geüpload icoon</label>
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Geüpload icoon
+                    </label>
                     <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                      {iconField.map(({id, url}, index) => {
+                      {iconField.map(({ id, url }, index) => {
                         return (
                           <div key={id} className="relative">
-                            <img src={url} alt={url}/>
+                            <img src={url} alt={url} />
                             <Button
                               color="red"
                               onClick={() => {
                                 removeImage(index);
                               }}
                               className="absolute right-0 top-0">
-                              <X size={24}/>
+                              <X size={24} />
                             </Button>
                           </div>
                         );
@@ -157,13 +161,13 @@ export default function ProjectDatalayerEdit() {
               <FormField
                 control={form.control}
                 name="layer"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Kaartlaag</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

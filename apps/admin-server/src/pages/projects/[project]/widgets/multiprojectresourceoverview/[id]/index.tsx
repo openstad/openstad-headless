@@ -1,4 +1,21 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { extractConfig } from '@/lib/sub-widget-helper';
+import { LikeWidgetTabProps } from '@/pages/projects/[project]/widgets/likes/[id]';
+import LikesDisplay from '@/pages/projects/[project]/widgets/likes/[id]/weergave';
+import WidgetMultiProjectSettings from '@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/settings';
+import WidgetResourceOverviewInclude from '@/pages/projects/[project]/widgets/resourceoverview/[id]/include';
+import WidgetResourceOverviewTags from '@/pages/projects/[project]/widgets/resourceoverview/[id]/tags';
+import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,31 +23,15 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetResourceOverviewGeneral from '../../resourceoverview/[id]/general';
 import WidgetResourceOverviewDisplay from '../../resourceoverview/[id]/display';
-import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
+import WidgetResourceOverviewGeneral from '../../resourceoverview/[id]/general';
 import WidgetResourceOverviewPagination from '../../resourceoverview/[id]/pagination';
 import WidgetResourceOverviewSearch from '../../resourceoverview/[id]/search';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
-import WidgetPreview from '@/components/widget-preview';
-import WidgetPublish from '@/components/widget-publish';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
+import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
-import { extractConfig } from '@/lib/sub-widget-helper';
-import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
-import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
-import WidgetMultiProjectSettings from "@/pages/projects/[project]/widgets/multiprojectresourceoverview/[id]/settings";
-import WidgetResourceOverviewTags from "@/pages/projects/[project]/widgets/resourceoverview/[id]/tags";
-import WidgetResourceOverviewInclude from "@/pages/projects/[project]/widgets/resourceoverview/[id]/include";
 
 export const getServerSideProps = withApiUrl;
 
@@ -95,7 +96,9 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="pagination">Paginering</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
-              <TabsTrigger value="settings">Instellingen multi project</TabsTrigger>
+              <TabsTrigger value="settings">
+                Instellingen multi project
+              </TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
@@ -170,15 +173,34 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                   <WidgetResourceOverviewTags {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="include" className="p-0">
-                  <WidgetResourceOverviewInclude {...totalPropPackage} isMultiProjectResourceOverview={true} />
+                  <WidgetResourceOverviewInclude
+                    {...totalPropPackage}
+                    isMultiProjectResourceOverview={true}
+                  />
                 </TabsContent>
                 <TabsContent value="likes" className="p-0">
                   {previewConfig && (
                     <>
-                      <p style={{backgroundColor: 'orange', color: 'white', fontSize: '14px',  fontWeight: 'bold', marginBottom: '5px', padding: '5px 10px', width: 'auto', display: 'inline-block', borderRadius: '6px'}}>
-                        Let op! Deze instellingen zijn voor het type weergave &apos;Inzendingen op de huidige pagina tonen, in een dialog.&apos;<br />
-                        Bij het tabje &apos;Weergave&apos; moet je ook aangevinkt hebben dat je likes wilt tonen.
-                        Als beide niet zo zijn ingesteld, dan zullen de likes niet getoond worden.
+                      <p
+                        style={{
+                          backgroundColor: 'orange',
+                          color: 'white',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          marginBottom: '5px',
+                          padding: '5px 10px',
+                          width: 'auto',
+                          display: 'inline-block',
+                          borderRadius: '6px',
+                        }}>
+                        Let op! Deze instellingen zijn voor het type weergave
+                        &apos;Inzendingen op de huidige pagina tonen, in een
+                        dialog.&apos;
+                        <br />
+                        Bij het tabje &apos;Weergave&apos; moet je ook
+                        aangevinkt hebben dat je likes wilt tonen. Als beide
+                        niet zo zijn ingesteld, dan zullen de likes niet getoond
+                        worden.
                       </p>
                       <LikesDisplay
                         omitSchemaKeys={['resourceId']}
@@ -191,7 +213,8 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                           updateConfig,
                           updatePreview,
                         })}
-                      /></>
+                      />
+                    </>
                   )}
                 </TabsContent>
                 <TabsContent value="settings" className="p-0">

@@ -1,14 +1,9 @@
-import { useState } from 'react';
-import { DialogClose } from '@radix-ui/react-dialog';
-
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { Heading, Paragraph } from '@/components/ui/typography';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { DialogClose } from '@radix-ui/react-dialog';
+import { useState } from 'react';
 
 export interface ExportSettings {
   splitMultipleChoice: boolean;
@@ -21,7 +16,8 @@ type Props = {
 
 export function ExportSettingsDialog({ disabled, onExport }: Props) {
   const [open, setOpen] = useState<boolean>(false);
-  const [splitMultipleChoice, setSplitMultipleChoice] = useState<boolean>(false);
+  const [splitMultipleChoice, setSplitMultipleChoice] =
+    useState<boolean>(false);
 
   const handleExport = () => {
     onExport({ splitMultipleChoice });
@@ -37,8 +33,7 @@ export function ExportSettingsDialog({ disabled, onExport }: Props) {
         onClick={(e) => {
           e.preventDefault();
           setOpen(true);
-        }}
-      >
+        }}>
         Exporteer inzendingen
       </Button>
       <DialogContent
@@ -48,8 +43,7 @@ export function ExportSettingsDialog({ disabled, onExport }: Props) {
         onInteractOutside={(e: Event) => {
           e.stopPropagation();
           setOpen(false);
-        }}
-      >
+        }}>
         <div>
           <Heading size="lg">Export instellingen</Heading>
           <Paragraph className="mb-6">
@@ -66,8 +60,7 @@ export function ExportSettingsDialog({ disabled, onExport }: Props) {
             />
             <label
               htmlFor="splitMultipleChoice"
-              className="text-sm font-medium leading-none cursor-pointer"
-            >
+              className="text-sm font-medium leading-none cursor-pointer">
               Meerkeuzevragen in aparte kolommen (Ja/Nee per optie)
             </label>
           </div>
@@ -80,8 +73,7 @@ export function ExportSettingsDialog({ disabled, onExport }: Props) {
                   setOpen(false);
                 }}
                 type="button"
-                variant="ghost"
-              >
+                variant="ghost">
                 Annuleren
               </Button>
             </DialogClose>
