@@ -146,14 +146,14 @@ async function ensureExternalSecret(secretName, namespace) {
         body: { ...externalSecretSpec, apiVersion: `external-secrets.io/${version}` }
       });
 
-      console.log(`[external-certificates] Created ExternalSecret: ${secretName}`);
+      console.log('[external-certificates] Created ExternalSecret');
       return { created: true, secretName };
 
     } catch (error) {
       const status = getErrorStatusCode(error);
       if (status === 409) {
         // Resource already exists — this is the desired state
-        console.log(`[external-certificates] ExternalSecret already exists: ${secretName}`);
+        console.log('[external-certificates] ExternalSecret already exists');
         return { created: false, secretName };
       } else if (status === 404 && version === 'v1') {
         // v1 not found, try v1beta1
@@ -246,7 +246,7 @@ async function checkSecretReady(secretName, namespace) {
   } catch (err) {
     if (getErrorStatusCode(err) !== 404) {
       // Unexpected error reading Secret
-      console.error(`[external-certificates] Error reading Secret ${secretName}:`, err.message);
+      console.error('[external-certificates] Unexpected error reading external certificate Secret:', err.message);
     }
     // 404 means Secret doesn't exist yet, secretExists stays false
   }
@@ -307,7 +307,7 @@ async function waitForSecretReady(secretName, namespace, options = {}) {
     }
 
     if (attempt < maxRetries) {
-      console.log(`[external-certificates] Secret ${secretName} not ready (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs / 1000}s...`);
+      console.log(`[external-certificates] Secret not ready (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs / 1000}s...`);
       await new Promise(resolve => setTimeout(resolve, retryDelayMs));
     }
   }

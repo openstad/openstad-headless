@@ -236,7 +236,7 @@ const checkHostStatus = async (conditions) => {
         try {
           await externalCertificatesManager.ensureExternalSecret(secretName, namespace);
         } catch (error) {
-          console.error(`[external-certificates] Failed to ensure ExternalSecret for project ${project.id}: ${error.message}`);
+          console.error(`[external-certificates] Failed to ensure ExternalSecret for project ${project.id}`);
           hostStatus.certificate = { method: 'external', state: 'error', secretName, lastChecked: new Date().toISOString() };
           await project.update({ hostStatus });
           return;

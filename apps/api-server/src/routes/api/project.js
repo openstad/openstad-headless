@@ -963,7 +963,7 @@ router.route('/:projectId(\\d+)/certificate-retry')
         ready: certStatus.ready
       });
     } catch (error) {
-      console.error(`[external-certificates] Retry failed for project ${req.params.projectId}:`, error.message);
+      console.error('[external-certificates] Retry failed for project %s:', String(req.params.projectId), error.message);
       return res.status(500).json({ error: 'Certificate retry failed' });
     }
   });
