@@ -19,6 +19,13 @@ import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
 import { useForm } from "react-hook-form";
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const formSchema = z.object({
   certificateMethod: z.enum(['cert-manager', 'external']),
@@ -31,6 +38,7 @@ const formSchema = z.object({
 function CertStatusBadge({ state }: { state?: string }) {
   const config: Record<string, { label: string; className: string }> = {
     linked: { label: 'Gekoppeld', className: 'bg-green-100 text-green-800' },
+    configured: { label: 'Geconfigureerd', className: 'bg-blue-100 text-blue-800' },
     pending: { label: 'In afwachting', className: 'bg-yellow-100 text-yellow-800' },
     error: { label: 'Fout', className: 'bg-red-100 text-red-800' },
   };
@@ -54,9 +62,10 @@ export default function ProjectSettingsCertificates() {
 
   useEffect(() => {
     if (data?.config) {
+      const certs = data.config.certificates || {};
       form.reset({
-        certificateMethod: data.config.certificateMethod || 'cert-manager',
-        externalCertSlug: data.config.externalCertSlug || '',
+        certificateMethod: certs.certificateMethod || data.config.certificateMethod || 'cert-manager',
+        externalCertSlug: certs.externalCertSlug || data.config.externalCertSlug || '',
       });
     }
   }, [data, form]);
@@ -64,8 +73,10 @@ export default function ProjectSettingsCertificates() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const result = await updateProject({
-        certificateMethod: values.certificateMethod,
-        externalCertSlug: values.externalCertSlug || undefined,
+        certificates: {
+          certificateMethod: values.certificateMethod,
+          externalCertSlug: values.externalCertSlug || '',
+        },
       });
       if (result) {
         toast.success('Certificaatinstellingen opgeslagen!');
@@ -101,8 +112,9 @@ export default function ProjectSettingsCertificates() {
 
   const certificateMethod = form.watch('certificateMethod');
   const showExternalCertConfig = certificateMethod === 'external';
-  const certStatus = data?.hostStatus?.externalCert?.state;
-  const secretName = data?.hostStatus?.externalCert?.secretName;
+  const certInfo = data?.hostStatus?.certificate;
+  const certStatus = certInfo?.state;
+  const secretName = certInfo?.secretName;
 
   return (
     <div>
@@ -136,30 +148,19 @@ export default function ProjectSettingsCertificates() {
                 render={({ field }) => (
                   <FormItem className="mb-6">
                     <FormLabel>Certificaatmethode</FormLabel>
-                    <FormControl>
-                      <fieldset>
-                        <div className="flex gap-4 mt-2">
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              value="cert-manager"
-                              checked={field.value === 'cert-manager'}
-                              onChange={() => field.onChange('cert-manager')}
-                            />
-                            cert-manager (standaard)
-                          </label>
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              value="external"
-                              checked={field.value === 'external'}
-                              onChange={() => field.onChange('external')}
-                            />
-                            Extern certificaat
-                          </label>
-                        </div>
-                      </fieldset>
-                    </FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="max-w-md">
+                          <SelectValue placeholder="Kies methode" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cert-manager">cert-manager (standaard)</SelectItem>
+                        <SelectItem value="external">Extern certificaat</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -198,16 +199,16 @@ export default function ProjectSettingsCertificates() {
                       </div>
                     </div>
                   )}
-
-                  {/* Certificate Status */}
-                  <div className="mb-6">
-                    <FormLabel>Huidige status</FormLabel>
-                    <div className="mt-2">
-                      <CertStatusBadge state={certStatus} />
-                    </div>
-                  </div>
                 </>
               )}
+
+              {/* Certificate Status — shown for both methods */}
+              <div className="mb-6">
+                <FormLabel>Huidige status</FormLabel>
+                <div className="mt-2">
+                  <CertStatusBadge state={certStatus} />
+                </div>
+              </div>
 
               {/* Actions */}
               <div className="flex gap-4">

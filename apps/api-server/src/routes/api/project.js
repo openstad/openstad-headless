@@ -906,8 +906,9 @@ router.route('/:projectId(\\d+)/certificate-retry')
         return res.status(404).json({ error: 'Project not found' });
       }
 
-      // Check project is configured for external certs
-      if (project.config?.certificateMethod !== 'external') {
+      // Check project is configured for external certs (new path with fallback)
+      const certMethod = project.config?.certificates?.certificateMethod || project.config?.certificateMethod;
+      if (certMethod !== 'external') {
         return res.status(400).json({ error: 'Project is not configured for external certificates' });
       }
 
@@ -926,7 +927,7 @@ router.route('/:projectId(\\d+)/certificate-retry')
       certRetryCooldowns.set(projectId, Date.now());
 
       const namespace = process.env.KUBERNETES_NAMESPACE;
-      const slugOverride = project.config?.externalCertSlug || null;
+      const slugOverride = project.config?.certificates?.externalCertSlug || project.config?.externalCertSlug || null;
       const secretName = externalCertificatesManager.generateSecretName(
         project.url, namespace, slugOverride
       );
@@ -937,7 +938,8 @@ router.route('/:projectId(\\d+)/certificate-retry')
 
       // Update hostStatus
       let hostStatus = project.hostStatus || {};
-      hostStatus.externalCert = {
+      hostStatus.certificate = {
+        method: 'external',
         state: certStatus.state,
         secretName,
         lastChecked: new Date().toISOString()
