@@ -45,7 +45,7 @@ const externalCertificates = require('./externalCertificates');
 
 // Import module under test (single import, no resetModules needed)
 const manager = await import('./externalCertificatesManager.js');
-const { generateSecretName, ensureExternalSecret, checkSecretReady } = manager;
+const { generateSecretName, ensureExternalSecret, checkSecretReady, waitForSecretReady } = manager;
 
 // -- Env helpers --
 
@@ -432,6 +432,106 @@ describe('externalCertificatesManager', () => {
       mockGetNamespacedCustomObject.mockRejectedValue(make500Error());
 
       await expect(checkSecretReady('test', 'ns')).rejects.toThrow('Internal Server Error');
+    });
+  });
+
+  // -------------------------------------------------------
+  // waitForSecretReady()
+  // -------------------------------------------------------
+  describe('waitForSecretReady()', () => {
+    test('returns immediately when secret is ready on first check', async () => {
+      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretReady('test'));
+      mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
+
+      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+
+      expect(result).toEqual({
+        ready: true,
+        state: 'linked',
+        reason: expect.any(String),
+      });
+      expect(mockGetNamespacedCustomObject).toHaveBeenCalledTimes(1);
+    });
+
+    test('returns immediately when secret is in error state', async () => {
+      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretError('test'));
+      mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
+
+      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+
+      expect(result).toEqual({
+        ready: false,
+        state: 'error',
+        reason: expect.any(String),
+      });
+      expect(mockGetNamespacedCustomObject).toHaveBeenCalledTimes(1);
+    });
+
+    test('retries when pending and succeeds on later attempt', async () => {
+      mockGetNamespacedCustomObject
+        .mockResolvedValueOnce(makeExternalSecretPending('test'))
+        .mockResolvedValueOnce(makeExternalSecretReady('test'));
+      mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
+
+      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+
+      expect(result).toEqual({
+        ready: true,
+        state: 'linked',
+        reason: expect.any(String),
+      });
+      expect(mockGetNamespacedCustomObject).toHaveBeenCalledTimes(2);
+    });
+
+    test('returns pending after exhausting all retries', async () => {
+      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretPending('test'));
+      mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
+
+      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+
+      expect(result).toEqual({
+        ready: false,
+        state: 'pending',
+        reason: expect.any(String),
+      });
+      expect(mockGetNamespacedCustomObject).toHaveBeenCalledTimes(3);
+    });
+
+    test('stops retrying when error state is reached', async () => {
+      mockGetNamespacedCustomObject
+        .mockResolvedValueOnce(makeExternalSecretPending('test'))
+        .mockResolvedValueOnce(makeExternalSecretError('test'));
+      mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
+
+      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+
+      expect(result).toEqual({
+        ready: false,
+        state: 'error',
+        reason: expect.any(String),
+      });
+      expect(mockGetNamespacedCustomObject).toHaveBeenCalledTimes(2);
+    });
+
+    test('uses default options when none provided', async () => {
+      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretReady('test'));
+      mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
+
+      const result = await waitForSecretReady('test', 'ns');
+
+      expect(result).toEqual({
+        ready: true,
+        state: 'linked',
+        reason: expect.any(String),
+      });
+    });
+
+    test('propagates errors from checkSecretReady', async () => {
+      mockGetNamespacedCustomObject.mockRejectedValue(make500Error());
+
+      await expect(
+        waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 })
+      ).rejects.toThrow('Internal Server Error');
     });
   });
 });

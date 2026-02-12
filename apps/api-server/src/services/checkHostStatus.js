@@ -251,7 +251,8 @@ const checkHostStatus = async (conditions) => {
           return;
         }
 
-        const certStatus = await externalCertificatesManager.checkSecretReady(secretName, namespace);
+        const certStatus = await externalCertificatesManager.waitForSecretReady(secretName, namespace);
+
         hostStatus.externalCert = {
           state: certStatus.state,
           secretName,

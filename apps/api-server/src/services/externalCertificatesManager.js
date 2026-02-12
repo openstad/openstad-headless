@@ -291,8 +291,41 @@ async function checkSecretReady(secretName, namespace) {
   };
 }
 
+/**
+ * Waits for an ExternalSecret's target Secret to become ready, retrying on pending status.
+ * Gives the cluster time to reconcile the ExternalSecret CRD into an actual Secret.
+ *
+ * @param {string} secretName - Name of ExternalSecret and Secret to check
+ * @param {string} namespace - K8s namespace
+ * @param {object} [options]
+ * @param {number} [options.maxRetries=3] - Maximum number of check attempts
+ * @param {number} [options.retryDelayMs=5000] - Delay between retries in milliseconds
+ * @returns {Promise<{ready: boolean, state: 'linked'|'pending'|'error', reason: string}>}
+ */
+async function waitForSecretReady(secretName, namespace, options = {}) {
+  const maxRetries = options.maxRetries ?? 3;
+  const retryDelayMs = options.retryDelayMs ?? 5000;
+  let certStatus;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    certStatus = await checkSecretReady(secretName, namespace);
+
+    if (certStatus.ready || certStatus.state === 'error') {
+      break;
+    }
+
+    if (attempt < maxRetries) {
+      console.log(`[external-certificates] Secret ${secretName} not ready (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs / 1000}s...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+    }
+  }
+
+  return certStatus;
+}
+
 module.exports = {
   generateSecretName,
   ensureExternalSecret,
-  checkSecretReady
+  checkSecretReady,
+  waitForSecretReady
 };
