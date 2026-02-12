@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import {HasAccess} from "@/lib/hasAccess";
 import {SessionContext} from "@/auth";
+import {useExternalCertificatesEnabled} from "@/hooks/use-external-certificates";
 
 export function SidenavProject({ className }: { className?: string }) {
   const router = useRouter();
@@ -20,6 +21,7 @@ export function SidenavProject({ className }: { className?: string }) {
   }, [router]);
 
   const sessionData = useContext(SessionContext);
+  const externalCertificatesEnabled = useExternalCertificatesEnabled();
 
   return (
     <nav
@@ -178,18 +180,20 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Tags</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/settings/certificates`}>
-              <Button
-                variant={
-                  location.includes('/settings/certificates')
-                    ? 'secondary'
-                    : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">TLS Certificaat (SSL)</span>
-              </Button>
-            </Link>
+            {externalCertificatesEnabled && (
+              <Link href={`/projects/${project}/settings/certificates`}>
+                <Button
+                  variant={
+                    location.includes('/settings/certificates')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">TLS Certificaat (SSL)</span>
+                </Button>
+              </Link>
+            )}
           </>
         ) : null}
         <Link href={`/projects/${project}/authentication`}>
