@@ -1,8 +1,10 @@
-import React from 'react';
 import { Parser as HtmlToReactParser } from 'html-to-react';
+import React from 'react';
+
 import RenderContent from './rte-formatting';
 
-const BLOCK_TAG_PATTERN = /<(address|article|aside|blockquote|details|dialog|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|li|main|menu|nav|ol|p|pre|section|table|tbody|thead|tfoot|tr|td|th|ul)\b/i;
+const BLOCK_TAG_PATTERN =
+  /<(address|article|aside|blockquote|details|dialog|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|li|main|menu|nav|ol|p|pre|section|table|tbody|thead|tfoot|tr|td|th|ul)\b/i;
 
 const parser = new HtmlToReactParser();
 
@@ -16,14 +18,18 @@ export function hasBlockLevelContent(html) {
 }
 
 function flattenToInlineHtml(html) {
-  if (typeof document === 'undefined' || typeof document.createElement !== 'function') {
+  if (
+    typeof document === 'undefined' ||
+    typeof document.createElement !== 'function'
+  ) {
     return html;
   }
 
   const template = document.createElement('template');
   template.innerHTML = html || '';
 
-  const blockSelector = 'address,article,aside,blockquote,details,dialog,div,dl,dt,dd,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,li,main,menu,nav,ol,p,pre,section,table,tbody,thead,tfoot,tr,td,th,ul';
+  const blockSelector =
+    'address,article,aside,blockquote,details,dialog,div,dl,dt,dd,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,li,main,menu,nav,ol,p,pre,section,table,tbody,thead,tfoot,tr,td,th,ul';
   const blocks = Array.from(template.content.querySelectorAll(blockSelector));
 
   blocks.forEach((block) => {

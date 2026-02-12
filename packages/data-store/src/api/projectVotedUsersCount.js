@@ -1,5 +1,5 @@
 export default {
-  fetch: async function({ projectId }) {
+  fetch: async function ({ projectId }) {
     let url = `/stats/project/${projectId}/vote/no-of-users`;
     const data = await this.fetch(url);
 
@@ -7,5 +7,5 @@ export default {
     const count = data?.count || 0;
 
     return { count };
-  }
-}
+  },
+};

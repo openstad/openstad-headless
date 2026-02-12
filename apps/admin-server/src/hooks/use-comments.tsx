@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useComments(
   projectId?: string,
@@ -10,12 +10,14 @@ export default function useComments(
 ) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
-  const includeString = includes ? includes : '?includeComments=1&includeRepliesOnComments=1';
+  const includeString = includes
+    ? includes
+    : '?includeComments=1&includeRepliesOnComments=1';
   getFromComments = getFromComments ? getFromComments : false;
 
   const baseUrl = getFromComments
-      ? `/api/openstad/api/project/${projectNumber}/comment${includeString}`
-      : `/api/openstad/api/project/${projectNumber}/resource${includeString}`;
+    ? `/api/openstad/api/project/${projectNumber}/comment${includeString}`
+    : `/api/openstad/api/project/${projectNumber}/resource${includeString}`;
 
   let url = baseUrl;
   if (page !== undefined && pageSize !== undefined) {
@@ -49,29 +51,37 @@ export default function useComments(
   }
 
   type createComment = {
-    projectId: string,
-    resourceId: number,
-    description: string,
-    sentiment: 'for' | 'against' | 'no sentiment',
-    parentId?: string,
-    confirmation?: boolean,
-    confirmationReplies?: boolean,
-  }
+    projectId: string;
+    resourceId: number;
+    description: string;
+    sentiment: 'for' | 'against' | 'no sentiment';
+    parentId?: string;
+    confirmation?: boolean;
+    confirmationReplies?: boolean;
+  };
 
-  async function createComment({projectId, resourceId, description, sentiment, parentId = undefined, confirmation = false, confirmationReplies = false}: createComment) {
+  async function createComment({
+    projectId,
+    resourceId,
+    description,
+    sentiment,
+    parentId = undefined,
+    confirmation = false,
+    confirmationReplies = false,
+  }: createComment) {
     let url = `/api/openstad/api/project/${projectId}/resource/${resourceId}/comment`;
 
     const body: {
-      description: string,
-      sentiment: 'for' | 'against' | 'no sentiment',
-      parentId?: string,
-      confirmation?: boolean,
-      confirmationReplies?: boolean,
+      description: string;
+      sentiment: 'for' | 'against' | 'no sentiment';
+      parentId?: string;
+      confirmation?: boolean;
+      confirmationReplies?: boolean;
     } = {
       description,
       sentiment,
       confirmation,
-      confirmationReplies
+      confirmationReplies,
     };
 
     if (parentId) {
@@ -102,12 +112,21 @@ export default function useComments(
     const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
 
     for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
-      const response = await fetch(`${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`);
+      const response = await fetch(
+        `${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`
+      );
       const results = await response.json();
       allData = allData.concat(results?.records || []);
     }
     return allData;
   }
 
-  return {...commentListSwr, data: records, pagination, removeComment, createComment, fetchAll}
+  return {
+    ...commentListSwr,
+    data: records,
+    pagination,
+    removeComment,
+    createComment,
+    fetchAll,
+  };
 }

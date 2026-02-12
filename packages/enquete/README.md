@@ -7,6 +7,7 @@ A form-based survey/enquete widget for citizen participation.
 To test this widget on your local machine:
 
 1. In the root of the `packages/enquete` widget, create a `.env.local` file:
+
 ```
 VITE_API_URL="http://localhost:31410"
 VITE_PROJECT_ID="<your project id>"
@@ -30,16 +31,17 @@ The Enquete widget automatically saves user input to `localStorage`, allowing us
 
 ### Configuration
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `enableDraftPersistence` | `boolean` | `false` | Enable/disable automatic draft saving |
-| `draftRetentionHours` | `number` | `24` | Hours before a draft expires and is deleted |
+| Prop                     | Type      | Default | Description                                 |
+| ------------------------ | --------- | ------- | ------------------------------------------- |
+| `enableDraftPersistence` | `boolean` | `false` | Enable/disable automatic draft saving       |
+| `draftRetentionHours`    | `number`  | `24`    | Hours before a draft expires and is deleted |
 
 These settings can be configured in the admin panel under the Enquete widget's "Algemeen" (General) tab.
 
 ### Storage key structure
 
 The storage key ensures drafts don't conflict across:
+
 - Different projects (`projectId`)
 - Different widgets on the same project (`widgetId`)
 - Same widget embedded on different pages (`pathname`)

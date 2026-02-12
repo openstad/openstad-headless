@@ -4,8 +4,8 @@ function getNestedValue(obj, path) {
   if (path === 'replies.description') {
     if (!Array.isArray(obj.replies)) return [];
     return obj.replies
-        .map(reply => reply && reply.description)
-        .filter(desc => typeof desc === 'string');
+      .map((reply) => reply && reply.description)
+      .filter((desc) => typeof desc === 'string');
   }
 
   const parts = path.split('.');
@@ -21,10 +21,10 @@ function getNestedValue(obj, path) {
   return current;
 }
 
-module.exports = function({ searchfields = ['title', 'summary', 'description'] }) {
-
-  return function(req, res, next) {
-
+module.exports = function ({
+  searchfields = ['title', 'summary', 'description'],
+}) {
+  return function (req, res, next) {
     let search = req.query.search;
 
     // if no search query exists move on
@@ -33,13 +33,13 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
     let list = req.results;
 
     // if results is not defined something weird happened
-    if (typeof list === 'undefined') return next('No results defined to search in');
+    if (typeof list === 'undefined')
+      return next('No results defined to search in');
 
     let results = [];
 
     if (!Array.isArray(search)) search = [search];
     search.forEach((criterium) => {
-
       let key = Object.keys(criterium)[0];
       let value = criterium[key].toLowerCase(); // Converteer naar lowercase voor case-insensitieve vergelijking
 
@@ -47,7 +47,7 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
       if (key === 'text') {
         useSearchFields = searchfields;
       } else {
-        useSearchFields = searchfields.filter(field => field === key);
+        useSearchFields = searchfields.filter((field) => field === key);
       }
 
       let searchTerms = value.split(' ');
@@ -57,7 +57,10 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
           return useSearchFields.some((field) => {
             let fieldValue = getNestedValue(item, field);
             if (Array.isArray(fieldValue)) {
-              return fieldValue.some(val => typeof val === 'string' && val.toLowerCase().includes(term));
+              return fieldValue.some(
+                (val) =>
+                  typeof val === 'string' && val.toLowerCase().includes(term)
+              );
             }
             if (typeof fieldValue === 'string') {
               return fieldValue.toLowerCase().includes(term);
@@ -70,12 +73,10 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
       results.push(...searchResult);
     });
 
-
     let merged = Array.from(new Set(results));
 
     req.results = merged;
 
     return next();
-
-  }
-}
+  };
+};

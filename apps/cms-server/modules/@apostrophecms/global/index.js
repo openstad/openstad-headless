@@ -184,7 +184,7 @@ module.exports = {
         def: 'false',
         label: 'Toon login knop',
       },
-      
+
       showLoginInCTA: {
         type: 'boolean',
         def: 'false',
@@ -388,7 +388,14 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle', 'siteLogo', 'logoAltText', 'archiveStatus', 'archiveStatusText'],
+        fields: [
+          'siteTitle',
+          'hideSiteTitle',
+          'siteLogo',
+          'logoAltText',
+          'archiveStatus',
+          'archiveStatusText',
+        ],
       },
       css: {
         label: 'Vormgeving',
@@ -406,7 +413,7 @@ module.exports = {
           'logoutButtonLabel',
           'ctaButtons',
           'topMenuButtons',
-        ,
+          ,
         ],
       },
       cookies: {

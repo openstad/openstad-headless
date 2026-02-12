@@ -43,7 +43,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
         default: false,
       },
-      
+
       label: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -69,7 +69,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: true,
       },
 
-		  extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
+      extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
 
       useDifferentSubmitAddress: {
         type: DataTypes.BOOLEAN,
@@ -90,10 +90,9 @@ module.exports = function (db, sequelize, DataTypes) {
       documentMapIconColor: {
         type: DataTypes.TEXT,
         allowNull: true,
-      }
-
-	  }, {
-
+      },
+    },
+    {
       defaultScope: {
         order: ['seqnr'],
       },
@@ -119,9 +118,9 @@ module.exports = function (db, sequelize, DataTypes) {
           where: {
             [db.Sequelize.Op.or]: [
               { projectId: projectId },
-              ...(includeGlobalTags ? [{ projectId: 0 }] : [])
-            ]
-          }
+              ...(includeGlobalTags ? [{ projectId: 0 }] : []),
+            ],
+          },
         };
       },
 

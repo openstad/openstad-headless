@@ -71,7 +71,6 @@ form trix-toolbar .trix-button-group:not(:first-child) {
   margin-left: 5px;
 }
 
-
 @layer base {
   * {
     @apply border-border;
@@ -326,7 +325,7 @@ pre > code.diff-highlight.diff-highlight .token.inserted:not(.prefix) {
   margin-right: 15px;
 }
 
-.color-picker-container input[type="color"] {
+.color-picker-container input[type='color'] {
   margin-right: 8px;
   -webkit-appearance: none;
   border: none;
@@ -337,19 +336,19 @@ pre > code.diff-highlight.diff-highlight .token.inserted:not(.prefix) {
   outline: none;
 }
 
-.color-picker-container input[type="color"]::-webkit-color-swatch-wrapper {
+.color-picker-container input[type='color']::-webkit-color-swatch-wrapper {
   padding: 0;
   width: 30px;
   height: 30px;
 }
 
-.color-picker-container input[type="color"]::-webkit-color-swatch {
+.color-picker-container input[type='color']::-webkit-color-swatch {
   border: 1px solid #bfc9d9;
   border-radius: 50px;
   padding: 0;
 }
 
-.color-picker-container input[type="text"] {
+.color-picker-container input[type='text'] {
   border: none;
   width: 100%;
   font-size: 14px;
@@ -359,12 +358,14 @@ pre > code.diff-highlight.diff-highlight .token.inserted:not(.prefix) {
   display: flex;
 }
 
-.widgets-admin-overview-container .rounded-lg.border.bg-card.text-card-foreground.shadow-sm.beta {
+.widgets-admin-overview-container
+  .rounded-lg.border.bg-card.text-card-foreground.shadow-sm.beta {
   position: relative;
   border: 3px solid #decc00;
 }
 
-.widgets-admin-overview-container .rounded-lg.border.bg-card.text-card-foreground.shadow-sm.beta:before {
+.widgets-admin-overview-container
+  .rounded-lg.border.bg-card.text-card-foreground.shadow-sm.beta:before {
   content: 'BETA';
   background-color: #decc00;
   top: 0;

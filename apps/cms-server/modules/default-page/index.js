@@ -1,7 +1,7 @@
 module.exports = {
   extend: '@apostrophecms/page-type',
   options: {
-    label: 'Standaard Pagina'
+    label: 'Standaard Pagina',
   },
   fields: {
     add: {
@@ -9,19 +9,16 @@ module.exports = {
         type: 'area',
         options: {
           widgets: {
-            'openstad-section': {}
-          }
-        }
-      }
+            'openstad-section': {},
+          },
+        },
+      },
     },
     group: {
       basics: {
         label: 'Basics',
-        fields: [
-          'title',
-          'main'
-        ]
-      }
-    }
-  }
+        fields: ['title', 'main'],
+      },
+    },
+  },
 };

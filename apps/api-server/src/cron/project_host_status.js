@@ -7,7 +7,7 @@
  * @type {[type]}
  */
 const log = require('debug')('app:cron');
-const checkHostStatus = require('../services/checkHostStatus')
+const checkHostStatus = require('../services/checkHostStatus');
 
 // if you want te debug, easiest is to run it here
 //checkHostStatus();
@@ -19,7 +19,7 @@ module.exports = {
   cronTime: '0 2 */6 * * *',
   runOnInit: false,
   onTick: async () => {
-    console.log('crons --- checking projects host status')
+    console.log('crons --- checking projects host status');
     checkHostStatus();
-  }
+  },
 };

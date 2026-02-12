@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -8,6 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -15,17 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import useResources from '@/hooks/use-resources';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ActivityWidgetProps } from '@openstad-headless/activity/src/activity';
+import { useRouter } from 'next/router';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { ActivityWidgetProps } from '@openstad-headless/activity/src/activity';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { useRouter } from 'next/router';
-import useResources from '@/hooks/use-resources';
 
 const formSchema = z.object({
   currentSite: z.array(z.object({})).optional(),
@@ -60,8 +60,12 @@ export default function ActivityDisplay(
       otherSites: props.otherSites,
       currentTitle: props.currentTitle || 'Activiteit op deze website',
       otherTitle: props.otherTitle || 'Activiteit op andere websites',
-      noActivityTextCurrent: props.noActivityTextCurrent || 'U heeft geen activiteit op deze website.',
-      noActivityTextOther: props.noActivityTextOther || 'U heeft geen activiteit op andere websites.',
+      noActivityTextCurrent:
+        props.noActivityTextCurrent ||
+        'U heeft geen activiteit op deze website.',
+      noActivityTextOther:
+        props.noActivityTextOther ||
+        'U heeft geen activiteit op andere websites.',
     },
   });
 
@@ -98,7 +102,9 @@ export default function ActivityDisplay(
           name="noActivityTextCurrent"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tekst wanneer er geen activiteit op de huidige site is geweest</FormLabel>
+              <FormLabel>
+                Tekst wanneer er geen activiteit op de huidige site is geweest
+              </FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -138,7 +144,9 @@ export default function ActivityDisplay(
           name="noActivityTextOther"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tekst wanneer er geen activiteit op andere sites is geweest</FormLabel>
+              <FormLabel>
+                Tekst wanneer er geen activiteit op andere sites is geweest
+              </FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -151,8 +159,6 @@ export default function ActivityDisplay(
             </FormItem>
           )}
         />
-
-
 
         <Button className="w-fit col-span-full" type="submit">
           Opslaan

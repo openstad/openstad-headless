@@ -1,11 +1,12 @@
 const validateFileData = async (dataRows, schema) => {
-
   if (!dataRows.length > 0) {
-    return [{
-      messageType: 'zeroRows',
-      color: 'blue',
-      message: `There are no rows in the file`,
-    }];
+    return [
+      {
+        messageType: 'zeroRows',
+        color: 'blue',
+        message: `There are no rows in the file`,
+      },
+    ];
   }
 
   let validationMessages = [];
@@ -13,7 +14,7 @@ const validateFileData = async (dataRows, schema) => {
   /**
    * Check for id
    */
-  if(dataRows[0].hasOwnProperty('id')) {
+  if (dataRows[0].hasOwnProperty('id')) {
     validationMessages.push({
       messageType: 'idColumnPresent',
       color: 'blue',
@@ -44,7 +45,10 @@ const validateFileData = async (dataRows, schema) => {
   /**
    * Check if parsing went correctly
    */
-  if(schemaValidationMessages.length > 2 && schemaValidationMessages.length >= Object.keys(schema).length) {
+  if (
+    schemaValidationMessages.length > 2 &&
+    schemaValidationMessages.length >= Object.keys(schema).length
+  ) {
     schemaValidationMessages.push({
       messageType: 'faultyImport',
       color: 'red',

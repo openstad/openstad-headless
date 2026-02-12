@@ -5,7 +5,7 @@ module.exports = {
   options: {
     label: 'Afbeelding',
     browser: {
-      src: 'ui/src/index.js'
+      src: 'ui/src/index.js',
     },
   },
   fields: {
@@ -52,7 +52,7 @@ module.exports = {
           {
             label: 'Extra groot',
             value: '--xlarge',
-          }
+          },
         ],
         required: true,
       },
@@ -97,9 +97,9 @@ module.exports = {
           { label: 'Middelgroot (760x760)', value: 'two-thirds' },
           { label: 'Gemiddeld (570x700)', value: 'one-half' },
           { label: 'Klein (380x700)', value: 'one-third' },
-          { label: 'Zeer klein (190x350)', value: 'one-sixth' }
+          { label: 'Zeer klein (190x350)', value: 'one-sixth' },
         ],
-        def: 'full'
+        def: 'full',
       },
 
       banner: {
@@ -111,7 +111,7 @@ module.exports = {
       uploadedImageLink: {
         type: 'string',
         label: 'Link de afbeelding naar een URL',
-        help: 'Vul in dit veld een URL in waar naartoe gelinkt moet worden als je op de afbeelding klikt.'
+        help: 'Vul in dit veld een URL in waar naartoe gelinkt moet worden als je op de afbeelding klikt.',
       },
 
       uploadedImageLinkTarget: {
@@ -123,9 +123,8 @@ module.exports = {
       uploadedImageLinkAlt: {
         type: 'string',
         label: 'Screenreader tekst voor deze URL',
-        help: 'Voor de toegankelijkheid moet er een tekst zijn die beschrijft wat er gebeurt als je op de afbeelding klikt'
-      }
-
+        help: 'Voor de toegankelijkheid moet er een tekst zijn die beschrijft wat er gebeurt als je op de afbeelding klikt',
+      },
     },
   },
   methods(self) {

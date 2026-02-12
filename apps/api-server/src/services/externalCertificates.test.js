@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Persistent mock functions that survive vi.resetModules()
 const mockListCRD = vi.fn();
@@ -123,7 +123,9 @@ describe('externalCertificates', () => {
       mockListCRD.mockResolvedValue({ items: [] });
       mockListNamespacedCustomObject.mockResolvedValue({ items: [] });
       mockListClusterCustomObject.mockResolvedValue({
-        items: [{ status: { conditions: [{ type: 'Ready', status: 'True' }] } }],
+        items: [
+          { status: { conditions: [{ type: 'Ready', status: 'True' }] } },
+        ],
       });
 
       const mod = await loadModule({
@@ -139,7 +141,14 @@ describe('externalCertificates', () => {
 
     test('auto-disables when RBAC check returns 403 on both v1 and v1beta1', async () => {
       mockListCRD.mockResolvedValue({
-        items: [{ spec: { group: 'external-secrets.io', names: { kind: 'ExternalSecret' } } }],
+        items: [
+          {
+            spec: {
+              group: 'external-secrets.io',
+              names: { kind: 'ExternalSecret' },
+            },
+          },
+        ],
       });
       mockListNamespacedCustomObject.mockRejectedValue({ code: 403 });
       mockListClusterCustomObject.mockResolvedValue({ items: [] });
@@ -155,11 +164,20 @@ describe('externalCertificates', () => {
 
     test('succeeds when CRD found and RBAC returns 404', async () => {
       mockListCRD.mockResolvedValue({
-        items: [{ spec: { group: 'external-secrets.io', names: { kind: 'ExternalSecret' } } }],
+        items: [
+          {
+            spec: {
+              group: 'external-secrets.io',
+              names: { kind: 'ExternalSecret' },
+            },
+          },
+        ],
       });
       mockListNamespacedCustomObject.mockRejectedValue({ code: 404 });
       mockListClusterCustomObject.mockResolvedValue({
-        items: [{ status: { conditions: [{ type: 'Ready', status: 'True' }] } }],
+        items: [
+          { status: { conditions: [{ type: 'Ready', status: 'True' }] } },
+        ],
       });
 
       const mod = await loadModule({
@@ -173,7 +191,14 @@ describe('externalCertificates', () => {
 
     test('logs warning when ClusterSecretStore list is empty but does NOT disable', async () => {
       mockListCRD.mockResolvedValue({
-        items: [{ spec: { group: 'external-secrets.io', names: { kind: 'ExternalSecret' } } }],
+        items: [
+          {
+            spec: {
+              group: 'external-secrets.io',
+              names: { kind: 'ExternalSecret' },
+            },
+          },
+        ],
       });
       mockListNamespacedCustomObject.mockResolvedValue({ items: [] });
       mockListClusterCustomObject.mockResolvedValue({ items: [] });
@@ -211,13 +236,22 @@ describe('externalCertificates', () => {
 
     test('tries v1beta1 fallback when v1 RBAC returns non-403/non-404 error', async () => {
       mockListCRD.mockResolvedValue({
-        items: [{ spec: { group: 'external-secrets.io', names: { kind: 'ExternalSecret' } } }],
+        items: [
+          {
+            spec: {
+              group: 'external-secrets.io',
+              names: { kind: 'ExternalSecret' },
+            },
+          },
+        ],
       });
       mockListNamespacedCustomObject
         .mockRejectedValueOnce({ code: 500 })
         .mockRejectedValueOnce({ code: 404 });
       mockListClusterCustomObject.mockResolvedValue({
-        items: [{ status: { conditions: [{ type: 'Ready', status: 'True' }] } }],
+        items: [
+          { status: { conditions: [{ type: 'Ready', status: 'True' }] } },
+        ],
       });
 
       const mod = await loadModule({

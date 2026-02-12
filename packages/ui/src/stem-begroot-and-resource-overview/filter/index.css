@@ -245,7 +245,10 @@
   gap: 1rem;
 }
 
-.osc-resource-overview-content .osc-resources-filter .utrecht-form-fieldset label.utrecht-form-label {
+.osc-resource-overview-content
+  .osc-resources-filter
+  .utrecht-form-fieldset
+  label.utrecht-form-label {
   margin-block-end: 6px;
 }
 
@@ -267,7 +270,10 @@
   background-size: var(--filtetCollapsable-close-icon-size);
 }
 
-.osc-resources-filter .form-element .utrecht-form-label .utrecht-button--subtle {
+.osc-resources-filter
+  .form-element
+  .utrecht-form-label
+  .utrecht-button--subtle {
   padding: 0;
   margin: 0 0 0 10px;
   font-size: 0.8rem;
@@ -278,6 +284,9 @@
   min-inline-size: auto;
 }
 
-.osc-resources-filter .form-element .utrecht-form-label .utrecht-button--subtle:hover {
+.osc-resources-filter
+  .form-element
+  .utrecht-form-label
+  .utrecht-button--subtle:hover {
   text-decoration: underline;
 }

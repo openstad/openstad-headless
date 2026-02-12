@@ -84,14 +84,14 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       score: {
-        type: DataTypes.DECIMAL(12,11),
+        type: DataTypes.DECIMAL(12, 11),
         auth: {
           updateableBy: 'editor',
         },
         allowNull: false,
         defaultValue: '0.00000000000',
       },
-      
+
       sort: {
         type: DataTypes.INTEGER,
         auth: {
@@ -301,7 +301,7 @@ module.exports = function (db, sequelize, DataTypes) {
             : undefined;
         },
       },
-      
+
       // Field that calculates net votes based on yes and no votes
       netVotes: {
         type: DataTypes.VIRTUAL,
@@ -309,7 +309,7 @@ module.exports = function (db, sequelize, DataTypes) {
           const yes = this.getDataValue('yes') || 0;
           const no = this.getDataValue('no') || 0;
           return yes - no;
-        }
+        },
       },
 
       createDateHumanized: {
@@ -347,7 +347,6 @@ module.exports = function (db, sequelize, DataTypes) {
           }
         },
       },
-
     },
     {
       hooks: {
@@ -355,12 +354,9 @@ module.exports = function (db, sequelize, DataTypes) {
         beforeValidate: beforeValidateHook,
         beforeDestroy: beforeValidateHook,
 
-        afterCreate: function (instance, options) {
-        },
+        afterCreate: function (instance, options) {},
 
-        afterUpdate: function (instance, options) {
-        },
-        
+        afterUpdate: function (instance, options) {},
       },
 
       individualHooks: true,
@@ -543,7 +539,15 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
+            attributes: [
+              'id',
+              'name',
+              'label',
+              'extraFunctionality',
+              'color',
+              'backgroundColor',
+              'mapIcon',
+            ],
             through: { attributes: [] },
             required: false,
           },
@@ -671,7 +675,16 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'seqnr', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor', 'mapIcon'],
+            attributes: [
+              'id',
+              'type',
+              'seqnr',
+              'name',
+              'label',
+              'defaultResourceImage',
+              'documentMapIconColor',
+              'mapIcon',
+            ],
             through: { attributes: [] },
             required: false,
           },
@@ -683,7 +696,16 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'seqnr', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
+            attributes: [
+              'id',
+              'name',
+              'seqnr',
+              'label',
+              'extraFunctionality',
+              'color',
+              'backgroundColor',
+              'mapIcon',
+            ],
             through: { attributes: [] },
             required: false,
           },
@@ -696,7 +718,7 @@ module.exports = function (db, sequelize, DataTypes) {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_tags
-                WHERE tagId IN (${tags.map(tag => `'${tag}'`).join(', ')}))
+                WHERE tagId IN (${tags.map((tag) => `'${tag}'`).join(', ')}))
               `),
             },
           },
@@ -709,7 +731,7 @@ module.exports = function (db, sequelize, DataTypes) {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_statuses
-                WHERE statusId IN (${statuses.map(status => `'${status}'`).join(', ')}))
+                WHERE statusId IN (${statuses.map((status) => `'${status}'`).join(', ')}))
               `),
             },
           },
@@ -774,7 +796,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'phonenumber',
               'address',
               'city',
-              'postcode'
+              'postcode',
             ],
           },
         ],
@@ -847,16 +869,15 @@ module.exports = function (db, sequelize, DataTypes) {
         return {
           where: {
             [db.Sequelize.Op.or]: [
-                ...projectIds.map((projectId) => {
+              ...projectIds.map((projectId) => {
                 return {
                   projectId: projectId,
                 };
-              })
-            ]
-          }
+              }),
+            ],
+          },
         };
       },
-
     };
   };
 
@@ -869,7 +890,10 @@ module.exports = function (db, sequelize, DataTypes) {
       onDelete: 'CASCADE',
     });
     this.hasMany(models.Comment, { as: 'commentsFor', onDelete: 'CASCADE' });
-    this.hasMany(models.Comment, { as: 'commentsNoSentiment', onDelete: 'CASCADE' });
+    this.hasMany(models.Comment, {
+      as: 'commentsNoSentiment',
+      onDelete: 'CASCADE',
+    });
     this.hasOne(models.Poll, {
       as: 'poll',
       foreignKey: 'resourceId',
@@ -901,7 +925,6 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   let canMutate = function (user, self) {
-
     if (
       userHasRole(user, 'editor', self.userId) ||
       userHasRole(user, 'admin', self.userId) ||
@@ -913,7 +936,7 @@ module.exports = function (db, sequelize, DataTypes) {
     let editableByUser = true;
     let statuses = self.statuses || [];
     for (let status of statuses) {
-      if ( status.extraFunctionality?.editableByUser === false ) {
+      if (status.extraFunctionality?.editableByUser === false) {
         editableByUser = false;
       }
     }
@@ -922,7 +945,6 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
     // canEditAfterFirstLikeOrComment is handled in the validate hook
-
   };
 
   Resource.auth = Resource.prototype.auth = {
@@ -951,7 +973,7 @@ module.exports = function (db, sequelize, DataTypes) {
     },
     canComment: function canComment(self) {
       if (!self) return false;
-      if ( self.project?.config?.comments?.canComment === false ) {
+      if (self.project?.config?.comments?.canComment === false) {
         // project config: comments is closed
         return false;
       }
@@ -960,13 +982,13 @@ module.exports = function (db, sequelize, DataTypes) {
       // status
       let statuses = self.statuses || [];
       for (let status of statuses) {
-        if ( status.extraFunctionality?.canComment === false ) {
+        if (status.extraFunctionality?.canComment === false) {
           return false;
         }
       }
       return true;
     },
-    canMutateStatus: function canMutateStatus (user, self) {
+    canMutateStatus: function canMutateStatus(user, self) {
       if (!user || !self) return false;
       if (!self.auth.canUpdate(user, self)) return false;
       return userHasRole(user, 'editor');
@@ -1011,7 +1033,9 @@ module.exports = function (db, sequelize, DataTypes) {
       }
 
       if (data.commentsNoSentiment) {
-        data.commentsNoSentiment = hideEmailsForNormalUsers(data.commentsNoSentiment);
+        data.commentsNoSentiment = hideEmailsForNormalUsers(
+          data.commentsNoSentiment
+        );
       }
 
       data.can = {};
@@ -1023,39 +1047,40 @@ module.exports = function (db, sequelize, DataTypes) {
       return data;
     },
   };
-  
-  const wilsonScore = require('../lib/wilson-score');
-  
-  Resource.calculateAndSaveScore = Resource.prototype.calculateAndSaveScore = async function() {
-    const resource = this;
-    const votes = await db.Vote.findAll({
-      where: {
-        resourceId: resource.id,
-        deletedAt: null,
-        [Op.or]: [
-          { checked: null },
-          { checked: true }
-        ]
-      },
-      attributes: ['opinion', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
-      group: ['opinion']
-    });
-    
-    let yesVotes = 0;
-    let noVotes = 0;
 
-    votes.forEach(vote => {
-      if (vote.opinion === 'yes') {
-        yesVotes = parseInt(vote.get('count'), 10);
-      } else if (vote.opinion === 'no') {
-        noVotes = parseInt(vote.get('count'), 10);
-      }
-    });
-    
-    // Calculate & save the score to the resource
-    resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
-    await resource.save({ validate: false, hooks: false });
-  }
+  const wilsonScore = require('../lib/wilson-score');
+
+  Resource.calculateAndSaveScore = Resource.prototype.calculateAndSaveScore =
+    async function () {
+      const resource = this;
+      const votes = await db.Vote.findAll({
+        where: {
+          resourceId: resource.id,
+          deletedAt: null,
+          [Op.or]: [{ checked: null }, { checked: true }],
+        },
+        attributes: [
+          'opinion',
+          [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+        ],
+        group: ['opinion'],
+      });
+
+      let yesVotes = 0;
+      let noVotes = 0;
+
+      votes.forEach((vote) => {
+        if (vote.opinion === 'yes') {
+          yesVotes = parseInt(vote.get('count'), 10);
+        } else if (vote.opinion === 'no') {
+          noVotes = parseInt(vote.get('count'), 10);
+        }
+      });
+
+      // Calculate & save the score to the resource
+      resource.setDataValue('score', wilsonScore(yesVotes, noVotes));
+      await resource.save({ validate: false, hooks: false });
+    };
 
   return Resource;
 
@@ -1070,7 +1095,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
     // count comments and votes
     let canEditAfterFirstLikeOrComment =
-      (projectConfig && projectConfig.resources && projectConfig.resources.canEditAfterFirstLikeOrComment) || false;
+      (projectConfig &&
+        projectConfig.resources &&
+        projectConfig.resources.canEditAfterFirstLikeOrComment) ||
+      false;
     if (
       !canEditAfterFirstLikeOrComment &&
       !userHasRole(instance.auth && instance.auth.user, 'editor')

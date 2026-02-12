@@ -1,7 +1,7 @@
 import { Spacer } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
-import React from 'react';
 import { Heading3 } from '@utrecht/component-library-react';
+import React from 'react';
 
 type Props = {
   loginUrl: string;

@@ -14,7 +14,9 @@
 .osc-DialogContent {
   background-color: white;
   border-radius: 6px;
-  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  box-shadow:
+    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -73,7 +75,7 @@
   }
 }
 
-.osc-DialogContent > .osc-carousel > .carousel-button-container{
+.osc-DialogContent > .osc-carousel > .carousel-button-container {
   position: absolute;
   display: flex;
   top: -36px;
@@ -82,8 +84,14 @@
   gap: 10px;
 }
 
-.osc-DialogContent > .osc-carousel > .carousel-button-container .osc-carousel-previous,
-.osc-DialogContent > .osc-carousel > .carousel-button-container .osc-carousel-next{
+.osc-DialogContent
+  > .osc-carousel
+  > .carousel-button-container
+  .osc-carousel-previous,
+.osc-DialogContent
+  > .osc-carousel
+  > .carousel-button-container
+  .osc-carousel-next {
   position: relative;
   flex-shrink: 0;
   flex-grow: 1;
@@ -91,12 +99,12 @@
   left: 0;
 }
 
-.osc-DialogContent > .osc-carousel .carousel-button-container p{
+.osc-DialogContent > .osc-carousel .carousel-button-container p {
   margin: 0;
 }
 
 .osc-DialogContent > div > button,
-.osc-DialogContent > .osc-carousel .carousel-button-container button{
+.osc-DialogContent > .osc-carousel .carousel-button-container button {
   aspect-ratio: 1;
   min-width: auto;
   min-height: auto;
@@ -105,6 +113,6 @@
   height: 36px;
 }
 
-.osc-DialogContent .carousel-items{
+.osc-DialogContent .carousel-items {
   padding-top: 10px;
 }

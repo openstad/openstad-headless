@@ -1,6 +1,7 @@
-import './video.scss';
-import React, { useState, useEffect, FC, useId, useRef } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
+import React, { FC, useEffect, useId, useRef, useState } from 'react';
+
+import './video.scss';
 
 export type VideoFieldProps = BaseProps &
   VideoProps & {
@@ -139,13 +140,11 @@ const VideoField: FC<VideoFieldProps> = ({
         onClick={(e) => handlePlayPause(e)}
         className={`playPauseToggle ${playing ? '--playing' : '--paused'}`}
         role="button"
-        tabIndex={0}
-      >
+        tabIndex={0}>
         <span className="sr-only">{playing ? 'Pause' : 'Play'}</span>
         <div className="icon"></div>
       </button>
       <div className="video-field">
-
         {videoId ? (
           <>
             <div className="video-container">
@@ -158,11 +157,11 @@ const VideoField: FC<VideoFieldProps> = ({
             </div>
             <div
               onClick={handleVideoClick}
-              className={`muteToggle ${muted ? '--muted' : '--unmuted'} ${muteToggle ? '--toggle' : ''
-                }`}
+              className={`muteToggle ${muted ? '--muted' : '--unmuted'} ${
+                muteToggle ? '--toggle' : ''
+              }`}
               role="button"
-              tabIndex={0}
-            >
+              tabIndex={0}>
               <span className="sr-only">{muted ? 'Unmute' : 'Mute'}</span>
               <div className="icon"></div>
             </div>

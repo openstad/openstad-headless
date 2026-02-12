@@ -1,4 +1,5 @@
-import { Icon as LeafletIcon, divIcon as LeafletDivIcon } from 'leaflet';
+import { divIcon as LeafletDivIcon, Icon as LeafletIcon } from 'leaflet';
+
 import type { MarkerIconType } from './types/marker-icon';
 
 export default function MarkerIcon({
@@ -9,18 +10,22 @@ export default function MarkerIcon({
   let result: any; // TODO
 
   if (!icon) {
-    if (iconCreateFunction && typeof iconCreateFunction === "string") {
-      const resolvedFunction = (globalThis as Record<string, any>)[iconCreateFunction];
+    if (iconCreateFunction && typeof iconCreateFunction === 'string') {
+      const resolvedFunction = (globalThis as Record<string, any>)[
+        iconCreateFunction
+      ];
 
-      if (typeof resolvedFunction === "function") {
+      if (typeof resolvedFunction === 'function') {
         iconCreateFunction = resolvedFunction;
       } else {
         iconCreateFunction = undefined;
-        console.warn(`Function ${iconCreateFunction} is not defined on globalThis.`);
+        console.warn(
+          `Function ${iconCreateFunction} is not defined on globalThis.`
+        );
       }
     }
 
-    if (iconCreateFunction && typeof iconCreateFunction === "function") {
+    if (iconCreateFunction && typeof iconCreateFunction === 'function') {
       icon = iconCreateFunction();
     }
   }
@@ -59,11 +64,10 @@ export default function MarkerIcon({
     result = LeafletDivIcon({
       html,
       className: icon?.className,
-      iconSize : [34,45],
-      iconAnchor : [17,45],
+      iconSize: [34, 45],
+      iconAnchor: [17, 45],
     });
   }
 
   return result;
-  
 }

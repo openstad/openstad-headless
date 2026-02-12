@@ -13,7 +13,7 @@ Voor nu wordt clustering in base-map.tsx uitgezet met deze regels:
     isActive: false
   };
 ```
+
 Vewijder die, en dan werkt het weer.
 
 Clustering als aan/uit optie is bovendien wel beschikbeer in de admin (resourcemap) maar uitgecomment.
-

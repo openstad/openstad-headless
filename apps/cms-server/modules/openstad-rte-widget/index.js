@@ -9,7 +9,7 @@ const contentWidgets = {
       'link',
       '|',
       'bulletList',
-      'orderedList'
+      'orderedList',
     ],
     styles: [
       {
@@ -31,9 +31,9 @@ const contentWidgets = {
       {
         tag: 'h4',
         label: 'Heading 4 (H4)',
-      }
-    ]
-  }
+      },
+    ],
+  },
 };
 
 module.exports = {
@@ -48,7 +48,7 @@ module.exports = {
         options: {
           widgets: contentWidgets,
         },
-        max: 1
+        max: 1,
       },
     },
   },

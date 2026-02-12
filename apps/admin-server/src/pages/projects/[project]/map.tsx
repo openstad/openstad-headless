@@ -13,7 +13,5 @@ export default function Map() {
     ssr: false,
   });
 
-  return (
-    <Map projectId={data.id} areaId={data.areaId} />
-  );
+  return <Map projectId={data.id} areaId={data.areaId} />;
 }

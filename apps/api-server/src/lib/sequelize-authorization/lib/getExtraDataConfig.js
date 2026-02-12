@@ -3,20 +3,18 @@
 const userHasRole = require('./hasRole');
 var sanitize = require('../../../util/sanitize');
 
-
-module.exports = function (dataTypeJSON,  projectConfigKey) {
+module.exports = function (dataTypeJSON, projectConfigKey) {
   return {
     type: dataTypeJSON,
     allowNull: false,
     defaultValue: {},
     get: function () {
-      let value =  this.getDataValue('extraData');
+      let value = this.getDataValue('extraData');
       try {
         if (typeof value == 'string') {
           value = JSON.parse(value);
         }
-      } catch (err) {
-      }
+      } catch (err) {}
 
       return value;
     },
@@ -25,17 +23,15 @@ module.exports = function (dataTypeJSON,  projectConfigKey) {
         if (typeof value == 'string') {
           value = JSON.parse(value);
         }
-      } catch (err) {
-      }
+      } catch (err) {}
 
-      let oldValue =  this.getDataValue('extraData') || {};
+      let oldValue = this.getDataValue('extraData') || {};
 
       try {
         if (typeof oldValue == 'string') {
           oldValue = JSON.parse(oldValue) || {};
         }
-      } catch (err) {
-      }
+      } catch (err) {}
 
       function fillValue(old, val) {
         old = old || {};
@@ -48,7 +44,12 @@ module.exports = function (dataTypeJSON,  projectConfigKey) {
             delete val[key];
           } else if (typeof val[key] == 'undefined') {
             // Prevent prototype pollution
-            if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+            if (
+              key === '__proto__' ||
+              key === 'constructor' ||
+              key === 'prototype'
+            )
+              return;
 
             // not defined in put data; use old val
             val[key] = old[key];
@@ -71,29 +72,38 @@ module.exports = function (dataTypeJSON,  projectConfigKey) {
     },
     auth: {
       viewableBy: 'all',
-      authorizeData: function(data, action, user, self, project) {
-
+      authorizeData: function (data, action, user, self, project) {
         if (!project) return; // todo: die kun je ophalen als eea. async is
         data = data || self.extraData;
         data = typeof data === 'object' ? data : {};
         let result = {};
 
         let userId = self.userId;
-        if (self.toString().match('SequelizeInstance:user')) { // TODO: find a better check
-          userId = self.id
+        if (self.toString().match('SequelizeInstance:user')) {
+          // TODO: find a better check
+          userId = self.id;
         }
 
         if (data) {
           Object.keys(data).forEach((key) => {
-
-            let testRole = project.config && project.config[projectConfigKey] && project.config[projectConfigKey].extraData && project.config[projectConfigKey].extraData[key] && project.config[projectConfigKey].extraData[key].auth && project.config[projectConfigKey].extraData[key].auth[action+'ableBy'];
-            testRole = testRole || self.rawAttributes.extraData.auth[action+'ableBy'];
-            testRole = testRole || ( self.auth && self.auth[action+'ableBy'] ) || [];
+            let testRole =
+              project.config &&
+              project.config[projectConfigKey] &&
+              project.config[projectConfigKey].extraData &&
+              project.config[projectConfigKey].extraData[key] &&
+              project.config[projectConfigKey].extraData[key].auth &&
+              project.config[projectConfigKey].extraData[key].auth[
+                action + 'ableBy'
+              ];
+            testRole =
+              testRole || self.rawAttributes.extraData.auth[action + 'ableBy'];
+            testRole =
+              testRole || (self.auth && self.auth[action + 'ableBy']) || [];
             if (!Array.isArray(testRole)) testRole = [testRole];
 
             if (testRole.includes('detailsViewableByRole')) {
               if (self.detailsViewableByRole) {
-                testRole = [ self.detailsViewableByRole, 'owner' ];
+                testRole = [self.detailsViewableByRole, 'owner'];
               }
             }
 
@@ -105,6 +115,6 @@ module.exports = function (dataTypeJSON,  projectConfigKey) {
 
         return result;
       },
-    }
+    },
   };
-}
+};

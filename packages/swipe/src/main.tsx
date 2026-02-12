@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { SwipeProps, SwipeField } from './swipe.js';
+
+import { SwipeField, SwipeProps } from './swipe.js';
 
 const config: SwipeProps = {
   api: {
@@ -16,49 +17,48 @@ const config: SwipeProps = {
   },
   cards: [
     {
-      id: "0",
-      title: "Card Title 1",
-      infoField: "Additional Info",
-      image: "https://picsum.photos/seed/260/1920/1080",
+      id: '0',
+      title: 'Card Title 1',
+      infoField: 'Additional Info',
+      image: 'https://picsum.photos/seed/260/1920/1080',
       explanationRequired: false,
     },
     {
-      id: "1",
-      title: "Card Title 2",
-      infoField: "Additional Info",
-      image: "https://picsum.photos/seed/392/1920/1080",
+      id: '1',
+      title: 'Card Title 2',
+      infoField: 'Additional Info',
+      image: 'https://picsum.photos/seed/392/1920/1080',
       explanationRequired: false,
     },
     {
-      id: "2",
-      title: "Card Title 3",
-      infoField: "Additional Info",
-      image: "https://picsum.photos/seed/990/1920/1080",
+      id: '2',
+      title: 'Card Title 3',
+      infoField: 'Additional Info',
+      image: 'https://picsum.photos/seed/990/1920/1080',
       explanationRequired: false,
     },
     {
-      id: "3",
-      title: "Card Title 4",
-      infoField: "Additional Info",
-      image: "https://picsum.photos/seed/306/1920/1080",
+      id: '3',
+      title: 'Card Title 4',
+      infoField: 'Additional Info',
+      image: 'https://picsum.photos/seed/306/1920/1080',
       explanationRequired: false,
     },
     {
-      id: "4",
-      title: "Card Title 5",
-      infoField: "Additional Info",
-      image: "https://picsum.photos/seed/761/1920/1080",
+      id: '4',
+      title: 'Card Title 5',
+      infoField: 'Additional Info',
+      image: 'https://picsum.photos/seed/761/1920/1080',
       explanationRequired: false,
     },
     {
-      id: "5",
-      title: "Card Title 6",
-      infoField: "Additional Info",
-      image: "https://picsum.photos/seed/563/1920/1080",
+      id: '5',
+      title: 'Card Title 6',
+      infoField: 'Additional Info',
+      image: 'https://picsum.photos/seed/563/1920/1080',
       explanationRequired: false,
     },
-
-  ]
+  ],
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

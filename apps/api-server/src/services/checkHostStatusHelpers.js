@@ -2,16 +2,22 @@
 const getCertificateConfig = (projectConfig) => {
   const certs = projectConfig?.certificates || {};
   return {
-    certificateMethod: certs.certificateMethod || projectConfig?.certificateMethod || 'cert-manager',
-    externalCertSlug: certs.externalCertSlug || projectConfig?.externalCertSlug || '',
+    certificateMethod:
+      certs.certificateMethod ||
+      projectConfig?.certificateMethod ||
+      'cert-manager',
+    externalCertSlug:
+      certs.externalCertSlug || projectConfig?.externalCertSlug || '',
   };
 };
 
 // Build annotations and ingressClassName for ingress resources
 const buildIngressConfig = (useClusterIssuer, useExternalCerts) => {
-  const prodIssuerName = (useClusterIssuer && !useExternalCerts)
-    ? (process.env.KUBERNETES_INGRESS_ISSUER_NAME || 'openstad-letsencrypt-prod')
-    : null;
+  const prodIssuerName =
+    useClusterIssuer && !useExternalCerts
+      ? process.env.KUBERNETES_INGRESS_ISSUER_NAME ||
+        'openstad-letsencrypt-prod'
+      : null;
 
   const annotations = process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS
     ? JSON.parse(process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS)
@@ -29,7 +35,11 @@ const buildIngressConfig = (useClusterIssuer, useExternalCerts) => {
     delete annotations['cert-manager.io/cluster-issuer'];
   }
 
-  if (useClusterIssuer && !!prodIssuerName && !annotations['cert-manager.io/cluster-issuer']) {
+  if (
+    useClusterIssuer &&
+    !!prodIssuerName &&
+    !annotations['cert-manager.io/cluster-issuer']
+  ) {
     annotations['cert-manager.io/cluster-issuer'] = prodIssuerName;
   }
 

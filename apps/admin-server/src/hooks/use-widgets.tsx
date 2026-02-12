@@ -1,6 +1,6 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { WidgetDefinition } from '@/lib/widget-definitions';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export function useWidgetsHook(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -10,8 +10,6 @@ export function useWidgetsHook(projectId?: string) {
   const widgetsSwr = useSWR(projectNumber ? url : null);
 
   async function createWidget(typeId: string, description: string) {
-
-
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -65,13 +63,11 @@ export function useWidgetsHook(projectId?: string) {
       updatedList[0].description = body.description;
       widgetsSwr.mutate(updatedList);
 
-      console.log({new: widgetsSwr.data});
+      console.log({ new: widgetsSwr.data });
       return widgetsSwr.data;
-
     } else {
       throw new Error('Could not update the widget');
     }
-
   }
 
   async function duplicate(ids: number[]) {
@@ -94,7 +90,6 @@ export function useWidgetsHook(projectId?: string) {
       throw new Error('Could not duplicate the widgets');
     }
   }
-
 
   return { ...widgetsSwr, createWidget, updateWidget, remove, duplicate };
 }

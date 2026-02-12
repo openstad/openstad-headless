@@ -79,7 +79,9 @@ function analyzeSpamPayload(payload = {}, options = {}) {
   // __timeToSubmitMs is injected upstream and removed before persistence.
   const timeToSubmitMs = Number(payload.__timeToSubmitMs);
   const veryFastSubmit =
-    Number.isFinite(timeToSubmitMs) && timeToSubmitMs > 0 && timeToSubmitMs < 2500;
+    Number.isFinite(timeToSubmitMs) &&
+    timeToSubmitMs > 0 &&
+    timeToSubmitMs < 2500;
 
   const candidateCount = textCandidates.length;
   const suspiciousCount = Math.max(randomLikeCount, compactMixedCaseCount);

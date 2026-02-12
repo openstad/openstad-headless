@@ -19,21 +19,20 @@
  * To set it to 90% confidence, for example, set WILSON_SCORE_Z=1.64 in your environment.
  * For reference, Reddit uses a z value of 1.28 for an 80% confidence level.
  */
-module.exports = function(wp, wn) {
-  
+module.exports = function (wp, wn) {
   // Let the z value be configurable via environment variable, defaults to 1.96 (95% confidence)
-  const z = process.env.WILSON_SCORE_Z ? parseFloat(process.env.WILSON_SCORE_Z) : 1.96;
-  
+  const z = process.env.WILSON_SCORE_Z
+    ? parseFloat(process.env.WILSON_SCORE_Z)
+    : 1.96;
+
   const n = wp + wn;
-  
+
   if (n === 0) {
     return 0;
   }
-  
-  const p        = wp / n;
+
+  const p = wp / n;
   const sqrtexpr = (p * (1 - p) + (z * z) / (4 * n)) / n;
-  
-  return (
-    (p + (z * z) / (2 * n) - z * Math.sqrt(sqrtexpr)) / (1 + (z * z) / n)
-  );
+
+  return (p + (z * z) / (2 * n) - z * Math.sqrt(sqrtexpr)) / (1 + (z * z) / n);
 };

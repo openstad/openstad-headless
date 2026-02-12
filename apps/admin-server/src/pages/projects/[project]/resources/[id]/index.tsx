@@ -1,17 +1,18 @@
-import React from 'react';
-import { PageLayout } from '../../../../../../src/components/ui/page-layout';
+import ProjectResourceCreateArgument from '@/pages/projects/[project]/resources/[id]/createComment';
 import { useRouter } from 'next/router';
+import React from 'react';
+
+import { PageLayout } from '../../../../../../src/components/ui/page-layout';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '../../../../../../src/components/ui/tabs';
-import ProjectResourceCreate from "./info";
-import ProjectResourceVotes from "./votes";
-import ProjectResourceArguments from "./comments";
-import ProjectResourceCreateArgument from "@/pages/projects/[project]/resources/[id]/createComment";
-import ProjectResourcePreview from "./preview";
+import ProjectResourceArguments from './comments';
+import ProjectResourceCreate from './info';
+import ProjectResourcePreview from './preview';
+import ProjectResourceVotes from './votes';
 
 export default function ProjectResource() {
   const router = useRouter();
@@ -61,7 +62,6 @@ export default function ProjectResource() {
               <ProjectResourcePreview />
             </TabsContent>
           </Tabs>
-
         </div>
       </PageLayout>
     </div>

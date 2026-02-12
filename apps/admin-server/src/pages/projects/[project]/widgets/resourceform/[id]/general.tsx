@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,10 +20,10 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as Switch from '@radix-ui/react-switch';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   resource: z.enum([
@@ -35,16 +36,30 @@ const formSchema = z.object({
   formName: z.string(),
   redirectUrl: z.preprocess(
     (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
-    z.string().refine(
-      (value) => /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value),
-      { message: "Must be a valid URL or a relative path" }
-    ).optional()
+    z
+      .string()
+      .refine((value) => /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value), {
+        message: 'Must be a valid URL or a relative path',
+      })
+      .optional()
   ),
   hideAdmin: z.boolean(),
-  minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
-  maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
-  minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
-  maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+  minCharactersWarning: z
+    .string()
+    .optional()
+    .default('Nog minimaal {minCharacters} tekens'),
+  maxCharactersWarning: z
+    .string()
+    .optional()
+    .default('Je hebt nog {maxCharacters} tekens over'),
+  minCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+  maxCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -64,10 +79,18 @@ export default function WidgetResourceFormGeneral() {
       formName: widget?.config?.[category]?.formName || '',
       redirectUrl: widget?.config?.[category]?.redirectUrl || '',
       hideAdmin: widget?.config?.[category]?.hideAdmin || false,
-      minCharactersWarning: widget?.config?.[category]?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
-      maxCharactersWarning: widget?.config?.[category]?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
-      minCharactersError: widget?.config?.[category]?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
-      maxCharactersError: widget?.config?.[category]?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      minCharactersWarning:
+        widget?.config?.[category]?.minCharactersWarning ||
+        'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning:
+        widget?.config?.[category]?.maxCharactersWarning ||
+        'Je hebt nog {maxCharacters} tekens over',
+      minCharactersError:
+        widget?.config?.[category]?.minCharactersError ||
+        'Tekst moet minimaal {minCharacters} karakters bevatten',
+      maxCharactersError:
+        widget?.config?.[category]?.maxCharactersError ||
+        'Tekst moet maximaal {maxCharacters} karakters bevatten',
     }),
     [widget?.config]
   );
@@ -130,10 +153,10 @@ export default function WidgetResourceFormGeneral() {
             name="formName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Naam formulier
-                </FormLabel>
-                <em className='text-xs'>Deze moet uniek zijn binnen dit project.</em>
+                <FormLabel>Naam formulier</FormLabel>
+                <em className="text-xs">
+                  Deze moet uniek zijn binnen dit project.
+                </em>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -147,7 +170,8 @@ export default function WidgetResourceFormGeneral() {
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>
-                  Naar welke URL moet de gebruiker geleid worden na het invullen van het formulier?
+                  Naar welke URL moet de gebruiker geleid worden na het invullen
+                  van het formulier?
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -191,9 +215,7 @@ export default function WidgetResourceFormGeneral() {
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters onder de minimum waarde ligt. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -210,9 +232,7 @@ export default function WidgetResourceFormGeneral() {
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -229,9 +249,7 @@ export default function WidgetResourceFormGeneral() {
                 <FormDescription>
                   {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters onder de minimum waarde ligt na het versturen van het formulier. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -248,9 +266,7 @@ export default function WidgetResourceFormGeneral() {
                 <FormDescription>
                   {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters boven de maximum waarde ligt na het versturen van het formulier. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}

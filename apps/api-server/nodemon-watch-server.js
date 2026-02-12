@@ -40,8 +40,10 @@ nodemon({
     // Because this function is async, the `start` function will start straight away
     // we use a promise on the `restarting` variable to block starting the server until after we resolve it
     let resolveRestart;
-    restarting = new Promise((resolve) => {resolveRestart = resolve});
-    
+    restarting = new Promise((resolve) => {
+      resolveRestart = resolve;
+    });
+
     const basePath = resolve(process.cwd(), '../../');
     const packagesPath = resolve(basePath, 'packages');
 

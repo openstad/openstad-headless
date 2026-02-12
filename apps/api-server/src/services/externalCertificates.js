@@ -41,7 +41,9 @@ async function validateInfrastructure() {
 
   // Skip validation if not running on K8s (local dev)
   if (!process.env.KUBERNETES_NAMESPACE) {
-    console.log('[external-certificates] Not running on K8s - skipping infrastructure validation');
+    console.log(
+      '[external-certificates] Not running on K8s - skipping infrastructure validation'
+    );
     return;
   }
 
@@ -63,13 +65,16 @@ async function validateInfrastructure() {
       // Handle both response patterns (direct object or .body wrapper)
       const items = crdResponse.items || crdResponse.body?.items || [];
 
-      const esoCRD = items.find(item =>
-        item.spec?.group === 'external-secrets.io' &&
-        item.spec?.names?.kind === 'ExternalSecret'
+      const esoCRD = items.find(
+        (item) =>
+          item.spec?.group === 'external-secrets.io' &&
+          item.spec?.names?.kind === 'ExternalSecret'
       );
 
       if (!esoCRD) {
-        blockers.push('ExternalSecret CRD not found (ESO operator not installed?)');
+        blockers.push(
+          'ExternalSecret CRD not found (ESO operator not installed?)'
+        );
       }
     } catch (error) {
       blockers.push(`CRD check failed: ${error.message}`);
@@ -88,7 +93,7 @@ async function validateInfrastructure() {
             group: 'external-secrets.io',
             version: version,
             namespace: namespace,
-            plural: 'externalsecrets'
+            plural: 'externalsecrets',
           });
           rbacCheckPassed = true;
           break;
@@ -96,7 +101,9 @@ async function validateInfrastructure() {
           if (getErrorStatusCode(err) === 403) {
             // 403 means RBAC insufficient - this is a blocker
             if (version === 'v1beta1') {
-              blockers.push('RBAC check failed: 403 Forbidden (missing permissions)');
+              blockers.push(
+                'RBAC check failed: 403 Forbidden (missing permissions)'
+              );
             }
           } else if (getErrorStatusCode(err) === 404) {
             // 404 means no resources exist yet, but permissions are fine
@@ -119,17 +126,25 @@ async function validateInfrastructure() {
           const cssResponse = await customObjects.listClusterCustomObject({
             group: 'external-secrets.io',
             version: version,
-            plural: 'clustersecretstores'
+            plural: 'clustersecretstores',
           });
 
           const items = cssResponse.items || cssResponse.body?.items || [];
 
           if (items.length === 0) {
-            warnings.push('No ClusterSecretStore found - ExternalSecrets will fail until one is configured');
+            warnings.push(
+              'No ClusterSecretStore found - ExternalSecrets will fail until one is configured'
+            );
           } else {
             // Log the ClusterSecretStores found
-            const ready = items.filter(item => item.status?.conditions?.some(c => c.type === 'Ready' && c.status === 'True'));
-            console.log(`[external-certificates] Found ${items.length} ClusterSecretStore(s), ${ready.length} ready`);
+            const ready = items.filter((item) =>
+              item.status?.conditions?.some(
+                (c) => c.type === 'Ready' && c.status === 'True'
+              )
+            );
+            console.log(
+              `[external-certificates] Found ${items.length} ClusterSecretStore(s), ${ready.length} ready`
+            );
           }
           break;
         } catch (err) {
@@ -144,30 +159,44 @@ async function validateInfrastructure() {
 
     // Evaluate results
     if (blockers.length > 0) {
-      console.error('[external-certificates] Infrastructure validation failed:');
-      blockers.forEach(msg => console.error(`[external-certificates]   - ${msg}`));
-      console.error('[external-certificates] Feature auto-disabled. Fix infrastructure and restart.');
+      console.error(
+        '[external-certificates] Infrastructure validation failed:'
+      );
+      blockers.forEach((msg) =>
+        console.error(`[external-certificates]   - ${msg}`)
+      );
+      console.error(
+        '[external-certificates] Feature auto-disabled. Fix infrastructure and restart.'
+      );
       _enabled = false;
       return;
     }
 
     // Success
-    console.log('[external-certificates] Infrastructure validated - feature enabled');
+    console.log(
+      '[external-certificates] Infrastructure validated - feature enabled'
+    );
 
     // Log warnings if any
     if (warnings.length > 0) {
-      warnings.forEach(msg => console.warn(`[external-certificates] WARNING: ${msg}`));
+      warnings.forEach((msg) =>
+        console.warn(`[external-certificates] WARNING: ${msg}`)
+      );
     }
-
   } catch (error) {
     // Unexpected error - auto-disable
-    console.error('[external-certificates] Unexpected validation error:', error.message);
-    console.error('[external-certificates] Feature auto-disabled. Fix infrastructure and restart.');
+    console.error(
+      '[external-certificates] Unexpected validation error:',
+      error.message
+    );
+    console.error(
+      '[external-certificates] Feature auto-disabled. Fix infrastructure and restart.'
+    );
     _enabled = false;
   }
 }
 
 module.exports = {
   isEnabled,
-  validateInfrastructure
+  validateInfrastructure,
 };

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Button } from '../ui/button';
 import { Loader } from 'lucide-react';
+import React from 'react';
 
+import { Button } from '../ui/button';
 
 const ActionButtonsLine = (props: {
   handleClose: () => void;
@@ -29,18 +29,11 @@ const ActionButtonsLine = (props: {
   if (dialogStatus === 'importFinished') {
     return (
       <>
-      <Button 
-        onClick={handleClose}
-        variant='ghost'
-      >
-        <span>{'SLUIT'}</span>
-      </Button>
+        <Button onClick={handleClose} variant="ghost">
+          <span>{'SLUIT'}</span>
+        </Button>
 
-        <Button
-          onClick={handleReload}
-          color='secondary'
-          variant='default'
-        >
+        <Button onClick={handleReload} color="secondary" variant="default">
           {importing && (
             <Loader className="animate-spin" size={18} strokeWidth={2} />
           )}
@@ -52,36 +45,37 @@ const ActionButtonsLine = (props: {
 
   return (
     <>
-      <Button 
-        onClick={handleClose}
-        variant='ghost'
-      >
+      <Button onClick={handleClose} variant="ghost">
         <span>{'SLUIT'}</span>
       </Button>
       <Button
-        disabled={(!values || values.length < 1) || importing}
+        disabled={!values || values.length < 1 || importing}
         onClick={handleSubmitCreate}
-        color='secondary'
-        variant='default'
-      >
-          {importing && (
-            <Loader className="animate-spin" size={18} strokeWidth={2} />
-          )}
-          <span>{'RIJEN CREËREN'}</span>
+        color="secondary"
+        variant="default">
+        {importing && (
+          <Loader className="animate-spin" size={18} strokeWidth={2} />
+        )}
+        <span>{'RIJEN CREËREN'}</span>
       </Button>
       <Button
-        disabled={!values || values.length < 1 || importing || !idPresent || (idPresent && !useId)}
+        disabled={
+          !values ||
+          values.length < 1 ||
+          importing ||
+          !idPresent ||
+          (idPresent && !useId)
+        }
         onClick={handleSubmitOverwrite}
-        color='primary'
-        variant='default'
-      >
-          {importing && (
-            <Loader className="animate-spin" size={18} strokeWidth={2} />
-          )}        
-          <span>{'RIJEN BIJWERKEN'}</span>
+        color="primary"
+        variant="default">
+        {importing && (
+          <Loader className="animate-spin" size={18} strokeWidth={2} />
+        )}
+        <span>{'RIJEN BIJWERKEN'}</span>
       </Button>
     </>
   );
-}
+};
 
 export default ActionButtonsLine;

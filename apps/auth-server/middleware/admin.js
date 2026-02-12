@@ -7,13 +7,11 @@ exports.ensure = (req, res, next) => {
   } else {
     throw new Error('Forbidden');
   }
-}
-
+};
 
 exports.addClient = (req, res, next) => {
-  db.Client
-    .findOne({ where: {id: adminClientId} })
-    .then(client => {
+  db.Client.findOne({ where: { id: adminClientId } })
+    .then((client) => {
       req.client = client;
       res.locals.client = req.client;
       next();
@@ -21,4 +19,4 @@ exports.addClient = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-}
+};

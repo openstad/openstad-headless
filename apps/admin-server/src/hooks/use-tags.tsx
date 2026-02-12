@@ -1,23 +1,41 @@
 import useSWR from 'swr';
-import {validateProjectNumber} from "../lib/validateProjectNumber";
 
-export default function useTag(projectId?: string, includeGlobalTags?: boolean) {
-  const projectNumber: number | undefined = validateProjectNumber(projectId, true);
+import { validateProjectNumber } from '../lib/validateProjectNumber';
+
+export default function useTag(
+  projectId?: string,
+  includeGlobalTags?: boolean
+) {
+  const projectNumber: number | undefined = validateProjectNumber(
+    projectId,
+    true
+  );
 
   let url = `/api/openstad/api/project/${projectNumber}/tag`;
   if (includeGlobalTags !== false) {
     url += '?includeGlobalTags=true';
   }
 
-  const tagListSwr = useSWR((projectNumber || projectNumber === 0 ) ? url : null);
+  const tagListSwr = useSWR(projectNumber || projectNumber === 0 ? url : null);
 
-  async function createTag(name: string, type: string, seqnr: number, addToNewResources: boolean) {
+  async function createTag(
+    name: string,
+    type: string,
+    seqnr: number,
+    addToNewResources: boolean
+  ) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId: projectNumber, name, type, seqnr, addToNewResources }),
+      body: JSON.stringify({
+        projectId: projectNumber,
+        name,
+        type,
+        seqnr,
+        addToNewResources,
+      }),
     });
 
     return await res.json();
@@ -43,5 +61,5 @@ export default function useTag(projectId?: string, includeGlobalTags?: boolean) 
     }
   }
 
-  return {...tagListSwr, createTag, removeTag}
+  return { ...tagListSwr, createTag, removeTag };
 }

@@ -3,7 +3,7 @@ const router = express.Router({ mergeParams: true });
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const db = require('../../db');
 const sanitize = require('../../util/sanitize');
-const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const getWidgetSettings = require('../widget/widget-settings');
 const createError = require('http-errors');
 router.all('*', function (req, res, next) {
@@ -39,12 +39,12 @@ router
 
   // Create widget
   .post(auth.useReqUser)
-  .post( rateLimiter(), async function (req, res, next) {
+  .post(rateLimiter(), async function (req, res, next) {
     const widget = req.body;
     const projectId = req.params.projectId;
     // Get the project to generate default config
     const project = await db.Project.scope('includeAreas').findOne({
-      where: { id: projectId }
+      where: { id: projectId },
     });
 
     if (!project) {
@@ -60,14 +60,14 @@ router
     }
 
     try {
-        if (
-            !!widgetDefinition.defaultConfig &&
-            !widgetDefinition.defaultConfig.projectId
-        ) {
-            widgetDefinition.defaultConfig.projectId = projectId;
-        }
+      if (
+        !!widgetDefinition.defaultConfig &&
+        !widgetDefinition.defaultConfig.projectId
+      ) {
+        widgetDefinition.defaultConfig.projectId = projectId;
+      }
     } catch (err) {
-        console.log('Error setting projectId in defaultConfig', err);
+      console.log('Error setting projectId in defaultConfig', err);
     }
 
     const createdWidget = await db.Widget.create({
@@ -85,93 +85,101 @@ router
 
 // Delete multiple widgets
 router
-    .route ('/delete')
-    .delete(auth.useReqUser)
-    .delete( rateLimiter(), async function (req, res, next)  {
-        let ids = req.body.ids;
+  .route('/delete')
+  .delete(auth.useReqUser)
+  .delete(rateLimiter(), async function (req, res, next) {
+    let ids = req.body.ids;
 
-        if (!ids || !Array.isArray(ids)) {
-            return next(new Error('Invalid request: ids must be an array'));
+    if (!ids || !Array.isArray(ids)) {
+      return next(new Error('Invalid request: ids must be an array'));
+    }
+
+    ids = ids.filter((id) => Number.isInteger(id));
+    if (ids.length === 0) {
+      return next(new Error('Invalid request: no valid ids provided'));
+    }
+
+    try {
+      const widgets = await db.Widget.scope(...req.scope).findAll({
+        where: { id: ids },
+      });
+
+      if (widgets.length === 0) {
+        return res
+          .status(404)
+          .json({ error: 'No widgets found for the provided IDs' });
+      }
+
+      for (const widget of widgets) {
+        if (!widget.can || !widget.can('delete')) {
+          return next(
+            new Error(`You cannot delete widget with ID ${widget.id}`)
+          );
         }
+      }
 
-        ids = ids.filter((id) => Number.isInteger(id));
-        if (ids.length === 0) {
-            return next(new Error('Invalid request: no valid ids provided'));
-        }
+      await db.Widget.destroy({
+        where: { id: ids },
+      });
 
-        try {
-            const widgets = await db.Widget.scope(...req.scope).findAll({
-                where: { id: ids }
-            });
-
-            if (widgets.length === 0) {
-                return res.status(404).json({ error: 'No widgets found for the provided IDs' });
-            }
-
-            for (const widget of widgets) {
-                if (!widget.can || !widget.can('delete')) {
-                    return next(new Error(`You cannot delete widget with ID ${widget.id}`));
-                }
-            }
-
-            await db.Widget.destroy({
-                where: { id: ids }
-            });
-
-            res.json({ message: 'Widgets deleted successfully' });
-        } catch (error) {
-            next(error);
-        }
-    })
+      res.json({ message: 'Widgets deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  });
 
 // Duplicate multiple widgets
 router
-    .route('/duplicate')
-    .post(auth.useReqUser)
-    .post(rateLimiter(), async function (req, res, next) {
-        let ids = req.body.ids;
-        const projectId = req.params.projectId;
+  .route('/duplicate')
+  .post(auth.useReqUser)
+  .post(rateLimiter(), async function (req, res, next) {
+    let ids = req.body.ids;
+    const projectId = req.params.projectId;
 
-        if (!ids || !Array.isArray(ids)) {
-            return next(new Error('Invalid request: ids must be an array'));
+    if (!ids || !Array.isArray(ids)) {
+      return next(new Error('Invalid request: ids must be an array'));
+    }
+
+    ids = ids.filter((id) => Number.isInteger(id));
+    if (ids.length === 0) {
+      return next(new Error('Invalid request: no valid ids provided'));
+    }
+
+    try {
+      const widgets = await db.Widget.scope(...req.scope).findAll({
+        where: { id: ids },
+      });
+
+      if (widgets.length === 0) {
+        return res
+          .status(404)
+          .json({ error: 'No widgets found for the provided IDs' });
+      }
+
+      for (const widget of widgets) {
+        if (!widget.can || !widget.can('create')) {
+          return next(
+            new Error(`You cannot duplicate widget with ID ${widget.id}`)
+          );
         }
+      }
 
-        ids = ids.filter((id) => Number.isInteger(id));
-        if (ids.length === 0) {
-            return next(new Error('Invalid request: no valid ids provided'));
-        }
+      const duplicatedWidgets = await Promise.all(
+        widgets.map((widget) => {
+          return db.Widget.create({
+            projectId,
+            description: widget?.description || '',
+            type: widget.type,
+            config: widget?.config || '{}',
+          });
+        })
+      );
 
-        try {
-            const widgets = await db.Widget.scope(...req.scope).findAll({
-                where: { id: ids }
-            });
-
-            if (widgets.length === 0) {
-                return res.status(404).json({ error: 'No widgets found for the provided IDs' });
-            }
-
-            for (const widget of widgets) {
-                if (!widget.can || !widget.can('create')) {
-                    return next(new Error(`You cannot duplicate widget with ID ${widget.id}`));
-                }
-            }
-
-            const duplicatedWidgets = await Promise.all(
-                widgets.map((widget) => {
-                    return db.Widget.create({
-                        projectId,
-                        description: widget?.description || '',
-                        type: widget.type,
-                        config: widget?.config || '{}',
-                    });
-                })
-            );
-
-            res.json(duplicatedWidgets);
-        } catch (error) {
-            next(error);
-        }
-    });
+      res.json(duplicatedWidgets);
+    } catch (error) {
+      next(error);
+    }
+  });
 
 // one widget routes: get widget
 // -------------------------
@@ -202,7 +210,7 @@ router
 
   // Update widget
   .put(auth.useReqUser)
-  .put( rateLimiter(), async function (req, res, next) {
+  .put(rateLimiter(), async function (req, res, next) {
     const widget = req.widget;
     const config = { ...widget.config, ...(req.body?.config || {}) };
     const description = req.body?.description ?? widget.description;
@@ -212,8 +220,10 @@ router
       // sanitize rawInput by user
 
       if (typesToSanitize.includes(widget.dataValues.type)) {
-        widget.dataValues.config.rawInput = sanitize.content(widget.dataValues.config.rawInput);
-    }
+        widget.dataValues.config.rawInput = sanitize.content(
+          widget.dataValues.config.rawInput
+        );
+      }
       widget.update({ config, description }).then((result) => res.json(result));
     }
   })
@@ -222,16 +232,16 @@ router
   // ---------
   .delete(auth.useReqUser)
   .delete(function (req, res, next) {
-      const widget = req.results;
-      if (!(widget && widget.can && widget.can('delete')))
-          return next(new Error('You cannot delete this widget'));
+    const widget = req.results;
+    if (!(widget && widget.can && widget.can('delete')))
+      return next(new Error('You cannot delete this widget'));
 
-      widget
-          .destroy()
-          .then(() => {
-              res.json({ widget: 'deleted' });
-          })
-          .catch(next);
+    widget
+      .destroy()
+      .then(() => {
+        res.json({ widget: 'deleted' });
+      })
+      .catch(next);
   });
 
 module.exports = router;

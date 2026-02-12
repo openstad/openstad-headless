@@ -36,11 +36,14 @@ The provider used is determined first by the query param `useAuth`. If that is n
 Configuration is done in the `auth` block in environment vars and/or `Project.config`.
 
 The minimal configuration in defines the url of the auth server and a jwt secret.
+
 ```
 AUTH_JWTSECRET=
 AUTH_ADAPTER_OPENSTAD_SERVERURL=
 ```
-or 
+
+or
+
 ```
 "auth": {
   "adapter": {
@@ -53,6 +56,7 @@ or
 ```
 
 Per site a minimal configuration of `default` and `anonymous` provider should contain clientId and clientSecret on the OpenStad auth sever:
+
 ```
 "auth": {
   "provider": {
@@ -71,6 +75,7 @@ Per site a minimal configuration of `default` and `anonymous` provider should co
 The only other generic configuration is the [User mapping](#user-mapping) which is explained later.
 
 Further configuration of providers and adapters is dependent on the adapter used. The `oidc` adapter for example is a rather basic implementation of OpenID Connect and has these options:
+
 ```
 "auth": {
   "adapter": {
@@ -97,11 +102,13 @@ idpUser: {
   accesstoken:
 }
 ```
+
 The identifier field should always be mapped.
 
 NOTE: is dit wel zo? Ik denk dat dit ook adapter specifiek is. Je kunt dan volhouden dat idpUser een vrij veld zou moeten zijn en niet gedefinieerd in de generiek map-user.
 
 The mapping should be a string, because it should be storable as JSON. In this example the code has not yet been stringified for readability:
+
 ```
 "auth": {
   "provider": {
@@ -120,6 +127,7 @@ The mapping should be a string, because it should be storable as JSON. In this e
 ### SSO
 
 The `oidc` adapter has one extra endpoint:
+
 ```
 POST /auth/site/:siteId/connect-user?useAuth=my-sso-server
 Content-type: application/json
@@ -129,6 +137,7 @@ Content-type: application/json
   "iss": "MUST BE EQUAL TO DEFINED serverURL"
 }
 ```
+
 Through this enpoint external users can be added to the API: a call is made to the defined server and the userData fetched. If the user does not yet exist in the API it is created. The result is a jwt that can be used for subsequent calls to the API.
 
 This makes it possible for a user of your CMS to be recognized by the OpenStad API, and use all the OpenStad component functionality.
@@ -139,6 +148,7 @@ NOTE: hier mag nog wel een voorbeeld bij denk ik...
 
 Sorry, no documentation (yet). Look at the existing adapters in API/src/adapters.
 To refer to your new adapter use the adapter configuration:
+
 ```
 "auth": {
   "adapter": {
@@ -159,11 +169,13 @@ To refer to your new adapter use the adapter configuration:
 When creating, deleting or updating users on the API these changes should probably be sent to the login provider as well. This can be done in the adapter.
 
 You can use the openstad adapter as an example. Code will be synced if the adapter.serveice has a defined function for that synhronization. Currently the recognized functions are:
- - __service.createUser__
- - __service.updateUser__
- - __service.deleteUser__
- - __service.updateClient__ - for configuration options that are used during login
+
+- **service.createUser**
+- **service.updateUser**
+- **service.deleteUser**
+- **service.updateClient** - for configuration options that are used during login
 
 ### ToDo
+
 - A SAML adapter
 - The JWT is created in the adapter, but used in generic API middleware. That means it has to be created in a specific way, and should therefore be available as an API service to the adapter.

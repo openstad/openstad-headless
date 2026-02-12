@@ -1,10 +1,6 @@
-import React from 'react';
 import { Image, Spacer } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
-import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
-
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
   Heading,
   Heading3,
@@ -12,6 +8,10 @@ import {
   Paragraph,
   Strong,
 } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React from 'react';
+
+import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 import { TagType } from '../stem-begroot';
 
 type Props = {

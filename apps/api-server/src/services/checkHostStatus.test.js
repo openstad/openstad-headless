@@ -1,7 +1,10 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Import pure helpers directly (no db dependency)
-import { getCertificateConfig, buildIngressConfig } from './checkHostStatusHelpers.js';
+import {
+  buildIngressConfig,
+  getCertificateConfig,
+} from './checkHostStatusHelpers.js';
 
 // ---- Env helpers ----
 const savedEnv = {};
@@ -28,33 +31,50 @@ afterEach(() => {
 // ---- getCertificateConfig ----
 describe('getCertificateConfig', () => {
   test('reads from new certificates path', () => {
-    expect(getCertificateConfig({
-      certificates: { certificateMethod: 'external', externalCertSlug: 'my-slug' },
-    })).toEqual({ certificateMethod: 'external', externalCertSlug: 'my-slug' });
+    expect(
+      getCertificateConfig({
+        certificates: {
+          certificateMethod: 'external',
+          externalCertSlug: 'my-slug',
+        },
+      })
+    ).toEqual({ certificateMethod: 'external', externalCertSlug: 'my-slug' });
   });
 
   test('falls back to root-level config', () => {
-    expect(getCertificateConfig({
-      certificateMethod: 'external', externalCertSlug: 'old-slug',
-    })).toEqual({ certificateMethod: 'external', externalCertSlug: 'old-slug' });
+    expect(
+      getCertificateConfig({
+        certificateMethod: 'external',
+        externalCertSlug: 'old-slug',
+      })
+    ).toEqual({ certificateMethod: 'external', externalCertSlug: 'old-slug' });
   });
 
   test('new path takes precedence over root-level', () => {
-    expect(getCertificateConfig({
-      certificateMethod: 'cert-manager',
-      externalCertSlug: 'old',
-      certificates: { certificateMethod: 'external', externalCertSlug: 'new' },
-    })).toEqual({ certificateMethod: 'external', externalCertSlug: 'new' });
+    expect(
+      getCertificateConfig({
+        certificateMethod: 'cert-manager',
+        externalCertSlug: 'old',
+        certificates: {
+          certificateMethod: 'external',
+          externalCertSlug: 'new',
+        },
+      })
+    ).toEqual({ certificateMethod: 'external', externalCertSlug: 'new' });
   });
 
   test('returns defaults when no config present', () => {
     expect(getCertificateConfig({})).toEqual({
-      certificateMethod: 'cert-manager', externalCertSlug: '',
+      certificateMethod: 'cert-manager',
+      externalCertSlug: '',
     });
   });
 
   test('handles null/undefined config', () => {
-    const defaults = { certificateMethod: 'cert-manager', externalCertSlug: '' };
+    const defaults = {
+      certificateMethod: 'cert-manager',
+      externalCertSlug: '',
+    };
     expect(getCertificateConfig(null)).toEqual(defaults);
     expect(getCertificateConfig(undefined)).toEqual(defaults);
   });
@@ -64,7 +84,9 @@ describe('getCertificateConfig', () => {
 describe('buildIngressConfig', () => {
   test('cert-manager with cluster issuer', () => {
     const { annotations } = buildIngressConfig(true, false);
-    expect(annotations['cert-manager.io/cluster-issuer']).toBe('openstad-letsencrypt-prod');
+    expect(annotations['cert-manager.io/cluster-issuer']).toBe(
+      'openstad-letsencrypt-prod'
+    );
     expect(annotations['kubernetes.io/ingress.class']).toBe('nginx');
   });
 
@@ -80,10 +102,13 @@ describe('buildIngressConfig', () => {
   });
 
   test('external cert removes cluster-issuer from custom annotations', () => {
-    setEnv('KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS', JSON.stringify({
-      'cert-manager.io/cluster-issuer': 'should-be-removed',
-      'custom/annotation': 'keep',
-    }));
+    setEnv(
+      'KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS',
+      JSON.stringify({
+        'cert-manager.io/cluster-issuer': 'should-be-removed',
+        'custom/annotation': 'keep',
+      })
+    );
     const { annotations } = buildIngressConfig(false, true);
     expect(annotations['cert-manager.io/cluster-issuer']).toBeUndefined();
     expect(annotations['custom/annotation']).toBe('keep');
@@ -100,7 +125,10 @@ describe('buildIngressConfig', () => {
   });
 
   test('custom annotations from env override defaults', () => {
-    setEnv('KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS', JSON.stringify({ 'custom/key': 'value' }));
+    setEnv(
+      'KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS',
+      JSON.stringify({ 'custom/key': 'value' })
+    );
     const { annotations } = buildIngressConfig(false, false);
     expect(annotations['custom/key']).toBe('value');
     expect(annotations['kubernetes.io/ingress.class']).toBeUndefined();
@@ -112,10 +140,15 @@ describe('buildIngressConfig', () => {
   });
 
   test('does not add cluster-issuer when already in custom annotations', () => {
-    setEnv('KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS', JSON.stringify({
-      'cert-manager.io/cluster-issuer': 'pre-existing-issuer',
-    }));
+    setEnv(
+      'KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS',
+      JSON.stringify({
+        'cert-manager.io/cluster-issuer': 'pre-existing-issuer',
+      })
+    );
     const { annotations } = buildIngressConfig(true, false);
-    expect(annotations['cert-manager.io/cluster-issuer']).toBe('pre-existing-issuer');
+    expect(annotations['cert-manager.io/cluster-issuer']).toBe(
+      'pre-existing-issuer'
+    );
   });
 });

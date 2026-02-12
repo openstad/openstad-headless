@@ -44,7 +44,8 @@ function generateSecretName(domain, namespace, slugOverride) {
   const orgName = namespace.replace(/^openstad-/, '');
 
   // Get prefix template from env, default to pattern with {orgName} placeholder
-  const prefixTemplate = process.env.EXTERNAL_CERT_SECRET_PREFIX || 'tls-openstad-prod-{orgName}';
+  const prefixTemplate =
+    process.env.EXTERNAL_CERT_SECRET_PREFIX || 'tls-openstad-prod-{orgName}';
 
   // Replace {orgName} placeholder with actual org name
   const prefix = prefixTemplate.replace('{orgName}', orgName);
@@ -68,7 +69,7 @@ async function getK8sClients() {
 
   return {
     customObjects: kc.makeApiClient(k8s.CustomObjectsApi),
-    core: kc.makeApiClient(k8s.CoreV1Api)
+    core: kc.makeApiClient(k8s.CoreV1Api),
   };
 }
 
@@ -95,44 +96,45 @@ async function ensureExternalSecret(secretName, namespace) {
 
   const { customObjects } = await getK8sClients();
 
-  const secretStoreName = process.env.EXTERNAL_CERT_SECRET_STORE || 'gcp-secret-store';
+  const secretStoreName =
+    process.env.EXTERNAL_CERT_SECRET_STORE || 'gcp-secret-store';
 
   const externalSecretSpec = {
     apiVersion: 'external-secrets.io/v1',
     kind: 'ExternalSecret',
     metadata: {
       name: secretName,
-      namespace: namespace
+      namespace: namespace,
     },
     spec: {
       refreshInterval: '1h',
       secretStoreRef: {
         name: secretStoreName,
-        kind: 'ClusterSecretStore'
+        kind: 'ClusterSecretStore',
       },
       target: {
         name: secretName,
         template: {
-          type: 'kubernetes.io/tls'
-        }
+          type: 'kubernetes.io/tls',
+        },
       },
       data: [
         {
           secretKey: 'tls.crt',
           remoteRef: {
             key: secretName,
-            property: 'tls.crt'
-          }
+            property: 'tls.crt',
+          },
         },
         {
           secretKey: 'tls.key',
           remoteRef: {
             key: secretName,
-            property: 'tls.key'
-          }
-        }
-      ]
-    }
+            property: 'tls.key',
+          },
+        },
+      ],
+    },
   };
 
   // Try v1 first, fallback to v1beta1 for ESO version compatibility
@@ -143,12 +145,14 @@ async function ensureExternalSecret(secretName, namespace) {
         version: version,
         namespace: namespace,
         plural: 'externalsecrets',
-        body: { ...externalSecretSpec, apiVersion: `external-secrets.io/${version}` }
+        body: {
+          ...externalSecretSpec,
+          apiVersion: `external-secrets.io/${version}`,
+        },
       });
 
       console.log('[external-certificates] Created ExternalSecret');
       return { created: true, secretName };
-
     } catch (error) {
       const status = getErrorStatusCode(error);
       if (status === 409) {
@@ -157,7 +161,9 @@ async function ensureExternalSecret(secretName, namespace) {
         return { created: false, secretName };
       } else if (status === 404 && version === 'v1') {
         // v1 not found, try v1beta1
-        console.log(`[external-certificates] ${version} API not available, falling back to v1beta1`);
+        console.log(
+          `[external-certificates] ${version} API not available, falling back to v1beta1`
+        );
         continue;
       } else {
         throw error;
@@ -194,16 +200,19 @@ async function checkSecretReady(secretName, namespace) {
         version: version,
         namespace: namespace,
         plural: 'externalsecrets',
-        name: secretName
+        name: secretName,
       });
 
       const externalSecret = response.body || response;
       const conditions = externalSecret.status?.conditions || [];
 
-      const readyCondition = conditions.find(c => c.type === 'Ready');
+      const readyCondition = conditions.find((c) => c.type === 'Ready');
 
       if (readyCondition) {
-        if (readyCondition.status === 'True' && readyCondition.reason === 'SecretSynced') {
+        if (
+          readyCondition.status === 'True' &&
+          readyCondition.reason === 'SecretSynced'
+        ) {
           synced = true;
         } else if (readyCondition.reason === 'SecretSyncedError') {
           error = true;
@@ -211,7 +220,6 @@ async function checkSecretReady(secretName, namespace) {
       }
 
       break; // Successfully read ExternalSecret, stop trying versions
-
     } catch (err) {
       if (getErrorStatusCode(err) === 404) {
         if (version === 'v1beta1') {
@@ -219,7 +227,7 @@ async function checkSecretReady(secretName, namespace) {
           return {
             ready: false,
             state: 'pending',
-            reason: 'ExternalSecret not found'
+            reason: 'ExternalSecret not found',
           };
         }
         // Try v1beta1
@@ -234,7 +242,7 @@ async function checkSecretReady(secretName, namespace) {
   try {
     const secretResponse = await core.readNamespacedSecret({
       name: secretName,
-      namespace: namespace
+      namespace: namespace,
     });
 
     const secret = secretResponse.body || secretResponse;
@@ -242,11 +250,13 @@ async function checkSecretReady(secretName, namespace) {
     if (secret.data && secret.data['tls.crt'] && secret.data['tls.key']) {
       secretExists = true;
     }
-
   } catch (err) {
     if (getErrorStatusCode(err) !== 404) {
       // Unexpected error reading Secret
-      console.error('[external-certificates] Unexpected error reading external certificate Secret:', err.message);
+      console.error(
+        '[external-certificates] Unexpected error reading external certificate Secret:',
+        err.message
+      );
     }
     // 404 means Secret doesn't exist yet, secretExists stays false
   }
@@ -256,7 +266,7 @@ async function checkSecretReady(secretName, namespace) {
     return {
       ready: false,
       state: 'error',
-      reason: 'ExternalSecret sync error'
+      reason: 'ExternalSecret sync error',
     };
   }
 
@@ -264,7 +274,7 @@ async function checkSecretReady(secretName, namespace) {
     return {
       ready: true,
       state: 'linked',
-      reason: 'ExternalSecret synced and Secret exists'
+      reason: 'ExternalSecret synced and Secret exists',
     };
   }
 
@@ -272,14 +282,14 @@ async function checkSecretReady(secretName, namespace) {
     return {
       ready: false,
       state: 'pending',
-      reason: 'ExternalSecret synced but Secret not yet created'
+      reason: 'ExternalSecret synced but Secret not yet created',
     };
   }
 
   return {
     ready: false,
     state: 'pending',
-    reason: 'ExternalSecret not synced yet'
+    reason: 'ExternalSecret not synced yet',
   };
 }
 
@@ -307,8 +317,10 @@ async function waitForSecretReady(secretName, namespace, options = {}) {
     }
 
     if (attempt < maxRetries) {
-      console.log(`[external-certificates] Secret not ready (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs / 1000}s...`);
-      await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+      console.log(
+        `[external-certificates] Secret not ready (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs / 1000}s...`
+      );
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
     }
   }
 
@@ -319,5 +331,5 @@ module.exports = {
   generateSecretName,
   ensureExternalSecret,
   checkSecretReady,
-  waitForSecretReady
+  waitForSecretReady,
 };

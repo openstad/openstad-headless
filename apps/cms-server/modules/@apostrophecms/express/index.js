@@ -2,8 +2,8 @@ module.exports = {
   options: {
     session: {
       // If this still says `undefined`, set a real secret!
-      secret: process.env.EXPRESS_SECRET
-    }
+      secret: process.env.EXPRESS_SECRET,
+    },
   },
   methods: (self) => {
     return {
@@ -12,8 +12,7 @@ module.exports = {
        * ApostropheCMS V3. It will otherwise run a listen command to express and this will cause an error
        * since our top level is managing express
        */
-      async listen() {
-      }
+      async listen() {},
     };
-  }
+  },
 };

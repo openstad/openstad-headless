@@ -1,14 +1,8 @@
-import { useState } from 'react';
-import { DialogClose } from '@radix-ui/react-dialog';
-
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { Heading, Paragraph } from '@/components/ui/typography';
-
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { DialogClose } from '@radix-ui/react-dialog';
+import { useState } from 'react';
 
 type Props = {
   header: string;

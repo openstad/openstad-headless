@@ -1,24 +1,4 @@
 import { Calendar } from '@/components/ui/calendar';
-import { Separator } from '@/components/ui/separator';
-import { Heading } from '@/components/ui/typography';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
-import { parseISO } from 'date-fns';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Button } from '../../../../../../components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '../../../../../../components/ui/form';
-import { Input } from '../../../../../../components/ui/input';
-import { useState, useEffect } from 'react';
 import {
   Select,
   SelectContent,
@@ -26,8 +6,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
 import * as Switch from '@radix-ui/react-switch';
+import { parseISO } from 'date-fns';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
+import { Button } from '../../../../../../components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../../../../../../components/ui/form';
+import { Input } from '../../../../../../components/ui/input';
 
 const formSchema = z.object({
   beforeText: z.string().optional(),
@@ -50,13 +50,17 @@ export default function CountdownBarGeneral(
   useEffect(() => {
     if (!selectedDate && props.date) {
       setSelectedDate(parseISO(props.date));
-    } else if (props && (!props.date && !selectedDate)) {
+    } else if (props && !props.date && !selectedDate) {
       setSelectedDate(new Date());
     }
   }, [selectedDate, props.date, props]);
 
   function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values, direction: values.direction as "horizontal" | "vertical" });
+    props.updateConfig({
+      ...props,
+      ...values,
+      direction: values.direction as 'horizontal' | 'vertical',
+    });
   }
 
   const form = useForm<FormData>({
@@ -127,16 +131,18 @@ export default function CountdownBarGeneral(
           render={({ field }) => (
             <FormItem>
               <FormLabel>Selecteer weergave</FormLabel>
-              <Select onValueChange={(e) => {
-                field.onChange(e);
-                props.onFieldChanged(field.name, e);
-              }} value={field.value}>
+              <Select
+                onValueChange={(e) => {
+                  field.onChange(e);
+                  props.onFieldChanged(field.name, e);
+                }}
+                value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecteer weergave" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent className='overflow-y-auto max-h-[16rem]'>
+                <SelectContent className="overflow-y-auto max-h-[16rem]">
                   <SelectItem key={1} value={'horizontal'}>
                     Naast elkaar
                   </SelectItem>
@@ -148,7 +154,7 @@ export default function CountdownBarGeneral(
             </FormItem>
           )}
         />
-        <div className='grid grid-cols-3'>
+        <div className="grid grid-cols-3">
           <FormField
             control={form.control}
             name="showLabels"

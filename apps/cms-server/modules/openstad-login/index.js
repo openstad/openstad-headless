@@ -6,7 +6,7 @@ module.exports = {
   },
   methods(self) {
     return {
-      ...self.methods
+      ...self.methods,
     };
-  }
+  },
 };

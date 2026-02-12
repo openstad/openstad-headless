@@ -1,42 +1,39 @@
 const config = require('config');
 
 module.exports = function (db, sequelize, DataTypes) {
-  const Submission = sequelize.define(
-    'submission',
-    {
-      id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
-      },
-      projectId: {
-        type: DataTypes.INTEGER,
-        defaultValue:
-          config.projectId && typeof config.projectId == 'number'
-            ? config.projectId
-            : 0,
-      },
-      userId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      status: {
-        type: DataTypes.ENUM('approved', 'pending', 'unapproved'),
-        defaultValue: 'pending',
-        allowNull: false,
-      },
-      submittedData: {
-        type: DataTypes.JSON,
-        default: {},
-        allowNull: false,
-      },
-      isSpam: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
-    }
-  );
+  const Submission = sequelize.define('submission', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    projectId: {
+      type: DataTypes.INTEGER,
+      defaultValue:
+        config.projectId && typeof config.projectId == 'number'
+          ? config.projectId
+          : 0,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM('approved', 'pending', 'unapproved'),
+      defaultValue: 'pending',
+      allowNull: false,
+    },
+    submittedData: {
+      type: DataTypes.JSON,
+      default: {},
+      allowNull: false,
+    },
+    isSpam: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+  });
 
   Submission.scopes = function scopes() {
     return {
@@ -55,7 +52,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'phonenumber',
               'address',
               'city',
-              'postcode'
+              'postcode',
             ],
           },
         ],

@@ -1,8 +1,7 @@
-import * as React from 'react';
+import { cn } from '@/lib/utils';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-
-import { cn } from '@/lib/utils';
+import * as React from 'react';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -31,7 +30,10 @@ const DialogContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DialogPortal>
     {/* <DialogOverlay /> */}
-    <div className={'fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0'}></div>
+    <div
+      className={
+        'fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0'
+      }></div>
     <DialogPrimitive.Content
       ref={ref}
       className={cn(

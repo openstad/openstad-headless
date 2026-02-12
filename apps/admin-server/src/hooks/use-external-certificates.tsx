@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 let cachedExternalCertificatesEnabled: boolean | null = null;
 
 export function useExternalCertificatesEnabled() {
-  const [enabled, setEnabled] = useState<boolean | null>(cachedExternalCertificatesEnabled);
+  const [enabled, setEnabled] = useState<boolean | null>(
+    cachedExternalCertificatesEnabled
+  );
 
   useEffect(() => {
     if (cachedExternalCertificatesEnabled !== null) {
@@ -15,7 +17,8 @@ export function useExternalCertificatesEnabled() {
       try {
         const response = await fetch('/api/external-certificates-enabled');
         const data = await response.json();
-        cachedExternalCertificatesEnabled = data.externalCertificatesEnabled === 'true';
+        cachedExternalCertificatesEnabled =
+          data.externalCertificatesEnabled === 'true';
         setEnabled(cachedExternalCertificatesEnabled);
       } catch (error) {
         console.error('Error fetching external certificates status:', error);

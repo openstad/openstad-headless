@@ -1,44 +1,53 @@
 .image-component,
 .external-icon {
- transition: filter 0.2s, opacity 0.2s;
+  transition:
+    filter 0.2s,
+    opacity 0.2s;
 }
 
 a.osc-image-link {
- position: relative;
- display: block;
+  position: relative;
+  display: block;
 
- & > .image-component {
-  cursor: pointer;
- }
+  & > .image-component {
+    cursor: pointer;
+  }
 
- & > .external-icon {
-  opacity: 0;
-  position: absolute;
-  top: 50%;
-  right: 50%;
-  transform: translate(50%, -50%);
-  background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, .2);
-  border-radius: 50%;
-  padding: 9px 8px 0px;
-  width: 56px;
-  height: 56px;
-  z-index: 2;
+  & > .external-icon {
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    padding: 9px 8px 0px;
+    width: 56px;
+    height: 56px;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+}
+
+a.osc-image-link:hover,
+a.osc-image-link:focus {
+  & > .image-component {
+    filter: brightness(0.65);
+  }
+
+  & > .external-icon {
+    opacity: 1;
+  }
+}
+
+.page
+  .apos-areas-widgets-list
+  > [data-area-label='Afbeelding']
+  > .apos-area-widget-inner
+  > .apos-area-widget-controls
+  + div
+  > a.osc-image-link {
   pointer-events: none;
-  transition: opacity 0.2s;
- }
-}
-
-a.osc-image-link:hover, a.osc-image-link:focus {
- & > .image-component {
-  filter: brightness(0.65);
- }
-
- & >  .external-icon{
-  opacity: 1;
- }
-}
-
-.page .apos-areas-widgets-list > [data-area-label="Afbeelding"] > .apos-area-widget-inner > .apos-area-widget-controls + div > a.osc-image-link {
- pointer-events: none;
 }

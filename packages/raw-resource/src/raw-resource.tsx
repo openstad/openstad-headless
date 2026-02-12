@@ -1,13 +1,13 @@
-import './raw-resource.css';
+import DataStore from '@openstad-headless/data-store/src';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { Spacer } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { useEffect } from 'react';
-import DataStore from '@openstad-headless/data-store/src';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
-import { Spacer } from '@openstad-headless/ui/src';
-import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
-import { renderRawTemplate } from '../includes/template-render';
 
+import { renderRawTemplate } from '../includes/template-render';
+import './raw-resource.css';
 
 export type RawResourceWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -23,11 +23,13 @@ export type RawResourceWidgetProps = BaseProps &
 function RawResource(props: RawResourceWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
 
-  let resourceId: string | undefined = String(getResourceId({
-    resourceId: parseInt(props.resourceId || ''),
-    url: document.location.href,
-    targetUrl: props.resourceIdRelativePath,
-  })); // todo: make it a number throughout the code
+  let resourceId: string | undefined = String(
+    getResourceId({
+      resourceId: parseInt(props.resourceId || ''),
+      url: document.location.href,
+      targetUrl: props.resourceIdRelativePath,
+    })
+  ); // todo: make it a number throughout the code
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -41,7 +43,7 @@ function RawResource(props: RawResourceWidgetProps) {
   useEffect(() => {
     if (currentUser?.logout) {
       (window as any).openstadLogout = () => {
-        currentUser.logout({url: location.href});
+        currentUser.logout({ url: location.href });
       };
     }
 
@@ -52,11 +54,14 @@ function RawResource(props: RawResourceWidgetProps) {
 
   let updatedProps = { ...props, resourceId, currentUser };
 
-  const { data: resource } = resourceId ? datastore.useResource(updatedProps) : { data: null };
+  const { data: resource } = resourceId
+    ? datastore.useResource(updatedProps)
+    : { data: null };
 
   const stylingClasses =
-    updatedProps.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
-    '';
+    updatedProps.stylingClasses
+      ?.map((stylingClass) => stylingClass.value)
+      .join(' ') || '';
 
   let render = renderRawTemplate(updatedProps, resource, resourceId, true);
   render = render.replace(/&amp;amp;/g, '&');

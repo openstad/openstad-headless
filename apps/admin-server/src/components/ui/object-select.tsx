@@ -1,4 +1,3 @@
-import { ControllerRenderProps } from 'react-hook-form';
 import { FormControl } from '@/components/ui/form';
 import {
   Select,
@@ -7,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ControllerRenderProps } from 'react-hook-form';
 
 type Props<T> = {
   field: ControllerRenderProps<any, any>;
@@ -41,7 +41,7 @@ export const ObjectListSelect = <T extends { [key: string]: any }>({
           <SelectValue placeholder="Selecteer een optie" />
         </SelectTrigger>
       </FormControl>
-      <SelectContent className='overflow-y-auto max-h-[16rem]'>
+      <SelectContent className="overflow-y-auto max-h-[16rem]">
         {noSelection.length > 0 ? (
           <SelectItem
             key={`${field.name}-dynamic-select-option-no-choice`}

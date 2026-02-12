@@ -1,12 +1,12 @@
 function getResourceId({
   resourceId,
   url,
-  targetUrl
+  targetUrl,
 }: {
   resourceId?: number;
   url: string;
   targetUrl?: string;
-}): number|undefined {
+}): number | undefined {
   // Methode 1: Resource ID is direct meegegeven
   if (resourceId) {
     return resourceId;
@@ -15,8 +15,8 @@ function getResourceId({
   if (!targetUrl) targetUrl = '?openstadResourceId=[id]';
 
   // Methode 2: Resource ID ophalen via reguliere expressie uit de URL
-  let regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, "\\$1");
-  regex = regex.replace(/\\\[id\\\]/, "(\\d+)");
+  let regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, '\\$1');
+  regex = regex.replace(/\\\[id\\\]/, '(\\d+)');
 
   let match = url.match(regex);
 
@@ -28,8 +28,8 @@ function getResourceId({
   if (!resourceId) {
     const urlPath = new URL(url).pathname + new URL(url).search;
 
-    regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, "\\$1");
-    regex = regex.replace(/\\\[id\\\]/, "(\\d+)");
+    regex = targetUrl.replace(/([\\^$.|?*+()[\]{}])/g, '\\$1');
+    regex = regex.replace(/\\\[id\\\]/, '(\\d+)');
 
     match = urlPath.match(regex);
 
@@ -63,7 +63,7 @@ function getResourceId({
 }
 
 // Get the first parameter name that has a value of [id] in the targetUrl
-function getFirstParamNameWithIdValue(targetUrl: string): string|null {
+function getFirstParamNameWithIdValue(targetUrl: string): string | null {
   const queryString = targetUrl.split('?')[1];
   if (!queryString) return null;
 
@@ -83,5 +83,5 @@ function getFirstParamNameWithIdValue(targetUrl: string): string|null {
 export {
   getResourceId as default,
   getResourceId,
-  getFirstParamNameWithIdValue
-}
+  getFirstParamNameWithIdValue,
+};

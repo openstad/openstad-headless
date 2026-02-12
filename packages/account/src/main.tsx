@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { AccountWidgetProps, Account } from './account.js';
+
+import { Account, AccountWidgetProps } from './account.js';
 
 const config: AccountWidgetProps = {
   allowNickname: true,

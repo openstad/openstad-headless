@@ -1,6 +1,4 @@
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,14 +9,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
-import toast from 'react-hot-toast';
-import { useForm } from "react-hook-form";
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -26,11 +16,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const formSchema = z.object({
   certificateMethod: z.enum(['cert-manager', 'external']),
-  externalCertSlug: z.string()
-    .regex(/^[a-z0-9-]*$/, { message: 'Alleen kleine letters, cijfers en streepjes toegestaan' })
+  externalCertSlug: z
+    .string()
+    .regex(/^[a-z0-9-]*$/, {
+      message: 'Alleen kleine letters, cijfers en streepjes toegestaan',
+    })
     .optional()
     .or(z.literal('')),
 });
@@ -38,12 +42,27 @@ const formSchema = z.object({
 function CertStatusBadge({ state }: { state?: string }) {
   const config: Record<string, { label: string; className: string }> = {
     linked: { label: 'Gekoppeld', className: 'bg-green-100 text-green-800' },
-    configured: { label: 'Geconfigureerd', className: 'bg-blue-100 text-blue-800' },
-    pending: { label: 'In afwachting', className: 'bg-yellow-100 text-yellow-800' },
+    configured: {
+      label: 'Geconfigureerd',
+      className: 'bg-blue-100 text-blue-800',
+    },
+    pending: {
+      label: 'In afwachting',
+      className: 'bg-yellow-100 text-yellow-800',
+    },
     error: { label: 'Fout', className: 'bg-red-100 text-red-800' },
   };
-  const { label, className } = config[state || ''] || { label: 'Niet geconfigureerd', className: 'bg-gray-100 text-gray-800' };
-  return <span className={`${className} px-2 py-1 rounded text-sm font-medium`} aria-label={`Certificaatstatus: ${label}`}>{label}</span>;
+  const { label, className } = config[state || ''] || {
+    label: 'Niet geconfigureerd',
+    className: 'bg-gray-100 text-gray-800',
+  };
+  return (
+    <span
+      className={`${className} px-2 py-1 rounded text-sm font-medium`}
+      aria-label={`Certificaatstatus: ${label}`}>
+      {label}
+    </span>
+  );
 }
 
 export default function ProjectSettingsCertificates() {
@@ -64,8 +83,12 @@ export default function ProjectSettingsCertificates() {
     if (data?.config) {
       const certs = data.config.certificates || {};
       form.reset({
-        certificateMethod: certs.certificateMethod || data.config.certificateMethod || 'cert-manager',
-        externalCertSlug: certs.externalCertSlug || data.config.externalCertSlug || '',
+        certificateMethod:
+          certs.certificateMethod ||
+          data.config.certificateMethod ||
+          'cert-manager',
+        externalCertSlug:
+          certs.externalCertSlug || data.config.externalCertSlug || '',
       });
     }
   }, [data, form]);
@@ -92,15 +115,20 @@ export default function ProjectSettingsCertificates() {
   async function handleRetry() {
     setRetryLoading(true);
     try {
-      const res = await fetch(`/api/openstad/api/project/${project}/certificate-retry`, {
-        method: 'POST',
-      });
+      const res = await fetch(
+        `/api/openstad/api/project/${project}/certificate-retry`,
+        {
+          method: 'POST',
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         toast.success('Certificaat controle uitgevoerd!');
         mutate(); // refresh project data
       } else if (res.status === 429) {
-        toast.error(`Wacht nog ${data.retryAfter} seconden voor een nieuwe poging.`);
+        toast.error(
+          `Wacht nog ${data.retryAfter} seconden voor een nieuwe poging.`
+        );
       } else {
         toast.error(data.error || 'Er is iets mis gegaan.');
       }
@@ -133,11 +161,12 @@ export default function ProjectSettingsCertificates() {
             name: 'TLS Certificaat (SSL)',
             url: `/projects/${project}/settings/certificates`,
           },
-        ]}
-      >
+        ]}>
         <div className="container py-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 bg-white rounded-md">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="p-6 bg-white rounded-md">
               <Heading size="xl">TLS Certificaat (SSL)</Heading>
               <Separator className="my-4" />
 
@@ -148,17 +177,19 @@ export default function ProjectSettingsCertificates() {
                 render={({ field }) => (
                   <FormItem className="mb-6">
                     <FormLabel>Certificaatmethode</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger className="max-w-md">
                           <SelectValue placeholder="Kies methode" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="cert-manager">cert-manager (standaard)</SelectItem>
-                        <SelectItem value="external">Extern certificaat</SelectItem>
+                        <SelectItem value="cert-manager">
+                          cert-manager (standaard)
+                        </SelectItem>
+                        <SelectItem value="external">
+                          Extern certificaat
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -220,9 +251,10 @@ export default function ProjectSettingsCertificates() {
                     type="button"
                     variant="outline"
                     onClick={handleRetry}
-                    disabled={retryLoading || isLoading}
-                  >
-                    {retryLoading ? 'Bezig...' : 'Certificaat opnieuw controleren'}
+                    disabled={retryLoading || isLoading}>
+                    {retryLoading
+                      ? 'Bezig...'
+                      : 'Certificaat opnieuw controleren'}
                   </Button>
                 )}
               </div>

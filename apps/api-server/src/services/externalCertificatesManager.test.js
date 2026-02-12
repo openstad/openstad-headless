@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // -- Persistent mock functions --
 
@@ -45,7 +45,12 @@ const externalCertificates = require('./externalCertificates');
 
 // Import module under test (single import, no resetModules needed)
 const manager = await import('./externalCertificatesManager.js');
-const { generateSecretName, ensureExternalSecret, checkSecretReady, waitForSecretReady } = manager;
+const {
+  generateSecretName,
+  ensureExternalSecret,
+  checkSecretReady,
+  waitForSecretReady,
+} = manager;
 
 // -- Env helpers --
 
@@ -78,9 +83,7 @@ function makeExternalSecretReady(secretName) {
     body: {
       metadata: { name: secretName },
       status: {
-        conditions: [
-          { type: 'Ready', status: 'True', reason: 'SecretSynced' },
-        ],
+        conditions: [{ type: 'Ready', status: 'True', reason: 'SecretSynced' }],
       },
     },
   };
@@ -104,9 +107,7 @@ function makeExternalSecretPending(secretName) {
     body: {
       metadata: { name: secretName },
       status: {
-        conditions: [
-          { type: 'Ready', status: 'False', reason: 'Pending' },
-        ],
+        conditions: [{ type: 'Ready', status: 'False', reason: 'Pending' }],
       },
     },
   };
@@ -177,7 +178,10 @@ describe('externalCertificatesManager', () => {
   // -------------------------------------------------------
   describe('generateSecretName()', () => {
     test('generates correct name from domain and namespace', () => {
-      const result = generateSecretName('www.example.com', 'openstad-amsterdam');
+      const result = generateSecretName(
+        'www.example.com',
+        'openstad-amsterdam'
+      );
       expect(result).toBe('tls-openstad-prod-amsterdam-www-example-com');
     });
 
@@ -188,12 +192,19 @@ describe('externalCertificatesManager', () => {
     });
 
     test('uses slugOverride when provided instead of domain', () => {
-      const result = generateSecretName('www.example.com', 'openstad-test', 'my-custom-slug');
+      const result = generateSecretName(
+        'www.example.com',
+        'openstad-test',
+        'my-custom-slug'
+      );
       expect(result).toBe('tls-openstad-prod-test-my-custom-slug');
     });
 
     test('handles domains with special characters', () => {
-      const result = generateSecretName('sub_domain.example.co.uk', 'openstad-prod');
+      const result = generateSecretName(
+        'sub_domain.example.co.uk',
+        'openstad-prod'
+      );
       expect(result).toBe('tls-openstad-prod-prod-sub-domain-example-co-uk');
     });
 
@@ -294,9 +305,9 @@ describe('externalCertificatesManager', () => {
     test('throws on unexpected errors (non-409, non-404)', async () => {
       mockCreateNamespacedCustomObject.mockRejectedValue(make500Error());
 
-      await expect(
-        ensureExternalSecret('my-secret', 'ns')
-      ).rejects.toThrow('Internal Server Error');
+      await expect(ensureExternalSecret('my-secret', 'ns')).rejects.toThrow(
+        'Internal Server Error'
+      );
     });
 
     test('uses default gcp-secret-store when EXTERNAL_CERT_SECRET_STORE not set', async () => {
@@ -326,7 +337,9 @@ describe('externalCertificatesManager', () => {
   // -------------------------------------------------------
   describe('checkSecretReady()', () => {
     test('returns ready/linked when ExternalSecret synced AND Secret has TLS keys', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretReady('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretReady('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
       const result = await checkSecretReady('test', 'ns');
@@ -339,7 +352,9 @@ describe('externalCertificatesManager', () => {
     });
 
     test('returns pending when ExternalSecret not synced yet', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretPending('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretPending('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
       const result = await checkSecretReady('test', 'ns');
@@ -352,7 +367,9 @@ describe('externalCertificatesManager', () => {
     });
 
     test('returns pending when ExternalSecret synced but Secret missing (404)', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretReady('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretReady('test')
+      );
       mockReadNamespacedSecret.mockRejectedValue(make404Error());
 
       const result = await checkSecretReady('test', 'ns');
@@ -379,7 +396,9 @@ describe('externalCertificatesManager', () => {
     });
 
     test('returns error when ExternalSecret has SecretSyncedError condition', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretError('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretError('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
       const result = await checkSecretReady('test', 'ns');
@@ -392,7 +411,9 @@ describe('externalCertificatesManager', () => {
     });
 
     test('returns pending when Secret exists but missing tls.key', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretReady('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretReady('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makePartialSecret('test'));
 
       const result = await checkSecretReady('test', 'ns');
@@ -423,7 +444,9 @@ describe('externalCertificatesManager', () => {
     test('throws on unexpected K8s errors (non-404)', async () => {
       mockGetNamespacedCustomObject.mockRejectedValue(make500Error());
 
-      await expect(checkSecretReady('test', 'ns')).rejects.toThrow('Internal Server Error');
+      await expect(checkSecretReady('test', 'ns')).rejects.toThrow(
+        'Internal Server Error'
+      );
     });
   });
 
@@ -432,10 +455,15 @@ describe('externalCertificatesManager', () => {
   // -------------------------------------------------------
   describe('waitForSecretReady()', () => {
     test('returns immediately when secret is ready on first check', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretReady('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretReady('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
-      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+      const result = await waitForSecretReady('test', 'ns', {
+        maxRetries: 3,
+        retryDelayMs: 0,
+      });
 
       expect(result).toEqual({
         ready: true,
@@ -446,10 +474,15 @@ describe('externalCertificatesManager', () => {
     });
 
     test('returns immediately when secret is in error state', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretError('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretError('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
-      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+      const result = await waitForSecretReady('test', 'ns', {
+        maxRetries: 3,
+        retryDelayMs: 0,
+      });
 
       expect(result).toEqual({
         ready: false,
@@ -465,7 +498,10 @@ describe('externalCertificatesManager', () => {
         .mockResolvedValueOnce(makeExternalSecretReady('test'));
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
-      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+      const result = await waitForSecretReady('test', 'ns', {
+        maxRetries: 3,
+        retryDelayMs: 0,
+      });
 
       expect(result).toEqual({
         ready: true,
@@ -476,10 +512,15 @@ describe('externalCertificatesManager', () => {
     });
 
     test('returns pending after exhausting all retries', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretPending('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretPending('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
-      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+      const result = await waitForSecretReady('test', 'ns', {
+        maxRetries: 3,
+        retryDelayMs: 0,
+      });
 
       expect(result).toEqual({
         ready: false,
@@ -495,7 +536,10 @@ describe('externalCertificatesManager', () => {
         .mockResolvedValueOnce(makeExternalSecretError('test'));
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
-      const result = await waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 });
+      const result = await waitForSecretReady('test', 'ns', {
+        maxRetries: 3,
+        retryDelayMs: 0,
+      });
 
       expect(result).toEqual({
         ready: false,
@@ -506,7 +550,9 @@ describe('externalCertificatesManager', () => {
     });
 
     test('uses default options when none provided', async () => {
-      mockGetNamespacedCustomObject.mockResolvedValue(makeExternalSecretReady('test'));
+      mockGetNamespacedCustomObject.mockResolvedValue(
+        makeExternalSecretReady('test')
+      );
       mockReadNamespacedSecret.mockResolvedValue(makeTlsSecret('test'));
 
       const result = await waitForSecretReady('test', 'ns');

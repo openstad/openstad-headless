@@ -1,54 +1,75 @@
 .stepper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .step-container {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    white-space: nowrap;
-}   
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  white-space: nowrap;
+}
 
-.step-container > .step-icon {    
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: var(--nlds-stepper-icon-width, .5rem);
-    height: var(--nlds-stepper-icon-height, .5rem);
-    padding: var(--nlds-stepper-icon-padding, .5rem);
-    margin-right: var(--nlds-stepper-icon-margin-right, .5rem);
-    border-width: var(--nlds-stepper-icon-border-width, 1px);
-    border-style: solid;
-    border-color: var(--nlds-stepper-icon-border-color, var(--utrecht-button-primary-action-background-color));
-    border-radius: var(--nlds-stepper-icon-border-radius, 50%);
+.step-container > .step-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: var(--nlds-stepper-icon-width, 0.5rem);
+  height: var(--nlds-stepper-icon-height, 0.5rem);
+  padding: var(--nlds-stepper-icon-padding, 0.5rem);
+  margin-right: var(--nlds-stepper-icon-margin-right, 0.5rem);
+  border-width: var(--nlds-stepper-icon-border-width, 1px);
+  border-style: solid;
+  border-color: var(
+    --nlds-stepper-icon-border-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
+  border-radius: var(--nlds-stepper-icon-border-radius, 50%);
 }
 
 .stepper > .step-divider {
-    height: var(--nlds-stepper-divider-height, 1px);
-    width: 100%;
-    margin-left: var(--nlds-stepper-divider-margin-left, 1rem);
-    margin-right: var(--nlds-stepper-divider-margin-right, 1rem);
-    background-color: var(--nlds-stepper-divider-color, #A9B2BA);
+  height: var(--nlds-stepper-divider-height, 1px);
+  width: 100%;
+  margin-left: var(--nlds-stepper-divider-margin-left, 1rem);
+  margin-right: var(--nlds-stepper-divider-margin-right, 1rem);
+  background-color: var(--nlds-stepper-divider-color, #a9b2ba);
 }
 
 .step-icon > p {
-    color: var(--nlds-stepper-icon-color, var(--utrecht-button-primary-action-background-color));
+  color: var(
+    --nlds-stepper-icon-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
 }
 
 .step-icon.active {
-    background-color: var(--nlds-stepper-icon-active-background-color, var(--utrecht-button-primary-action-background-color));
+  background-color: var(
+    --nlds-stepper-icon-active-background-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
 }
 
 .step-icon.done {
-    background-color: var(--nlds-stepper-icon-done-background-color, var(--utrecht-button-secondary-action-background-color));
-    border-color: var(--nlds-stepper-icon-done-border-color, var(--utrecht-button-secondary-action-background-color));
+  background-color: var(
+    --nlds-stepper-icon-done-background-color,
+    var(--utrecht-button-secondary-action-background-color)
+  );
+  border-color: var(
+    --nlds-stepper-icon-done-border-color,
+    var(--utrecht-button-secondary-action-background-color)
+  );
 }
 
-.step-icon.active > p{
-    color: var(--nlds-stepper-icon-active-color, var(--utrecht-button-primary-action-color));
+.step-icon.active > p {
+  color: var(
+    --nlds-stepper-icon-active-color,
+    var(--utrecht-button-primary-action-color)
+  );
 }
- .step-icon.done  > p{
-    color: var(--nlds-stepper-icon-active-color, var(--utrecht-button-secondary-action-color));
+.step-icon.done > p {
+  color: var(
+    --nlds-stepper-icon-active-color,
+    var(--utrecht-button-secondary-action-color)
+  );
 }

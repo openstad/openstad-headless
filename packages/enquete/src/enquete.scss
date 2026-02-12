@@ -3,14 +3,18 @@
   justify-content: space-between;
   flex-direction: column;
   grid-gap: 1rem;
-  border: solid var(--setEnqueteBorderWidth, 1px) var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
+  border: solid var(--setEnqueteBorderWidth, 1px)
+    var(
+      --nlds-enquete-background-color,
+      var(--nlds-default-background-color, #f0f4f8)
+    );
 }
 
-.form-container>div.button-group {
+.form-container > div.button-group {
   flex-direction: row;
 }
 
-.form-container>div {
+.form-container > div {
   color: var(--osc-card-foreground);
   padding: 1.5rem;
   display: flex;
@@ -27,8 +31,11 @@
   display: none;
 }
 
-.form-container>div:nth-child(even) {
-  background-color: var(--nlds-enquete-background-color, var(--nlds-default-background-color, #F0F4F8));
+.form-container > div:nth-child(even) {
+  background-color: var(
+    --nlds-enquete-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
 }
 
 .form-container figure img {
@@ -36,15 +43,14 @@
   object-fit: cover;
 }
 
-.osc-enquete-item-content button[type="submit"] {
+.osc-enquete-item-content button[type='submit'] {
   margin: 0 0 10px 10px;
 }
 
-.osc-enquete-item-content button[type="submit"]:disabled {
+.osc-enquete-item-content button[type='submit']:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-
 
 .range-slider-labels {
   display: flex;
@@ -53,8 +59,8 @@
   color: black;
 }
 
-.question input[type="range"],
-.video-slider input[type="range"] {
+.question input[type='range'],
+.video-slider input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -68,8 +74,8 @@
 }
 
 /* Thumb: webkit */
-.question input[type="range"]::-webkit-slider-thumb,
-.video-slider input[type="range"]::-webkit-slider-thumb {
+.question input[type='range']::-webkit-slider-thumb,
+.video-slider input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   height: 30px;
@@ -80,8 +86,8 @@
 }
 
 /* Thumb: Firefox */
-.question input[type="range"]::-moz-range-thumb,
-.video-slider input[type="range"]::-moz-range-thumb {
+.question input[type='range']::-moz-range-thumb,
+.video-slider input[type='range']::-moz-range-thumb {
   height: 30px;
   width: 30px;
   margin-top: -5px;
@@ -89,10 +95,10 @@
   background-size: cover;
 }
 
-.question input[type="range"]:focus::-webkit-slider-thumb,
-.video-slider input[type="range"]:focus::-webkit-slider-thumb {
-
-  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
+.question input[type='range']:focus::-webkit-slider-thumb,
+.video-slider input[type='range']:focus::-webkit-slider-thumb {
+  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0)
+    var(--utrecht-focus-inverse-outline-color, transparent);
   box-shadow: var(--_utrecht-focus-ring-box-shadow);
   outline-color: var(--utrecht-focus-outline-color, revert);
   outline-offset: var(--utrecht-focus-outline-offset, revert);
@@ -101,9 +107,10 @@
   border-radius: 50%;
 }
 
-.question input[type="range"]:focus::-moz-range-thumb,
-.video-slider input[type="range"]:focus::-moz-range-thumb {
-  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
+.question input[type='range']:focus::-moz-range-thumb,
+.video-slider input[type='range']:focus::-moz-range-thumb {
+  --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0)
+    var(--utrecht-focus-inverse-outline-color, transparent);
   box-shadow: var(--_utrecht-focus-ring-box-shadow);
   outline-color: var(--utrecht-focus-outline-color, revert);
   outline-offset: var(--utrecht-focus-outline-offset, revert);
@@ -123,7 +130,7 @@ label.utrecht-form-label {
 }
 
 .question-type-text textarea,
-.question-type-text input[type="text"] {
+.question-type-text input[type='text'] {
   max-width: none;
 }
 
@@ -145,29 +152,18 @@ label.utrecht-form-label {
   align-items: flex-start;
 }
 
-.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio {
+.question-type-imageChoice
+  .image-choice-container
+  > .utrecht-form-field--radio {
   display: inline-block;
 }
 
-.question-type-imageChoice .image-choice-container>.utrecht-form-field--radio+.utrecht-form-field--radio {
+.question-type-imageChoice
+  .image-choice-container
+  > .utrecht-form-field--radio
+  + .utrecht-form-field--radio {
   margin-top: 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Youth widgets
 
@@ -208,7 +204,7 @@ label.utrecht-form-label {
     border-radius: 50%;
     right: 0;
     background-position: 20px 20px;
-    animation: nextPagePulse .8s infinite ease-in-out;
+    animation: nextPagePulse 0.8s infinite ease-in-out;
     pointer-events: all;
   }
 
@@ -222,31 +218,62 @@ label.utrecht-form-label {
   margin: 0 auto;
   word-break: auto-phrase;
 
-  --youth-intro-card-background-color: var(--setYouthIntroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
+  --youth-intro-card-background-color: var(
+    --setYouthIntroCardBackgroundColor,
+    var(--utrecht-button-primary-action-background-color, #11b886)
+  );
   --youth-intro-card-title-color: var(--setYouthIntroCardTitleColor, #ffffff);
-  --youth-intro-card-description-color: var(--setYouthIntroCardDescriptionColor, #ffffff);
+  --youth-intro-card-description-color: var(
+    --setYouthIntroCardDescriptionColor,
+    #ffffff
+  );
 
-  --youth-intro-card-title-font-size: var(--setYouthIntroCardTitleFontSize, 32px);
-  --youth-intro-card-description-font-size: var(--setYouthIntroCardDescriptionFontSize, 18px);
+  --youth-intro-card-title-font-size: var(
+    --setYouthIntroCardTitleFontSize,
+    32px
+  );
+  --youth-intro-card-description-font-size: var(
+    --setYouthIntroCardDescriptionFontSize,
+    18px
+  );
 
-  --youth-page-card-background-color: var(--setYouthPageCardBackgroundColor, #ffffff);
+  --youth-page-card-background-color: var(
+    --setYouthPageCardBackgroundColor,
+    #ffffff
+  );
   --youth-page-card-title-font-size: var(--setYouthPageCardTitleFontSize, 32px);
-  --youth-page-card-description-font-size: var(--setYouthPageCardDescriptionFontSize, 18px);
+  --youth-page-card-description-font-size: var(
+    --setYouthPageCardDescriptionFontSize,
+    18px
+  );
 
-  --youth-outro-card-background-color: var(--setYouthOutroCardBackgroundColor, var(--utrecht-button-primary-action-background-color, #11B886));
+  --youth-outro-card-background-color: var(
+    --setYouthOutroCardBackgroundColor,
+    var(--utrecht-button-primary-action-background-color, #11b886)
+  );
   --youth-outro-card-title-color: var(--setYouthOutroCardTitleColor, #ffffff);
-  --youth-outro-card-description-color: var(--setYouthOutroCardDescriptionColor, #ffffff);
+  --youth-outro-card-description-color: var(
+    --setYouthOutroCardDescriptionColor,
+    #ffffff
+  );
 
-  --youth-outro-card-title-font-size: var(--setYouthOutroCardTitleFontSize, 32px);
-  --youth-outro-card-description-font-size: var(--setYouthOutroCardDescriptionFontSize, 18px);
+  --youth-outro-card-title-font-size: var(
+    --setYouthOutroCardTitleFontSize,
+    32px
+  );
+  --youth-outro-card-description-font-size: var(
+    --setYouthOutroCardDescriptionFontSize,
+    18px
+  );
 
-  --youth-next-button-background-color: var(--setYouthNextButtonBackgroundColor, var(--utrecht-button-primary-action-hover-background-color, #F8D62D));
+  --youth-next-button-background-color: var(
+    --setYouthNextButtonBackgroundColor,
+    var(--utrecht-button-primary-action-hover-background-color, #f8d62d)
+  );
   --setEnqueteBorderWidth: 1px;
 }
 
 .osc-enquete-item-content {
-
-
   &.--youth {
     height: 100%;
     // min-height: 500px;
@@ -255,8 +282,7 @@ label.utrecht-form-label {
     transform: translate(0, 0);
 
     &:has(.question-type-none),
-
-    &:has([aria-invalid="true"]),
+    &:has([aria-invalid='true']),
     &:has(.utrecht-textbox--required),
     &:has(.swipe-finished) {
       .button-group.--flex .utrecht-button--primary-action:before {
@@ -264,19 +290,19 @@ label.utrecht-form-label {
       }
     }
 
-    &:has([aria-invalid="true"]) {
+    &:has([aria-invalid='true']) {
       .button-group.--flex .utrecht-button--primary-action:after {
         pointer-events: none;
-        opacity: .5;
+        opacity: 0.5;
         animation: none;
       }
     }
 
-    &:has([aria-invalid="false"]) {
+    &:has([aria-invalid='false']) {
       .button-group.--flex .utrecht-button--primary-action:after {
         pointer-events: all;
         opacity: 1;
-        animation: nextPagePulse .8s infinite ease-in-out;
+        animation: nextPagePulse 0.8s infinite ease-in-out;
       }
     }
 
@@ -308,8 +334,8 @@ label.utrecht-form-label {
           opacity: 0;
           transform: translateY(20px);
 
-          animation: IntroButtonFadeIn .4s ease-out forwards;
-          animation-delay: .4s;
+          animation: IntroButtonFadeIn 0.4s ease-out forwards;
+          animation-delay: 0.4s;
 
           &:after {
             box-shadow: -1px -4px 15px 0px rgba(0, 0, 0, 0.1);
@@ -350,15 +376,14 @@ label.utrecht-form-label {
 
         .info-field-container {
           .info-field-title {
-
             i {
-              color: var(--youth-intro-card-background-color, #1D6B34);
+              color: var(--youth-intro-card-background-color, #1d6b34);
               font-style: normal;
               font-weight: inherit;
               font-family: inherit;
 
               &:nth-of-type(even) {
-                color: #094B81;
+                color: #094b81;
               }
             }
           }
@@ -455,16 +480,14 @@ label.utrecht-form-label {
         justify-content: center;
         display: flex;
         cursor: pointer;
-        transition: all .2s ease-in-out;
+        transition: all 0.2s ease-in-out;
 
         &:hover {
           background: #fff;
           color: #000;
         }
-
       }
     }
-
 
     .button-group.--flex {
       padding: unset;
@@ -486,11 +509,15 @@ label.utrecht-form-label {
         height: 110px;
         bottom: 0;
         position: absolute;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.0) 0%, #ffffff 100%);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0) 0%,
+          #ffffff 100%
+        );
         z-index: 0;
       }
 
-      >button {
+      > button {
         pointer-events: all;
 
         &:hover {
@@ -505,7 +532,10 @@ label.utrecht-form-label {
         position: absolute;
         top: 36px;
         left: 24px;
-        color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
+        color: var(
+          --setBackColor,
+          var(--utrecht-button-primary-action-background-color, #094b81)
+        );
         z-index: 3;
 
         &:before {
@@ -515,11 +545,12 @@ label.utrecht-form-label {
           height: 20px;
           mask-size: contain;
           mask-repeat: no-repeat;
-          background-color: var(--setBackColor, var(--utrecht-button-primary-action-background-color, #094B81));
-
+          background-color: var(
+            --setBackColor,
+            var(--utrecht-button-primary-action-background-color, #094b81)
+          );
         }
       }
-
 
       .utrecht-button--primary-action {
         @include utrecht-button-appearance;
@@ -540,7 +571,6 @@ label.utrecht-form-label {
           line-height: 130%;
           text-decoration: underline;
           text-underline-offset: 4px;
-
         }
       }
     }
@@ -552,9 +582,13 @@ label.utrecht-form-label {
       position: relative;
 
       &:before {
-        content: "";
+        content: '';
         background-color: inherit;
-        mask-image: linear-gradient(180deg, #ffffff 50%, rgba(255, 255, 255, 0) 100%);
+        mask-image: linear-gradient(
+          180deg,
+          #ffffff 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
         position: fixed;
         top: var(--setEnqueteBorderWidth, 1px);
         left: var(--setEnqueteBorderWidth, 1px);
@@ -579,7 +613,6 @@ label.utrecht-form-label {
     }
 
     .question.question-type-none {
-
       .info-field-container {
         text-align: center;
         display: flex;
@@ -640,7 +673,7 @@ label.utrecht-form-label {
         figure:not(:has(input:checked)) {
           img {
             opacity: 0.6;
-            scale: .9;
+            scale: 0.9;
           }
 
           figcaption {
@@ -668,7 +701,7 @@ label.utrecht-form-label {
         grid-template-columns: 1fr 1fr;
 
         &:before {
-          content: "OF";
+          content: 'OF';
           position: absolute;
           top: 0;
           left: 50%;
@@ -685,7 +718,6 @@ label.utrecht-form-label {
           letter-spacing: 0px;
           text-align: center;
           box-shadow: 0px 3.67px 12.83px 0px rgba(0, 0, 0, 0.55);
-
         }
 
         figure {
@@ -699,7 +731,8 @@ label.utrecht-form-label {
 
           &:has(input:checked) {
             img {
-              border: solid 3px var(--youth-intro-card-background-color, #1D6B34);
+              border: solid 3px
+                var(--youth-intro-card-background-color, #1d6b34);
               box-shadow: 0px 7px 8px 5px rgba(0, 0, 0, 0.15);
             }
           }
@@ -709,7 +742,7 @@ label.utrecht-form-label {
             height: 100%;
             width: 100%;
             border-radius: 10px;
-            border: solid 0px var(--youth-intro-card-background-color, #1D6B34);
+            border: solid 0px var(--youth-intro-card-background-color, #1d6b34);
 
             transition: all 0.3s ease;
           }
@@ -739,7 +772,7 @@ label.utrecht-form-label {
       label.utrecht-form-label {
         margin: 0;
         padding: 0 10px;
-        align-items: center
+        align-items: center;
       }
 
       .utrecht-radio-button--html-input:invalid {
@@ -763,14 +796,13 @@ label.utrecht-form-label {
       --scale-hover: 3;
       --range-slider-height: 8px;
       --range-thumb-size: 44px;
-      --range-slider-background: #F1F1F1;
+      --range-slider-background: #f1f1f1;
       --range-slider-thumb-background: #268641;
       --range-slider-thumb-borderRadius: 50%;
       --range-thumb-backgroundImage: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Pro v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--%3E%3Cpath fill='%23ffffff' d='M342.6 73.4C330.1 60.9 309.8 60.9 297.3 73.4L153.3 217.4C140.8 229.9 140.8 250.2 153.3 262.7C165.8 275.2 186.1 275.2 198.6 262.7L320 141.3L441.4 262.6C453.9 275.1 474.2 275.1 486.7 262.6C499.2 250.1 499.2 229.8 486.7 217.3L342.7 73.3zM486.6 422.7C499.1 410.2 499.1 389.9 486.6 377.4C474.1 364.9 453.8 364.9 441.3 377.4L320 498.7L198.6 377.4C186.1 364.9 165.8 364.9 153.3 377.4C140.8 389.9 140.8 410.2 153.3 422.7L297.3 566.7C309.8 579.2 330.1 579.2 342.6 566.7L486.6 422.7z'/%3E%3C/svg%3E");
       --range-thumb-backgroundSize: 24px;
       align-items: center;
       justify-content: center;
-
 
       .a-b-slider-container {
         position: relative;
@@ -793,7 +825,7 @@ label.utrecht-form-label {
           }
         }
 
-        input[type=range] {
+        input[type='range'] {
           margin-bottom: 0;
           margin-top: 30px;
           touch-action: none;
@@ -807,29 +839,28 @@ label.utrecht-form-label {
             pointer-events: none;
           }
 
-
-          &[value="1"]~.range-slider-labels>span:nth-of-type(1) {
+          &[value='1'] ~ .range-slider-labels > span:nth-of-type(1) {
             scale: var(--scale-hover);
           }
 
-          &[value="2"]~.range-slider-labels>span:nth-of-type(2) {
+          &[value='2'] ~ .range-slider-labels > span:nth-of-type(2) {
             scale: var(--scale-hover);
           }
 
-          &[value="3"]~.range-slider-labels>span:nth-of-type(3) {
+          &[value='3'] ~ .range-slider-labels > span:nth-of-type(3) {
             scale: var(--scale-hover);
           }
 
-          &[value="4"]~.range-slider-labels>span:nth-of-type(4) {
+          &[value='4'] ~ .range-slider-labels > span:nth-of-type(4) {
             scale: var(--scale-hover);
           }
 
-          &[value="5"]~.range-slider-labels>span:nth-of-type(5) {
+          &[value='5'] ~ .range-slider-labels > span:nth-of-type(5) {
             scale: var(--scale-hover);
           }
         }
 
-        .range-slider-labels>span {
+        .range-slider-labels > span {
           transition: all 0.3s ease;
           scale: 1.4;
           display: block;
@@ -838,11 +869,8 @@ label.utrecht-form-label {
           padding-left: 4px;
         }
 
-
-
-
         /* Basis styling van de slider */
-        input[type="range"] {
+        input[type='range'] {
           -webkit-appearance: none;
           width: 100%;
           height: var(--range-slider-height);
@@ -851,7 +879,7 @@ label.utrecht-form-label {
         }
 
         /* Voor Chrome, Safari, Edge (WebKit) */
-        input[type="range"]::-webkit-slider-thumb {
+        input[type='range']::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
           width: var(--range-thumb-size);
@@ -864,11 +892,13 @@ label.utrecht-form-label {
           background-position: center;
           transform: rotate(90deg);
           cursor: pointer;
-          transition: background 0.2s, transform 0.1s;
+          transition:
+            background 0.2s,
+            transform 0.1s;
         }
 
         /* Voor Firefox */
-        input[type="range"]::-moz-range-thumb {
+        input[type='range']::-moz-range-thumb {
           width: var(--range-thumb-size);
           height: var(--range-thumb-size);
           border-radius: var(--range-slider-thumb-borderRadius);
@@ -879,11 +909,13 @@ label.utrecht-form-label {
           background-position: center;
           transform: rotate(90deg);
           cursor: pointer;
-          transition: background 0.2s, transform 0.1s;
+          transition:
+            background 0.2s,
+            transform 0.1s;
         }
 
         /* Voor Edge (Chromium gebruikt ook WebKit, maar voor oudere versies) */
-        input[type="range"]::-ms-thumb {
+        input[type='range']::-ms-thumb {
           width: var(--range-thumb-size);
           height: var(--range-thumb-size);
           border-radius: var(--range-slider-thumb-borderRadius);
@@ -910,7 +942,7 @@ label.utrecht-form-label {
 
       // &:not(:has(.swipe-finished)):has([data-required="true"]) {
       &:not(:has(.swipe-finished)) {
-        +.button-group .utrecht-button--submit.utrecht-button--primary-action {
+        + .button-group .utrecht-button--submit.utrecht-button--primary-action {
           display: none;
         }
       }
@@ -949,7 +981,7 @@ label.utrecht-form-label {
         justify-content: start !important;
       }
 
-      .dilemma-field>.utrecht-button--primary-action {
+      .dilemma-field > .utrecht-button--primary-action {
         @include utrecht-button-appearance;
         position: fixed;
         left: unset;
@@ -967,7 +999,7 @@ label.utrecht-form-label {
         display: none;
       }
 
-      +.button-group .utrecht-button--secondary-action {
+      + .button-group .utrecht-button--secondary-action {
         background-color: #fff;
         color: #000;
         padding: 0 10px;
@@ -977,7 +1009,7 @@ label.utrecht-form-label {
         }
       }
 
-      +.button-group {
+      + .button-group {
         &:before {
           display: none;
         }
@@ -987,7 +1019,6 @@ label.utrecht-form-label {
         }
       }
     }
-
 
     .form-widget:has(.question.question-type-matrix) {
       width: 100%;
@@ -1003,23 +1034,19 @@ label.utrecht-form-label {
       font-size: var(--youth-page-card-title-font-size);
       color: #000;
 
-
       i {
-        color: var(--youth-intro-card-background-color, #1D6B34);
+        color: var(--youth-intro-card-background-color, #1d6b34);
         font-style: normal;
         font-weight: inherit;
         font-family: inherit;
       }
     }
-
-
   }
 }
 
-
 .more-info-btn {
   border-radius: 50%;
-  border: solid 1px #BFBFBF;
+  border: solid 1px #bfbfbf;
   box-shadow: 0px 2.35px 6.27px 0px rgba(0, 0, 0, 0.149);
   font-size: 1rem;
   background: #fff;
@@ -1058,14 +1085,13 @@ label.utrecht-form-label {
 
   transition: all 0.3s ease-in-out;
 
-
   &-container {
     background: #fff;
     border-radius: 24px 24px 0 0;
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease-in-out;
-    scale: .98;
+    scale: 0.98;
     transform: translateY(10px);
     padding: 25px;
     position: absolute;
@@ -1078,7 +1104,6 @@ label.utrecht-form-label {
     }
   }
 
-
   &[aria-hidden='false'] {
     opacity: 1;
     pointer-events: all;
@@ -1089,7 +1114,6 @@ label.utrecht-form-label {
       transform: translateY(0);
       pointer-events: auto;
     }
-
   }
 }
 
@@ -1122,7 +1146,6 @@ label.utrecht-form-label {
     transform: translateY(0);
   }
 }
-
 
 // Fullscreen enquete
 
@@ -1232,8 +1255,7 @@ label.utrecht-form-label {
         height: 100%;
         justify-content: center;
 
-        @media screen and (max-height:550px) {
-
+        @media screen and (max-height: 550px) {
           &:has(.dilemma-finished),
           &:has(.swipe-finished) {
             justify-content: start;
@@ -1261,7 +1283,7 @@ label.utrecht-form-label {
         &.--youth-intro,
         &.--youth-page,
         &.--youth-outro {
-          >div {
+          > div {
             max-width: 500px;
             max-height: 500px;
             align-self: center;
@@ -1295,14 +1317,13 @@ label.utrecht-form-label {
 
     @container (min-width: 700px) {
       .info-card {
-
         .info-card-container {
           position: absolute;
           max-width: 500px;
           border-radius: 25px;
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -50%) scale(.95);
+          transform: translate(-50%, -50%) scale(0.95);
           bottom: unset;
         }
 
@@ -1314,19 +1335,23 @@ label.utrecht-form-label {
   }
 }
 
-
 .osc:has(.--youth) {
-
   &:has(.dilemma-back-button:not([disabled])),
   &:has(.swipe-back-button:not([disabled])) {
-    .osc-enquete-item-content.--youth .button-group.--flex .utrecht-button--secondary-action {
+    .osc-enquete-item-content.--youth
+      .button-group.--flex
+      .utrecht-button--secondary-action {
       display: none;
       pointer-events: none;
     }
   }
 }
 
-.osc-enquete-item-content .question .info-field-container .info-image-container figcaption {
+.osc-enquete-item-content
+  .question
+  .info-field-container
+  .info-image-container
+  figcaption {
   margin: 10px 0 20px;
 }
 

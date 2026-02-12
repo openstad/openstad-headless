@@ -1,10 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import spamDetector from './spam-detector.js';
 
-const {
-  isLikelyRandomText,
-  analyzeSpamPayload,
-} = spamDetector;
+const { isLikelyRandomText, analyzeSpamPayload } = spamDetector;
 
 describe('spam-detector', () => {
   it('analyzeSpamPayload returns minimal shape by default', () => {
@@ -18,10 +16,7 @@ describe('spam-detector', () => {
   });
 
   it('isLikelyRandomText flags gibberish-like text', () => {
-    const samples = [
-      'TzqVDdSFJVpgHYymZvrD',
-      'MelgkXhrEYcgMVqpUhpQXTJl',
-    ];
+    const samples = ['TzqVDdSFJVpgHYymZvrD', 'MelgkXhrEYcgMVqpUhpQXTJl'];
 
     samples.forEach((sample) => {
       expect(isLikelyRandomText(sample)).toBe(true);
@@ -84,8 +79,10 @@ describe('spam-detector', () => {
 
   it('analyzeSpamPayload does not mark normal payloads as spam', () => {
     const payload = {
-      vraag: 'Ik wil graag een melding doen over het groenonderhoud in mijn buurt.',
-      toelichting: 'Het gras is al weken niet gemaaid en dat zorgt voor overlast.',
+      vraag:
+        'Ik wil graag een melding doen over het groenonderhoud in mijn buurt.',
+      toelichting:
+        'Het gras is al weken niet gemaaid en dat zorgt voor overlast.',
       __timeToSubmitMs: 4300,
     };
 

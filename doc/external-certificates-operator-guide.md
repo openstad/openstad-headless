@@ -75,12 +75,12 @@ kubectl auth can-i list externalsecrets.external-secrets.io -n <namespace> --as=
 
 The feature is configured under `api.externalCertificates` in `values.yaml`:
 
-| Value | Default | Description |
-|-------|---------|-------------|
-| `api.externalCertificates.enabled` | `false` | Feature toggle. Must be `true` to enable. |
-| `api.externalCertificates.secretPrefix` | `tls-openstad-prod-{orgName}` | Naming prefix template for generated secret names. `{orgName}` is replaced at runtime. |
-| `api.externalCertificates.secretStoreName` | `gcp-secret-store` | Name of the ClusterSecretStore to reference in ExternalSecret resources. |
-| `api.externalCertificates.retryCooldownSeconds` | `60` | Cooldown in seconds between manual retry triggers per project. |
+| Value                                           | Default                       | Description                                                                            |
+| ----------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
+| `api.externalCertificates.enabled`              | `false`                       | Feature toggle. Must be `true` to enable.                                              |
+| `api.externalCertificates.secretPrefix`         | `tls-openstad-prod-{orgName}` | Naming prefix template for generated secret names. `{orgName}` is replaced at runtime. |
+| `api.externalCertificates.secretStoreName`      | `gcp-secret-store`            | Name of the ClusterSecretStore to reference in ExternalSecret resources.               |
+| `api.externalCertificates.retryCooldownSeconds` | `60`                          | Cooldown in seconds between manual retry triggers per project.                         |
 
 Example configuration:
 
@@ -88,8 +88,8 @@ Example configuration:
 api:
   externalCertificates:
     enabled: true
-    secretPrefix: "tls-openstad-prod-{orgName}"
-    secretStoreName: "gcp-secret-store"
+    secretPrefix: 'tls-openstad-prod-{orgName}'
+    secretStoreName: 'gcp-secret-store'
     retryCooldownSeconds: 60
 ```
 
@@ -97,12 +97,12 @@ api:
 
 The Helm chart injects these values as environment variables into the api-server deployment:
 
-| Environment Variable | Helm Source |
-|---------------------|-------------|
-| `EXTERNAL_CERTIFICATES_ENABLED` | `api.externalCertificates.enabled` |
-| `EXTERNAL_CERT_SECRET_PREFIX` | `api.externalCertificates.secretPrefix` |
-| `EXTERNAL_CERT_SECRET_STORE` | `api.externalCertificates.secretStoreName` |
-| `EXTERNAL_CERT_RETRY_COOLDOWN` | `api.externalCertificates.retryCooldownSeconds` |
+| Environment Variable            | Helm Source                                     |
+| ------------------------------- | ----------------------------------------------- |
+| `EXTERNAL_CERTIFICATES_ENABLED` | `api.externalCertificates.enabled`              |
+| `EXTERNAL_CERT_SECRET_PREFIX`   | `api.externalCertificates.secretPrefix`         |
+| `EXTERNAL_CERT_SECRET_STORE`    | `api.externalCertificates.secretStoreName`      |
+| `EXTERNAL_CERT_RETRY_COOLDOWN`  | `api.externalCertificates.retryCooldownSeconds` |
 
 Additionally, `KUBERNETES_NAMESPACE` is injected from the pod's metadata and is used for namespace-scoped operations.
 
@@ -121,9 +121,9 @@ Where:
 
 ### Examples
 
-| Namespace | Domain | Secret Name |
-|-----------|--------|-------------|
-| `openstad-nijkerk` | `www.nijkerk-doet-mee.nl` | `tls-openstad-prod-nijkerk-www-nijkerk-doet-mee-nl` |
+| Namespace            | Domain                      | Secret Name                                             |
+| -------------------- | --------------------------- | ------------------------------------------------------- |
+| `openstad-nijkerk`   | `www.nijkerk-doet-mee.nl`   | `tls-openstad-prod-nijkerk-www-nijkerk-doet-mee-nl`     |
 | `openstad-amsterdam` | `participatie.amsterdam.nl` | `tls-openstad-prod-amsterdam-participatie-amsterdam-nl` |
 
 ### Slug override
@@ -186,6 +186,7 @@ The external certificates feature integrates into the existing host status check
 **Symptoms:** Log messages containing `[external-certificates] Infrastructure validation failed` and `Feature auto-disabled`.
 
 **Causes:**
+
 - ExternalSecret CRD not found (ESO not installed)
 - RBAC permissions insufficient (403 Forbidden on list operation)
 
@@ -211,6 +212,7 @@ kubectl logs -n <namespace> deployment/<api-deployment> | grep '\[external-certi
 **Symptoms:** Admin UI shows "In afwachting" (Pending) status. HTTPS not available for the project.
 
 **Causes:**
+
 - Secret not yet provisioned in the external provider
 - ESO not syncing (operator pod unhealthy)
 - ClusterSecretStore not configured or not ready
@@ -238,6 +240,7 @@ kubectl get clustersecretstore <store-name> -o jsonpath='{.status.conditions}'
 **Symptoms:** Admin UI shows "Fout" (Error) status.
 
 **Causes:**
+
 - ExternalSecret sync error (`SecretSyncedError` condition)
 - External provider access failure (auth, permissions, quota)
 - Secret name mismatch between ExternalSecret remote ref and actual provider key

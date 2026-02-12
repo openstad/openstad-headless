@@ -1,13 +1,13 @@
-import React, { useContext } from 'react';
-import { Spacer } from '@openstad-headless/ui/src';
+import DataStore from '@openstad-headless/data-store/src';
 import Form from '@openstad-headless/form/src/form';
 import type { CombinedFieldPropsWithType } from '@openstad-headless/form/src/props';
-
+import { Spacer } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
+import React, { useContext } from 'react';
+
 import { CommentWidgetContext } from '../comments';
 import { CommentFormProps } from '../types/comment-form-props';
-import DataStore from "@openstad-headless/data-store/src";
 
 function CommentForm({
   comment,
@@ -52,44 +52,53 @@ function CommentForm({
     fieldKey: 'description',
     placeholder: commentsContext?.placeholder,
     defaultValue: !parentId ? args.comment?.description : '',
-    maxCharactersWarning: maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
-    minCharactersWarning: minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
-    minCharactersError: minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
-    maxCharactersError: maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+    maxCharactersWarning:
+      maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+    minCharactersWarning:
+      minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+    minCharactersError:
+      minCharactersError ||
+      'Tekst moet minimaal {minCharacters} karakters bevatten',
+    maxCharactersError:
+      maxCharactersError ||
+      'Tekst moet maximaal {maxCharacters} karakters bevatten',
   });
 
   if (
-    !parentId
-    && !(args?.comment?.parentId)
-    && extraFieldsTagGroups
-    && Array.isArray(extraFieldsTagGroups)
-    && extraFieldsTagGroups.length > 0
+    !parentId &&
+    !args?.comment?.parentId &&
+    extraFieldsTagGroups &&
+    Array.isArray(extraFieldsTagGroups) &&
+    extraFieldsTagGroups.length > 0
   ) {
     const datastore = new DataStore({
       projectId: props.projectId,
       api: props.api,
     });
 
-    const {data: allTags} = datastore.useTags({
+    const { data: allTags } = datastore.useTags({
       projectId: props.projectId,
-      type: ''
+      type: '',
     });
 
     extraFieldsTagGroups.map((tagGroup) => {
-      const options = !!allTags ?
-        allTags
-          .filter((tag: any) => tag.type === tagGroup.type)
-          .map((tag: any) => ({
-            label: tag.name, value: tag.id
-          }))
+      const options = !!allTags
+        ? allTags
+            .filter((tag: any) => tag.type === tagGroup.type)
+            .map((tag: any) => ({
+              label: tag.name,
+              value: tag.id,
+            }))
         : [];
 
-      const defaultValue = args.comment?.tags?.map((tag: any) => {
-        if (tag.type === tagGroup.type) {
-          return tag.id;
-        }})
-        ?.filter((id: any) => !!id)
-          || [];
+      const defaultValue =
+        args.comment?.tags
+          ?.map((tag: any) => {
+            if (tag.type === tagGroup.type) {
+              return tag.id;
+            }
+          })
+          ?.filter((id: any) => !!id) || [];
 
       formFields.push({
         type: 'select',
@@ -98,9 +107,9 @@ function CommentForm({
         fieldRequired: false,
         multiple: !!tagGroup.multiple,
         choices: options,
-        defaultValue: defaultValue.length ? defaultValue : []
-      })
-    })
+        defaultValue: defaultValue.length ? defaultValue : [],
+      });
+    });
   }
 
   formFields.push({

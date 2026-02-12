@@ -6,4 +6,4 @@ module.exports = {
   'carrier pigeon': carrierPigeon,
   email,
   sms,
-}
+};
