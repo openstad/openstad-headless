@@ -18,7 +18,6 @@ export const keyMap: Record<string, string> = {
   modBreak: 'Moderatie bericht',
   modBreakDate: 'Moderatie bericht datum',
   images: 'Afbeeldingen',
-  tags: 'Tags',
   documents: 'Documenten',
   'user.id': 'Gebruiker ID',
   'user.role': 'Gebruiker rol',
@@ -28,6 +27,7 @@ export const keyMap: Record<string, string> = {
   'user.address': 'Gebruiker adres',
   'user.city': 'Gebruiker woonplaats',
   'user.postcode': 'Gebruiker postcode',
+  'tags.*': "tags", // Wildcard key (eg. tags.theme, tags.place)
 };
 
 // mapping from humanReadable to backendKey
