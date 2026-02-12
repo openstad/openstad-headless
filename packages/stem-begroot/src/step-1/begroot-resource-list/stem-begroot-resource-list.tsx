@@ -7,6 +7,7 @@ import {
   Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
+import { canLikeResource } from '@openstad-headless/lib';
 
 import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
 import { deterministicRandomSort } from '@openstad-headless/lib';
@@ -228,6 +229,7 @@ export const StemBegrootResourceList = ({
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);
         const primaryBtnDisabled = !resourceBtnEnabled(resource);
+        const canVoteByStatus = canLikeResource(resource);
         const originalUrl = defineOriginalUrl(resource);
 
         let defaultImage = '';
@@ -260,7 +262,9 @@ export const StemBegrootResourceList = ({
 
         return (
           <>
-            <article className={`stem-begroot--container ${hasImages}`}>
+            <article
+              className={`stem-begroot--container ${hasImages} ${!canVoteByStatus ? 'resource-vote-disabled' : ''}`.trim()}
+            >
               <Carousel
                 items={resourceImages}
                 buttonText={{

@@ -1,4 +1,5 @@
 import { PageLayout } from '../../../../components/ui/page-layout';
+import { Button } from '../../../../components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
@@ -11,27 +12,44 @@ import useUsers from "@/hooks/use-users";
 import {useWidgetsHook} from "@/hooks/use-widgets";
 import {exportSubmissionsToCSV} from "@/lib/export-helpers/submissions-export";
 import {Select, SelectTrigger, SelectContent, SelectValue, SelectItem} from "@/components/ui/select";
+import { Checkbox } from '@/components/ui/checkbox';
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
+
+interface Submission {
+  id: string;
+  projectId: number;
+  userId: number | null;
+  widgetId: number;
+  status: 'approved' | 'pending' | 'unapproved';
+  submittedData: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function ProjectSubmissions() {
   const router = useRouter();
   const { project } = router.query;
   const { data, remove } = useSubmissions(project as string);
 
-  const [filterData, setFilterData] = useState(data);
+  const [filterData, setFilterData] = useState<Submission[]>(data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [activeWidget, setActiveWidget] = useState("0");
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
   const [selectedWidget, setSelectedWidget] = useState<any>(null);
 
+  const [totalCount, setTotalCount] = useState(0);
+
   useEffect(() => {
-    let loadedSubmissions = (data || []) as { createdAt: string }[];
+    let loadedSubmissions = (data || []) as Submission[];
 
     const sortedData = loadedSubmissions.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 
     setFilterData(sortedData);
+    setTotalCount(data?.length || 0);
   }, [data]);
 
   const { data: usersData } = useUsers();
@@ -115,32 +133,80 @@ export default function ProjectSubmissions() {
           </div>
         }>
         <div className="container py-6">
-
-        <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
-            <select
-              className="p-2 rounded"
-              onChange={(e) => setFilterSearchType(e.target.value)}
-            >
-              <option value="">Alles</option>
-              <option value="id">Widget ID</option>
-              <option value="user">Gebruiker ID</option>
-              <option value="submittedData">Ingezonden Data</option>
-              <option value="createdAt">Datum aangemaakt</option>
-            </select>
-            <input
-              type="text"
-              className='p-2 rounded'
-              placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
-            />
+          <div className="mb-2">
+            <span className="text-sm text-gray-500">
+              {selectedItems.length > 0
+                ? `${selectedItems.length} van ${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'} geselecteerd`
+                : `${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'}`}
+            </span>
+          </div>
+          <div className="flex justify-between mb-4 gap-4">
+            <div className="flex gap-4">
+              <Button
+                variant={'destructive'}
+                className="flex items-center gap-2"
+                onClick={(e) => e.preventDefault()}
+                disabled={selectedItems.length === 0}
+              >
+                <ConfirmActionDialog
+                  buttonText="Verwijderen"
+                  header="Inzendingen verwijderen"
+                  message="Weet je zeker dat je de geselecteerde inzendingen wilt verwijderen?"
+                  confirmButtonText="Verwijderen"
+                  cancelButtonText="Annuleren"
+                  onConfirmAccepted={() => {
+                    remove(0, true, selectedItems)
+                      .then(() => {
+                        setFilterData((prev) => prev.filter((item: any) => !selectedItems.includes(item.id)));
+                        setTotalCount((prev) => prev - selectedItems.length);
+                        toast.success('Inzendingen succesvol verwijderd');
+                        setSelectedItems([]);
+                      })
+                      .catch(() =>
+                        toast.error('Inzendingen konden niet worden verwijderd')
+                      )
+                  }}
+                  confirmButtonVariant="destructive"
+                />
+              </Button>
+            </div>
+            <div className="flex gap-4">
+              <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+              <select
+                className="p-2 rounded"
+                onChange={(e) => setFilterSearchType(e.target.value)}
+              >
+                <option value="">Alles</option>
+                <option value="id">Widget ID</option>
+                <option value="user">Gebruiker ID</option>
+                <option value="submittedData">Ingezonden Data</option>
+                <option value="createdAt">Datum aangemaakt</option>
+              </select>
+              <input
+                type="text"
+                className='p-2 rounded'
+                placeholder="Zoeken..."
+                onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+              />
+            </div>
           </div>
 
-          <div className="p-6 bg-white rounded-md clear-right">
+          <div className="p-6 bg-white rounded-md">
             <div
-              className="grid grid-cols-2 lg:grid-cols-5 items-center py-2 px-2 border-b border-border"
-              style={{gridTemplateColumns: "1fr 1fr 2fr 1fr 1fr"}}
+              className="grid grid-cols-3 lg:grid-cols-6 items-center py-2 px-2 border-b border-border"
+              style={{gridTemplateColumns: "50px 1fr 1fr 2fr 1fr 1fr"}}
             >
+              <Checkbox
+                checked={filterData?.length > 0 && filterData.every((s: any) => selectedItems.includes(s.id))}
+                onCheckedChange={(checked) => {
+                  const currentPageIds = filterData?.map((s: any) => s.id) || [];
+                  if (checked) {
+                    setSelectedItems(prev => Array.from(new Set([...prev, ...currentPageIds])));
+                  } else {
+                    setSelectedItems(prev => prev.filter(id => !currentPageIds.includes(id)));
+                  }
+                }}
+              />
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('widgetId', e, filterData))}>
                   Widget ID | Naam
@@ -177,9 +243,20 @@ export default function ProjectSubmissions() {
                 return (
                   <li
                     key={submission.id}
-                    className="grid grid-cols-2 lg:grid-cols-5 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
-                    style={{gridTemplateColumns: "1fr 1fr 2fr 1fr 1fr"}}
+                    className="grid grid-cols-3 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                    style={{gridTemplateColumns: "50px 1fr 1fr 2fr 1fr 1fr"}}
                   >
+                    <Checkbox
+                      className="my-auto"
+                      checked={selectedItems.includes(submission.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedItems(prev => [...prev, submission.id]);
+                        } else {
+                          setSelectedItems(prev => prev.filter(id => id !== submission.id));
+                        }
+                      }}
+                    />
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       <a
                         style={{textDecoration: 'underline'}}
@@ -220,10 +297,12 @@ export default function ProjectSubmissions() {
                         message="Weet je zeker dat je deze inzending wilt verwijderen?"
                         onDeleteAccepted={() =>
                           remove(submission.id)
-                            .then(() =>
-                              toast.success('Inzending successvol verwijderd')
-                            )
-                            .catch((e) =>
+                            .then(() => {
+                              setFilterData((prev) => prev.filter((item: any) => item.id !== submission.id));
+                              setTotalCount((prev) => prev - 1);
+                              toast.success('Inzending succesvol verwijderd');
+                            })
+                            .catch(() =>
                               toast.error('Inzending kon niet worden verwijderd')
                             )
                         }

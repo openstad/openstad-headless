@@ -18,21 +18,30 @@ import { ImportButton } from '@/components/importButton';
 import { keyMap } from '@/lib/keyMap';
 import { Paginator } from '@openstad-headless/ui/src';
 
-interface ProjectResourcesProps {
-  BETA_FEATURE_FLAG_BULK_IMPORT: string;
-}
-
 const prepareDataForExport = (data: any[]) => {
   const allResources: any[] = [];
 
   data.forEach((resource) => {
     for (const [key, values] of Object.entries(resource)) {
-      if ( (key.startsWith('tags') || key.startsWith('statuses')) && Array.isArray(values)) {
+      if (key === "tags" && Array.isArray(values)) {
+        const tagsByType: Record<string, string[]> = {};
+        
+        values.forEach((tag: any) => {
+          const columnName = `tags.${tag.type}`;
+          if (!tagsByType[columnName]) {
+            tagsByType[columnName] = [];
+          }
+          tagsByType[columnName].push(tag.name);
+        });
+        
+        Object.entries(tagsByType).forEach(([columnName, names]) => {
+          resource[columnName] = names.join(' | ');
+        });
+      }
+      if (key.startsWith('statuses') && Array.isArray(values)) {
         try {
           const createString = values.map((value: any) => {
-            return key.startsWith('tags')
-            ? `${value.name} (type: ${value.type})`
-            : value.name
+            return value.name
           }).filter(Boolean).join(' | ');
 
           resource[key] = createString || '';
@@ -58,15 +67,7 @@ const prepareDataForExport = (data: any[]) => {
   return allResources;
 }
 
-export async function getServerSideProps() {
-  return {
-    props: {
-      BETA_FEATURE_FLAG_BULK_IMPORT: process.env.BETA_FEATURE_FLAG_BULK_IMPORT,
-    },
-  };
-}
-
-export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: ProjectResourcesProps) {
+export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
 
@@ -96,7 +97,6 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
   const [filterData, setFilterData] = useState(data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
-  const [bulkSelectActive, setBulkSelectActive] = useState<boolean>(false);
   const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
       setTotalCount(count);
     }
     setFilterData(data);
-  }, [data, pagination, pageLimit])
+  }, [pagination, pageLimit])
 
   if (!data) return null;
 
@@ -147,44 +147,39 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
               Exporteer inzendingen
             </Button>
-            {BETA_FEATURE_FLAG_BULK_IMPORT === "true" && <ImportButton project={project as string} />}
+            <ImportButton project={project as string} />
           </div>
         }>
-        <div className="container py-6"><div className="float-left mb-4 flex gap-4">
-          <Button
-            variant={'outline'}
-            className="flex items-center gap-2 float-left"
-            onClick={() => {
-              setSelectedWidgets([])
-              setBulkSelectActive(!bulkSelectActive)
-            }}
-          >
-            {bulkSelectActive ? 'Bulk selecteren stoppen' : 'Bulk selecteren'}
-          </Button>
-
-          {bulkSelectActive && (
-            <>
+        <div className="container py-6">
+          <div className="mb-2">
+            <span className="text-sm text-gray-500">
+              {selectedWidgets.length > 0
+                ? `${selectedWidgets.length} van ${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'} geselecteerd`
+                : `${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'}`}
+            </span>
+          </div>
+          <div className="flex justify-between mb-4 gap-4">
+            <div className="flex gap-4">
               <Button
                 variant={'default'}
-                className="flex items-center gap-2 float-left"
+                className="flex items-center gap-2"
                 onClick={(e) => e.preventDefault()}
                 disabled={ selectedWidgets.length === 0 }
               >
                 <ConfirmActionDialog
                   buttonText="Dupliceren"
-                  header="Widgets Dupliceren"
-                  message="Weet je zeker dat je de geselecteerde widgets wilt dupliceren?"
+                  header="Inzendingen dupliceren"
+                  message="Weet je zeker dat je de geselecteerde inzendingen wilt dupliceren?"
                   confirmButtonText="Dupliceren"
                   cancelButtonText="Annuleren"
                   onConfirmAccepted={() => {
                     duplicate(selectedWidgets)
                       .then(() => {
-                        toast.success('Widgets successvol gedupliceerd');
+                        toast.success('Inzendingen succesvol gedupliceerd');
                         setSelectedWidgets([]);
-                        setBulkSelectActive(false);
                       })
-                      .catch((e) =>
-                        toast.error('Widgets konden (gedeeltelijk) niet worden gedupliceerd')
+                      .catch(() =>
+                        toast.error('Inzendingen konden (gedeeltelijk) niet worden gedupliceerd')
                       )
                   }}
                   confirmButtonVariant="default"
@@ -192,63 +187,69 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
               </Button>
               <Button
                 variant={'destructive'}
-                className="flex items-center gap-2 float-left"
+                className="flex items-center gap-2"
                 onClick={(e) => e.preventDefault()}
                 disabled={ selectedWidgets.length === 0 }
               >
                 <ConfirmActionDialog
                   buttonText="Verwijderen"
-                  header="Widgets Verwijderen"
-                  message="Weet je zeker dat je de geselecteerde widgets wilt verwijderen?"
+                  header="Inzendingen verwijderen"
+                  message="Weet je zeker dat je de geselecteerde inzendingen wilt verwijderen?"
                   confirmButtonText="Verwijderen"
                   cancelButtonText="Annuleren"
                   onConfirmAccepted={() => {
                     remove(0, true, selectedWidgets)
                       .then(() => {
-                        toast.success('Widgets successvol verwijderd');
+                        toast.success('Inzendingen succesvol verwijderd');
                         setSelectedWidgets([]);
-                        setBulkSelectActive(false);
                       })
-                      .catch((e) =>
-                        toast.error('Widgets konden (gedeeltelijk) niet worden verwijderd')
+                      .catch(() =>
+                        toast.error('Inzendingen konden (gedeeltelijk) niet worden verwijderd')
                       )
                   }}
                   confirmButtonVariant="destructive"
                 />
               </Button>
-            </>
-          )}
-        </div>
-
-          <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
-            <select
-              className="p-2 rounded"
-              onChange={(e) => setFilterSearchType(e.target.value)}
-            >
-              <option value="">Alles</option>
-              <option value="id">Stem ID</option>
-              <option value="title">Inzendingen</option>
-              <option value="yes">Gestemd op ja</option>
-              <option value="no">Gestemd op nee</option>
-              <option value="createdAt">Datum aangemaakt</option>
-
-
-            </select>
-            <input
-              type="text"
-              className='p-2 rounded'
-              placeholder="Zoeken..."
-              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
-            />
+            </div>
+            <div className="flex gap-4">
+              <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+              <select
+                className="p-2 rounded"
+                onChange={(e) => setFilterSearchType(e.target.value)}
+              >
+                <option value="">Alles</option>
+                <option value="id">Stem ID</option>
+                <option value="title">Inzendingen</option>
+                <option value="yes">Gestemd op ja</option>
+                <option value="no">Gestemd op nee</option>
+                <option value="createdAt">Datum aangemaakt</option>
+              </select>
+              <input
+                type="text"
+                className='p-2 rounded'
+                placeholder="Zoeken..."
+                onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+              />
+            </div>
           </div>
 
-          <div className="p-6 bg-white rounded-md clear-right">
+          <div className="p-6 bg-white rounded-md">
             <div
               className="grid grid-cols-2 items-center py-2 px-2 border-b border-border"
-              style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
+              style={{ gridTemplateColumns: 'repeat(2, 50px) 3fr repeat(5, 1fr) 60px' }}
             >
-              {bulkSelectActive && (<ListHeading />)}
+              <Checkbox
+                className="my-auto"
+                checked={filterData?.length > 0 && filterData.every((r: any) => selectedWidgets.includes(r.id))}
+                onCheckedChange={(checked) => {
+                  const currentPageIds = filterData?.map((r: any) => r.id) || [];
+                  if (checked) {
+                    setSelectedWidgets(prev => Array.from(new Set([...prev, ...currentPageIds])));
+                  } else {
+                    setSelectedWidgets(prev => prev.filter(id => !currentPageIds.includes(id)));
+                  }
+                }}
+              />
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
                   ID
@@ -283,27 +284,22 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
             </div>
             <ul>
               {filterData?.map((resource: any) => (
-                <Link
+                <li
                   key={resource.id}
-                  href={ bulkSelectActive ? `/projects/${project}/resources/` : `/projects/${project}/resources/${resource.id}`}
-                  scroll={ !bulkSelectActive }
+                  className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                  style={{ gridTemplateColumns: 'repeat(2, 50px) 3fr repeat(5, 1fr) 60px' }}
                 >
-                  <li
-                    className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
-                    style={{ gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 50px) 3fr repeat(5, 1fr) 60px` }}
-                  >
-                    {bulkSelectActive && (
-                      <Checkbox
-                        className="my-auto"
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedWidgets((prev) => [...prev, resource.id]);
-                          } else {
-                            setSelectedWidgets((prev) => prev.filter(id => id !== resource.id));
-                          }
-                        }}
-                      />
-                    )}
+                  <Checkbox
+                    className="my-auto"
+                    checked={selectedWidgets.includes(resource.id)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedWidgets((prev) => [...prev, resource.id]);
+                      } else {
+                        setSelectedWidgets((prev) => prev.filter(id => id !== resource.id));
+                      }
+                    }}
+                  />
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       {resource.id}
                     </Paragraph>
@@ -340,14 +336,13 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
                         }
                       />
                     </div>
-                    <Paragraph className="flex">
+                    <Link href={`/projects/${project}/resources/${resource.id}`}>
                       <ChevronRight
                         strokeWidth={1.5}
                         className="w-5 h-5 my-auto ml-auto"
                       />
-                    </Paragraph>
+                    </Link>
                   </li>
-                </Link>
               ))}
             </ul>
 
@@ -374,9 +369,6 @@ export default function ProjectResources({ BETA_FEATURE_FLAG_BULK_IMPORT }: Proj
                     <option value={100}>100</option>
                     <option value={250}>250</option>
                   </select>
-                  <span className="text-sm text-gray-500">
-                    ({totalCount} totaal)
-                  </span>
                 </div>
               </div>
             )}

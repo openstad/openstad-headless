@@ -23,7 +23,7 @@ import { Icon } from '../../ui/src/icon';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps } from '@openstad-headless/types/base-props';
 import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props';
-import { hasRole } from '../../lib';
+import { canLikeResource, hasRole } from "../../lib";
 
 export type GridderResourceDetailProps = BaseProps &
   ProjectSettingProps & {
@@ -63,11 +63,11 @@ export const GridderResourceDetail = ({
   // When resource is correctly typed the we will not need :any
 
   let resourceFilteredTags = (dialogTagGroups && Array.isArray(dialogTagGroups) && Array.isArray(resource?.tags))
-    ? resource?.tags.filter((tag: { type: string }) => dialogTagGroups.includes(tag.type))
-    : resource?.tags;
+    ? resource.tags.filter((tag: { type: string }) => dialogTagGroups.includes(tag.type))
+    : (Array.isArray(resource?.tags) ? resource.tags : []);
 
-  resourceFilteredTags = resourceFilteredTags?.length
-    ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+  resourceFilteredTags = resourceFilteredTags.length
+    ? resourceFilteredTags.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
       if (a.seqnr === undefined || a.seqnr === null) return 1;
       if (b.seqnr === undefined || b.seqnr === null) return -1;
       return a.seqnr - b.seqnr;
@@ -109,6 +109,7 @@ export const GridderResourceDetail = ({
       ? resource.images?.at(0)?.url
       : defaultImage;
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
+  const canLike = canLikeResource(resource);
 
   const renderImage = (image: string, clickableImage: boolean) => {
     const imageComponent = <Image src={image} className="--aspectRatio-16-9" />;
@@ -218,6 +219,7 @@ export const GridderResourceDetail = ({
             {displayLikeButton && (
               <Likes
                 {...props}
+                disabled={!canLike}
                 title={props.resourceOverviewMapWidget?.title}
                 yesLabel={props.resourceOverviewMapWidget?.yesLabel}
                 noLabel={props.resourceOverviewMapWidget?.noLabel}

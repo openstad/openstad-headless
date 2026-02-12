@@ -6,3 +6,4 @@ export {
   deterministicRandomSort,
   getScopedSessionRandomSortSeed,
 } from './random-sort';
+export { canLikeResource } from './can-like';
