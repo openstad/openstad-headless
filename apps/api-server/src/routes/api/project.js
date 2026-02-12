@@ -931,9 +931,9 @@ router.route('/:projectId(\\d+)/certificate-retry')
         project.url, namespace, slugOverride
       );
 
-      // Full retry: ensure ExternalSecret exists, check status, update Ingress
+      // Full retry: ensure ExternalSecret exists, wait for readiness, update Ingress
       await externalCertificatesManager.ensureExternalSecret(secretName, namespace);
-      const certStatus = await externalCertificatesManager.checkSecretReady(secretName, namespace);
+      const certStatus = await externalCertificatesManager.waitForSecretReady(secretName, namespace);
 
       // Update hostStatus
       let hostStatus = project.hostStatus || {};

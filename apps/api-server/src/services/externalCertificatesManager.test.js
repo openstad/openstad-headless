@@ -135,21 +135,22 @@ function makePartialSecret(secretName) {
   };
 }
 
+// K8s client v1.x throws ApiException with .code, not .statusCode
 function make404Error() {
   const err = new Error('Not Found');
-  err.statusCode = 404;
+  err.code = 404;
   return err;
 }
 
 function make409Error() {
   const err = new Error('Conflict');
-  err.statusCode = 409;
+  err.code = 409;
   return err;
 }
 
 function make500Error() {
   const err = new Error('Internal Server Error');
-  err.statusCode = 500;
+  err.code = 500;
   return err;
 }
 

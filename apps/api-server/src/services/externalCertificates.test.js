@@ -141,7 +141,7 @@ describe('externalCertificates', () => {
       mockListCRD.mockResolvedValue({
         items: [{ spec: { group: 'external-secrets.io', names: { kind: 'ExternalSecret' } } }],
       });
-      mockListNamespacedCustomObject.mockRejectedValue({ statusCode: 403 });
+      mockListNamespacedCustomObject.mockRejectedValue({ code: 403 });
       mockListClusterCustomObject.mockResolvedValue({ items: [] });
 
       const mod = await loadModule({
@@ -157,7 +157,7 @@ describe('externalCertificates', () => {
       mockListCRD.mockResolvedValue({
         items: [{ spec: { group: 'external-secrets.io', names: { kind: 'ExternalSecret' } } }],
       });
-      mockListNamespacedCustomObject.mockRejectedValue({ statusCode: 404 });
+      mockListNamespacedCustomObject.mockRejectedValue({ code: 404 });
       mockListClusterCustomObject.mockResolvedValue({
         items: [{ status: { conditions: [{ type: 'Ready', status: 'True' }] } }],
       });
@@ -214,8 +214,8 @@ describe('externalCertificates', () => {
         items: [{ spec: { group: 'external-secrets.io', names: { kind: 'ExternalSecret' } } }],
       });
       mockListNamespacedCustomObject
-        .mockRejectedValueOnce({ statusCode: 500 })
-        .mockRejectedValueOnce({ statusCode: 404 });
+        .mockRejectedValueOnce({ code: 500 })
+        .mockRejectedValueOnce({ code: 404 });
       mockListClusterCustomObject.mockResolvedValue({
         items: [{ status: { conditions: [{ type: 'Ready', status: 'True' }] } }],
       });

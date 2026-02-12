@@ -69,6 +69,7 @@ export default function ProjectSettingsCertificates() {
       });
       if (result) {
         toast.success('Certificaatinstellingen opgeslagen!');
+        mutate();
       } else {
         toast.error('Er is helaas iets mis gegaan.');
       }

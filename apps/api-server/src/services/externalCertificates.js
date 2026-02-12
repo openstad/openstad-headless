@@ -5,6 +5,15 @@
 let _enabled = process.env.EXTERNAL_CERTIFICATES_ENABLED === 'true';
 
 /**
+ * Extracts HTTP status code from K8s client errors.
+ * @kubernetes/client-node v1.x throws ApiException with .code,
+ * older versions throw HttpError with .statusCode.
+ */
+function getErrorStatusCode(error) {
+  return error.code ?? error.statusCode;
+}
+
+/**
  * Returns current feature flag state.
  * Other modules call this to gate external certificate logic.
  * @returns {boolean} true if feature is enabled and infrastructure validated
@@ -84,12 +93,12 @@ async function validateInfrastructure() {
           rbacCheckPassed = true;
           break;
         } catch (err) {
-          if (err.statusCode === 403) {
+          if (getErrorStatusCode(err) === 403) {
             // 403 means RBAC insufficient - this is a blocker
             if (version === 'v1beta1') {
               blockers.push('RBAC check failed: 403 Forbidden (missing permissions)');
             }
-          } else if (err.statusCode === 404) {
+          } else if (getErrorStatusCode(err) === 404) {
             // 404 means no resources exist yet, but permissions are fine
             rbacCheckPassed = true;
             break;
