@@ -4,7 +4,7 @@ import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { hasRole } from '@openstad-headless/lib';
+import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { StemBegrootBudgetList } from './step-1/begroot-budget-list/stem-begroot-budget-list';
 import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/stem-begroot-detail-dialog';
@@ -23,7 +23,6 @@ import { Step4 } from './step-4';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Heading, ButtonLink } from '@utrecht/component-library-react';
-import useTags from '@openstad-headless/admin-server/src/hooks/use-tag';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 
@@ -53,8 +52,11 @@ export type StemBegrootWidgetProps = BaseProps &
     displayRanking: boolean;
     displayPriceLabel: boolean;
     showVoteCount: boolean;
-    showOriginalResource: boolean;
+    showOriginalResource?: boolean;
     originalResourceUrl?: string;
+    displayTitle?: boolean;
+    displaySummary?: boolean;
+    displayDescription?: boolean;
     displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
@@ -142,7 +144,10 @@ function StemBegroot({
     api: props.api,
   });
 
-   const { data: allTags } = useTags(props.projectId);
+  const { data: allTags = [] } = datastore.useTags({
+    projectId: props.projectId,
+    type: '',
+  });
 
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
@@ -248,7 +253,9 @@ function StemBegroot({
 
   const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : undefined;
   const urlStatusIdsArray = urlStatusIds
+   
     ? stringToArray(urlStatusIds)
+   
     : undefined;
 
 
@@ -593,8 +600,22 @@ function StemBegroot({
       : null;
   };
 
+  const canVoteByStatus = (resource: {
+    statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
+  }) => {
+    return canLikeResource(resource);
+  };
+
   // For now only support budgeting and count
-  const resourceSelectable = (resource: { id: number; budget: number }) => {
+  const resourceSelectable = (resource: {
+    id: number;
+    budget: number;
+    statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
+  }) => {
+    if (!canVoteByStatus(resource)) {
+      return isInSelected(resource);
+    }
+
     if (
       props.votes.voteType === 'countPerTag' ||
       props.votes.voteType === 'budgetingPerTag'
@@ -811,8 +832,11 @@ function StemBegroot({
         displayPriceLabel={props.displayPriceLabel}
         displayRanking={props.displayRanking}
         showVoteCount={props.showVoteCount}
-        showOriginalResource={props.showOriginalResource}
+        showOriginalResource={props.showOriginalResource ?? true}
         originalResourceUrl={props.originalResourceUrl}
+        displayTitle={props.displayTitle ?? true}
+        displaySummary={props.displaySummary ?? true}
+        displayDescription={props.displayDescription ?? true}
         resources={resourcesToUse}
         resourceBtnEnabled={resourceSelectable}
         resourceBtnTextHandler={createItemBtnString}
@@ -1345,8 +1369,10 @@ function StemBegroot({
               displayPriceLabel={props.displayPriceLabel}
               displayRanking={props.displayRanking}
               showVoteCount={props.showVoteCount}
-              showOriginalResource={props.showOriginalResource}
+              showOriginalResource={props.showOriginalResource ?? true}
               originalResourceUrl={props.originalResourceUrl}
+              displayTitle={props.displayTitle ?? true}
+              displaySummary={props.displaySummary ?? true}
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 votePendingStorage.clearAllVotePending();

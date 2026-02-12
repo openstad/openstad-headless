@@ -4,15 +4,19 @@ module.exports = function (polygon, latKey = 0, longKey = 1) {
 
   const polygonType = polygon.type;
 
-  if ( polygonType === 'MultiPolygon') {
-    return polygon.coordinates.map(polygon => {
-      return polygon[0].map(x => {
-        return {lat: x[latKey], lng: x[longKey]};
+  if (polygonType === 'MultiPolygon') {
+    return polygon.coordinates.map((poly) => {
+      return poly.map((ring) => {
+        return ring.map((x) => ({ lat: x[latKey], lng: x[longKey] }));
       });
     });
-  } else {
-    return polygon.coordinates[0].map(x => {
-      return {lat: x[latKey], lng: x[longKey]};
+  }
+
+  if (polygonType === 'Polygon') {
+    return polygon.coordinates.map((ring) => {
+      return ring.map((x) => ({ lat: x[latKey], lng: x[longKey] }));
     });
   }
+
+  return [];
 }

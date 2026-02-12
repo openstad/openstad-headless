@@ -269,6 +269,18 @@ router.route('/*')
 						throw createError(400, 'Resource niet gevonden');
 					}
 
+					for (const resource of resources) {
+						if (
+							Array.isArray(resource.statuses) &&
+							resource.statuses.some(
+								(status) =>
+									status?.extraFunctionality?.canLike === false
+							)
+						) {
+							throw createError(403, 'Je kunt niet stemmen op deze inzending');
+						}
+					}
+
 					if (req.project.config.votes.voteType == 'likes' &&
 						req.project.config.votes.requiredUserRole == 'anonymous'
 					) {

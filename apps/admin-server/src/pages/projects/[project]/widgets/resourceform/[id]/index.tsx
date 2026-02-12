@@ -21,6 +21,7 @@ import WidgetPreview from "@/components/widget-preview";
 import { ResourceFormWidgetProps } from "@openstad-headless/resource-form/src/props";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
+import WidgetResourceFormPolygons from "@/pages/projects/[project]/widgets/resourceform/[id]/polygons";
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetResourceForm({
@@ -64,6 +65,7 @@ export default function WidgetResourceForm({
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="info">Weergave</TabsTrigger>
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
+              <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
@@ -122,6 +124,25 @@ export default function WidgetResourceForm({
                     }}
                   />
                 </>
+              )}
+            </TabsContent>
+            <TabsContent value="polygons" className="p-0">
+              {previewConfig && (
+                <WidgetResourceFormPolygons
+                  {...previewConfig}
+                  updateConfig={(config) => {
+                    console.log( "Config", widget.config, config )
+                    updateConfig({...widget.config, ...config})
+                  }}
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
               )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">

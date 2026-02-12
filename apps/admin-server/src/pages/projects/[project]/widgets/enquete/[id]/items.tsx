@@ -1969,7 +1969,7 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {form.watch('questionType') === 'multiple' && (
+                    {(form.watch('questionType') === 'multiple' || (form.watch('questionType') === 'images' && form.watch('multiple'))) && (
                       <>
                         <FormField
                           control={form.control}

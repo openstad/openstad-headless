@@ -11,7 +11,7 @@ import { Filters, PostcodeAutoFillLocation } from '@openstad-headless/ui/src/ste
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
-import { hasRole } from '@openstad-headless/lib';
+import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
 import '@utrecht/component-library-css';
@@ -126,6 +126,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
+    onMarkerResourceClick?: (resource: any, index: number) => void;
     displayLikeButton?: boolean;
     displayDislike?: boolean;
     clickableImage?: boolean;
@@ -193,6 +194,13 @@ const defaultHeaderRenderer = (
           givenResources={resources}
           selectedProjects={selectedProjects}
           locationProx={location}
+          onMarkerClick={
+            widgetProps.displayType === 'cardgrid'
+              ? (resource, index) => {
+                  widgetProps.onMarkerResourceClick?.(resource, index);
+                }
+              : undefined
+          }
         />
       }
       {displayHeader &&
@@ -210,6 +218,9 @@ const defaultItemRenderer = (
   onItemClick?: () => void,
   refreshLikes?: () => void,
 ) => {
+  const canLike = canLikeResource(resource);
+  const allowLikingInOverview = !!props.allowLikingInOverview;
+
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
       return <Paragraph>Template is nog niet ingesteld</Paragraph>;
@@ -301,7 +312,7 @@ const defaultItemRenderer = (
 
   let resourceFilteredTags = (overviewTagGroups && Array.isArray(overviewTagGroups) && Array.isArray(resource?.tags))
     ? resource?.tags.filter((tag: { type: string }) => overviewTagGroups.includes(tag.type))
-    : resource?.tags || [];
+    : (Array.isArray(resource?.tags) ? resource.tags : []);
 
   resourceFilteredTags = resourceFilteredTags?.length
     ? resourceFilteredTags?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
@@ -338,7 +349,7 @@ const defaultItemRenderer = (
         {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
           <div className="micro-score-container">
             <Icon icon="ri-thumb-up-line" variant="big" description='Stemmen voor' onClick={() => vote('yes')}/>
-            <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
             {props.likeWidget?.displayDislike &&
               <Icon icon="ri-thumb-down-line" variant="big" description='Stemmen tegen' onClick={() => vote('no')}/>}
           </div>
@@ -417,12 +428,13 @@ const defaultItemRenderer = (
             </Paragraph>
           </div>
 
-          { props.allowLikingInOverview ? (
+          { allowLikingInOverview ? (
             <Likes
               {...props.likeWidget}
               resourceId={resource.id}
               projectId={props.projectId}
               {...props}
+              disabled={!canLike}
               refreshResourceLikes={refreshLikes}
             >
               {(doVote) => (
@@ -517,7 +529,7 @@ const defaultItemRenderer = (
             {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
               <>
                 <Icon icon="ri-thumb-up-line" variant="big" />
-                <Paragraph className="votes-score">{resource.netPositiveVotes}</Paragraph>
+                <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
                 {props.likeWidget?.displayDislike && <Icon icon="ri-thumb-down-line" variant="big"  />}
               </>
             )}
@@ -1004,7 +1016,9 @@ function ResourceOverviewInner({
       }
     </section>
   );
-
+const validFilteredResources = filteredResources?.filter(
+  r => r && (r.id || r.uniqueId) // only real resources or projects
+) || [];
   return tagsLoading ? (
       <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
     ) : (
@@ -1015,7 +1029,7 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            items={validFilteredResources}
             buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
@@ -1049,7 +1063,22 @@ function ResourceOverviewInner({
       />
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
-        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, (displayMap && !displayAsTabs), selectedProjects, location, props.headingLevel || '4') : null}
+      {displayBanner || displayMap
+        ? renderHeader(
+            {
+              ...props,
+              displayType,
+              onMarkerResourceClick: onResourceClick,
+            },
+            filteredResources || [],
+            bannerText,
+            displayBanner,
+            displayMap && !displayAsTabs,
+            selectedProjects,
+            location,
+            props.headingLevel || '4'
+          )
+        : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''

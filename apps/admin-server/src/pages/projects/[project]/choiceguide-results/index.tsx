@@ -12,6 +12,8 @@ import {useWidgetsHook} from "@/hooks/use-widgets";
 import {exportChoiceGuideToCSV} from "@/lib/export-helpers/choiceguide-export";
 import {Select, SelectTrigger, SelectContent, SelectValue, SelectItem} from "@/components/ui/select";
 import {Paginator} from "@openstad-headless/ui/src";
+import { Checkbox } from '@/components/ui/checkbox';
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 
 export default function ProjectChoiceGuideResults() {
   const router = useRouter();
@@ -25,6 +27,7 @@ export default function ProjectChoiceGuideResults() {
   const [filterData, setFilterData] = useState<{ createdAt: string, id?: string }[]>([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [activeWidget, setActiveWidget] = useState("0");
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
@@ -63,10 +66,23 @@ export default function ProjectChoiceGuideResults() {
       await remove(id);
 
       setFilterData((prevData) => prevData.filter((item) => item.id !== id));
+      setTotalCount((prev) => prev - 1);
 
-      toast.success('Inzending succesvol verwijderd');
+      toast.success('Resultaat succesvol verwijderd');
     } catch (error) {
-      toast.error('Inzending kon niet worden verwijderd');
+      toast.error('Resultaat kon niet worden verwijderd');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      await remove(0, true, selectedItems);
+      setFilterData((prevData) => prevData.filter((item) => !selectedItems.includes(Number(item.id))));
+      setTotalCount((prev) => prev - selectedItems.length);
+      toast.success('Resultaten succesvol verwijderd');
+      setSelectedItems([]);
+    } catch (error) {
+      toast.error('Resultaten konden niet worden verwijderd');
     }
   };
 
@@ -170,33 +186,63 @@ export default function ProjectChoiceGuideResults() {
             </div>
           }>
           <div className="container py-6">
-
-            <div className="float-right mb-4 flex gap-4">
-              <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
-              <select
-                className="p-2 rounded"
-                onChange={(e) => setFilterSearchType(e.target.value)}
-              >
-                <option value="">Alles</option>
-                <option value="id">Widget ID</option>
-                <option value="user">Gebruiker ID</option>
-                <option value="result">Ingezonden Data</option>
-                <option value="createdAt">Datum aangemaakt</option>
-              </select>
-              {/*  --- Search werkt voor even niet ---  */}
-              {/*<input*/}
-              {/*  type="text"*/}
-              {/*  className='p-2 rounded'*/}
-              {/*  placeholder="Zoeken..."*/}
-              {/*  onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}*/}
-              {/*/>*/}
+            <div className="mb-2">
+              <span className="text-sm text-gray-500">
+                {selectedItems.length > 0
+                  ? `${selectedItems.length} van ${totalCount} ${totalCount === 1 ? 'resultaat' : 'resultaten'} geselecteerd`
+                  : `${totalCount} ${totalCount === 1 ? 'resultaat' : 'resultaten'}`}
+              </span>
+            </div>
+            <div className="flex justify-between mb-4 gap-4">
+              <div className="flex gap-4">
+                <Button
+                  variant={'destructive'}
+                  className="flex items-center gap-2"
+                  onClick={(e) => e.preventDefault()}
+                  disabled={selectedItems.length === 0}
+                >
+                  <ConfirmActionDialog
+                    buttonText="Verwijderen"
+                    header="Resultaten verwijderen"
+                    message="Weet je zeker dat je de geselecteerde resultaten wilt verwijderen?"
+                    confirmButtonText="Verwijderen"
+                    cancelButtonText="Annuleren"
+                    onConfirmAccepted={handleBulkDelete}
+                    confirmButtonVariant="destructive"
+                  />
+                </Button>
+              </div>
+              <div className="flex gap-4">
+                <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+                <select
+                  className="p-2 rounded"
+                  onChange={(e) => setFilterSearchType(e.target.value)}
+                >
+                  <option value="">Alles</option>
+                  <option value="id">Widget ID</option>
+                  <option value="user">Gebruiker ID</option>
+                  <option value="result">Ingezonden Data</option>
+                  <option value="createdAt">Datum aangemaakt</option>
+                </select>
+              </div>
             </div>
 
-            <div className="p-6 bg-white rounded-md clear-right">
+            <div className="p-6 bg-white rounded-md">
               <div
-                className="grid grid-cols-2 lg:grid-cols-5 items-center py-2 px-2 border-b border-border"
-                style={{gridTemplateColumns: "1fr 1fr 2fr 1fr 1fr"}}
+                className="grid grid-cols-3 lg:grid-cols-6 items-center py-2 px-2 border-b border-border"
+                style={{gridTemplateColumns: "50px 1fr 1fr 2fr 1fr 1fr"}}
               >
+                <Checkbox
+                  checked={filterData?.length > 0 && filterData.every((r: any) => selectedItems.includes(r.id))}
+                  onCheckedChange={(checked) => {
+                    const currentPageIds = filterData?.map((r: any) => r.id) || [];
+                    if (checked) {
+                      setSelectedItems(prev => Array.from(new Set([...prev, ...currentPageIds])));
+                    } else {
+                      setSelectedItems(prev => prev.filter(id => !currentPageIds.includes(id)));
+                    }
+                  }}
+                />
                 <ListHeading className="hidden lg:flex">
                   <button className="filter-button" onClick={(e) => setFilterData(sortTable('widgetId', e, filterData))}>
                     Widget ID | Naam
@@ -233,9 +279,20 @@ export default function ProjectChoiceGuideResults() {
                   return (
                     <li
                       key={choiceguideResult.id}
-                      className="grid grid-cols-2 lg:grid-cols-5 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
-                      style={{gridTemplateColumns: "1fr 1fr 2fr 1fr 1fr"}}
+                      className="grid grid-cols-3 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                      style={{gridTemplateColumns: "50px 1fr 1fr 2fr 1fr 1fr"}}
                     >
+                      <Checkbox
+                        className="my-auto"
+                        checked={selectedItems.includes(choiceguideResult.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedItems(prev => [...prev, choiceguideResult.id]);
+                          } else {
+                            setSelectedItems(prev => prev.filter(id => id !== choiceguideResult.id));
+                          }
+                        }}
+                      />
                       <Paragraph className="my-auto -mr-16 lg:mr-0">
                         <a
                           style={{textDecoration: 'underline'}}
@@ -272,8 +329,8 @@ export default function ProjectChoiceGuideResults() {
                         className="hidden lg:flex ml-auto"
                         onClick={(e) => e.preventDefault()}>
                         <RemoveResourceDialog
-                          header="Inzending verwijderen"
-                          message="Weet je zeker dat je deze inzending wilt verwijderen?"
+                          header="Resultaat verwijderen"
+                          message="Weet je zeker dat je dit resultaat wilt verwijderen?"
                           onDeleteAccepted={() =>
                             handleDelete(choiceguideResult.id)
                           }

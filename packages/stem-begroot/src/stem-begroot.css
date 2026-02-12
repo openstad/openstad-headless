@@ -165,6 +165,15 @@ article.stem-begroot--container {
   display: grid;
   grid-gap: 0.5rem;
 }
+
+article.stem-begroot--container.resource-vote-disabled {
+  opacity: 0.6;
+}
+
+article.stem-begroot--container.resource-vote-disabled
+  .osc-stem-begroot-item-action-btn {
+  cursor: not-allowed;
+}
 article.stem-begroot--container .price {
   background-color: var(
     --nlds-price-background-color,

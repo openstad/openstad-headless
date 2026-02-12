@@ -535,6 +535,23 @@ router.route('/')
         delete user.id;
         user.projectId = project.id;
         await db.User.create(user);
+
+        // Sync user role to auth server so user_roles entry is created
+        try {
+          const authConfig = await authSettings.config({ project, useAuth: 'default' });
+          const adapter = await authSettings.adapter({ authConfig });
+          if (user.idpUser?.identifier && adapter.service.updateUser) {
+            await adapter.service.updateUser({
+              authConfig,
+              userData: {
+                id: user.idpUser.identifier,
+                role: user.role,
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to sync user role to auth server for new project:', err);
+        }
       }
 
       return next()
@@ -633,13 +650,25 @@ router.route('/:projectId') //(\\d+)
     try {
       let providers = await authSettings.providers({ project });
       const configData = req.body.config?.auth?.provider?.openstad?.config || {};
-      const allowedDomains = req.body.config?.allowedDomains || false;
+      let allowedDomains = req.body.config?.allowedDomains || false;
+      if (Array.isArray(allowedDomains)) {
+        allowedDomains = allowedDomains.map((d) => (typeof d === 'string' ? d.trim() : d));
+        req.body.config.allowedDomains = allowedDomains;
+      }
       const twoFactorRoles = req.body.config?.auth?.provider?.openstad?.twoFactorRoles;
 
       for (let provider of providers) {
+        // Get provider-specific config data
+        const providerConfig = req.body.config?.auth?.provider?.[provider] || {};
+        const configData = providerConfig.config || {};
+        const requiredUserFields = providerConfig.requiredUserFields;
+        const twoFactorRoles = providerConfig.twoFactorRoles;
+
+        // Skip if no config data and no allowedDomains update
         if (
             Object.keys(configData).length === 0
-            && !(!!allowedDomains && Object.keys(configData).length === 0)
+            && !requiredUserFields
+            && !(!!allowedDomains)
         ) {
           continue;
         }
@@ -654,6 +683,7 @@ router.route('/:projectId') //(\\d+)
         if (adapter.service.updateClient) {
           let merged = merge.recursive({}, authConfig, {
             config: configData,
+            requiredUserFields: requiredUserFields || authConfig.requiredUserFields,
             twoFactorRoles: twoFactorRoles || authConfig.twoFactorRoles
           });
           await adapter.service.updateClient({ authConfig: merged, project });

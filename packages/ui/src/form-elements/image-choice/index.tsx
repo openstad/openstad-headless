@@ -45,6 +45,8 @@ export type ImageChoiceFieldProps = {
     createImageSlider?: boolean;
     imageClickable?: boolean;
     infoField?: string;
+    maxChoices?: string;
+    maxChoicesMessage?: string;
 }
 
 export type ChoiceItem = {
@@ -77,6 +79,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     images = [],
     createImageSlider = false,
     imageClickable = false,
+    maxChoices,
+    maxChoicesMessage,
 }) => {
     let initialValue = [];
 
@@ -87,13 +91,22 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     const [selectedChoices, setSelectedChoices] = useState<string[]>(initialValue);
     const [isInfoVisible, setIsInfoVisible] = useState(false);
 
+    const maxChoicesNum = parseInt(maxChoices || '', 10) || 0;
+    const maxReached = multiple && maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
+
     const handleChoiceChange = (choiceValue: string) => {
         if (!multiple) {
             setSelectedChoices([choiceValue]);
-        } else if (!selectedChoices.includes(choiceValue)) {
-            setSelectedChoices([...selectedChoices, choiceValue]);
         } else {
-            setSelectedChoices(selectedChoices.filter((choice) => choice !== choiceValue));
+            setSelectedChoices((prev) => {
+                if (prev.includes(choiceValue)) {
+                    return prev.filter((choice) => choice !== choiceValue);
+                }
+                if (maxChoicesNum > 0 && prev.length >= maxChoicesNum) {
+                    return prev;
+                }
+                return [...prev, choiceValue];
+            });
         }
     };
 
@@ -183,7 +196,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                                     name={fieldKey}
                                                     required={fieldRequired}
                                                     onChange={() => { handleChoiceChange(choice.value), setCheckInvalid(false) }}
-                                                    disabled={disabled}
+                                                    disabled={disabled || (maxReached && !selectedChoices.includes(choice.value))}
                                                 checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
                                                 />
                                                 {(choice.label && !choice.hideLabel && !choice.description) && (
@@ -207,6 +220,9 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                     })}
 
                 </div>
+                {maxReached && maxChoicesMessage && (
+                    <em aria-live="polite">{maxChoicesMessage}</em>
+                )}
             </Fieldset>
             {infoField && (
                 <div className="extra-info-container">

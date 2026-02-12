@@ -5,7 +5,7 @@ import { HasAccess } from './lib/hasAccess';
 const restrictedPaths = [
   '/areas',
   '/duplicate',
-  '/settings/anonymization',
+  '/settings/users',
   '/settings/notifications',
   '/settings/alloweddomains',
   '/settings/design',

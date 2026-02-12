@@ -24,6 +24,15 @@ type Point = {
   lng: number;
 };
 
+const flattenAreaPoints = (input: any): Point[] => {
+  if (!Array.isArray(input) || input.length === 0) return [];
+  const first = input[0];
+  if (first && typeof first.lat === 'number' && typeof first.lng === 'number') {
+    return input as Point[];
+  }
+  return input.flatMap((entry: any) => flattenAreaPoints(entry));
+};
+
 const ResourceOverviewMap = ({
   categorize = undefined,
   markerHref = undefined,
@@ -32,6 +41,7 @@ const ResourceOverviewMap = ({
   locationProx = undefined,
   givenResources,
   selectedProjects = [],
+  onMarkerClick,
   ...props
 }: PropsWithChildren<ResourceOverviewMapWidgetProps>) => {
   const datastore = new DataStore({
@@ -75,7 +85,7 @@ const ResourceOverviewMap = ({
     }
   }
   let currentMarkers =
-    allResources.map((resource: any) => {
+    allResources.map((resource: any, index: number) => {
       // TODO: types/resource does not exist yet
       let marker: MarkerProps = {
         location: resource?.location ? { ...resource.location } : undefined,
@@ -84,16 +94,25 @@ const ResourceOverviewMap = ({
       marker.lat = markerLatLng.lat;
       marker.lng = markerLatLng.lng;
 
-      if ( Array.isArray(selectedProjects) && selectedProjects.length > 0 ) {
-        const markerHrefUrl = selectedProjects.find((project) => project.id === resource.projectId)?.detailPageLink;
+      const projectPageLink =
+        Array.isArray(selectedProjects) && selectedProjects.length > 0
+          ? selectedProjects.find(
+              (project) => project.id === resource.projectId
+            )?.detailPageLink
+          : undefined;
 
-        if (markerHrefUrl) {
-          markerHref = markerHrefUrl;
+      if (marker.lat && marker.lng) {
+        if (onMarkerClick) {
+          marker.onClick = [
+            () => onMarkerClick(resource, index)
+          ];
+        } else {
+            const markerLink = projectPageLink || props.itemLink || markerHref;
+
+            if (markerLink) {
+              marker.href = markerLink.replace(/\[id\]/, resource.id);
+            }
         }
-      }
-
-      if (marker.lat && marker.lng && markerHref) {
-        marker.href = markerHref.replace(/\[id\]/, resource.id);
       }
 
       if (marker.lat && marker.lng && categorizeByField && categories) {
@@ -207,14 +226,12 @@ const ResourceOverviewMap = ({
       ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
       : [];
 
-  function calculateCenter(polygon: Point[] | Point[][]) {
+  function calculateCenter(polygon: Point[] | Point[][] | Point[][][]) {
     if (!polygon || polygon.length === 0) {
       return undefined;
     }
 
-    const flatPolygon = Array.isArray(polygon[0])
-      ? (polygon as Point[][]).flat()
-      : (polygon as Point[]);
+    const flatPolygon = flattenAreaPoints(polygon);
 
     let minX = Infinity;
     let maxX = -Infinity;

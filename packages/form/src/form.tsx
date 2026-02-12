@@ -154,6 +154,29 @@ function Form({
         }
     };
 
+    const handleFormKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
+        const nativeEvent = event.nativeEvent as KeyboardEvent;
+        const isComposing = nativeEvent.isComposing || nativeEvent.keyCode === 229;
+
+        if (event.key !== 'Enter' || event.defaultPrevented || isComposing) {
+            return;
+        }
+
+        const target = event.target as HTMLElement;
+        if (!(target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        // Prevent implicit submit only for text-like single-line inputs.
+        const blockedEnterSubmitTypes = ['text', 'email', 'tel', 'url', 'password', 'number'];
+        const inputType = (target.type || 'text').toLowerCase();
+        if (!blockedEnterSubmitTypes.includes(inputType)) {
+            return;
+        }
+
+        event.preventDefault();
+    };
+
     const handleInputChange = (event: { name: string, value: any }, triggerSetLastKey?: boolean) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
@@ -187,8 +210,8 @@ function Form({
     }, [formValues]);
 
     const scrollTop = () => {
-        // const formWidget = document.querySelector('.osc-enquete-item-content:not(.--youth)');
-        const formWidget = document.querySelector('.osc-enquete-item-content');
+        const formWidget = document.querySelector('.osc-enquete-item-content, .osc-resource-form-item-content');
+
         if (formWidget) {
             const elementPosition = formWidget.getBoundingClientRect().top + window.scrollY;
             window.scrollTo({
@@ -265,7 +288,13 @@ function Form({
                   </div>
                 )}
 
-                <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
+                <form
+                    className="form-container"
+                    noValidate
+                    onSubmit={handleFormSubmit}
+                    onKeyDown={handleFormKeyDown}
+                    ref={formRef}
+                >
                     {formStyle === 'youth' && totalFieldCount > 0 && (
                         <ul className="form-fieldCounter">
                             {Array.from({ length: totalFieldCount }, (_, index) => (

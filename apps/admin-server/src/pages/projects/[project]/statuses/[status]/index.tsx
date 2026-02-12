@@ -42,6 +42,7 @@ const formSchema = z.object({
   mapIcon: z.string().optional(),
   mapIconUploader: z.string().optional(),
   listIcon: z.string().optional(),
+  canLike: z.boolean().optional(),
   editableByUser: z.boolean().optional(),
   canComment: z.boolean().optional(),
 });
@@ -65,6 +66,7 @@ export default function ProjectStatusEdit() {
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
+      canLike: data?.extraFunctionality?.canLike ?? true,
       editableByUser: data?.extraFunctionality?.editableByUser ?? true,
       canComment: data?.extraFunctionality?.canComment ?? true,
     }),
@@ -77,7 +79,17 @@ export default function ProjectStatusEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const status = await updateStatus(values.name, values.seqnr, values.addToNewResources, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon, { editableByUser: values.editableByUser, canComment: values.canComment });
+    const status = await updateStatus(
+      values.name,
+      values.seqnr,
+      values.addToNewResources,
+      values.backgroundColor,
+      values.color,
+      values.label,
+      values.mapIcon,
+      values.listIcon,
+      { editableByUser: values.editableByUser, canComment: values.canComment, canLike: values.canLike }
+    );
     if (status) {
       toast.success('Status aangepast!');
     } else {
@@ -378,6 +390,34 @@ export default function ProjectStatusEdit() {
                         <FormItem>
                           <FormLabel>
                             Er kan worden gereageerd op de resource
+                          </FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                                let val = value == 'true' ? true : false
+                                field.onChange(val);
+                              }}
+                            value={field.value ? 'true' : 'false'}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Ja</SelectItem>
+                              <SelectItem value="false">Nee</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="canLike"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Liken toestaan op resources met deze status
                           </FormLabel>
                           <Select
                             onValueChange={(value) => {
