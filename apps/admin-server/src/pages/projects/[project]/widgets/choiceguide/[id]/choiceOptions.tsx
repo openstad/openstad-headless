@@ -1,23 +1,33 @@
+import { ImageUploader } from '@/components/image-uploader';
+import AccordionUI from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
+import { Spacer } from '@/components/ui/spacer';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  ChoiceOptions,
+  Item,
+  Weight,
+} from '@openstad-headless/choiceguide/src/props';
+import { X } from 'lucide-react';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import * as z from 'zod';
+
 import { Button } from '../../../../../../components/ui/button';
-import { Input } from '../../../../../../components/ui/input';
 import {
   Form,
-  FormControl, FormItem, FormLabel, FormField, FormMessage, FormDescription
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '../../../../../../components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useFieldArray } from 'react-hook-form';
-import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { X } from 'lucide-react';
-import { Textarea } from "@/components/ui/textarea";
-import { Spacer } from "@/components/ui/spacer";
-import AccordionUI from "@/components/ui/accordion";
-import { ImageUploader } from '@/components/image-uploader';
-import {ChoiceOptions, Item, Weight} from "@openstad-headless/choiceguide/src/props";
-import { useRouter } from 'next/router';
+import { Input } from '../../../../../../components/ui/input';
 
 const formSchema = z.object({
   choiceOptions: z.array(
@@ -30,7 +40,6 @@ const formSchema = z.object({
     })
   ),
 });
-
 
 export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   const category = 'choiceOption';
@@ -45,29 +54,24 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   } = useWidgetConfig<any>();
 
   const chosenConfig = widget?.config?.choiceGuide?.choicesType || 'default';
-  let dimensions = chosenConfig === 'plane'
-    ? ['X', 'Y']
-    : ['X'];
+  let dimensions = chosenConfig === 'plane' ? ['X', 'Y'] : ['X'];
   dimensions = chosenConfig === 'hidden' ? [] : dimensions;
 
   const nextIdRef = useRef<number>(1);
 
-  const defaults = useCallback(
-    () => {
-      const choiceOptions = widget?.config?.[category]?.choiceOptions || [];
+  const defaults = useCallback(() => {
+    const choiceOptions = widget?.config?.[category]?.choiceOptions || [];
 
-      if (choiceOptions.length > 0) {
-        nextIdRef.current = Math.max(...choiceOptions.map((group: ChoiceOptions) => group.id)) + 1;
-      } else {
-        nextIdRef.current = 1;
-      }
-      return {
-        choiceOptions
-      };
-    },
-    [widget?.config]
-  );
-
+    if (choiceOptions.length > 0) {
+      nextIdRef.current =
+        Math.max(...choiceOptions.map((group: ChoiceOptions) => group.id)) + 1;
+    } else {
+      nextIdRef.current = 1;
+    }
+    return {
+      choiceOptions,
+    };
+  }, [widget?.config]);
 
   type FormData = z.infer<typeof formSchema>;
 
@@ -79,7 +83,7 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'choiceOptions',
-    keyName: "reactKey",
+    keyName: 'reactKey',
   });
 
   useEffect(() => {
@@ -103,7 +107,9 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   const handleAddGroup = () => {
     const choiceOptions = form.getValues('choiceOptions') || [];
     const newId = choiceOptions.length
-      ? Math.max(...choiceOptions.map((group: ChoiceOptions) => Number(group.id))) + 1
+      ? Math.max(
+          ...choiceOptions.map((group: ChoiceOptions) => Number(group.id))
+        ) + 1
       : nextIdRef.current;
 
     append({ id: newId, title: '', description: '' });
@@ -115,13 +121,10 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
       <Form {...form}>
         <Heading size="xl">Keuze opties</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
           {fields.map((field, index) => {
-            const title = field.title ? field.title : `Keuze optie ${field.id}`
-            const image = form.getValues(`choiceOptions.${index}.image`) || "";
+            const title = field.title ? field.title : `Keuze optie ${field.id}`;
+            const image = form.getValues(`choiceOptions.${index}.image`) || '';
 
             return (
               <AccordionUI
@@ -131,47 +134,58 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
                     header: title,
                     content: (
                       <div className="flex flex-col w-full col-span-full mt-4 mb-4 bg-gray-100 rounded-md p-6">
-                        <Spacer size={1}/>
+                        <Spacer size={1} />
                         <div className="flex justify-start items-center">
-                          <p>{field.title ? `Verwijder ${field.title}?` : `Verwijder keuze optie ${field.id}?`}</p>
+                          <p>
+                            {field.title
+                              ? `Verwijder ${field.title}?`
+                              : `Verwijder keuze optie ${field.id}?`}
+                          </p>
                           <Button
                             type="button"
                             variant="destructive"
                             onClick={() => remove(index)}
                             className="p-1 ml-2"
-                            style={{padding: '3px 6px'}}
-                          >
-                            <X className="w-4 h-4"/>
+                            style={{ padding: '3px 6px' }}>
+                            <X className="w-4 h-4" />
                           </Button>
                         </div>
-                        <Spacer size={3}/>
+                        <Spacer size={3} />
                         <FormField
                           control={form.control}
                           name={`choiceOptions.${index}.title`}
-                          render={({field}) => (
+                          render={({ field }) => (
                             <FormItem>
                               <FormLabel>Titel</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Titel van de keuze optie" value={field.value ?? ''}/>
+                                <Input
+                                  {...field}
+                                  placeholder="Titel van de keuze optie"
+                                  value={field.value ?? ''}
+                                />
                               </FormControl>
                             </FormItem>
                           )}
                         />
-                        <Spacer size={2}/>
+                        <Spacer size={2} />
                         <FormField
                           control={form.control}
                           name={`choiceOptions.${index}.description`}
-                          render={({field}) => (
+                          render={({ field }) => (
                             <FormItem>
                               <FormLabel>Beschrijving</FormLabel>
                               <FormControl>
-                                <Textarea rows={5} {...field} placeholder="Beschrijving van de keuze optie"
-                                          value={field.value ?? ''}/>
+                                <Textarea
+                                  rows={5}
+                                  {...field}
+                                  placeholder="Beschrijving van de keuze optie"
+                                  value={field.value ?? ''}
+                                />
                               </FormControl>
                             </FormItem>
                           )}
                         />
-                        <Spacer size={2}/>
+                        <Spacer size={2} />
                         <FormField
                           control={form.control}
                           name={`choiceOptions.${index}.image`}
@@ -183,11 +197,19 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
                                   project={project as string}
                                   imageLabel="Upload hier een afbeelding"
                                   fieldName={`choiceOptions.${index}.imageUploader`}
-                                  allowedTypes={["image/*"]}
+                                  allowedTypes={['image/*']}
                                   onImageUploaded={(imageResult) => {
-                                    const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
-                                    form.setValue(`choiceOptions.${index}.image`, result);
-                                    form.resetField(`choiceOptions.${index}.imageUploader`);
+                                    const result =
+                                      typeof imageResult.url !== 'undefined'
+                                        ? imageResult.url
+                                        : '';
+                                    form.setValue(
+                                      `choiceOptions.${index}.image`,
+                                      result
+                                    );
+                                    form.resetField(
+                                      `choiceOptions.${index}.imageUploader`
+                                    );
                                   }}
                                 />
                               </FormControl>
@@ -199,15 +221,22 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
                         <div className="space-y-2 col-span-full md:col-span-1 flex flex-col mt-3">
                           {!!image && (
                             <>
-                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mt-3">Afbeelding</label>
+                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mt-3">
+                                Afbeelding
+                              </label>
                               <section className="grid col-span-full grid-cols-1 gap-y-4">
                                 <div className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
                                   <img src={image} alt={image} />
                                   <Button
                                     color="red"
                                     onClick={() => {
-                                      form.setValue(`choiceOptions.${index}.image`, '');
-                                      form.resetField(`choiceOptions.${index}.imageUploader`);
+                                      form.setValue(
+                                        `choiceOptions.${index}.image`,
+                                        ''
+                                      );
+                                      form.resetField(
+                                        `choiceOptions.${index}.imageUploader`
+                                      );
                                     }}
                                     className="absolute left-0 top-0">
                                     <X size={24} />
@@ -218,20 +247,19 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
                           )}
                         </div>
 
-                        <Spacer size={2}/>
+                        <Spacer size={2} />
                       </div>
-                    )
-                  }
+                    ),
+                  },
                 ]}
               />
-            )
+            );
           })}
 
           <Button
             type="button"
             onClick={handleAddGroup}
-            className="w-fit col-span-full mt-4 block"
-          >
+            className="w-fit col-span-full mt-4 block">
             Voeg Keuze optie Toe
           </Button>
 

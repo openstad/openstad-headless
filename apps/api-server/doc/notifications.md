@@ -38,6 +38,7 @@ Note: some types (currently 'new or updated comment - admin update') are saved w
 ### Types
 
 Currently available types:
+
 - new or updated comment - admin update
 - new concept resource - user feedback
 - new published resource - user feedback
@@ -55,6 +56,7 @@ Currently available types:
 ## API notification endpoints:
 
 #### Create a notification
+
 ```
 POST :HOSTNAME/notification/project/:PROJECT_ID/notification
 Content-Type: application/json
@@ -74,18 +76,21 @@ See above; this is the only truly useful notification endpoint.
 But for completeness the normal set of CRUD actions is available:
 
 #### List all notifications
+
 ```
 GET :HOSTNAME/notification/project/:PROJECT_ID/notification
 Authorization: XXX
 ```
 
 #### View a single notification
+
 ```
 GET :HOSTNAME/notification/project/:PROJECT_ID/notification/:NOTIFICATION_ID
 Authorization: XXX
 ```
 
 #### Update a notification
+
 ```
 PUT :HOSTNAME/notification/project/:PROJECT_ID/notification/:NOTIFICATION_ID
 Content-Type: application/json
@@ -98,29 +103,30 @@ Authorization: XXX
 ```
 
 #### Delete a notification
+
 ```
 DELETE :HOSTNAME/notification/project/:PROJECT_ID/notification/:NOTIFICATION_ID
 Authorization: XXX
 ```
 
-
-
-
 ## API template endpoints:
 
 #### List all templates
+
 ```
 GET :HOSTNAME/notification/project/:PROJECT_ID/template
 Authorization: XXX
 ```
 
 #### View a single template
+
 ```
 GET :HOSTNAME/notification/project/:PROJECT_ID/template/:TEMPLATE_ID
 Authorization: XXX
 ```
 
 #### Create a template
+
 ```
 POST :HOSTNAME/notification/project/:PROJECT_ID/template
 Content-Type: application/json
@@ -136,6 +142,7 @@ Authorization: XXX
 ```
 
 #### Update a template
+
 ```
 PUT :HOSTNAME/notification/project/:PROJECT_ID/template/:TEMPLATE_ID
 Content-Type: application/json
@@ -148,12 +155,14 @@ Authorization: XXX
 ```
 
 #### Delete a template
+
 ```
 DELETE :HOSTNAME/notification/project/:PROJECT_ID/template/:TEMPLATE_ID
 Authorization: XXX
 ```
 
 ## Todo:
+
 - sms doet het nog niet
 - default templates moeten nog gemaakt
 - the dir for default templates could be configurable, to facilitate easy replacement

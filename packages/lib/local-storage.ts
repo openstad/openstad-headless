@@ -60,7 +60,6 @@ export default class LocalStorage {
   destroy() {
     window.localStorage.setItem('openstad', JSON.stringify({}));
   }
-
 }
 
 export { LocalStorage };

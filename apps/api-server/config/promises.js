@@ -1,5 +1,5 @@
-var config  = require('config');
+var config = require('config');
 
-if( config.get('debug') ) {
-	Promise.longStackTraces();
+if (config.get('debug')) {
+  Promise.longStackTraces();
 }

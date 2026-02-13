@@ -25,8 +25,6 @@ Uiteindelijk zal de API alleen config vars opslaan die zijn gedefineerd. Voor nu
 
 De gedefinieerde config wordt nog wel gebruikt voor defaults etc. Die ziet er nu zo uit (maar dat is volgende week vast weer anders):
 
-
-
 ```
 {
   "config": {
@@ -299,9 +297,8 @@ De gedefinieerde config wordt nog wel gebruikt voor defaults etc. Die ziet er nu
 }
 ```
 
-
-
 #### TODO
+
 - config.votes.userRole doet nog niets. Je moet nu member zijn om te mogen stemmen. Dat zal ook anomniem moeten kunnen, waarbij hij dan automatisch een gebruiker aanmaakt (ook in mijnopenstad). Aanpassen rolePlay daarop.
 - config.votes.maxChoices doet nog niets.
 - config.votes.mustConfirm doet nog niets.

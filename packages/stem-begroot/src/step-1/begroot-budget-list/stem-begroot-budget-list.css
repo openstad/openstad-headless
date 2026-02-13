@@ -47,7 +47,7 @@
   font-size: var(--nlds--budget-aside-amount-font-size, inherit);
 }
 
-.stem-begroot-helptext-and-budget-section-budget ul{
+.stem-begroot-helptext-and-budget-section-budget ul {
   list-style: none;
   margin: 0;
   padding: 0;

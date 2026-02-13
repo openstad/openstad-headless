@@ -1,18 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import LikesDisplay from './weergave';
-import { useRouter } from 'next/router';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { useRouter } from 'next/router';
+import React, { useEffect, useRef, useState } from 'react';
+
+import LikesDisplay from './weergave';
 
 export const getServerSideProps = withApiUrl;
-
 
 // Use these props in the widget tabs
 export type LikeWidgetTabProps = Omit<
@@ -20,17 +23,17 @@ export type LikeWidgetTabProps = Omit<
   keyof Omit<BaseProps, 'projectId'> | keyof ProjectSettingProps
 >;
 
-export default function WidgetLikes({
-  apiUrl,
-}:WithApiUrlProps) {
+export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } = useWidgetConfig<LikeWidgetTabProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetTabProps>({
-    projectId,
-  });
+  const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetTabProps>(
+    {
+      projectId,
+    }
+  );
 
   return (
     <div>

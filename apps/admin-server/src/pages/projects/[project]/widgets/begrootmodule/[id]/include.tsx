@@ -1,27 +1,24 @@
 import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-} from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import useStatuses from "@/hooks/use-statuses";
-import React from "react";
 
 const formSchema = z.object({
   onlyIncludeTagIds: z.string().optional(),
-  onlyIncludeStatusIds: z.string().optional()
+  onlyIncludeStatusIds: z.string().optional(),
 });
 
 export default function WidgetStemBegrootInclude(
-  props: StemBegrootWidgetProps &
-    EditFieldProps<StemBegrootWidgetProps>
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
@@ -41,7 +38,6 @@ export default function WidgetStemBegrootInclude(
     type?: string;
   }>;
 
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -50,16 +46,12 @@ export default function WidgetStemBegrootInclude(
     },
   });
 
-  
-
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form} className="p-6 bg-white rounded-md">
         <Heading size="xl">Inclusief/Exclusief</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid gap-4">         
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
           <CheckboxList
             form={form}
             fieldName="onlyIncludeTagIds"
@@ -77,12 +69,14 @@ export default function WidgetStemBegrootInclude(
             }
             onValueChange={(tag, checked) => {
               const ids = form.getValues('onlyIncludeTagIds')?.split(',') ?? [];
-              const idsToSave = (checked
-                ? [...ids, tag.id]
-                : ids.filter((id) => id !== `${tag.id}`)).join(',');
+              const idsToSave = (
+                checked
+                  ? [...ids, tag.id]
+                  : ids.filter((id) => id !== `${tag.id}`)
+              ).join(',');
 
               form.setValue('onlyIncludeTagIds', idsToSave);
-              props.onFieldChanged("onlyIncludeTagIds", idsToSave);
+              props.onFieldChanged('onlyIncludeTagIds', idsToSave);
             }}
           />
 
@@ -102,14 +96,17 @@ export default function WidgetStemBegrootInclude(
                 ?.findIndex((tg) => tg === `${t.id}`) > -1
             }
             onValueChange={(status, checked) => {
-              const values = form.getValues('onlyIncludeStatusIds')?.split(',') ?? [];
+              const values =
+                form.getValues('onlyIncludeStatusIds')?.split(',') ?? [];
 
-              const idsToSave = (checked
-                ? [...values, status.id]
-                : values.filter((id) => id !== `${status.id}`)).join(',');
+              const idsToSave = (
+                checked
+                  ? [...values, status.id]
+                  : values.filter((id) => id !== `${status.id}`)
+              ).join(',');
 
               form.setValue('onlyIncludeStatusIds', idsToSave);
-              props.onFieldChanged("onlyIncludeStatusIds", idsToSave);
+              props.onFieldChanged('onlyIncludeStatusIds', idsToSave);
             }}
           />
 

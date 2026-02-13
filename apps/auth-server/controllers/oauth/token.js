@@ -25,21 +25,26 @@ const validate = require('../../validate');
  * @returns {Promise} Returns the promise for testing only
  */
 exports.info = (req, res) =>
-  validate.tokenForHttp(req.query.access_token)
-  .then(() => memoryStorage.accessTokens.find(req.query.access_token))
-  .then(token => validate.tokenExistsForHttp(token))
-  .then(token =>
-    memoryStorage.clients.find(token.clientID)
-    .then(client => validate.clientExistsForHttp(client))
-    .then(client => ({ client, token })))
-  .then(({ client, token }) => {
-    const expirationLeft = Math.floor((token.expirationDate.getTime() - Date.now()) / 1000);
-    res.json({ audience : client.clientId, expires_in : expirationLeft });
-  })
-  .catch((err) => {
-    res.status(err.status);
-    res.json({ error: err.message });
-  });
+  validate
+    .tokenForHttp(req.query.access_token)
+    .then(() => memoryStorage.accessTokens.find(req.query.access_token))
+    .then((token) => validate.tokenExistsForHttp(token))
+    .then((token) =>
+      memoryStorage.clients
+        .find(token.clientID)
+        .then((client) => validate.clientExistsForHttp(client))
+        .then((client) => ({ client, token }))
+    )
+    .then(({ client, token }) => {
+      const expirationLeft = Math.floor(
+        (token.expirationDate.getTime() - Date.now()) / 1000
+      );
+      res.json({ audience: client.clientId, expires_in: expirationLeft });
+    })
+    .catch((err) => {
+      res.status(err.status);
+      res.json({ error: err.message });
+    });
 
 /**
  * This endpoint is for revoking a token.  This has the same signature to
@@ -63,19 +68,20 @@ exports.info = (req, res) =>
  * @returns {Promise} Returns the promise for testing
  */
 exports.revoke = (req, res) =>
-  validate.tokenForHttp(req.query.token)
-  .then(() => memoryStorage.accessTokens.delete(req.query.token))
-  .then((token) => {
-    if (token == null) {
-      return memoryStorage.refreshTokens.delete(req.query.token);
-    }
-    return token;
-  })
-  .then(tokenDeleted => validate.tokenExistsForHttp(tokenDeleted))
-  .then(() => {
-    res.json({});
-  })
-  .catch((err) => {
-    res.status(err.status);
-    res.json({ error: err.message });
-  });
+  validate
+    .tokenForHttp(req.query.token)
+    .then(() => memoryStorage.accessTokens.delete(req.query.token))
+    .then((token) => {
+      if (token == null) {
+        return memoryStorage.refreshTokens.delete(req.query.token);
+      }
+      return token;
+    })
+    .then((tokenDeleted) => validate.tokenExistsForHttp(tokenDeleted))
+    .then(() => {
+      res.json({});
+    })
+    .catch((err) => {
+      res.status(err.status);
+      res.json({ error: err.message });
+    });

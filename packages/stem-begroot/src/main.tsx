@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+
 import { StemBegroot, StemBegrootWidgetProps } from './stem-begroot.js';
 
 const config: StemBegrootWidgetProps = {
@@ -44,7 +45,7 @@ const config: StemBegrootWidgetProps = {
     withExisting: 'error',
   },
   displayTagFilters: true,
-  displaySearch:true,
+  displaySearch: true,
   tagGroups: [
     { type: 'status', label: 'Status', multiple: false },
     { type: 'area', label: 'Gebied', multiple: false },

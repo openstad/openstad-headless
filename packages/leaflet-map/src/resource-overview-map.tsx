@@ -1,23 +1,24 @@
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
-import { Button, ButtonLink } from '@utrecht/component-library-react';
-
-import {PropsWithChildren, useEffect} from 'react';
-import { loadWidget } from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
-import parseLocation from './lib/parse-location';
-
+import { LocationType } from '@openstad-headless/leaflet-map/src/types/location.js';
+import '@utrecht/component-library-css';
+import { Button, ButtonLink } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { PropsWithChildren, useEffect } from 'react';
+import React, { useState } from 'react';
+
+import { loadWidget } from '../../lib/load-widget';
+import { BaseMap } from './base-map';
 import './css/base-map.css';
 import './css/resource-overview-map.css';
-
-import type { MarkerProps } from './types/marker-props';
+import parseLocation from './lib/parse-location';
 import type { CategoriesType } from './types/categorize';
-import type {DataLayer, ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
-import { BaseMap } from './base-map';
-import React, { useState } from 'react';
-import { LocationType } from '@openstad-headless/leaflet-map/src/types/location.js';
-import L from 'leaflet';
+import type { MarkerProps } from './types/marker-props';
+import type {
+  DataLayer,
+  ResourceOverviewMapWidgetProps,
+} from './types/resource-overview-map-widget-props';
 
 type Point = {
   lat: number;
@@ -66,7 +67,10 @@ const ResourceOverviewMap = ({
   let categorizeByField = categorize?.categorizeByField;
   let categories: CategoriesType = {};
 
-  const projectId = Array.isArray(selectedProjects) && selectedProjects.length > 0 ? "0" : props.projectId;
+  const projectId =
+    Array.isArray(selectedProjects) && selectedProjects.length > 0
+      ? '0'
+      : props.projectId;
 
   if (categorizeByField) {
     const { data: tags } = datastore.useTags({
@@ -103,15 +107,13 @@ const ResourceOverviewMap = ({
 
       if (marker.lat && marker.lng) {
         if (onMarkerClick) {
-          marker.onClick = [
-            () => onMarkerClick(resource, index)
-          ];
+          marker.onClick = [() => onMarkerClick(resource, index)];
         } else {
-            const markerLink = projectPageLink || props.itemLink || markerHref;
+          const markerLink = projectPageLink || props.itemLink || markerHref;
 
-            if (markerLink) {
-              marker.href = markerLink.replace(/\[id\]/, resource.id);
-            }
+          if (markerLink) {
+            marker.href = markerLink.replace(/\[id\]/, resource.id);
+          }
         }
       }
 
@@ -124,23 +126,38 @@ const ResourceOverviewMap = ({
 
       const firstStatus = resource.statuses
         ? resource.statuses
-        .filter((status: { seqnr: number }) => status.seqnr !== undefined && status.seqnr !== null)
-        .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.statuses[0]
+            .filter(
+              (status: { seqnr: number }) =>
+                status.seqnr !== undefined && status.seqnr !== null
+            )
+            .sort(
+              (a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr
+            )[0] || resource.statuses[0]
         : false;
-      let MapIconImage = firstStatus && firstStatus.mapIcon ? firstStatus.mapIcon : '';
+      let MapIconImage =
+        firstStatus && firstStatus.mapIcon ? firstStatus.mapIcon : '';
 
       const firstTag = resource.tags
         ? resource.tags
-        .filter((tag: { seqnr: number }) => tag.seqnr !== undefined && tag.seqnr !== null)
-        .sort((a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr)[0] || resource.tags[0]
+            .filter(
+              (tag: { seqnr: number }) =>
+                tag.seqnr !== undefined && tag.seqnr !== null
+            )
+            .sort(
+              (a: { seqnr: number }, b: { seqnr: number }) => a.seqnr - b.seqnr
+            )[0] || resource.tags[0]
         : false;
-      MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : MapIconImage;
-      const MapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '';
+      MapIconImage =
+        firstTag && firstTag.mapIcon ? firstTag.mapIcon : MapIconImage;
+      const MapIconColor =
+        firstTag && firstTag.documentMapIconColor
+          ? firstTag.documentMapIconColor
+          : '';
 
       // Set the resource name
       marker.icon = {
         title: resource.title ?? 'Locatie pin',
-      }
+      };
 
       // Set the icon color
       if (MapIconColor) {
@@ -160,27 +177,29 @@ const ResourceOverviewMap = ({
       return marker;
     }) || [];
 
-  const projectMarkers = selectedProjects.map((project) => {
-    const marker: MarkerProps = {
-      lat: project.projectLat ? parseFloat(project.projectLat) : undefined,
-      lng: project.projectLng ? parseFloat(project.projectLng) : undefined,
-      href: project.overviewUrl || '',
-      title: project.overviewTitle || project.name || '',
-      icon: project.overviewMarkerIcon
-        ? L.icon({
-          iconUrl: project.overviewMarkerIcon,
-          iconSize: [30, 40],
-          iconAnchor: [15, 40],
-          className: 'custom-image-icon',
-        })
-        : undefined,
-    };
+  const projectMarkers = selectedProjects
+    .map((project) => {
+      const marker: MarkerProps = {
+        lat: project.projectLat ? parseFloat(project.projectLat) : undefined,
+        lng: project.projectLng ? parseFloat(project.projectLng) : undefined,
+        href: project.overviewUrl || '',
+        title: project.overviewTitle || project.name || '',
+        icon: project.overviewMarkerIcon
+          ? L.icon({
+              iconUrl: project.overviewMarkerIcon,
+              iconSize: [30, 40],
+              iconAnchor: [15, 40],
+              className: 'custom-image-icon',
+            })
+          : undefined,
+      };
 
-    if (marker.lat && marker.lng) {
-      return marker;
-    }
-    return null;
-  }).filter(marker => marker !== null);
+      if (marker.lat && marker.lng) {
+        return marker;
+      }
+      return null;
+    })
+    .filter((marker) => marker !== null);
 
   currentMarkers = currentMarkers.concat(projectMarkers);
 
@@ -191,8 +210,7 @@ const ResourceOverviewMap = ({
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
-      <div
-        className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
+      <div className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
         <section className="resource-counter">
           {resources?.metadata?.totalCount}
         </section>
@@ -209,8 +227,9 @@ const ResourceOverviewMap = ({
       <ButtonLink
         appearance="primary-action-button"
         href={ctaButton.href}
-        className={`osc-resource-overview-map-button ${countButtonElement ? 'osc-second-button' : 'osc-first-button'
-          }`}>
+        className={`osc-resource-overview-map-button ${
+          countButtonElement ? 'osc-second-button' : 'osc-first-button'
+        }`}>
         <section className="resource-label">{ctaButton.label}</section>
       </ButtonLink>
     );
@@ -255,39 +274,48 @@ const ResourceOverviewMap = ({
 
   useEffect(() => {
     if (!!polygon) {
-      setCenter( calculateCenter(polygon) );
+      setCenter(calculateCenter(polygon));
     }
   }, [polygon, areas]);
 
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
-    maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
+    maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20,
   };
 
   const skipMarkers = () => {
-    const nextFocus: HTMLButtonElement | null = document.querySelectorAll('.leaflet-control-zoom-in')[0] as HTMLButtonElement;
+    const nextFocus: HTMLButtonElement | null = document.querySelectorAll(
+      '.leaflet-control-zoom-in'
+    )[0] as HTMLButtonElement;
 
     if (nextFocus) {
       nextFocus.focus();
     }
   };
 
-  if ( !!props?.map && typeof(props?.map) === 'object' ) {
+  if (!!props?.map && typeof props?.map === 'object') {
     props.map = {
       ...props.map,
       tilesVariant: props?.tilesVariant || props?.map?.tilesVariant || 'nlmaps',
       customUrl: props?.customUrl || props?.map?.customUrl || '',
-    }
+    };
   }
 
-  const dataLayerSettings = !!props?.datalayer ? {
-    datalayer: props?.datalayer || [],
-    enableOnOffSwitching: props?.enableOnOffSwitching || false,
-  } : props?.resourceOverviewMapWidget || {};
+  const dataLayerSettings = !!props?.datalayer
+    ? {
+        datalayer: props?.datalayer || [],
+        enableOnOffSwitching: props?.enableOnOffSwitching || false,
+      }
+    : props?.resourceOverviewMapWidget || {};
 
-  return ((polygon && center) || !Number(areaId)) ? (
-    <div className='map-container--buttons'>
-      <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
+  return (polygon && center) || !Number(areaId) ? (
+    <div className="map-container--buttons">
+      <Button
+        appearance="primary-action-button"
+        className="skip-link"
+        onClick={skipMarkers}>
+        Sla kaart over
+      </Button>
       <BaseMap
         {...props}
         {...zoom}
@@ -297,10 +325,8 @@ const ResourceOverviewMap = ({
         center={center}
         markers={currentMarkers}
         locationProx={locationProx}
-        dataLayerSettings={dataLayerSettings}
-      >
-      </BaseMap>
-      <div className='map-buttons'>
+        dataLayerSettings={dataLayerSettings}></BaseMap>
+      <div className="map-buttons">
         {ctaButtonElement}
         {countButtonElement}
       </div>

@@ -1,14 +1,11 @@
-module.exports= {
+module.exports = {
   options: {
     addFileGroups: [
       {
         name: 'icons',
-        extensions: [
-          'ico', 'gif', 'png'
-        ],
-        extensionMaps: {
-        }
-      }
-    ]
-  }
+        extensions: ['ico', 'gif', 'png'],
+        extensionMaps: {},
+      },
+    ],
+  },
 };

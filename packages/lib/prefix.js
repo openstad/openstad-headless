@@ -1,5 +1,5 @@
-import prefixer from 'postcss-prefix-selector';
 import autoprefixer from 'autoprefixer';
+import prefixer from 'postcss-prefix-selector';
 
 export const prefix = () => ({
   postcss: {
@@ -20,14 +20,17 @@ export const prefix = () => ({
           // }
 
           const annotation = rule.prev();
-          if (annotation?.type === 'comment' && annotation.text.trim() === 'no-prefix') {
+          if (
+            annotation?.type === 'comment' &&
+            annotation.text.trim() === 'no-prefix'
+          ) {
             return selector;
           }
 
           return prefixedSelector;
         },
       }),
-      autoprefixer({})
+      autoprefixer({}),
     ],
-  }
+  },
 });

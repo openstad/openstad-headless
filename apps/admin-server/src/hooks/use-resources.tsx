@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useResources(
   projectId?: string,
@@ -115,12 +115,23 @@ export default function useResources(
     const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
 
     for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
-      const response = await fetch(`${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`);
+      const response = await fetch(
+        `${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`
+      );
       const results = await response.json();
       allData = allData.concat(results?.records || []);
     }
     return allData;
   }
 
-  return { ...resourcesListSwr, data: records, pagination, create, update, remove, duplicate, fetchAll };
+  return {
+    ...resourcesListSwr,
+    data: records,
+    pagination,
+    create,
+    update,
+    remove,
+    duplicate,
+    fetchAll,
+  };
 }

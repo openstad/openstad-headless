@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { CounterWidgetProps, Counter } from './counter.js';
+
+import { Counter, CounterWidgetProps } from './counter.js';
 
 const config: CounterWidgetProps = {
   counterType: 'choiceGuideResults',
@@ -11,7 +12,7 @@ const config: CounterWidgetProps = {
   api: {
     url: 'http://localhost:31410',
   },
-  projectId: '2'
+  projectId: '2',
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

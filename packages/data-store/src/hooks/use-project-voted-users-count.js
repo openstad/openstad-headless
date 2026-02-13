@@ -1,6 +1,4 @@
-export default function useProjectVotedUsersCount({
-  projectId,
-}) {
+export default function useProjectVotedUsersCount({ projectId }) {
   let self = this;
 
   if (!projectId) {

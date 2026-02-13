@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -40,7 +41,8 @@ export default function WidgetResourceOverviewSearch(
     defaultValues: {
       displaySearch: props.displaySearch || false,
       displaySearchText: props.displaySearchText || false,
-      textActiveSearch: props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
+      textActiveSearch:
+        props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
       searchPlaceholder: props.searchPlaceholder || 'Zoeken',
     },
   });
@@ -55,7 +57,6 @@ export default function WidgetResourceOverviewSearch(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 gap-4">
-
           <FormField
             control={form.control}
             name="displaySearch"

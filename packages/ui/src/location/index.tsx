@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import './index.css';
+import { FormLabel } from '@utrecht/component-library-react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Select } from '../select';
 import { PostcodeAutoFillLocation } from '../stem-begroot-and-resource-overview/filter';
-import {Select} from "../select";
-import {FormLabel} from "@utrecht/component-library-react";
+import './index.css';
 
 const proximityOptions = [
-  { label: '100 meter', value: "0.1" },
-  { label: '250 meter', value: "0.25" },
-  { label: '500 meter', value: "0.5" },
-  { label: '1 km', value: "1" },
-  { label: '2 km', value: "2" },
-  { label: '3 km', value: "3" },
+  { label: '100 meter', value: '0.1' },
+  { label: '250 meter', value: '0.25' },
+  { label: '500 meter', value: '0.5' },
+  { label: '1 km', value: '1' },
+  { label: '2 km', value: '2' },
+  { label: '3 km', value: '3' },
 ];
 
 type Props = {
@@ -36,11 +37,17 @@ type FullSuggestion = Suggestion & {
   longitude: string;
 };
 
-export default function PostcodeAutoFill({ onValueChange, locationDefault, ...props }: Props) {
+export default function PostcodeAutoFill({
+  onValueChange,
+  locationDefault,
+  ...props
+}: Props) {
   const options = props.proximityOptions || proximityOptions;
-  const defaultProximity = props.proximityDefault || (options.length === 1
+  const defaultProximity =
+    props.proximityDefault ||
+    (options.length === 1
       ? options[0].value
-      : options[Math.floor((options.length / 2) - 1)]?.value || "0.5");
+      : options[Math.floor(options.length / 2 - 1)]?.value || '0.5');
 
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -53,11 +60,11 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if ( !locationDefault && input !== '' ) {
+    if (!locationDefault && input !== '') {
       reset();
       setProximity(defaultProximity);
     }
-  }, [ locationDefault, defaultProximity ]);
+  }, [locationDefault, defaultProximity]);
 
   useEffect(() => {
     if (input.length < 3) {
@@ -108,7 +115,10 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         if (!selected) setInput('');
         setShowDropdown(false);
         setHighlightedIndex(0);
@@ -156,7 +166,7 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
             type="text"
             ref={inputRef}
             value={input}
-            onChange={e => {
+            onChange={(e) => {
               setInput(e.target.value);
               setSelected(null);
               setShowDropdown(true);
@@ -168,7 +178,11 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
             aria-autocomplete="list"
             aria-controls="suggestion-list"
             aria-expanded={showDropdown}
-            aria-activedescendant={ showDropdown && suggestions.length > 0 ? `suggestion-${highlightedIndex}` : undefined }
+            aria-activedescendant={
+              showDropdown && suggestions.length > 0
+                ? `suggestion-${highlightedIndex}`
+                : undefined
+            }
             role="combobox"
           />
           {selected && (
@@ -176,34 +190,41 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
               className="clear-button"
               onClick={reset}
               type="button"
-              aria-label="Wis selectie"
-            >
+              aria-label="Wis selectie">
               ✕
             </button>
           )}
         </div>
 
-        {loading && <p className="loading" aria-live="polite">Laden...</p>}
+        {loading && (
+          <p className="loading" aria-live="polite">
+            Laden...
+          </p>
+        )}
 
         {!loading && showDropdown && suggestions.length > 0 && (
-          <ul className="suggestion-list" id="suggestion-list" role="listbox"
-              onKeyDown={e => {
-                if (showDropdown && suggestions.length > 0) {
-                  if (e.key === 'ArrowDown') {
-                    setHighlightedIndex(i => Math.min(i + 1, suggestions.length - 1));
-                    e.preventDefault();
-                  } else if (e.key === 'ArrowUp') {
-                    setHighlightedIndex(i => Math.max(i - 1, 0));
-                    e.preventDefault();
-                  } else if (e.key === 'Enter') {
-                    handleSelect(suggestions[highlightedIndex]);
-                    e.preventDefault();
-                  } else if (e.key === ' ') {
-                    e.preventDefault();
-                  }
+          <ul
+            className="suggestion-list"
+            id="suggestion-list"
+            role="listbox"
+            onKeyDown={(e) => {
+              if (showDropdown && suggestions.length > 0) {
+                if (e.key === 'ArrowDown') {
+                  setHighlightedIndex((i) =>
+                    Math.min(i + 1, suggestions.length - 1)
+                  );
+                  e.preventDefault();
+                } else if (e.key === 'ArrowUp') {
+                  setHighlightedIndex((i) => Math.max(i - 1, 0));
+                  e.preventDefault();
+                } else if (e.key === 'Enter') {
+                  handleSelect(suggestions[highlightedIndex]);
+                  e.preventDefault();
+                } else if (e.key === ' ') {
+                  e.preventDefault();
                 }
-              }}
-          >
+              }
+            }}>
             {suggestions.map((s: Suggestion, index) => (
               <li
                 key={index}
@@ -211,8 +232,7 @@ export default function PostcodeAutoFill({ onValueChange, locationDefault, ...pr
                 role="option"
                 id={`suggestion-${index}`}
                 aria-selected={highlightedIndex === index}
-                tabIndex={-1}
-              >
+                tabIndex={-1}>
                 <strong>{s.postcode}</strong> {s.straat}, {s.woonplaats}
               </li>
             ))}

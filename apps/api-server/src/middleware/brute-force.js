@@ -1,7 +1,6 @@
 // The use of express-brute was commented out 2 years ago, while express-brute has not been updated since 2016.
 // I propose to remove this dependency, and fix this in another way, to be done later.
 
-
 //const ExpressBrute = require('express-brute');
 // const createError = require('http-errors')
 // const moment = require('moment-timezone');
@@ -29,7 +28,7 @@
 //   handleStoreError: handleStoreError
 // });
 
-exports.postMiddleware = function(req, res, next) {
+exports.postMiddleware = function (req, res, next) {
   next();
 
   /*
@@ -40,7 +39,7 @@ exports.postMiddleware = function(req, res, next) {
 		postBruteForce.prevent(req, res, next);
 	}
   */
-}
+};
 
 //CONFIGURE BRUTE FORCE PROTECT
 // let globalBruteForce = new ExpressBrute(new ExpressBrute.MemoryStore(), {
@@ -54,7 +53,7 @@ exports.postMiddleware = function(req, res, next) {
 //   handleStoreError: handleStoreError
 // });
 
-exports.globalMiddleware = function(req, res, next) {
+exports.globalMiddleware = function (req, res, next) {
   next();
   /*
 	if ((config.ignoreBruteForceIPs && config.ignoreBruteForceIPs.indexOf(req.ip) != -1) || ( req.project && req.project.config && req.project.config.ignoreBruteForceIPs && req.project.config.ignoreBruteForceIPs.indexOf(req.ip) != -1 )) {
@@ -63,4 +62,4 @@ exports.globalMiddleware = function(req, res, next) {
 		globalBruteForce.prevent(req, res, next);
 	}
   */
-}
+};

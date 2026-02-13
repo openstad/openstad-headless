@@ -1,10 +1,3 @@
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-import { useCallback, useEffect } from 'react';
-import { useProject } from '../../../../hooks/use-project';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -14,14 +7,21 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import {useRouter} from "next/router";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
+import * as React from 'react';
+import { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const formSchema = z.object({
   UniqueCodeTitle: z.string().optional(),
@@ -56,46 +56,100 @@ const formSchema = z.object({
 });
 
 export default function ProjectAuthentication() {
-
-  const {
-    data,
-    updateProject,
-  } = useProject(['includeAuthConfig']);
+  const { data, updateProject } = useProject(['includeAuthConfig']);
 
   const router = useRouter();
   const { project } = router.query;
 
   const defaults = useCallback(
     () => ({
-      UniqueCodeTitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.title || '',
-      UniqueCodeDescription: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.description || '',
-      UniqueCodeLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.label || '',
-      UniqueCodeButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.buttonText || '',
-      UniqueCodeHelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.helpText || '',
-      UrlTitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.title || '',
-      UrlDescription: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.description || '',
-      UrlLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.label || '',
-      UrlButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.buttonText || '',
-      UrlHelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.helpText || '',
-      SMS1Title: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginTitle || '',
-      SMS1Subtitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginSubtitle || '',
-      SMS1Description: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginDescription || '',
-      SMS1Label: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginLabel || '',
-      SMS1ButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginButtonText || '',
-      SMS1HelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginHelpText || '',
-      SMS2Title: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeTitle || '',
-      SMS2Subtitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeSubtitle || '',
-      SMS2Description: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeDescription || '',
-      SMS2Label: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeLabel || '',
-      SMS2ButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeButtonText || '',
-      SMS2HelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeHelpText || '',
-      LocalTitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.title || '',
-      LocalDescription: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.description || '',
-      LocalEmailLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.emailLabel || '',
-      LocalPasswordLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.passwordLabel || '',
-      LocalButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.buttonText || '',
-      LocalHelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.helpText || '',
-      LocalForgotPasswordText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.forgotPasswordText || '',
+      UniqueCodeTitle:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
+          ?.title || '',
+      UniqueCodeDescription:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
+          ?.description || '',
+      UniqueCodeLabel:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
+          ?.label || '',
+      UniqueCodeButtonText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
+          ?.buttonText || '',
+      UniqueCodeHelpText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
+          ?.helpText || '',
+      UrlTitle:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.title ||
+        '',
+      UrlDescription:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.description || '',
+      UrlLabel:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.label ||
+        '',
+      UrlButtonText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.buttonText || '',
+      UrlHelpText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.helpText || '',
+      SMS1Title:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.loginTitle || '',
+      SMS1Subtitle:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.loginSubtitle || '',
+      SMS1Description:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.loginDescription || '',
+      SMS1Label:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.loginLabel || '',
+      SMS1ButtonText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.loginButtonText || '',
+      SMS1HelpText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.loginHelpText || '',
+      SMS2Title:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeTitle || '',
+      SMS2Subtitle:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeSubtitle || '',
+      SMS2Description:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeDescription || '',
+      SMS2Label:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeLabel || '',
+      SMS2ButtonText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeButtonText || '',
+      SMS2HelpText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeHelpText || '',
+      LocalTitle:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
+          ?.title || '',
+      LocalDescription:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
+          ?.description || '',
+      LocalEmailLabel:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
+          ?.emailLabel || '',
+      LocalPasswordLabel:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
+          ?.passwordLabel || '',
+      LocalButtonText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
+          ?.buttonText || '',
+      LocalHelpText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
+          ?.helpText || '',
+      LocalForgotPasswordText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
+          ?.forgotPasswordText || '',
     }),
     [data?.config]
   );
@@ -108,7 +162,7 @@ export default function ProjectAuthentication() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-  
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const project = await updateProject({
@@ -154,20 +208,20 @@ export default function ProjectAuthentication() {
                   forgotPasswordText: values.LocalForgotPasswordText,
                 },
               },
-            }
-          }
-        }
+            },
+          },
+        },
       });
       if (project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('Could not update', error);
     }
   }
-  
+
   return (
     <div>
       <PageLayout
@@ -182,7 +236,7 @@ export default function ProjectAuthentication() {
             url: `/projects/${project}/authentication`,
           },
           {
-            name: 'Login pagina\'s',
+            name: "Login pagina's",
             url: `/projects/${project}/authentication/loginpaginas`,
           },
         ]}>
@@ -202,13 +256,13 @@ export default function ProjectAuthentication() {
                   <Separator className="my-4" />
                   <div>
                     <FormLabel>
-                      Deze teksten staan op de pagina waar gebruikers met een unieke code inloggen.
+                      Deze teksten staan op de pagina waar gebruikers met een
+                      unieke code inloggen.
                     </FormLabel>
                   </div>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="lg:w-1/2 grid grid-cols-1 gap-4">
-
                     <FormField
                       control={form.control}
                       name="UniqueCodeTitle"
@@ -290,17 +344,19 @@ export default function ProjectAuthentication() {
             <TabsContent value="Url" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
-                  <Heading size="xl">Login pagina voor E-mail een loginlink</Heading>
+                  <Heading size="xl">
+                    Login pagina voor E-mail een loginlink
+                  </Heading>
                   <Separator className="my-4" />
                   <div>
                     <FormLabel>
-                      Als een gebruiker inlogt via een loginlink in een e-mail dan doet die dat op een een pagina met deze teksten:
+                      Als een gebruiker inlogt via een loginlink in een e-mail
+                      dan doet die dat op een een pagina met deze teksten:
                     </FormLabel>
                   </div>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="lg:w-1/2 grid grid-cols-1 gap-4">
-
                     <FormField
                       control={form.control}
                       name="UrlTitle"
@@ -382,17 +438,20 @@ export default function ProjectAuthentication() {
             <TabsContent value="Phonenumber" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
-                  <Heading size="xl">Pagina&apos;s voor SMS authenticatie</Heading>
+                  <Heading size="xl">
+                    Pagina&apos;s voor SMS authenticatie
+                  </Heading>
                   <Separator className="my-4" />
                   <div>
                     <FormLabel>
-                      Authenticatie met SMS gaat in twee stappen: het invoeren van je telefoonnummer en dan het invullen van de code die je hebt ontvangen.
+                      Authenticatie met SMS gaat in twee stappen: het invoeren
+                      van je telefoonnummer en dan het invullen van de code die
+                      je hebt ontvangen.
                     </FormLabel>
                   </div>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="lg:w-1/2 grid grid-cols-1 gap-4">
-
                     <div>
                       <FormLabel>
                         Teksten voor de eerste pagina (invoeren telefoonnummer):
@@ -581,131 +640,134 @@ export default function ProjectAuthentication() {
               </div>
             </TabsContent>
 
-              <TabsContent value="Local" className="p-0">
-                <div className="p-6 bg-white rounded-md">
-                  <Form {...form}>
-                    <Heading size="xl">Login met wachtwoord pagina</Heading>
-                    <Separator className="my-4" />
-                    <div>
-                      <FormLabel>
-                        Deze teksten staan op de pagina waar gebruikers met een wachtwoord inloggen.
-                      </FormLabel>
-                    </div>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="lg:w-1/2 grid grid-cols-1 gap-4">
-  
-                      <FormField
-                        control={form.control}
-                        name="LocalTitle"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Titel</FormLabel>
-                            <FormControl>
-                              <Input placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-  
-                      <FormField
-                        control={form.control}
-                        name="LocalDescription"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Beschrijving</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-  
-                      <FormField
-                        control={form.control}
-                        name="LocalEmailLabel"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Label bij het invoerveld gebruikers naam / e-mail</FormLabel>
-                            <FormControl>
-                              <Input placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-  
-                      <FormField
-                        control={form.control}
-                        name="LocalPasswordLabel"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Label bij het invoerveld wachtwoord</FormLabel>
-                            <FormControl>
-                              <Input placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-  
-                      <FormField
-                        control={form.control}
-                        name="LocalButtonText"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Knoptekst</FormLabel>
-                            <FormControl>
-                              <Input placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-  
-                      <FormField
-                        control={form.control}
-                        name="LocalHelpText"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Help tekst</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+            <TabsContent value="Local" className="p-0">
+              <div className="p-6 bg-white rounded-md">
+                <Form {...form}>
+                  <Heading size="xl">Login met wachtwoord pagina</Heading>
+                  <Separator className="my-4" />
+                  <div>
+                    <FormLabel>
+                      Deze teksten staan op de pagina waar gebruikers met een
+                      wachtwoord inloggen.
+                    </FormLabel>
+                  </div>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="LocalTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Titel</FormLabel>
+                          <FormControl>
+                            <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                      <FormField
-                        control={form.control}
-                        name="LocalForgotPasswordText"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Tekst voor &apos;wachtwoord vergeten&apos;</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-  
-                      <Button className="w-fit col-span-full" type="submit">
-                        Opslaan
-                      </Button>
-                    </form>
-                  </Form>
-                </div>
-              </TabsContent>
+                    <FormField
+                      control={form.control}
+                      name="LocalDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Beschrijving</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
+                    <FormField
+                      control={form.control}
+                      name="LocalEmailLabel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Label bij het invoerveld gebruikers naam / e-mail
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="LocalPasswordLabel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Label bij het invoerveld wachtwoord
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="LocalButtonText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Knoptekst</FormLabel>
+                          <FormControl>
+                            <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="LocalHelpText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Help tekst</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="LocalForgotPasswordText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Tekst voor &apos;wachtwoord vergeten&apos;
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button className="w-fit col-span-full" type="submit">
+                      Opslaan
+                    </Button>
+                  </form>
+                </Form>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </PageLayout>
     </div>
   );
 }
-
-

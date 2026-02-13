@@ -1,7 +1,6 @@
 const hasRole = require('../lib/hasRole');
 
 module.exports = function can(action, user, self) {
-
   self = self || this;
 
   if (!user) user = self.auth && self.auth.user;
@@ -9,16 +8,17 @@ module.exports = function can(action, user, self) {
 
   // use function defined on model
   let functionName = 'can' + action[0].toUpperCase() + action.slice(1);
-  if (self.auth && typeof self.auth[functionName] == 'function') return self.auth[functionName](user, self);
+  if (self.auth && typeof self.auth[functionName] == 'function')
+    return self.auth[functionName](user, self);
 
   let userId = self.userId;
-  if (self.toString().match('SequelizeInstance:user')) { // TODO: find a better check
-    userId = self.id
+  if (self.toString().match('SequelizeInstance:user')) {
+    // TODO: find a better check
+    userId = self.id;
   }
 
   // or fallback to default
   switch (action) {
-
     case 'list':
       return hasRole(user, self.auth && self.auth.listableBy, userId);
       break;
@@ -42,5 +42,4 @@ module.exports = function can(action, user, self) {
     default:
       return false;
   }
-
-}
+};

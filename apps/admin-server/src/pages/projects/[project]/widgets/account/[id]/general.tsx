@@ -1,24 +1,25 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AccountWidgetProps } from '@openstad-headless/account/src/account';
+import { useRouter } from 'next/router';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { AccountWidgetProps } from '@openstad-headless/account/src/account';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { useRouter } from 'next/router';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
 
 const formSchema = z.object({
   allowNickname: z.boolean(),
@@ -43,8 +44,14 @@ export default function AccountDisplay(
       allowNickname: props.allowNickname,
       allowUserEdit: props.allowUserEdit,
       showLogoutButton: props.showLogoutButton || false,
-      loginButtonText: typeof(props.loginButtonText) === 'undefined' ? 'Inloggen' : props.loginButtonText,
-      loginRequiredText: typeof(props.loginRequiredText) === 'undefined' ? 'Je moet ingelogd zijn om verder te gaan.' : props.loginRequiredText,
+      loginButtonText:
+        typeof props.loginButtonText === 'undefined'
+          ? 'Inloggen'
+          : props.loginButtonText,
+      loginRequiredText:
+        typeof props.loginRequiredText === 'undefined'
+          ? 'Je moet ingelogd zijn om verder te gaan.'
+          : props.loginRequiredText,
       showEmailConsentField: props.showEmailConsentField || false,
     },
   });
@@ -60,7 +67,6 @@ export default function AccountDisplay(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
-
         <FormField
           control={form.control}
           name="allowNickname"
@@ -90,11 +96,12 @@ export default function AccountDisplay(
           name="showEmailConsentField"
           render={({ field }) => (
             <FormItem className="col-span-1">
-              <FormLabel>
-                Toon veld voor e-mail toestemming
-              </FormLabel>
+              <FormLabel>Toon veld voor e-mail toestemming</FormLabel>
               <FormDescription>
-                Hiermee kan een gebruiker aangeven e-mails te willen ontvangen wanneer iemand reageert op zijn of haar inzending of reactie. Dit werkt alleen als e-mailnotificaties ook zijn ingeschakeld in de instellingen van de inzending- en reactie-widgets.
+                Hiermee kan een gebruiker aangeven e-mails te willen ontvangen
+                wanneer iemand reageert op zijn of haar inzending of reactie.
+                Dit werkt alleen als e-mailnotificaties ook zijn ingeschakeld in
+                de instellingen van de inzending- en reactie-widgets.
               </FormDescription>
               {YesNoSelect(field, props)}
               <FormMessage />
@@ -119,9 +126,7 @@ export default function AccountDisplay(
           name="loginButtonText"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Tekst voor de inlogknop
-              </FormLabel>
+              <FormLabel>Tekst voor de inlogknop</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -136,15 +141,12 @@ export default function AccountDisplay(
           )}
         />
 
-
         <FormField
           control={form.control}
           name="loginRequiredText"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Tekst die getoond wordt boven de inlogknop
-              </FormLabel>
+              <FormLabel>Tekst die getoond wordt boven de inlogknop</FormLabel>
               <FormControl>
                 <Input
                   {...field}

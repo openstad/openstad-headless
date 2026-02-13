@@ -18,7 +18,13 @@
     "test:unit:image": "vitest run apps/image-server",
     "test:e2e": "cypress run",
     "test:component": "node ./scripts/run-component-tests.js",
-    "cy:open": "cypress open"
+    "cy:open": "cypress open",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,css,scss,md,json,html,yml,yaml}": "prettier --write"
   },
   "repository": {
     "type": "git",
@@ -37,11 +43,13 @@
   ],
   "private": true,
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/cron": "^2.4.3",
     "cypress": "^15.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "mysql2": "^3.11.3",
-    "prettier": "3.0.3",
+    "prettier": "^3.8.1",
     "vitest": "^3.2.3"
   },
   "dependencies": {

@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
-const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 let router = express.Router({ mergeParams: true });
 
@@ -11,7 +11,9 @@ router.all('*', function (req, res, next) {
   req.scope.push('defaultScope');
 
   const includeGlobalTags = req?.query?.includeGlobalTags === 'true';
-  req.scope.push({ method: ['forProjectId', req.params.projectId, includeGlobalTags] });
+  req.scope.push({
+    method: ['forProjectId', req.params.projectId, includeGlobalTags],
+  });
 
   if (req.query.includeProject) {
     req.scope.push('includeProject');
@@ -21,7 +23,7 @@ router.all('*', function (req, res, next) {
     let type = req.query.type;
     req.scope.push({ method: ['selectType', type] });
   }
-  
+
   if (req.query.tags) {
     let tags = req.query.tags;
     req.scope.push({ method: ['onlyWithIds', tags] });
@@ -42,7 +44,9 @@ router
     let { dbQuery } = req;
 
     const includeGlobalTags = req?.query?.includeGlobalTags === 'true';
-    req.scope.push({ method: ['forProjectId', req.params.projectId, includeGlobalTags] });
+    req.scope.push({
+      method: ['forProjectId', req.params.projectId, includeGlobalTags],
+    });
 
     db.Tag.scope(...req.scope)
       .findAndCountAll(dbQuery)
@@ -62,7 +66,7 @@ router
   // create tag
   // ---------------
   .post(auth.can('Tag', 'create'))
-  .post( rateLimiter(), function (req, res, next) {
+  .post(rateLimiter(), function (req, res, next) {
     const data = {
       name: req.body.name,
       type: req.body.type,
@@ -116,7 +120,7 @@ router
   // update tag
   // ---------------
   .put(auth.useReqUser)
-  .put( rateLimiter(), function (req, res, next) {
+  .put(rateLimiter(), function (req, res, next) {
     const tag = req.results;
     if (!(tag && tag.can && tag.can('update')))
       return next(new Error('You cannot update this tag'));

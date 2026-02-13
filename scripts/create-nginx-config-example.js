@@ -1,7 +1,6 @@
 const fs = require('fs');
 
 module.exports = async function createNginxConfigExample() {
-
   let nginxConfigExample = `# ----------------------------------------------------------------------------------------------------
 # API
 
@@ -74,10 +73,8 @@ server {
   try {
     console.log('==============================');
     console.log('Create nginx config example file');
-    await fs.writeFileSync('./nginx.config.example', nginxConfigExample );
+    await fs.writeFileSync('./nginx.config.example', nginxConfigExample);
   } catch (err) {
     console.log(err);
   }
-
-}
-  
+};

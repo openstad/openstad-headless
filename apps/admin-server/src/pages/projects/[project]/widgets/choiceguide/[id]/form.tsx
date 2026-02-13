@@ -1,13 +1,30 @@
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  ChoiceGuide,
+  ChoiceGuideProps,
+} from '@openstad-headless/choiceguide/src/props';
+import dynamic from 'next/dynamic';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+
 import { Button } from '../../../../../../components/ui/button';
-import { Input } from '../../../../../../components/ui/input';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
-  FormLabel, FormMessage,
+  FormLabel,
+  FormMessage,
 } from '../../../../../../components/ui/form';
+import { Input } from '../../../../../../components/ui/input';
 import {
   Select,
   SelectContent,
@@ -15,28 +32,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../../../../components/ui/select';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
-import {ChoiceGuide, ChoiceGuideProps} from '@openstad-headless/choiceguide/src/props';
-import dynamic from "next/dynamic";
 
 const TrixEditor = dynamic(
   () =>
-    import("@openstad-headless/ui/src/form-elements/text/index").then(
+    import('@openstad-headless/ui/src/form-elements/text/index').then(
       (mod) => mod.TrixEditor
     ),
   {
     ssr: false,
-    loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded border" />
+    loading: () => (
+      <div className="h-32 bg-gray-100 animate-pulse rounded border" />
+    ),
   }
 );
-import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
-import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   noOfQuestionsToShow: z.string().optional(),
@@ -53,15 +61,27 @@ const formSchema = z.object({
   afterUrl: z.string().optional(),
   introTitle: z.string().optional(),
   introDescription: z.string().optional(),
-  minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
-  maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
-  minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
-  maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+  minCharactersWarning: z
+    .string()
+    .optional()
+    .default('Nog minimaal {minCharacters} tekens'),
+  maxCharactersWarning: z
+    .string()
+    .optional()
+    .default('Je hebt nog {maxCharacters} tekens over'),
+  minCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+  maxCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
 });
 
 export default function ChoicesSelectorForm(
   props: ChoiceGuideProps & EditFieldProps<ChoiceGuideProps>
-)  {
+) {
   const category = 'choiceGuide';
 
   const {
@@ -72,24 +92,44 @@ export default function ChoicesSelectorForm(
 
   const defaults = useCallback(
     () => ({
-      noOfQuestionsToShow: widget?.config?.[category]?.noOfQuestionsToShow || "100",
-      showPageCountAndCurrentPageInButton: undefinedToTrueOrProp(widget?.config?.[category]?.showPageCountAndCurrentPageInButton),
-      showBackButtonInTopOfPage: widget?.config?.[category]?.showBackButtonInTopOfPage || false,
+      noOfQuestionsToShow:
+        widget?.config?.[category]?.noOfQuestionsToShow || '100',
+      showPageCountAndCurrentPageInButton: undefinedToTrueOrProp(
+        widget?.config?.[category]?.showPageCountAndCurrentPageInButton
+      ),
+      showBackButtonInTopOfPage:
+        widget?.config?.[category]?.showBackButtonInTopOfPage || false,
       choicesType: widget?.config?.[category]?.choicesType || 'default',
       imageAspectRatio: widget?.config?.[category]?.imageAspectRatio || '16x9',
-      choicesPreferenceMinColor: widget?.config?.[category]?.choicesPreferenceMinColor || '#ff9100',
-      choicesPreferenceMaxColor: widget?.config?.[category]?.choicesPreferenceMaxColor || '#bed200',
-      choicesPreferenceTitle: widget?.config?.[category]?.choicesPreferenceTitle || 'Jouw voorkeur is {preferredChoice}',
-      choicesNoPreferenceYetTitle: widget?.config?.[category]?.choicesNoPreferenceYetTitle || 'Je hebt nog geen keuze gemaakt',
-      choicesInBetweenPreferenceTitle: widget?.config?.[category]?.choicesInBetweenPreferenceTitle || 'Je staat precies tussen meerdere voorkeuren in',
+      choicesPreferenceMinColor:
+        widget?.config?.[category]?.choicesPreferenceMinColor || '#ff9100',
+      choicesPreferenceMaxColor:
+        widget?.config?.[category]?.choicesPreferenceMaxColor || '#bed200',
+      choicesPreferenceTitle:
+        widget?.config?.[category]?.choicesPreferenceTitle ||
+        'Jouw voorkeur is {preferredChoice}',
+      choicesNoPreferenceYetTitle:
+        widget?.config?.[category]?.choicesNoPreferenceYetTitle ||
+        'Je hebt nog geen keuze gemaakt',
+      choicesInBetweenPreferenceTitle:
+        widget?.config?.[category]?.choicesInBetweenPreferenceTitle ||
+        'Je staat precies tussen meerdere voorkeuren in',
       beforeUrl: widget?.config?.[category]?.beforeUrl || '',
       afterUrl: widget?.config?.[category]?.afterUrl || '',
       introTitle: widget?.config?.[category]?.introTitle || '',
       introDescription: widget?.config?.[category]?.introDescription || '',
-      minCharactersWarning: widget?.config?.[category]?.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
-      maxCharactersWarning: widget?.config?.[category]?.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
-      minCharactersError: widget?.config?.[category]?.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
-      maxCharactersError: widget?.config?.[category]?.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      minCharactersWarning:
+        widget?.config?.[category]?.minCharactersWarning ||
+        'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning:
+        widget?.config?.[category]?.maxCharactersWarning ||
+        'Je hebt nog {maxCharacters} tekens over',
+      minCharactersError:
+        widget?.config?.[category]?.minCharactersError ||
+        'Tekst moet minimaal {minCharacters} karakters bevatten',
+      maxCharactersError:
+        widget?.config?.[category]?.maxCharactersError ||
+        'Tekst moet maximaal {maxCharacters} karakters bevatten',
     }),
     [widget?.config]
   );
@@ -162,15 +202,20 @@ export default function ChoicesSelectorForm(
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="default">Standaard</SelectItem>
-                    <SelectItem value="minus-to-plus-100">Van min naar plus 100</SelectItem>
+                    <SelectItem value="minus-to-plus-100">
+                      Van min naar plus 100
+                    </SelectItem>
                     <SelectItem value="plane">In een vlak</SelectItem>
-                    <SelectItem value="hidden">Geen: verberg de voorkeuren</SelectItem>
+                    <SelectItem value="hidden">
+                      Geen: verberg de voorkeuren
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
             )}
           />
-          {(watchChoicesType === 'minus-to-plus-100' || watchChoicesType === 'plane') && (
+          {(watchChoicesType === 'minus-to-plus-100' ||
+            watchChoicesType === 'plane') && (
             <>
               {watchChoicesType === 'minus-to-plus-100' && (
                 <>
@@ -217,7 +262,9 @@ export default function ChoicesSelectorForm(
                 name="choicesNoPreferenceYetTitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Titel boven de keuzes, nog geen voorkeur</FormLabel>
+                    <FormLabel>
+                      Titel boven de keuzes, nog geen voorkeur
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -328,9 +375,7 @@ export default function ChoicesSelectorForm(
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters onder de minimum waarde ligt. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -347,9 +392,7 @@ export default function ChoicesSelectorForm(
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -366,9 +409,7 @@ export default function ChoicesSelectorForm(
                 <FormDescription>
                   {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters onder de minimum waarde ligt na het versturen van het formulier. Gebruik {minCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -385,9 +426,7 @@ export default function ChoicesSelectorForm(
                 <FormDescription>
                   {`Dit is de tekst van de foutmelding die getoond wordt als het aantal karakters boven de maximum waarde ligt na het versturen van het formulier. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}

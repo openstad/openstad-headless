@@ -1,3 +1,4 @@
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -7,27 +8,26 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Spacer } from '@/components/ui/spacer';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import useTags from '@/hooks/use-tags';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import InfoDialog from '@/components/ui/info-hover';
-import { CheckboxList } from '@/components/checkbox-list';
-import useTags from "@/hooks/use-tags";
-import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
-import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
-import { Spacer } from '@/components/ui/spacer';
 
 const formSchema = z.object({
   submitButton: z.string(),
   saveButton: z.string(),
   saveConceptButton: z.string(),
-  defaultAddedTags: z.string().optional()
+  defaultAddedTags: z.string().optional(),
 });
 
 export default function WidgetResourceFormSubmit() {
@@ -92,7 +92,6 @@ export default function WidgetResourceFormSubmit() {
                 <FormLabel>
                   Tekst voor de oplever-knop
                   <InfoDialog content={'TODO'} />
-
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -136,7 +135,10 @@ export default function WidgetResourceFormSubmit() {
 
           <Spacer />
 
-          <FormLabel>Kies de tags die standaard toegevoegd worden bij een nieuwe inzending</FormLabel>
+          <FormLabel>
+            Kies de tags die standaard toegevoegd worden bij een nieuwe
+            inzending
+          </FormLabel>
           <CheckboxList
             form={form}
             fieldName="defaultAddedTags"
@@ -154,9 +156,11 @@ export default function WidgetResourceFormSubmit() {
             onValueChange={(tag, checked) => {
               const ids = form.getValues('defaultAddedTags')?.split(',') ?? [];
 
-              const idsToSave = (checked
-                ? [...ids, tag.id]
-                : ids.filter((id) => id !== `${tag.id}`)).join(',');
+              const idsToSave = (
+                checked
+                  ? [...ids, tag.id]
+                  : ids.filter((id) => id !== `${tag.id}`)
+              ).join(',');
 
               form.setValue('defaultAddedTags', idsToSave);
             }}

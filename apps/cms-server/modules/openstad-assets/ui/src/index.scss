@@ -1,4 +1,4 @@
-@import "vendor/bootstrap/scss/functions";
+@import 'vendor/bootstrap/scss/functions';
 
 // 2. Include any default variable overrides here
 // Default variable overrides
@@ -6,25 +6,25 @@ $body-bg: #fff;
 $body-color: #111;
 
 // 3. Include remainder of required Bootstrap stylesheets
-@import "vendor/bootstrap/scss/variables";
-@import "vendor/bootstrap/scss/mixins";
-@import "vendor/bootstrap/scss/root";
+@import 'vendor/bootstrap/scss/variables';
+@import 'vendor/bootstrap/scss/mixins';
+@import 'vendor/bootstrap/scss/root';
 
 // 4. Include any optional Bootstrap CSS as needed
-@import "vendor/bootstrap/scss/utilities";
-@import "vendor/bootstrap/scss/reboot";
-@import "vendor/bootstrap/scss/type";
-@import "vendor/bootstrap/scss/images";
-@import "vendor/bootstrap/scss/containers";
-@import "vendor/bootstrap/scss/grid";
-@import "vendor/bootstrap/scss/helpers";
+@import 'vendor/bootstrap/scss/utilities';
+@import 'vendor/bootstrap/scss/reboot';
+@import 'vendor/bootstrap/scss/type';
+@import 'vendor/bootstrap/scss/images';
+@import 'vendor/bootstrap/scss/containers';
+@import 'vendor/bootstrap/scss/grid';
+@import 'vendor/bootstrap/scss/helpers';
 
 // 5. Optionally include utilities API last to generate classes based on the Sass map in `_utilities.scss`
-@import "vendor/bootstrap/scss/utilities/api";
+@import 'vendor/bootstrap/scss/utilities/api';
 
-@import "header.scss";
-@import "navbar.scss";
-@import "cookie-warning.scss";
+@import 'header.scss';
+@import 'navbar.scss';
+@import 'cookie-warning.scss';
 
 .apos-popover {
   z-index: 10000 !important;
@@ -37,7 +37,10 @@ $body-color: #111;
 body {
   max-width: 100%;
   margin: 0 auto;
-  background-color: var(--nlds-body-background-color, var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(
+    --nlds-body-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
 }
 
 .utrecht-heading-1.utrecht-accordion__header {
@@ -73,7 +76,8 @@ main {
 }
 
 *:focus-visible {
-  outline: var(--utrecht-focus-outline-width) var(--utrecht-focus-outline-style) var(--utrecht-focus-outline-color);
+  outline: var(--utrecht-focus-outline-width) var(--utrecht-focus-outline-style)
+    var(--utrecht-focus-outline-color);
 }
 
 .iconButton--container {

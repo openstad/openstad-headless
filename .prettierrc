@@ -1,9 +1,10 @@
 {
   "tabWidth": 2,
   "singleQuote": true,
-  "jsxBracketSameLine": true,
+  "bracketSameLine": true,
   "trailingComma": "es5",
   "semi": true,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "importOrder": ["^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true

@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -15,17 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { zodResolver } from '@hookform/resolvers/zod';
 import useTags from '@/hooks/use-tags';
-import { useForm } from 'react-hook-form';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+
 import { ResourceOverviewMapWidgetTabProps } from '.';
-import * as React from "react";
 
 type Tag = {
   id: number;
@@ -48,7 +50,6 @@ const formSchema = z.object({
   height: z.string().optional(),
 });
 
-
 type SchemaKey = keyof typeof formSchema.shape;
 
 export default function WidgetResourcesMapMap(
@@ -57,7 +58,6 @@ export default function WidgetResourcesMapMap(
       omitSchemaKeys?: Array<SchemaKey>;
     }
 ) {
-
   type FormData = z.infer<typeof formSchema>;
 
   async function onSubmit(values: FormData) {
@@ -76,19 +76,18 @@ export default function WidgetResourcesMapMap(
       tilesVariant: props?.tilesVariant || '',
       customUrl: props?.customUrl || '',
       width: props?.width || '',
-      height: props?.height || ''
+      height: props?.height || '',
     },
   });
 
   const { data: tags } = useTags(props.projectId);
-
 
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
   useEffect(() => {
     if (Array.isArray(tags)) {
       const fetchedTags = tags as Array<Tag>;
-      let groupNames = fetchedTags.map(tag => tag.type);
+      let groupNames = fetchedTags.map((tag) => tag.type);
       groupNames = groupNames.filter((value, index, array) => {
         return array.indexOf(value) == index;
       });
@@ -114,15 +113,12 @@ export default function WidgetResourcesMapMap(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
-
           <FormField
             control={form.control}
             name="autoZoomAndCenter"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Automatisch inzoomen en centreren
-                </FormLabel>
+                <FormLabel>Automatisch inzoomen en centreren</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     props.onFieldChanged(field.name, value);
@@ -135,7 +131,9 @@ export default function WidgetResourcesMapMap(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="" disabled>Selecteer een optie</SelectItem>
+                    <SelectItem value="" disabled>
+                      Selecteer een optie
+                    </SelectItem>
                     <SelectItem value="markers">Toon de markers</SelectItem>
                     <SelectItem value="area">Toon het gebied</SelectItem>
                   </SelectContent>
@@ -173,10 +171,11 @@ export default function WidgetResourcesMapMap(
             <FormField
               control={form.control}
               name="categorize.categorizeByField"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Gebruik tags van dit type (gebruik de iconen en kleuren van de tag) om de inzending te tonen.
+                    Gebruik tags van dit type (gebruik de iconen en kleuren van
+                    de tag) om de inzending te tonen.
                   </FormLabel>
                   <Select
                     onValueChange={(value) => {
@@ -186,17 +185,21 @@ export default function WidgetResourcesMapMap(
                     value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecteer een optie"/>
+                        <SelectValue placeholder="Selecteer een optie" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
-                      {tagGroupNames.map(type => (
-                        <SelectItem value={type} key={type}>{type}</SelectItem>
+                      <SelectItem value="">
+                        Geen (gebruik alleen standaardiconen)
+                      </SelectItem>
+                      {tagGroupNames.map((type) => (
+                        <SelectItem value={type} key={type}>
+                          {type}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage/>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -207,9 +210,7 @@ export default function WidgetResourcesMapMap(
             name="tilesVariant"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Kaart stijl
-                </FormLabel>
+                <FormLabel>Kaart stijl</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     props.onFieldChanged(field.name, value);
@@ -222,8 +223,10 @@ export default function WidgetResourcesMapMap(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="" disabled>Selecteer een optie</SelectItem>
-                    {tileLayerOptions.map(option => (
+                    <SelectItem value="" disabled>
+                      Selecteer een optie
+                    </SelectItem>
+                    {tileLayerOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -235,26 +238,30 @@ export default function WidgetResourcesMapMap(
             )}
           />
 
-          {(!!form.watch('tilesVariant') && form.watch('tilesVariant') !== 'nlmaps') && (
-            <p
-              style={{
-                backgroundColor: '#d69e2e',
-                color: 'black',
-                padding: '15px',
-                borderLeft: '4px solid black',
-                borderTopRightRadius: '5px',
-                borderBottomRightRadius: '5px',
-                marginTop: '10px',
-                fontSize: '13px'
-              }}
-              className="lg:w-full lg:col-span-2"
-            >
-              <strong>Let op!</strong> Wanneer je een andere kaartweergave kiest dan de &quot;Nederlandse Kaart&quot;, en je hebt een Content
-              Security Policy (CSP) ingesteld, moet je ervoor zorgen dat je de juiste headers toevoegt aan je
-              CSP. <br /> <br />
-              Lees meer over CSP instellingen voor kaartweergaven bij <strong>Projectinstellingen &gt; Algemeen &gt; Beveiligingsheaders</strong>
-            </p>
-          )}
+          {!!form.watch('tilesVariant') &&
+            form.watch('tilesVariant') !== 'nlmaps' && (
+              <p
+                style={{
+                  backgroundColor: '#d69e2e',
+                  color: 'black',
+                  padding: '15px',
+                  borderLeft: '4px solid black',
+                  borderTopRightRadius: '5px',
+                  borderBottomRightRadius: '5px',
+                  marginTop: '10px',
+                  fontSize: '13px',
+                }}
+                className="lg:w-full lg:col-span-2">
+                <strong>Let op!</strong> Wanneer je een andere kaartweergave
+                kiest dan de &quot;Nederlandse Kaart&quot;, en je hebt een
+                Content Security Policy (CSP) ingesteld, moet je ervoor zorgen
+                dat je de juiste headers toevoegt aan je CSP. <br /> <br />
+                Lees meer over CSP instellingen voor kaartweergaven bij{' '}
+                <strong>
+                  Projectinstellingen &gt; Algemeen &gt; Beveiligingsheaders
+                </strong>
+              </p>
+            )}
 
           {form.watch('tilesVariant') === 'custom' && (
             <FormField
@@ -262,12 +269,13 @@ export default function WidgetResourcesMapMap(
               name="customUrl"
               render={({ field }) => (
                 <FormItem className="col-span-1">
-                  <FormLabel>
-                    Aangepaste URL
-                  </FormLabel>
+                  <FormLabel>Aangepaste URL</FormLabel>
                   <FormDescription>{`Voer de URL in voor de aangepaste kaartweergave. Bijvoorbeeld: https://example.com/tiles/{z}/{x}/{y}.png`}</FormDescription>
                   <FormControl>
-                    <Input placeholder="https://example.com/tiles/{z}/{x}/{y}.png" {...field} />
+                    <Input
+                      placeholder="https://example.com/tiles/{z}/{x}/{y}.png"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -280,9 +288,7 @@ export default function WidgetResourcesMapMap(
             name="width"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Breedte
-                </FormLabel>
+                <FormLabel>Breedte</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Bijv: 100%"
@@ -304,9 +310,7 @@ export default function WidgetResourcesMapMap(
             name="height"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Hoogte
-                </FormLabel>
+                <FormLabel>Hoogte</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Bijv: 350px"

@@ -1,31 +1,30 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormDescription,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRouter } from 'next/router';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
 import useArea from '@/hooks/use-areas';
 import useTags from '@/hooks/use-tags';
-import toast from 'react-hot-toast';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Spacer } from '@openstad-headless/ui/src';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -67,7 +66,9 @@ export default function ProjectAreaCreate() {
       toast.success('Polygoon aangemaakt!');
       router.push(`/projects/${project}/areas`);
     } else {
-      toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
+      toast.error(
+        'De polygoon die is meegegeven lijkt niet helemaal te kloppen.'
+      );
     }
   }
 
@@ -124,7 +125,8 @@ export default function ProjectAreaCreate() {
                           <FormItem className="lg:col-span-2">
                             <FormLabel>Polygoon</FormLabel>
                             <FormDescription>
-                              Maak een polygoon aan en kopieer de GeoJSON (bijv. via geojson.io). Plak de GeoJSON hieronder.
+                              Maak een polygoon aan en kopieer de GeoJSON (bijv.
+                              via geojson.io). Plak de GeoJSON hieronder.
                             </FormDescription>
                             <FormControl>
                               <Textarea placeholder="" {...field} />
@@ -148,7 +150,9 @@ export default function ProjectAreaCreate() {
                                   }}
                                 />
                                 <FormDescription>
-                                  Kies dit als je de polygoon niet zichtbaar wilt tonen op de kaart. De polygoon is voor admins wel zichtbaar in de admin.
+                                  Kies dit als je de polygoon niet zichtbaar
+                                  wilt tonen op de kaart. De polygoon is voor
+                                  admins wel zichtbaar in de admin.
                                 </FormDescription>
                               </div>
                             </FormControl>
@@ -174,9 +178,13 @@ export default function ProjectAreaCreate() {
                           name="tagIds"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Tags bij klikken binnen de polygoon</FormLabel>
+                              <FormLabel>
+                                Tags bij klikken binnen de polygoon
+                              </FormLabel>
                               <FormDescription>
-                                Kies één of meerdere tags die automatisch worden toegevoegd wanneer iemand binnen de polygoon klikt. Mag leeg blijven.
+                                Kies één of meerdere tags die automatisch worden
+                                toegevoegd wanneer iemand binnen de polygoon
+                                klikt. Mag leeg blijven.
                               </FormDescription>
                               <div className="p-3">
                                 <CheckboxList
@@ -196,9 +204,9 @@ export default function ProjectAreaCreate() {
                                   onValueChange={(tag, checked) => {
                                     const ids = form.getValues('tagIds') ?? [];
 
-                                    const idsToSave = (checked
+                                    const idsToSave = checked
                                       ? [...ids, tag.id]
-                                      : ids.filter((id) => id !== tag.id));
+                                      : ids.filter((id) => id !== tag.id);
 
                                     form.setValue('tagIds', idsToSave);
                                   }}
@@ -215,9 +223,13 @@ export default function ProjectAreaCreate() {
                           name="tagIdsOutside"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Tags bij klikken buiten de polygoon</FormLabel>
+                              <FormLabel>
+                                Tags bij klikken buiten de polygoon
+                              </FormLabel>
                               <FormDescription>
-                                Kies tags die worden toegevoegd wanneer er buiten de polygoon wordt geklikt. Mag leeg blijven.
+                                Kies tags die worden toegevoegd wanneer er
+                                buiten de polygoon wordt geklikt. Mag leeg
+                                blijven.
                               </FormDescription>
                               <div className="p-3">
                                 <CheckboxList
@@ -235,11 +247,12 @@ export default function ProjectAreaCreate() {
                                       ?.findIndex((tg) => tg === t.id) > -1
                                   }
                                   onValueChange={(tag, checked) => {
-                                    const ids = form.getValues('tagIdsOutside') ?? [];
+                                    const ids =
+                                      form.getValues('tagIdsOutside') ?? [];
 
-                                    const idsToSave = (checked
+                                    const idsToSave = checked
                                       ? [...ids, tag.id]
-                                      : ids.filter((id) => id !== tag.id));
+                                      : ids.filter((id) => id !== tag.id);
 
                                     form.setValue('tagIdsOutside', idsToSave);
                                   }}

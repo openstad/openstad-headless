@@ -1,4 +1,15 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -7,25 +18,15 @@ import {
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
 import BegrootmoduleDisplay from './display';
-import BegrootmoduleText from './text';
 import BegrootmoduleExplanation from './explanation';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
-export const getServerSideProps = withApiUrl;
-import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
-
-import WidgetPreview from '@/components/widget-preview';
-import WidgetStemBegrootOverviewTags from './tags';
-import WidgetStemBegrootSorting from './sorting';
-import WidgetStemBegrootPagination from './pagination';
 import WidgetStemBegrootInclude from './include';
+import WidgetStemBegrootPagination from './pagination';
 import WidgetStemBegrootSearch from './search';
+import WidgetStemBegrootSorting from './sorting';
+import WidgetStemBegrootOverviewTags from './tags';
+import BegrootmoduleText from './text';
+
+export const getServerSideProps = withApiUrl;
 
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();

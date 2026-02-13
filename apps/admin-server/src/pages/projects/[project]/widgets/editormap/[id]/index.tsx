@@ -1,22 +1,23 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import type { EditorMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/editormap-widget-props';
+import { useRouter } from 'next/router';
 import React from 'react';
-import { PageLayout } from '../../../../../../components/ui/page-layout';
+
 import { Button } from '../../../../../../components/ui/button';
+import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import { useRouter } from 'next/router';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import WidgetPreview from '@/components/widget-preview';
-import type { EditorMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/editormap-widget-props';
 
 export const getServerSideProps = withApiUrl;
 
@@ -25,7 +26,8 @@ export default function WidgetEditorMap({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<EditorMapWidgetProps>();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<EditorMapWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<EditorMapWidgetProps>({
       projectId,

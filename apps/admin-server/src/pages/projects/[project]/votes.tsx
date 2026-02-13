@@ -1,21 +1,24 @@
-import { PageLayout } from '../../../components/ui/page-layout';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { ListHeading, Paragraph } from '@/components/ui/typography';
-import useVotes from '@/hooks/use-votes';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
-import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
-import useUsers from "@/hooks/use-users";
-import { sortTable, searchTable } from '@/components/ui/sortTable';
-import {exportToXLSX} from "@/lib/export-helpers/xlsx-export";
+import { searchTable, sortTable } from '@/components/ui/sortTable';
+import { ListHeading, Paragraph } from '@/components/ui/typography';
+import useUsers from '@/hooks/use-users';
+import useVotes from '@/hooks/use-votes';
+import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import { Paginator } from '@openstad-headless/ui/src';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+
+import { PageLayout } from '../../../components/ui/page-layout';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { remove } = useVotes(project as string);
-  const [filterData, setFilterData] = useState<{ createdAt: string, id?: string }[]>([]);
+  const [filterData, setFilterData] = useState<
+    { createdAt: string; id?: string }[]
+  >([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
@@ -25,31 +28,35 @@ export default function ProjectResources() {
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
 
     const keyMap: Record<string, string> = {
-      'id'                    : 'Stem ID',
-      'resourceId'            : 'Inzending ID',
-      'resource.title'        : 'Inzending titel',
-      'opinion'               : 'Stem',
-      'createdAt'             : 'Datum',
-      'ip'                    : 'IP Adres',
-      'userId'                : 'Gebruiker ID',
-      'user.role'             : 'Gebruiker rol',
-      'user.name'             : 'Gebruiker naam',
-      'user.displayName'      : 'Gebruiker weergavenaam',
-      'user.email'            : 'Gebruiker e-mailadres',
-      'user.phonenumber'      : 'Gebruiker telefoonnummer',
-      'user.address'          : 'Gebruiker adres',
-      'user.city'             : 'Gebruiker woonplaats',
-      'user.postcode'         : 'Gebruiker postcode',
+      id: 'Stem ID',
+      resourceId: 'Inzending ID',
+      'resource.title': 'Inzending titel',
+      opinion: 'Stem',
+      createdAt: 'Datum',
+      ip: 'IP Adres',
+      userId: 'Gebruiker ID',
+      'user.role': 'Gebruiker rol',
+      'user.name': 'Gebruiker naam',
+      'user.displayName': 'Gebruiker weergavenaam',
+      'user.email': 'Gebruiker e-mailadres',
+      'user.phonenumber': 'Gebruiker telefoonnummer',
+      'user.address': 'Gebruiker adres',
+      'user.city': 'Gebruiker woonplaats',
+      'user.postcode': 'Gebruiker postcode',
     };
 
     await toast.promise(
       fetchAllResults().then((dataToExport) => {
-        exportToXLSX(dataToExport, `${projectId}_stemmen_${formattedDate}.xlsx`, keyMap);
+        exportToXLSX(
+          dataToExport,
+          `${projectId}_stemmen_${formattedDate}.xlsx`,
+          keyMap
+        );
       }),
       {
         loading: 'Laden...',
-        success: "De stemmen zijn succesvol geëxporteerd",
-        error: "Er is een fout opgetreden bij het exporteren van de stemmen"
+        success: 'De stemmen zijn succesvol geëxporteerd',
+        error: 'Er is een fout opgetreden bij het exporteren van de stemmen',
       }
     );
   }
@@ -86,7 +93,9 @@ export default function ProjectResources() {
         setTotalPages(pageCount);
 
         let loadedVotesResults = (data || []) as { createdAt: string }[];
-        const sortedData = loadedVotesResults.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+        const sortedData = loadedVotesResults.sort(
+          (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
+        );
 
         setTotalCount(totalCount);
         setFilterData(sortedData);
@@ -107,7 +116,7 @@ export default function ProjectResources() {
     }
 
     return allData;
-  }
+  };
 
   return (
     <div>
@@ -124,20 +133,23 @@ export default function ProjectResources() {
           },
         ]}
         action={
-          <div className='flex flex-row w-full md:w-auto my-auto'>
-            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+          <div className="flex flex-row w-full md:w-auto my-auto">
+            <Button
+              className="text-xs p-2 w-fit"
+              type="submit"
+              onClick={transform}>
               Exporteer stemmen
             </Button>
           </div>
         }>
         <div className="container py-6">
-
           <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <p className="text-xs font-medium text-muted-foreground self-center">
+              Filter op:
+            </p>
             <select
               className="p-2 rounded"
-              onChange={(e) => setFilterSearchType(e.target.value)}
-            >
+              onChange={(e) => setFilterSearchType(e.target.value)}>
               <option value="">Alles</option>
               <option value="id">Stem ID</option>
               <option value="createdAt">Stemdatum</option>
@@ -158,32 +170,56 @@ export default function ProjectResources() {
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-8 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('id', e, filterData))
+                  }>
                   Stem ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('createdAt', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('createdAt', e, filterData))
+                  }>
                   Stemdatum
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resourceId', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('resourceId', e, filterData))
+                  }>
                   Plan ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('userId', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('userId', e, filterData))
+                  }>
                   Gebruiker ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('ip', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('ip', e, filterData))
+                  }>
                   Gebruiker IP
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('opinion', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('opinion', e, filterData))
+                  }>
                   Voorkeur
                 </button>
               </ListHeading>
@@ -191,8 +227,12 @@ export default function ProjectResources() {
             <ul>
               {filterData?.map((vote: any) => {
                 const userId = vote.userId;
-                const user = usersData?.find((user: any) => user.id === userId) || null;
-                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : (user?.id?.toString() || 'unknown');
+                const user =
+                  usersData?.find((user: any) => user.id === userId) || null;
+                const currentUserKey =
+                  !!user && user.idpUser?.identifier && user.idpUser?.provider
+                    ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
+                    : user?.id?.toString() || 'unknown';
 
                 return (
                   <li
@@ -205,10 +245,18 @@ export default function ProjectResources() {
                       {vote.createdAt}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      <a href={`/projects/${project}/resources/${vote.resourceId}`} style={{ textDecoration: 'underline' }}>{vote.resourceId}</a>
+                      <a
+                        href={`/projects/${project}/resources/${vote.resourceId}`}
+                        style={{ textDecoration: 'underline' }}>
+                        {vote.resourceId}
+                      </a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      <a href={`/users/${btoa(currentUserKey)}`} style={{ textDecoration: 'underline' }}>{vote.userId}</a>
+                      <a
+                        href={`/users/${btoa(currentUserKey)}`}
+                        style={{ textDecoration: 'underline' }}>
+                        {vote.userId}
+                      </a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                       {vote.ip}
@@ -247,7 +295,6 @@ export default function ProjectResources() {
                 />
               )}
             </div>
-
           </div>
         </div>
       </PageLayout>

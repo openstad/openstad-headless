@@ -1,27 +1,27 @@
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
+import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]/index';
 import { zodResolver } from '@hookform/resolvers/zod';
+import _ from 'lodash';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useEffect, useState } from 'react';
-import _ from 'lodash';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { CheckboxList } from '@/components/checkbox-list';
-import {ArgumentWidgetTabProps} from "@/pages/projects/[project]/widgets/comments/[id]/index";
 
 const formSchema = z.object({
   extraFieldsTagGroups: z
@@ -35,7 +35,7 @@ const formSchema = z.object({
     .refine((value) => value.some((item) => item), {
       message: 'You have to select at least one item.',
     }),
-  defaultTags: z.string().optional()
+  defaultTags: z.string().optional(),
 });
 
 type Tag = {
@@ -45,8 +45,7 @@ type Tag = {
 };
 
 export default function ArgumentsExtraFields(
-  props: ArgumentWidgetTabProps &
-    EditFieldProps<ArgumentWidgetTabProps>,
+  props: ArgumentWidgetTabProps & EditFieldProps<ArgumentWidgetTabProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);
@@ -82,7 +81,6 @@ export default function ArgumentsExtraFields(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
-
           <FormField
             control={form.control}
             name="extraFieldsTagGroups"
@@ -91,8 +89,11 @@ export default function ArgumentsExtraFields(
                 <div>
                   <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
                   <FormDescription>
-                    Selecteer de gewenste tag groepen die als extra velden verschijnen.<br />
-                    Het label veld fungeert als een titel boven de dropdown van het extra veld.
+                    Selecteer de gewenste tag groepen die als extra velden
+                    verschijnen.
+                    <br />
+                    Het label veld fungeert als een titel boven de dropdown van
+                    het extra veld.
                   </FormDescription>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-4">
@@ -144,7 +145,6 @@ export default function ArgumentsExtraFields(
                         control={form.control}
                         name="extraFieldsTagGroups"
                         render={({ field }) => {
-
                           const defaultValue = field.value.find(
                             (g) => g.type === groupName
                           )?.label;
@@ -240,7 +240,8 @@ export default function ArgumentsExtraFields(
               <FormItem className="col-span-full">
                 <FormLabel>Selecteer de standaard tags</FormLabel>
                 <FormDescription>
-                  Selecteer de standaard tags die aan reacties worden toegevoegd zonder dat de gebruiker dit ziet.
+                  Selecteer de standaard tags die aan reacties worden toegevoegd
+                  zonder dat de gebruiker dit ziet.
                 </FormDescription>
                 <CheckboxList
                   form={form}
@@ -260,12 +261,14 @@ export default function ArgumentsExtraFields(
                   }
                   onValueChange={(tag, checked) => {
                     const ids = form.getValues('defaultTags')?.split(',') ?? [];
-                    const idsToSave = (checked
-                      ? [...ids, tag.id]
-                      : ids.filter((id) => id !== `${tag.id}`)).join(',');
+                    const idsToSave = (
+                      checked
+                        ? [...ids, tag.id]
+                        : ids.filter((id) => id !== `${tag.id}`)
+                    ).join(',');
 
                     form.setValue('defaultTags', idsToSave);
-                    props.onFieldChanged("defaultTags", idsToSave);
+                    props.onFieldChanged('defaultTags', idsToSave);
                   }}
                 />
               </FormItem>

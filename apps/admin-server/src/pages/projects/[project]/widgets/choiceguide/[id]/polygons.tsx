@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -8,16 +9,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import { Heading } from '@/components/ui/typography';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import * as z from 'zod';
-import { useRouter } from 'next/router';
 import useAreas from '@/hooks/use-areas';
-import { Checkbox } from '@/components/ui/checkbox';
-import React from 'react';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ChoiceGuideProps } from '@openstad-headless/choiceguide/src/props';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   allowedPolygons: z
@@ -43,7 +43,8 @@ export default function WidgetChoiceGuidePolygons(
 
   const router = useRouter();
   const projectId = router.query.project as string;
-  const projectKey = props.projectId === undefined ? projectId : props.projectId;
+  const projectKey =
+    props.projectId === undefined ? projectId : props.projectId;
 
   const { data: areas } =
     (useAreas(projectKey) as {
@@ -55,13 +56,13 @@ export default function WidgetChoiceGuidePolygons(
       <Form {...form}>
         <Heading size="xl">Polygonen</Heading>
         <p className="text-sm text-muted-foreground mt-2">
-          Standaard wordt de polygoon uit de projectinstellingen gebruikt, dus laat leeg om de projectinstelling te gebruiken.
+          Standaard wordt de polygoon uit de projectinstellingen gebruikt, dus
+          laat leeg om de projectinstelling te gebruiken.
         </p>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2"
-        >
+          className="space-y-4 lg:w-1/2">
           {areas?.map((item) => (
             <FormField
               key={item.id}
@@ -72,7 +73,9 @@ export default function WidgetChoiceGuidePolygons(
                   Array.isArray(field.value) &&
                   field.value.some((obj) => obj.id === Number(item.id));
                 const label =
-                  item.visible === false ? `${item.name} (verborgen)` : item.name;
+                  item.visible === false
+                    ? `${item.name} (verborgen)`
+                    : item.name;
 
                 return (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
@@ -83,7 +86,9 @@ export default function WidgetChoiceGuidePolygons(
                           let values = form.getValues('allowedPolygons') || [];
 
                           if (checked) {
-                            if (!values.some((obj) => obj.id === Number(item.id))) {
+                            if (
+                              !values.some((obj) => obj.id === Number(item.id))
+                            ) {
                               const updated = [
                                 ...values,
                                 { name: item.name, id: Number(item.id) },
@@ -96,7 +101,10 @@ export default function WidgetChoiceGuidePolygons(
                               (obj) => obj.id !== Number(item.id)
                             );
                             form.setValue('allowedPolygons', filteredValues);
-                            props.onFieldChanged('allowedPolygons', filteredValues);
+                            props.onFieldChanged(
+                              'allowedPolygons',
+                              filteredValues
+                            );
                           }
                         }}
                       />

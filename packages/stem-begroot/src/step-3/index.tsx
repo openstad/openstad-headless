@@ -1,10 +1,10 @@
 import { Spacer } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
+import '@utrecht/component-library-css';
+import { Button, Heading3 } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
-import { Heading3, Button } from '@utrecht/component-library-react';
 import { createVotePendingStorage } from '../utils/vote-pending-storage';
 
 type Props = {
@@ -16,7 +16,15 @@ type Props = {
   voteType?: string;
   apiUrl: string;
 };
-export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, apiUrl, ...props }: Props) => {
+export const Step3 = ({
+  step3,
+  stemCodeTitle,
+  step3Title,
+  projectId,
+  voteType,
+  apiUrl,
+  ...props
+}: Props) => {
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(projectId),
     [projectId]
@@ -31,7 +39,7 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
       />
       <Spacer size={2} />
       <Button
-        appearance='primary-action-button'
+        appearance="primary-action-button"
         onClick={async (e) => {
           const loginUrl = new URL(props.loginUrl);
 
@@ -47,7 +55,7 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
           }
 
           if (pendingVoteData) {
-            let pendingBudgetVoteApiUrl =`${apiUrl}/api/pending-budget-vote`;
+            let pendingBudgetVoteApiUrl = `${apiUrl}/api/pending-budget-vote`;
 
             // post pendingVoteData to apiUrl
             const response = await fetch(pendingBudgetVoteApiUrl, {
@@ -64,11 +72,13 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
               const responseData = await response.json();
               const { id } = responseData;
               if (id) {
-
                 const newRedirectUri = new URL(redirectUri);
                 newRedirectUri.searchParams.set('pendingBudgetVote', id);
 
-                loginUrl.searchParams.set('redirectUri', encodeURIComponent(newRedirectUri.toString()));
+                loginUrl.searchParams.set(
+                  'redirectUri',
+                  encodeURIComponent(newRedirectUri.toString())
+                );
               }
             }
           }

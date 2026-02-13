@@ -1,6 +1,7 @@
 # Tags
 
 ## Inhoud
+
 [Beschrijving](#beschrijving)
 [Endpoints](#endpoints)
 [Ideas](#ideas)
@@ -25,16 +26,19 @@ Beheren van tags kan alleen admin. Toevoegen aan resources kan iedereen die een 
 Standaard CRUD
 
 #### List all tags
+
 ```
 GET :HOSTNAME/api/site/:SITE_ID/tag
 ```
 
 #### Show one tag
+
 ```
 GET :HOSTNAME/api/site/:SITE_ID/tag/:TAG_ID
 ```
 
 #### Create a tag
+
 ```
 POST :HOSTNAME/api/site/:SITE_ID/tag
 
@@ -44,6 +48,7 @@ POST :HOSTNAME/api/site/:SITE_ID/tag
 ```
 
 #### Update a tag
+
 ```
 PUT :HOSTNAME/api/site/:SITE_ID/tag/:TAG_ID
 
@@ -53,6 +58,7 @@ PUT :HOSTNAME/api/site/:SITE_ID/tag/:TAG_ID
 ```
 
 #### Delete an tag
+
 ```
 DELETE :HOSTNAME/api/site/:SITE_ID/tag/:TAG_ID
 ```
@@ -62,10 +68,13 @@ DELETE :HOSTNAME/api/site/:SITE_ID/tag/:TAG_ID
 Op resource niveau worden tags alleen op name gebruikt.
 
 Gebruik includeTags om tags in het resultaat mee te nemen:
+
 ```
 GET :HOSTNAME/api/site/:SITE_ID/idea?includeTags=1
 ```
+
 Dat geeft dan als resultaat
+
 ```
 {
   ...idea fields
@@ -75,6 +84,7 @@ Dat geeft dan als resultaat
 ```
 
 Zo stuur je ze ook mee bij het creeren of updaten van een idea:
+
 ```
 PUT :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID
 
@@ -87,11 +97,13 @@ PUT :HOSTNAME/api/site/:SITE_ID/idea/:IDEA_ID
 ```
 
 Zoeken van ideas op tags doe je ook met een query parameter:
+
 ```
 GET :HOSTNAME/api/site/:SITE_ID/idea?tags[]=Rode%20fietsen&tags[]=Gele%20auto's
 ```
 
 ## TODO
+
 - na merge van hotfix/003 moet deze functionaliteit vermoedelijk ook naar articles
 - tags is eeen OR; ik zie zo geen toepassing voor een AND, maar wellicht moet er dus nog een komen
 - ik kan me nog voorstellen dat je tags in tags wilt kunnen hangen, dat zou dan ook een todo zijn

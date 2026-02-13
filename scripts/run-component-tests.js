@@ -15,24 +15,25 @@ for (const folder of packageFolders) {
   const cypressComponentPath = path.join(cypressPath, 'component');
 
   if (!fs.existsSync(pkgJsonPath)) continue;
-  
+
   let args = ['run', '--component'];
-  
+
   // get current folder name
   const group = folder.trim().replace(/\ /g, '-').toLowerCase();
-  
-  
+
   if (process.env?.CYPRESS_RECORD_KEY) {
     args.push('--record', `--group=${group}`, '--tag=component');
-    
+
     if (ciBuildId) {
       args.push(` --ci-build-id=${ciBuildId}`);
     }
   }
-  
+
   // Check if the package has cypress component tests defined
   if (!fs.existsSync(cypressPath) || !fs.existsSync(cypressComponentPath)) {
-    console.log(`\nSkipping ${folder} as it does not have component tests defined.`);
+    console.log(
+      `\nSkipping ${folder} as it does not have component tests defined.`
+    );
     continue;
   }
   console.log(`\nRunning component tests in ${folder}...`);

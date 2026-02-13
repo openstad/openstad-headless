@@ -18,7 +18,8 @@ function truncateNode(
   if (node.nodeType === Node.TEXT_NODE) {
     const text = node.nodeValue || '';
     if (currentLength.value + text.length > maxLength) {
-      truncatedHTML += text.substring(0, maxLength - currentLength.value) + '...';
+      truncatedHTML +=
+        text.substring(0, maxLength - currentLength.value) + '...';
       currentLength.value = maxLength;
     } else {
       truncatedHTML += text;
@@ -37,7 +38,11 @@ function truncateNode(
 
     for (let i = 0; i < element.childNodes.length; i++) {
       if (currentLength.value >= maxLength) break;
-      truncatedHTML += truncateNode(element.childNodes[i], maxLength, currentLength);
+      truncatedHTML += truncateNode(
+        element.childNodes[i],
+        maxLength,
+        currentLength
+      );
     }
 
     truncatedHTML += `</${tagName}>`;
@@ -55,7 +60,11 @@ export function elipsizeHTML(value: string, maxLength: number): string {
 
   for (let i = 0; i < tempDiv.childNodes.length; i++) {
     if (currentLength.value >= maxLength) break;
-    truncatedHTML += truncateNode(tempDiv.childNodes[i], maxLength, currentLength);
+    truncatedHTML += truncateNode(
+      tempDiv.childNodes[i],
+      maxLength,
+      currentLength
+    );
   }
 
   return DOMPurify.sanitize(truncatedHTML);
