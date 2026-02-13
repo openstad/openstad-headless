@@ -38,6 +38,16 @@ const formSchema = z.object({
     .optional(),
 });
 
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function toDateInputValue(value?: string) {
+  if (!value) return '';
+  if (DATE_ONLY_REGEX.test(value)) return value;
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
+
 export default function WidgetAgendaItems(
   props: AgendaWidgetProps & EditFieldProps<AgendaWidgetProps>
 ) {
@@ -165,8 +175,8 @@ export default function WidgetAgendaItems(
         title: selectedItem.title || '',
         description: selectedItem.description,
         active: selectedItem.active,
-        activeFrom: selectedItem.activeFrom || '',
-        activeTo: selectedItem.activeTo || '',
+        activeFrom: toDateInputValue(selectedItem.activeFrom),
+        activeTo: toDateInputValue(selectedItem.activeTo),
         links: selectedItem.links || [],
       });
       setLinks(selectedItem.links || []);
@@ -509,9 +519,10 @@ export default function WidgetAgendaItems(
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                Actief vanaf — laat leeg om direct te starten
+                                Actief vanaf (hele dag) — laat leeg om direct te
+                                starten
                               </FormLabel>
-                              <Input type="datetime-local" {...field} />
+                              <Input type="date" {...field} />
                               <FormMessage />
                             </FormItem>
                           )}
@@ -522,9 +533,10 @@ export default function WidgetAgendaItems(
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                Actief tot — laat leeg voor geen einddatum
+                                Actief t/m (hele dag) — laat leeg voor geen
+                                einddatum
                               </FormLabel>
-                              <Input type="datetime-local" {...field} />
+                              <Input type="date" {...field} />
                               <FormMessage />
                             </FormItem>
                           )}
