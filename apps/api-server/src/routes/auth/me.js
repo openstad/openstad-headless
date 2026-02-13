@@ -9,23 +9,7 @@ let router = express.Router({mergeParams: true});
 router
   .route('(/project/:projectId)?/me')
   .get(async function (req, res, next) {
-    if (!req.user || !req.user.id) {
-      console.log('[auth-user-debug][route-me] empty user response', {
-        path: req.path,
-        projectIdParam: req.params.projectId,
-        hasAuthorization: !!req.headers.authorization,
-      });
-      return res.json({});
-    }
-    console.log('[auth-user-debug][route-me] user resolved', {
-      path: req.path,
-      projectIdParam: req.params.projectId,
-      userId: req.user.id,
-      userProjectId: req.user.projectId,
-      userRole: req.user.role,
-      hasIdpUser: !!req.user.idpUser,
-      hasAccessToken: !!(req.user.idpUser && req.user.idpUser.accesstoken),
-    });
+    if (!req.user || !req.user.id) return res.json({});
 
     let userNickName = '';
 

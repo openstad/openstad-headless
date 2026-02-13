@@ -456,8 +456,16 @@ function StemBegroot({
     }
 
     if (hasPendingSelection && currentStep < 4) {
-      setCurrentStep(3);
-      submitVoteAndCleanup();
+      // Show in-progress state while submitting and only advance on successful submit
+      if (currentStep < 3) {
+        setCurrentStep(3);
+      }
+      void (async () => {
+        const submitted = await submitVoteAndCleanup();
+        if (submitted) {
+          setCurrentStep(4);
+        }
+      })();
     }
   }, [
     currentUser,
@@ -471,9 +479,10 @@ function StemBegroot({
   ]);
 
   async function submitVoteAndCleanup() {
+    let submitted = false;
     try {
       if (submitInProgressRef.current) {
-        return;
+        return false;
       }
       submitInProgressRef.current = true;
 
@@ -505,13 +514,15 @@ function StemBegroot({
           votePendingStorage.clearVotePendingPerTag();
 
           await doVote(uniqueResourcesToVote);
+          submitted = true;
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
         }
       } else {
         if (selectedResources.length > 0) {
           votePendingStorage.clearVotePending();
-          return await doVote(selectedResources);
+          await doVote(selectedResources);
+          submitted = true;
         }
       }
     } catch (err: any) {
@@ -519,6 +530,7 @@ function StemBegroot({
     } finally {
       submitInProgressRef.current = false;
     }
+    return submitted;
   }
 
   async function prepareForVote(
@@ -1222,8 +1234,10 @@ function StemBegroot({
                     }
 
                     if (currentStep === 3) {
-                      await submitVoteAndCleanup();
-                      setCurrentStep(4);
+                      const submitted = await submitVoteAndCleanup();
+                      if (submitted) {
+                        setCurrentStep(4);
+                      }
                     } else if (currentStep === 4) {
                       currentUser.logout({ url: location.href });
                     } else {

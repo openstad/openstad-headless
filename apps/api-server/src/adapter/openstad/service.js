@@ -5,7 +5,7 @@ const config = require('config');
 const db = require('../../db');
 
 let service = {};
-service.fetchUserData = async function fetchUserData({ authConfig, userId, email, accessToken, raw = false, debugMeta }) {
+service.fetchUserData = async function fetchUserData({ authConfig, userId, email, accessToken, raw = false }) {
 
   let path = '';
   let headers = {};
@@ -25,38 +25,14 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
   }
 
   let url = `${authConfig.serverUrlInternal}${path}`;
-  const debug = !!debugMeta;
 
   try {
-    if (debug) {
-      console.log('[auth-user-debug][openstad-service] fetchUserData request', {
-        path: debugMeta.path,
-        url,
-        provider: authConfig && authConfig.provider,
-        clientId: authConfig && authConfig.clientId,
-        hasAccessToken: !!accessToken,
-        hasUserId: !!userId,
-        hasEmail: !!email,
-      });
-    }
 
     let response = await fetch(url, {
 	    headers,
     })
-    if (debug) {
-      console.log('[auth-user-debug][openstad-service] fetchUserData response', {
-        path: debugMeta.path,
-        url,
-        status: response.status,
-        ok: response.ok,
-      });
-    }
     if (!response.ok) {
-      let errorText = '';
-      try {
-        errorText = await response.text();
-      } catch(err) {}
-      throw new Error(`Fetch failed status=${response.status} body=${errorText}`)
+      throw new Error('Fetch failed')
     }
 
     let userData;
@@ -79,13 +55,6 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
     return mappedUserData;
 
   } catch(err) {
-    if (debug) {
-      console.log('[auth-user-debug][openstad-service] fetchUserData error', {
-        path: debugMeta.path,
-        url,
-        message: err && err.message,
-      });
-    }
     throw new Error('Cannot connect to auth server');
   }
 
