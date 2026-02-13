@@ -430,36 +430,45 @@ function StemBegroot({
 
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
-    let pending;
-
-    if (
+    const pending =
       props.votes.voteType === 'countPerTag' ||
       props.votes.voteType === 'budgetingPerTag'
-    ) {
-      pending = votePendingStorage.getVotePendingPerTag();
-    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
-      pending = votePendingStorage.getVotePendingPerTag();
-    } else {
-      pending = votePendingStorage.getVotePending();
-    }
+        ? votePendingStorage.getVotePendingPerTag()
+        : votePendingStorage.getVotePending();
 
-    if (
-      pending &&
-      ((isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
-        (isAllowedToVote && navAfterLogin && currentStep === 2) ||
-        (isAllowedToVote && !navAfterLogin))
-    ) {
-      if (voteAfterLoggingIn) {
-        if (selectedResources.length > 0 || tagCounter.length > 0) {
-          setCurrentStep(3);
-          submitVoteAndCleanup();
-        }
-      } else {
+    if (!pending || !isAllowedToVote) return;
+
+    const hasPendingSelection =
+      props.votes.voteType === 'countPerTag' ||
+      props.votes.voteType === 'budgetingPerTag'
+        ? tagCounter.some((tagObj) => {
+            const tagName = Object.keys(tagObj)[0];
+            const selectedForTag = tagObj[tagName]?.selectedResources || [];
+            return selectedForTag.length > 0;
+          })
+        : selectedResources.length > 0;
+
+    if (!voteAfterLoggingIn) {
+      if (currentStep < 3) {
         setCurrentStep(3);
       }
-     }
+      return;
     }
-  }, [currentUser, currentStep, selectedResources, tagCounter]);
+
+    if (hasPendingSelection && currentStep < 4) {
+      setCurrentStep(3);
+      submitVoteAndCleanup();
+    }
+  }, [
+    currentUser,
+    currentStep,
+    selectedResources,
+    tagCounter,
+    isAllowedToVote,
+    voteAfterLoggingIn,
+    props.votes.voteType,
+    votePendingStorage,
+  ]);
 
   async function submitVoteAndCleanup() {
     try {
