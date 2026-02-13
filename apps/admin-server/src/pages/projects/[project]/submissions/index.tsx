@@ -303,25 +303,43 @@ export default function ProjectSubmissions() {
                   <li
                     key={submission.id}
                     className="grid grid-cols-3 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      router.push(
+                        `/projects/${project}/submissions/${submission.widgetId}?dataId=${submission.id}`
+                      )
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        router.push(
+                          `/projects/${project}/submissions/${submission.widgetId}?dataId=${submission.id}`
+                        );
+                      }
+                    }}
                     style={{ gridTemplateColumns: '50px 1fr 1fr 2fr 1fr 1fr' }}>
-                    <Checkbox
-                      className="my-auto"
-                      checked={selectedItems.includes(submission.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedItems((prev) => [...prev, submission.id]);
-                        } else {
-                          setSelectedItems((prev) =>
-                            prev.filter((id) => id !== submission.id)
-                          );
-                        }
-                      }}
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        className="my-auto"
+                        checked={selectedItems.includes(submission.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedItems((prev) => [...prev, submission.id]);
+                          } else {
+                            setSelectedItems((prev) =>
+                              prev.filter((id) => id !== submission.id)
+                            );
+                          }
+                        }}
+                      />
+                    </div>
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       <a
                         style={{ textDecoration: 'underline' }}
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           router.push(
                             `/projects/${project}/submissions/${submission.widgetId}?dataId=${submission.id}`
                           );
@@ -334,6 +352,7 @@ export default function ProjectSubmissions() {
                         style={{ textDecoration: 'underline' }}
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           router.push(`/users/${btoa(currentUserKey)}`);
                         }}>
                         {submission.userId}
@@ -350,7 +369,10 @@ export default function ProjectSubmissions() {
 
                     <div
                       className="hidden lg:flex ml-auto"
-                      onClick={(e) => e.preventDefault()}>
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}>
                       <RemoveResourceDialog
                         header="Inzending verwijderen"
                         message="Weet je zeker dat je deze inzending wilt verwijderen?"
