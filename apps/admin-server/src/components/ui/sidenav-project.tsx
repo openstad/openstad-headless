@@ -98,7 +98,7 @@ export function SidenavProject({ className }: { className?: string }) {
                   }
                   size="default"
                   className="w-full flex justify-start pl-8">
-                  <span className="truncate">Gebruikers</span>
+                  <span className="truncate">Archivering</span>
                 </Button>
               </Link>
             )}
