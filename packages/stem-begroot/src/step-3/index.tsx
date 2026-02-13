@@ -30,12 +30,6 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
         appearance='primary-action-button'
         onClick={async (e) => {
           const loginUrl = new URL(props.loginUrl);
-          console.log('[pending-vote-debug][widget][step3] login click', {
-            projectId,
-            voteType,
-            apiUrl,
-            loginUrl: loginUrl.toString(),
-          });
 
           const redirectUri = loginUrl.searchParams.get('redirectUri');
 
@@ -47,17 +41,9 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
           } else {
             pendingVoteData = votePendingStorage.getVotePending();
           }
-          console.log('[pending-vote-debug][widget][step3] pending vote loaded', {
-            hasPendingVoteData: !!pendingVoteData,
-            pendingKeys: pendingVoteData && typeof pendingVoteData === 'object' ? Object.keys(pendingVoteData).length : 0,
-          });
 
           if (pendingVoteData) {
             let pendingBudgetVoteApiUrl =`${apiUrl}/api/pending-budget-vote`;
-            console.log('[pending-vote-debug][widget][step3] posting pending vote', {
-              pendingBudgetVoteApiUrl,
-              hasRedirectUri: !!redirectUri,
-            });
 
             // post pendingVoteData to apiUrl
             const response = await fetch(pendingBudgetVoteApiUrl, {
@@ -69,39 +55,20 @@ export const Step3 = ({ step3, stemCodeTitle, step3Title, projectId, voteType, a
                 ...pendingVoteData,
               }),
             });
-            console.log('[pending-vote-debug][widget][step3] pending vote post response', {
-              status: response.status,
-              ok: response.ok,
-            });
 
             if (response.ok && redirectUri) {
               const responseData = await response.json();
               const { id } = responseData;
-              console.log('[pending-vote-debug][widget][step3] pending vote post payload', {
-                id,
-              });
               if (id) {
 
                 const newRedirectUri = new URL(redirectUri);
                 newRedirectUri.searchParams.set('pendingBudgetVote', id);
 
                 loginUrl.searchParams.set('redirectUri', encodeURIComponent(newRedirectUri.toString()));
-                console.log('[pending-vote-debug][widget][step3] redirectUri updated with pending uuid', {
-                  pendingBudgetVote: id,
-                  newRedirectUri: newRedirectUri.toString(),
-                });
               }
-            } else {
-              console.log('[pending-vote-debug][widget][step3] pending vote post did not set redirect uuid', {
-                responseOk: response.ok,
-                hasRedirectUri: !!redirectUri,
-              });
             }
           }
 
-          console.log('[pending-vote-debug][widget][step3] navigating to login', {
-            loginUrl: loginUrl.toString(),
-          });
           document.location.href = loginUrl.toString();
         }}>
         {stemCodeTitle}

@@ -5,7 +5,7 @@ const db = require('../db');
 const authSettings = require('../util/auth-settings');
 
 let adapters = {};
-const DEBUG_PATH_RE = /^\/api\/pending-budget-vote(\/|$)/;
+const DEBUG_PATH_RE = /^\/auth(\/project\/\d+)?\/me\/?$/;
 
 function shouldDebugRequest(req) {
   return DEBUG_PATH_RE.test(req.path || '');
@@ -30,7 +30,7 @@ module.exports = async function getUser( req, res, next ) {
   try {
     const debug = shouldDebugRequest(req);
     if (debug) {
-      console.log('[pending-vote-debug][user-mw] start', {
+      console.log('[auth-user-debug][user-mw] start', {
         method: req.method,
         path: req.path,
         hasAuthorization: !!req.headers['authorization'],
@@ -41,7 +41,7 @@ module.exports = async function getUser( req, res, next ) {
     }
 
     if (!req.headers['authorization']) {
-      if (debug) console.log('[pending-vote-debug][user-mw] no authorization header, using empty user');
+      if (debug) console.log('[auth-user-debug][user-mw] no authorization header, using empty user');
       return nextWithEmptyUser(req, res, next);
     } else {
       const allowedUploadPaths = [
@@ -61,12 +61,12 @@ module.exports = async function getUser( req, res, next ) {
         const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
 
         req.headers['authorization'] = `Bearer ${uploadJwt}`;
-        if (debug) console.log('[pending-vote-debug][user-mw] upload request, injected temporary jwt');
+        if (debug) console.log('[auth-user-debug][user-mw] upload request, injected temporary jwt');
       }
     }
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['authorization']);
     if (debug) {
-      console.log('[pending-vote-debug][user-mw] parsed auth header', {
+      console.log('[auth-user-debug][user-mw] parsed auth header', {
         userId,
         isFixed: !!isFixed,
         authProvider: authProvider || 'none',
@@ -74,7 +74,7 @@ module.exports = async function getUser( req, res, next ) {
     }
     let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider })
     if (debug) {
-      console.log('[pending-vote-debug][user-mw] resolved auth config', {
+      console.log('[auth-user-debug][user-mw] resolved auth config', {
         provider: authConfig && authConfig.provider,
         adapter: authConfig && authConfig.adapter,
         hasProjectContext: !!req.project,
@@ -85,15 +85,22 @@ module.exports = async function getUser( req, res, next ) {
     }
 
     if(userId === null || typeof userId === 'undefined') {
-      if (debug) console.log('[pending-vote-debug][user-mw] no userId parsed, using empty user');
+      if (debug) console.log('[auth-user-debug][user-mw] no userId parsed, using empty user');
       return nextWithEmptyUser(req, res, next);
     }
 
     let projectId = req.project && req.project.id;
 
-    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) || {};
+    const userEntity = await getUserInstance({
+      authConfig,
+      authProvider,
+      userId,
+      isFixed,
+      projectId,
+      debugMeta: debug ? { path: req.path } : undefined,
+    }) || {};
     if (debug) {
-      console.log('[pending-vote-debug][user-mw] getUserInstance result', {
+      console.log('[auth-user-debug][user-mw] getUserInstance result', {
         hasUserEntity: !!(userEntity && userEntity.id),
         userId: userEntity && userEntity.id,
         role: userEntity && userEntity.role,
@@ -106,7 +113,7 @@ module.exports = async function getUser( req, res, next ) {
     
   } catch(error) {
     if (shouldDebugRequest(req)) {
-      console.log('[pending-vote-debug][user-mw] error', {
+      console.log('[auth-user-debug][user-mw] error', {
         message: error && error.message,
         stackTop: error && error.stack && error.stack.split('\n')[0],
       });
@@ -164,7 +171,8 @@ function parseJwt(authorizationHeader) {
  * @param projectConfig
  * @returns {Promise<{}|*>}
  */
-async function getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) {
+async function getUserInstance({ authConfig, authProvider, userId, isFixed, projectId, debugMeta }) {
+  const debug = !!debugMeta;
 
   let dbUser;
   
@@ -190,6 +198,17 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     }
 
     dbUser = await db.User.findOne({ where });
+    if (debug) {
+      console.log('[auth-user-debug][user-mw] db user lookup', {
+        path: debugMeta.path,
+        lookupUserId: userId,
+        foundUser: !!dbUser,
+        foundProjectId: dbUser && dbUser.projectId,
+        foundRole: dbUser && dbUser.role,
+        hasIdpUser: !!(dbUser && dbUser.idpUser),
+        hasAccessToken: !!(dbUser && dbUser.idpUser && dbUser.idpUser.accesstoken),
+      });
+    }
 
     if (isFixed) {
       if (!dbUser.projectId || dbUser.projectId == config.admin.projectId) dbUser.role = 'superuser'; // !dbUser.projectId is backwards compatibility
@@ -209,6 +228,15 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     // admin op config.admin.projectId = superuser; use the correct authConfig
     let adminProject = await db.Project.findOne({ where: { id: config.admin.projectId } });
     authConfig = await authSettings.config({ project: adminProject, useAuth: 'default' });
+    if (debug) {
+      console.log('[auth-user-debug][user-mw] switched to admin auth config', {
+        path: debugMeta.path,
+        projectId,
+        adminProjectId: config.admin.projectId,
+        provider: authConfig && authConfig.provider,
+        clientId: authConfig && authConfig.clientId,
+      });
+    }
   }
 
   let adapter = authConfig.adapter || 'openstad';
@@ -228,6 +256,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     let userData = await service.fetchUserData({
       authConfig: authConfig,
       accessToken: dbUser.idpUser.accesstoken,
+      debugMeta,
     })
 
     let mergedUser = merge(dbUser, userData);
@@ -239,13 +268,21 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     return mergedUser;
     
   } catch(err) {
-    console.log('[pending-vote-debug][user-mw] auth-server fetch failed in getUserInstance', {
+    if (debug) {
+      console.log('[auth-user-debug][user-mw] auth-server fetch failed in getUserInstance', {
+        path: debugMeta.path,
+        message: err && err.message,
+        userId,
+        projectId,
+        authProvider: authConfig && authConfig.provider,
+        clientId: authConfig && authConfig.clientId,
+        serverUrlInternal: authConfig && authConfig.serverUrlInternal,
+      });
+    }
+    console.log('[auth-user-debug][user-mw] resetting external access token after auth fetch failure', {
       message: err && err.message,
       userId,
-      projectId,
-      authProvider: authConfig && authConfig.provider,
-      clientId: authConfig && authConfig.clientId,
-      serverUrlInternal: authConfig && authConfig.serverUrlInternal,
+      hasDbUser: !!dbUser,
     });
     console.log(err);
     return await resetUserToken(dbUser);
@@ -263,6 +300,10 @@ async function resetUserToken(user) {
   if (!( user && user.update )) return {};
   let idpUser = { ...user.idpUser };
   delete idpUser.accesstoken;
+  console.log('[auth-user-debug][user-mw] resetUserToken update', {
+    userId: user && user.id,
+    hadIdpUser: !!(user && user.idpUser),
+  });
   await user.update({
     idpUser,
   });

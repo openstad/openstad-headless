@@ -5,7 +5,7 @@ const config = require('config');
 const db = require('../../db');
 
 let service = {};
-service.fetchUserData = async function fetchUserData({ authConfig, userId, email, accessToken, raw = false }) {
+service.fetchUserData = async function fetchUserData({ authConfig, userId, email, accessToken, raw = false, debugMeta }) {
 
   let path = '';
   let headers = {};
@@ -25,11 +25,12 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
   }
 
   let url = `${authConfig.serverUrlInternal}${path}`;
-  const debug = true;
+  const debug = !!debugMeta;
 
   try {
     if (debug) {
-      console.log('[pending-vote-debug][openstad-service] fetchUserData request', {
+      console.log('[auth-user-debug][openstad-service] fetchUserData request', {
+        path: debugMeta.path,
         url,
         provider: authConfig && authConfig.provider,
         clientId: authConfig && authConfig.clientId,
@@ -43,14 +44,19 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
 	    headers,
     })
     if (debug) {
-      console.log('[pending-vote-debug][openstad-service] fetchUserData response', {
+      console.log('[auth-user-debug][openstad-service] fetchUserData response', {
+        path: debugMeta.path,
         url,
         status: response.status,
         ok: response.ok,
       });
     }
     if (!response.ok) {
-      throw new Error('Fetch failed')
+      let errorText = '';
+      try {
+        errorText = await response.text();
+      } catch(err) {}
+      throw new Error(`Fetch failed status=${response.status} body=${errorText}`)
     }
 
     let userData;
@@ -74,7 +80,8 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
 
   } catch(err) {
     if (debug) {
-      console.log('[pending-vote-debug][openstad-service] fetchUserData error', {
+      console.log('[auth-user-debug][openstad-service] fetchUserData error', {
+        path: debugMeta.path,
         url,
         message: err && err.message,
       });
