@@ -185,7 +185,6 @@ export default function ProjectTags({ preset }: { preset?: string }) {
   ) : (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -41,7 +41,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Enquête"
         breadcrumbs={[
           {
             name: 'Projecten',

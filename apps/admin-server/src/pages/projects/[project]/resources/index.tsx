@@ -134,7 +134,6 @@ export default function ProjectResources() {
       `}</style>
       <div>
         <PageLayout
-          pageHeader="Inzendingen"
           breadcrumbs={[
             {
               name: 'Projecten',

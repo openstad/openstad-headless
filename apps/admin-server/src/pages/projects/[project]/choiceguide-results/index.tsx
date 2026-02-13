@@ -159,7 +159,6 @@ export default function ProjectChoiceGuideResults() {
 
       <div>
         <PageLayout
-          pageHeader="Keuzewijzer inzendingen"
           breadcrumbs={[
             {
               name: 'Projecten',

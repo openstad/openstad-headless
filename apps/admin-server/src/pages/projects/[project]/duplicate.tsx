@@ -235,7 +235,6 @@ export default function ProjectDuplicate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

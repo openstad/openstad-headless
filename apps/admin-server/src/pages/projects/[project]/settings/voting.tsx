@@ -162,7 +162,6 @@ export default function ProjectSettingsVoting() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

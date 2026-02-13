@@ -274,7 +274,6 @@ export default function ProjectComments() {
       `}</style>
       <div>
         <PageLayout
-          pageHeader="Projecten"
           breadcrumbs={[
             {
               name: 'Projecten',

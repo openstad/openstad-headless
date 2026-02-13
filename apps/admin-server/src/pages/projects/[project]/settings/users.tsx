@@ -185,7 +185,6 @@ export default function ProjectSettingsUsers(
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           { name: 'Projecten', url: '/projects' },
           { name: 'Instellingen', url: `/projects/${project}/settings` },

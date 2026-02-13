@@ -117,7 +117,6 @@ export default function ProjectSubmissions() {
   return (
     <div>
       <PageLayout
-        pageHeader="Formulier inzendingen"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -29,7 +29,6 @@ export default function ProjectStatuses() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -147,7 +147,6 @@ export default function ProjectSettingsCertificates() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -125,7 +125,6 @@ export default function ProjectSettingsComments() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
