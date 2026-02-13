@@ -444,7 +444,7 @@ header:has(.header_navbar-container.--show)~#navbar {
 
 // Archive status banner
 .archive-status-banner {
-  background: var(--nlds-header-compact-background-color, var(--utrecht-button-primary-action-background-color));
+  background: var(--nlds-archiveBanner-backgroundColor, var(--utrecht-button-primary-action-background-color));
   padding: 8px 0;
   text-align: center;
   margin: 0;
