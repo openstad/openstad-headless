@@ -440,8 +440,8 @@ header:has(.header_navbar-container.--show) ~ #navbar {
 }
 
 // Archive status banner
-.archive-status-banner {
-  background: var(--nlds-archiveBanner-backgroundColor, var(--utrecht-button-primary-action-background-color));
+.status-banner {
+  background: var(--nlds-statusBanner-backgroundColor, var(--utrecht-button-primary-action-background-color));
   padding: 8px 0;
   text-align: center;
   margin: 0;
@@ -452,7 +452,7 @@ header:has(.header_navbar-container.--show) ~ #navbar {
   p {
     display: inline-flex;
     color: var(
-      --nlds-archiveBanner-color,
+      --nlds-statusBanner-color,
       var(--utrecht-button-primary-action-color)
     );
     margin: 0;
@@ -466,7 +466,7 @@ header:has(.header_navbar-container.--show) ~ #navbar {
       display: inline-block;
       width: 18px;
       height: 18px;
-      background-color: var(--nlds-archiveBanner-color, var(--utrecht-button-primary-action-color));
+      background-color: var(--nlds-statusBanner-color, var(--utrecht-button-primary-action-color));
     }
   }
 }
