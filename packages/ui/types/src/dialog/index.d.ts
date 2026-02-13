@@ -1,7 +1,17 @@
 import * as RadixDialog from '@radix-ui/react-dialog';
+import React, { PropsWithChildren } from 'react';
+
 import '../index.css';
 import './index.css';
-import React, { PropsWithChildren } from 'react';
-export declare const Dialog: ({ children, open, onOpenChange, className, ...props }: PropsWithChildren<RadixDialog.DialogProps & {
+
+export declare const Dialog: ({
+  children,
+  open,
+  onOpenChange,
+  className,
+  ...props
+}: PropsWithChildren<
+  RadixDialog.DialogProps & {
     className?: string;
-}>) => React.JSX.Element;
+  }
+>) => React.JSX.Element;

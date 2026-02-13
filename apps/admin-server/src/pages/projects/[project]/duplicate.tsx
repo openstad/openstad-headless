@@ -1,9 +1,3 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { PageLayout } from '../../../components/ui/page-layout';
-import { Button } from '../../../components/ui/button';
-import { useRouter } from 'next/router';
-import { useProject } from '@/hooks/use-project';
-import * as z from 'zod';
 import {
   Form,
   FormControl,
@@ -12,12 +6,19 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useProject } from '@/hooks/use-project';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { Button } from '../../../components/ui/button';
+import { PageLayout } from '../../../components/ui/page-layout';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -29,10 +30,15 @@ export default function ProjectDuplicate() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading } = useProject();
-  const [errors, setErrors] = useState<Array<{step: string, error: string}>>([]);
+  const [errors, setErrors] = useState<Array<{ step: string; error: string }>>(
+    []
+  );
   const [isErrorsVisible, setIsErrorsVisible] = useState(false);
   const [duplicatingInProgress, setDuplicatingInProgress] = useState(false);
-  const [removePreviousDuplicatedDataInProgress, setRemovePreviousDuplicatedDataInProgress] = useState(false);
+  const [
+    removePreviousDuplicatedDataInProgress,
+    setRemovePreviousDuplicatedDataInProgress,
+  ] = useState(false);
   const [duplicatedData, setDuplicatedData] = useState<Array<any>>([]);
 
   const defaults = useCallback(
@@ -53,8 +59,8 @@ export default function ProjectDuplicate() {
 
   if (!data) return null;
 
-  async function fetchData( url: string) {
-    let response = await fetch(url) || [];
+  async function fetchData(url: string) {
+    let response = (await fetch(url)) || [];
 
     if (!response.ok) {
       return [];
@@ -73,7 +79,7 @@ export default function ProjectDuplicate() {
       item.originalId = item.id;
       delete item.id;
       return item;
-    })
+    });
   }
 
   type DuplicateData = {
@@ -95,28 +101,35 @@ export default function ProjectDuplicate() {
     setRemovePreviousDuplicatedDataInProgress(true);
 
     try {
-      const response = await fetch('/api/openstad/api/project/delete-duplicated-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...duplicatedData }),
-      });
+      const response = await fetch(
+        '/api/openstad/api/project/delete-duplicated-data',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...duplicatedData }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to delete duplicated data');
       }
 
-      toast.success('Gedupliceerde project en gedupliceerde data is verwijderd.');
+      toast.success(
+        'Gedupliceerde project en gedupliceerde data is verwijderd.'
+      );
     } catch (error) {
-      toast.error('Verwijderen niet gelukt. Neem contact op met de beheerders.');
+      toast.error(
+        'Verwijderen niet gelukt. Neem contact op met de beheerders.'
+      );
     } finally {
       setRemovePreviousDuplicatedDataInProgress(false);
       setErrors([]);
       setIsErrorsVisible(false);
       setDuplicatedData([]);
     }
-  }
+  };
 
   async function duplicate(values: z.infer<typeof formSchema>) {
     setDuplicatingInProgress(true);
@@ -137,20 +150,26 @@ export default function ProjectDuplicate() {
       skipDefaultStatuses: true,
     };
 
-    if ( duplicateData.config && duplicateData.config.uniqueId ) {
+    if (duplicateData.config && duplicateData.config.uniqueId) {
       delete duplicateData.config.uniqueId;
     }
 
-    const widgets = await fetchData(`/api/openstad/api/project/${data.id}/widgets`);
+    const widgets = await fetchData(
+      `/api/openstad/api/project/${data.id}/widgets`
+    );
     duplicateData.widgets = widgets;
 
     const tags = await fetchData(`/api/openstad/api/project/${data.id}/tag`);
     duplicateData.tags = tags;
 
-    const statuses = await fetchData(`/api/openstad/api/project/${data.id}/status`);
+    const statuses = await fetchData(
+      `/api/openstad/api/project/${data.id}/status`
+    );
     duplicateData.statuses = statuses;
 
-    const resources = await fetchData(`/api/openstad/api/project/${data.id}/resource?includeTags=1&includeStatus=1`);
+    const resources = await fetchData(
+      `/api/openstad/api/project/${data.id}/resource?includeTags=1&includeStatus=1`
+    );
     duplicateData.resources = resources;
 
     duplicateData.resourceSettings = duplicateData?.config?.resources || {};
@@ -182,17 +201,29 @@ export default function ProjectDuplicate() {
 
     if (!response.ok) {
       const responseJSON = await response.json();
-      setErrors(responseJSON.errors || [{error: "There was an error trying to duplicate the project", step: "Duplicate project"}]);
+      setErrors(
+        responseJSON.errors || [
+          {
+            error: 'There was an error trying to duplicate the project',
+            step: 'Duplicate project',
+          },
+        ]
+      );
       setDuplicatedData(responseJSON.duplicatedData || []);
-      toast.error('Er is een fout opgetreden bij het dupliceren van het project.');
+      toast.error(
+        'Er is een fout opgetreden bij het dupliceren van het project.'
+      );
 
       return;
     }
 
     const newId = await response.json();
-    toast.success('Er is een kopie van het project aangemaakt. Je wordt nu doorgestuurd naar de projecten pagina.', {
-      duration: 5000
-    });
+    toast.success(
+      'Er is een kopie van het project aangemaakt. Je wordt nu doorgestuurd naar de projecten pagina.',
+      {
+        duration: 5000,
+      }
+    );
 
     setTimeout(() => {
       if (newId) {
@@ -227,10 +258,12 @@ export default function ProjectDuplicate() {
                   Gebruik deze knop om de gegevens van je project te dupliceren.
                 </p>
                 <p>
-                  Bij het dupliceren van je project wordt er een compleet identieke versie van het project aangemaakt in de database.
+                  Bij het dupliceren van je project wordt er een compleet
+                  identieke versie van het project aangemaakt in de database.
                 </p>
                 <p>
-                  Hou er wel rekening mee dat de gewenste gebruikers van het project eerst aan het project gekoppeld moeten worden.
+                  Hou er wel rekening mee dat de gewenste gebruikers van het
+                  project eerst aan het project gekoppeld moeten worden.
                 </p>
                 <br />
                 <FormField
@@ -246,36 +279,57 @@ export default function ProjectDuplicate() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" variant={'default'} disabled={duplicatingInProgress}>
-                  {duplicatingInProgress ? 'Bezig met dupliceren' : 'Dupliceren'}
+                <Button
+                  type="submit"
+                  variant={'default'}
+                  disabled={duplicatingInProgress}>
+                  {duplicatingInProgress
+                    ? 'Bezig met dupliceren'
+                    : 'Dupliceren'}
                 </Button>
               </form>
               {errors.length > 0 && (
                 <div className="mt-4">
-                  <br/>
-                  <Separator className="my-4"/>
-                  <Heading size="lg">Er is een fout opgetreden bij het dupliceren van het project.</Heading>
+                  <br />
+                  <Separator className="my-4" />
+                  <Heading size="lg">
+                    Er is een fout opgetreden bij het dupliceren van het
+                    project.
+                  </Heading>
                   <div className="mt-4">
-                    <p>De data is al (deels) gedupliceerd.
-                      Als je de data wilt verwijderen, klik dan op de knop hieronder.</p>
+                    <p>
+                      De data is al (deels) gedupliceerd. Als je de data wilt
+                      verwijderen, klik dan op de knop hieronder.
+                    </p>
 
-                  <div className="flex mt-4">
-                    <Button variant={'default'} disabled={removePreviousDuplicatedDataInProgress}
-                            onClick={() => removePreviousDuplicatedData()} style={{marginRight: '15px'}}>
-                      {removePreviousDuplicatedDataInProgress ? 'Bezig met verwijderen' : 'Verwijder laatste duplicaat'}
-                    </Button>
-                    <Button style={{backgroundColor: "red", color: "white"}}
-                            onClick={() => setIsErrorsVisible(!isErrorsVisible)}>
-                      {isErrorsVisible ? 'Verberg fouten' : 'Toon fouten'}
-                    </Button>
-                  </div>
+                    <div className="flex mt-4">
+                      <Button
+                        variant={'default'}
+                        disabled={removePreviousDuplicatedDataInProgress}
+                        onClick={() => removePreviousDuplicatedData()}
+                        style={{ marginRight: '15px' }}>
+                        {removePreviousDuplicatedDataInProgress
+                          ? 'Bezig met verwijderen'
+                          : 'Verwijder laatste duplicaat'}
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: 'red', color: 'white' }}
+                        onClick={() => setIsErrorsVisible(!isErrorsVisible)}>
+                        {isErrorsVisible ? 'Verberg fouten' : 'Toon fouten'}
+                      </Button>
+                    </div>
                     {isErrorsVisible && (
                       <div className="mt-2 text-red-600">
-                        <p style={{color: "black", marginBottom: "10px"}}>Er zijn fouten opgetreden. Als de fouten niet
-                          duidelijk zijn, neem dan contact op met de beheerders.</p>
+                        <p style={{ color: 'black', marginBottom: '10px' }}>
+                          Er zijn fouten opgetreden. Als de fouten niet
+                          duidelijk zijn, neem dan contact op met de beheerders.
+                        </p>
                         <ul>
                           {errors.map((error, index) => (
-                            <li key={index}>{`${error.step} - ${error.error}`}</li>
+                            <li
+                              key={
+                                index
+                              }>{`${error.step} - ${error.error}`}</li>
                           ))}
                         </ul>
                       </div>

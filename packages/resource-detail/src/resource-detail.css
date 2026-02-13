@@ -308,8 +308,14 @@
 
 /* Accordion component */
 .dd-accordion {
-  --accordion-minHeight: var(--set-accordion-minHeight, var(--dataAccordionLines, 100px));
-  --accordion-fontSize: var(--set-accordion-fontSize, var(--utrecht-paragraph-font-size, var(--utrecht-document-font-size, 1rem)));
+  --accordion-minHeight: var(
+    --set-accordion-minHeight,
+    var(--dataAccordionLines, 100px)
+  );
+  --accordion-fontSize: var(
+    --set-accordion-fontSize,
+    var(--utrecht-paragraph-font-size, var(--utrecht-document-font-size, 1rem))
+  );
   --accordion-lineHeight: var(--set-accordion-lineHeight, 1.65rem);
 }
 .dd-accordion .dd-accordion-trigger {
@@ -320,9 +326,8 @@
   justify-content: space-between;
   cursor: pointer;
   margin-top: 1rem;
-  
 }
-.dd-accordion .dd-accordion-trigger .icon{
+.dd-accordion .dd-accordion-trigger .icon {
   font-size: 1.3rem;
 }
 .dd-accordion .dd-accordion-trigger[aria-expanded='true'] .icon {
@@ -354,7 +359,6 @@
   min-height: var(--accordion-minHeight);
 }
 
-
 .dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='0']) {
   --dataAccordionLines: 0px;
 }
@@ -379,7 +383,7 @@
 .dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='7']) {
   --dataAccordionLines: calc(7 * var(--accordion-lineHeight));
 }
-.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='8'])  {
+.dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='8']) {
   --dataAccordionLines: calc(8 * var(--accordion-lineHeight));
 }
 .dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='9']) {

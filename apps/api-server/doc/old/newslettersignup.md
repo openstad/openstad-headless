@@ -1,6 +1,7 @@
 # Newsletter Signup
 
 Het aanmelden voor niewsbrieven staat alleen open als dat in de siteconfig is opgegeven. De minimale site config is:
+
 ```
 {
   "config": {
@@ -37,6 +38,7 @@ Ook voor het afmeden wordt een token gegenereerd. Dat zou bij elke verstuurde ni
 `POST /api/site/:SITE_ID/confirm`
 
 Payload:
+
 ```
 {
   "confirmToken": "TOKEN"
@@ -45,10 +47,10 @@ Payload:
 
 Bevestig een aanmelding. Open voor iedereen; het token geeft je rechten.
 
-
 `POST /api/site/:SITE_ID/signout`
 
 Payload:
+
 ```
 {
   "signoutToken": "TOKEN"
@@ -56,7 +58,6 @@ Payload:
 ```
 
 Meld je af. Open voor iedereen; het token geeft je rechten.
-
 
 `PUT /api/site/:SITE_ID/newslettersignup/:NEWSLETTERSIGNUP_ID`
 Update a newslettersignup
@@ -67,4 +68,3 @@ Alleen voor admins
 Delete a newslettersignup
 
 Alleen voor admins.
-

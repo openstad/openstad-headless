@@ -1,17 +1,18 @@
-import './stem-begroot-budget-list.css';
-import React, { Dispatch, SetStateAction } from 'react';
-import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
+  Button,
   Heading5,
   Paragraph,
   Strong,
-  Button,
 } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { Dispatch, SetStateAction } from 'react';
+
+import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { TagType } from '../../stem-begroot';
+import './stem-begroot-budget-list.css';
 
 export const StemBegrootBudgetList = ({
   introText = '',

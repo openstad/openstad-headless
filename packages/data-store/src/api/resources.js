@@ -1,6 +1,16 @@
 export default {
   fetch: async function (
-    { projectId, page, pageSize, search, tags, sort, statuses, projectIds, allowMultipleProjects },
+    {
+      projectId,
+      page,
+      pageSize,
+      search,
+      tags,
+      sort,
+      statuses,
+      projectIds,
+      allowMultipleProjects,
+    },
     options
   ) {
     const params = new URLSearchParams();
@@ -57,12 +67,13 @@ export default {
 
     let body = JSON.stringify(data);
 
-    return await this.fetch(url, {method, body});
+    return await this.fetch(url, { method, body });
   },
 
   submitLike: async function ({ projectId }, resources) {
     if (!Array.isArray(resources)) throw new Error('Resources is geen array');
-    if(resources.some(r => !'resourceId' in r || !'opinion' in r)) throw new Error("Ontbrekende velden resourceId of opinion");
+    if (resources.some((r) => (!'resourceId') in r || (!'opinion') in r))
+      throw new Error('Ontbrekende velden resourceId of opinion');
 
     let url = `/api/project/${projectId}/vote`;
     let headers = {

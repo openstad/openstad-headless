@@ -1,4 +1,21 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useProject } from '@/hooks/use-project';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import ArgumentsConfirmation from '@/pages/projects/[project]/widgets/comments/[id]/confirmation';
+import ArgumentsExtraFields from '@/pages/projects/[project]/widgets/comments/[id]/extraFields';
+import ArgumentsInclude from '@/pages/projects/[project]/widgets/comments/[id]/include';
+import ArgumentsSorting from '@/pages/projects/[project]/widgets/comments/[id]/sorting';
+import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,25 +23,10 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
+import ArgumentsForm from './form';
 import ArgumentsGeneral from './general';
 import ArgumentsList from './list';
-import ArgumentsForm from './form';
-import { useRouter } from 'next/router';
-import WidgetPreview from '@/components/widget-preview';
-import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import ArgumentsSorting from "@/pages/projects/[project]/widgets/comments/[id]/sorting";
-import ArgumentsExtraFields from "@/pages/projects/[project]/widgets/comments/[id]/extraFields";
-import ArgumentsInclude from "@/pages/projects/[project]/widgets/comments/[id]/include";
-import ArgumentsConfirmation from "@/pages/projects/[project]/widgets/comments/[id]/confirmation";
-import { useProject } from '@/hooks/use-project';
+
 export const getServerSideProps = withApiUrl;
 
 // Use these props in the widget tabs
@@ -44,8 +46,11 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
       projectId,
     });
 
-  const { data: projectConfig } = useProject( ['includeConfig'] );
-  const requiredFieldsIncludesEmailNotificationConsent = projectConfig?.config?.auth?.provider?.openstad?.requiredUserFields?.includes('emailNotificationConsent');
+  const { data: projectConfig } = useProject(['includeConfig']);
+  const requiredFieldsIncludesEmailNotificationConsent =
+    projectConfig?.config?.auth?.provider?.openstad?.requiredUserFields?.includes(
+      'emailNotificationConsent'
+    );
 
   return (
     <div>
@@ -183,7 +188,9 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
                       });
                     }
                   }}
-                  requiredFieldsIncludesEmailNotificationConsent={requiredFieldsIncludesEmailNotificationConsent}
+                  requiredFieldsIncludesEmailNotificationConsent={
+                    requiredFieldsIncludesEmailNotificationConsent
+                  }
                 />
               ) : null}
             </TabsContent>

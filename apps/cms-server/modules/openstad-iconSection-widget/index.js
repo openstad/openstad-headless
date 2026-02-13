@@ -5,19 +5,19 @@
 module.exports = {
   extend: 'base-widget',
   options: {
-    label: 'Icon Section'
+    label: 'Icon Section',
   },
   fields: {
     add: {
       expandable: {
         label: 'Uitklapbaar',
         type: 'boolean',
-        def: true
+        def: true,
       },
       expanded: {
         label: 'Standaard uitgeklapt',
         type: 'boolean',
-        def: true
+        def: true,
       },
       expandablelabel: {
         label: 'Uitklapbaar label',
@@ -28,45 +28,45 @@ module.exports = {
         type: 'array',
         fields: {
           add: {
-            image:{
+            image: {
               label: 'Afbeelding',
               type: 'attachment',
               fileGroup: 'images',
             },
             imageAlt: {
               label: 'Afbeelding alt tekst',
-              type: 'string'
+              type: 'string',
             },
             title: {
               label: 'Titel',
-              type: 'string'
+              type: 'string',
             },
             description: {
               label: 'Omschrijving',
               type: 'string',
-              textarea: true
+              textarea: true,
             },
-            linkText:{
+            linkText: {
               label: 'Link tekst',
-              type: 'string'
+              type: 'string',
             },
             href: {
               label: 'Link url',
-              type: 'url'
+              type: 'url',
             },
             linkScreenReaderText: {
               label: 'Link screenreader tekst',
               help: 'Standaard is de screenreader tekst hetzelfde als de link tekst. Door dit veld te vullen overschrijf je de standaard screenreader tekst',
-              type: 'string'
+              type: 'string',
             },
             target: {
               label: 'Open link in nieuw venster',
               type: 'boolean',
-              def: false
-            }
-          }
-        }
-      }
+              def: false,
+            },
+          },
+        },
+      },
     },
-  }
+  },
 };

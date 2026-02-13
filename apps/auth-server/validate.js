@@ -13,9 +13,6 @@ const validate = {};
 /** Suppress tracing for things like unit testing */
 const displayTrace = process.env.DISPLAY_TRACE === 'true';
 
-
-
-
 /**
  * Log the message and throw it as an Error
  * @param   {String} msg - Message to log and throw
@@ -105,16 +102,20 @@ validate.token = (token, accessToken) => {
 
   // token is a user token
   if (token.userID != null) {
-    return db.User
-      .findOne({where: {id: token.userID} })
-      .then(client => validate.userExists(client))
-      .then((client) => { return client; });
+    return db.User.findOne({ where: { id: token.userID } })
+      .then((client) => validate.userExists(client))
+      .then((client) => {
+        return client;
+      });
   }
 
-  return db.Client()
-    .findOne({where: {clientId: token.clientID} })
-    .then(client => validate.clientExists(client))
-    .then((client) => { return client; });
+  return db
+    .Client()
+    .findOne({ where: { clientId: token.clientID } })
+    .then((client) => validate.clientExists(client))
+    .then((client) => {
+      return client;
+    });
 };
 
 /**
@@ -130,7 +131,9 @@ validate.token = (token, accessToken) => {
 validate.refreshToken = (token, refreshToken, client) => {
   utils.verifyToken(refreshToken);
   if (client.id !== token.clientID) {
-    validate.logAndThrow('RefreshToken clientID does not match client id given');
+    validate.logAndThrow(
+      'RefreshToken clientID does not match client id given'
+    );
   }
   return refreshToken;
 };
@@ -155,7 +158,7 @@ validate.authCode = (code, authCode, client, redirectURI) => {
 
   // Fixme: why is this disabled?
   if (redirectURI !== authCode.redirectURI) {
-//    validate.logAndThrow('AuthCode redirectURI does not match redirectURI given');
+    //    validate.logAndThrow('AuthCode redirectURI does not match redirectURI given');
   }
   return authCode;
 };
@@ -165,7 +168,8 @@ validate.authCode = (code, authCode, client, redirectURI) => {
  * @param   {Array}   scope - The scope to check if is a refresh token if it has 'offline_access'
  * @returns {Boolean} true If the scope is offline_access, otherwise false
  */
-validate.isRefreshToken = ({ scope }) => scope != null && scope.indexOf('offline_access') === 0;
+validate.isRefreshToken = ({ scope }) =>
+  scope != null && scope.indexOf('offline_access') === 0;
 
 /**
  * Given a userId, clientID, and scope this will generate a refresh token, save it, and return it
@@ -175,9 +179,13 @@ validate.isRefreshToken = ({ scope }) => scope != null && scope.indexOf('offline
  * @returns {Promise} The resolved refresh token after saved
  */
 validate.generateRefreshToken = ({ userId, clientID, scope }) => {
-  const refreshToken = utils.createToken({ sub : userId, exp : config.refreshToken.expiresIn });
-  return memoryStorage.refreshTokens.save(refreshToken, userId, clientID, scope)
-  .then(() => refreshToken);
+  const refreshToken = utils.createToken({
+    sub: userId,
+    exp: config.refreshToken.expiresIn,
+  });
+  return memoryStorage.refreshTokens
+    .save(refreshToken, userId, clientID, scope)
+    .then(() => refreshToken);
 };
 
 /**
@@ -188,10 +196,11 @@ validate.generateRefreshToken = ({ userId, clientID, scope }) => {
  * @returns {Promise}  The resolved refresh token after saved
  */
 validate.generateToken = ({ userID, clientID, scope }) => {
-  const token      = utils.createToken({ sub : userID, exp : config.token.expiresIn });
+  const token = utils.createToken({ sub: userID, exp: config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
-  return memoryStorage.accessTokens.save(token, expiration, userID, clientID, scope)
-  .then(() => token);
+  return memoryStorage.accessTokens
+    .save(token, expiration, userID, clientID, scope)
+    .then(() => token);
 };
 
 /**
@@ -217,12 +226,12 @@ validate.generateTokens = (authCode) => {
  * @param   {Object}  token - The token to check
  * @returns {Promise} Resolved with the token if it is a valid token otherwise rejected with error
  */
-validate.tokenForHttp = token =>
+validate.tokenForHttp = (token) =>
   new Promise((resolve, reject) => {
     try {
       utils.verifyToken(token);
     } catch (err) {
-      const error  = new Error('invalid_token');
+      const error = new Error('invalid_token');
       error.status = 400;
       reject(error);
     }
@@ -245,7 +254,6 @@ validate.tokenExistsForHttp = (token) => {
   return token;
 };
 
-
 /**
  * Given a client this will return the client if it is not null. Otherwise this will throw a
  * HTTP error.
@@ -255,7 +263,7 @@ validate.tokenExistsForHttp = (token) => {
  */
 validate.clientExistsForHttp = (client) => {
   if (client == null) {
-    const error  = new Error('invalid_token');
+    const error = new Error('invalid_token');
     error.status = 400;
     throw error;
   }

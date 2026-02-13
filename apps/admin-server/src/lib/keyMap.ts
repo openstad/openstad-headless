@@ -27,10 +27,13 @@ export const keyMap: Record<string, string> = {
   'user.address': 'Gebruiker adres',
   'user.city': 'Gebruiker woonplaats',
   'user.postcode': 'Gebruiker postcode',
-  'tags.*': "tags", // Wildcard key (eg. tags.theme, tags.place)
+  'tags.*': 'tags', // Wildcard key (eg. tags.theme, tags.place)
 };
 
 // mapping from humanReadable to backendKey
 export const reverseKeyMap: Record<string, string> = Object.fromEntries(
-  Object.entries(keyMap).map(([backend, humanReadable]) => [humanReadable, backend])
+  Object.entries(keyMap).map(([backend, humanReadable]) => [
+    humanReadable,
+    backend,
+  ])
 );

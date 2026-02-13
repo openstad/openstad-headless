@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
-const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const createError = require('http-errors');
 
 let router = express.Router({ mergeParams: true });
@@ -15,7 +15,7 @@ router.all('*', function (req, res, next) {
   if (req.query.includeProject) {
     req.scope.push('includeProject');
   }
-  
+
   if (req.query.statuses) {
     let statuses = req.query.statuses;
     req.scope.push({ method: ['onlyWithIds', statuses] });
@@ -55,7 +55,7 @@ router
   // create status
   // ---------------
   .post(auth.can('Status', 'create'))
-  .post( rateLimiter(), function (req, res, next) {
+  .post(rateLimiter(), function (req, res, next) {
     const extraFunctionality = {
       ...(req.body.extraFunctionality || {}),
     };
@@ -114,7 +114,7 @@ router
   // update status
   // ---------------
   .put(auth.useReqUser)
-  .put( rateLimiter(), function (req, res, next) {
+  .put(rateLimiter(), function (req, res, next) {
     const status = req.results;
     if (!(status && status.can && status.can('update')))
       return next(new Error('You cannot update this status'));

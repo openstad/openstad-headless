@@ -19,4 +19,4 @@ module.exports = function (polygon, latKey = 0, longKey = 1) {
   }
 
   return [];
-}
+};

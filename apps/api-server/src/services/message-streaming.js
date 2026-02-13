@@ -6,9 +6,8 @@ let client = null;
 async function getClient() {
   let client;
   try {
-    client = await redis.createClient(config.messageStreaming.redis)
-      .connect();
-  } catch(err) {
+    client = await redis.createClient(config.messageStreaming.redis).connect();
+  } catch (err) {
     //console.log(err);
   }
 

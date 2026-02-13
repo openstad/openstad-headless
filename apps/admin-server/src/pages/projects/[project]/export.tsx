@@ -1,15 +1,15 @@
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import useExport from '@/hooks/use-export';
+import { useRouter } from 'next/router';
 import React from 'react';
-import { PageLayout } from '../../../components/ui/page-layout';
 
 import { Button } from '../../../components/ui/button';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
-import useExport from '@/hooks/use-export';
+import { PageLayout } from '../../../components/ui/page-layout';
 
 export default function ProjectExport() {
   const router = useRouter();
-  const { project } = router.query;    
+  const { project } = router.query;
 
   // Function to export data as a file
   const exportData = (data: BlobPart, fileName: string, type: string) => {
@@ -24,10 +24,9 @@ export default function ProjectExport() {
   };
   const { data, isLoading } = useExport(project as string);
 
-
   function transform() {
     const jsonData = JSON.stringify(data);
-    exportData(jsonData, `${data.name}.json`, "application/json");
+    exportData(jsonData, `${data.name}.json`, 'application/json');
   }
 
   return (
@@ -63,7 +62,10 @@ export default function ProjectExport() {
                   </ul>
                 </div>
               </div>
-              <Button className="w-fit col-span-full mt-4" type="submit" onClick={transform}>
+              <Button
+                className="w-fit col-span-full mt-4"
+                type="submit"
+                onClick={transform}>
                 Opslaan
               </Button>
             </div>

@@ -15,11 +15,9 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
-      "react": [ "./node_modules/@types/react" ]
+      "react": ["./node_modules/@types/react"]
     },
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
   "include": [
     "next-env.d.ts",
@@ -27,7 +25,8 @@
     "**/*.tsx",
     "**/*.js",
     "**/*.jsx",
-    "types/**/*.d.ts"
-, "src/lib/form-widget-helpers"  ],
+    "types/**/*.d.ts",
+    "src/lib/form-widget-helpers"
+  ],
   "exclude": ["node_modules"]
 }

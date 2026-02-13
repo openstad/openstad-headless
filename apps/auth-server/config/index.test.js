@@ -1,7 +1,7 @@
-import { expect, test, describe, vi } from "vitest";
+import { describe, expect, test, vi } from 'vitest';
 
 const testSessionSecret = '123secret';
-vi.stubEnv('SESSION_SECRET', testSessionSecret)
+vi.stubEnv('SESSION_SECRET', testSessionSecret);
 
 const config = require('./index');
 

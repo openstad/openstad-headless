@@ -1,21 +1,15 @@
-import { useState } from 'react';
-import { DialogClose } from '@radix-ui/react-dialog';
-import { MoreHorizontal, Trash } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
-import { Heading, Paragraph } from '@/components/ui/typography';
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { Heading, Paragraph } from '@/components/ui/typography';
+import { DialogClose } from '@radix-ui/react-dialog';
+import { MoreHorizontal, Trash } from 'lucide-react';
+import { useState } from 'react';
 
 type Props = {
   buttonText: string;
@@ -23,7 +17,15 @@ type Props = {
   message: string;
   confirmButtonText?: string;
   cancelButtonText?: string;
-  confirmButtonVariant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined;
+  confirmButtonVariant?:
+    | 'link'
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | null
+    | undefined;
   onConfirmAccepted: () => void;
 };
 
@@ -40,10 +42,12 @@ export function ConfirmActionDialog({
 
   return (
     <Dialog open={open} modal={true} onOpenChange={setOpen}>
-      <div className="flex items-center" onClick={(e) => {
-        e.preventDefault();
-        setOpen(true);
-      }}>
+      <div
+        className="flex items-center"
+        onClick={(e) => {
+          e.preventDefault();
+          setOpen(true);
+        }}>
         {buttonText}
       </div>
       <DialogContent

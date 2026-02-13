@@ -16,13 +16,15 @@ module.exports = {
   onTick: UseLock.createLockedExecutable({
     name: 'send-enddate-notifications',
     task: async (next) => {
-      
-      if (process.env.DISABLE_PROJECT_ISSUE_WARNINGS && process.env.DISABLE_PROJECT_ISSUE_WARNINGS === "true") return;
+      if (
+        process.env.DISABLE_PROJECT_ISSUE_WARNINGS &&
+        process.env.DISABLE_PROJECT_ISSUE_WARNINGS === 'true'
+      )
+        return;
 
       let endDateConfig = config.notifications.sendEndDateNotifications;
 
       try {
-
         // for each project
         let targetDate = new Date();
         targetDate.setDate(targetDate.getDate() + endDateConfig.XDaysBefore);
@@ -33,70 +35,74 @@ module.exports = {
                 config: {
                   project: {
                     endDate: {
-                      [Sequelize.Op.not]: null
-                    }
-                  }
-                }
-              }, {
+                      [Sequelize.Op.not]: null,
+                    },
+                  },
+                },
+              },
+              {
                 config: {
                   project: {
                     endDate: {
-                      [Sequelize.Op.not]: ''
-                    }
-                  }
-                }
-              }, {
+                      [Sequelize.Op.not]: '',
+                    },
+                  },
+                },
+              },
+              {
                 config: {
                   project: {
                     endDate: {
                       [Sequelize.Op.lte]: targetDate,
-                    }
-                  }
-                }
-              }, {
+                    },
+                  },
+                },
+              },
+              {
                 config: {
                   project: {
                     projectHasEnded: false,
-                  }
-                }
+                  },
+                },
                 //            }, {
                 //              config: {
                 //                project: {
                 //                  endDateNotificationSent: false
                 //                }
                 //              }
-              }
-            ]
-          }
+              },
+            ],
+          },
         });
-        for (let i=0; i < projects.length; i++) {
+        for (let i = 0; i < projects.length; i++) {
           let project = projects[i];
 
-          if (!project.config.project.endDateNotificationSent) { // todo: the where clause above does not work for reasons I do not have time for now
+          if (!project.config.project.endDateNotificationSent) {
+            // todo: the where clause above does not work for reasons I do not have time for now
 
             // send notification
-            console.log('CRON send-enddate-notifications: send email to projectmanager');
+            console.log(
+              'CRON send-enddate-notifications: send email to projectmanager'
+            );
             await db.Notification.create({
-              type: "project issues warning",
-			        projectId: project.id,
+              type: 'project issues warning',
+              projectId: project.id,
               data: {
-                messages: [{content: 'de einddatum van je project nadert'}]
-              }
-			      })
+                messages: [{ content: 'de einddatum van je project nadert' }],
+              },
+            });
 
-            project.update({ config: { project: { endDateNotificationSent: true } } });
-
+            project.update({
+              config: { project: { endDateNotificationSent: true } },
+            });
           }
         }
-        
-        return next();
 
+        return next();
       } catch (err) {
         console.log('error in send-enddate-notifications cron');
         next(err); // let the locked function handle this
       }
-      
-    }
-  })
-
+    },
+  }),
 };

@@ -1,10 +1,11 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import {RTE} from './rte.tsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+import { RTE } from './rte.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RTE 
+    <RTE
       content='
       <h3>Utrecht heading 3</h3>
       <h4>Utrecht heading 4</h4>
@@ -47,7 +48,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <li>Utrecht unordered list item 3</li>
         <li>Utrecht unordered list item 4</li>
       </ul>
-      ' 
+      '
     />
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

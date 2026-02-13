@@ -1,20 +1,20 @@
-import './agenda.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer } from '@openstad-headless/ui/src';
-import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
+import { Accordion } from '@openstad-headless/ui/src/accordion';
+import '@utrecht/component-library-css';
+import {
+  Heading3,
+  Heading4,
+  LinkList,
+  LinkListLink,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import {
-  Heading4,
-  Heading3,
-  Paragraph,
-  LinkListLink,
-  LinkList
-} from "@utrecht/component-library-react";
-import { Accordion } from '@openstad-headless/ui/src/accordion';
+import './agenda.css';
 
 export type AgendaWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -38,15 +38,15 @@ export type AgendaWidgetProps = BaseProps &
         openInNewWindow: boolean;
       }>;
     }>;
-  displayToggle?: boolean;
-  toggleDefaultClosed?: boolean;
-  toggleShowText?: string;
-  toggleHideText?: string;
-  toggleType?: string;
-  toggleStart?: string;
-  toggleEnd?: string;
-  defaultClosedFromBreakpoint?: 'not' | '480' | '640' | '768' | '1024';
-};
+    displayToggle?: boolean;
+    toggleDefaultClosed?: boolean;
+    toggleShowText?: string;
+    toggleHideText?: string;
+    toggleType?: string;
+    toggleStart?: string;
+    toggleEnd?: string;
+    defaultClosedFromBreakpoint?: 'not' | '480' | '640' | '768' | '1024';
+  };
 
 function Agenda({
   displayToggle = false,
@@ -69,7 +69,9 @@ function Agenda({
     return false;
   };
 
-  const now = props.useActiveDates ? new Date(props.serverTime || Date.now()) : null;
+  const now = props.useActiveDates
+    ? new Date(props.serverTime || Date.now())
+    : null;
   const itemsSorted = [...(props.items ?? [])]
     .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
     .map((item) => {
@@ -81,7 +83,9 @@ function Agenda({
     });
 
   let startIdx = isNaN(parseInt(toggleStart)) ? 0 : parseInt(toggleStart);
-  let endIdx = isNaN(parseInt(toggleEnd)) ? itemsSorted.length - 1 : parseInt(toggleEnd);
+  let endIdx = isNaN(parseInt(toggleEnd))
+    ? itemsSorted.length - 1
+    : parseInt(toggleEnd);
 
   if (endIdx < startIdx) endIdx = startIdx;
 
@@ -95,11 +99,9 @@ function Agenda({
         <div
           key={item.trigger}
           className={`osc-agenda-item${item.active ? ' --active-item' : ''}`}
-          aria-current={item.active ? 'true' : undefined}
-        >
+          aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
-
             <Heading4>{item.title}</Heading4>
             <Paragraph>{item.description}</Paragraph>
             {item.links && item.links?.length > 0 && (
@@ -117,7 +119,7 @@ function Agenda({
         </div>
       ))}
     </>
-  )
+  );
 
   const ItemsSection = (
     <section className="osc-agenda">

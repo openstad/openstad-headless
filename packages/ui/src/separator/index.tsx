@@ -1,6 +1,6 @@
-import * as React from 'react';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
 import { type ClassValue, clsx } from 'clsx';
+import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
 
 function cn(...inputs: ClassValue[]) {
@@ -10,7 +10,7 @@ function cn(...inputs: ClassValue[]) {
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
-  >(
+>(
   (
     { className, orientation = 'horizontal', decorative = true, ...props },
     ref

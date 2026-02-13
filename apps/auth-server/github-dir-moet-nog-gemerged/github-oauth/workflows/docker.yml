@@ -6,7 +6,7 @@ on:
     branches:
       - '**'
     tags:
-      - "v*"
+      - 'v*'
 jobs:
   # define job to build and publish docker image
   build-and-push-docker-image:
@@ -64,4 +64,3 @@ jobs:
             })
       - name: Image digest
         run: echo "${{ steps.docker_build.outputs.metadata }}"
-       

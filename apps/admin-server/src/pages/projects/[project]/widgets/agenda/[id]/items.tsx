@@ -13,11 +13,11 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
+import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -155,7 +155,7 @@ export default function WidgetAgendaItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-      onFieldChanged('items', items);
+    onFieldChanged('items', items);
   }, [items]);
 
   useEffect(() => {
@@ -373,9 +373,9 @@ export default function WidgetAgendaItems(
                       className="w-fit mt-4 bg-secondary text-black hover:text-white"
                       type="button"
                       onClick={() => {
-                        setSettingLinks(() => !settingLinks),
+                        (setSettingLinks(() => !settingLinks),
                           setLink(null),
-                          setLinks([]);
+                          setLinks([]));
                       }}>
                       Annuleer
                     </Button>
@@ -508,7 +508,9 @@ export default function WidgetAgendaItems(
                           name="activeFrom"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Actief vanaf — laat leeg om direct te starten</FormLabel>
+                              <FormLabel>
+                                Actief vanaf — laat leeg om direct te starten
+                              </FormLabel>
                               <Input type="datetime-local" {...field} />
                               <FormMessage />
                             </FormItem>
@@ -519,7 +521,9 @@ export default function WidgetAgendaItems(
                           name="activeTo"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Actief tot — laat leeg voor geen einddatum</FormLabel>
+                              <FormLabel>
+                                Actief tot — laat leeg voor geen einddatum
+                              </FormLabel>
                               <Input type="datetime-local" {...field} />
                               <FormMessage />
                             </FormItem>

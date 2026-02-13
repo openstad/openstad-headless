@@ -1,4 +1,20 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import Preview from '@/components/widget-preview';
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import WidgetResourceFormItems from '@/pages/projects/[project]/widgets/resourceform/[id]/items';
+import WidgetResourceFormPolygons from '@/pages/projects/[project]/widgets/resourceform/[id]/polygons';
+import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,40 +22,26 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetResourceFormGeneral from './general';
-import WidgetResourceFormSubmit from './submit';
-import WidgetResourceFormInfo from './info';
 import WidgetResourceFormConfirmation from './confirmation';
-import { useRouter } from 'next/router';
-import Preview from '@/components/widget-preview';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
-import WidgetResourceFormItems from "@/pages/projects/[project]/widgets/resourceform/[id]/items";
-import { useWidgetPreview } from "@/hooks/useWidgetPreview";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import WidgetPreview from "@/components/widget-preview";
-import { ResourceFormWidgetProps } from "@openstad-headless/resource-form/src/props";
-import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
-import WidgetResourceFormPolygons from "@/pages/projects/[project]/widgets/resourceform/[id]/polygons";
+import WidgetResourceFormGeneral from './general';
+import WidgetResourceFormInfo from './info';
+import WidgetResourceFormSubmit from './submit';
 
 export const getServerSideProps = withApiUrl;
-export default function WidgetResourceForm({
-  apiUrl,
-}: WithApiUrlProps) {
+export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<ResourceFormWidgetProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<ResourceFormWidgetProps>(
-    {
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceFormWidgetProps>();
+  const { previewConfig, updatePreview } =
+    useWidgetPreview<ResourceFormWidgetProps>({
       projectId,
-    }
-  );
+    });
 
   return (
-    <div >
+    <div>
       <PageLayout
         pageHeader="Projectnaam"
         breadcrumbs={[
@@ -68,8 +70,7 @@ export default function WidgetResourceForm({
               <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="p-0">
-            </TabsContent>
+            <TabsContent value="preview" className="p-0"></TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetResourceFormGeneral />
             </TabsContent>
@@ -106,7 +107,8 @@ export default function WidgetResourceForm({
                   <Alert variant="info" className="mb-4">
                     <AlertTitle>Let op!</AlertTitle>
                     <AlertDescription>
-                      De kaartopties zijn alleen van toepassing als je een veld hebt die een kaart bevat.
+                      De kaartopties zijn alleen van toepassing als je een veld
+                      hebt die een kaart bevat.
                     </AlertDescription>
                   </Alert>
                   <WidgetResourcesMapDatalayers
@@ -131,8 +133,8 @@ export default function WidgetResourceForm({
                 <WidgetResourceFormPolygons
                   {...previewConfig}
                   updateConfig={(config) => {
-                    console.log( "Config", widget.config, config )
-                    updateConfig({...widget.config, ...config})
+                    console.log('Config', widget.config, config);
+                    updateConfig({ ...widget.config, ...config });
                   }}
                   onFieldChanged={(key, value) => {
                     if (previewConfig) {

@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
 import { AccordionSection } from '@utrecht/component-library-react';
+import React, { useState } from 'react';
+
 import './index.css';
 
-function Accordion({ content, closeLabel, openLabel, headingLevel = 2, expanded = false }: any) {
+function Accordion({
+  content,
+  closeLabel,
+  openLabel,
+  headingLevel = 2,
+  expanded = false,
+}: any) {
   const [open, setOpen] = useState(expanded as boolean);
 
   const handleActivate = () => {
@@ -16,8 +23,7 @@ function Accordion({ content, closeLabel, openLabel, headingLevel = 2, expanded 
       expanded={open}
       label={open ? closeLabel : openLabel}
       onActivate={handleActivate}
-      className="osc-accordion-section"
-    >
+      className="osc-accordion-section">
       {content}
     </AccordionSection>
   );

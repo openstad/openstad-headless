@@ -2,46 +2,43 @@ const sanitize = require('../util/sanitize');
 const config = require('config');
 
 module.exports = function (db, sequelize, DataTypes) {
-  let DataLayer = sequelize.define(
-    'datalayers',
-    {
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        set: function (text) {
-          this.setDataValue('name', sanitize.title(text.trim()));
-        },
-      },
-
-      layer: {
-        type: DataTypes.JSON,
-        allowNull: false,
-        defaultValue: {},
-      },
-
-      icon: {
-        type: DataTypes.JSON,
-        allowNull: false,
-        defaultValue: {},
-      },
-
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
-
-      updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
-
-      deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        default: null,
+  let DataLayer = sequelize.define('datalayers', {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      set: function (text) {
+        this.setDataValue('name', sanitize.title(text.trim()));
       },
     },
-  );
+
+    layer: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+    },
+
+    icon: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+    },
+
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      default: null,
+    },
+  });
 
   DataLayer.scopes = function scopes() {
     return {

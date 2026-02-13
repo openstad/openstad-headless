@@ -1,4 +1,4 @@
-@if $media-type == "print" {
+@if $media-type == 'print' {
   h1 {
     font-size: 22pt !important;
     line-height: 27.5pt !important;
@@ -41,9 +41,7 @@
       }
     }
   }
-}
-
-@else {
+} @else {
   h1,
   h2,
   h3,
@@ -87,7 +85,7 @@
     }
   }
 
-  #{$rich-content-class} p a:not([class*="alltoaction"]) {
+  #{$rich-content-class} p a:not([class*='alltoaction']) {
     @include inline-link-focus;
   }
 

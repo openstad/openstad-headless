@@ -1,19 +1,16 @@
 import useSWR from 'swr';
 
 type paramsType = {
-  projectsWithIssues?: boolean,
-}
-
+  projectsWithIssues?: boolean;
+};
 
 export default function useProjectList(params?: paramsType) {
+  let projectListSwrKey = `/api/openstad/api/project?includeConfig=1`;
 
-  let projectListSwrKey =`/api/openstad/api/project?includeConfig=1`;
-
-  if (params?.projectsWithIssues)  {
+  if (params?.projectsWithIssues) {
     projectListSwrKey = `/api/openstad/api/project/issues`;
   }
 
   let projectListSwr = useSWR(projectListSwrKey);
   return { ...projectListSwr };
-
 }

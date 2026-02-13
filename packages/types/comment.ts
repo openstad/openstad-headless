@@ -20,7 +20,7 @@ export type Comment = {
 
   replies: Array<Comment>;
 
-  user?: { displayName: string, role: string};
+  user?: { displayName: string; role: string };
 
   tags?: Array<{
     id: string;

@@ -8,6 +8,7 @@ import {
 } from '@/lib/server-side-props-definition';
 import { RawResourceWidgetProps } from '@openstad-headless/raw-resource/src/raw-resource';
 import { useRouter } from 'next/router';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -24,7 +25,8 @@ export default function WidgetRawResource({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<RawResourceWidgetProps>();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<RawResourceWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<RawResourceWidgetProps>({
       projectId,

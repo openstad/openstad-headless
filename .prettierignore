@@ -2,4 +2,20 @@
 node_modules/
 nginx.config.example
 build/
+dist/
+.next/
+out/
 coverage/
+*.min.js
+*.min.css
+*.map
+package-lock.json
+charts/
+operations/
+*.iife.js
+*.less
+
+# Nunjucks templates (Prettier can't parse template syntax in HTML)
+apps/auth-server/views/
+apps/cms-server/views/partials/oud/
+apps/cms-server/modules/openstad-section-widget/views/

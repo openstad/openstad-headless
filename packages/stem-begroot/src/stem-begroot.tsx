@@ -1,30 +1,32 @@
-import './stem-begroot.css';
-import React, { useEffect, useRef, useState } from 'react';
-import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
+import {
+  canLikeResource,
+  getScopedSessionRandomSortSeed,
+  hasRole,
+} from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { hasRole, getScopedSessionRandomSortSeed, canLikeResource } from '@openstad-headless/lib';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
+import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
+import '@utrecht/component-library-css';
+import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useRef, useState } from 'react';
+
+import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
+import NotificationService from '../../lib/NotificationProvider/notification-service';
+import { BudgetUsedList } from './reuseables/used-budget-component';
+import './stem-begroot.css';
 import { StemBegrootBudgetList } from './step-1/begroot-budget-list/stem-begroot-budget-list';
 import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/stem-begroot-detail-dialog';
-import { createVotePendingStorage } from './utils/vote-pending-storage';
-import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
-
 import { StemBegrootResourceList } from './step-1/begroot-resource-list/stem-begroot-resource-list';
-import { BudgetUsedList } from './reuseables/used-budget-component';
 import { BegrotenSelectedOverview } from './step-2/selected-overview';
-import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
-
-import { Step3Success } from './step-3-success';
 import { Step3 } from './step-3';
+import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
-
-import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
-import { Button, Heading, ButtonLink } from '@utrecht/component-library-react';
-import NotificationService from '../../lib/NotificationProvider/notification-service';
-import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
+import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
+import { createVotePendingStorage } from './utils/vote-pending-storage';
 
 type TagTypeSingle = {
   min: number;
@@ -128,7 +130,7 @@ function StemBegroot({
   displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
- // Initialize storage instances with project ID
+  // Initialize storage instances with project ID
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(props.projectId),
     [props.projectId]
@@ -153,7 +155,6 @@ function StemBegroot({
 
   // Restore pending-budget-vote from server if UUID is in URL
   useEffect(() => {
-
     if (pendingVoteFetched) return;
 
     const url = new URL(window.location.href);
@@ -167,12 +168,12 @@ function StemBegroot({
 
         if (!props.api || !props.api.url) return;
 
-        let apiUrl =`${props.api.url}/api/pending-budget-vote/${uuid}`;
+        let apiUrl = `${props.api.url}/api/pending-budget-vote/${uuid}`;
 
         const pendingBudgetVote = await fetch(apiUrl, {
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         });
 
         // Remove pendingBudgetVote from URL
@@ -180,7 +181,10 @@ function StemBegroot({
         window.history.replaceState({}, document.title, url.toString());
 
         if (!pendingBudgetVote.ok || !pendingBudgetVote) {
-          console.error('Failed to fetch pending budget vote from server', pendingBudgetVote.statusText);
+          console.error(
+            'Failed to fetch pending budget vote from server',
+            pendingBudgetVote.statusText
+          );
           return;
         }
 
@@ -193,7 +197,10 @@ function StemBegroot({
 
         const { data } = pendingBudgetVoteData;
 
-        if (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag') {
+        if (
+          props.votes.voteType === 'countPerTag' ||
+          props.votes.voteType === 'budgetingPerTag'
+        ) {
           votePendingStorage.setVotePendingPerTag(data as any);
         } else {
           votePendingStorage.setVotePending(data as any);
@@ -208,9 +215,11 @@ function StemBegroot({
       return;
     }
 
-    const localPending = (props.votes.voteType === 'countPerTag' || props.votes.voteType === 'budgetingPerTag')
-      ? votePendingStorage.getVotePendingPerTag()
-      : votePendingStorage.getVotePending();
+    const localPending =
+      props.votes.voteType === 'countPerTag' ||
+      props.votes.voteType === 'budgetingPerTag'
+        ? votePendingStorage.getVotePendingPerTag()
+        : votePendingStorage.getVotePending();
 
     if (localPending) {
       setPendingVoteFetched(true);
@@ -253,11 +262,8 @@ function StemBegroot({
 
   const urlTagIdsArray = urlTagIds ? stringToArray(urlTagIds) : undefined;
   const urlStatusIdsArray = urlStatusIds
-   
     ? stringToArray(urlStatusIds)
-   
     : undefined;
-
 
   const initTags =
     urlTagIdsArray && urlTagIdsArray.length > 0
@@ -268,9 +274,10 @@ function StemBegroot({
       ? urlStatusIdsArray
       : statusIdsToLimitResourcesTo || [];
 
-  const prefilterTagObj = urlTagIdsArray && allTags
-    ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
-    : [];
+  const prefilterTagObj =
+    urlTagIdsArray && allTags
+      ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
+      : [];
 
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
@@ -280,10 +287,14 @@ function StemBegroot({
     props.defaultSorting || undefined
   );
   const randomSortSeed = React.useMemo(() => {
-    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const pathname =
+      typeof window !== 'undefined' ? window.location.pathname : '';
     const search = typeof window !== 'undefined' ? window.location.search : '';
     const seedScope = `${props.projectId || 'project'}:${pathname}:${search}`;
-    return getScopedSessionRandomSortSeed(seedScope, 'stemBegrootRandomSortSeed');
+    return getScopedSessionRandomSortSeed(
+      seedScope,
+      'stemBegrootRandomSortSeed'
+    );
   }, [props.projectId]);
   const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
@@ -362,7 +373,10 @@ function StemBegroot({
 
   // Save selectedResources to storage whenever they change
   useEffect(() => {
-    if (props.votes.voteType !== "countPerTag" && props.votes.voteType !== "budgetingPerTag") {
+    if (
+      props.votes.voteType !== 'countPerTag' &&
+      props.votes.voteType !== 'budgetingPerTag'
+    ) {
       selectedResourcesStorage.setSelectedResources(selectedResources);
     }
   }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
@@ -450,27 +464,30 @@ function StemBegroot({
       props.votes.voteType === 'budgetingPerTag'
     ) {
       pending = votePendingStorage.getVotePendingPerTag();
-    if (props.votes.voteType === "countPerTag" || props.votes.voteType === "budgetingPerTag") {
-      pending = votePendingStorage.getVotePendingPerTag();
-    } else {
-      pending = votePendingStorage.getVotePending();
-    }
-
-    if (
-      pending &&
-      ((isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
-        (isAllowedToVote && navAfterLogin && currentStep === 2) ||
-        (isAllowedToVote && !navAfterLogin))
-    ) {
-      if (voteAfterLoggingIn) {
-        if (selectedResources.length > 0 || tagCounter.length > 0) {
-          setCurrentStep(3);
-          submitVoteAndCleanup();
-        }
+      if (
+        props.votes.voteType === 'countPerTag' ||
+        props.votes.voteType === 'budgetingPerTag'
+      ) {
+        pending = votePendingStorage.getVotePendingPerTag();
       } else {
-        setCurrentStep(3);
+        pending = votePendingStorage.getVotePending();
       }
-     }
+
+      if (
+        pending &&
+        ((isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
+          (isAllowedToVote && navAfterLogin && currentStep === 2) ||
+          (isAllowedToVote && !navAfterLogin))
+      ) {
+        if (voteAfterLoggingIn) {
+          if (selectedResources.length > 0 || tagCounter.length > 0) {
+            setCurrentStep(3);
+            submitVoteAndCleanup();
+          }
+        } else {
+          setCurrentStep(3);
+        }
+      }
     }
   }, [currentUser, currentStep, selectedResources, tagCounter]);
 
@@ -535,9 +552,11 @@ function StemBegroot({
       props.votes.voteType !== 'budgetingPerTag'
     ) {
       const resourcesToVoteFor: { [key: string]: any } = {};
-      (selectedResources.length ? selectedResources : []).forEach((resource: any) => {
-        resourcesToVoteFor[resource.id] = 'yes';
-      });
+      (selectedResources.length ? selectedResources : []).forEach(
+        (resource: any) => {
+          resourcesToVoteFor[resource.id] = 'yes';
+        }
+      );
       votePendingStorage.setVotePending(resourcesToVoteFor);
     } else {
       const resourcesToVoteForPerTag: {
@@ -697,15 +716,15 @@ function StemBegroot({
         !(resource.budget <= props.votes.maxBudget - budgetUsed)
         ? notEnoughBudgetText
         : isInSelected(resource)
-        ? step1Delete || 'Verwijder'
-        : step1Add || 'Voeg toe';
+          ? step1Delete || 'Verwijder'
+          : step1Add || 'Voeg toe';
     }
     return !isInSelected(resource) &&
       !((props.votes.maxResources || 0) > selectedResources.length)
       ? notEnoughBudgetText
       : isInSelected(resource)
-      ? step1Delete || 'Verwijder'
-      : step1Add || 'Voeg toe';
+        ? step1Delete || 'Verwijder'
+        : step1Add || 'Voeg toe';
   };
 
   const steps = [
@@ -828,7 +847,7 @@ function StemBegroot({
   }, [activeTagTab]);
 
   useEffect(() => {
-    console.log("Curr step", currentStep);
+    console.log('Curr step', currentStep);
   }, [currentStep]);
 
   return (
@@ -988,7 +1007,7 @@ function StemBegroot({
                   budget: number;
                 }) => {
                   votePendingStorage.clearAllVotePending();
-                  selectedResourcesStorage.clearSelectedResources()
+                  selectedResourcesStorage.clearSelectedResources();
 
                   let newTagCounter = [...tagCounter];
 
@@ -1383,7 +1402,7 @@ function StemBegroot({
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 votePendingStorage.clearAllVotePending();
-                selectedResourcesStorage.clearSelectedResources()
+                selectedResourcesStorage.clearSelectedResources();
                 let newTagCounter = [...tagCounter];
 
                 if (

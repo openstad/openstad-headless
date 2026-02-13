@@ -1,24 +1,26 @@
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useStatus from '@/hooks/use-statuses';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
+import * as Switch from '@radix-ui/react-switch';
+import { useState } from 'react';
+import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+
 import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel, FormMessage,
+  FormLabel,
+  FormMessage,
 } from '../../../../../../components/ui/form';
 import { Input } from '../../../../../../components/ui/input';
-import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
-import useStatus from '@/hooks/use-statuses';
-import { useState } from "react";
-import * as React from "react";
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   statusId: z.string().optional(),
@@ -34,13 +36,16 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function DocumentGeneral(
-  props: DocumentMapProps &
-    EditFieldProps<DocumentMapProps>
+  props: DocumentMapProps & EditFieldProps<DocumentMapProps>
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
   const [disabled, setDisabled] = useState(false);
-  const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(props.accessibilityUrlVisible || false);
-  const [definitiveUrlVisible, setDefinitiveUrlVisible] = useState(props.definitiveUrlVisible || false);
+  const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(
+    props.accessibilityUrlVisible || false
+  );
+  const [definitiveUrlVisible, setDefinitiveUrlVisible] = useState(
+    props.definitiveUrlVisible || false
+  );
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -57,7 +62,8 @@ export default function DocumentGeneral(
       definitiveUrlVisible: props.definitiveUrlVisible || false,
       definitiveUrl: props.definitiveUrl || '',
       definitiveUrlText: props.definitiveUrlText || '',
-      backUrlContent: props.backUrlContent || 'Je bekijkt nu de versie met reacties',
+      backUrlContent:
+        props.backUrlContent || 'Je bekijkt nu de versie met reacties',
       backUrlText: props.backUrlText || 'Bekijk de verbeterde versie',
     },
   });
@@ -71,20 +77,17 @@ export default function DocumentGeneral(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
-
         <FormField
           control={form.control}
           name="accessibilityUrlVisible"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Heeft een pagina met begeleidende tekst?
-              </FormLabel>
+              <FormLabel>Heeft een pagina met begeleidende tekst?</FormLabel>
               <Switch.Root
                 className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                 onCheckedChange={(e: boolean) => {
                   field.onChange(e);
-                  setAccessibilityUrlVisible(e)
+                  setAccessibilityUrlVisible(e);
                 }}
                 checked={field.value}>
                 <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -101,7 +104,10 @@ export default function DocumentGeneral(
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Link naar pagina met begeleidende tekst</FormLabel>
-                  <em className="text-xs">Maak gebruik van =[id] om de link dynamisch te maken. (pad/naar=[id])</em>
+                  <em className="text-xs">
+                    Maak gebruik van =[id] om de link dynamisch te maken.
+                    (pad/naar=[id])
+                  </em>
                   <FormControl>
                     <Input
                       placeholder="/path/to/page?openstadResourceId=[id]"
@@ -143,14 +149,12 @@ export default function DocumentGeneral(
           name="definitiveUrlVisible"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Heeft een definitieve versie van het plan?
-              </FormLabel>
+              <FormLabel>Heeft een definitieve versie van het plan?</FormLabel>
               <Switch.Root
                 className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                 onCheckedChange={(e: boolean) => {
                   field.onChange(e);
-                  setDefinitiveUrlVisible(e)
+                  setDefinitiveUrlVisible(e);
                 }}
                 checked={field.value}>
                 <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -166,8 +170,13 @@ export default function DocumentGeneral(
               name="definitiveUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Link naar pagina van de definitieve versie</FormLabel>
-                  <em className="text-xs">Maak gebruik van =[id] om de link dynamisch te maken. (pad/naar=[id])</em>
+                  <FormLabel>
+                    Link naar pagina van de definitieve versie
+                  </FormLabel>
+                  <em className="text-xs">
+                    Maak gebruik van =[id] om de link dynamisch te maken.
+                    (pad/naar=[id])
+                  </em>
                   <FormControl>
                     <Input
                       placeholder="/path/to/page?openstadResourceId=[id]"
@@ -201,8 +210,6 @@ export default function DocumentGeneral(
               )}
             />
 
-
-
             <FormObjectSelectField
               form={form}
               fieldName="statusId"
@@ -211,15 +218,11 @@ export default function DocumentGeneral(
               keyForValue="id"
               label={(status) => `${status.id} - ${status.name}`}
               onFieldChanged={(e, key) => {
-                props.onFieldChanged
+                props.onFieldChanged;
               }}
             />
-
-
-
           </>
         )}
-
 
         <FormField
           control={form.control}
@@ -248,9 +251,7 @@ export default function DocumentGeneral(
           name="backUrlText"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Terug naar definitieve versie, link tekst
-              </FormLabel>
+              <FormLabel>Terug naar definitieve versie, link tekst</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Bekijk definitieve versie"
@@ -264,10 +265,7 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={disabled}
-        >
+        <Button type="submit" disabled={disabled}>
           Opslaan
         </Button>
       </form>

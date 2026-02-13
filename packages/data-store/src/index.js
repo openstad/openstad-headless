@@ -1,25 +1,26 @@
-import mergeData from './merge-data';
 import { useSWRConfig } from 'swr';
 import useSWR from 'swr';
+
 import API from './api';
-import useResource from './hooks/use-resource.js';
-import useChoicesguide from './hooks/use-choicesguide';
 import useArea from './hooks/use-area.js';
-import useDatalayer from './hooks/use-datalayer.js';
 import useAreas from './hooks/use-areas.js';
-import useComments from './hooks/use-comments.js';
-import useResources from './hooks/use-resources.js';
-import useTags from './hooks/use-tags.js';
-import useCurrentUser from './hooks/use-current-user.js';
-import useUserVote from './hooks/use-user-vote.js';
-import useSubmissions from './hooks/use-submissions.js';
-import useCommentsByProject from './hooks/use-comments-by-project';
-import useChoiceGuideResults from './hooks/use-choiceguide-results';
-import useUserActivity from './hooks/use-user-activity';
-import useWidget from "./hooks/use-widget";
 import useChoiceGuideResultCount from './hooks/use-choiceguide-result-count';
-import useEnqueteResultCount from "./hooks/use-enquete-result-count";
+import useChoiceGuideResults from './hooks/use-choiceguide-results';
+import useChoicesguide from './hooks/use-choicesguide';
+import useCommentsByProject from './hooks/use-comments-by-project';
+import useComments from './hooks/use-comments.js';
+import useCurrentUser from './hooks/use-current-user.js';
+import useDatalayer from './hooks/use-datalayer.js';
+import useEnqueteResultCount from './hooks/use-enquete-result-count';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
+import useResource from './hooks/use-resource.js';
+import useResources from './hooks/use-resources.js';
+import useSubmissions from './hooks/use-submissions.js';
+import useTags from './hooks/use-tags.js';
+import useUserActivity from './hooks/use-user-activity';
+import useUserVote from './hooks/use-user-vote.js';
+import useWidget from './hooks/use-widget';
+import mergeData from './merge-data';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -68,7 +69,7 @@ function DataStore(props = {}) {
   self.useSWR = function (props, fetcherAsString, options = {}) {
     const fetcherPath = fetcherAsString.split('.');
     let fetcher = self.api;
-    
+
     // fetcherAsString can be a path to a fetcher function, e.g. 'resources.fetch'
     // if so, we need to traverse the api object to find the fetcher function
     if (fetcherPath.length > 1) {
@@ -78,11 +79,11 @@ function DataStore(props = {}) {
         }
         fetcher = fetcher[fetcherPath[i]];
       }
-    // otherwise, fetcherAsString is the name of the fetcher function and we use that directly
+      // otherwise, fetcherAsString is the name of the fetcher function and we use that directly
     } else {
       fetcher = self.api[fetcherAsString];
     }
-    
+
     let key = self.createKey(props, fetcherAsString);
 
     windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
@@ -96,7 +97,9 @@ function DataStore(props = {}) {
   self.mutate = async function (props, fetcherAsString, newData, options) {
     // TODO: meesturen mutate options
 
-    let fetcher = fetcherAsString.split('.').reduce((obj, key) => obj[key], self.api);
+    let fetcher = fetcherAsString
+      .split('.')
+      .reduce((obj, key) => obj[key], self.api);
     let key = self.createKey(props, fetcherAsString);
 
     let defaultOptions = {

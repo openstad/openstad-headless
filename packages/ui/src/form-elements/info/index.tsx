@@ -1,9 +1,14 @@
-import React, { FC } from "react";
-import { AccordionProvider, Paragraph, Strong } from "@utrecht/component-library-react";
-import { Spacer } from "../../spacer";
-import { FormValue } from "@openstad-headless/form/src/form";
-import { InfoImage } from "../../infoImage";
-import RteContent from "../../rte-formatting/rte-content";
+import { FormValue } from '@openstad-headless/form/src/form';
+import {
+  AccordionProvider,
+  Paragraph,
+  Strong,
+} from '@utrecht/component-library-react';
+import React, { FC } from 'react';
+
+import { InfoImage } from '../../infoImage';
+import RteContent from '../../rte-formatting/rte-content';
+import { Spacer } from '../../spacer';
 
 export type InfoFieldProps = {
   overrideDefaultValue?: FormValue;
@@ -34,7 +39,7 @@ export type InfoFieldProps = {
   }>;
   createImageSlider?: boolean;
   imageClickable?: boolean;
-}
+};
 
 const InfoField: FC<InfoFieldProps> = ({
   title = '',
@@ -59,12 +64,26 @@ const InfoField: FC<InfoFieldProps> = ({
 
   return (
     <div className="info-field-container">
-      {title && <Paragraph className="info-field-title"><RteContent content={title} inlineComponent={Strong} unwrapSingleRootDiv={true} forceInline={true} /></Paragraph>}
-      {description &&
-        <Paragraph className="info-field-description">
-          <RteContent content={description} inlineComponent="span" unwrapSingleRootDiv={true} forceInline={true} />
+      {title && (
+        <Paragraph className="info-field-title">
+          <RteContent
+            content={title}
+            inlineComponent={Strong}
+            unwrapSingleRootDiv={true}
+            forceInline={true}
+          />
         </Paragraph>
-      }
+      )}
+      {description && (
+        <Paragraph className="info-field-description">
+          <RteContent
+            content={description}
+            inlineComponent="span"
+            unwrapSingleRootDiv={true}
+            forceInline={true}
+          />
+        </Paragraph>
+      )}
 
       {showMoreInfo && (
         <>
@@ -75,7 +94,7 @@ const InfoField: FC<InfoFieldProps> = ({
                 body: <HtmlContent html={moreInfoContent} />,
                 expanded: undefined,
                 label: moreInfoButton,
-              }
+              },
             ]}
           />
           <Spacer size={1.5} />
@@ -89,7 +108,7 @@ const InfoField: FC<InfoFieldProps> = ({
         images: images,
         createImageSlider: createImageSlider,
         addSpacer: !!infoImage,
-        imageClickable: imageClickable
+        imageClickable: imageClickable,
       })}
     </div>
   );

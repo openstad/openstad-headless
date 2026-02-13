@@ -6,8 +6,11 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import WidgetDistributionModuleDistribute from '@/pages/projects/[project]/widgets/distributionmodule/[id]/distribute';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import { useRouter } from 'next/router';
+import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -15,10 +18,8 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import React from "react";
 import WidgetDistributionModuleGeneral from './general';
-import WidgetDistributionModuleItems from "./items";
-import WidgetDistributionModuleDistribute from "@/pages/projects/[project]/widgets/distributionmodule/[id]/distribute";
+import WidgetDistributionModuleItems from './items';
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
@@ -26,12 +27,12 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<DistributionModuleProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<DistributionModuleProps>(
-    {
+  const { data: widget, updateConfig } =
+    useWidgetConfig<DistributionModuleProps>();
+  const { previewConfig, updatePreview } =
+    useWidgetPreview<DistributionModuleProps>({
       projectId,
-    }
-  );
+    });
 
   return (
     <div>

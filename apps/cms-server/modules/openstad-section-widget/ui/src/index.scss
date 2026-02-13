@@ -6,9 +6,9 @@
   bottom: 0;
   z-index: 1;
 
-//  /* @media @phone {
-//     top: 113px;
-//   }*/
+  //  /* @media @phone {
+  //     top: 113px;
+  //   }*/
 
   .full-screen-section-inner {
     position: relative;
@@ -34,7 +34,6 @@
   position: relative;
 }
 
-
 .section-bg-image {
   position: absolute;
   top: 0;
@@ -47,7 +46,10 @@
   margin-top: -70px;
 }
 .section.--solid {
-  background-color: var(--nlds-section-background-color, var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(
+    --nlds-section-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
   border-radius: var(--nlds-section-border-radius, 0);
   padding: 2.5rem 1.5rem;
 }
@@ -56,13 +58,15 @@
   margin-block-start: var(--nlds-default-margin-block-start, 3.5rem);
 }
 
-.section.--negative{
-  margin-block-start: calc((var(--nlds-default-margin-block-start, 3.5rem) + 5rem) * -1);
+.section.--negative {
+  margin-block-start: calc(
+    (var(--nlds-default-margin-block-start, 3.5rem) + 5rem) * -1
+  );
 }
-.section.--mt-0{
+.section.--mt-0 {
   margin-block-start: 0;
 }
-.section .container{
+.section .container {
   padding-left: 0;
   padding-right: 0;
 }
@@ -117,12 +121,10 @@
     margin-left: 250px;
     min-height: 100vh;
     position: relative;
-
   }
 }
 
 .section {
-
   .toggle-title {
     color: black;
     padding: 15px 20px;
@@ -141,7 +143,6 @@
     outline: 5px auto -webkit-focus-ring-color !important;
   }
 
-
   &.mobileonly {
     .toggle-title {
       display: none;
@@ -159,11 +160,10 @@
       }
 
       &.closed {
-
         .container,
         .full-width-container,
         .full-screen-section {
-          display: none !important
+          display: none !important;
         }
 
         .arrow {
@@ -172,7 +172,6 @@
       }
 
       &.open {
-
         .container,
         .full-width-container,
         .full-screen-section {
@@ -187,30 +186,26 @@
   }
 
   &.closed:not(.mobileonly) {
-
     .container,
     .full-width-container,
     .full-screen-section {
-      display: none
+      display: none;
     }
 
     .arrow {
       transform: rotate(0deg);
     }
-
   }
 
   &.open:not(.mobileonly) {
-
     .container,
     .full-width-container,
     .full-screen-section {
-      display: block
+      display: block;
     }
 
     .arrow {
       transform: rotate(180deg);
     }
-
   }
 }

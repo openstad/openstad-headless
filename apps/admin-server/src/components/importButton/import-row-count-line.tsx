@@ -1,5 +1,5 @@
-import React from 'react';
 import { Info } from 'lucide-react';
+import React from 'react';
 
 const ImportRowCount = (props: { values: any[] }) => {
   const { values } = props;
@@ -7,15 +7,22 @@ const ImportRowCount = (props: { values: any[] }) => {
   if (!values || values.length < 1) return <></>;
 
   const tooltipContent = values
-    .map(row =>
+    .map((row) =>
       Object.keys(row)
-        .map(key => `${key}: ${row[key]}`)
+        .map((key) => `${key}: ${row[key]}`)
         .join(', ')
     )
     .join('\n');
 
   return (
-    <div style={{ marginBottom: '0px', color: 'blue', display: 'flex', alignItems: 'center', gap: '4px' }}>
+    <div
+      style={{
+        marginBottom: '0px',
+        color: 'blue',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+      }}>
       <span>
         Import row count: <strong>{values.length}</strong>
       </span>
@@ -26,8 +33,7 @@ const ImportRowCount = (props: { values: any[] }) => {
           verticalAlign: 'middle',
           padding: '4px',
           cursor: 'pointer',
-        }}
-      >
+        }}>
         <Info className="inline-block mr-2 h-5 w-5" />
       </span>
     </div>

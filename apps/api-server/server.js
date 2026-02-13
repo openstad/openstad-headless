@@ -16,8 +16,8 @@ require('./config/moment');
 require('./config/debug');
 
 // Start HTTP server.
-const Server     = require('./src/Server');
-const Cron       = require('./src/cron-calendar');
+const Server = require('./src/Server');
+const Cron = require('./src/cron-calendar');
 
 Cron.start();
 

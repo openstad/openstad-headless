@@ -1,5 +1,11 @@
 export default {
-  fetch: async function ({ projectId, resourceId, sentiment, onlyIncludeTagIds, search }) {
+  fetch: async function ({
+    projectId,
+    resourceId,
+    sentiment,
+    onlyIncludeTagIds,
+    search,
+  }) {
     let url = `/api/project/${projectId}/resource/${resourceId}/comment?sentiment=${sentiment}&includeUser=1&includeUserVote=1&includeVoteCount=1&includeRepliesOnComments=1`;
 
     onlyIncludeTagIds = onlyIncludeTagIds || '';
@@ -49,7 +55,7 @@ export default {
 
     return await this.fetch(url, { method });
   },
-  
+
   submitDislike: async function ({ projectId, resourceId }, data) {
     let url = `/api/project/${projectId}/resource/${resourceId}/comment/${data.id}/vote/no`;
     let method = 'post';
