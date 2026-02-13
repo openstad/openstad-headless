@@ -457,44 +457,59 @@ function StemBegroot({
 
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
-    let pending;
-
-    if (
+    const pending =
       props.votes.voteType === 'countPerTag' ||
       props.votes.voteType === 'budgetingPerTag'
-    ) {
-      pending = votePendingStorage.getVotePendingPerTag();
-      if (
-        props.votes.voteType === 'countPerTag' ||
-        props.votes.voteType === 'budgetingPerTag'
-      ) {
-        pending = votePendingStorage.getVotePendingPerTag();
-      } else {
-        pending = votePendingStorage.getVotePending();
-      }
+        ? votePendingStorage.getVotePendingPerTag()
+        : votePendingStorage.getVotePending();
 
-      if (
-        pending &&
-        ((isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
-          (isAllowedToVote && navAfterLogin && currentStep === 2) ||
-          (isAllowedToVote && !navAfterLogin))
-      ) {
-        if (voteAfterLoggingIn) {
-          if (selectedResources.length > 0 || tagCounter.length > 0) {
-            setCurrentStep(3);
-            submitVoteAndCleanup();
-          }
-        } else {
-          setCurrentStep(3);
-        }
+    if (!pending || !isAllowedToVote) return;
+
+    const hasPendingSelection =
+      props.votes.voteType === 'countPerTag' ||
+      props.votes.voteType === 'budgetingPerTag'
+        ? tagCounter.some((tagObj) => {
+            const tagName = Object.keys(tagObj)[0];
+            const selectedForTag = tagObj[tagName]?.selectedResources || [];
+            return selectedForTag.length > 0;
+          })
+        : selectedResources.length > 0;
+
+    if (!voteAfterLoggingIn) {
+      if (currentStep < 3) {
+        setCurrentStep(3);
       }
+      return;
     }
-  }, [currentUser, currentStep, selectedResources, tagCounter]);
+
+    if (hasPendingSelection && currentStep < 4) {
+      // Show in-progress state while submitting and only advance on successful submit
+      if (currentStep < 3) {
+        setCurrentStep(3);
+      }
+      void (async () => {
+        const submitted = await submitVoteAndCleanup();
+        if (submitted) {
+          setCurrentStep(4);
+        }
+      })();
+    }
+  }, [
+    currentUser,
+    currentStep,
+    selectedResources,
+    tagCounter,
+    isAllowedToVote,
+    voteAfterLoggingIn,
+    props.votes.voteType,
+    votePendingStorage,
+  ]);
 
   async function submitVoteAndCleanup() {
+    let submitted = false;
     try {
       if (submitInProgressRef.current) {
-        return;
+        return false;
       }
       submitInProgressRef.current = true;
 
@@ -526,13 +541,16 @@ function StemBegroot({
           votePendingStorage.clearVotePendingPerTag();
 
           await doVote(uniqueResourcesToVote);
+          submitted = true;
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
         }
       } else {
         if (selectedResources.length > 0) {
           votePendingStorage.clearVotePending();
-          return await doVote(selectedResources);
+          await doVote(selectedResources);
+          selectedResourcesStorage.clearSelectedResources();
+          submitted = true;
         }
       }
     } catch (err: any) {
@@ -540,6 +558,7 @@ function StemBegroot({
     } finally {
       submitInProgressRef.current = false;
     }
+    return submitted;
   }
 
   async function prepareForVote(
@@ -1263,8 +1282,10 @@ function StemBegroot({
                     }
 
                     if (currentStep === 3) {
-                      await submitVoteAndCleanup();
-                      setCurrentStep(4);
+                      const submitted = await submitVoteAndCleanup();
+                      if (submitted) {
+                        setCurrentStep(4);
+                      }
                     } else if (currentStep === 4) {
                       currentUser.logout({ url: location.href });
                     } else {
