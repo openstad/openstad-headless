@@ -1,5 +1,6 @@
-import React from 'react'
-import { List } from '../../src/list'
+import React from 'react';
+
+import { List } from '../../src/list';
 
 describe('<List />', () => {
   it('renders a list', () => {
@@ -9,7 +10,7 @@ describe('<List />', () => {
         items={[
           { id: '1', label: 'Item 1' },
           { id: '2', label: 'Item 2' },
-          { id: '3', label: 'Item 3' }
+          { id: '3', label: 'Item 3' },
         ]}
         renderItem={(item) => (
           <div key={item.id} className="list-item">
@@ -17,7 +18,7 @@ describe('<List />', () => {
           </div>
         )}
       />
-    )
+    );
 
     cy.get('.list-item').should('have.length', 3);
   });

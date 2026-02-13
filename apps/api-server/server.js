@@ -16,10 +16,20 @@ require('./config/moment');
 require('./config/debug');
 
 // Start HTTP server.
-const Server     = require('./src/Server');
-const Cron       = require('./src/cron-calendar');
+const Server = require('./src/Server');
+const Cron = require('./src/cron-calendar');
 
 Cron.start();
 
 Server.init();
+
+// Validate external certificates infrastructure on startup
+const externalCertificates = require('./src/services/externalCertificates');
+externalCertificates.validateInfrastructure().catch((err) => {
+  console.error(
+    '[external-certificates] Startup validation error:',
+    err.message
+  );
+});
+
 Server.start(config.get('express.port'));

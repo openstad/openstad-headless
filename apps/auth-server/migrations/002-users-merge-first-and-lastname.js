@@ -1,7 +1,7 @@
 var db = require('../db').sequelize;
 
 module.exports = {
-  up: function() {
+  up: function () {
     try {
       return db.query(`
         UPDATE users SET name = CONCAT(
@@ -10,8 +10,8 @@ module.exports = {
           IF(lastName IS NOT NULL, lastName, '')
         );
       `);
-    } catch(e) {
+    } catch (e) {
       return true;
     }
   },
-}
+};

@@ -1,9 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BaseMapWidgetProps, BaseMap } from './base-map.js';
-import { EditorMapWidgetProps, EditorMap } from './editor-map.js';
-import { ResourceDetailMapWidgetProps, ResourceDetailMap } from './resource-detail-map.js';
-import { ResourceOverviewMapWidgetProps, ResourceOverviewMap } from './resource-overview-map.js';
+
+import { BaseMap, BaseMapWidgetProps } from './base-map.js';
+import { EditorMap, EditorMapWidgetProps } from './editor-map.js';
+import {
+  ResourceDetailMap,
+  ResourceDetailMapWidgetProps,
+} from './resource-detail-map.js';
+import {
+  ResourceOverviewMap,
+  ResourceOverviewMapWidgetProps,
+} from './resource-overview-map.js';
 
 const config: BaseMapWidgetProps = {
   api: {
@@ -18,38 +25,46 @@ const config: BaseMapWidgetProps = {
 
 try {
   config.area = JSON.parse(import.meta.env.VITE_AREA);
-} catch(err) {console.log(err);}
+} catch (err) {
+  console.log(err);
+}
 
 try {
   config.markers = JSON.parse(import.meta.env.VITE_MARKERS);
-} catch(err) {console.log(err);}
+} catch (err) {
+  console.log(err);
+}
 
 try {
   config.clustering = JSON.parse(import.meta.env.VITE_CLUSTERING);
-} catch(err) {console.log(err);}
+} catch (err) {
+  console.log(err);
+}
 
 try {
   config.categorize = JSON.parse(import.meta.env.VITE_CATEGORIZE);
-} catch(err) {console.log(err);}
+} catch (err) {
+  console.log(err);
+}
 // TODO: dit moet naar env
 
-config.onClick = function(e, map) {
-  console.log('MAIN onClick')
-}
+config.onClick = function (e, map) {
+  console.log('MAIN onClick');
+};
 
-config.onMarkerClick = function(e, map) {
+config.onMarkerClick = function (e, map) {
   console.log('MAIN onMarkerKlick');
-}
+};
 
-window.addEventListener( 'osc-map-click', e => {
+window.addEventListener('osc-map-click', (e) => {
   console.log('osc-map-click', e.detail);
 });
 
-window.addEventListener( 'osc-map-marker-click', e => {
+window.addEventListener('osc-map-marker-click', (e) => {
   console.log('osc-map-marker-click', e.detail);
 });
 
-window.addEventListener( 'osc-map-is-ready', e => {
+window.addEventListener('osc-map-is-ready', (e) => {
   console.log('osc-map-is-ready', e.detail);
 });
 
@@ -57,25 +72,25 @@ let baseConfig = config; //{};
 
 ReactDOM.createRoot(document.getElementById('map1')!).render(
   <React.StrictMode>
-    <BaseMap {...baseConfig}/>
+    <BaseMap {...baseConfig} />
   </React.StrictMode>
 );
 
-let editorConfig:EditorMapWidgetProps = {
+let editorConfig: EditorMapWidgetProps = {
   ...config,
   markers: undefined,
   editorMarker: {
-	  lat: 52.36904644463586,
-	  lng: 4.930402911007405,
+    lat: 52.36904644463586,
+    lng: 4.930402911007405,
   },
-}
+};
 ReactDOM.createRoot(document.getElementById('map2')!).render(
   <React.StrictMode>
-    <EditorMap {...editorConfig}/>
+    <EditorMap {...editorConfig} />
   </React.StrictMode>
 );
 
-let ResourceOverviewConfig:ResourceOverviewMapWidgetProps = {
+let ResourceOverviewConfig: ResourceOverviewMapWidgetProps = {
   ...config,
   markers: undefined,
   tilesVariant: 'nlmaps',
@@ -90,27 +105,25 @@ let ResourceOverviewConfig:ResourceOverviewMapWidgetProps = {
     show: true,
     label: 'plannen',
   },
-}
+};
 
-config.tilesVariant = 'amaps'
-config.autoZoomAndCenter = 'area'
+config.tilesVariant = 'amaps';
+config.autoZoomAndCenter = 'area';
 ReactDOM.createRoot(document.getElementById('map3')!).render(
   <React.StrictMode>
-    <ResourceOverviewMap {...ResourceOverviewConfig}/>
+    <ResourceOverviewMap {...ResourceOverviewConfig} />
   </React.StrictMode>
 );
 
-let ResourceDetailConfig:ResourceDetailMapWidgetProps = {
+let ResourceDetailConfig: ResourceDetailMapWidgetProps = {
   ...config,
   markers: undefined,
   tilesVariant: 'nlmaps',
   autoZoomAndCenter: 'markers',
-}
+};
 
 ReactDOM.createRoot(document.getElementById('map4')!).render(
   <React.StrictMode>
-    <ResourceDetailMap {...ResourceDetailConfig}/>
+    <ResourceDetailMap {...ResourceDetailConfig} />
   </React.StrictMode>
 );
-
-

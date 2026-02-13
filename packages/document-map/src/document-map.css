@@ -3,7 +3,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
-.documentMap--container.--largeDoc{
+.documentMap--container.--largeDoc {
   grid-template-columns: 1fr 650px;
 }
 
@@ -12,7 +12,7 @@
     grid-template-columns: 1fr;
     height: auto;
   }
-  .documentMap--container.--largeDoc{
+  .documentMap--container.--largeDoc {
     grid-template-columns: 1fr;
     height: auto;
   }
@@ -97,10 +97,10 @@
   border: solid 2px;
 
   position: absolute;
-    top: 25px;
-    right: 25px;
+  top: 25px;
+  right: 25px;
 }
-.documentMap--container .map-container .modal button span{
+.documentMap--container .map-container .modal button span {
   display: none;
 }
 .documentMap--container .content .comment {
@@ -178,9 +178,9 @@
   display: flex;
   gap: 0.5rem;
   float: right;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
 }
-.toggleMarkers + *{
+.toggleMarkers + * {
   clear: both;
 }
 .--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
@@ -232,11 +232,11 @@ a + .url-list:before {
   font-weight: normal;
 }
 
-.modal-overlay[aria-hidden="true"] {
+.modal-overlay[aria-hidden='true'] {
   display: none;
 }
 
-.modal-overlay[aria-hidden="false"] {
+.modal-overlay[aria-hidden='false'] {
   display: block;
 }
 
@@ -268,7 +268,6 @@ a + .url-list:before {
 
 .documentMap--container:has(.content:empty) {
   grid-template-columns: 1fr;
-  
 }
 .documentMap--container:has(.content:empty) .map-container {
   max-width: 1140px;
@@ -418,7 +417,7 @@ a + .url-list:before {
   transform: translateX(-50%);
 }
 
-section.comment-item-footer .utrecht-button--disabled:before, 
+section.comment-item-footer .utrecht-button--disabled:before,
 .like-option-container .utrecht-button--disabled:hover:before {
   content: 'Je moet ingelogd zijn om te kunnen reageren.';
   position: absolute;
@@ -489,8 +488,8 @@ section.comment-item-footer .utrecht-button--disabled:before,
 }
 
 .documentMap--container .lr-map-interaction-overlay {
-  background-color: rgba(0, 0, 0, .75);
-  border-radius: .5rem;
+  background-color: rgba(0, 0, 0, 0.75);
+  border-radius: 0.5rem;
   color: #fff;
   font-size: 1rem;
   left: 50%;
@@ -501,7 +500,7 @@ section.comment-item-footer .utrecht-button--disabled:before,
   text-align: center;
   top: 50%;
   transform: translate(-50%, -50%);
-  transition: opacity .5s ease;
+  transition: opacity 0.5s ease;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;

@@ -40,9 +40,9 @@
   .account > div {
     grid-template-columns: 1fr;
   }
-  
+
   .account .account-edit-button,
-  .account > div > *{
+  .account > div > * {
     grid-column: 1;
   }
 }
@@ -51,6 +51,11 @@
   margin-inline-start: 0 !important;
 }
 
-.consent-checkbox-container .utrecht-form-field__label--checkbox input[type="checkbox"]:hover {
-  border-color: var(--utrecht-checkbox-disabled-border-color, var(--utrecht-checkbox-border-color));
+.consent-checkbox-container
+  .utrecht-form-field__label--checkbox
+  input[type='checkbox']:hover {
+  border-color: var(
+    --utrecht-checkbox-disabled-border-color,
+    var(--utrecht-checkbox-border-color)
+  );
 }

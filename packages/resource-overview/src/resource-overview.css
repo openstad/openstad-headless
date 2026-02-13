@@ -251,7 +251,9 @@ p.osc-searchtext {
   z-index: 2;
 }
 
-.resource-card--link .osc-resource-overview-content-item-footer.liking-allowed div.icon:not([data-description="Aantal reacties"]) {
+.resource-card--link
+  .osc-resource-overview-content-item-footer.liking-allowed
+  div.icon:not([data-description='Aantal reacties']) {
   pointer-events: all;
   cursor: pointer;
 }
@@ -481,8 +483,6 @@ p.osc-searchtext {
   background-color: #d3d3d3;
 }
 
-
-
 /* Micro score */
 .micro-score-container {
   --microScoreBackground: var(--setMicroScoreBackground, unset);
@@ -498,7 +498,7 @@ p.osc-searchtext {
   display: flex;
   align-items: center;
 }
-.micro-score-container .votes-score{
+.micro-score-container .votes-score {
   margin: 0;
   padding: 0 8px;
   color: inherit;

@@ -9,17 +9,18 @@ exports.validate = (req, res, next) => {
   const minutes = 60;
   const msForAMinute = 60000;
   const date = new Date();
-  const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
+  const timeAgo = new Date(
+    date.setTime(date.getTime() - minutes * msForAMinute)
+  );
 
-  db.PasswordResetToken
-    .findOne({
-      where: {
-        token: queryToken,
-        valid: true,
-        'createdAt': { [db.Sequelize.Op.gte]: timeAgo }
-      },
-      order: [[ 'createdAt', 'DESC' ]]
-    })
+  db.PasswordResetToken.findOne({
+    where: {
+      token: queryToken,
+      valid: true,
+      createdAt: { [db.Sequelize.Op.gte]: timeAgo },
+    },
+    order: [['createdAt', 'DESC']],
+  })
     .then((passwordResetToken) => {
       // if token found validate, otherwise throw error
       if (passwordResetToken) {
@@ -27,7 +28,7 @@ exports.validate = (req, res, next) => {
         req.body.userId = passwordResetToken.userId;
         req.userId = passwordResetToken.userId;
 
-          next();
+        next();
       } else {
         throw new Error('No token found');
       }
@@ -35,4 +36,4 @@ exports.validate = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-}
+};

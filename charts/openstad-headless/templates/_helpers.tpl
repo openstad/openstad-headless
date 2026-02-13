@@ -287,3 +287,83 @@ Create the name of the service account to use
 {{ .Values.secrets.existingSecret }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+    Ingress controller type (nginx or traefik)
+*/}}
+{{- define "openstad.ingress.type" -}}
+{{- if and .Values.global .Values.global.ingress .Values.global.ingress.type -}}
+{{- .Values.global.ingress.type -}}
+{{- else -}}
+nginx
+{{- end -}}
+{{- end -}}
+
+{{/*
+    Traefik middleware reference helper.
+    Builds a single middleware ref: <namespace>-<name>@kubernetescrd
+*/}}
+{{- define "openstad.traefik.middlewareRef" -}}
+{{- printf "%s-%s@kubernetescrd" .Release.Namespace .name -}}
+{{- end -}}
+
+{{/*
+    Traefik middleware annotations per service.
+    Each returns the full comma-separated middleware chain for that service.
+*/}}
+
+{{/* admin: security-headers + noindex + body-size-limit */}}
+{{- define "openstad.traefik.middlewares.admin" -}}
+{{- $ns := .Release.Namespace -}}
+{{- $fn := include "openstad.fullname" . -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn $ns $fn -}}
+{{- end -}}
+
+{{/* auth: security-headers only */}}
+{{- define "openstad.traefik.middlewares.auth" -}}
+{{- $ns := .Release.Namespace -}}
+{{- $fn := include "openstad.fullname" . -}}
+{{- printf "%s-%s-security-headers@kubernetescrd" $ns $fn -}}
+{{- end -}}
+
+{{/* api: security-headers + hsts + body-size-limit */}}
+{{- define "openstad.traefik.middlewares.api" -}}
+{{- $ns := .Release.Namespace -}}
+{{- $fn := include "openstad.fullname" . -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn $ns $fn -}}
+{{- end -}}
+
+{{/* image: security-headers + body-size-limit */}}
+{{- define "openstad.traefik.middlewares.image" -}}
+{{- $ns := .Release.Namespace -}}
+{{- $fn := include "openstad.fullname" . -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn -}}
+{{- end -}}
+
+{{/* cms: security-headers + hsts + body-size-limit */}}
+{{- define "openstad.traefik.middlewares.cms" -}}
+{{- $ns := .Release.Namespace -}}
+{{- $fn := include "openstad.fullname" . -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn $ns $fn -}}
+{{- end -}}
+
+{{/* createdIngresses: security-headers + hsts + noindex + body-size-limit + www-redirect */}}
+{{- define "openstad.traefik.middlewares.createdIngresses" -}}
+{{- $ns := .Release.Namespace -}}
+{{- $fn := include "openstad.fullname" . -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-www-redirect@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn $ns $fn -}}
+{{- end -}}
+
+{{/*
+    Compute annotations for dynamically created ingresses (passed as JSON env var).
+    When traefik, returns a dict with the traefik middleware annotation.
+    When nginx, returns the user-provided annotations from values.
+*/}}
+{{- define "openstad.createdIngresses.annotations" -}}
+{{- if eq (include "openstad.ingress.type" .) "traefik" -}}
+{{- $annotations := dict "traefik.ingress.kubernetes.io/router.middlewares" (include "openstad.traefik.middlewares.createdIngresses" .) -}}
+{{- $annotations | toJson -}}
+{{- else -}}
+{{- .Values.api.createdIngresses.annotations | default dict | toJson -}}
+{{- end -}}
+{{- end -}}

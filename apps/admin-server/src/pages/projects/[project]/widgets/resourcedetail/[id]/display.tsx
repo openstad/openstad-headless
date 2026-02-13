@@ -1,25 +1,33 @@
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
 import {
-  Form, FormControl, FormDescription,
+  Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Input } from "@/components/ui/input";
-import { useFieldDebounce } from "@/hooks/useFieldDebounce";
-import {CheckboxList} from "@/components/checkbox-list";
-import React from "react";
 
-type ShareOption = 'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink';
+type ShareOption =
+  | 'facebook'
+  | 'x'
+  | 'mail'
+  | 'whatsapp'
+  | 'linkedin'
+  | 'copylink';
 const shareOptions: [ShareOption, ...ShareOption[]] = [
   'facebook',
   'x',
@@ -93,11 +101,17 @@ export default function WidgetResourceDetailDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayImage: undefinedToTrueOrProp(props?.displayImage),
-      displayImageDescription: undefinedToTrueOrProp(props?.displayImageDescription),
-      displayDescriptionExpandable: props?.displayDescriptionExpandable || false,
-      displayDescriptionExpandable_expandBeforeText: props?.displayDescriptionExpandable_expandBeforeText || 'Lees meer',
-      displayDescriptionExpandable_expandAfterText: props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
-      displayDescriptionExpandable_visibleLines: props?.displayDescriptionExpandable_visibleLines || '4',
+      displayImageDescription: undefinedToTrueOrProp(
+        props?.displayImageDescription
+      ),
+      displayDescriptionExpandable:
+        props?.displayDescriptionExpandable || false,
+      displayDescriptionExpandable_expandBeforeText:
+        props?.displayDescriptionExpandable_expandBeforeText || 'Lees meer',
+      displayDescriptionExpandable_expandAfterText:
+        props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
+      displayDescriptionExpandable_visibleLines:
+        props?.displayDescriptionExpandable_visibleLines || '4',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
       displayDescription: undefinedToTrueOrProp(props?.displayDescription),
@@ -120,10 +134,12 @@ export default function WidgetResourceDetailDisplay(
       displayEditResourceButton: props?.displayEditResourceButton || false,
       displayDeleteButton: undefinedToTrueOrProp(props?.displayDeleteButton),
       urlWithResourceFormForEditing: props?.urlWithResourceFormForEditing || '',
-      displayDeleteEditButtonOnTop: props?.displayDeleteEditButtonOnTop || false,
-      selectedSocialShareOptions: typeof props?.selectedSocialShareOptions === 'undefined'
-        ? defaultShareValues
-        : props?.selectedSocialShareOptions || []
+      displayDeleteEditButtonOnTop:
+        props?.displayDeleteEditButtonOnTop || false,
+      selectedSocialShareOptions:
+        typeof props?.selectedSocialShareOptions === 'undefined'
+          ? defaultShareValues
+          : props?.selectedSocialShareOptions || [],
     },
   });
 
@@ -236,7 +252,7 @@ export default function WidgetResourceDetailDisplay(
                 </FormItem>
               )}
             />
-            {form.watch("displayDescription") && (
+            {form.watch('displayDescription') && (
               <div className="bg-stone-100 p-4 mt-4 rounded-md border border-stone-200">
                 <FormField
                   control={form.control}
@@ -245,22 +261,26 @@ export default function WidgetResourceDetailDisplay(
                     <FormItem>
                       <FormLabel>Uitklapbaar</FormLabel>
                       <FormDescription>
-                        Als je dit aanzet, wordt de beschrijving standaard ingeklapt weergegeven met een &apos;Lees meer&apos; knop.
+                        Als je dit aanzet, wordt de beschrijving standaard
+                        ingeklapt weergegeven met een &apos;Lees meer&apos;
+                        knop.
                       </FormDescription>
                       {YesNoSelect(field, props)}
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {form.watch("displayDescriptionExpandable") && (
+                {form.watch('displayDescriptionExpandable') && (
                   <>
-                    <div className='flex gap-4 mt-4 mb-4'>
+                    <div className="flex gap-4 mt-4 mb-4">
                       <FormField
                         control={form.control}
                         name="displayDescriptionExpandable_expandBeforeText"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Tekst voor de &apos;Lees meer&apos; knop</FormLabel>
+                            <FormLabel>
+                              Tekst voor de &apos;Lees meer&apos; knop
+                            </FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -273,7 +293,9 @@ export default function WidgetResourceDetailDisplay(
                         name="displayDescriptionExpandable_expandAfterText"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Tekst voor de &apos;Lees minder&apos; knop</FormLabel>
+                            <FormLabel>
+                              Tekst voor de &apos;Lees minder&apos; knop
+                            </FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -287,7 +309,9 @@ export default function WidgetResourceDetailDisplay(
                       name="displayDescriptionExpandable_visibleLines"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Aantal zichtbare regels (0 - 10)</FormLabel>
+                          <FormLabel>
+                            Aantal zichtbare regels (0 - 10)
+                          </FormLabel>
                           <FormControl>
                             <Input {...field} min={0} max={10} type="number" />
                           </FormControl>
@@ -341,7 +365,9 @@ export default function WidgetResourceDetailDisplay(
             name="displayStatusBar"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>De balk met statussen weergeven bij de afbeelding?</FormLabel>
+                <FormLabel>
+                  De balk met statussen weergeven bij de afbeelding?
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -377,9 +403,7 @@ export default function WidgetResourceDetailDisplay(
             name="displayDocuments"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Geüploade documenten weergeven
-                </FormLabel>
+                <FormLabel>Geüploade documenten weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -395,7 +419,8 @@ export default function WidgetResourceDetailDisplay(
                   Moet de afbeelding in de dialog klikbaar zijn?
                 </FormLabel>
                 <FormDescription>
-                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar en wordt de afbeelding geopend in een nieuw tabblad.
+                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar
+                  en wordt de afbeelding geopend in een nieuw tabblad.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
@@ -403,7 +428,7 @@ export default function WidgetResourceDetailDisplay(
             )}
           />
 
-          {form.watch("displayDocuments") && (
+          {form.watch('displayDocuments') && (
             <>
               <FormField
                 control={form.control}
@@ -434,7 +459,8 @@ export default function WidgetResourceDetailDisplay(
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Welke beschrijving moet er boven de download knop(pen) komen?
+                      Welke beschrijving moet er boven de download knop(pen)
+                      komen?
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -458,24 +484,27 @@ export default function WidgetResourceDetailDisplay(
             name="displayEditResourceButton"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Toon de knop om de inzending te bewerken
-                </FormLabel>
+                <FormLabel>Toon de knop om de inzending te bewerken</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {form.watch("displayEditResourceButton") && (
+          {form.watch('displayEditResourceButton') && (
             <FormField
               control={form.control}
               name="urlWithResourceFormForEditing"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Wat is de URL van de pagina waar het formulier staat?</FormLabel>
+                  <FormLabel>
+                    Wat is de URL van de pagina waar het formulier staat?
+                  </FormLabel>
                   <FormDescription>
-                    Vul hier de URL in van de pagina waar het inzendingformulier staat. Op die pagina kan de gebruiker zijn inzending bewerken. Er wordt automatisch ?openstadResourceId=[id] aan de URL toegevoegd.
+                    Vul hier de URL in van de pagina waar het inzendingformulier
+                    staat. Op die pagina kan de gebruiker zijn inzending
+                    bewerken. Er wordt automatisch ?openstadResourceId=[id] aan
+                    de URL toegevoegd.
                   </FormDescription>
                   <FormControl>
                     <Input {...field} />
@@ -506,7 +535,8 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Toon de bewerk- en verwijderknoppen bovenaan in plaats van onderaan
+                  Toon de bewerk- en verwijderknoppen bovenaan in plaats van
+                  onderaan
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
@@ -514,7 +544,7 @@ export default function WidgetResourceDetailDisplay(
             )}
           />
 
-          { form.watch("displaySocials") && (
+          {form.watch('displaySocials') && (
             <FormField
               control={form.control}
               name="selectedSocialShareOptions"
@@ -534,15 +564,22 @@ export default function WidgetResourceDetailDisplay(
                         ?.getValues('selectedSocialShareOptions')
                         ?.findIndex((tg) => tg === `${t.value}`) > -1
                     }
-                    onValueChange={(share: { value: ShareOption, label: string }, checked) => {
-                      const ids = form.getValues('selectedSocialShareOptions') ?? [];
+                    onValueChange={(
+                      share: { value: ShareOption; label: string },
+                      checked
+                    ) => {
+                      const ids =
+                        form.getValues('selectedSocialShareOptions') ?? [];
 
-                      const idsToSave = (checked
+                      const idsToSave = checked
                         ? [...ids, share.value]
-                        : ids.filter((id) => id !== `${share.value}`));
+                        : ids.filter((id) => id !== `${share.value}`);
 
                       form.setValue('selectedSocialShareOptions', idsToSave);
-                      props.onFieldChanged("selectedSocialShareOptions", idsToSave);
+                      props.onFieldChanged(
+                        'selectedSocialShareOptions',
+                        idsToSave
+                      );
                     }}
                   />
                 </FormItem>

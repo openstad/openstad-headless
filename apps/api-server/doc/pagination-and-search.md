@@ -33,7 +33,7 @@ If you do the following metadata is added to the results:
 }
 ```
 
-Pagination is done in the database query. A request  asking for 20 records from a table containing 1000000 should be very fast.
+Pagination is done in the database query. A request asking for 20 records from a table containing 1000000 should be very fast.
 
 But...
 
@@ -69,12 +69,13 @@ Searching is done using the [fuzzysort](https://github.com/farzher/fuzzysort) mo
 ### List resources filtered by tag(s)
 
 See [tags documentation](./tags.and.statuses.md):
+
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/resource?tags=:TAG_ID1&tags=:TAG_ID2
 ```
 
-
 ## TODO
+
 - Testen fuzzy search: voldoet dit?
 - Bepalen van de minimum score om in de resultaten terrecht te komen; wellicht configureerbaar.
 - Meer zoekopties, waarschijnlijk ook dingen als zoeken op tags

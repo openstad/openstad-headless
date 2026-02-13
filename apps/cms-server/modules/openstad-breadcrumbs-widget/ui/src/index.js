@@ -36,7 +36,7 @@ function createBreadcrumbItem({ label, href, isCurrent }) {
 }
 
 function removeTrailingSlash(url) {
-    return typeof url === 'string' && url.endsWith('/') ? url.slice(0, -1) : url;
+  return typeof url === 'string' && url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
 function renderBreadcrumbs(container) {
@@ -48,11 +48,14 @@ function renderBreadcrumbs(container) {
 
   const ol = document.createElement('ol');
 
-  const homeUrl = removeTrailingSlash(container?.getAttribute('data-homeUrl')) || null;
+  const homeUrl =
+    removeTrailingSlash(container?.getAttribute('data-homeUrl')) || null;
 
   const homeOrigin = window.location.origin;
   const homePageIsWithSubdomain = homeUrl !== homeOrigin;
-  const currentUrl = removeTrailingSlash(window.location.origin + window.location.pathname);
+  const currentUrl = removeTrailingSlash(
+    window.location.origin + window.location.pathname
+  );
 
   const isHomepage = homeUrl === currentUrl;
   ol.appendChild(

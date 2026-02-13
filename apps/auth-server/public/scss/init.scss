@@ -1,4 +1,4 @@
-@import "mixin/amsterdam-vars";
+@import 'mixin/amsterdam-vars';
 
 html,
 body,
@@ -192,11 +192,11 @@ sup {
 }
 
 sup {
-  top: -.5em;
+  top: -0.5em;
 }
 
 sub {
-  bottom: -.25em;
+  bottom: -0.25em;
 }
 
 pre {
@@ -209,18 +209,28 @@ textarea {
   overflow: auto;
 }
 
-form.formulier div.selectie div.invoer div.antwoorden div.antwoord input[type="radio"] {
+form.formulier
+  div.selectie
+  div.invoer
+  div.antwoorden
+  div.antwoord
+  input[type='radio'] {
   vertical-align: top;
 }
 
-form.formulier div.selectie div.invoer div.antwoorden div.antwoord input[type="checkbox"] {
+form.formulier
+  div.selectie
+  div.invoer
+  div.antwoorden
+  div.antwoord
+  input[type='checkbox'] {
   vertical-align: top;
 }
 
 label,
-input[type="button"],
-input[type="submit"],
-input[type="image"],
+input[type='button'],
+input[type='submit'],
+input[type='image'],
 button {
   cursor: pointer;
 }

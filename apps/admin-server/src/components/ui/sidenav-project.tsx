@@ -1,14 +1,15 @@
 'use client';
-import React, {useContext} from 'react';
-
-import { Button } from './button';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { SessionContext } from '@/auth';
+import { useExternalCertificatesEnabled } from '@/hooks/use-external-certificates';
+import { HasAccess } from '@/lib/hasAccess';
 import { cn } from '@/lib/utils';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
-import {HasAccess} from "@/lib/hasAccess";
-import {SessionContext} from "@/auth";
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useContext } from 'react';
+import { useEffect, useState } from 'react';
+
+import { Button } from './button';
 
 export function SidenavProject({ className }: { className?: string }) {
   const router = useRouter();
@@ -18,8 +19,9 @@ export function SidenavProject({ className }: { className?: string }) {
   useEffect(() => {
     setLocation(router.pathname);
   }, [router]);
-  
+
   const sessionData = useContext(SessionContext);
+  const externalCertificatesEnabled = useExternalCertificatesEnabled();
 
   return (
     <nav
@@ -49,9 +51,7 @@ export function SidenavProject({ className }: { className?: string }) {
             size="default"
             className="w-full flex justify-between">
             <span className="truncate">Projectinstellingen</span>
-            <ChevronDown
-              size={16}
-            />
+            <ChevronDown size={16} />
           </Button>
         </Link>
         {location.includes('/settings') ? (
@@ -59,7 +59,9 @@ export function SidenavProject({ className }: { className?: string }) {
             {HasAccess(sessionData) && (
               <Link href={`/projects/${project}/settings`}>
                 <Button
-                  variant={location.endsWith('/settings') ? 'secondary' : 'ghost'}
+                  variant={
+                    location.endsWith('/settings') ? 'secondary' : 'ghost'
+                  }
                   size="default"
                   className="w-full flex justify-start pl-8">
                   <span className="truncate">Algemeen</span>
@@ -79,7 +81,9 @@ export function SidenavProject({ className }: { className?: string }) {
             <Link href={`/projects/${project}/settings/comments`}>
               <Button
                 variant={
-                  location.includes('/settings/comments') ? 'secondary' : 'ghost'
+                  location.includes('/settings/comments')
+                    ? 'secondary'
+                    : 'ghost'
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
@@ -90,9 +94,7 @@ export function SidenavProject({ className }: { className?: string }) {
               <Link href={`/projects/${project}/settings/users`}>
                 <Button
                   variant={
-                    location.includes('/settings/users')
-                      ? 'secondary'
-                      : 'ghost'
+                    location.includes('/settings/users') ? 'secondary' : 'ghost'
                   }
                   size="default"
                   className="w-full flex justify-start pl-8">
@@ -129,9 +131,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <Link href={`/projects/${project}/settings/map`}>
               <Button
                 variant={
-                  location.includes('/settings/map')
-                    ? 'secondary'
-                    : 'ghost'
+                  location.includes('/settings/map') ? 'secondary' : 'ghost'
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
@@ -169,15 +169,27 @@ export function SidenavProject({ className }: { className?: string }) {
             <Link href={`/projects/${project}/settings/tags`}>
               <Button
                 variant={
-                  location.includes('/settings/tags')
-                    ? 'secondary'
-                    : 'ghost'
+                  location.includes('/settings/tags') ? 'secondary' : 'ghost'
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
                 <span className="truncate">Tags</span>
               </Button>
             </Link>
+            {externalCertificatesEnabled && (
+              <Link href={`/projects/${project}/settings/certificates`}>
+                <Button
+                  variant={
+                    location.includes('/settings/certificates')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">TLS Certificaat (SSL)</span>
+                </Button>
+              </Link>
+            )}
           </>
         ) : null}
         <Link href={`/projects/${project}/authentication`}>
@@ -188,9 +200,7 @@ export function SidenavProject({ className }: { className?: string }) {
             size="default"
             className="w-full flex justify-between">
             <span className="truncate">Authenticatie</span>
-            <ChevronDown
-              size={16}
-            />
+            <ChevronDown size={16} />
           </Button>
         </Link>
         {location.includes('/authentication') ? (
@@ -245,7 +255,11 @@ export function SidenavProject({ className }: { className?: string }) {
             </Link>
             <Link href={`/projects/${project}/authentication/access-codes`}>
               <Button
-                variant={location.includes('/authentication/access-codes') ? 'secondary' : 'ghost'}
+                variant={
+                  location.includes('/authentication/access-codes')
+                    ? 'secondary'
+                    : 'ghost'
+                }
                 className="w-full flex justify-start pl-8"
                 size="default">
                 <span className="truncate">Toegangscodes</span>
@@ -319,7 +333,9 @@ export function SidenavProject({ className }: { className?: string }) {
         </Link>
         <Link href={`/projects/${project}/choiceguide-results`}>
           <Button
-            variant={location.includes('/choiceguide-results') ? 'secondary' : 'ghost'}
+            variant={
+              location.includes('/choiceguide-results') ? 'secondary' : 'ghost'
+            }
             className="w-full flex justify-start"
             onClick={(e) => {}}>
             <span className="truncate">Keuzewijzer inzendingen</span>
@@ -338,10 +354,9 @@ export function SidenavProject({ className }: { className?: string }) {
         {HasAccess(sessionData) && (
           <Link href={`/projects/${project}/duplicate`}>
             <Button
-              variant={location.includes("/duplicate") ? "secondary" : "ghost"}
+              variant={location.includes('/duplicate') ? 'secondary' : 'ghost'}
               className="w-full flex justify-start"
-              onClick={(e) => {}}
-            >
+              onClick={(e) => {}}>
               <span className="truncate">Dupliceren</span>
             </Button>
           </Link>
@@ -349,10 +364,9 @@ export function SidenavProject({ className }: { className?: string }) {
         {HasAccess(sessionData) && (
           <Link href={`/projects/${project}/export`}>
             <Button
-              variant={location.includes("/export") ? "secondary" : "ghost"}
+              variant={location.includes('/export') ? 'secondary' : 'ghost'}
               className="w-full flex justify-start"
-              onClick={(e) => {}}
-            >
+              onClick={(e) => {}}>
               <span className="truncate">Exporteren</span>
             </Button>
           </Link>

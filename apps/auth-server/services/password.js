@@ -8,38 +8,39 @@ const hat = require('hat');
  */
 const getUrl = (user, client, token, redirectUrl) => {
   return `${appUrl}/auth/local/reset?token=${token}&clientId=${client.clientId}&redirect_uri=${redirectUrl}`;
-}
+};
 
 exports.formatResetLink = (client, user, redirectUrl) => {
-  return new Promise((resolve, reject) =>  {
+  return new Promise((resolve, reject) => {
     const token = hat();
 
-    db.PasswordResetToken
-    .create({
+    db.PasswordResetToken.create({
       userId: user.id,
-      token: token
+      token: token,
     })
-    .then((resetToken) => {
-      const url = getUrl(user, client, resetToken.token, redirectUrl);
-      resolve(url);
-    })
-    .catch((err) => {
-      reject(err);
-    });
+      .then((resetToken) => {
+        const url = getUrl(user, client, resetToken.token, redirectUrl);
+        resolve(url);
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
-}
+};
 
 exports.invalidateTokensForUser = (userId) => {
-
   return new Promise((resolve, reject) => {
     if (!userId) {
       resolve();
     } else {
-      db.PasswordResetToken
-        .findOne({ where: {userId: userId} })
-        .update({valid: false})
-        .then(() => { resolve(); })
-        .catch(() => { resolve(); })
+      db.PasswordResetToken.findOne({ where: { userId: userId } })
+        .update({ valid: false })
+        .then(() => {
+          resolve();
+        })
+        .catch(() => {
+          resolve();
+        });
     }
   });
-}
+};

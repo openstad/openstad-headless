@@ -1,17 +1,22 @@
-import React, { useContext } from 'react';
-import '../index.css';
-import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
-import CommentForm from './comment-form.js';
 import { DropDownMenu } from '@openstad-headless/ui/src';
-import hasRole from '../../../lib/has-role';
+import '@utrecht/component-library-css';
+import {
+  Button,
+  ButtonGroup,
+  Heading,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useContext } from 'react';
+import { useState } from 'react';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Paragraph, Heading, Button, ButtonGroup } from "@utrecht/component-library-react";
-import { CommentProps } from '../types/comment-props';
+import hasRole from '../../../lib/has-role';
 import { CommentWidgetContext } from '../comments';
+import '../index.css';
+import { CommentProps } from '../types/comment-props';
+import CommentForm from './comment-form.js';
 
 function Comment({
   comment = {
@@ -54,8 +59,12 @@ function Comment({
   const [yesVotes, setYesVotes] = useState<number>(args.comment.yes || 0);
   const [noVotes, setNoVotes] = useState<number>(args.comment.no || 0);
   const [netVotes, setNetVotes] = useState<number>(args.comment.netVotes || 0);
-  const [hasUserLiked, setHasUserLiked] = useState<boolean>(args.comment.hasUserLiked || false);
-  const [hasUserDisliked, setHasUserDisliked] = useState<boolean>(args.comment.hasUserDisliked || false);
+  const [hasUserLiked, setHasUserLiked] = useState<boolean>(
+    args.comment.hasUserLiked || false
+  );
+  const [hasUserDisliked, setHasUserDisliked] = useState<boolean>(
+    args.comment.hasUserDisliked || false
+  );
 
   function toggleReplyForm() {
     // todo: scrollto
@@ -95,12 +104,18 @@ function Comment({
   }
 
   const findLocation = (index: number) => () => {
+    const markerIcons = Array.from(
+      document.getElementsByClassName('leaflet-marker-icon')
+    );
+    const comments = Array.from(
+      document.getElementsByClassName('comment-item')
+    );
+    const isAlreadySelected =
+      markerIcons[index]?.classList.contains('--highlightedIcon');
 
-    const markerIcons = Array.from(document.getElementsByClassName('leaflet-marker-icon'));
-    const comments = Array.from(document.getElementsByClassName('comment-item'));
-    const isAlreadySelected = markerIcons[index]?.classList.contains('--highlightedIcon');
-
-    markerIcons.forEach((markerIcon) => markerIcon.classList.remove('--highlightedIcon'));
+    markerIcons.forEach((markerIcon) =>
+      markerIcon.classList.remove('--highlightedIcon')
+    );
     comments.forEach((comment) => comment.classList.remove('selected'));
 
     if (!isAlreadySelected) {
@@ -108,13 +123,14 @@ function Comment({
         if (markerIcon.classList.contains(`id-${index}`)) {
           markerIcon.classList.add('--highlightedIcon');
         }
-      })
+      });
       document.getElementById(`comment-${index}`)?.classList.toggle('selected');
     }
-  }
+  };
 
   async function handleLike() {
-    const newData = await args.comment.submitLike() as CommentProps['comment'];
+    const newData =
+      (await args.comment.submitLike()) as CommentProps['comment'];
 
     setHasUserLiked(newData.hasUserLiked || false);
     setHasUserDisliked(newData.hasUserDisliked || false);
@@ -124,7 +140,8 @@ function Comment({
   }
 
   async function handleDislike() {
-    const newData = await args.comment.submitDislike() as CommentProps['comment'];
+    const newData =
+      (await args.comment.submitDislike()) as CommentProps['comment'];
 
     setHasUserLiked(newData.hasUserLiked || false);
     setHasUserDisliked(newData.hasUserDisliked || false);
@@ -133,44 +150,51 @@ function Comment({
     setNetVotes(newData.netVotes || 0);
   }
 
-
   return (
-    <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${comment?.id}`} onClick={findLocation(comment?.id || 0)}>
+    <article
+      className={`comment-item ${selected ? 'selected' : ''}`}
+      id={`comment-${comment?.id}`}
+      onClick={findLocation(comment?.id || 0)}>
       <section className="comment-item-header">
-        <Heading level={4} appearance='utrecht-heading-6' className={`reaction-name`}>
+        <Heading
+          level={4}
+          appearance="utrecht-heading-6"
+          className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
-          {args.comment.user && args.comment.user.role === 'admin' ? <span className='--isAdmin'>{adminLabel}</span> : null}
+          {args.comment.user && args.comment.user.role === 'admin' ? (
+            <span className="--isAdmin">{adminLabel}</span>
+          ) : null}
         </Heading>
         {canEdit() || canDelete() ? (
           <div className="edit-delete-button-group">
-            <Button appearance="subtle-button" onClick={() => setIsOpen(!isOpen)}>
+            <Button
+              appearance="subtle-button"
+              onClick={() => setIsOpen(!isOpen)}>
               <div>
-                <i className={isOpen ? "ri-close-fill" : "ri-more-fill"}></i>
+                <i className={isOpen ? 'ri-close-fill' : 'ri-more-fill'}></i>
                 <span className="sr-only">Bewerken</span>
               </div>
             </Button>
 
             {isOpen && (
               <div className="DropdownMenuContent">
-                <ButtonGroup direction='column'>
+                <ButtonGroup direction="column">
                   <Button
-                    appearance='secondary-action-button'
+                    appearance="secondary-action-button"
                     className="DropdownMenuItem"
                     onClick={() => {
                       setIsOpen(false);
                       toggleEditForm();
-                    }}
-                  >
+                    }}>
                     Bewerken
                   </Button>
                   <Button
-                    appearance='secondary-action-button'
+                    appearance="secondary-action-button"
                     className="DropdownMenuItem"
                     onClick={() => {
                       if (args.comment && confirm('Weet u het zeker?'))
                         args.comment.delete(args.comment.id);
-                    }}
-                  >
+                    }}>
                     Verwijderen
                   </Button>
                 </ButtonGroup>
@@ -197,7 +221,9 @@ function Comment({
       ) : (
         <>
           <Spacer size={0.25} />
-          <Paragraph className="comment-reaction-text">{args.comment.description}</Paragraph>
+          <Paragraph className="comment-reaction-text">
+            {args.comment.description}
+          </Paragraph>
           <Spacer size={0.25} />
           {showDateSeperately && (
             <Paragraph className="comment-reaction-strong-text">
@@ -213,48 +239,78 @@ function Comment({
           </Paragraph>
           <ButtonGroup className={`variant-${variant}`}>
             <div>
-              {widgetContext.canLike && (
-                canLike() ? (
+              {widgetContext.canLike &&
+                (canLike() ? (
                   <Button
-                    appearance='secondary-action-button'
+                    appearance="secondary-action-button"
                     className={hasUserLiked ? `active` : ''}
                     onClick={handleLike}>
-                    <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
-                    {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
-                    {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
+                    <i
+                      className={
+                        hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'
+                      }></i>
+                    {variant != 'micro-score' && (
+                      <>
+                        Mee eens (<span>{yesVotes}</span>)
+                      </>
+                    )}
+                    {variant == 'micro-score' && (
+                      <span className="sr-only">Mee eens</span>
+                    )}
                   </Button>
                 ) : (
                   <Button disabled>
                     <i className="ri-thumb-up-line"></i>
-                    {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
-                    {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
+                    {variant != 'micro-score' && (
+                      <>
+                        Mee eens (<span>{yesVotes}</span>)
+                      </>
+                    )}
+                    {variant == 'micro-score' && (
+                      <span className="sr-only">Mee eens</span>
+                    )}
                   </Button>
-                )
-              )}
+                ))}
               {variant == 'micro-score' && (
-                <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netVotes}</Paragraph>
+                <Paragraph className="comment-reaction-score">
+                  <span className="sr-only">Score</span> {netVotes}
+                </Paragraph>
               )}
-              {widgetContext.canDislike && (
-                canLike() ? (
+              {widgetContext.canDislike &&
+                (canLike() ? (
                   <Button
-                    appearance='secondary-action-button'
+                    appearance="secondary-action-button"
                     className={hasUserDisliked ? `active` : ''}
                     onClick={handleDislike}>
-                    <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
-                    {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
-                    {variant == 'micro-score' && (<span className='sr-only'>Mee oneens</span>)}
+                    <i
+                      className={
+                        hasUserDisliked
+                          ? 'ri-thumb-down-fill'
+                          : 'ri-thumb-down-line'
+                      }></i>
+                    {variant != 'micro-score' && (
+                      <>
+                        Mee oneens (<span>{noVotes}</span>)
+                      </>
+                    )}
+                    {variant == 'micro-score' && (
+                      <span className="sr-only">Mee oneens</span>
+                    )}
                   </Button>
                 ) : (
                   <Button disabled>
                     <i className="ri-thumb-down-line"></i>
-                    {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
+                    {variant != 'micro-score' && (
+                      <>
+                        Mee oneens (<span>{noVotes}</span>)
+                      </>
+                    )}
                   </Button>
-                )
-              )}
+                ))}
             </div>
             {canReply() ? (
               <Button
-                appearance='primary-action-button'
+                appearance="primary-action-button"
                 onClick={() => toggleReplyForm()}>
                 Reageren
               </Button>
@@ -271,45 +327,77 @@ function Comment({
             </Paragraph>
             <ButtonGroup className={`variant-${variant}`}>
               <div>
-                {widgetContext.canLike && (
-                  canLike() ? (
+                {widgetContext.canLike &&
+                  (canLike() ? (
                     <Button
-                      appearance='secondary-action-button'
+                      appearance="secondary-action-button"
                       className={hasUserLiked ? `active` : ''}
                       onClick={handleLike}>
-                      <i className={hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
-                      {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
-                      {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
+                      <i
+                        className={
+                          hasUserLiked ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'
+                        }></i>
+                      {variant != 'micro-score' && (
+                        <>
+                          Mee eens (<span>{yesVotes}</span>)
+                        </>
+                      )}
+                      {variant == 'micro-score' && (
+                        <span className="sr-only">Mee eens</span>
+                      )}
                     </Button>
                   ) : (
                     <Button disabled>
                       <i className="ri-thumb-up-line"></i>
-                      {variant != 'micro-score' && (<>Mee eens (<span>{yesVotes}</span>)</>)}
-                      {variant == 'micro-score' && (<span className='sr-only'>Mee eens</span>)}
+                      {variant != 'micro-score' && (
+                        <>
+                          Mee eens (<span>{yesVotes}</span>)
+                        </>
+                      )}
+                      {variant == 'micro-score' && (
+                        <span className="sr-only">Mee eens</span>
+                      )}
                     </Button>
-                  )
-                )}
+                  ))}
                 {variant == 'micro-score' && (
-                  <Paragraph className="comment-reaction-score"><span className='sr-only'>Score</span> {netVotes}</Paragraph>
+                  <Paragraph className="comment-reaction-score">
+                    <span className="sr-only">Score</span> {netVotes}
+                  </Paragraph>
                 )}
-                {widgetContext.canDislike && (
-                  canLike() ? (
+                {widgetContext.canDislike &&
+                  (canLike() ? (
                     <Button
-                      appearance='secondary-action-button'
+                      appearance="secondary-action-button"
                       className={hasUserDisliked ? `active` : ''}
                       onClick={handleDislike}>
-                      <i className={hasUserDisliked ? 'ri-thumb-down-fill' : 'ri-thumb-down-line'}></i>
-                      {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
-                      {variant == 'micro-score' && (<span className='sr-only'>Mee oneens</span>)}
+                      <i
+                        className={
+                          hasUserDisliked
+                            ? 'ri-thumb-down-fill'
+                            : 'ri-thumb-down-line'
+                        }></i>
+                      {variant != 'micro-score' && (
+                        <>
+                          Mee oneens (<span>{noVotes}</span>)
+                        </>
+                      )}
+                      {variant == 'micro-score' && (
+                        <span className="sr-only">Mee oneens</span>
+                      )}
                     </Button>
                   ) : (
                     <Button disabled>
                       <i className="ri-thumb-down-line"></i>
-                      {variant != 'micro-score' && (<>Mee oneens (<span>{noVotes}</span>)</>)}
-                      {variant == 'micro-score' && (<span className='sr-only'>Mee oneens</span>)}
+                      {variant != 'micro-score' && (
+                        <>
+                          Mee oneens (<span>{noVotes}</span>)
+                        </>
+                      )}
+                      {variant == 'micro-score' && (
+                        <span className="sr-only">Mee oneens</span>
+                      )}
                     </Button>
-                  )
-                )}
+                  ))}
               </div>
             </ButtonGroup>
           </section>
@@ -322,23 +410,30 @@ function Comment({
         args.comment.replies.map((reply, index) => {
           return (
             <div className="reaction-container" key={index}>
-              <Comment {...args} variant={variant} comment={reply} disableSubmit={disableSubmit} showDateSeperately={false} />
+              <Comment
+                {...args}
+                variant={variant}
+                comment={reply}
+                disableSubmit={disableSubmit}
+                showDateSeperately={false}
+              />
             </div>
           );
         })}
 
-      {extraReplyButton && (
-
-        (!args.comment.parentId && args.comment.replies && args.comment.replies.length > 0 && canReply() && !isReplyFormActive) && (
+      {extraReplyButton &&
+        !args.comment.parentId &&
+        args.comment.replies &&
+        args.comment.replies.length > 0 &&
+        canReply() &&
+        !isReplyFormActive && (
           <Button
-            appearance='secondary-action-button'
+            appearance="secondary-action-button"
             className="reply-container-button"
             onClick={() => toggleReplyForm()}>
             Reageren
           </Button>
-        )
-
-      )}
+        )}
 
       {isReplyFormActive ? (
         <div className="reaction-container">
@@ -358,8 +453,11 @@ function Comment({
                 toggleReplyForm();
               }}
             />
-            <Spacer size={.5} />
-            <Button className={'cancel-reply'} onClick={toggleReplyForm}> Annuleren </Button>
+            <Spacer size={0.5} />
+            <Button className={'cancel-reply'} onClick={toggleReplyForm}>
+              {' '}
+              Annuleren{' '}
+            </Button>
             <Spacer size={1} />
           </div>
         </div>

@@ -3,7 +3,8 @@ const UINT32_MODULUS = MAX_INT_UNSIGNED + 1;
 const DEFAULT_RANDOM_SORT_SEED_STORAGE_PREFIX = 'openstadRandomSortSeed';
 
 function getNavigationType() {
-  if (typeof window === 'undefined' || !window.performance?.getEntriesByType) return '';
+  if (typeof window === 'undefined' || !window.performance?.getEntriesByType)
+    return '';
   const [entry] = window.performance.getEntriesByType('navigation') as any[];
   return entry?.type || '';
 }

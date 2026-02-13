@@ -44,7 +44,7 @@ exports.save = (token, userID, clientID, scope) => {
   try {
     decoded = utils.verifyToken(token);
   } catch (e) {
-    console.warn('Error verifying JWT: ', e)
+    console.warn('Error verifying JWT: ', e);
     return Promise.resolve(new Error('Invalid refresh token'));
   }
   const id = decoded.jti;
@@ -75,6 +75,6 @@ exports.delete = (token) => {
  */
 exports.removeAll = () => {
   const deletedTokens = tokens;
-  tokens              = Object.create(null);
+  tokens = Object.create(null);
   return Promise.resolve(deletedTokens);
 };

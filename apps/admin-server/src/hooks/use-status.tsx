@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useStatuses(projectId?: string, id?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -47,5 +47,5 @@ export default function useStatuses(projectId?: string, id?: string) {
     return await res.json();
   }
 
-  return { ...statuseswr, updateStatus }
+  return { ...statuseswr, updateStatus };
 }

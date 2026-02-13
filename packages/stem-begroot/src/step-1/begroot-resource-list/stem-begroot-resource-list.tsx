@@ -1,4 +1,6 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import { canLikeResource } from '@openstad-headless/lib';
+import { deterministicRandomSort } from '@openstad-headless/lib';
+import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
 import {
   Carousel,
   Icon,
@@ -7,20 +9,16 @@ import {
   Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
-import { canLikeResource } from '@openstad-headless/lib';
-
-import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
-import { deterministicRandomSort } from '@openstad-headless/lib';
-
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
   Button,
-  Paragraph,
-  Link,
-  Heading5,
   Heading,
+  Heading5,
+  Link,
+  Paragraph,
 } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 export const StemBegrootResourceList = ({
   resources,
@@ -51,7 +49,7 @@ export const StemBegrootResourceList = ({
   showOriginalResource = true,
   displayTitle = true,
   displaySummary = true,
-  header
+  header,
 }: {
   resourceListColumns?: number;
   resources: Array<any>;
@@ -87,7 +85,10 @@ export const StemBegrootResourceList = ({
   displaySummary?: boolean;
 }) => {
   const getResourceStableKey = (resource: any) =>
-    String(resource?.id || `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`);
+    String(
+      resource?.id ||
+        `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+    );
 
   // Memoize intTags to avoid creating new array on every render
   const intTags = useMemo(() => {
@@ -124,11 +125,8 @@ export const StemBegrootResourceList = ({
         : resources.filter((resource: any) => {
             if (tags.length > 0) {
               if (filterBehavior === 'and') {
-                return tagIntegers.every(
-                  (tagId) =>
-                    resource.tags?.some(
-                      (tag: { id: number }) => tag.id === tagId
-                    )
+                return tagIntegers.every((tagId) =>
+                  resource.tags?.some((tag: { id: number }) => tag.id === tagId)
                 );
               } else {
                 return resource.tags?.some((tag: { id: number }) =>
@@ -186,7 +184,12 @@ export const StemBegrootResourceList = ({
             return a.title.localeCompare(b.title);
           }
           if (sort === 'random') {
-            return deterministicRandomSort(a, b, randomSortSeed, getResourceStableKey);
+            return deterministicRandomSort(
+              a,
+              b,
+              randomSortSeed,
+              getResourceStableKey
+            );
           }
           return 0;
         })
@@ -263,8 +266,7 @@ export const StemBegrootResourceList = ({
         return (
           <>
             <article
-              className={`stem-begroot--container ${hasImages} ${!canVoteByStatus ? 'resource-vote-disabled' : ''}`.trim()}
-            >
+              className={`stem-begroot--container ${hasImages} ${!canVoteByStatus ? 'resource-vote-disabled' : ''}`.trim()}>
               <Carousel
                 items={resourceImages}
                 buttonText={{
@@ -280,25 +282,49 @@ export const StemBegrootResourceList = ({
                       Tags
                     </Heading>
                     <div className="pill-grid stembegroot">
-                      {(resource.tags as Array<{ type: string; name: string, seqnr?: number }>)
+                      {(
+                        resource.tags as Array<{
+                          type: string;
+                          name: string;
+                          seqnr?: number;
+                        }>
+                      )
                         ?.filter((t) => t.type !== 'status')
-                        ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
-                          if (a.seqnr === undefined || a.seqnr === null) return 1;
-                          if (b.seqnr === undefined || b.seqnr === null) return -1;
-                          return a.seqnr - b.seqnr;
-                        })
-                        ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
+                        ?.sort(
+                          (a: { seqnr?: number }, b: { seqnr?: number }) => {
+                            if (a.seqnr === undefined || a.seqnr === null)
+                              return 1;
+                            if (b.seqnr === undefined || b.seqnr === null)
+                              return -1;
+                            return a.seqnr - b.seqnr;
+                          }
+                        )
+                        ?.map((t) => (
+                          <span>{t.name || 'Geen thema'}</span>
+                        ))}
                     </div>
                   </div>
                 </section>
               )}
               {displayTitle ? (
-                <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
+                <Heading
+                  level={2}
+                  appearance="utrecht-heading-4"
+                  dangerouslySetInnerHTML={{ __html: resource.title }}
+                />
               ) : null}
               {displaySummary ? (
-                <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
+                <Paragraph
+                  dangerouslySetInnerHTML={{
+                    __html: elipsizeHTML(resource.summary, 100),
+                  }}
+                />
               ) : null}
-              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, 200)}}/>
+              <Paragraph
+                dangerouslySetInnerHTML={{
+                  __html: elipsizeHTML(resource.description, 200),
+                }}
+              />
               {showOriginalResource && originalUrl ? (
                 <Paragraph className="strong">
                   Dit is een vervolg op plan:&nbsp;

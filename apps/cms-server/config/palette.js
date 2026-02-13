@@ -45,7 +45,11 @@ exports.fields = [
     name: 'textFooterColor',
     label: 'Color of the text in the footer',
     type: 'color',
-    selector: ['footer .container h2', 'footer .container p', 'footer .container a'],
+    selector: [
+      'footer .container h2',
+      'footer .container p',
+      'footer .container a',
+    ],
     property: 'color',
   },
   {
@@ -70,7 +74,7 @@ exports.fields = [
     max: 300,
     step: 1,
     unit: 'px',
-    mediaQuery: '(max-width: 768px)'
+    mediaQuery: '(max-width: 768px)',
   },
   {
     name: 'headerPadding',
@@ -81,7 +85,7 @@ exports.fields = [
     min: 0,
     max: 125,
     step: 1,
-    unit: 'px'
+    unit: 'px',
   },
   {
     name: 'headerPaddingMobile',
@@ -93,7 +97,7 @@ exports.fields = [
     max: 125,
     step: 1,
     unit: 'px',
-    mediaQuery: '(max-width: 768px)'
+    mediaQuery: '(max-width: 768px)',
   },
   {
     name: 'CTAButtonBgColor',
@@ -127,14 +131,37 @@ exports.fields = [
     name: 'buttonColor',
     label: 'Background color of button',
     type: 'color',
-    selector: ['a.page-button-flag', '.filled-button', '.btn-primary', '.btn--blue', '.begroot-container .button-add-idea-to-budget',' #map-with-buttons-container .no-of-locations-content', '.no-of-locations-content', '#title .secondary .controls .vote button', '#title .secondary .controls .vote button.idea-status-OPEN:disabled',  '#title .secondary .controls .no-of-votes-for-content', '#title .secondary .controls .no-of-votes-against-content' ],
+    selector: [
+      'a.page-button-flag',
+      '.filled-button',
+      '.btn-primary',
+      '.btn--blue',
+      '.begroot-container .button-add-idea-to-budget',
+      ' #map-with-buttons-container .no-of-locations-content',
+      '.no-of-locations-content',
+      '#title .secondary .controls .vote button',
+      '#title .secondary .controls .vote button.idea-status-OPEN:disabled',
+      '#title .secondary .controls .no-of-votes-for-content',
+      '#title .secondary .controls .no-of-votes-against-content',
+    ],
     property: ['background-color', 'border-color'],
   },
   {
     name: 'buttonFontColor',
     label: 'Font color of button',
     type: 'color',
-    selector: ['a.page-button-flag', '.filled-button', '.btn-primary', '.btn--blue', '.begroot-container .button-add-idea-to-budget',' #map-with-buttons-container .no-of-locations-content',  '.no-of-locations-content', '#title .secondary .controls .vote button', '#title .secondary .controls .no-of-votes-for-content', '#title .secondary .controls .no-of-votes-against-content' ],
+    selector: [
+      'a.page-button-flag',
+      '.filled-button',
+      '.btn-primary',
+      '.btn--blue',
+      '.begroot-container .button-add-idea-to-budget',
+      ' #map-with-buttons-container .no-of-locations-content',
+      '.no-of-locations-content',
+      '#title .secondary .controls .vote button',
+      '#title .secondary .controls .no-of-votes-for-content',
+      '#title .secondary .controls .no-of-votes-against-content',
+    ],
     property: 'color',
   },
 
@@ -142,21 +169,45 @@ exports.fields = [
     name: 'buttonHoverBgColor',
     label: 'Background color of button - hover',
     type: 'color',
-    selector: ['a.page-button-flag:hover', '.filled-button:hover', '.btn-primary:hover', '.btn--blue:hover', '.begroot-container .button-add-idea-to-budget:hover',  '#title .secondary .controls .vote button:hover', '#title .secondary .controls .vote button.idea-status-OPEN:disabled:hover' ],
+    selector: [
+      'a.page-button-flag:hover',
+      '.filled-button:hover',
+      '.btn-primary:hover',
+      '.btn--blue:hover',
+      '.begroot-container .button-add-idea-to-budget:hover',
+      '#title .secondary .controls .vote button:hover',
+      '#title .secondary .controls .vote button.idea-status-OPEN:disabled:hover',
+    ],
     property: ['background-color', 'border-color'],
   },
   {
     name: 'buttonHoverFontBgColor',
     label: 'Font color of button - hover',
     type: 'color',
-    selector: ['a.page-button-flag:hover', '.filled-button:hover', '.btn-primary:hover', '.btn--blue:hover', '.begroot-container .button-add-idea-to-budget:hover',  '#title .secondary .controls .vote button:hover'  ],
+    selector: [
+      'a.page-button-flag:hover',
+      '.filled-button:hover',
+      '.btn-primary:hover',
+      '.btn--blue:hover',
+      '.begroot-container .button-add-idea-to-budget:hover',
+      '#title .secondary .controls .vote button:hover',
+    ],
     property: 'color',
   },
   {
     name: 'buttonBorderRadius',
     label: 'Border radius of button',
     type: 'range',
-    selector: ['a.page-button-flag', '.filled-button', '.outlined-button', '.btn-primary', '.btn--blue', '.btn', '.btn-primary', '.menu-cta-button' ],
+    selector: [
+      'a.page-button-flag',
+      '.filled-button',
+      '.outlined-button',
+      '.btn-primary',
+      '.btn--blue',
+      '.btn',
+      '.btn-primary',
+      '.menu-cta-button',
+    ],
     property: 'border-radius',
     min: 0,
     max: 50,
@@ -167,7 +218,13 @@ exports.fields = [
     name: 'buttonOutlinedColor',
     label: 'Outlined color of button',
     type: 'color',
-    selector: ['.outlined-button', '.outlined-button:hover', '.outlined-button:visited', '.begroot-container .button-add-idea-to-budget.added', '.begroot-container .button-add-idea-to-budget.added:hover'],
+    selector: [
+      '.outlined-button',
+      '.outlined-button:hover',
+      '.outlined-button:visited',
+      '.begroot-container .button-add-idea-to-budget.added',
+      '.begroot-container .button-add-idea-to-budget.added:hover',
+    ],
     property: ['color', 'border-color', 'outline-color'],
   },
   {
@@ -186,13 +243,11 @@ exports.fields = [
   },
 ];
 
-
 exports.arrangeFields = [
-
   {
     name: 'logoFields',
     label: 'Logo',
-    fields: ['logoWidth', 'logoWidthMobile']
+    fields: ['logoWidth', 'logoWidthMobile'],
   },
   {
     name: 'colorFields',
@@ -207,17 +262,26 @@ exports.arrangeFields = [
       'CTAButtonBgColor',
       'CTAButtonFontColor',
       'CTAButtonHoverBgColor',
-      'CTAButtonHoverFontColor'
-    ]
+      'CTAButtonHoverFontColor',
+    ],
   },
   {
     name: 'buttons',
     label: 'Buttons & links',
-    fields: ['buttonColor', 'buttonFontColor', 'buttonHoverBgColor', 'buttonHoverFontBgColor', 'buttonBorderRadius','buttonOutlinedColor', 'linkColor', 'linkVisitedColor']
+    fields: [
+      'buttonColor',
+      'buttonFontColor',
+      'buttonHoverBgColor',
+      'buttonHoverFontBgColor',
+      'buttonBorderRadius',
+      'buttonOutlinedColor',
+      'linkColor',
+      'linkVisitedColor',
+    ],
   },
   {
     name: 'footer',
     label: 'Footer',
-    fields: ['backgroundFooterColor', 'textFooterColor']
+    fields: ['backgroundFooterColor', 'textFooterColor'],
   },
-]
+];

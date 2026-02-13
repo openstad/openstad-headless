@@ -1,4 +1,4 @@
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 
 function prepareDocument(document: any) {
   const formData = new FormData();
@@ -14,10 +14,13 @@ export async function UploadDocument(data: any, project?: string) {
 
   const projectNumber: number | undefined = validateProjectNumber(project);
 
-  const response = await fetch(`/api/openstad/api/project/${projectNumber}/upload/document`, {
-    method: 'POST',
-    body: document
-  })
+  const response = await fetch(
+    `/api/openstad/api/project/${projectNumber}/upload/document`,
+    {
+      method: 'POST',
+      body: document,
+    }
+  );
 
   return await response.json();
 }

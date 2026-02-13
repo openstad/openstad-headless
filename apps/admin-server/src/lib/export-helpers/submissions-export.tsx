@@ -1,7 +1,8 @@
-import * as XLSX from "xlsx";
-import { fetchMatrixData } from "./fetch-matrix-data";
-import { normalizeToArray } from "./normalize-to-array";
-import { stripHtmlTags } from "@openstad-headless/lib/strip-html-tags";
+import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import * as XLSX from 'xlsx';
+
+import { fetchMatrixData } from './fetch-matrix-data';
+import { normalizeToArray } from './normalize-to-array';
 
 export interface ExportSettings {
   splitMultipleChoice: boolean;
@@ -18,11 +19,13 @@ export const exportSubmissionsToCSV = (
     widgetName = widgetName.replace(/[^a-z0-9-]/g, '');
     widgetName = widgetName.replace(/-+/g, '-');
 
-    const currentDate = new Date().toLocaleDateString('nl-NL', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).replace(/\//g, '-');
+    const currentDate = new Date()
+      .toLocaleDateString('nl-NL', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      .replace(/\//g, '-');
 
     return `export-${widgetName}-${currentDate}`;
   }
@@ -37,17 +40,19 @@ export const exportSubmissionsToCSV = (
     } catch (error) {}
 
     if (Array.isArray(parsedValue)) {
-      return [...parsedValue].join(' | ')
+      return [...parsedValue].join(' | ');
     }
 
     if (typeof value === 'object') {
-      if ( Array.isArray(value) && value.length > 0 ) {
-        if ( typeof(value[0]) === 'object' ) {
-          return value.map((item: any) => {
-            return Object.entries(item)
-              .map(([key, val]) => `${key}: ${val}`)
-              .join(', ');
-          }).join(' | ')
+      if (Array.isArray(value) && value.length > 0) {
+        if (typeof value[0] === 'object') {
+          return value
+            .map((item: any) => {
+              return Object.entries(item)
+                .map(([key, val]) => `${key}: ${val}`)
+                .join(', ');
+            })
+            .join(' | ');
         }
       }
 
@@ -56,7 +61,7 @@ export const exportSubmissionsToCSV = (
         .join(', ');
     }
 
-    if ( typeof value === 'string' ) {
+    if (typeof value === 'string') {
       let escapedValue = value.replace(/(\r\n|\r\r|\n\n|\n|\r)+/g, '\n');
       escapedValue = escapedValue.replace(/"/g, "'");
 
@@ -67,11 +72,18 @@ export const exportSubmissionsToCSV = (
   };
 
   const fieldKeyToTitleMap = new Map();
-  const multipleChoiceOptionsMap = new Map<string, { title: string; options: string[] }>();
+  const multipleChoiceOptionsMap = new Map<
+    string,
+    { title: string; options: string[] }
+  >();
 
   if (selectedWidget?.config?.items?.length > 0) {
     selectedWidget.config.items.forEach((item: any) => {
-      if (item.questionType === 'none' && selectedWidget?.type !== "distributionmodule") return;
+      if (
+        item.questionType === 'none' &&
+        selectedWidget?.type !== 'distributionmodule'
+      )
+        return;
 
       const title = item.title || item.fieldKey;
       if (item.questionType === 'matrix') {
@@ -85,13 +97,15 @@ export const exportSubmissionsToCSV = (
 
       if (
         settings?.splitMultipleChoice &&
-        (item.questionType === 'multiplechoice' || item.questionType === 'multiple') &&
+        (item.questionType === 'multiplechoice' ||
+          item.questionType === 'multiple') &&
         item.options &&
         Array.isArray(item.options)
       ) {
         const optionLabels: string[] = [];
         item.options.forEach((option: any) => {
-          const optionTitle = option.titles?.[0]?.key ||
+          const optionTitle =
+            option.titles?.[0]?.key ||
             option.titles?.[0]?.title ||
             option.value ||
             option.label ||
@@ -119,9 +133,12 @@ export const exportSubmissionsToCSV = (
           ) {
             const otherKey = `${item.fieldKey}_${index}_other`;
 
-            const hasOtherData = data.some((row: any) => !!row?.submittedData?.[otherKey]);
+            const hasOtherData = data.some(
+              (row: any) => !!row?.submittedData?.[otherKey]
+            );
 
-            const otherTitle = titles[0].key || titles[0].title || 'Anders, namelijk';
+            const otherTitle =
+              titles[0].key || titles[0].title || 'Anders, namelijk';
             if (hasOtherData && otherTitle) {
               fieldKeyToTitleMap.set(otherKey, otherTitle);
             }
@@ -133,10 +150,11 @@ export const exportSubmissionsToCSV = (
 
   const rows = data.map((row: any) => {
     const rowData: Record<string, any> = {
-      'ID': row.id || ' ',
+      ID: row.id || ' ',
       'Aangemaakt op': row.createdAt || ' ',
       'Project ID': row.projectId || ' ',
-      'Widget': widgetName || ' ',
+      Widget: widgetName || ' ',
+      'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee',
       'Gebruikers ID': row.userId || ' ',
       'Gebruikers rol': row.user?.role || ' ',
       'Gebruikers naam': row.user?.name || ' ',
@@ -148,8 +166,9 @@ export const exportSubmissionsToCSV = (
       'Gebruikers postcode': row.user?.postcode || ' ',
     };
 
-    if ( process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' ) {
-      rowData['Gebruikers IP-adres (gehasht)'] = row?.submittedData?.ipAddress || ' ';
+    if (process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true') {
+      rowData['Gebruikers IP-adres (gehasht)'] =
+        row?.submittedData?.ipAddress || ' ';
     }
 
     const keyCount: Record<string, number> = {};
@@ -157,20 +176,37 @@ export const exportSubmissionsToCSV = (
       let rawValue = row.submittedData?.[key];
 
       if (key?.startsWith('matrix')) {
-        rawValue = fetchMatrixData(key, selectedWidget?.config?.items, row?.submittedData || [], false) || '';
+        rawValue =
+          fetchMatrixData(
+            key,
+            selectedWidget?.config?.items,
+            row?.submittedData || [],
+            false
+          ) || '';
       }
 
-      const fieldType = (selectedWidget?.config?.items || []).find((item: any) => item.fieldKey === key)?.questionType;
-      const fieldTitle = (selectedWidget?.config?.items || []).find((item: any) => item.fieldKey === key)?.title;
+      const fieldType = (selectedWidget?.config?.items || []).find(
+        (item: any) => item.fieldKey === key
+      )?.questionType;
+      const fieldTitle = (selectedWidget?.config?.items || []).find(
+        (item: any) => item.fieldKey === key
+      )?.title;
 
-      if (typeof rawValue === 'object' && (fieldType === 'swipe' || fieldType === 'dilemma')) {
+      if (
+        typeof rawValue === 'object' &&
+        (fieldType === 'swipe' || fieldType === 'dilemma')
+      ) {
         Object.values(rawValue).forEach((item: any) => {
           let returnText = fieldType === 'swipe' ? item.answer : item.title;
           if (item.explanation) returnText += `: ${item.explanation}`;
 
           if (fieldType === 'dilemma') {
-            const dilemmaId = !isNaN(Number(item.dilemmaId)) ? Number(item.dilemmaId) + 1 : '';
-            const header = fieldTitle ? `${fieldTitle} ${dilemmaId}` : `Keuze ${dilemmaId || item.dilemmaId}`;
+            const dilemmaId = !isNaN(Number(item.dilemmaId))
+              ? Number(item.dilemmaId) + 1
+              : '';
+            const header = fieldTitle
+              ? `${fieldTitle} ${dilemmaId}`
+              : `Keuze ${dilemmaId || item.dilemmaId}`;
             rowData[stripHtmlTags(header)] = returnText;
           }
 
@@ -200,13 +236,13 @@ export const exportSubmissionsToCSV = (
       const baseKey = title;
       let keyHeader = keyCount[baseKey]
         ? `${baseKey} (${keyCount[baseKey]++})`
-        : (keyCount[baseKey] = 1, baseKey);
+        : ((keyCount[baseKey] = 1), baseKey);
 
       keyHeader = keyHeader && stripHtmlTags(keyHeader);
 
       rowData[keyHeader] = normalizeData(rawValue, fieldType || '');
     });
-    if (selectedWidget?.type !== "distributionmodule") {
+    if (selectedWidget?.type !== 'distributionmodule') {
       rowData['Embedded URL'] = row?.submittedData?.embeddedUrl || '';
     }
     return rowData;

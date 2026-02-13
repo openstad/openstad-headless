@@ -92,9 +92,8 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
-
       // Temp log for use in k9s
-      console.error({widgetBuildError: e});
+      console.error({ widgetBuildError: e });
       return next(
         createError(
           500,
@@ -173,7 +172,9 @@ Object.keys(widgetDefinitions).forEach((widget) => {
       `/${widget}-images`,
       express.static(
         path.resolve(
-          require.resolve(`${widgetDefinitions[widget].packageName}/package.json`),
+          require.resolve(
+            `${widgetDefinitions[widget].packageName}/package.json`
+          ),
           '../../images/'
         )
       )
@@ -186,7 +187,6 @@ Object.keys(widgetDefinitions).forEach((widget) => {
 });
 
 function getDefaultConfig(project, widgetType) {
-
   const loginUrl = `${config.url}/auth/project/${project.id}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
   const loginUrlAnonymous = `${config.url}/auth/project/${project.id}/login?useAuth=anonymous&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
   const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
@@ -221,12 +221,16 @@ function getDefaultConfig(project, widgetType) {
     serverTime: new Date().toISOString(),
   };
 
-  if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {
-    result.area = project.area?.polygon
+  if (
+    widgetType == 'resourcedetailmap' ||
+    widgetType == 'resourcesmap' ||
+    widgetType == 'editormap' ||
+    widgetType == 'resourceform'
+  ) {
+    result.area = project.area?.polygon;
   }
 
   return result;
-
 }
 
 function setConfigsToOutput(
@@ -238,10 +242,9 @@ function setConfigsToOutput(
   widgetConfig,
   widgetId
 ) {
-
   // Move general settings to the root to ensure we have the correct config
   if (widgetConfig.hasOwnProperty('general')) {
-    widgetConfig = {...widgetConfig, ...widgetConfig.general};
+    widgetConfig = { ...widgetConfig, ...widgetConfig.general };
   }
 
   let config = merge.recursive(
@@ -253,7 +256,7 @@ function setConfigsToOutput(
     { widgetId }
   );
 
-  config = JSON.stringify(config)
+  config = JSON.stringify(config);
 
   return getWidgetJavascriptOutput(
     widgetSettings,
@@ -276,15 +279,18 @@ function getWidgetJavascriptOutput(
   let widgetOutput = '';
   let css = '';
 
-  const data = JSON.parse(widgetConfig)
+  const data = JSON.parse(widgetConfig);
 
   const apiUrl = process.env.URL ?? '';
 
   // TODO: Fix this, it's a hack to get the ChoiceGuide to work
-  if ( widgetSettings.componentName === 'ChoiceGuide' ) {
-
+  if (widgetSettings.componentName === 'ChoiceGuide') {
     widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/choiceguide', file);
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/choiceguide',
+        file
+      );
       if (!fs.existsSync(filePath)) {
         console.error(`JS file not found: ${filePath}`);
       } else {
@@ -293,18 +299,24 @@ function getWidgetJavascriptOutput(
     });
 
     widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/choiceguide', file);
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/choiceguide',
+        file
+      );
       if (!fs.existsSync(filePath)) {
         console.error(`CSS file not found: ${filePath}`);
       } else {
         css += fs.readFileSync(filePath, 'utf8');
       }
     });
-
-  } else if ( widgetSettings.componentName === 'DistributionModule' ) {
-
+  } else if (widgetSettings.componentName === 'DistributionModule') {
     widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/distribution-module', file);
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/distribution-module',
+        file
+      );
       if (!fs.existsSync(filePath)) {
         console.error(`JS file not found: ${filePath}`);
       } else {
@@ -313,18 +325,24 @@ function getWidgetJavascriptOutput(
     });
 
     widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/distribution-module', file);
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/distribution-module',
+        file
+      );
       if (!fs.existsSync(filePath)) {
         console.error(`CSS file not found: ${filePath}`);
       } else {
         css += fs.readFileSync(filePath, 'utf8');
       }
     });
-
-  } else if ( widgetSettings.componentName === 'MultiProjectResourceOverview' ) {
-
+  } else if (widgetSettings.componentName === 'MultiProjectResourceOverview') {
     widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/multi-project-resource-overview',
+        file
+      );
       if (!fs.existsSync(filePath)) {
         console.error(`JS file not found: ${filePath}`);
       } else {
@@ -333,29 +351,34 @@ function getWidgetJavascriptOutput(
     });
 
     widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(__dirname, '../../../../../packages/multi-project-resource-overview', file);
+      const filePath = path.resolve(
+        __dirname,
+        '../../../../../packages/multi-project-resource-overview',
+        file
+      );
       if (!fs.existsSync(filePath)) {
         console.error(`CSS file not found: ${filePath}`);
       } else {
         css += fs.readFileSync(filePath, 'utf8');
       }
     });
-
   } else {
     widgetSettings.js.forEach((file) => {
-      widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+      widgetOutput += fs.readFileSync(
+        require.resolve(`${widgetSettings.packageName}/${file}`),
+        'utf8'
+      );
     });
 
     widgetSettings.css.forEach((file) => {
-      css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+      css += fs.readFileSync(
+        require.resolve(`${widgetSettings.packageName}/${file}`),
+        'utf8'
+      );
     });
   }
 
   // End of to do
-
-
-
-
 
   // Rewrite the url to the images that we serve statically
   css = css.replaceAll(
@@ -363,7 +386,9 @@ function getWidgetJavascriptOutput(
     `url(${config.url}/widget/${widgetType}-images/`
   );
 
-  const widgetConfigWithCorrectEscapes = widgetConfig.replaceAll('\\', '\\\\').replaceAll('`', '\\`');
+  const widgetConfigWithCorrectEscapes = widgetConfig
+    .replaceAll('\\', '\\\\')
+    .replaceAll('`', '\\`');
 
   // Create function to render component
   // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly

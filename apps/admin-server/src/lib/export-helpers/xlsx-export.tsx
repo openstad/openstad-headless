@@ -1,5 +1,5 @@
-import flattenObject from "@/lib/export-helpers/flattenObject";
-import * as XLSX from "xlsx";
+import flattenObject from '@/lib/export-helpers/flattenObject';
+import * as XLSX from 'xlsx';
 
 export const exportToXLSX = (
   data: any[],
@@ -13,8 +13,8 @@ export const exportToXLSX = (
       // Handle wildcard keys like tags.*
       if (key.endsWith('.*')) {
         const prefix = key.replace('.*', '');
-        
-        Object.keys(flat).forEach(flatKey => {
+
+        Object.keys(flat).forEach((flatKey) => {
           if (flatKey.startsWith(prefix + '.')) {
             const type = flatKey.substring(prefix.length + 1); // Skip "prefix."
             cleaned[`${label}.${type}`] = flat[flatKey];
@@ -31,4 +31,4 @@ export const exportToXLSX = (
   const worksheet = XLSX.utils.json_to_sheet(cleanedData);
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
   XLSX.writeFile(workbook, fileName);
-}
+};

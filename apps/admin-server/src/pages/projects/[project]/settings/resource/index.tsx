@@ -1,10 +1,6 @@
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
-import { PageLayout } from '@/components/ui/page-layout';
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -14,6 +10,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PageLayout } from '@/components/ui/page-layout';
 import {
   Select,
   SelectContent,
@@ -21,19 +19,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useProject } from '../../../../../hooks/use-project';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import toast from 'react-hot-toast';
-import { useRouter } from 'next/router';
-import useTags from '@/hooks/use-tags';
+import { Heading } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
-import _ from 'lodash';
+import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
-import { CheckboxList } from '@/components/checkbox-list';
+import { zodResolver } from '@hookform/resolvers/zod';
+import _ from 'lodash';
+import { useRouter } from 'next/router';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../../hooks/use-project';
 
 const reactions = [
   {
@@ -116,7 +116,8 @@ export default function ProjectSettingsResource() {
       modbreakTitle: data?.config?.[category]?.modbreakTitle || null,
       tagGroups: data?.config?.resources?.defaultTagIds || [],
       statusGroups: data?.config?.resources?.defaultStatusIds || [],
-      canEditAfterFirstLikeOrComment: data?.config?.resources?.canEditAfterFirstLikeOrComment || false,
+      canEditAfterFirstLikeOrComment:
+        data?.config?.resources?.canEditAfterFirstLikeOrComment || false,
     }),
     [data?.config]
   );
@@ -185,9 +186,11 @@ export default function ProjectSettingsResource() {
             <Heading size="xl">Inzendingsinstellingen</Heading>
             <Separator className="my-4" />
             <p className="text-gray-500">
-            Met resources bedoelen we het type inzending(en) voor dit project. <br /> Denk aan ideeën, plannen, tips of knelpunten. Dit is afhankelijk van wat je wilt uitvragen voor dit project. 
+              Met resources bedoelen we het type inzending(en) voor dit project.{' '}
+              <br /> Denk aan ideeën, plannen, tips of knelpunten. Dit is
+              afhankelijk van wat je wilt uitvragen voor dit project.
             </p>
-            <br/>
+            <br />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -196,9 +199,7 @@ export default function ProjectSettingsResource() {
                 name="canAddNewResources"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Is inzenden mogelijk?
-                    </FormLabel>
+                    <FormLabel>Is inzenden mogelijk?</FormLabel>
                     {YesNoSelect(field, {})}
                     <FormMessage />
                   </FormItem>
@@ -312,14 +313,12 @@ export default function ProjectSettingsResource() {
                 )}
               /> */}
 
-<FormField
+              <FormField
                 control={form.control}
                 name="modbreakTitle"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>
-                      Titel voor boven modbreak 
-                    </FormLabel>
+                    <FormLabel>Titel voor boven modbreak</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Tekst die boven de modbreak wordt getoond"
@@ -334,18 +333,20 @@ export default function ProjectSettingsResource() {
               <FormField
                 control={form.control}
                 name="canEditAfterFirstLikeOrComment"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Kunnen gebruikers hun inzendingen bewerken nadat ze een like of reactie hebben ontvangen?
+                      Kunnen gebruikers hun inzendingen bewerken nadat ze een
+                      like of reactie hebben ontvangen?
                     </FormLabel>
                     <Select
-                      onValueChange={(e: string) => field.onChange(e === 'true')}
-                      value={field.value ? 'true' : 'false'}
-                    >
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'true')
+                      }
+                      value={field.value ? 'true' : 'false'}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Kies een optie"/>
+                          <SelectValue placeholder="Kies een optie" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -353,7 +354,7 @@ export default function ProjectSettingsResource() {
                         <SelectItem value="true">Ja</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -391,8 +392,9 @@ export default function ProjectSettingsResource() {
                 items={statuses}
                 layout="vertical"
                 selectedPredicate={(t) =>
-                  form.getValues('statusGroups').findIndex((tg) => tg === t.id) >
-                  -1
+                  form
+                    .getValues('statusGroups')
+                    .findIndex((tg) => tg === t.id) > -1
                 }
                 onValueChange={(status, checked) => {
                   const values = form.getValues('statusGroups');

@@ -1,21 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useDebouncedValue } from 'rooks';
-import { PageLayout } from '../../components/ui/page-layout';
-import { ListHeading, Paragraph } from '../../components/ui/typography';
-import Link from 'next/link';
-import { useUsers, type userType } from '@/hooks/use-users';
-import { Plus, ChevronRight, ChevronLeft, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sortTable } from '@/components/ui/sortTable';
+import { useUsers, type userType } from '@/hooks/use-users';
+import { ChevronLeft, ChevronRight, Loader, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDebouncedValue } from 'rooks';
 import * as XLSX from 'xlsx';
+
+import { PageLayout } from '../../components/ui/page-layout';
+import { ListHeading, Paragraph } from '../../components/ui/typography';
 
 const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 600;
 
 type MergedType = {
   [key: string]: userType & { key?: string };
-}
+};
 
 export default function Users() {
   const router = useRouter();
@@ -23,7 +24,11 @@ export default function Users() {
   const [searchQuery, setSearchQuery] = useState('');
   const [apiSearch] = useDebouncedValue(searchQuery, SEARCH_DEBOUNCE_MS);
 
-  const { data, metadata, isValidating } = useUsers({ page: currentPage, pageSize: PAGE_SIZE, q: apiSearch || undefined });
+  const { data, metadata, isValidating } = useUsers({
+    page: currentPage,
+    pageSize: PAGE_SIZE,
+    q: apiSearch || undefined,
+  });
   const lastDataRef = useRef<userType[] | null>(null);
   const [users, setUsers] = useState<userType[]>([]);
 
@@ -32,9 +37,10 @@ export default function Users() {
     lastDataRef.current = data;
     const merged: MergedType = {};
     data.forEach((user: userType) => {
-      const key = user.idpUser?.identifier && user.idpUser?.provider
-        ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
-        : (user.id?.toString() || 'unknown');
+      const key =
+        user.idpUser?.identifier && user.idpUser?.provider
+          ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
+          : user.id?.toString() || 'unknown';
       merged[key] = user;
     });
     setUsers(Object.keys(merged).map((key) => ({ ...merged[key], key })));
@@ -78,22 +84,26 @@ export default function Users() {
           },
         ]}
         action={
-          <div className='flex flex-row w-full md:w-auto my-auto gap-4'>
+          <div className="flex flex-row w-full md:w-auto my-auto gap-4">
             <Link href="/users/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />
                 Gebruiker toevoegen
               </Button>
             </Link>
-            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+            <Button
+              className="text-xs p-2 w-fit"
+              type="submit"
+              onClick={transform}>
               Exporteer gebruikers
             </Button>
           </div>
         }>
         <div className="container py-6">
-
           <div className="float-right mb-4 flex gap-4">
-            <p className="text-xs font-medium text-muted-foreground self-center">Zoeken (naam, e-mail, postcode):</p>
+            <p className="text-xs font-medium text-muted-foreground self-center">
+              Zoeken (naam, e-mail, postcode):
+            </p>
             <input
               type="text"
               className="p-2 rounded"
@@ -112,17 +122,29 @@ export default function Users() {
             )}
             <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('email', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('email', e, filterData))
+                  }>
                   E-mail
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('name', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('name', e, filterData))
+                  }>
                   Naam
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('postcode', e, filterData))}>
+                <button
+                  className="filter-button"
+                  onClick={(e) =>
+                    setFilterData(sortTable('postcode', e, filterData))
+                  }>
                   Postcode
                 </button>
               </ListHeading>
@@ -154,16 +176,20 @@ export default function Users() {
             {metadata && metadata.pageCount > 1 && (
               <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
                 <Paragraph className="text-sm text-muted-foreground">
-                  Pagina {metadata.page + 1} van {metadata.pageCount} ({metadata.totalCount} gebruikers)
+                  Pagina {metadata.page + 1} van {metadata.pageCount} (
+                  {metadata.totalCount} gebruikers)
                 </Paragraph>
                 <div className="flex gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage((currentPage) => Math.max(0, currentPage - 1))}
-                    disabled={metadata.page <= 0}
-                  >
+                    onClick={() =>
+                      setCurrentPage((currentPage) =>
+                        Math.max(0, currentPage - 1)
+                      )
+                    }
+                    disabled={metadata.page <= 0}>
                     <ChevronLeft className="w-4 h-4" />
                     Vorige
                   </Button>
@@ -171,9 +197,12 @@ export default function Users() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage((currentPage) => Math.min(metadata.pageCount - 1, currentPage + 1))}
-                    disabled={metadata.page >= metadata.pageCount - 1}
-                  >
+                    onClick={() =>
+                      setCurrentPage((currentPage) =>
+                        Math.min(metadata.pageCount - 1, currentPage + 1)
+                      )
+                    }
+                    disabled={metadata.page >= metadata.pageCount - 1}>
                     Volgende
                     <ChevronRight className="w-4 h-4" />
                   </Button>

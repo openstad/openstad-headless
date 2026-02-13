@@ -1,7 +1,6 @@
 const apiConfig = require('config');
 
 module.exports = {
-
   anonymize: {
     type: 'object',
     subset: {
@@ -27,7 +26,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
           },
           attachments: {
             type: 'arrayOfStrings',
-            default: []
+            default: [],
           },
         },
       },
@@ -60,7 +59,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
             type: 'string',
             default: 'Sluitingsdatum project nadert',
           },
-          template:  {
+          template: {
             type: 'string',
             default: `De website <a href="{{URL}}">{{URL}}</a> nadert de ingestelde sluitingsdatum. De sluitingsdatum is ingesteld op <strong>{{ENDDATE}}</strong>.<br/>\
 <br/>\
@@ -73,7 +72,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
 <br/>\
 <br/>\
 <em>Dit is een geautomatiseerde email.</em><br/>\
-`
+`,
           },
         },
       },
@@ -94,7 +93,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         inzendingPath: {
           type: 'string',
-          default: "/PATH/TO/PLAN/[[resourceId]]",
+          default: '/PATH/TO/PLAN/[[resourceId]]',
         },
         template: {
           type: 'string',
@@ -102,7 +101,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         attachments: {
           type: 'arrayOfStrings',
-          default: []
+          default: [],
         },
       },
       conceptEmail: {
@@ -116,7 +115,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         inzendingPath: {
           type: 'string',
-          default: "/PATH/TO/PLAN/[[resourceId]]",
+          default: '/PATH/TO/PLAN/[[resourceId]]',
         },
         template: {
           type: 'string',
@@ -124,7 +123,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         attachments: {
           type: 'arrayOfStrings',
-          default: []
+          default: [],
         },
       },
       conceptToPublishedEmail: {
@@ -138,7 +137,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         inzendingPath: {
           type: 'string',
-          default: "/PATH/TO/PLAN/[[resourceId]]",
+          default: '/PATH/TO/PLAN/[[resourceId]]',
         },
         template: {
           type: 'string',
@@ -146,13 +145,14 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         attachments: {
           type: 'arrayOfStrings',
-          default: []
+          default: [],
         },
       },
     },
   },
 
-  styling: { // used by emails
+  styling: {
+    // used by emails
     type: 'object',
     subset: {
       logo: {
@@ -160,6 +160,5 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         default: '',
       },
     },
-  }
-
-}
+  },
+};

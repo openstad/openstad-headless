@@ -1,71 +1,80 @@
-import React, { FC, useState, useEffect } from "react";
+import { FormValue } from '@openstad-headless/form/src/form';
+import { Spacer } from '@openstad-headless/ui/src';
 import {
-    FormField,
-    FormFieldDescription,
-    FormLabel,
-    Paragraph,
-    Textbox
-} from "@utrecht/component-library-react";
-import {Spacer } from '@openstad-headless/ui/src';
+  FormField,
+  FormFieldDescription,
+  FormLabel,
+  Paragraph,
+  Textbox,
+} from '@utrecht/component-library-react';
+import React, { FC, useEffect, useState } from 'react';
+
+import { InfoImage } from '../../infoImage';
+import RteContent from '../../rte-formatting/rte-content';
 import './style.css';
-import { FormValue } from "@openstad-headless/form/src/form";
-import {InfoImage} from "../../infoImage";
-import RteContent from "../../rte-formatting/rte-content";
 
 export type NumberInputProps = {
-    title: string;
-    overrideDefaultValue?: FormValue;
-    description?: string;
-    requiredWarning?: string;
-    fieldKey: string;
-    defaultValue?: string | number;
-    disabled?: boolean;
-    onChange?: (e: { name: string, value: FormValue }, triggerSetLastKey?: boolean) => void;
-    reset?: (resetFn: () => void) => void;
-    format?: boolean;
-    prepend?: string;
-    append?: string;
-    type?: string;
-    placeholder?: string;
-    randomId?: string;
-    fieldInvalid?: boolean;
-    prevPageText?: string;
-    nextPageText?: string;
-    fieldOptions?: { value: string; label: string }[];
-    images?: Array<{
-        url: string;
-        name?: string;
-        imageAlt?: string;
-        imageDescription?: string;
-    }>;
-    createImageSlider?: boolean;
-    imageClickable?: boolean;
-    infoImage?: string;
-}
+  title: string;
+  overrideDefaultValue?: FormValue;
+  description?: string;
+  requiredWarning?: string;
+  fieldKey: string;
+  defaultValue?: string | number;
+  disabled?: boolean;
+  onChange?: (
+    e: { name: string; value: FormValue },
+    triggerSetLastKey?: boolean
+  ) => void;
+  reset?: (resetFn: () => void) => void;
+  format?: boolean;
+  prepend?: string;
+  append?: string;
+  type?: string;
+  placeholder?: string;
+  randomId?: string;
+  fieldInvalid?: boolean;
+  prevPageText?: string;
+  nextPageText?: string;
+  fieldOptions?: { value: string; label: string }[];
+  images?: Array<{
+    url: string;
+    name?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+  }>;
+  createImageSlider?: boolean;
+  imageClickable?: boolean;
+  infoImage?: string;
+};
 
 const NumberInput: FC<NumberInputProps> = ({
-    title,
-    description,
-    fieldKey,
-    defaultValue = '',
-    onChange,
-    disabled = false,
-    reset,
-    format = false,
-    prepend,
-    append,
-    placeholder = '',
-    randomId = '',
-    fieldInvalid = false,
-    overrideDefaultValue,
-    infoImage,
-    images = [],
-    createImageSlider = false,
-    imageClickable = false,
+  title,
+  description,
+  fieldKey,
+  defaultValue = '',
+  onChange,
+  disabled = false,
+  reset,
+  format = false,
+  prepend,
+  append,
+  placeholder = '',
+  randomId = '',
+  fieldInvalid = false,
+  overrideDefaultValue,
+  infoImage,
+  images = [],
+  createImageSlider = false,
+  imageClickable = false,
 }) => {
-  const initialValue = overrideDefaultValue !== undefined ? overrideDefaultValue as string : defaultValue;
+  const initialValue =
+    overrideDefaultValue !== undefined
+      ? (overrideDefaultValue as string)
+      : defaultValue;
 
-  const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  const randomID =
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15);
   const [value, setValue] = useState(initialValue);
   const MAX_VALUE = 1_000_000_000_000;
 
@@ -76,18 +85,18 @@ const NumberInput: FC<NumberInputProps> = ({
   }, [reset, initialValue]);
 
   const formatNumber = (num: string) => {
-    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value.replace(/\D/g, "").replace(/^0+/, "");
+    let inputValue = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
 
-    if (inputValue === "") {
-      setValue("");
+    if (inputValue === '') {
+      setValue('');
       if (onChange) {
         onChange({
           name: fieldKey,
-          value: "",
+          value: '',
         });
       }
       return;
@@ -104,7 +113,7 @@ const NumberInput: FC<NumberInputProps> = ({
     if (onChange) {
       onChange({
         name: fieldKey,
-        value: (numericValue).toString(),
+        value: numericValue.toString(),
       });
     }
   };
@@ -114,7 +123,11 @@ const NumberInput: FC<NumberInputProps> = ({
       {title && (
         <Paragraph className="utrecht-form-field__label">
           <FormLabel htmlFor={randomID}>
-            <RteContent content={title} unwrapSingleRootDiv={true} forceInline={true} />
+            <RteContent
+              content={title}
+              unwrapSingleRootDiv={true}
+              forceInline={true}
+            />
           </FormLabel>
         </Paragraph>
       )}
@@ -123,7 +136,7 @@ const NumberInput: FC<NumberInputProps> = ({
           <FormFieldDescription>
             <RteContent content={description} unwrapSingleRootDiv={true} />
           </FormFieldDescription>
-          <Spacer size={0.5}/>
+          <Spacer size={0.5} />
         </>
       )}
 
@@ -132,11 +145,13 @@ const NumberInput: FC<NumberInputProps> = ({
         images: images,
         createImageSlider: createImageSlider,
         addSpacer: !!infoImage,
-        imageClickable: imageClickable
+        imageClickable: imageClickable,
       })}
 
       <div className={`utrecht-form-field__input`}>
-        {prepend && <span className="utrecht-form-field__prepend">{prepend}</span>}
+        {prepend && (
+          <span className="utrecht-form-field__prepend">{prepend}</span>
+        )}
         <Textbox
           id={randomID}
           name={fieldKey}
@@ -145,16 +160,20 @@ const NumberInput: FC<NumberInputProps> = ({
           onChange={handleChange}
           onPaste={(e) => {
             e.preventDefault();
-            let pastedData = e.clipboardData.getData("text").replace(/\D/g, "");
+            let pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
             let numericValue = parseInt(pastedData, 10);
             if (numericValue > MAX_VALUE) numericValue = MAX_VALUE;
 
-            setValue(format ? formatNumber(numericValue.toString()) : numericValue.toString());
+            setValue(
+              format
+                ? formatNumber(numericValue.toString())
+                : numericValue.toString()
+            );
 
             if (onChange) {
               onChange({
                 name: fieldKey,
-                value: (numericValue).toString(),
+                value: numericValue.toString(),
               });
             }
           }}

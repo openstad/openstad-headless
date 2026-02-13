@@ -1,4 +1,17 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,24 +19,11 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetResourceDetailGeneral from './general';
-import WidgetResourceDetailDisplay from './display';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
-
-import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
-import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourceDetailDisplay from './display';
+import WidgetResourceDetailGeneral from './general';
 
-import WidgetPreview from '@/components/widget-preview';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetPublish from '@/components/widget-publish';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -38,7 +38,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
       projectId,
     });
 
-  const totalPropPackageMap: ResourceOverviewMapWidgetProps & EditFieldProps<ResourceOverviewMapWidgetProps> = {
+  const totalPropPackageMap: ResourceOverviewMapWidgetProps &
+    EditFieldProps<ResourceOverviewMapWidgetProps> = {
     ...(widget?.config || {}),
     ...(previewConfig || {}),
     marker: {
@@ -137,14 +138,12 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   <TabsTrigger value="button">Knoppen</TabsTrigger>
                 </TabsList>
 
-
                 <TabsContent value="map" className="p-0">
                   <WidgetResourcesMapMap {...totalPropPackageMap} />
                 </TabsContent>
                 <TabsContent value="button" className="p-0">
                   <WidgetResourcesMapButtons {...totalPropPackageMap} />
                 </TabsContent>
-
               </Tabs>
             </TabsContent>
             <TabsContent value="publish" className="p-0">
@@ -163,7 +162,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             )}
           </div>
         </div>
-      </PageLayout >
-    </div >
+      </PageLayout>
+    </div>
   );
 }

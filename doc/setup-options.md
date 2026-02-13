@@ -1,6 +1,7 @@
 ## Setup options
 
 The setup scripts (see the [setup doc](./setup.md)) create configurations for the different servers based on a very simple set of environment variables. Create an .env file with the following contents:
+
 ```
 AUTH_FIRST_LOGIN_CODE=CREATEACODE
 
@@ -113,6 +114,7 @@ IMAGE_THROTTLE_CC_REQUESTS = 100
 ```
 
 ## Phone hash salt (`AUTH_PHONE_HASH_SALT`) (2025-06-30)
+
 Due to switching from `md5` to `sha256` for hashing phone numbers, the `AUTH_PHONE_HASH_SALT` environment variable is now used.
 Preferably this should be a string of at least 32 characters. You can generate it using the `generateRandomToken` function or any other secure random string generator.
 The salt should be kept secret and not shared with anyone, to ensure the security of the phone number hashing process.

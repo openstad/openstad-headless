@@ -8,7 +8,6 @@
  * Upper box that contains the title Authorization Server, the UserName, and Password fields
  */
 .upper-box {
-
   width: 350px;
 
   border-top: 1px solid;
@@ -56,7 +55,7 @@
    * Gradient calculated from gradient calculator of
    * http://gradients.glrzad.com/
    */
-   background: white;
+  background: white;
 }
 
 /**

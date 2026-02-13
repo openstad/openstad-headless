@@ -1,7 +1,7 @@
 $sg-patterns: false;
 
-@import "functions";
-@import "mixins";
+@import 'functions';
+@import 'mixins';
 
 $media-type: all;
 
@@ -56,60 +56,60 @@ $print-color-white: #fff;
 $print-color-yellow: rgb(255, 242, 0);
 
 $colors: (
-  "black": $color-black,
-  "darkblue": $color-darkblue,
-  "darkgreen": $color-darkgreen,
-  "darkgrey": $color-darkgrey,
-  "text-darkgrey": $color-text-darkgrey,
-  "text-mediumgrey": $color-text-mediumgrey,
-  "green": $color-green,
-  "mediumgrey": $color-mediumgrey,
-  "grey": $color-grey,
-  "lightblue": $color-lightblue,
-  "lightgrey": $color-lightgrey,
-  "magenta": $color-magenta,
-  "orange": $color-orange,
-  "deeppurple": $color-deeppurple,
-  "purple": $color-purple,
-  "red": $color-red,
-  "mediumdarkgrey": $color-mediumdarkgrey,
-  "superdarkgrey": $color-superdarkgrey,
-  "superlightgrey": $color-superlightgrey,
-  "white": $color-white,
-  "lightyellow": $color-lightyellow,
-  "yellow": $color-yellow
+  'black': $color-black,
+  'darkblue': $color-darkblue,
+  'darkgreen': $color-darkgreen,
+  'darkgrey': $color-darkgrey,
+  'text-darkgrey': $color-text-darkgrey,
+  'text-mediumgrey': $color-text-mediumgrey,
+  'green': $color-green,
+  'mediumgrey': $color-mediumgrey,
+  'grey': $color-grey,
+  'lightblue': $color-lightblue,
+  'lightgrey': $color-lightgrey,
+  'magenta': $color-magenta,
+  'orange': $color-orange,
+  'deeppurple': $color-deeppurple,
+  'purple': $color-purple,
+  'red': $color-red,
+  'mediumdarkgrey': $color-mediumdarkgrey,
+  'superdarkgrey': $color-superdarkgrey,
+  'superlightgrey': $color-superlightgrey,
+  'white': $color-white,
+  'lightyellow': $color-lightyellow,
+  'yellow': $color-yellow,
 );
 
 $print-colors: (
-  "black": $print-color-black,
-  "darkblue": $print-color-darkblue,
-  "darkgreen": $print-color-darkgreen,
-  "darkgrey": $print-color-darkgrey,
-  "text-darkgrey": $print-color-text-darkgrey,
-  "text-mediumgrey": $print-color-text-mediumgrey,
-  "green": $print-color-green,
-  "mediumgrey": $print-color-mediumgrey,
-  "grey": $print-color-grey,
-  "lightblue": $print-color-lightblue,
-  "lightgrey": $print-color-lightgrey,
-  "magenta": $print-color-magenta,
-  "orange": $print-color-orange,
-  "purple": $print-color-purple,
-  "red": $print-color-red,
-  "mediumdarkgrey": $print-color-mediumdarkgrey,
-  "superdarkgrey": $print-color-superdarkgrey,
-  "superlightgrey": $print-color-superlightgrey,
-  "white": $print-color-white,
-  "lightyellow": $print-color-lightyellow,
-  "yellow": $print-color-yellow
+  'black': $print-color-black,
+  'darkblue': $print-color-darkblue,
+  'darkgreen': $print-color-darkgreen,
+  'darkgrey': $print-color-darkgrey,
+  'text-darkgrey': $print-color-text-darkgrey,
+  'text-mediumgrey': $print-color-text-mediumgrey,
+  'green': $print-color-green,
+  'mediumgrey': $print-color-mediumgrey,
+  'grey': $print-color-grey,
+  'lightblue': $print-color-lightblue,
+  'lightgrey': $print-color-lightgrey,
+  'magenta': $print-color-magenta,
+  'orange': $print-color-orange,
+  'purple': $print-color-purple,
+  'red': $print-color-red,
+  'mediumdarkgrey': $print-color-mediumdarkgrey,
+  'superdarkgrey': $print-color-superdarkgrey,
+  'superlightgrey': $print-color-superlightgrey,
+  'white': $print-color-white,
+  'lightyellow': $print-color-lightyellow,
+  'yellow': $print-color-yellow,
 );
 
 $bodybg-grey: #e5e5e5;
 $buttonbg-tertiair-hover: $color-white;
 
-$screenfont: "Avenir Next W01", verdana, sans-serif;
-$printfont-text: "Avenir W01", verdana, sans-serif;
-$printfont-heading: "Avenir W01", arial, sans-serif;
+$screenfont: 'Avenir Next W01', verdana, sans-serif;
+$printfont-text: 'Avenir W01', verdana, sans-serif;
+$printfont-heading: 'Avenir W01', arial, sans-serif;
 
 $rowheight: 44px;
 $button-lineheight: 1em;

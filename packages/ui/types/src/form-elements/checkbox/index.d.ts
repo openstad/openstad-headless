@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { FormValue } from "@openstad-headless/form/src/form";
+import { FormValue } from '@openstad-headless/form/src/form';
+import { FC } from 'react';
 export type CheckboxFieldProps = {
     title: string;
     overrideDefaultValue?: FormValue;

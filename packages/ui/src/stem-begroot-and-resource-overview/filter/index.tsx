@@ -1,15 +1,16 @@
 import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
-import React, { useState, useEffect, useRef } from 'react';
+import { IconButton } from '@openstad-headless/ui/src';
+import '@utrecht/component-library-css';
+import { Button, FormLabel } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDebounce } from 'rooks';
+
+import PostcodeAutoFill from '../../location';
+import './index.css';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
-import './index.css';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Button, FormLabel } from "@utrecht/component-library-react";
-import { IconButton } from '@openstad-headless/ui/src';
-import PostcodeAutoFill from "../../location";
 type Filter = {
   tags: Array<number>;
   search: { text: string };
@@ -19,11 +20,13 @@ type Filter = {
   location: PostcodeAutoFillLocation;
 };
 
-export type PostcodeAutoFillLocation = {
-  lat: string;
-  lng: string;
-  proximity?: number;
-} | undefined;
+export type PostcodeAutoFillLocation =
+  | {
+      lat: string;
+      lng: string;
+      proximity?: number;
+    }
+  | undefined;
 
 type Props = {
   className?: string;
@@ -37,13 +40,24 @@ type Props = {
   displaySearch: boolean;
   itemsPerPage?: number;
   displayTagFilters: boolean;
-  tagGroups?: Array<{type: string; label?: string; multiple: boolean; projectId?: any, inlineOptions?: boolean }>;
+  tagGroups?: Array<{
+    type: string;
+    label?: string;
+    multiple: boolean;
+    projectId?: any;
+    inlineOptions?: boolean;
+  }>;
   tagsLimitation?: Array<number> | { [key: string]: number[] };
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
   showActiveTags?: boolean;
-  preFilterTags?: Array<{ id: number; type: string; label: string; name: string }>;
+  preFilterTags?: Array<{
+    id: number;
+    type: string;
+    label: string;
+    name: string;
+  }>;
   displayLocationFilter?: boolean;
   displayCollapsibleFilter?: boolean;
 };
@@ -66,9 +80,10 @@ export function Filters({
     ? preFilterTags.map((tag) => Number(tag.id)).filter((id) => !isNaN(id))
     : [];
 
-  const defaultTags = preFilterTags && preFilterTags.length > 0
-    ? preFilterTags.map((tag) => ({ ...tag, label: tag.name }))
-    : [];
+  const defaultTags =
+    preFilterTags && preFilterTags.length > 0
+      ? preFilterTags.map((tag) => ({ ...tag, label: tag.name }))
+      : [];
 
   const defaultFilter: Filter = {
     tags: preFilterTagIds,
@@ -90,17 +105,28 @@ export function Filters({
     });
   }
 
-  const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>(defaultSelectedOptions);
+  const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>(
+    defaultSelectedOptions
+  );
   const [filter, setFilter] = useState<Filter>(defaultFilter);
-  const [selectedOptions, setSelected] = useState<{ [key: string]: any }>(defaultSelectedOptions);
-  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
-  const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
-  const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState<boolean>(false);
-  const [tagsReadyForParameter, setTagsReadyForParameter] = useState<Array<string | number>>(preFilterTagIds);
+  const [selectedOptions, setSelected] = useState<{ [key: string]: any }>(
+    defaultSelectedOptions
+  );
+  const [newActiveTagsDraft, setNewActiveTagsDraft] =
+    useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
+  const [activeTags, setActiveTags] =
+    useState<Array<{ type: string; id: number; label: string }>>(defaultTags);
+  const [stopUsingDefaultValue, setStopUsingDefaultValue] =
+    useState<boolean>(false);
+  const [tagsReadyForParameter, setTagsReadyForParameter] =
+    useState<Array<string | number>>(preFilterTagIds);
   const [activeFilter, setActiveFilter] = useState<Filter>(defaultFilter);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [sortValue, setSortValue] = useState<string>(props.defaultSorting || 'createdAt_desc');
-  const [locationValue, setLocationValue] = useState<PostcodeAutoFillLocation>(undefined);
+  const [sortValue, setSortValue] = useState<string>(
+    props.defaultSorting || 'createdAt_desc'
+  );
+  const [locationValue, setLocationValue] =
+    useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
   const [disableTransition, setDisableTransition] = useState(true);
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
@@ -126,7 +152,7 @@ export function Filters({
     } else {
       url.searchParams.delete('tagIds');
     }
-    
+
     window.history.replaceState(null, '', url);
   }, [tagsReadyForParameter]);
 
@@ -180,7 +206,12 @@ export function Filters({
     }
   }
 
-  const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel: string, forceSelected?: boolean) => {
+  const updateTagListMultiple = (
+    tagType: string,
+    updatedTag: number,
+    updatedLabel: string,
+    forceSelected?: boolean
+  ) => {
     let selectedTags;
     setSelected((prevSelectedOptions) => {
       const existingTags = prevSelectedOptions[tagType] || [];
@@ -203,8 +234,13 @@ export function Filters({
 
     let draftTags;
     setNewActiveTagsDraft((prevSelectedOptions) => {
-      const selectedDraft: { type: string, id: number, label: string }[] = [...(prevSelectedOptions || [])];
-      const tagIndex = selectedDraft.findIndex((tag: { type: string, id: number, label: string }) => tag.id === updatedTag);
+      const selectedDraft: { type: string; id: number; label: string }[] = [
+        ...(prevSelectedOptions || []),
+      ];
+      const tagIndex = selectedDraft.findIndex(
+        (tag: { type: string; id: number; label: string }) =>
+          tag.id === updatedTag
+      );
 
       if (tagIndex !== -1) {
         if (!forceSelected) {
@@ -216,7 +252,7 @@ export function Filters({
       }
 
       if (forceSelected) {
-        setActiveTags(selectedDraft)
+        setActiveTags(selectedDraft);
       }
 
       draftTags = selectedDraft;
@@ -224,13 +260,19 @@ export function Filters({
     });
 
     if (autoApply) {
-      const newTags = Object.values(selectedTags || {}).flat().map(Number);
+      const newTags = Object.values(selectedTags || {})
+        .flat()
+        .map(Number);
       const newFilter = { ...filter, tags: newTags };
       handleSubmit(undefined, newFilter, draftTags);
     }
   };
 
-  const updateTagListSingle = (tagType: string, updatedTag: string, updatedLabel?: string) => {
+  const updateTagListSingle = (
+    tagType: string,
+    updatedTag: string,
+    updatedLabel?: string
+  ) => {
     const existingTags = selectedOptions[tagType];
     let selected = [...(existingTags || [])];
 
@@ -238,14 +280,21 @@ export function Filters({
     if (updatedTag === '') {
       selected = [];
 
-      draftTags = (newActiveTagsDraft || []).filter(tag => tag.type !== tagType);
+      draftTags = (newActiveTagsDraft || []).filter(
+        (tag) => tag.type !== tagType
+      );
       setNewActiveTagsDraft(draftTags);
     } else {
       selected = [updatedTag];
 
-      const filtered = (newActiveTagsDraft || []).filter(tag => tag.type !== tagType);
+      const filtered = (newActiveTagsDraft || []).filter(
+        (tag) => tag.type !== tagType
+      );
       const label = updatedLabel || '';
-      draftTags = [...filtered, { id: Number(updatedTag), label: label, type: tagType }];
+      draftTags = [
+        ...filtered,
+        { id: Number(updatedTag), label: label, type: tagType },
+      ];
       setNewActiveTagsDraft(draftTags);
     }
 
@@ -254,23 +303,28 @@ export function Filters({
     setTags(tagType, selected);
 
     if (autoApply) {
-      const newTags = Object.values(selectedTags || {}).flat().map(Number);
+      const newTags = Object.values(selectedTags || {})
+        .flat()
+        .map(Number);
       const newFilter = { ...filter, tags: newTags };
       handleSubmit(undefined, newFilter, draftTags);
     }
-  }
+  };
 
   function removeActiveTag(tagType: string, tagId: number) {
-    const updatedTags = newActiveTagsDraft.filter(tag => !(tag.type === tagType && tag.id === tagId));
+    const updatedTags = newActiveTagsDraft.filter(
+      (tag) => !(tag.type === tagType && tag.id === tagId)
+    );
     setNewActiveTagsDraft(updatedTags);
 
     const updatedSelectedOptions = {
       ...selectedOptions,
       [tagType]: Array.isArray(selectedOptions[tagType])
         ? (selectedOptions[tagType] || []).filter((id: number | string) => {
-          const isMatch = (typeof id === 'number' ? id === tagId : Number(id) === tagId);
-          return !isMatch;
-        })
+            const isMatch =
+              typeof id === 'number' ? id === tagId : Number(id) === tagId;
+            return !isMatch;
+          })
         : [],
     };
     setSelected(updatedSelectedOptions);
@@ -278,7 +332,7 @@ export function Filters({
 
     const updatedFilter = {
       ...filter,
-      tags: Object.values(updatedSelectedOptions).flat()
+      tags: Object.values(updatedSelectedOptions).flat(),
     };
 
     setFilter(updatedFilter);
@@ -311,8 +365,14 @@ export function Filters({
     }
   };
 
-
-  const sortOptionsOrder = ['createdAt_desc', 'createdAt_asc', 'title_asc', 'title_desc', 'votes_desc', 'votes_asc'];
+  const sortOptionsOrder = [
+    'createdAt_desc',
+    'createdAt_asc',
+    'title_asc',
+    'title_desc',
+    'votes_desc',
+    'votes_asc',
+  ];
   sorting = sorting?.sort((a, b) => {
     const indexA = sortOptionsOrder.indexOf(a.value);
     const indexB = sortOptionsOrder.indexOf(b.value);
@@ -322,12 +382,15 @@ export function Filters({
   const filterGroup = () => {
     return (
       <>
-        {(props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
+        {props.displayTagFilters &&
+        tagGroups &&
+        Array.isArray(tagGroups) &&
+        tagGroups.length > 0 ? (
           <>
             {tagGroups.map((tagGroup, index) => {
               const limitedTags = Array.isArray(tagsLimitation)
                 ? tagsLimitation
-                : (tagsLimitation && tagsLimitation[tagGroup.type])
+                : tagsLimitation && tagsLimitation[tagGroup.type]
                   ? tagsLimitation[tagGroup.type]
                   : [];
 
@@ -340,8 +403,17 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onlyIncludeIds={limitedTags}
-                    onUpdateFilter={(updatedTag, updatedLabel, forceSelected) => {
-                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel || '', forceSelected || false);
+                    onUpdateFilter={(
+                      updatedTag,
+                      updatedLabel,
+                      forceSelected
+                    ) => {
+                      updateTagListMultiple(
+                        tagGroup.type,
+                        updatedTag,
+                        updatedLabel || '',
+                        forceSelected || false
+                      );
                     }}
                     tagGroupProjectId={tagGroup.projectId || ''}
                     preFilterTags={preFilterTagIds}
@@ -360,13 +432,21 @@ export function Filters({
                     title={`Selecteer een item`}
                     onlyIncludeIds={limitedTags}
                     onUpdateFilter={(updatedTag, updatedLabel) =>
-                      updateTagListSingle(tagGroup.type, updatedTag, updatedLabel)
+                      updateTagListSingle(
+                        tagGroup.type,
+                        updatedTag,
+                        updatedLabel
+                      )
                     }
                     tagGroupProjectId={tagGroup.projectId || ''}
                     preFilterTags={preFilterTagIds}
                     parentStopUsingDefaultValue={stopUsingDefaultValue}
                     inlineOptions={tagGroup.inlineOptions}
-                    valueSelected={selectedOptions[tagGroup.type]?.length ? String(selectedOptions[tagGroup.type]?.[0]) : ''}
+                    valueSelected={
+                      selectedOptions[tagGroup.type]?.length
+                        ? String(selectedOptions[tagGroup.type]?.[0])
+                        : ''
+                    }
                     removeActiveTag={removeActiveTag}
                     resetCounter={resetCounter}
                     setResetCounter={setResetCounter}
@@ -399,11 +479,13 @@ export function Filters({
           />
         ) : null}
 
-        <div className='button-group'>
+        <div className="button-group">
           <Button
-            appearance='secondary-action-button'
+            appearance="secondary-action-button"
             onClick={() => {
-              const filterParent = document.querySelector('#stem-begroot-filter');
+              const filterParent = document.querySelector(
+                '#stem-begroot-filter'
+              );
 
               const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
                 filterParent?.querySelectorAll(':scope select');
@@ -430,23 +512,34 @@ export function Filters({
               onUpdateFilter && onUpdateFilter(defaultFilter);
               setLocation(undefined);
               handleSubmit(undefined, defaultFilter, []);
-              setResetCounter(currCount => currCount + 1);
+              setResetCounter((currCount) => currCount + 1);
             }}
-            test-id={"filter-reset-button"}
-          >
+            test-id={'filter-reset-button'}>
             {props.resetText}
           </Button>
           {!autoApply && (
-            <Button type='submit' appearance='primary-action-button' test-id={"filter-apply-button"}>{props.applyText}</Button>
+            <Button
+              type="submit"
+              appearance="primary-action-button"
+              test-id={'filter-apply-button'}>
+              {props.applyText}
+            </Button>
           )}
         </div>
       </>
-    )
-  }
+    );
+  };
 
-  return !(props.displayTagFilters || props.displaySearch || props.displaySorting || props.displayLocationFilter) ? null : (
+  return !(
+    props.displayTagFilters ||
+    props.displaySearch ||
+    props.displaySorting ||
+    props.displayLocationFilter
+  ) ? null : (
     <section id="stem-begroot-filter">
-      <form className={`osc-resources-filter ${className}`} onSubmit={!autoApply ? handleSubmit : undefined}>
+      <form
+        className={`osc-resources-filter ${className}`}
+        onSubmit={!autoApply ? handleSubmit : undefined}>
         {props.displaySearch ? (
           <div className="form-element">
             <FormLabel htmlFor="search">Zoeken</FormLabel>
@@ -458,12 +551,12 @@ export function Filters({
               }}
               className="osc-filter-search-bar"
               placeholder={props.searchPlaceholder}
-              id='search'
+              id="search"
             />
           </div>
         ) : null}
-        {(props.displaySearch && displayCollapsibleFilter) ? (
-          <button type='submit' className="apply-filters-button">
+        {props.displaySearch && displayCollapsibleFilter ? (
+          <button type="submit" className="apply-filters-button">
             <span className="filter-icon"></span>
             <span className="sr-only">Filters toepassen</span>
           </button>
@@ -473,12 +566,13 @@ export function Filters({
           <>
             <Button
               className="toggle-filters-button"
-              appearance='primary-action-button'
+              appearance="primary-action-button"
               type="button"
               aria-expanded={filtersVisible ? 'true' : 'false'}
               aria-controls="filters-container"
               onClick={(e) => {
-                if (!filtersVisible && disableTransition) setDisableTransition(false);
+                if (!filtersVisible && disableTransition)
+                  setDisableTransition(false);
                 setFiltersVisible(!filtersVisible);
               }}>
               <span className="filter-icon"></span>
@@ -488,42 +582,48 @@ export function Filters({
               id="filters-container"
               className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
-              onClick={(e) => { setFiltersVisible(false) }}
-            >
+              onClick={(e) => {
+                setFiltersVisible(false);
+              }}>
               <div
                 className="filters-wrapper"
                 ref={filtersWrapperRef}
-                onClick={(e) => { e.stopPropagation(); }}>
-                <button className="close-filters-button" type="button" onClick={(e) => { setFiltersVisible(false) }}>
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}>
+                <button
+                  className="close-filters-button"
+                  type="button"
+                  onClick={(e) => {
+                    setFiltersVisible(false);
+                  }}>
                   <span className="close-icon"></span>
                   <span className="sr-only">Sluit filters</span>
                 </button>
-                <div className="filters-content">
-                  {filterGroup()}
-                </div>
+                <div className="filters-content">{filterGroup()}</div>
               </div>
             </div>
           </>
         ) : (
           filterGroup()
         )}
-
-
-
       </form>
 
-      {(activeTags.length > 0 && showActiveTags) && (
+      {activeTags.length > 0 && showActiveTags && (
         <div className="active-tags">
           <ul>
-            {activeTags.map(tag => (
-              <li key={`${tag.type}-${tag.id}`} className={tag.type} role="status">
+            {activeTags.map((tag) => (
+              <li
+                key={`${tag.type}-${tag.id}`}
+                className={tag.type}
+                role="status">
                 {tag.label}
                 <IconButton
                   onClick={() => removeActiveTag(tag.type, tag.id)}
                   className="subtle-button"
                   icon="ri-close-line"
                   iconOnly={true}
-                  text='Filter verwijderen'
+                  text="Filter verwijderen"
                 />
               </li>
             ))}
@@ -539,27 +639,32 @@ export function Filters({
             {props.displaySearch && (
               <p>Zoekterm: {activeFilter.search.text || 'geen'}</p>
             )}
-            {props.displaySorting && (() => {
-              const sortLabel = sorting.find(sort => sort.value === activeFilter.sort)?.label || activeFilter.sort;
-              return <p>Sorteer op: {sortLabel}</p>;
-            })()}
+            {props.displaySorting &&
+              (() => {
+                const sortLabel =
+                  sorting.find((sort) => sort.value === activeFilter.sort)
+                    ?.label || activeFilter.sort;
+                return <p>Sorteer op: {sortLabel}</p>;
+              })()}
 
-            {props.displayLocationFilter && (
-              locationValue && locationValue.lat && locationValue.lng ? (
+            {props.displayLocationFilter &&
+              (locationValue && locationValue.lat && locationValue.lng ? (
                 <p>
-                  Locatie filter: Breedtegraad {locationValue.lat}, Lengtegraad {locationValue.lng}
-                  {locationValue.proximity ? `, Straal: ${locationValue.proximity}m` : ''}
+                  Locatie filter: Breedtegraad {locationValue.lat}, Lengtegraad{' '}
+                  {locationValue.lng}
+                  {locationValue.proximity
+                    ? `, Straal: ${locationValue.proximity}m`
+                    : ''}
                 </p>
               ) : (
                 <p>Locatie filter: geen</p>
-              )
-            )}
+              ))}
             {props.displayTagFilters && (
               <>
                 <p>Tags: {activeFilter.tags.length > 0 ? '' : 'geen'}</p>
                 {activeFilter.tags.length > 0 && (
                   <ul>
-                    {activeTags.map(tag => (
+                    {activeTags.map((tag) => (
                       <li key={`${tag.type}-${tag.id}`}> {tag.label} </li>
                     ))}
                   </ul>
@@ -569,7 +674,6 @@ export function Filters({
           </>
         </div>
       )}
-
     </section>
   );
 }

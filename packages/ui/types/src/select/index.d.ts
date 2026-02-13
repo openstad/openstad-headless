@@ -1,7 +1,7 @@
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 import './index.css';
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
 declare const Select: React.ForwardRefExoticComponent<{
     onValueChange?: (resource: any, label?: string) => void;
     options?: Array<{

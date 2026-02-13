@@ -1,72 +1,74 @@
 const express = require('express');
-const createError = require('http-errors')
+const createError = require('http-errors');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
-const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const { sequelize } = require('../../../src/db');
 
-let router = express.Router({mergeParams: true});
+let router = express.Router({ mergeParams: true });
 
 // for all get requests
+router.all('*', function (req, res, next) {
+  return next();
+});
+
 router
-    .all('*', function(req, res, next) {
+  .route('/total')
 
-        return next();
+  // count votes
+  .get(rateLimiter(), async function (req, res, next) {
+    let isViewable =
+      req.project &&
+      req.project.config &&
+      req.project.config.votes &&
+      req.project.config.votes.isViewable;
+    isViewable = isViewable || hasRole(req.user, 'editor');
+    if (!isViewable)
+      return next(createError(401, 'Je kunt deze stats niet bekijken'));
 
-    })
+    let query =
+      'SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND  (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?';
+    let bindvars = [req.params.projectId];
 
-router.route('/total')
+    if (req.query.opinion) {
+      query += ' AND votes.opinion=?';
+      bindvars.push(req.query.opinion);
+    }
 
-    // count votes
-    .get( rateLimiter(), async function(req, res, next) {
+    try {
+      const [rows] = await sequelize.query(query, {
+        replacements: bindvars,
+        type: sequelize.QueryTypes.SELECT,
+      });
 
-        let isViewable = req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable;
-        isViewable = isViewable || hasRole( req.user, 'editor')
-        if (!isViewable) return next(createError(401, 'Je kunt deze stats niet bekijken'));
+      let counted = rows?.counted ?? 0;
 
-        let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND  (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?";
-        let bindvars = [req.params.projectId]
+      res.json({ count: counted });
+    } catch (err) {
+      next(err);
+    }
+  });
 
-        if (req.query.opinion) {
-            query += " AND votes.opinion=?"
-            bindvars.push(req.query.opinion);
-        }
+router
+  .route('/no-of-users')
 
-        try {
-            const [rows] = await sequelize.query(query, {
-                replacements: bindvars,
-                type: sequelize.QueryTypes.SELECT
-            })
-            
-            let counted = rows?.counted ?? 0;
+  // count unique users who voted
+  .get(rateLimiter(), async function (req, res, next) {
+    let query =
+      'SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE resources.projectId=? AND votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL';
+    let bindvars = [req.params.projectId];
 
-            res.json({ count: counted })
-        } catch (err) {
-            next(err)
-        }
+    try {
+      const [rows] = await sequelize.query(query, {
+        replacements: bindvars,
+        type: sequelize.QueryTypes.SELECT,
+      });
 
-    })
+      let counted = rows?.counted ?? 0;
 
-
-router.route('/no-of-users')
-
-    // count unique users who voted
-    .get( rateLimiter(), async function(req, res, next) {
-
-        let query = "SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE resources.projectId=? AND votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL";
-        let bindvars = [req.params.projectId]
-
-        try{
-            const [rows] = await sequelize.query(query, {
-                replacements: bindvars,
-                type: sequelize.QueryTypes.SELECT
-            })
-
-            let counted = rows?.counted ?? 0
-
-            res.json({ count: counted })
-        } catch (err) {
-            next(err)
-        }
-    })
+      res.json({ count: counted });
+    } catch (err) {
+      next(err);
+    }
+  });
 
 module.exports = router;

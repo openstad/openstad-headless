@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useAreas(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);

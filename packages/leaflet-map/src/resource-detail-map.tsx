@@ -1,16 +1,15 @@
-import type { PropsWithChildren } from 'react';
-import { loadWidget } from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
-import parseLocation from './lib/parse-location';
-
 import 'leaflet/dist/leaflet.css';
-import './css/base-map.css';
-
-import type { MarkerProps } from './types/marker-props';
-import type {ResourceDetailMapWidgetProps} from './types/resource-detail-map-widget-props';
-import { BaseMap } from './base-map';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
+
 import { getFirstParamNameWithIdValue } from '../../lib/get-resource-id';
+import { loadWidget } from '../../lib/load-widget';
+import { BaseMap } from './base-map';
+import './css/base-map.css';
+import parseLocation from './lib/parse-location';
+import type { MarkerProps } from './types/marker-props';
+import type { ResourceDetailMapWidgetProps } from './types/resource-detail-map-widget-props';
 
 const ResourceDetailMap = ({
   resourceId = undefined,
@@ -20,7 +19,6 @@ const ResourceDetailMap = ({
   resourceIdRelativePath = 'openstadResourceId',
   ...props
 }: PropsWithChildren<ResourceDetailMapWidgetProps>) => {
-
   props.zoom ||= 7;
 
   const datastore = new DataStore({
@@ -28,7 +26,6 @@ const ResourceDetailMap = ({
     api: props.api,
     config: { api: props.api },
   });
-
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -61,16 +58,18 @@ const ResourceDetailMap = ({
   }
 
   const { data: areas } = datastore.useArea({
-    projectId: props.projectId
+    projectId: props.projectId,
   });
 
-
   let areaId = props?.map?.areaId || false;
-  const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
+  const polygon =
+    areaId && Array.isArray(areas) && areas.length > 0
+      ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
+      : [];
 
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
-    maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
+    maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20,
   };
 
   return (

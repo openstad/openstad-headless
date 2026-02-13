@@ -1,4 +1,16 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { extractConfig } from '@/lib/sub-widget-helper';
+import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,29 +18,18 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
-import WidgetPreview from '@/components/widget-preview';
-import WidgetPublish from '@/components/widget-publish';
-import {
-  WithApiUrlProps,
-  withApiUrl,
-} from '@/lib/server-side-props-definition';
-import WidgetResourceOverviewSearch from '../../resourceoverview/[id]/search';
 import WidgetResourceOverviewDisplay from '../../resourceoverview/[id]/display';
 import WidgetResourceOverviewGeneral from '../../resourceoverview/[id]/general';
 import WidgetResourceOverviewInclude from '../../resourceoverview/[id]/include';
 import WidgetResourceOverviewPagination from '../../resourceoverview/[id]/pagination';
+import WidgetResourceOverviewSearch from '../../resourceoverview/[id]/search';
 import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
 import WidgetResourceOverviewTags from '../../resourceoverview/[id]/tags';
-import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
-import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
-import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
-import WidgetResourcesMapDatalayers from '../../resourcesmap/[id]/datalayers';
-import { extractConfig } from '@/lib/sub-widget-helper';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
+import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
+import WidgetResourcesMapDatalayers from '../../resourcesmap/[id]/datalayers';
+import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
 
 export const getServerSideProps = withApiUrl;
 

@@ -1,89 +1,130 @@
 .osc .multi-select {
-    background-color: var(--osc-background);
+  background-color: var(--osc-background);
 }
 
-.osc .multi-select button{
-    width: 100%;
-    justify-content: space-between;
+.osc .multi-select button {
+  width: 100%;
+  justify-content: space-between;
 
-
-    background-color: var(--utrecht-textbox-background-color, var(--utrecht-form-control-background-color));
-    block-size: initial;
-    border-width: var(--utrecht-textbox-border-width, var(--utrecht-form-control-border-width));
-    border-block-end-width: var(--utrecht-textbox-border-bottom-width, var(--utrecht-textbox-border-width, var(--utrecht-form-control-border-width)));
-    border-color: var(--utrecht-textbox-border-color, var(--utrecht-form-control-border-color));
-    border-radius: var(--utrecht-textbox-border-radius, var(--utrecht-form-control-border-radius, 0));
-    border-style: solid;
-    box-sizing: border-box;
-    color: var(--utrecht-textbox-color, var(--utrecht-form-control-color));
-    font-family: var(--utrecht-textbox-font-family, var(--utrecht-form-control-font-family));
-    font-size: var(--utrecht-textbox-font-size, var(--utrecht-form-control-font-size, inherit));
-    font-weight: initial;
-    inline-size: 100%;
-    line-height: var(--utrecht-textbox-line-height, var(--utrecht-form-control-line-height, initial));
-    padding-block-end: var(--utrecht-textbox-padding-block-end, var(--utrecht-form-control-padding-block-end, 0));
-    padding-block-start: var(--utrecht-textbox-padding-block-start, var(--utrecht-form-control-padding-block-start, 0));
-    padding-inline-end: var(--utrecht-textbox-padding-inline-end, var(--utrecht-form-control-padding-inline-end, initial));
-    padding-inline-start: var(--utrecht-textbox-padding-inline-start, var(--utrecht-form-control-padding-inline-start, initial));
-    max-width: none;
-    --utrecht-button-min-block-size: 38px;
-    scale: 1 !important;
+  background-color: var(
+    --utrecht-textbox-background-color,
+    var(--utrecht-form-control-background-color)
+  );
+  block-size: initial;
+  border-width: var(
+    --utrecht-textbox-border-width,
+    var(--utrecht-form-control-border-width)
+  );
+  border-block-end-width: var(
+    --utrecht-textbox-border-bottom-width,
+    var(
+      --utrecht-textbox-border-width,
+      var(--utrecht-form-control-border-width)
+    )
+  );
+  border-color: var(
+    --utrecht-textbox-border-color,
+    var(--utrecht-form-control-border-color)
+  );
+  border-radius: var(
+    --utrecht-textbox-border-radius,
+    var(--utrecht-form-control-border-radius, 0)
+  );
+  border-style: solid;
+  box-sizing: border-box;
+  color: var(--utrecht-textbox-color, var(--utrecht-form-control-color));
+  font-family: var(
+    --utrecht-textbox-font-family,
+    var(--utrecht-form-control-font-family)
+  );
+  font-size: var(
+    --utrecht-textbox-font-size,
+    var(--utrecht-form-control-font-size, inherit)
+  );
+  font-weight: initial;
+  inline-size: 100%;
+  line-height: var(
+    --utrecht-textbox-line-height,
+    var(--utrecht-form-control-line-height, initial)
+  );
+  padding-block-end: var(
+    --utrecht-textbox-padding-block-end,
+    var(--utrecht-form-control-padding-block-end, 0)
+  );
+  padding-block-start: var(
+    --utrecht-textbox-padding-block-start,
+    var(--utrecht-form-control-padding-block-start, 0)
+  );
+  padding-inline-end: var(
+    --utrecht-textbox-padding-inline-end,
+    var(--utrecht-form-control-padding-inline-end, initial)
+  );
+  padding-inline-start: var(
+    --utrecht-textbox-padding-inline-start,
+    var(--utrecht-form-control-padding-inline-start, initial)
+  );
+  max-width: none;
+  --utrecht-button-min-block-size: 38px;
+  scale: 1 !important;
 }
-.osc .multi-select button .icon{
-    height: 0;
+.osc .multi-select button .icon {
+  height: 0;
 }
 .osc .multi-select-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: .25rem 0rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0rem;
 }
 
-.osc .multi-select-header > p{
-   margin: 0 1rem;
-   color: var(--osc-foreground);
+.osc .multi-select-header > p {
+  margin: 0 1rem;
+  color: var(--osc-foreground);
 }
 
 .osc .multi-select-header > .osc-icon {
-    color: var(--osc-foreground);
-    font-weight: lighter;
-    gap: 0; 
+  color: var(--osc-foreground);
+  font-weight: lighter;
+  gap: 0;
 }
 
-.osc .multiselect-container{
-    padding: 1rem;
-    display: grid;
-    grid-gap: 0.5rem;
+.osc .multiselect-container {
+  padding: 1rem;
+  display: grid;
+  grid-gap: 0.5rem;
 }
 
-.osc .multi-select{
-    position: relative;
+.osc .multi-select {
+  position: relative;
 }
 
 .osc .multi-select.multiselect-container--inline {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 .osc .multi-select.multiselect-container--inline .multiselect-container {
-    position: relative;
-    background-color: transparent;
-    padding: 0;
+  position: relative;
+  background-color: transparent;
+  padding: 0;
 }
 
 .osc .multi-select:not(.multiselect-container--inline) .multiselect-container {
-    background: #fff;
-    position: absolute;
-    z-index: 999;
-    width: 100%;
-    max-height: 250px;
-    overflow: auto;
-    box-shadow: 0 0 6px hsl(0deg 0% 0% / 16.08%);
+  background: #fff;
+  position: absolute;
+  z-index: 999;
+  width: 100%;
+  max-height: 250px;
+  overflow: auto;
+  box-shadow: 0 0 6px hsl(0deg 0% 0% / 16.08%);
 }
 
-.osc .multi-select .multiselect-container .utrecht-form-field__label--checkbox{
-    display: flex;
+.osc .multi-select .multiselect-container .utrecht-form-field__label--checkbox {
+  display: flex;
 }
 
-.osc .multi-select .multiselect-container .utrecht-checkbox.utrecht-checkbox--html-input.utrecht-checkbox--custom {
-    order: 0;
+.osc
+  .multi-select
+  .multiselect-container
+  .utrecht-checkbox.utrecht-checkbox--html-input.utrecht-checkbox--custom {
+  order: 0;
 }

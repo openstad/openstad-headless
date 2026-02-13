@@ -1,15 +1,17 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useChoiceGuideResults(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
   let url = `/api/openstad/api/project/${projectNumber}/choicesguide`;
 
-  async function remove(id: string|number, multiple?: boolean, ids?: number[]) {
-    const deleteUrl = multiple
-      ? `${url}/delete`
-      : `${url}/${id}`;
+  async function remove(
+    id: string | number,
+    multiple?: boolean,
+    ids?: number[]
+  ) {
+    const deleteUrl = multiple ? `${url}/delete` : `${url}/${id}`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',

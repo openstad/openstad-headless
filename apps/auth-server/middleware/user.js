@@ -1,12 +1,11 @@
-const { checkSchema, validationResult }  = require('express-validator')
-const db                    = require('../db');
+const { checkSchema, validationResult } = require('express-validator');
+const db = require('../db');
 const userProfileValidation = require('../config/user').validation.profile;
-const bcrypt                = require('bcrypt');
-const saltRounds            = 10;
-const Promise               = require('bluebird');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const Promise = require('bluebird');
 
 exports.withAll = (req, res, next) => {
-
   const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
   const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
   const search = req.query.search ? req.query.search : false;
@@ -16,10 +15,10 @@ exports.withAll = (req, res, next) => {
   if (search) {
     where = {
       [db.Sequelize.Op.or]: [
-        { email: { [db.Sequelize.Op.like]: '%' +search+ '%' } },
-        { name: { [db.Sequelize.Op.like]: '%' +search+ '%' } },
+        { email: { [db.Sequelize.Op.like]: '%' + search + '%' } },
+        { name: { [db.Sequelize.Op.like]: '%' + search + '%' } },
       ],
-    }
+    };
   }
 
   // deze slaat nergens op en heb ik dus verwijderd
@@ -31,27 +30,25 @@ exports.withAll = (req, res, next) => {
     where.email = req.query.email;
   }
 
-  db.User
-    .findAll({ where, limit, offset, order: [['id', 'DESC']] })
+  db.User.findAll({ where, limit, offset, order: [['id', 'DESC']] })
     .then((response) => {
       req.users = response;
       req.users = req.users.map((user) => {
         return user;
-      })
+      });
       req.totalCodeCount = response.length;
       next();
     })
     .catch((err) => {
-      console.log('error', err)
+      console.log('error', err);
       next(err);
     });
-}
+};
 
 exports.withOne = (req, res, next) => {
   const userId = req.body.userId ? req.body.userId : req.params.userId;
-  db.User
-    .scope(['includeUserRoles'])
-    .findOne({ where: { id: userId  }})
+  db.User.scope(['includeUserRoles'])
+    .findOne({ where: { id: userId } })
     .then((user) => {
       req.userObject = user;
       next();
@@ -59,41 +56,38 @@ exports.withOne = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-}
+};
 
 exports.withRoleForClient = (req, res, next) => {
+  db.UserRole.findOne({
+    where: { userId: req.user.id, clientId: req.client.id },
+  })
+    .then((userRole) => {
+      if (userRole) {
+        const roleId = userRole.roleId;
 
-  db.UserRole
-    .findOne({ where: { userId: req.user.id, clientId: req.client.id } })
-     .then((userRole) => {
-
-       if (userRole) {
-         const roleId = userRole.roleId;
-
-         db.Role
-           .findOne({ where: {id: roleId} })
-           .then((role) => {
-             if (role) {
-               req.user.role = role.name;
-             }
-             next();
-           })
-           .catch((err) => {
-             next(err);
-           })
-       } else {
-         next();
-       }
-     })
+        db.Role.findOne({ where: { id: roleId } })
+          .then((role) => {
+            if (role) {
+              req.user.role = role.name;
+            }
+            next();
+          })
+          .catch((err) => {
+            next(err);
+          });
+      } else {
+        next();
+      }
+    })
     .catch((err) => {
       next(err);
     });
-}
+};
 
 exports.withOneByEmail = (req, res, next) => {
   const email = req.body.email ? req.body.email : req.query.email;
-  db.User
-    .findOne({ where: { email: req.body.email } })
+  db.User.findOne({ where: { email: req.body.email } })
     .then((user) => {
       req.userObject = user;
 
@@ -102,11 +96,10 @@ exports.withOneByEmail = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-}
+};
 
-
-exports.validateUser = async(req, res, next) => {
-/*  userFields.forEach ((field) => {
+exports.validateUser = async (req, res, next) => {
+  /*  userFields.forEach ((field) => {
     let fields = req.assert(field.key, field.message)
 
     if (field.required) {
@@ -139,41 +132,74 @@ exports.validateUser = async(req, res, next) => {
   } else {
     next();
   }
-}
+};
 
-exports.create =  (req, res, next) => {
-  let { name, email, streetName, houseNumber, suffix, postcode, accessCode, emailNotificationConsent, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+exports.create = (req, res, next) => {
+  let {
+    name,
+    email,
+    streetName,
+    houseNumber,
+    suffix,
+    postcode,
+    accessCode,
+    emailNotificationConsent,
+    city,
+    phoneNumber,
+    hashedPhoneNumber,
+    password,
+  } = req.body;
 
-  db.User
-    .create({
-      name,
-      email,
-      streetName,
-      houseNumber,
-      suffix,
-      postcode,
-      emailNotificationConsent,
-      accessCode,
-      city,
-      phoneNumber,
-      password: password ? bcrypt.hashSync(password, saltRounds) : null,
-    })
-    .then(user => {
+  db.User.create({
+    name,
+    email,
+    streetName,
+    houseNumber,
+    suffix,
+    postcode,
+    emailNotificationConsent,
+    accessCode,
+    city,
+    phoneNumber,
+    password: password ? bcrypt.hashSync(password, saltRounds) : null,
+  })
+    .then((user) => {
       req.userObject = user;
       next();
     })
     .catch((err) => {
       next(err);
     });
+};
 
-}
-
-exports.update = async(req, res, next) => {
-  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'accessCode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
+exports.update = async (req, res, next) => {
+  const keysToUpdate = [
+    'name',
+    'email',
+    'streetName',
+    'houseNumber',
+    'suffix',
+    'postcode',
+    'accessCode',
+    'city',
+    'phoneNumber',
+    'hashedPhoneNumber',
+    'password',
+    'requiredFields',
+    'exposedFields',
+    'authTypes',
+    'twoFactorConfigured',
+    'twoFactorToken',
+  ];
 
   let data = {};
   keysToUpdate.forEach((key) => {
-    if (req.body[key] || req.body[key] === 0 || req.body[key] === null  || req.body[key] === false) {
+    if (
+      req.body[key] ||
+      req.body[key] === 0 ||
+      req.body[key] === null ||
+      req.body[key] === false
+    ) {
       let value = req.body[key];
 
       if (key === 'password' && value) {
@@ -186,21 +212,23 @@ exports.update = async(req, res, next) => {
 
   const clientId = req?.body?.clientId || null;
 
-  if (clientId && req.body.hasOwnProperty('emailNotificationConsent') ) {
+  if (clientId && req.body.hasOwnProperty('emailNotificationConsent')) {
     let projectId = null;
 
-    await db.Client
-      .findOne({ where: { clientId: clientId } })
+    await db.Client.findOne({ where: { clientId: clientId } })
       .then((client) => {
         if (client) {
           projectId = String(client.id);
 
-          const currentConsent = { ...(req.userObject.emailNotificationConsent || {}) };
+          const currentConsent = {
+            ...(req.userObject.emailNotificationConsent || {}),
+          };
           currentConsent[projectId] = req.body.emailNotificationConsent;
           data.emailNotificationConsent = currentConsent;
 
-          req.userObject.update(data)
-            .then(user => {
+          req.userObject
+            .update(data)
+            .then((user) => {
               req.userObject = user;
               next();
             })
@@ -209,11 +237,11 @@ exports.update = async(req, res, next) => {
             });
         }
       })
-      .catch((err) => {}
-      );
+      .catch((err) => {});
   } else {
-    req.userObject.update(data)
-      .then(user => {
+    req.userObject
+      .update(data)
+      .then((user) => {
         req.userObject = user;
         next();
       })
@@ -221,7 +249,7 @@ exports.update = async(req, res, next) => {
         next(err);
       });
   }
-}
+};
 
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
@@ -237,93 +265,100 @@ exports.saveRoles = (req, res, next) => {
     Object.keys(roles).forEach((clientId) => {
       if (clientId) {
         let role = roles[clientId] ? roles[clientId] : false;
-        let roleId = parseInt(role, 10)
-        if ( !( roleId && Number.isInteger(roleId)  )) {
-          let found = req.roles.find(availableRole => availableRole.name == role);
+        let roleId = parseInt(role, 10);
+        if (!(roleId && Number.isInteger(roleId))) {
+          let found = req.roles.find(
+            (availableRole) => availableRole.name == role
+          );
           roleId = found && found.id;
         }
 
-        if (roleId){
-          clientId = clientId.replace(/'/g, '')
+        if (roleId) {
+          clientId = clientId.replace(/'/g, '');
           let parsedClientId = parseInt(clientId, 10);
-          if ( !( parsedClientId && clientId == parsedClientId && Number.isInteger(parsedClientId))) {
-            let found = req.clients.find(availableClient => availableClient.clientId == clientId);
+          if (
+            !(
+              parsedClientId &&
+              clientId == parsedClientId &&
+              Number.isInteger(parsedClientId)
+            )
+          ) {
+            let found = req.clients.find(
+              (availableClient) => availableClient.clientId == clientId
+            );
             parsedClientId = found && found.id;
           }
-          saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
+          saveRoles.push(() => {
+            return createOrUpdateUserRole(parsedClientId, userId, roleId);
+          });
         }
       }
     });
 
-    Promise
-      .map(saveRoles, saveRole => saveRole())
-      .then(() => { next(); })
+    Promise.map(saveRoles, (saveRole) => saveRole())
+      .then(() => {
+        next();
+      })
       .catch((err) => {
-         console.log('==> update err', err);
-         next(err);
-       });
+        console.log('==> update err', err);
+        next(err);
+      });
   }
-}
+};
 
 const createOrUpdateUserRole = (clientId, userId, roleId) => {
-  return new Promise ((resolve, reject) => {
-    db.UserRole
-      .findOne({ where: {clientId, userId} })
+  return new Promise((resolve, reject) => {
+    db.UserRole.findOne({ where: { clientId, userId } })
       .then((userRole) => {
         if (userRole) {
-          return userRole.update({'roleId': roleId});
+          return userRole.update({ roleId: roleId });
         } else {
           return db.UserRole.create({ clientId, roleId, userId });
         }
       })
-      .then(()=> {
-        resolve()
+      .then(() => {
+        resolve();
       })
       .catch((err) => {
-        reject(err)
+        reject(err);
       });
   });
-}
+};
 
-exports.validateUniqueEmail  = (req, res, next) => {
-  db.User
-    .findOne({ where: { email: req.body.email  } })
-    .then(user => {
-      if (user) {
-        req.flash('error', {
-          msg: 'E-mail al in gebruik!'
-        });
-        res.redirect(req.header('Referer') || '/account');
-      } else {
-        next();
-      }
-    });
-}
+exports.validateUniqueEmail = (req, res, next) => {
+  db.User.findOne({ where: { email: req.body.email } }).then((user) => {
+    if (user) {
+      req.flash('error', {
+        msg: 'E-mail al in gebruik!',
+      });
+      res.redirect(req.header('Referer') || '/account');
+    } else {
+      next();
+    }
+  });
+};
 
 exports.validatePassword = (req, res, next) => {
   if (
-    req.body.password
-    && req.body.password === req.body.password_confirm
-    && req.body.password.length >= 8
+    req.body.password &&
+    req.body.password === req.body.password_confirm &&
+    req.body.password.length >= 8
   ) {
     next();
   } else {
-    req.flash('error', {msg: 'Incorrect wachtwoord'});
+    req.flash('error', { msg: 'Incorrect wachtwoord' });
     res.redirect(req.header('Referer') || '/account');
   }
-}
+};
 
 exports.validateEmail = (req, res, next) => {
-  if (
-    req.body.email
-    && req.body.email === req.user.email
-  ) {
+  if (req.body.email && req.body.email === req.user.email) {
     next();
   } else {
-    req.flash('error', {msg: 'Incorrect email'});
+    req.flash('error', { msg: 'Incorrect email' });
     res.redirect(req.header('Referer') || '/account');
   }
-}
+};
 
 exports.deleteOne = (req, res, next) => {
   req.userObject
@@ -331,5 +366,7 @@ exports.deleteOne = (req, res, next) => {
     .then(() => {
       next();
     })
-    .catch((err) => { next(err); });
-}
+    .catch((err) => {
+      next(err);
+    });
+};

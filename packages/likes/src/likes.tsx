@@ -1,21 +1,22 @@
+import DataStore from '@openstad-headless/data-store/src';
+import { hasRole } from '@openstad-headless/lib';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { LocalStorage } from '@openstad-headless/lib/local-storage';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { ProgressBar } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
-  Heading5,
-  Paragraph,
   Button,
   Heading4,
+  Heading5,
   Heading6,
+  Paragraph,
 } from '@utrecht/component-library-react';
-import { ProgressBar } from '@openstad-headless/ui/src';
-import { LocalStorage } from '@openstad-headless/lib/local-storage';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
-import { hasRole } from '@openstad-headless/lib';
-import DataStore from '@openstad-headless/data-store/src';
-import React, { useState, useEffect } from 'react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useState } from 'react';
+
 import './likes.css';
-import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export type LikeWidgetProps = BaseProps &
   LikeProps &
@@ -147,7 +148,6 @@ function Likes({
 
   return (
     <div className="osc">
-
       {variant !== 'micro-score' ? (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
@@ -164,10 +164,8 @@ function Likes({
                   resource?.userVote?.opinion === likeVariant.type
                     ? 'selected'
                     : ''
-                  } ${hideCounters ? 'osc-no-counter' : ''}`
-                }
-                disabled={disabled}
-              >
+                } ${hideCounters ? 'osc-no-counter' : ''}`}
+                disabled={disabled}>
                 <section className="like-kind">
                   <i className={likeVariant.icon}></i>
                   {variant === 'small' ? null : likeVariant.label}
@@ -175,7 +173,8 @@ function Likes({
 
                 {!hideCounters ? (
                   <section className="like-counter">
-                    {resource[likeVariant.type] && resource[likeVariant.type] < 10
+                    {resource[likeVariant.type] &&
+                    resource[likeVariant.type] < 10
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
@@ -199,7 +198,9 @@ function Likes({
               showProgressBar &&
               props.progressBarDescription && (
                 <Heading6
-                  dangerouslySetInnerHTML={{ __html: props.progressBarDescription }}
+                  dangerouslySetInnerHTML={{
+                    __html: props.progressBarDescription,
+                  }}
                 />
               )}
           </div>
@@ -221,19 +222,17 @@ function Likes({
                     resource?.userVote?.opinion === likeVariant.type
                       ? 'selected'
                       : ''
-                    } ${hideCounters ? 'osc-no-counter' : ''}`
-                  }
-                  disabled={disabled}
-                >
-
+                  } ${hideCounters ? 'osc-no-counter' : ''}`}
+                  disabled={disabled}>
                   <section className="like-kind">
-                    <i className={likeVariant.icon}></i> <span className="sr-only">{likeVariant.label}</span>
+                    <i className={likeVariant.icon}></i>{' '}
+                    <span className="sr-only">{likeVariant.label}</span>
                   </section>
-
                 </Button>
                 {!hideCounters && index === 0 ? (
                   <section className="like-counter">
-                    <span className="sr-only">Score</span> {resource['netVotes'] ? resource['netVotes']  : '0'}
+                    <span className="sr-only">Score</span>{' '}
+                    {resource['netVotes'] ? resource['netVotes'] : '0'}
                   </section>
                 ) : null}
               </>
@@ -242,7 +241,9 @@ function Likes({
 
           {props?.resources?.minimumYesVotes && showProgressBar ? (
             <div className="progressbar-container">
-              <ProgressBar progress={(resource.netVotes / necessaryVotes) * 100} />
+              <ProgressBar
+                progress={(resource.netVotes / necessaryVotes) * 100}
+              />
               <Paragraph className="progressbar-counter">
                 {resource.netVotes || 0} /{necessaryVotes}
               </Paragraph>
@@ -254,7 +255,9 @@ function Likes({
               showProgressBar &&
               props.progressBarDescription && (
                 <Heading6
-                  dangerouslySetInnerHTML={{ __html: props.progressBarDescription }}
+                  dangerouslySetInnerHTML={{
+                    __html: props.progressBarDescription,
+                  }}
                 />
               )}
           </div>

@@ -42,7 +42,7 @@
 }
 
 .osc.counter-container .amount {
-  margin-inline-end: .3rem;
+  margin-inline-end: 0.3rem;
 }
 
 .osc.counter-container .amount-item {
@@ -65,5 +65,5 @@
   content: '';
   position: absolute;
   inset: 0 0 50% 0;
-  background: rgba(0, 0, 0, .1);
+  background: rgba(0, 0, 0, 0.1);
 }

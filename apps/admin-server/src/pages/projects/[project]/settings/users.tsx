@@ -1,36 +1,36 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
+import { NotificationForm } from '@/components/notification-form';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
-import toast from 'react-hot-toast';
-import * as Switch from '@radix-ui/react-switch';
-import InfoDialog from '@/components/ui/info-hover';
+import { Heading } from '@/components/ui/typography';
+import useNotificationTemplate from '@/hooks/use-notification-template';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { NotificationForm } from '@/components/notification-form';
-import useNotificationTemplate from '@/hooks/use-notification-template';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as Switch from '@radix-ui/react-switch';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const usersFormSchema = z.object({
   canCreateNewUsers: z.boolean().optional(),
@@ -63,11 +63,7 @@ export default function ProjectSettingsUsers(
 ) {
   const router = useRouter();
   const { project } = router.query;
-  const {
-    data,
-    updateProject,
-    anonymizeUsersOfProject,
-  } = useProject();
+  const { data, updateProject, anonymizeUsersOfProject } = useProject();
 
   const anonymizeCategory = 'anonymize';
 
@@ -81,15 +77,20 @@ export default function ProjectSettingsUsers(
   const anonymizeDefaults = useCallback(
     () => ({
       allowAnonymizeUsersAfterEndDate:
-        data?.config?.[anonymizeCategory]?.allowAnonymizeUsersAfterEndDate || false,
+        data?.config?.[anonymizeCategory]?.allowAnonymizeUsersAfterEndDate ||
+        false,
       anonymizeUsersXDaysAfterEndDate:
-        data?.config?.[anonymizeCategory]?.anonymizeUsersXDaysAfterEndDate || null,
+        data?.config?.[anonymizeCategory]?.anonymizeUsersXDaysAfterEndDate ||
+        null,
       warnUsersAfterXDaysOfInactivity:
-        data?.config?.[anonymizeCategory]?.warnUsersAfterXDaysOfInactivity || null,
+        data?.config?.[anonymizeCategory]?.warnUsersAfterXDaysOfInactivity ||
+        null,
       anonymizeUsersAfterXDaysOfInactivity:
-        data?.config?.[anonymizeCategory]?.anonymizeUsersAfterXDaysOfInactivity || null,
+        data?.config?.[anonymizeCategory]
+          ?.anonymizeUsersAfterXDaysOfInactivity || null,
       anonymizeUserName:
-        data?.config?.[anonymizeCategory]?.anonymizeUserName || 'Gebruiker is geanonimiseerd',
+        data?.config?.[anonymizeCategory]?.anonymizeUserName ||
+        'Gebruiker is geanonimiseerd',
     }),
     [data?.config]
   );
@@ -97,9 +98,11 @@ export default function ProjectSettingsUsers(
   const emailDefaults = useCallback(
     () => ({
       subject:
-        data?.emailConfig?.[anonymizeCategory]?.inactiveWarningEmail?.subject || null,
+        data?.emailConfig?.[anonymizeCategory]?.inactiveWarningEmail?.subject ||
+        null,
       template:
-        data?.emailConfig?.[anonymizeCategory]?.inactiveWarningEmail?.template || null,
+        data?.emailConfig?.[anonymizeCategory]?.inactiveWarningEmail
+          ?.template || null,
     }),
     [data?.emailConfig]
   );
@@ -142,7 +145,9 @@ export default function ProjectSettingsUsers(
     }
   }
 
-  async function onAnonymizeSubmit(values: z.infer<typeof anonymizeFormSchema>) {
+  async function onAnonymizeSubmit(
+    values: z.infer<typeof anonymizeFormSchema>
+  ) {
     try {
       await updateProject({
         [anonymizeCategory]: values,
@@ -167,7 +172,9 @@ export default function ProjectSettingsUsers(
 
   const [dangerZoneEnabled, setDangerZoneEnabled] = useState(false);
 
-  const { data: notificationTemplates } = useNotificationTemplate(project as string);
+  const { data: notificationTemplates } = useNotificationTemplate(
+    project as string
+  );
   const template = notificationTemplates?.find(
     (t: { type: string }) => t.type === 'user account about to expire'
   );
@@ -203,10 +210,12 @@ export default function ProjectSettingsUsers(
                     name="canCreateNewUsers"
                     render={({ field }) => (
                       <FormItem className="col-span-1">
-                        <FormLabel>Nieuwe gebruikers kunnen worden aangemaakt</FormLabel>
+                        <FormLabel>
+                          Nieuwe gebruikers kunnen worden aangemaakt
+                        </FormLabel>
                         <FormDescription>
-                          Wanneer een project wordt beëindigd, wordt deze instelling
-                          automatisch uitgeschakeld
+                          Wanneer een project wordt beëindigd, wordt deze
+                          instelling automatisch uitgeschakeld
                         </FormDescription>
                         <Switch.Root
                           className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
@@ -239,52 +248,56 @@ export default function ProjectSettingsUsers(
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Gebruikers automatisch anonimiseren na het beëindigen van het
-                            project?
-                            <InfoDialog
-                              content="Als je deze optie aanzet worden gebruikers na het aantal dagen dat je hieronder instelt automatisch geanonimiseerd. Dit gebeurt alleen als het project een einddatum heeft en deze datum is verstreken."
-                            />
+                            Gebruikers automatisch anonimiseren na het
+                            beëindigen van het project?
+                            <InfoDialog content="Als je deze optie aanzet worden gebruikers na het aantal dagen dat je hieronder instelt automatisch geanonimiseerd. Dit gebeurt alleen als het project een einddatum heeft en deze datum is verstreken." />
                           </FormLabel>
                           {YesNoSelect(field, props)}
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {!!anonymizeForm.watch('allowAnonymizeUsersAfterEndDate') && (
+                    {!!anonymizeForm.watch(
+                      'allowAnonymizeUsersAfterEndDate'
+                    ) && (
                       <FormField
                         control={anonymizeForm.control}
                         name="anonymizeUsersXDaysAfterEndDate"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              Na hoeveel dagen na het einde van het project worden
-                              gebruikers geanonimiseerd?
+                              Na hoeveel dagen na het einde van het project
+                              worden gebruikers geanonimiseerd?
                               <InfoDialog
                                 content={`Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "${anonymizeForm.watch('anonymizeUserName') || 'Gebruiker is geanonimiseerd'}".`}
                               />
                             </FormLabel>
                             <FormControl>
-                              <Input type="number" placeholder="60" {...field} />
+                              <Input
+                                type="number"
+                                placeholder="60"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
-                    />
+                      />
                     )}
                     {isSendEmailNotSet && (
                       <Alert variant="error" className="mb-4">
                         <AlertTitle>Let op!</AlertTitle>
                         <AlertDescription>
-                          Het e-mailadres voor het versturen van notificaties is nog niet
-                          ingesteld. Stel deze eerst in bij de{' '}
+                          Het e-mailadres voor het versturen van notificaties is
+                          nog niet ingesteld. Stel deze eerst in bij de{' '}
                           <a
                             href={`/projects/${project}/settings/notifications`}
                             className="underline">
                             e-mail instellingen
                           </a>
-                          . Zonder een juist ingesteld e-mailadres kunnen er geen
-                          waarschuwingsmails worden verstuurd en zullen gebruikers worden
-                          geanonimiseerd zonder waarschuwing.
+                          . Zonder een juist ingesteld e-mailadres kunnen er
+                          geen waarschuwingsmails worden verstuurd en zullen
+                          gebruikers worden geanonimiseerd zonder waarschuwing.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -374,8 +387,8 @@ export default function ProjectSettingsUsers(
                   <b> kan niet ongedaan gemaakt worden</b>.
                 </div>
                 <div className="mt-2">
-                  Het project moet eerst zijn beëindigd voordat deze actie uitgevoerd kan
-                  worden.
+                  Het project moet eerst zijn beëindigd voordat deze actie
+                  uitgevoerd kan worden.
                 </div>
                 <div className="flex items-center gap-2 mt-4">
                   <Checkbox

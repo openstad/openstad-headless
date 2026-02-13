@@ -1,10 +1,10 @@
-import { FC } from "react";
-import './map.css';
-import { BaseProps } from "@openstad-headless/types/base-props.js";
+import { FormValue } from '@openstad-headless/form/src/form';
 import type { AreaProps } from '@openstad-headless/leaflet-map/src/types/area-props';
-import { ProjectSettingProps } from "@openstad-headless/types/project-setting-props.js";
-import { DataLayer } from "@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props";
-import { FormValue } from "@openstad-headless/form/src/form";
+import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { BaseProps } from '@openstad-headless/types/base-props.js';
+import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props.js';
+import { FC } from 'react';
+import './map.css';
 export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
     overrideDefaultValue?: FormValue;
     title: string;

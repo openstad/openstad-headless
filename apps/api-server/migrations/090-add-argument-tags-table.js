@@ -1,8 +1,8 @@
 'use strict';
 
-const {Sequelize} = require("sequelize");
+const { Sequelize } = require('sequelize');
 module.exports = {
-  async up ({ context: queryInterface }) {
+  async up({ context: queryInterface }) {
     queryInterface.createTable('comment_tags', {
       createdAt: {
         type: Sequelize.DATE,
@@ -25,7 +25,7 @@ module.exports = {
     });
   },
 
-  async down ({ context: queryInterface }) {
+  async down({ context: queryInterface }) {
     await queryInterface.dropTable('comment_tags');
-  }
+  },
 };

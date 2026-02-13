@@ -2,12 +2,10 @@ const fs = require('fs');
 const execute = require('./execute');
 
 module.exports = async function setupImageServer(actions) {
-
   console.log('==============================');
   console.log('Setup image server');
-  
-  try {
 
+  try {
     // create local config
     let imgConfig = `
 APP_URL=${process.env.IMAGE_APP_URL}
@@ -21,7 +19,7 @@ THROTTLE=${process.env.IMAGE_THROTTLE}
 THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
 THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
-`
+`;
 
     if (actions['create config']) {
       console.log('------------------------------');
@@ -40,14 +38,14 @@ THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
     if (actions['init images']) {
       console.log('------------------------------');
       console.log('Init default images');
-      await execute('npm', ['run', 'init-images'], { cwd: './apps/image-server' });
+      await execute('npm', ['run', 'init-images'], {
+        cwd: './apps/image-server',
+      });
     }
-    
-  } catch(err) {
+  } catch (err) {
     console.log('------------------------------');
     console.log('Image server initialisatie error');
     console.log(err);
     process.exit();
   }
-}
- 
+};

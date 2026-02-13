@@ -1,4 +1,19 @@
+import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { useProject } from '@/hooks/use-project';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
+import { extractConfig } from '@/lib/sub-widget-helper';
+import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]';
+import ArgumentsConfirmation from '@/pages/projects/[project]/widgets/comments/[id]/confirmation';
+import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
+import { useRouter } from 'next/router';
 import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -6,40 +21,27 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
-import WidgetPreview from '@/components/widget-preview';
-import WidgetPublish from '@/components/widget-publish';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
-import DocumentGeneral from './general';
-import DocumentLinks from './links';
-import LikesDisplay from '../../likes/[id]/weergave';
 import { LikeWidgetTabProps } from '../../likes/[id]';
-import { extractConfig } from '@/lib/sub-widget-helper';
-import DocumentInclude from './include';
+import LikesDisplay from '../../likes/[id]/weergave';
+import DocumentContent from './content';
 import DocumentExtraFields from './extraFields';
 import DocumentFilters from './filters';
-import DocumentContent from './content';
+import DocumentGeneral from './general';
+import DocumentInclude from './include';
+import DocumentLinks from './links';
 import DocumentSorting from './sorting';
-import ArgumentsConfirmation from "@/pages/projects/[project]/widgets/comments/[id]/confirmation";
-import {ArgumentWidgetTabProps} from "@/pages/projects/[project]/widgets/comments/[id]";
-import {useProject} from "@/hooks/use-project";
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetDateCountdownBar({
-  apiUrl,
-}: WithApiUrlProps) {
+export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
 
   const { data: widget, updateConfig } = useWidgetConfig<DocumentMapProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<DocumentMapProps>({});
+  const { previewConfig, updatePreview } = useWidgetPreview<DocumentMapProps>(
+    {}
+  );
 
   const totalPropPackage = {
     ...widget?.config,
@@ -57,8 +59,11 @@ export default function WidgetDateCountdownBar({
     projectId,
   };
 
-  const { data: projectConfig } = useProject( ['includeConfig'] );
-  const requiredFieldsIncludesEmailNotificationConsent = projectConfig?.config?.auth?.provider?.openstad?.requiredUserFields?.includes('emailNotificationConsent');
+  const { data: projectConfig } = useProject(['includeConfig']);
+  const requiredFieldsIncludesEmailNotificationConsent =
+    projectConfig?.config?.auth?.provider?.openstad?.requiredUserFields?.includes(
+      'emailNotificationConsent'
+    );
 
   return (
     <div>
@@ -93,48 +98,73 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              {previewConfig ?
-                <DocumentGeneral {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
-                : null}
+              {previewConfig ? (
+                <DocumentGeneral
+                  {...totalPropPackage}
+                  projectId={projectId as string}
+                  {...previewConfig}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="links" className="p-0">
-              {previewConfig ?
-                <DocumentLinks {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
-                : null}
+              {previewConfig ? (
+                <DocumentLinks
+                  {...totalPropPackage}
+                  projectId={projectId as string}
+                  {...previewConfig}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="include" className="p-0">
-              {previewConfig ?
-                  <DocumentInclude {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
-                  : null}
+              {previewConfig ? (
+                <DocumentInclude
+                  {...totalPropPackage}
+                  projectId={projectId as string}
+                  {...previewConfig}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="filters" className="p-0">
-              {previewConfig ?
-                  <DocumentFilters {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
-                  : null}
+              {previewConfig ? (
+                <DocumentFilters
+                  {...totalPropPackage}
+                  projectId={projectId as string}
+                  {...previewConfig}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="sorting" className="p-0">
-              {previewConfig ?
-                  <DocumentSorting {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
-                  : null}
+              {previewConfig ? (
+                <DocumentSorting
+                  {...totalPropPackage}
+                  projectId={projectId as string}
+                  {...previewConfig}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="extraFields" className="p-0">
-              {previewConfig ?
-                  <DocumentExtraFields {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
-                  : null}
+              {previewConfig ? (
+                <DocumentExtraFields
+                  {...totalPropPackage}
+                  projectId={projectId as string}
+                  {...previewConfig}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="text" className="p-0">
-              {previewConfig ?
-                  <DocumentContent {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
-                  : null}
+              {previewConfig ? (
+                <DocumentContent
+                  {...totalPropPackage}
+                  projectId={projectId as string}
+                  {...previewConfig}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="likes" className="p-0">
               {previewConfig && (
                 <LikesDisplay
                   omitSchemaKeys={['resourceId']}
-                  {...extractConfig<
-                    DocumentMapProps,
-                    LikeWidgetTabProps
-                  >({
+                  {...extractConfig<DocumentMapProps, LikeWidgetTabProps>({
                     subWidgetKey: 'likeWidget',
                     previewConfig: previewConfig,
                     updateConfig,
@@ -146,16 +176,15 @@ export default function WidgetDateCountdownBar({
             <TabsContent value="confirmation" className="p-0">
               {previewConfig && (
                 <ArgumentsConfirmation
-                  {...extractConfig<
-                    DocumentMapProps,
-                    ArgumentWidgetTabProps
-                  >({
+                  {...extractConfig<DocumentMapProps, ArgumentWidgetTabProps>({
                     subWidgetKey: 'commentsWidget',
                     previewConfig: previewConfig,
                     updateConfig,
                     updatePreview,
                   })}
-                  requiredFieldsIncludesEmailNotificationConsent={ requiredFieldsIncludesEmailNotificationConsent }
+                  requiredFieldsIncludesEmailNotificationConsent={
+                    requiredFieldsIncludesEmailNotificationConsent
+                  }
                 />
               )}
             </TabsContent>

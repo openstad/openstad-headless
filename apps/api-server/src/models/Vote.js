@@ -14,7 +14,10 @@ const updateResourceScore = async (vote, options) => {
     if (options && options.transaction && options.transaction.afterCommit) {
       options.transaction.afterCommit(() => {
         run().catch((err) =>
-          console.error('Failed to recalc resource score after transaction commit:', err)
+          console.error(
+            'Failed to recalc resource score after transaction commit:',
+            err
+          )
         );
       });
     } else {
@@ -23,148 +26,158 @@ const updateResourceScore = async (vote, options) => {
   } catch (err) {
     console.error('Update resource score failed in hook for Vote:', err);
   }
-}
+};
 
-module.exports = function( db, sequelize, DataTypes ) {
-	var Vote = sequelize.define('vote', {
-		resourceId: {
-			type         : DataTypes.INTEGER,
-			allowNull    : false
-		},
-		userId: {
-			type         : DataTypes.INTEGER,
-			allowNull    : false,
-			defaultValue: 0,
-		},
-		confirmed: {
-			type         : DataTypes.BOOLEAN,
-			allowNull    : true,
-			defaultValue : null
-		},
-		confirmReplacesVoteId: {
-			type         : DataTypes.INTEGER,
-			allowNull    : true,
-			defaultValue : null
-		},
-		ip: {
-			type         : DataTypes.STRING(64),
-			allowNull    : true,
-			validate     : {
-				//isIP: true
-			}
-		},
-		opinion: {
-			type         : DataTypes.STRING(64),
-			allowNull    : true,
-			defaultValue : null
-		},
-		// This will be true if the vote validation CRON determined this
-		// vote is valid.
-		checked : {
-			type         : DataTypes.BOOLEAN,
-			allowNull    : true
-		}
-	}, {
-		indexes: [{
-			fields : ['resourceId', 'userId', 'deletedAt'],
-			unique : true
-		}],
-    hooks: {
-      afterCreate: async (vote, options) => {
-        await updateResourceScore(vote, options);
+module.exports = function (db, sequelize, DataTypes) {
+  var Vote = sequelize.define(
+    'vote',
+    {
+      resourceId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
-
-      afterUpdate: async function (vote, options) {
-        await updateResourceScore(vote, options);
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
       },
-      
-      afterDestroy: async function (vote, options) {
-        await updateResourceScore(vote, options);
+      confirmed: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: null,
       },
-      
-      afterUpsert: async function (vote, options) {
-        await updateResourceScore(vote, options);
-      }
-      
+      confirmReplacesVoteId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
+      },
+      ip: {
+        type: DataTypes.STRING(64),
+        allowNull: true,
+        validate: {
+          //isIP: true
+        },
+      },
+      opinion: {
+        type: DataTypes.STRING(64),
+        allowNull: true,
+        defaultValue: null,
+      },
+      // This will be true if the vote validation CRON determined this
+      // vote is valid.
+      checked: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+      },
     },
-		// paranoid: false,
-	});
+    {
+      indexes: [
+        {
+          fields: ['resourceId', 'userId', 'deletedAt'],
+          unique: true,
+        },
+      ],
+      hooks: {
+        afterCreate: async (vote, options) => {
+          await updateResourceScore(vote, options);
+        },
 
-	Vote.associate = function( models ) {
-		Vote.belongsTo(models.Resource, { onDelete: 'CASCADE' });
-		Vote.belongsTo(models.User, { onDelete: 'CASCADE' });
-	}
+        afterUpdate: async function (vote, options) {
+          await updateResourceScore(vote, options);
+        },
 
-	Vote.scopes = function scopes() {
-		return {
+        afterDestroy: async function (vote, options) {
+          await updateResourceScore(vote, options);
+        },
 
-			forProjectId: function( projectId ) {
-				return {
-					// where: {
-					//  	resourceId: [ sequelize.literal(`select id FROM resources WHERE projectId = ${projectId}`) ]
-					// }
-					include: [{
-						model      : db.Resource,
-						attributes : ['id', 'projectId'],
-						required: true,
-						where: {
-							projectId: projectId
-						}
-					}],
-				};
-			},
-			includeResource: function() {
-				return {
-					include: [{
-						model      : db.Resource,
-						attributes : ['id', 'title', 'projectId', 'viewableByRole'],
-            include: {
-              model: db.Tag,
-              attributes: ['id', 'type', 'name'],
-              where: { type: 'status' },
-              required: false,
+        afterUpsert: async function (vote, options) {
+          await updateResourceScore(vote, options);
+        },
+      },
+      // paranoid: false,
+    }
+  );
+
+  Vote.associate = function (models) {
+    Vote.belongsTo(models.Resource, { onDelete: 'CASCADE' });
+    Vote.belongsTo(models.User, { onDelete: 'CASCADE' });
+  };
+
+  Vote.scopes = function scopes() {
+    return {
+      forProjectId: function (projectId) {
+        return {
+          // where: {
+          //  	resourceId: [ sequelize.literal(`select id FROM resources WHERE projectId = ${projectId}`) ]
+          // }
+          include: [
+            {
+              model: db.Resource,
+              attributes: ['id', 'projectId'],
+              required: true,
+              where: {
+                projectId: projectId,
+              },
             },
-					}]
-				}
-			},
-			includeUser: {
-				include: [{
-					model      : db.User,
-					attributes : [
-						'role',
-						'displayName',
-						'nickName',
-						'name',
-						'displayName',
-						'email',
-						'phonenumber',
-						'address',
-						'city',
-						'postcode'
-					]
-				}]
-			},
-		}
-	}
+          ],
+        };
+      },
+      includeResource: function () {
+        return {
+          include: [
+            {
+              model: db.Resource,
+              attributes: ['id', 'title', 'projectId', 'viewableByRole'],
+              include: {
+                model: db.Tag,
+                attributes: ['id', 'type', 'name'],
+                where: { type: 'status' },
+                required: false,
+              },
+            },
+          ],
+        };
+      },
+      includeUser: {
+        include: [
+          {
+            model: db.User,
+            attributes: [
+              'role',
+              'displayName',
+              'nickName',
+              'name',
+              'displayName',
+              'email',
+              'phonenumber',
+              'address',
+              'city',
+              'postcode',
+            ],
+          },
+        ],
+      },
+    };
+  };
 
-	Vote.prototype.toggle = function() {
-		var checked = this.get('checked');
-		return this.update({
-			checked: checked === null ? false : !checked
-		});
-	}
+  Vote.prototype.toggle = function () {
+    var checked = this.get('checked');
+    return this.update({
+      checked: checked === null ? false : !checked,
+    });
+  };
 
   // TODO: dit wordt nauwelijks gebruikt omdat de logica helemaal in de route zit. Maar hier zou dus netter zijn.
-	Vote.auth = Vote.prototype.auth = {
+  Vote.auth = Vote.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
     updateableBy: ['editor', 'owner'],
     deleteableBy: ['editor', 'owner'],
-    canToggle: function(user, self) {
+    canToggle: function (user, self) {
       return userHasRole(user, 'editor', self.userId);
-    }
-  }
+    },
+  };
 
-	return Vote;
+  return Vote;
 };

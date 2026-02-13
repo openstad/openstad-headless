@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, FeatureGroup, Polygon } from 'react-leaflet';
+import 'leaflet-draw/dist/leaflet.draw.css';
 // import { EditControl } from "react-leaflet-draw"
 
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
+import React, { useEffect } from 'react';
+import { FeatureGroup, MapContainer, Polygon, TileLayer } from 'react-leaflet';
 import useSWR from 'swr';
 
 export default function BaseMap({
