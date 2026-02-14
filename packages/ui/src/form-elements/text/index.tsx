@@ -38,7 +38,7 @@ export type TextInputProps = {
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
-  variant?: 'text input' | 'textarea' | 'richtext';
+  variant?: 'text input' | 'textarea' | 'richtext' | 'email';
   placeholder?: string;
   defaultValue?: string;
   disabled?: boolean;
@@ -197,8 +197,9 @@ const TextInput: FC<TextInputProps> = ({
     'text input': Textbox,
     textarea: Textarea,
     richtext: TrixEditor,
+    email: Textbox,
   };
-  const InputComponent = variantMap[variant];
+  const InputComponent = variantMap[variant] || Textbox;
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -271,6 +272,7 @@ const TextInput: FC<TextInputProps> = ({
 
   const getAutocomplete = (fieldKey: string) => {
     switch (fieldKey?.toLocaleLowerCase()) {
+      case 'email':
       case 'mail':
         return 'email';
       case 'tel':
@@ -295,6 +297,8 @@ const TextInput: FC<TextInputProps> = ({
   };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
+  const isSingleLine = variant === 'text input' || variant === 'email';
+  const resolvedInputType = variant === 'email' ? 'email' : getType(fieldKey);
   return (
     <FormField type="text">
       {title && (
@@ -348,7 +352,7 @@ const TextInput: FC<TextInputProps> = ({
           id={randomId}
           name={fieldKey}
           required={fieldRequired}
-          type={getType(fieldKey)}
+          {...(isSingleLine ? { type: resolvedInputType } : {})}
           placeholder={placeholder}
           value={value}
           onChange={(
