@@ -26,7 +26,7 @@ export type TextInputProps = {
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
-  variant?: 'text input' | 'textarea' | 'richtext';
+  variant?: 'text input' | 'textarea' | 'richtext' | 'email';
   placeholder?: string;
   defaultValue?: string;
   disabled?: boolean;
