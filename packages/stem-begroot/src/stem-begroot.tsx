@@ -1098,7 +1098,7 @@ function StemBegroot({
                       props.votes.voteType === 'budgeting'
                         ? notUsedResources.some(
                             (r: { budget: number }) =>
-                              r.budget < props.votes.maxBudget - budgetUsed
+                              r.budget <= props.votes.maxBudget - budgetUsed
                           )
                         : Math.max(
                             props.votes.maxResources - selectedResources.length,
