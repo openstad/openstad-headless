@@ -325,7 +325,10 @@ export default function ProjectSubmissions() {
                         checked={selectedItems.includes(submission.id)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedItems((prev) => [...prev, submission.id]);
+                            setSelectedItems((prev) => [
+                              ...prev,
+                              submission.id,
+                            ]);
                           } else {
                             setSelectedItems((prev) =>
                               prev.filter((id) => id !== submission.id)
