@@ -1162,8 +1162,12 @@ router
         });
       }
 
-      // Set cooldown
+      // Set cooldown with auto-cleanup to prevent memory leak
       certRetryCooldowns.set(projectId, Date.now());
+      setTimeout(
+        () => certRetryCooldowns.delete(projectId),
+        CERT_RETRY_COOLDOWN_MS
+      );
 
       const namespace = process.env.KUBERNETES_NAMESPACE;
       const slugOverride =
@@ -1208,8 +1212,9 @@ router
       });
     } catch (error) {
       console.error(
-        '[external-certificates] Retry failed for project %s:',
-        String(req.params.projectId)
+        '[external-certificates] Retry failed for project %s: %s',
+        String(req.params.projectId),
+        error.message || error
       );
       return res.status(500).json({ error: 'Certificate retry failed' });
     }
