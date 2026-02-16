@@ -298,7 +298,7 @@ const checkHostStatus = async (conditions) => {
           );
         } catch (error) {
           console.error(
-            `[external-certificates] Failed to ensure ExternalSecret for project ${project.id}: ${error.message || error}`
+            `[external-certificates] Failed to ensure ExternalSecret for project ${project.id}`
           );
           hostStatus.certificate = {
             method: 'external',
@@ -444,10 +444,7 @@ const checkHostStatus = async (conditions) => {
     const results = await Promise.allSettled(promises);
     for (const result of results) {
       if (result.status === 'rejected') {
-        console.error(
-          '[checkHostStatus] Project check failed:',
-          result.reason?.message || result.reason
-        );
+        console.error('[checkHostStatus] Project check failed');
       }
     }
   }

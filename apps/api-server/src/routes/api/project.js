@@ -989,9 +989,8 @@ router
               );
             } catch (cleanupErr) {
               console.error(
-                '[external-certificates] Failed to clean up ExternalSecret for project %s: %s',
-                project.id,
-                cleanupErr.message || cleanupErr
+                '[external-certificates] Failed to clean up ExternalSecret for project %s',
+                project.id
               );
               // Non-blocking: proceed with deletion even if K8s cleanup fails
             }
@@ -1244,9 +1243,8 @@ router
       });
     } catch (error) {
       console.error(
-        '[external-certificates] Retry failed for project %s: %s',
-        String(req.params.projectId),
-        error.message || error
+        '[external-certificates] Retry failed for project %s',
+        String(req.params.projectId)
       );
       return res.status(500).json({ error: 'Certificate retry failed' });
     }
