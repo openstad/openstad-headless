@@ -32,6 +32,7 @@
 .osc-choiceguide-container.sticky-top-bar > .osc-choiceguide-sidebar-container {
   order: -1;
   top: 1rem;
+  z-index: 10;
 }
 
 @media screen and (max-width: 768px) {
