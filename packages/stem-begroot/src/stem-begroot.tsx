@@ -517,12 +517,15 @@ function StemBegroot({
           submitted = true;
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
+          setSelectedResources([]);
         }
       } else {
         if (selectedResources.length > 0) {
           votePendingStorage.clearVotePending();
           await doVote(selectedResources);
           submitted = true;
+          selectedResourcesStorage.clearSelectedResources();
+          setSelectedResources([]);
         }
       }
     } catch (err: any) {
