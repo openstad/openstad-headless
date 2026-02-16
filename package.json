@@ -74,6 +74,6 @@
     "cjs-module-lexer@<=2.2.0": "2.2.0",
     "cookie@<=0.7.0": "0.7.0",
     "on-headers@<=1.1.0": "1.1.0",
-    "vega-lite": "^5.23.0"
+    "fast-xml-parser@>=5.0.9": "5.3.4"
   }
 }
