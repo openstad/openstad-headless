@@ -217,6 +217,18 @@ describe('externalCertificatesManager', () => {
       const result = generateSecretName('a--b..c', 'openstad-org');
       expect(result).toBe('tls-openstad-prod-org-a-b-c');
     });
+
+    test('throws when namespace is undefined', () => {
+      expect(() => generateSecretName('example.com', undefined)).toThrow(
+        'requires a namespace'
+      );
+    });
+
+    test('throws when namespace is null', () => {
+      expect(() => generateSecretName('example.com', null)).toThrow(
+        'requires a namespace'
+      );
+    });
   });
 
   // -------------------------------------------------------

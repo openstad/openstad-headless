@@ -40,6 +40,12 @@ function slugify(str) {
  * @returns {string} Full secret name (e.g., 'tls-openstad-prod-amsterdam-www-example-com')
  */
 function generateSecretName(domain, namespace, slugOverride) {
+  if (!namespace) {
+    throw new Error(
+      'generateSecretName requires a namespace (KUBERNETES_NAMESPACE not set?)'
+    );
+  }
+
   // Extract org name from namespace by stripping 'openstad-' prefix
   const orgName = namespace.replace(/^openstad-/, '');
 

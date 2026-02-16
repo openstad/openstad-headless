@@ -1186,8 +1186,8 @@ router
         namespace
       );
 
-      // Update hostStatus
-      let hostStatus = project.hostStatus || {};
+      // Clone to avoid Sequelize JSON mutation trap (same pattern as checkHostStatus.js)
+      let hostStatus = project.hostStatus ? { ...project.hostStatus } : {};
       hostStatus.certificate = {
         method: 'external',
         state: certStatus.state,
