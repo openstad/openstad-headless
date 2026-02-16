@@ -11,6 +11,9 @@ const checkHostStatus = require('../../services/checkHostStatus');
 const projectsWithIssues = require('../../services/projects-with-issues');
 const externalCertificatesManager = require('../../services/externalCertificatesManager');
 const externalCertificates = require('../../services/externalCertificates');
+const {
+  getCertificateConfig,
+} = require('../../services/checkHostStatusHelpers');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
@@ -967,6 +970,35 @@ router
     }
 
     try {
+      // Clean up K8s ExternalSecret if project used external certificates
+      if (externalCertificates.isEnabled()) {
+        const certConfig = getCertificateConfig(project.config);
+        if (certConfig.certificateMethod === 'external') {
+          const namespace = process.env.KUBERNETES_NAMESPACE;
+          if (namespace) {
+            try {
+              const slugOverride = certConfig.externalCertSlug || null;
+              const secretName = externalCertificatesManager.generateSecretName(
+                project.url,
+                namespace,
+                slugOverride
+              );
+              await externalCertificatesManager.deleteExternalSecret(
+                secretName,
+                namespace
+              );
+            } catch (cleanupErr) {
+              console.error(
+                '[external-certificates] Failed to clean up ExternalSecret for project %s: %s',
+                project.id,
+                cleanupErr.message || cleanupErr
+              );
+              // Non-blocking: proceed with deletion even if K8s cleanup fails
+            }
+          }
+        }
+      }
+
       await project.destroy();
       res.json({ success: true });
     } catch (err) {
