@@ -517,12 +517,16 @@ export default function WidgetAgendaItems(
                           control={form.control}
                           name="activeFrom"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="items-start md:col-span-full">
                               <FormLabel>
                                 Actief vanaf (hele dag) — laat leeg om direct te
                                 starten
                               </FormLabel>
-                              <Input type="date" {...field} />
+                              <Input
+                                type="date"
+                                {...field}
+                                className="inline-block !w-auto"
+                              />
                               <FormMessage />
                             </FormItem>
                           )}
@@ -531,12 +535,16 @@ export default function WidgetAgendaItems(
                           control={form.control}
                           name="activeTo"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="items-start md:col-span-full">
                               <FormLabel>
                                 Actief t/m (hele dag) — laat leeg voor geen
                                 einddatum
                               </FormLabel>
-                              <Input type="date" {...field} />
+                              <Input
+                                type="date"
+                                {...field}
+                                className="inline-block !w-auto"
+                              />
                               <FormMessage />
                             </FormItem>
                           )}
