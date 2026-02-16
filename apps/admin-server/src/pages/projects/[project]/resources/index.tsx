@@ -332,7 +332,7 @@ export default function ProjectResources() {
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
               </div>
-              <ul>
+              <ul className="admin-overview">
                 {filterData?.map((resource: any) => (
                   <li
                     key={resource.id}

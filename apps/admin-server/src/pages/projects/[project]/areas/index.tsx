@@ -134,7 +134,7 @@ export default function ProjectAreas() {
               </ListHeading>
             </div>
 
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((item: any) => (
                 <Link
                   href={`/projects/${project}/areas/${item.type === 'Polygoon' ? item.id : `layers/${item.id}`}`}

@@ -136,7 +136,7 @@ export default function ProjectCodes() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((code: any) => (
                 <li
                   key={code.id}

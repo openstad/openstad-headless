@@ -282,7 +282,7 @@ export default function ProjectSubmissions() {
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((submission: any) => {
                 const userId = submission.userId;
                 const user =

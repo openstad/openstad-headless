@@ -179,7 +179,7 @@ export default function ProjectComments() {
 
   function renderComments(comments: any, pre = '') {
     return (
-      <ul>
+      <ul className="admin-overview">
         {comments.map((comment: any) => (
           <React.Fragment key={comment.id}>
             <li

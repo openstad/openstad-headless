@@ -195,7 +195,7 @@ export default function ProjectWidgets() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {(data as Widget[])?.map((widget) => {
                 return (
                   <Link

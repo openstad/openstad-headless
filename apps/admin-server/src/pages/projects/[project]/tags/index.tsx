@@ -124,7 +124,7 @@ export default function ProjectTags({ preset }: { preset?: string }) {
             </button>
           </ListHeading>
         </div>
-        <ul>
+        <ul className="admin-overview">
           {filterData?.map((tag: any) => (
             <Link
               href={

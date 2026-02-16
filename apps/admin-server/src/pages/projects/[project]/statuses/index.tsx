@@ -110,7 +110,7 @@ export default function ProjectStatuses() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((status: any) => (
                 <Link
                   href={`/projects/${project}/statuses/${status.id}`}
