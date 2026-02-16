@@ -191,10 +191,10 @@ export default function ProjectSettingsUsers(
           { name: 'Archivering', url: `/projects/${project}/settings/users` },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="users" className="w-full">
+          <Tabs defaultValue="anonymize" className="w-full">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="users">Archivering</TabsTrigger>
               <TabsTrigger value="anonymize">Anonimiseren</TabsTrigger>
+              <TabsTrigger value="users">Archivering</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="p-0">
