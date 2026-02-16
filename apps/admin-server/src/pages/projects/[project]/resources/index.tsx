@@ -340,12 +340,16 @@ export default function ProjectResources() {
                     role="button"
                     tabIndex={0}
                     onClick={() =>
-                      router.push(`/projects/${project}/resources/${resource.id}`)
+                      router.push(
+                        `/projects/${project}/resources/${resource.id}`
+                      )
                     }
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        router.push(`/projects/${project}/resources/${resource.id}`);
+                        router.push(
+                          `/projects/${project}/resources/${resource.id}`
+                        );
                       }
                     }}
                     style={{
@@ -358,7 +362,10 @@ export default function ProjectResources() {
                         checked={selectedWidgets.includes(resource.id)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedWidgets((prev) => [...prev, resource.id]);
+                            setSelectedWidgets((prev) => [
+                              ...prev,
+                              resource.id,
+                            ]);
                           } else {
                             setSelectedWidgets((prev) =>
                               prev.filter((id) => id !== resource.id)

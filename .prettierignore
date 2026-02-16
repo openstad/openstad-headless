@@ -15,6 +15,13 @@ operations/
 *.iife.js
 *.less
 
+apps/cms-server/data
+apps/cms-server/public/uploads
+apps/cms-server/public/apos-minified
+apps/cms-server/public/modules
+apps/cms-server/apos-build
+apps/cms-server/public/apos-frontend
+
 # Nunjucks templates (Prettier can't parse template syntax in HTML)
 apps/auth-server/views/
 apps/cms-server/views/partials/oud/
