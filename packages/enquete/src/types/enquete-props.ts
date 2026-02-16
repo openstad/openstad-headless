@@ -15,6 +15,7 @@ export type EnqueteProps = {
   confirmation?: Confirmation;
   minCharactersWarning?: string;
   maxCharactersWarning?: string;
+  maxCharactersOverWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
   showMinMaxAfterBlur?: boolean;
