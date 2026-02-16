@@ -441,7 +441,12 @@ const checkHostStatus = async (conditions) => {
       await project.update({ hostStatus });
     });
 
-    await Promise.all(promises);
+    const results = await Promise.allSettled(promises);
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        console.error('[checkHostStatus] Project check failed');
+      }
+    }
   }
 };
 

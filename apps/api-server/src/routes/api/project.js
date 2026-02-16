@@ -11,6 +11,9 @@ const checkHostStatus = require('../../services/checkHostStatus');
 const projectsWithIssues = require('../../services/projects-with-issues');
 const externalCertificatesManager = require('../../services/externalCertificatesManager');
 const externalCertificates = require('../../services/externalCertificates');
+const {
+  getCertificateConfig,
+} = require('../../services/checkHostStatusHelpers');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
@@ -967,6 +970,34 @@ router
     }
 
     try {
+      // Clean up K8s ExternalSecret if project used external certificates
+      if (externalCertificates.isEnabled()) {
+        const certConfig = getCertificateConfig(project.config);
+        if (certConfig.certificateMethod === 'external') {
+          const namespace = process.env.KUBERNETES_NAMESPACE;
+          if (namespace) {
+            try {
+              const slugOverride = certConfig.externalCertSlug || null;
+              const secretName = externalCertificatesManager.generateSecretName(
+                project.url,
+                namespace,
+                slugOverride
+              );
+              await externalCertificatesManager.deleteExternalSecret(
+                secretName,
+                namespace
+              );
+            } catch (cleanupErr) {
+              console.error(
+                '[external-certificates] Failed to clean up ExternalSecret for project %s',
+                project.id
+              );
+              // Non-blocking: proceed with deletion even if K8s cleanup fails
+            }
+          }
+        }
+      }
+
       await project.destroy();
       res.json({ success: true });
     } catch (err) {
@@ -1162,8 +1193,12 @@ router
         });
       }
 
-      // Set cooldown
+      // Set cooldown with auto-cleanup to prevent memory leak
       certRetryCooldowns.set(projectId, Date.now());
+      setTimeout(
+        () => certRetryCooldowns.delete(projectId),
+        CERT_RETRY_COOLDOWN_MS
+      );
 
       const namespace = process.env.KUBERNETES_NAMESPACE;
       const slugOverride =
@@ -1186,8 +1221,8 @@ router
         namespace
       );
 
-      // Update hostStatus
-      let hostStatus = project.hostStatus || {};
+      // Clone to avoid Sequelize JSON mutation trap (same pattern as checkHostStatus.js)
+      let hostStatus = project.hostStatus ? { ...project.hostStatus } : {};
       hostStatus.certificate = {
         method: 'external',
         state: certStatus.state,
@@ -1208,7 +1243,7 @@ router
       });
     } catch (error) {
       console.error(
-        '[external-certificates] Retry failed for project %s:',
+        '[external-certificates] Retry failed for project %s',
         String(req.params.projectId)
       );
       return res.status(500).json({ error: 'Certificate retry failed' });

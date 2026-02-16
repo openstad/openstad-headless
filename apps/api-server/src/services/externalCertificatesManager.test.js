@@ -6,6 +6,7 @@ const mockCreateNamespacedCustomObject = vi.fn();
 const mockGetNamespacedCustomObject = vi.fn();
 const mockPatchNamespacedCustomObject = vi.fn();
 const mockListNamespacedCustomObject = vi.fn();
+const mockDeleteNamespacedCustomObject = vi.fn();
 const mockReadNamespacedSecret = vi.fn();
 
 const FakeCustomObjectsApi = class {};
@@ -22,6 +23,7 @@ vi.mock('@kubernetes/client-node', () => {
           getNamespacedCustomObject: mockGetNamespacedCustomObject,
           patchNamespacedCustomObject: mockPatchNamespacedCustomObject,
           listNamespacedCustomObject: mockListNamespacedCustomObject,
+          deleteNamespacedCustomObject: mockDeleteNamespacedCustomObject,
         };
       }
       if (ApiClass === FakeCoreV1Api) {
@@ -50,6 +52,7 @@ const {
   ensureExternalSecret,
   checkSecretReady,
   waitForSecretReady,
+  deleteExternalSecret,
 } = manager;
 
 // -- Env helpers --
@@ -162,6 +165,7 @@ beforeEach(() => {
   mockGetNamespacedCustomObject.mockReset();
   mockPatchNamespacedCustomObject.mockReset();
   mockListNamespacedCustomObject.mockReset();
+  mockDeleteNamespacedCustomObject.mockReset();
   mockReadNamespacedSecret.mockReset();
 
   // Spy on isEnabled on the same CJS module instance used by the manager
@@ -216,6 +220,18 @@ describe('externalCertificatesManager', () => {
     test('collapses multiple dashes and trims edge dashes', () => {
       const result = generateSecretName('a--b..c', 'openstad-org');
       expect(result).toBe('tls-openstad-prod-org-a-b-c');
+    });
+
+    test('throws when namespace is undefined', () => {
+      expect(() => generateSecretName('example.com', undefined)).toThrow(
+        'requires a namespace'
+      );
+    });
+
+    test('throws when namespace is null', () => {
+      expect(() => generateSecretName('example.com', null)).toThrow(
+        'requires a namespace'
+      );
     });
   });
 
@@ -570,6 +586,53 @@ describe('externalCertificatesManager', () => {
       await expect(
         waitForSecretReady('test', 'ns', { maxRetries: 3, retryDelayMs: 0 })
       ).rejects.toThrow('Internal Server Error');
+    });
+  });
+
+  // -------------------------------------------------------
+  // deleteExternalSecret()
+  // -------------------------------------------------------
+  describe('deleteExternalSecret()', () => {
+    test('returns { deleted: false } when feature is disabled', async () => {
+      vi.spyOn(externalCertificates, 'isEnabled').mockReturnValue(false);
+
+      const result = await deleteExternalSecret('test-secret', 'ns');
+
+      expect(result).toEqual({ deleted: false });
+      expect(mockDeleteNamespacedCustomObject).not.toHaveBeenCalled();
+    });
+
+    test('deletes ExternalSecret successfully', async () => {
+      mockDeleteNamespacedCustomObject.mockResolvedValue({});
+
+      const result = await deleteExternalSecret('test-secret', 'ns');
+
+      expect(result).toEqual({ deleted: true });
+      expect(mockDeleteNamespacedCustomObject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          group: 'external-secrets.io',
+          version: 'v1',
+          namespace: 'ns',
+          plural: 'externalsecrets',
+          name: 'test-secret',
+        })
+      );
+    });
+
+    test('returns { deleted: false } on 404 (already gone)', async () => {
+      mockDeleteNamespacedCustomObject.mockRejectedValue(make404Error());
+
+      const result = await deleteExternalSecret('test-secret', 'ns');
+
+      expect(result).toEqual({ deleted: false });
+    });
+
+    test('throws on unexpected errors', async () => {
+      mockDeleteNamespacedCustomObject.mockRejectedValue(make500Error());
+
+      await expect(deleteExternalSecret('test-secret', 'ns')).rejects.toThrow(
+        'Internal Server Error'
+      );
     });
   });
 });

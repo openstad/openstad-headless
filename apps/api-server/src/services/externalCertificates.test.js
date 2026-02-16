@@ -111,11 +111,13 @@ describe('externalCertificates', () => {
       expect(mockKubeConfigConstructor).not.toHaveBeenCalled();
     });
 
-    test('skips when KUBERNETES_NAMESPACE is not set', async () => {
+    test('auto-disables when KUBERNETES_NAMESPACE is not set', async () => {
       const mod = await loadModule({ EXTERNAL_CERTIFICATES_ENABLED: 'true' });
+      expect(mod.isEnabled()).toBe(true);
 
       await mod.validateInfrastructure();
 
+      expect(mod.isEnabled()).toBe(false);
       expect(mockKubeConfigConstructor).not.toHaveBeenCalled();
     });
 

@@ -39,10 +39,11 @@ async function validateInfrastructure() {
     return;
   }
 
-  // Skip validation if not running on K8s (local dev)
+  // Auto-disable if not running on K8s — downstream code requires namespace
   if (!process.env.KUBERNETES_NAMESPACE) {
+    _enabled = false;
     console.log(
-      '[external-certificates] Not running on K8s - skipping infrastructure validation'
+      '[external-certificates] Not running on K8s - feature auto-disabled'
     );
     return;
   }

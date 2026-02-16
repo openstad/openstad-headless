@@ -40,6 +40,12 @@ function slugify(str) {
  * @returns {string} Full secret name (e.g., 'tls-openstad-prod-amsterdam-www-example-com')
  */
 function generateSecretName(domain, namespace, slugOverride) {
+  if (!namespace) {
+    throw new Error(
+      'generateSecretName requires a namespace (KUBERNETES_NAMESPACE not set?)'
+    );
+  }
+
   // Extract org name from namespace by stripping 'openstad-' prefix
   const orgName = namespace.replace(/^openstad-/, '');
 
@@ -327,9 +333,57 @@ async function waitForSecretReady(secretName, namespace, options = {}) {
   return certStatus;
 }
 
+/**
+ * Deletes an ExternalSecret CRD from the given namespace.
+ * Handles 404 gracefully (resource already gone).
+ * No-op when feature is disabled.
+ *
+ * @param {string} secretName - Name of the ExternalSecret to delete
+ * @param {string} namespace - K8s namespace
+ * @returns {Promise<{deleted: boolean}>}
+ */
+async function deleteExternalSecret(secretName, namespace) {
+  if (!externalCertificates.isEnabled()) {
+    return { deleted: false };
+  }
+
+  const { customObjects } = await getK8sClients();
+
+  for (const version of ['v1', 'v1beta1']) {
+    try {
+      await customObjects.deleteNamespacedCustomObject({
+        group: 'external-secrets.io',
+        version: version,
+        namespace: namespace,
+        plural: 'externalsecrets',
+        name: secretName,
+      });
+
+      console.log(
+        `[external-certificates] Deleted ExternalSecret ${secretName}`
+      );
+      return { deleted: true };
+    } catch (error) {
+      const status = getErrorStatusCode(error);
+      if (status === 404 && version === 'v1') {
+        // v1 API not available, try v1beta1
+        continue;
+      } else if (status === 404) {
+        // Resource already gone — desired state
+        return { deleted: false };
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  return { deleted: false };
+}
+
 module.exports = {
   generateSecretName,
   ensureExternalSecret,
   checkSecretReady,
   waitForSecretReady,
+  deleteExternalSecret,
 };

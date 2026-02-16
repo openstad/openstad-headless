@@ -361,8 +361,9 @@ nginx
 */}}
 {{- define "openstad.createdIngresses.annotations" -}}
 {{- if eq (include "openstad.ingress.type" .) "traefik" -}}
-{{- $annotations := dict "traefik.ingress.kubernetes.io/router.middlewares" (include "openstad.traefik.middlewares.createdIngresses" .) -}}
-{{- $annotations | toJson -}}
+{{- $user := .Values.api.createdIngresses.annotations | default dict -}}
+{{- $traefik := dict "traefik.ingress.kubernetes.io/router.middlewares" (include "openstad.traefik.middlewares.createdIngresses" .) -}}
+{{- mustMergeOverwrite $user $traefik | toJson -}}
 {{- else -}}
 {{- .Values.api.createdIngresses.annotations | default dict | toJson -}}
 {{- end -}}
