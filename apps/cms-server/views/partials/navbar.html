@@ -1,13 +1,12 @@
-{% if data.global.arrangeMainMenu and data.global.arrangeMainMenu == 'manually'%}
-{% set mainMenu = data.global.mainMenuItems | jsonAttribute %}
+{% if data.global.arrangeMainMenu and data.global.arrangeMainMenu ==
+'manually'%} {% set mainMenu = data.global.mainMenuItems | jsonAttribute %}
 
 <div
   id="navbar"
   data-content="{{ mainMenu | jsonAttribute }}"
   data-prefix="{{ data.prefix }}"></div>
-{% else %}
-{% if not data.global.compactMenu %}
-{% set menuData = data.home._children | jsonAttribute %}
+{% else %} {% if not data.global.compactMenu %} {% set menuData =
+data.home._children | jsonAttribute %}
 
 <div
   id="navbar"

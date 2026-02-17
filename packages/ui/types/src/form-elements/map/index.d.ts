@@ -4,12 +4,8 @@ import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-ove
 import { BaseProps } from '@openstad-headless/types/base-props.js';
 import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props.js';
 import { FC } from 'react';
-
 import './map.css';
-
-export type MapProps = BaseProps &
-  AreaProps &
-  ProjectSettingProps & {
+export type MapProps = BaseProps & AreaProps & ProjectSettingProps & {
     overrideDefaultValue?: FormValue;
     title: string;
     description: string;
@@ -17,13 +13,10 @@ export type MapProps = BaseProps &
     fieldRequired: boolean;
     disabled?: boolean;
     type?: string;
-    onChange?: (
-      e: {
+    onChange?: (e: {
         name: string;
         value: FormValue;
-      },
-      triggerSetLastKey?: boolean
-    ) => void;
+    }, triggerSetLastKey?: boolean) => void;
     requiredWarning?: string;
     showMoreInfo?: boolean;
     moreInfoButton?: string;
@@ -33,25 +26,25 @@ export type MapProps = BaseProps &
     enableOnOffSwitching?: boolean;
     defaultValue?: FormValue;
     allowedPolygons?: Array<{
-      id: number;
-      name: string;
+        id: number;
+        name: string;
     }>;
     prevPageText?: string;
     nextPageText?: string;
     fieldOptions?: {
-      value: string;
-      label: string;
+        value: string;
+        label: string;
     }[];
     images?: Array<{
-      url: string;
-      name?: string;
-      imageAlt?: string;
-      imageDescription?: string;
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
     }>;
     createImageSlider?: boolean;
     imageClickable?: boolean;
     enablePolygonTags?: boolean;
     showHiddenPolygonsForAdmin?: boolean;
-  };
+};
 declare const MapField: FC<MapProps>;
 export default MapField;
