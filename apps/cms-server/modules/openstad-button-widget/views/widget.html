@@ -1,4 +1,4 @@
-{% set buttonData = data.widget.buttons | json | replace("'", "&#39;") %}
+{% set buttonData = data.widget.buttons | jsonAttribute %}
 
 <div
   data-openstad-button
