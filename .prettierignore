@@ -26,3 +26,10 @@ apps/cms-server/public/apos-frontend
 apps/auth-server/views/
 apps/cms-server/views/partials/oud/
 apps/cms-server/modules/openstad-section-widget/views/
+# These Nunjucks partials contain JSON serialized into HTML data attributes.
+# Prettier's HTML parser rewrites quote styles in a way that can break the
+# encoded JSON payloads used by navbar/footer widgets at runtime.
+# Keep them out of Prettier to preserve safe single-quoted JSON attributes.
+apps/cms-server/views/partials/footer.html
+apps/cms-server/views/partials/navbar.html
+apps/cms-server/views/partials/header.html

@@ -1,25 +1,27 @@
-{% if data.global.arrangeMainMenu and data.global.arrangeMainMenu == 'manually'
-%} {% set mainMenu = data.global.mainMenuItems | json | replace("'", "&#39;") %}
+{% if data.global.arrangeMainMenu and data.global.arrangeMainMenu == 'manually'%}
+  {% set mainMenu = data.global.mainMenuItems | json | replace("'", "&#39;") %}
 
-<div
-  id="navbar"
-  data-content="{{ mainMenu }}"
-  data-prefix="{{ data.prefix }}"></div>
-{% else %} {% if not data.global.compactMenu %} {% set menuData =
-data.home._children | json | replace("'", "&#39;") %} {% if not data.home.orphan
-%} {% set homeData = [{"_url": data.home._url, "title": data.home.title}] | json
-| replace("'", "&#39;") %} {% endif %}
+  <div
+    id="navbar"
+    data-content='{{ mainMenu }}'
+    data-prefix="{{ data.prefix }}"
+  >
+  </div>
+  {% else %}
+  {% if not data.global.compactMenu %}
+    {% set menuData = data.home._children | json | replace("'", "&#39;") %}
+  {% if not data.home.orphan %}
+    {% set homeData = [{"_url": data.home._url, "title": data.home.title}] | json | replace("'", "&#39;") %}
+  {% endif %}
 
-<div
-  id="navbar"
-  {%
-  if
-  not
-  data.home.orphan
-  %}data-home="{{ homeData }}"
-  {%
-  endif
-  %}
-  data-content="{{ menuData }}"
-  data-prefix="{{ data.prefix }}"></div>
-{% endif %} {% endif %}
+  <div
+    id="navbar"
+    {% if not data.home.orphan %}
+    data-home='{{ homeData }}'
+    {% endif %}
+    data-content='{{ menuData }}'
+    data-prefix="{{ data.prefix }}"
+  >
+  </div>
+  {% endif %}
+{% endif %}

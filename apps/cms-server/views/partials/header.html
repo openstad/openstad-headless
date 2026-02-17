@@ -113,23 +113,14 @@
                 <li>
                   <a
                     href="{{topLink.url | safeRelativeUrl}}"
-                    {%
-                    if
-                    topLink.targetBlank
-                    %}
+                    {% if topLink.targetBlank %}
                     target="_blank"
-                    {%
-                    endif
-                    %}
+                    {% endif %}
                     class="link-caret--black"
-                    {%
-                    if
-                    data.currentPath.startsWith(topLink.url)
-                    %}
+                    {% if data.currentPath.startsWith(topLink.url) %}
                     aria-current="page"
-                    {%
-                    endif
-                    %}>
+                    {% endif %}
+                  >
                     {{topLink.label}}
                   </a>
                 </li>
@@ -164,15 +155,10 @@
         <div
           id="navbar"
           class="--compact"
-          {%
-          if
-          not
-          data.home.orphan
-          %}data-home="{{ homeData }}"
-          {%
-          endif
-          %}
-          data-content="{{ menuData }}"
+          {% if not data.home.orphan %}
+          data-home='{{ homeData }}'
+          {% endif %}
+          data-content='{{ menuData }}'
           data-prefix="{{ data.prefix }}"
           data-mobile-menu="{{ data.global.mobileMenu }}"></div>
         {% endif %}
