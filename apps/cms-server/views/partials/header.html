@@ -158,7 +158,7 @@
       <div class="header_navbar-container">
         <button class="close-button"><span>Menu tonen</span></button>
         {% if data.global.compactMenu %} {% set menuData = data.home._children |
-        json | replace('"', "&quot;") %}
+        jsonAttribute %}
         <div
           id="navbar"
           class="--compact"
