@@ -1663,17 +1663,18 @@ export default function WidgetChoiceGuideItems(
                                           )}
                                         />
                                       </div>
-
-                                      <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
-                                        <ArrowLeft
-                                          className="cursor-pointer"
-                                          onClick={() => moveUpImage(index)}
-                                        />
-                                        <ArrowRight
-                                          className="cursor-pointer"
-                                          onClick={() => moveDownImage(index)}
-                                        />
-                                      </span>
+                                      {imageFields.length > 1 && (
+                                        <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                          <ArrowLeft
+                                            className="cursor-pointer"
+                                            onClick={() => moveUpImage(index)}
+                                          />
+                                          <ArrowRight
+                                            className="cursor-pointer"
+                                            onClick={() => moveDownImage(index)}
+                                          />
+                                        </span>
+                                      )}
                                     </div>
                                   );
                                 })}
