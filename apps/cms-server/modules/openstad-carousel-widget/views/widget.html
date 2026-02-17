@@ -1,9 +1,9 @@
-{% set carouselImages = data.widget.images | dump | replace("'", "&#39;") %}
+{% set images = data.widget.images | jsonAttribute %}
 
 <div
   data-openstad-carousel
   data-size="{{ data.widget.size }}"
   data-fit="{{ data.widget.fit }}"
   data-title="{{ data.widget.title }}"
-  data-images="{{ carouselImages }}"
+  data-images="{{ images }}"
   data-imagesize="{{ data.widget.imageSize | default('full') }}"></div>

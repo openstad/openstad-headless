@@ -1,8 +1,9 @@
-{% set footerContent = data.global.footerlinks %} {% set footerLogo =
-data.global.footerLogo %}
+{% set footerLinks = data.global.footerlinks | jsonAttribute %}
+{% set footerLogo = data.global.footerLogo | jsonAttribute %}
+{% set footerLogoAltText = data.global.footerLogoAltText | jsonAttribute %}
 
 <div
   id="footer-container"
-  data-content="{{ footerContent | jsonAttribute }}"
-  data-logo="{{ footerLogo | jsonAttribute }}"
-  data-alt="{{ data.global.footerLogoAltText }}"></div>
+  data-content="{{ footerLinks }}"
+  data-logo="{{ footerLogo }}"
+  data-alt="{{ footerLogoAltText }}"></div>
