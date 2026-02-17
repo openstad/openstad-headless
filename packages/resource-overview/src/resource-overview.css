@@ -360,11 +360,11 @@ p.osc-searchtext {
 }
 
 .selected > .ri-thumb-up-line:before {
-  content: "\f206";
+  content: '\f206';
 }
 
 .selected > .ri-thumb-down-line:before {
-  content: "\f204";
+  content: '\f204';
 }
 
 /* Text Colors */

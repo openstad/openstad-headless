@@ -794,7 +794,7 @@ const config: EnqueteWidgetProps = {
   maxCharactersWarning: 'Je hebt nog {maxCharacters} tekens over',
   minCharactersWarning: 'Nog minimaal {minCharacters} tekens',
   enableDraftPersistence: true,
-  maxCharactersOverWarning: "Je hebt {overCharacters} tekens teveel",
+  maxCharactersOverWarning: 'Je hebt {overCharacters} tekens teveel',
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

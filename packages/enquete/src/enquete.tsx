@@ -390,8 +390,11 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['minCharactersError'] =
             props?.minCharactersError ||
             'Tekst moet minimaal {minCharacters} karakters bevatten';
-          fieldData['showMinMaxAfterBlur'] = props?.showMinMaxAfterBlur || false;
-          fieldData['maxCharactersOverWarning'] = props?.maxCharactersOverWarning || 'Je hebt {overCharacters} tekens teveel';
+          fieldData['showMinMaxAfterBlur'] =
+            props?.showMinMaxAfterBlur || false;
+          fieldData['maxCharactersOverWarning'] =
+            props?.maxCharactersOverWarning ||
+            'Je hebt {overCharacters} tekens teveel';
           break;
         case 'multiplechoice':
         case 'multiple': {

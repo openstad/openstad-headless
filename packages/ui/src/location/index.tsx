@@ -167,13 +167,13 @@ export default function PostcodeAutoFill({
             type="text"
             ref={inputRef}
             value={input}
-            onChange={e => {
+            onChange={(e) => {
               const nextValue = sanitizeZipInput(e.target.value);
               setInput(nextValue);
               setSelected(null);
               setShowDropdown(true);
             }}
-            onKeyDown={e => {
+            onKeyDown={(e) => {
               if (e.key === ' ' || e.key === 'Spacebar') {
                 e.preventDefault();
               }

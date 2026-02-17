@@ -101,7 +101,10 @@ export default function CreateUserProjects() {
           if (user.emailNotificationConsent !== updateValue.consent) {
             updatedUser.emailNotificationConsent = updateValue.consent;
           }
-          if (typeof updateValue.roleId !== 'undefined' && user.role !== updateValue.roleId) {
+          if (
+            typeof updateValue.roleId !== 'undefined' &&
+            user.role !== updateValue.roleId
+          ) {
             updatedUser.role = updateValue.roleId;
           }
 

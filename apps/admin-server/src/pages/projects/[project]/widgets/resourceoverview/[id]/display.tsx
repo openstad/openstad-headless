@@ -979,7 +979,8 @@ export default function WidgetResourceOverviewDisplay(
                 <FormItem>
                   <FormLabel>Filters automatisch sluiten na selectie</FormLabel>
                   <FormDescription>
-                    Alleen van toepassing bij automatisch toepassen en een inklapbaar filtermenu.
+                    Alleen van toepassing bij automatisch toepassen en een
+                    inklapbaar filtermenu.
                   </FormDescription>
                   {YesNoSelect(field, props)}
                   <FormMessage />

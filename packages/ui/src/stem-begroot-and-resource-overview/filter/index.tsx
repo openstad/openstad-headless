@@ -365,7 +365,11 @@ export function Filters({
       setActiveTags(newActiveTagsDraft);
     }
 
-    if (autoApply && displayCollapsibleFilter && props.closeFiltersOnAutoApply) {
+    if (
+      autoApply &&
+      displayCollapsibleFilter &&
+      props.closeFiltersOnAutoApply
+    ) {
       setFiltersVisible(false);
     }
   };

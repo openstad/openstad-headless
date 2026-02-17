@@ -254,41 +254,50 @@ const TextInput: FC<TextInputProps> = ({
       default:
         return 'text';
     }
-  }
-
-    useEffect(() => {
-        if (reset) {
-            reset(() => setValue(initialValue));
-        }
-    }, [reset, defaultValue]);
-
-    useEffect(() => {
-        value && setCheckInvalid(false);
-    }, [])
-
-    const characterHelpText = (count: number) => {
-      let helpText = '';
-
-      if (!!minCharacters && count < minCharacters) {
-          helpText = minCharactersWarning?.replace('{minCharacters}', (minCharacters - count).toString());
-      } else if (!!maxCharacters && count <= maxCharacters) {
-          helpText = maxCharactersWarning?.replace('{maxCharacters}', (maxCharacters - count).toString());
-      } else if (!!maxCharacters && count > maxCharacters) {
-          helpText = maxCharactersOverWarning?.replace('{overCharacters}', (count - maxCharacters).toString());
-      }
-
-      setHelpText(helpText);
   };
 
   useEffect(() => {
-      if (reset) {
-          reset(() => setValue(initialValue));
-      }
+    if (reset) {
+      reset(() => setValue(initialValue));
+    }
   }, [reset, defaultValue]);
 
   useEffect(() => {
-      value && setCheckInvalid(false);
-  }, [])
+    value && setCheckInvalid(false);
+  }, []);
+
+  const characterHelpText = (count: number) => {
+    let helpText = '';
+
+    if (!!minCharacters && count < minCharacters) {
+      helpText = minCharactersWarning?.replace(
+        '{minCharacters}',
+        (minCharacters - count).toString()
+      );
+    } else if (!!maxCharacters && count <= maxCharacters) {
+      helpText = maxCharactersWarning?.replace(
+        '{maxCharacters}',
+        (maxCharacters - count).toString()
+      );
+    } else if (!!maxCharacters && count > maxCharacters) {
+      helpText = maxCharactersOverWarning?.replace(
+        '{overCharacters}',
+        (count - maxCharacters).toString()
+      );
+    }
+
+    setHelpText(helpText);
+  };
+
+  useEffect(() => {
+    if (reset) {
+      reset(() => setValue(initialValue));
+    }
+  }, [reset, defaultValue]);
+
+  useEffect(() => {
+    value && setCheckInvalid(false);
+  }, []);
 
   const getAutocomplete = (fieldKey: string) => {
     switch (fieldKey?.toLocaleLowerCase()) {
@@ -339,82 +348,87 @@ const TextInput: FC<TextInputProps> = ({
         </>
       )}
 
-            {showMoreInfo && (
-                <>
-                    <AccordionProvider
-                        sections={[
-                            {
-                                headingLevel: 3,
-                                body: <HtmlContent html={moreInfoContent} />,
-                                expanded: undefined,
-                                label: moreInfoButton,
-                            }
-                        ]}
-                    />
-                    <Spacer size={1.5} />
-                </>
-            )}
+      {showMoreInfo && (
+        <>
+          <AccordionProvider
+            sections={[
+              {
+                headingLevel: 3,
+                body: <HtmlContent html={moreInfoContent} />,
+                expanded: undefined,
+                label: moreInfoButton,
+              },
+            ]}
+          />
+          <Spacer size={1.5} />
+        </>
+      )}
 
-            {InfoImage({
-                imageFallback: infoImage || '',
-                images: images,
-                createImageSlider: createImageSlider,
-                addSpacer: !!infoImage,
-                imageClickable: imageClickable
-            })}
+      {InfoImage({
+        imageFallback: infoImage || '',
+        images: images,
+        createImageSlider: createImageSlider,
+        addSpacer: !!infoImage,
+        imageClickable: imageClickable,
+      })}
 
-            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`} aria-invalid={checkInvalid}>
-                <InputComponent
-                    id={randomId}
-                    name={fieldKey}
-                    required={fieldRequired}
-                    type={getType(fieldKey)}
-                    placeholder={placeholder}
-                    value={value}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                        setValue(e.target.value);
-                        const valueLength = e.target.value.length;
-                        const hasMax = maxCharacters > 0;
-                        const exceedsMax = hasMax && valueLength > maxCharacters;
+      <div
+        className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}
+        aria-invalid={checkInvalid}>
+        <InputComponent
+          id={randomId}
+          name={fieldKey}
+          required={fieldRequired}
+          type={getType(fieldKey)}
+          placeholder={placeholder}
+          value={value}
+          onChange={(
+            e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+          ) => {
+            setValue(e.target.value);
+            const valueLength = e.target.value.length;
+            const hasMax = maxCharacters > 0;
+            const exceedsMax = hasMax && valueLength > maxCharacters;
 
-                        if (fieldRequired && valueLength === 0) {
-                            setCheckInvalid(true);
-                        } else if (exceedsMax) {
-                            setCheckInvalid(true);
-                        } else {
-                            setCheckInvalid(false);
-                        }
+            if (fieldRequired && valueLength === 0) {
+              setCheckInvalid(true);
+            } else if (exceedsMax) {
+              setCheckInvalid(true);
+            } else {
+              setCheckInvalid(false);
+            }
 
-                        if (onChange) {
-                            onChange({
-                                name: fieldKey,
-                                value: e.target.value,
-                            });
-                        }
-                        characterHelpText(valueLength);
-
-                    }}
-                    disabled={disabled}
-                    rows={rows}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => {
-                        setIsFocused(false);
-                        setHasBlurred(true);
-                    }}
-                    autoComplete={getAutocomplete(fieldKey)}
-
-                    aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
-                    aria-invalid={checkInvalid}
-                />
-                {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
-                    <FormFieldDescription className="help-text" id={helpTextId} aria-live="polite" aria-atomic="true">
-                        {helpText}
-                    </FormFieldDescription>
-                )}
-            </div>
-
-        </FormField>
-    );
+            if (onChange) {
+              onChange({
+                name: fieldKey,
+                value: e.target.value,
+              });
+            }
+            characterHelpText(valueLength);
+          }}
+          disabled={disabled}
+          rows={rows}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => {
+            setIsFocused(false);
+            setHasBlurred(true);
+          }}
+          autoComplete={getAutocomplete(fieldKey)}
+          aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
+          aria-invalid={checkInvalid}
+        />
+        {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
+          <FormFieldDescription
+            className="help-text"
+            id={helpTextId}
+            aria-live="polite"
+            aria-atomic="true">
+            {helpText}
+          </FormFieldDescription>
+        )}
+      </div>
+    </FormField>
+  );
 };
 
 export { TrixEditor };

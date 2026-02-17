@@ -38,13 +38,13 @@ export type ProjectSettingProps = {
     canDislike: boolean;
     canReply: boolean;
     closedText: string;
-    requiredUserRole: string,
-    descriptionMinLength: number,
-    descriptionMaxLength: number,
-    adminLabel: string,
-    editorLabel?: string,
-    minCharactersWarning?: string,
-    maxCharactersWarning?: string,
+    requiredUserRole: string;
+    descriptionMinLength: number;
+    descriptionMaxLength: number;
+    adminLabel: string;
+    editorLabel?: string;
+    minCharactersWarning?: string;
+    maxCharactersWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
     variant?: 'micro-score' | 'medium';

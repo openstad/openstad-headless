@@ -60,14 +60,11 @@ const formSchema = z.object({
     .string()
     .optional()
     .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
-  showMinMaxAfterBlur: z
-    .boolean()
-    .optional()
-    .default(false),
+  showMinMaxAfterBlur: z.boolean().optional().default(false),
   maxCharactersOverWarning: z
     .string()
     .optional()
-    .default("Je hebt {overCharacters} tekens teveel"),
+    .default('Je hebt {overCharacters} tekens teveel'),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -262,9 +259,7 @@ export default function WidgetResourceFormGeneral() {
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters over de maximum waarde heen gaat. Gebruik {overCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
-                <Input
-                  {...field}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
