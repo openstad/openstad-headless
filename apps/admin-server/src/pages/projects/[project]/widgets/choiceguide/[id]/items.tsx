@@ -1801,7 +1801,9 @@ export default function WidgetChoiceGuideItems(
                         </>
                       )}
 
-                      {form.watch('type') !== 'none' && (
+                      {!['none', 'a-b-slider', 'sort', 'scale'].includes(
+                        form.watch('type') || ''
+                      ) && (
                         <FormField
                           control={form.control}
                           name="fieldRequired"

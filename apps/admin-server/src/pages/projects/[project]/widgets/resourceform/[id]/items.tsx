@@ -1444,8 +1444,9 @@ export default function WidgetResourceFormItems(
                         )}
                       </>
                     )}
-                    {form.watch('type') !== 'none' &&
-                      form.watch('type') !== 'pagination' && (
+                    {!['none', 'pagination', 'a-b-slider', 'sort', 'scale'].includes(
+                      form.watch('type') || ''
+                    ) && (
                         <FormField
                           control={form.control}
                           name="fieldRequired"
