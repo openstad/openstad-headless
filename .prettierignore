@@ -14,6 +14,7 @@ charts/
 operations/
 *.iife.js
 *.less
+*.d.ts
 
 apps/cms-server/data
 apps/cms-server/public/uploads
