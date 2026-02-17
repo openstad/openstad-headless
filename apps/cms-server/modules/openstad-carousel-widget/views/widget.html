@@ -1,4 +1,4 @@
-{% set images = data.widget.images | dump | replace('"', "&quot;") %}
+{% set images = data.widget.images | jsonAttribute %}
 
 <div
   data-openstad-carousel
