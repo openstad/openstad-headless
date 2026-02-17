@@ -1444,69 +1444,73 @@ export default function WidgetResourceFormItems(
                         )}
                       </>
                     )}
-                    {!['none', 'pagination', 'a-b-slider', 'sort', 'scale'].includes(
-                      form.watch('type') || ''
-                    ) && (
-                        <FormField
-                          control={form.control}
-                          name="fieldRequired"
-                          render={({ field }) => {
-                            const staticType = [
-                              'title',
-                              'summary',
-                              'description',
-                            ];
-                            const type = form.watch('type');
-                            const required = staticType.includes(type || '');
+                    {![
+                      'none',
+                      'pagination',
+                      'a-b-slider',
+                      'sort',
+                      'scale',
+                    ].includes(form.watch('type') || '') && (
+                      <FormField
+                        control={form.control}
+                        name="fieldRequired"
+                        render={({ field }) => {
+                          const staticType = [
+                            'title',
+                            'summary',
+                            'description',
+                          ];
+                          const type = form.watch('type');
+                          const required = staticType.includes(type || '');
 
-                            return (
-                              <FormItem>
-                                <FormLabel>
-                                  Is dit veld verplicht?
-                                  <InfoDialog
-                                    content={
-                                      'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'
-                                    }
-                                  />
-                                  {form.watch('type') === 'matrix' && (
-                                    <FormDescription>
-                                      Als je het veld <b>verplicht</b> maakt
-                                      moeten gebruikers bij elke rij een
-                                      antwoord selecteren. Als je het veld{' '}
-                                      <b>niet verplicht</b> maakt kunnen
-                                      gebruikers elke rij overslaan en invullen
-                                      wat ze willen.
-                                    </FormDescription>
-                                  )}
-                                </FormLabel>
-                                <Select
-                                  onValueChange={(e: string) =>
-                                    field.onChange(e === 'true')
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                Is dit veld verplicht?
+                                <InfoDialog
+                                  content={
+                                    'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'
                                   }
-                                  value={
-                                    required
+                                />
+                                {form.watch('type') === 'matrix' && (
+                                  <FormDescription>
+                                    Als je het veld <b>verplicht</b> maakt
+                                    moeten gebruikers bij elke rij een antwoord
+                                    selecteren. Als je het veld{' '}
+                                    <b>niet verplicht</b> maakt kunnen
+                                    gebruikers elke rij overslaan en invullen
+                                    wat ze willen.
+                                  </FormDescription>
+                                )}
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={
+                                  required
+                                    ? 'true'
+                                    : field.value
                                       ? 'true'
-                                      : field.value
-                                        ? 'true'
-                                        : 'false'
-                                  }
-                                  disabled={required}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Kies een optie" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="true">Ja</SelectItem>
-                                    <SelectItem value="false">Nee</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      )}
+                                      : 'false'
+                                }
+                                disabled={required}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    )}
                     {['description', 'text'].includes(
                       form.watch('type') || ''
                     ) && (

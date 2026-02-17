@@ -463,9 +463,7 @@ const defaultItemRenderer = (
               onClick={() => vote('yes')}
               className={`micro-score-vote micro-score-vote--yes ${selectedOpinion === 'yes' ? 'selected' : ''}`}
             />
-            <Paragraph className="votes-score">
-              {resource.netVotes}
-            </Paragraph>
+            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon={`${

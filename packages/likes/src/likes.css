@@ -148,7 +148,10 @@
   color: var(--microLikeColor);
 }
 
-.like-widget-container.micro-score .like-option-container button .micro-score-triangle {
+.like-widget-container.micro-score
+  .like-option-container
+  button
+  .micro-score-triangle {
   display: inline-block;
 }
 

@@ -2095,41 +2095,41 @@ export default function WidgetEnqueteItems(
                       'a-b-slider',
                       'video',
                     ].includes(form.watch('questionType') || '') && (
-                        <FormField
-                          control={form.control}
-                          name="fieldRequired"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Is dit veld verplicht?</FormLabel>
-                              {form.watch('questionType') === 'matrix' && (
-                                <FormDescription>
-                                  Als je het veld <b>verplicht</b> maakt moeten
-                                  gebruikers bij elke rij een antwoord
-                                  selecteren. Als je het veld{' '}
-                                  <b>niet verplicht</b> maakt kunnen gebruikers
-                                  elke rij overslaan en invullen wat ze willen.
-                                </FormDescription>
-                              )}
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="false">Nee</SelectItem>
-                                  <SelectItem value="true">Ja</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
+                      <FormField
+                        control={form.control}
+                        name="fieldRequired"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Is dit veld verplicht?</FormLabel>
+                            {form.watch('questionType') === 'matrix' && (
+                              <FormDescription>
+                                Als je het veld <b>verplicht</b> maakt moeten
+                                gebruikers bij elke rij een antwoord selecteren.
+                                Als je het veld <b>niet verplicht</b> maakt
+                                kunnen gebruikers elke rij overslaan en invullen
+                                wat ze willen.
+                              </FormDescription>
+                            )}
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     {form.watch('questionType') === 'matrix' && (
                       <FormField
