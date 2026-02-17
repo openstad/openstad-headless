@@ -113,14 +113,23 @@
                 <li>
                   <a
                     href="{{topLink.url | safeRelativeUrl}}"
-                    {% if topLink.targetBlank %}
+                    {%
+                    if
+                    topLink.targetBlank
+                    %}
                     target="_blank"
-                    {% endif %}
+                    {%
+                    endif
+                    %}
                     class="link-caret--black"
-                    {% if data.currentPath.startsWith(topLink.url) %}
+                    {%
+                    if
+                    data.currentPath.startsWith(topLink.url)
+                    %}
                     aria-current="page"
-                    {% endif %}
-                  >
+                    {%
+                    endif
+                    %}>
                     {{topLink.label}}
                   </a>
                 </li>
@@ -148,17 +157,22 @@
 
       <div class="header_navbar-container">
         <button class="close-button"><span>Menu tonen</span></button>
-        {% if data.global.compactMenu %} {% set menuData = data.home._children |
-        json | replace("'", "&#39;") %} {% if not data.home.orphan %} {% set
-        homeData = [{"_url": data.home._url, "title": data.home.title}] | json |
-        replace("'", "&#39;") %} {% endif %}
+        {% if data.global.compactMenu %} {% set menuData = data.home._children
+        %} {% if not data.home.orphan %} {% set homeData = [{"_url":
+        data.home._url, "title": data.home.title}] %} {% endif %}
         <div
           id="navbar"
           class="--compact"
-          {% if not data.home.orphan %}
-          data-home='{{ homeData }}'
-          {% endif %}
-          data-content='{{ menuData }}'
+          {%
+          if
+          not
+          data.home.orphan
+          %}
+          data-home="{{ homeData | jsonAttribute }}"
+          {%
+          endif
+          %}
+          data-content="{{ menuData | jsonAttribute }}"
           data-prefix="{{ data.prefix }}"
           data-mobile-menu="{{ data.global.mobileMenu }}"></div>
         {% endif %}
