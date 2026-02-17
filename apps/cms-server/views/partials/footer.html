@@ -1,5 +1,10 @@
+{% set footerLinks = data.global.footerlinks | json | replace('"', "&quot;") %}
+{% set footerLogo = data.global.footerLogo | json | replace('"', "&quot;") %} {%
+set footerLogoAltText = data.global.footerLogoAltText | json | replace('"',
+"&quot;") %}
+
 <div
   id="footer-container"
-  data-content="{{data.global.footerlinks | json}}"
-  data-logo="{{data.global.footerLogo | json}}"
-  data-alt="{{data.global.footerLogoAltText | json}}"></div>
+  data-content="{{ footerLinks }}"
+  data-logo="{{ footerLogo }}"
+  data-alt="{{ footerLogoAltText }}"></div>

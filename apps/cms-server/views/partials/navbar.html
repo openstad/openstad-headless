@@ -1,12 +1,13 @@
 {% if data.global.arrangeMainMenu and data.global.arrangeMainMenu == 'manually'
-%} {% set mainMenu = data.global.mainMenuItems | json | replace("'", "&#39;") %}
+%} {% set mainMenu = data.global.mainMenuItems | json | replace('"', "&quot;")
+%}
 
 <div
   id="navbar"
   data-content="{{ mainMenu }}"
   data-prefix="{{ data.prefix }}"></div>
 {% else %} {% if not data.global.compactMenu %} {% set menuData =
-data.home._children | json | replace("'", "&#39;") %}
+data.home._children | json | replace('"', "&quot;") %}
 
 <div
   id="navbar"
