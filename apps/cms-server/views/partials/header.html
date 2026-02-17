@@ -158,7 +158,9 @@
       <div class="header_navbar-container">
         <button class="close-button"><span>Menu tonen</span></button>
         {% if data.global.compactMenu %} {% set menuData = data.home._children |
-        json | replace("'", "&#39;") %}
+        json | replace("'", "&#39;") %} {% if not data.home.orphan %} {% set
+        homeData = [{"_url": data.home._url, "title": data.home.title}] | json |
+        replace("'", "&#39;") %} {% endif %}
         <div
           id="navbar"
           class="--compact"
@@ -166,12 +168,7 @@
           if
           not
           data.home.orphan
-          %}
-          data-home='
-                    [{
-                      "_url": "{{ data.home._url }}",
-                      "title": "{{ data.home.title }}"
-                    }]'
+          %}data-home="{{ homeData }}"
           {%
           endif
           %}

@@ -1,4 +1,6 @@
+{% set buttonData = data.widget.buttons | json | replace("'", "&#39;") %}
+
 <div
   data-openstad-button
-  data-direction="{{data.widget.direction}}"
-  data-buttons="{{data.widget.buttons | json}}"></div>
+  data-direction="{{ data.widget.direction }}"
+  data-buttons="{{ buttonData }}"></div>
