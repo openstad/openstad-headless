@@ -511,3 +511,11 @@ p.osc-searchtext {
   padding: 0 8px;
   color: inherit;
 }
+
+.micro-score-container .micro-score-triangle {
+  display: inline-block;
+}
+
+.micro-score-container .micro-score-triangle-down {
+  transform: rotate(180deg);
+}

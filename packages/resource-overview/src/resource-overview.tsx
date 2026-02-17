@@ -453,22 +453,30 @@ const defaultItemRenderer = (
         {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
           <div className="micro-score-container">
             <Icon
-              icon="ri-thumb-up-line"
+              icon={`${
+                selectedOpinion === 'yes'
+                  ? 'ri-triangle-fill'
+                  : 'ri-triangle-line'
+              } micro-score-triangle`}
               variant="big"
               description="Stemmen voor"
               onClick={() => vote('yes')}
-              className={selectedOpinion === 'yes' ? 'selected' : ''}
+              className={`micro-score-vote micro-score-vote--yes ${selectedOpinion === 'yes' ? 'selected' : ''}`}
             />
             <Paragraph className="votes-score">
-              {resource.netPositiveVotes}
+              {resource.netVotes}
             </Paragraph>
             {props.likeWidget?.displayDislike && (
               <Icon
-                icon="ri-thumb-down-line"
+                icon={`${
+                  selectedOpinion === 'no'
+                    ? 'ri-triangle-fill'
+                    : 'ri-triangle-line'
+                } micro-score-triangle micro-score-triangle-down`}
                 variant="big"
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
-                className={selectedOpinion === 'no' ? 'selected' : ''}
+                className={`micro-score-vote micro-score-vote--no ${selectedOpinion === 'no' ? 'selected' : ''}`}
               />
             )}
           </div>
@@ -726,18 +734,26 @@ const defaultItemRenderer = (
               props.displayVote && (
                 <>
                   <Icon
-                    icon="ri-thumb-up-line"
+                    icon={`${
+                      selectedOpinion === 'yes'
+                        ? 'ri-triangle-fill'
+                        : 'ri-triangle-line'
+                    } micro-score-triangle`}
                     variant="big"
-                    className={selectedOpinion === 'yes' ? 'selected' : ''}
+                    className={`micro-score-vote micro-score-vote--yes ${selectedOpinion === 'yes' ? 'selected' : ''}`}
                   />
                   <Paragraph className="votes-score">
-                    {resource.netPositiveVotes}
+                    {resource.netVotes}
                   </Paragraph>
                   {props.likeWidget?.displayDislike && (
                     <Icon
-                      icon="ri-thumb-down-line"
+                      icon={`${
+                        selectedOpinion === 'no'
+                          ? 'ri-triangle-fill'
+                          : 'ri-triangle-line'
+                      } micro-score-triangle micro-score-triangle-down`}
                       variant="big"
-                      className={selectedOpinion === 'no' ? 'selected' : ''}
+                      className={`micro-score-vote micro-score-vote--no ${selectedOpinion === 'no' ? 'selected' : ''}`}
                     />
                   )}
                 </>
