@@ -1,12 +1,13 @@
-{% if data.global.arrangeMainMenu and data.global.arrangeMainMenu ==
-'manually'%} {% set mainMenu = data.global.mainMenuItems | jsonAttribute %}
+{% if data.global.arrangeMainMenu and data.global.arrangeMainMenu == 'manually'%}
+{% set mainMenu = data.global.mainMenuItems | jsonAttribute %}
 
 <div
   id="navbar"
   data-content="{{ mainMenu | jsonAttribute }}"
   data-prefix="{{ data.prefix }}"></div>
 {% else %} {% if not data.global.compactMenu %} {% set menuData =
-data.home._children | jsonAttribute %}
+data.home._children %} {% if not data.home.orphan %} {% set homeData = [{"_url":
+data.home._url, "title": data.home.title}] %} {% endif %}
 
 <div
   id="navbar"
@@ -15,11 +16,7 @@ data.home._children | jsonAttribute %}
   not
   data.home.orphan
   %}
-  data-home='
-        [{
-          "_url": "{{ data.home._url }}",
-          "title": "{{ data.home.title }}"
-        }]'
+  data-home="{{ homeData | jsonAttribute }}"
   {%
   endif
   %}
