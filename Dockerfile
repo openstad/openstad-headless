@@ -31,6 +31,7 @@ COPY --chown=node:node vendor/ ./vendor
 RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
 RUN npm config set fetch-timeout 300000
+RUN npm config set legacy-peer-deps true
 
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
