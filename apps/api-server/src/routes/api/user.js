@@ -518,6 +518,18 @@ router
     return next();
   })
   .put(async function (req, res, next) {
+    try {
+      const value =
+        typeof req.body?.anonymizeUserName === 'string'
+          ? req.body.anonymizeUserName.trim()
+          : '';
+      req.anonymizeUserName = value || undefined;
+    } catch (err) {
+      return next(err);
+    }
+    return next();
+  })
+  .put(async function (req, res, next) {
     let result;
     if (
       !(
@@ -539,7 +551,7 @@ router
     }
     try {
       if (req.params.willOrDo == 'do') {
-        result = await req.targetUser.doAnonymize();
+        result = await req.targetUser.doAnonymize(req.anonymizeUserName);
       } else {
         result = await req.targetUser.willAnonymize();
       }
@@ -563,7 +575,7 @@ router
           if (!(user && user.can && user.can('update', req.user)))
             return next(new Error('You cannot update this User'));
           if (req.params.willOrDo == 'do') {
-            result = await user.doAnonymize();
+            result = await user.doAnonymize(req.anonymizeUserName);
           } else {
             result = await user.willAnonymize();
           }

@@ -1,4 +1,3 @@
-import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
@@ -48,5 +47,25 @@ export default function useUser() {
     return await res.json();
   }
 
-  return { ...userSwr, updateUser };
+  async function anonymizeUser(body: {
+    id: number;
+    projectId: number;
+    anonymizeUserName?: string;
+  }) {
+    const url = `/api/openstad/api/project/${body.projectId}/user/${body.id}/do-anonymizeall`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        anonymizeUserName: body.anonymizeUserName,
+      }),
+    });
+    if (!res.ok) throw new Error('User anonymization failed');
+
+    return await res.json();
+  }
+
+  return { ...userSwr, updateUser, anonymizeUser };
 }

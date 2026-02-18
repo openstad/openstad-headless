@@ -120,7 +120,14 @@ export default function Users() {
                 <Loader className="animate-spin" size={32} strokeWidth={2} />
               </div>
             )}
-            <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
+            <div className="mt-4 grid grid-cols-2 lg:grid-cols-5 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden lg:flex">
+                <button
+                  className="filter-button"
+                  onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                  ID
+                </button>
+              </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button
                   className="filter-button"
@@ -152,7 +159,10 @@ export default function Users() {
             <ul>
               {filterData?.map((user: any) => (
                 <Link href={`/users/${btoa(user.key)}`} key={user.key}>
-                  <li className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li className="grid grid-cols-2 lg:grid-cols-5 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                    <Paragraph className="hidden lg:flex truncate">
+                      {user.id}
+                    </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
                       {user.email}
                     </Paragraph>

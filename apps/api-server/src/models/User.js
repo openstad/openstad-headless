@@ -591,7 +591,7 @@ module.exports = function (db, sequelize, DataTypes) {
     return result;
   };
 
-  User.prototype.doAnonymize = async function () {
+  User.prototype.doAnonymize = async function (anonymizeUserName) {
     let self = this;
     let result = await self.willAnonymize();
 
@@ -599,15 +599,19 @@ module.exports = function (db, sequelize, DataTypes) {
       // anonymize
       if (!self.project) throw Error('Project not found');
 
+      const safeAnonymizedName =
+        typeof anonymizeUserName === 'string' && anonymizeUserName.trim()
+          ? anonymizeUserName.trim()
+          : self?.project?.config?.anonymize?.anonymizeUserName ||
+            'Gebruiker is geanonimiseerd';
+
       await self.update({
         idpUser: {},
         role: 'anonymous',
         extraData: {},
         email: null,
         nickName: null,
-        name:
-          self?.project?.config?.anonymize?.anonymizeUserName ||
-          'Gebruiker is geanonimiseerd',
+        name: safeAnonymizedName,
         firstname: null,
         lastname: null,
         listableByRole: 'editor',
