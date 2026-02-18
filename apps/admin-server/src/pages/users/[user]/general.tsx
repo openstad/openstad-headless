@@ -1,5 +1,7 @@
 import { ResetResourceDialog } from '@/components/dialog-resource-reset';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -37,8 +39,14 @@ export default function CreateUserGeneral() {
    * updated, so editing one of these linked users suffices
    */
 
-  const { data, updateUser } = useUser();
+  const { data, updateUser, anonymizeUser, mutate } = useUser();
   const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
+  const [isAnonymizeDialogOpen, setIsAnonymizeDialogOpen] = useState(false);
+  const [anonymizeUserName, setAnonymizeUserName] = useState(
+    'Gebruiker is geanonimiseerd'
+  );
+  const [isAnonymizeConfirmed, setIsAnonymizeConfirmed] = useState(false);
+  const [isAnonymizing, setIsAnonymizing] = useState(false);
 
   let user = data;
   if (Array.isArray(data)) user = data[0];
@@ -109,6 +117,28 @@ export default function CreateUserGeneral() {
       toast.success('Two-factor authentication reset succesvol');
     } catch (error) {
       toast.error('Two-factor authenticatie kon niet worden gereset');
+    }
+  }
+
+  async function handleAnonymizeUser() {
+    if (!user?.id || !user?.projectId) return;
+    if (!isAnonymizeConfirmed) return;
+
+    setIsAnonymizing(true);
+    try {
+      await anonymizeUser({
+        id: user.id,
+        projectId: user.projectId,
+        anonymizeUserName: anonymizeUserName?.trim() || undefined,
+      });
+      await mutate();
+      toast.success('Gebruiker is geanonimiseerd');
+      setIsAnonymizeDialogOpen(false);
+      setIsAnonymizeConfirmed(false);
+    } catch (error: any) {
+      toast.error(error?.message || 'Gebruiker kon niet worden geanonimiseerd');
+    } finally {
+      setIsAnonymizing(false);
     }
   }
 
@@ -285,6 +315,103 @@ export default function CreateUserGeneral() {
           />
         )}
       </div>
+
+      <Separator className="my-4" />
+
+      <div>
+        <Heading size="lg">Gebruiker anonimiseren</Heading>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Anonimiseer deze gebruiker in alle projecten waarin dit account
+          voorkomt.
+        </p>
+        <Button
+          className="mt-4"
+          type="button"
+          variant="destructive"
+          onClick={() => {
+            setAnonymizeUserName(
+              user?.project?.config?.anonymize?.anonymizeUserName ||
+                'Gebruiker is geanonimiseerd'
+            );
+            setIsAnonymizeConfirmed(false);
+            setIsAnonymizeDialogOpen(true);
+          }}>
+          Gebruiker anonimiseren
+        </Button>
+      </div>
+
+      <Dialog
+        open={isAnonymizeDialogOpen}
+        modal={true}
+        onOpenChange={setIsAnonymizeDialogOpen}>
+        <DialogContent
+          onEscapeKeyDown={(e: KeyboardEvent) => {
+            e.stopPropagation();
+          }}
+          onInteractOutside={(e: Event) => {
+            e.stopPropagation();
+            if (isAnonymizing) return;
+            setIsAnonymizeDialogOpen(false);
+          }}>
+          <div>
+            <Heading size="lg">Weet je het zeker?</Heading>
+            <p className="mt-3 mb-6 text-sm text-muted-foreground">
+              Deze actie verwijdert persoonlijke gegevens (zoals e-mail,
+              telefoon, adres en naam) en maakt de gebruiker anoniem in alle
+              projecten waarin dit account voorkomt. Deze actie kan niet
+              ongedaan worden gemaakt.
+            </p>
+
+            <div className="space-y-2 mb-6">
+              <label
+                htmlFor="anonymizeUserName"
+                className="text-sm font-medium leading-none">
+                Naam na anonimisering
+              </label>
+              <Input
+                id="anonymizeUserName"
+                value={anonymizeUserName}
+                onChange={(e) => setAnonymizeUserName(e.target.value)}
+                placeholder="Gebruiker is geanonimiseerd"
+              />
+            </div>
+
+            <div className="flex items-start gap-3 mb-8">
+              <Checkbox
+                id="confirm-anonymize-user"
+                checked={isAnonymizeConfirmed}
+                onCheckedChange={(checked) =>
+                  setIsAnonymizeConfirmed(checked === true)
+                }
+              />
+              <label
+                htmlFor="confirm-anonymize-user"
+                className="text-sm leading-5 cursor-pointer">
+                Ik begrijp dat deze actie niet ongedaan gemaakt kan worden.
+              </label>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  if (isAnonymizing) return;
+                  setIsAnonymizeDialogOpen(false);
+                }}>
+                Annuleren
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={!isAnonymizeConfirmed || isAnonymizing}
+                onClick={handleAnonymizeUser}>
+                {isAnonymizing ? 'Bezig met anonimiseren...' : 'Anonimiseren'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
