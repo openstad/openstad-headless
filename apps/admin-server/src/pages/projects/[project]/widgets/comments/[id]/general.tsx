@@ -32,7 +32,7 @@ import * as z from 'zod';
 import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
-  resourceId: z.string().optional(),
+  resourceId: z.string().min(1, 'Selecteer een inzending'),
   sentiment: z.string(),
   useSentiments: z.string().optional(),
   itemsPerPage: z.coerce.number(),
@@ -71,7 +71,7 @@ export default function ArgumentsGeneral({
   const form = useForm<finalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
-      resourceId: props.resourceId,
+      resourceId: props.resourceId ?? '',
       sentiment: props.sentiment || 'for',
       useSentiments: JSON.stringify(props.useSentiments || ['for', 'against']),
       itemsPerPage: props?.itemsPerPage || 9999,
@@ -114,7 +114,6 @@ export default function ArgumentsGeneral({
               keyForValue="id"
               label={(resource) => `${resource.id} ${resource.title}`}
               onFieldChanged={props.onFieldChanged}
-              noSelection="Niet koppelen (gebruik queryparam openstadResourceId)"
             />
           )}
 
