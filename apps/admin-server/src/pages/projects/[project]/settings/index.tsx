@@ -138,13 +138,16 @@ export default function ProjectSettings() {
         values.name,
         values.url
       );
-      if (project) {
+      if (project?.error) {
+        toast.error(project.error);
+      } else if (project) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('could not update', error);
+      toast.error('Er is helaas iets mis gegaan.');
     }
   }
 

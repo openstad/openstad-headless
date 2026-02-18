@@ -23,6 +23,52 @@ let router = express.Router({ mergeParams: true });
 const { Op } = require('sequelize');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
+// Middleware: reject duplicate project URLs (case-insensitive, ignoring www and trailing slashes).
+// `removeProtocolFromUrl` already strips the protocol from req.body.url before this runs.
+// The DB index (`projects_url_unique`) enforces exact uniqueness; this middleware enforces
+// normalized uniqueness (e.g. www.example.com/ == example.com).
+function checkUniqueUrl(req, res, next) {
+  if (!req.body.url) return next();
+
+  let normalizedUrl = req.body.url
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, '');
+  while (normalizedUrl.endsWith('/')) {
+    normalizedUrl = normalizedUrl.slice(0, -1);
+  }
+
+  if (!normalizedUrl) return next();
+
+  const excludeId = req.params.projectId
+    ? parseInt(req.params.projectId)
+    : null;
+
+  const normalizedColumn = Sequelize.literal(
+    "LOWER(TRIM(TRAILING '/' FROM REPLACE(REPLACE(REPLACE(`url`, 'https://', ''), 'http://', ''), 'www.', '')))"
+  );
+
+  const whereClause = excludeId
+    ? {
+        [Op.and]: [
+          Sequelize.where(normalizedColumn, normalizedUrl),
+          { id: { [Op.ne]: excludeId } },
+        ],
+      }
+    : Sequelize.where(normalizedColumn, normalizedUrl);
+
+  db.Project.findOne({ where: whereClause })
+    .then((existing) => {
+      if (existing) {
+        return next(
+          createError(409, 'Deze URL is al in gebruik door een ander project.')
+        );
+      }
+      return next();
+    })
+    .catch(next);
+}
+
 async function getProject(req, res, next, include = []) {
   const projectId = req.params.projectId;
   let query = { where: { id: parseInt(projectId) }, include: include };
@@ -510,6 +556,7 @@ router
   // -----------
   .post(auth.can('Project', 'create'))
   .post(removeProtocolFromUrl)
+  .post(checkUniqueUrl)
   .post(rateLimiter(), async function (req, res, next) {
     req.widgets = req.body.widgets || [];
     req.tags = req.body.tags || [];
@@ -787,6 +834,7 @@ router
   // -----------
   .put(auth.useReqUser)
   .put(removeProtocolFromUrl)
+  .put(checkUniqueUrl)
   .put(rateLimiter(), async function (req, res, next) {
     // update certain parts of config to the oauth client
     const project = await db.Project.findOne({ where: { id: req.results.id } });
