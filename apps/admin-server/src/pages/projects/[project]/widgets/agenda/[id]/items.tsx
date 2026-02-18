@@ -441,7 +441,7 @@ export default function WidgetAgendaItems(
                 </div>
               </div>
             ) : (
-              <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
+              <div className="p-6 bg-white rounded-md flex flex-col col-span-2">
                 <div>
                   <Heading size="xl">Agenda items</Heading>
                   <Separator className="my-4" />
