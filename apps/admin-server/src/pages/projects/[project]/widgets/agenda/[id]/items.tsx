@@ -484,7 +484,7 @@ export default function WidgetAgendaItems(
                         name="active"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Actief</FormLabel>
+                            <FormLabel>Markeer item</FormLabel>
                             <Switch.Root
                               className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                               onCheckedChange={(e: boolean) => {
