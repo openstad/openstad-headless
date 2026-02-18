@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -70,7 +71,12 @@ export default function WidgetAgendaGeneral(
             name="useActiveDates"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Actief op basis van datum</FormLabel>
+                <FormLabel>Markering bepalen op basis van datum</FormLabel>
+                <FormDescription>
+                  Wanneer ingeschakeld wordt de markering (gevulde cirkel)
+                  automatisch bepaald op basis van een datum-bereik per item, in
+                  plaats van handmatig aan/uit.
+                </FormDescription>
                 <Switch.Root
                   className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                   onCheckedChange={(e: boolean) => {

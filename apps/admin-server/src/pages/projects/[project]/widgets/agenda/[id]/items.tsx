@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -484,7 +485,12 @@ export default function WidgetAgendaItems(
                         name="active"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Actief</FormLabel>
+                            <FormLabel>Gemarkeerd als huidig item</FormLabel>
+                            <FormDescription>
+                              Een gemarkeerd item wordt visueel benadrukt met
+                              een gevulde cirkel in de tijdlijn. Alle items
+                              blijven zichtbaar.
+                            </FormDescription>
                             <Switch.Root
                               className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                               onCheckedChange={(e: boolean) => {
@@ -509,7 +515,8 @@ export default function WidgetAgendaItems(
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                Actief vanaf — laat leeg om direct te starten
+                                Gemarkeerd vanaf — laat leeg om direct te
+                                starten
                               </FormLabel>
                               <Input type="datetime-local" {...field} />
                               <FormMessage />
@@ -522,7 +529,7 @@ export default function WidgetAgendaItems(
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                Actief tot — laat leeg voor geen einddatum
+                                Gemarkeerd tot — laat leeg voor geen einddatum
                               </FormLabel>
                               <Input type="datetime-local" {...field} />
                               <FormMessage />
