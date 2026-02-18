@@ -3,6 +3,29 @@ import { z } from 'zod';
 
 import { CombinedFieldPropsWithType } from '../props';
 
+const toFiniteInt = (value: unknown, fallback: number): number => {
+  if (value === null || typeof value === 'undefined' || value === '') {
+    return fallback;
+  }
+
+  const n = typeof value === 'number' ? value : Number(String(value));
+  if (!Number.isFinite(n)) return fallback;
+
+  return Math.floor(n);
+};
+
+const toMinInt = (value: unknown): number => {
+  // minCharacters <= 0 is effectively "no minimum"
+  const n = toFiniteInt(value, 0);
+  return n > 0 ? n : 0;
+};
+
+const toMaxInt = (value: unknown): number => {
+  // maxCharacters <= 0 or non-numeric is effectively "no maximum"
+  const n = toFiniteInt(value, Infinity);
+  return n > 0 ? n : Infinity;
+};
+
 export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
   const fileSchema = z.object({
     name: z.string(),
@@ -14,7 +37,51 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
   switch (field.type) {
     case 'text':
-      let min = field.minCharacters || 0;
+      // Some widgets (e.g. Enquete) want an "email field" while still using the generic text field type.
+      // We model that as a variant so the UI can render `type="email"` and the schema can validate it.
+      if ((field as any)?.variant === 'email') {
+        const requiredWarning =
+          field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht';
+
+        const emailWarning =
+          (field as any)?.emailError || 'Vul een geldig e-mailadres in';
+
+        const max = toMaxInt((field as any)?.maxCharacters);
+        let maxWarning =
+          field.maxCharactersError ||
+          'Tekst moet maximaal {maxCharacters} karakters bevatten';
+        maxWarning = maxWarning.replace('{maxCharacters}', String(max));
+
+        if (field.fieldRequired) {
+          // Empty should show the required warning, non-empty but invalid should show the email warning.
+          let schema = z.string().min(1, requiredWarning).email(emailWarning);
+          if (Number.isFinite(max)) schema = schema.max(max, maxWarning);
+          return schema;
+        }
+
+        // When not required the value is typically an empty string, not `undefined`.
+        // Allow '' but validate any other value.
+        return z.union([
+          z.literal(''),
+          (() => {
+            let schema = z.string().email(emailWarning);
+            if (Number.isFinite(max)) schema = schema.max(max, maxWarning);
+            return schema;
+          })(),
+        ]);
+      }
+
+      const maxRaw = toMaxInt((field as any)?.maxCharacters);
+      const minRaw = toMinInt((field as any)?.minCharacters);
+
+      const max = maxRaw;
+      let min = minRaw;
+
+      // If both are configured but contradictory, prefer a non-crashing, non-surprising clamp.
+      if (Number.isFinite(max) && min > max) {
+        min = max;
+      }
+
       let minWarning =
         field.minCharactersError ||
         'Tekst moet minimaal {minCharacters} karakters bevatten';
@@ -27,16 +94,19 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         minWarning = minWarning.replace('{minCharacters}', min.toString());
       }
 
-      const max = field.maxCharacters || Infinity;
       let maxWarning =
         field.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten';
-      maxWarning = maxWarning.replace('{maxCharacters}', max.toString());
+      maxWarning = maxWarning.replace('{maxCharacters}', String(max));
 
       if (field.fieldRequired) {
-        return z.string().min(min, minWarning).max(max, maxWarning);
+        let schema = z.string().min(min, minWarning);
+        if (Number.isFinite(max)) schema = schema.max(max, maxWarning);
+        return schema;
       } else {
-        return z.string().min(min, minWarning).max(max, maxWarning).optional();
+        let schema = z.string().min(min, minWarning);
+        if (Number.isFinite(max)) schema = schema.max(max, maxWarning);
+        return schema.optional();
       }
 
     case 'checkbox':
