@@ -321,7 +321,6 @@ let moduleDefinitions = {
       resourceListColumns: 3,
       hideTagsForResources: false,
       showInfoMenu: false,
-      showOriginalResource: false,
       step1Tab: 'Kies',
       step2Tab: 'Overzicht',
       step3Tab: 'Stemcode',
@@ -353,6 +352,20 @@ let moduleDefinitions = {
       displayPagination: false,
       onlyIncludeTagIds: '',
       onlyIncludeStatusIds: '',
+      step0:
+        '<h4>Kies jouw favoriete inzendingen per thema!</h4>\n<ol type="1">\n<li>Selecteer hieronder een thema om de inzendingen voor dat thema te bekijken</li>\n<li>Kies jouw favoriete inzendingen voor dat thema</li>\n<li>Ga naar het volgende thema om hetzelfde te doen</li>\n<li>Klaar en tevreden? In stap 3 vul je ter controle de stemcode in. Tot slot verstuur je in stap 4 je stem</li>\n</ol>',
+      step1:
+        'Kies uit onderstaand overzicht jouw favoriete plannen. In stap 3 vul je ter controle de stemcode in die je per post hebt ontvangen. Tot slot verstuur je in stap 4 je stem.',
+      step2:
+        'Bekijk hieronder je selectie. Ben je tevreden? Klik dan onderaan door naar stap 3 om jouw stemcode in te vullen.',
+      step3:
+        'Via onderstaande knop kun je op een aparte pagina je persoonlijke stemcode invullen. Wij controleren de stemcode op geldigheid. Als dat gelukt is kom je terug op deze pagina waarna je kunt stemmen.',
+      step3success:
+        'Het controleren van je stemcode is gelukt! Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.',
+      voteMessage: 'Gelukt, je hebt gestemd!',
+      thankMessage: 'Bedankt voor het stemmen!',
+      showNewsletterButton: false,
+      newsLetterLink: '/',
     },
   },
   simplevoting: {
