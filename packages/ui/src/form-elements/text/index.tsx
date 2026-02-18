@@ -325,6 +325,7 @@ const TextInput: FC<TextInputProps> = ({
   };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
+  const isOverCharacterLimit = !!maxCharacters && value.length > maxCharacters;
   const helpTextId = `${randomId}_help`;
   return (
     <FormField type="text">
@@ -419,10 +420,15 @@ const TextInput: FC<TextInputProps> = ({
         />
         {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
           <FormFieldDescription
-            className="help-text"
+            className={`help-text${isOverCharacterLimit ? ' help-text--error' : ''}`}
             id={helpTextId}
             aria-live="polite"
             aria-atomic="true">
+            {isOverCharacterLimit && (
+              <i
+                className="ri-error-warning-line help-text__icon"
+                aria-hidden="true"></i>
+            )}
             {helpText}
           </FormFieldDescription>
         )}
