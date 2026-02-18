@@ -30,11 +30,13 @@ const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 function checkUniqueUrl(req, res, next) {
   if (!req.body.url) return next();
 
-  const normalizedUrl = req.body.url
+  let normalizedUrl = req.body.url
     .trim()
     .toLowerCase()
-    .replace(/^www\./, '')
-    .replace(/\/+$/, '');
+    .replace(/^www\./, '');
+  while (normalizedUrl.endsWith('/')) {
+    normalizedUrl = normalizedUrl.slice(0, -1);
+  }
 
   if (!normalizedUrl) return next();
 
