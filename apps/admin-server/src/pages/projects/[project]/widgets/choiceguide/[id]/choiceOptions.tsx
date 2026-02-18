@@ -82,8 +82,9 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
 
     if (choiceOptions.length > 0) {
       nextIdRef.current =
-        Math.max(...choiceOptions.map((group: ChoiceOptions) => Number(group.id))) +
-        1;
+        Math.max(
+          ...choiceOptions.map((group: ChoiceOptions) => Number(group.id))
+        ) + 1;
     } else {
       nextIdRef.current = 1;
     }
