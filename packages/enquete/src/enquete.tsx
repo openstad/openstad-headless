@@ -123,6 +123,7 @@ function Enquete(props: EnqueteWidgetProps) {
   const [draftChecked, setDraftChecked] = useState(false);
   const latestValuesRef = useRef<Record<string, unknown> | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
+  const formStartTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -308,6 +309,10 @@ function Enquete(props: EnqueteWidgetProps) {
     };
 
     formData.embeddedUrl = cleanUrlFromEndingQuestionMarks(embeddedUrl);
+    formData.__timeToSubmitMs = Math.max(
+      Date.now() - formStartTimeRef.current,
+      0
+    );
 
     const result = await createSubmission(formData, props.widgetId);
 
@@ -385,6 +390,11 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['minCharactersError'] =
             props?.minCharactersError ||
             'Tekst moet minimaal {minCharacters} karakters bevatten';
+          fieldData['showMinMaxAfterBlur'] =
+            props?.showMinMaxAfterBlur || false;
+          fieldData['maxCharactersOverWarning'] =
+            props?.maxCharactersOverWarning ||
+            'Je hebt {overCharacters} tekens teveel';
           break;
         case 'multiplechoice':
         case 'multiple': {

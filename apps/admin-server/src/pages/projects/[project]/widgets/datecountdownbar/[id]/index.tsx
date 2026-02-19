@@ -50,7 +50,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',

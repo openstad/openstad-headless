@@ -7,6 +7,11 @@ const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const crypto = require('crypto');
+const {
+  analyzeSpamPayload,
+  logSpamAnalysis,
+  removeSpamMetaFields,
+} = require('../../services/spam-detector');
 
 const router = express.Router({ mergeParams: true });
 
@@ -181,11 +186,21 @@ router
     return next();
   })
   .post(rateLimiter(), function (req, res, next) {
+    const sanitizedSubmittedData = removeSpamMetaFields(
+      req.body.submittedData || {}
+    );
+    const analysis = analyzeSpamPayload(req.body.submittedData || {}, {
+      withDetails: true,
+    });
+    logSpamAnalysis({ routeName: 'choicesguide', req, analysis });
+    const isSpamSubmission = analysis.isProbablySpam;
+
     let data = {
       userId: req.user && req.user.id,
-      result: req.body.submittedData,
+      result: sanitizedSubmittedData,
       widgetId: req.body.widgetId,
       projectId: req.params.projectId,
+      isSpam: isSpamSubmission,
       createdAt: new Date(
         new Date().toLocaleString('en-US', { timeZone: 'Europe/Amsterdam' })
       ),

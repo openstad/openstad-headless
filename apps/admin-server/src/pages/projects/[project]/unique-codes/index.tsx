@@ -69,7 +69,6 @@ export default function ProjectCodes() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -153,7 +152,7 @@ export default function ProjectCodes() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((code: any) => (
                 <li
                   key={code.id}

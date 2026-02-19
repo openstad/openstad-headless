@@ -1,5 +1,4 @@
-{% set apostrophe3Content = data.widget.content | json | replace("'", "&#39;")
-%}
+{% set apostrophe3Content = data.widget.content | jsonAttribute %}
 
 <div
   data-openstad-iconSection

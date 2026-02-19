@@ -70,6 +70,8 @@ export type TextInputProps = {
   }>;
   createImageSlider?: boolean;
   imageClickable?: boolean;
+  showMinMaxAfterBlur?: boolean;
+  maxCharactersOverWarning?: string;
 };
 
 const TrixEditor: React.FC<{
@@ -192,6 +194,8 @@ const TextInput: FC<TextInputProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  showMinMaxAfterBlur = false,
+  maxCharactersOverWarning = 'Je hebt {overCharacters} tekens teveel',
 }) => {
   const variantMap = {
     'text input': Textbox,
@@ -214,6 +218,7 @@ const TextInput: FC<TextInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [helpText, setHelpText] = useState('');
   const [value, setValue] = useState(initialValue);
+  const [hasBlurred, setHasBlurred] = useState(false);
 
   const hasInitialValue = !!initialValue;
   const [checkInvalid, setCheckInvalid] = useState(
@@ -238,24 +243,6 @@ const TextInput: FC<TextInputProps> = ({
     value && setCheckInvalid(false);
   }, []);
 
-  const characterHelpText = (count: number) => {
-    let helpText = '';
-
-    if (!!minCharacters && count < minCharacters) {
-      helpText = minCharactersWarning?.replace(
-        '{minCharacters}',
-        (minCharacters - count).toString()
-      );
-    } else if (!!maxCharacters && count < maxCharacters) {
-      helpText = maxCharactersWarning?.replace(
-        '{maxCharacters}',
-        (maxCharacters - count).toString()
-      );
-    }
-
-    setHelpText(helpText);
-  };
-
   const getType = (fieldKey: string) => {
     switch (fieldKey) {
       case 'email':
@@ -268,6 +255,49 @@ const TextInput: FC<TextInputProps> = ({
         return 'text';
     }
   };
+
+  useEffect(() => {
+    if (reset) {
+      reset(() => setValue(initialValue));
+    }
+  }, [reset, defaultValue]);
+
+  useEffect(() => {
+    value && setCheckInvalid(false);
+  }, []);
+
+  const characterHelpText = (count: number) => {
+    let helpText = '';
+
+    if (!!minCharacters && count < minCharacters) {
+      helpText = minCharactersWarning?.replace(
+        '{minCharacters}',
+        (minCharacters - count).toString()
+      );
+    } else if (!!maxCharacters && count <= maxCharacters) {
+      helpText = maxCharactersWarning?.replace(
+        '{maxCharacters}',
+        (maxCharacters - count).toString()
+      );
+    } else if (!!maxCharacters && count > maxCharacters) {
+      helpText = maxCharactersOverWarning?.replace(
+        '{overCharacters}',
+        (count - maxCharacters).toString()
+      );
+    }
+
+    setHelpText(helpText);
+  };
+
+  useEffect(() => {
+    if (reset) {
+      reset(() => setValue(initialValue));
+    }
+  }, [reset, defaultValue]);
+
+  useEffect(() => {
+    value && setCheckInvalid(false);
+  }, []);
 
   const getAutocomplete = (fieldKey: string) => {
     switch (fieldKey?.toLocaleLowerCase()) {
@@ -295,6 +325,8 @@ const TextInput: FC<TextInputProps> = ({
   };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
+  const isOverCharacterLimit = !!maxCharacters && value.length > maxCharacters;
+  const helpTextId = `${randomId}_help`;
   return (
     <FormField type="text">
       {title && (
@@ -355,19 +387,16 @@ const TextInput: FC<TextInputProps> = ({
             e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
           ) => {
             setValue(e.target.value);
-            if (
-              Number(minCharacters) > 0 &&
-              e.target.value.length >= Number(minCharacters) &&
-              maxCharacters > 0 &&
-              e.target.value.length <= maxCharacters
-            ) {
-              setCheckInvalid(false);
+            const valueLength = e.target.value.length;
+            const hasMax = maxCharacters > 0;
+            const exceedsMax = hasMax && valueLength > maxCharacters;
+
+            if (fieldRequired && valueLength === 0) {
+              setCheckInvalid(true);
+            } else if (exceedsMax) {
+              setCheckInvalid(true);
             } else {
-              if (fieldRequired && e.target.value.length === 0) {
-                setCheckInvalid(true);
-              } else {
-                setCheckInvalid(false);
-              }
+              setCheckInvalid(false);
             }
 
             if (onChange) {
@@ -376,17 +405,30 @@ const TextInput: FC<TextInputProps> = ({
                 value: e.target.value,
               });
             }
-            characterHelpText(e.target.value.length);
+            characterHelpText(valueLength);
           }}
           disabled={disabled}
           rows={rows}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => {
+            setIsFocused(false);
+            setHasBlurred(true);
+          }}
           autoComplete={getAutocomplete(fieldKey)}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
+          aria-invalid={checkInvalid}
         />
-        {isFocused && helpText && (
-          <FormFieldDescription className="help-text">
+        {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
+          <FormFieldDescription
+            className={`help-text${isOverCharacterLimit ? ' help-text--error' : ''}`}
+            id={helpTextId}
+            aria-live="polite"
+            aria-atomic="true">
+            {isOverCharacterLimit && (
+              <i
+                className="ri-error-warning-line help-text__icon"
+                aria-hidden="true"></i>
+            )}
             {helpText}
           </FormFieldDescription>
         )}

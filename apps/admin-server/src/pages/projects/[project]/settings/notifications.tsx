@@ -76,7 +76,6 @@ export default function ProjectSettingsNotifications() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

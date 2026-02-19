@@ -62,7 +62,6 @@ export default function ProjectCommentEdit() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

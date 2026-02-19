@@ -94,7 +94,8 @@ article.comment-item.selected {
   border-top: solid 1px rgba(0, 0, 0, 0.1);
 }
 
-.--isAdmin {
+.--isAdmin,
+.--isEditor {
   color: #000;
   font-weight: 300;
   font-size: 10px;

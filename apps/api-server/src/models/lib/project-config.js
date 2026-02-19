@@ -312,6 +312,21 @@ module.exports = {
     },
   },
 
+  certificates: {
+    type: 'object',
+    subset: {
+      certificateMethod: {
+        type: 'enum',
+        values: ['cert-manager', 'external'],
+        default: 'cert-manager',
+      },
+      externalCertSlug: {
+        type: 'string',
+        default: '',
+      },
+    },
+  },
+
   host: {
     status: null,
   },

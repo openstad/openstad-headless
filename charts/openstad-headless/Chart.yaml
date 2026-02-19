@@ -13,10 +13,9 @@ icon: https://avatars.githubusercontent.com/u/99011277?s=200&v=4
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.2.2
+# The chart version is automatically inserted by the release process, and the released helm chart will have this version number.
+# We purposefully keep it at 0.0.0 to make it clear that this is automatically updated and should not be manually changed.
+version: 0.0.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to

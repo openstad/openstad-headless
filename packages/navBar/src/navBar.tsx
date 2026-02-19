@@ -13,8 +13,20 @@ interface Item {
   prefix?: string;
 }
 
+function parseJSON<T>(value: unknown, fallback: T): T {
+  if (typeof value !== 'string' || value.trim() === '') return fallback;
+
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 function NavBar({ home, content, prefix = '' }: Item) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const homeItems = parseJSON<any[]>(home, []);
+  const menuItems = parseJSON<any[]>(content, []);
 
   useEffect(() => {
     const event = new Event('navBarLoaded');
@@ -30,21 +42,20 @@ function NavBar({ home, content, prefix = '' }: Item) {
   return (
     <div className="container">
       <nav id="main-menu">
-        {home &&
-          JSON.parse(home).map((item: any, index: number) => {
-            return (
-              <div key={index} className="item-container">
-                <Link
-                  className="level-1"
-                  key={index}
-                  href={item._url}
-                  aria-current={getCurrentPage(item.title)}>
-                  {item.title}
-                </Link>
-              </div>
-            );
-          })}
-        {JSON.parse(content).map((item: any, index: number) => {
+        {homeItems.map((item: any, index: number) => {
+          return (
+            <div key={index} className="item-container">
+              <Link
+                className="level-1"
+                key={index}
+                href={item._url}
+                aria-current={getCurrentPage(item.title)}>
+                {item.title}
+              </Link>
+            </div>
+          );
+        })}
+        {menuItems.map((item: any, index: number) => {
           return (
             <MenuItem
               key={index}

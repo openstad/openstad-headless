@@ -13,6 +13,8 @@ export type UsersPaginationOptions = {
   page?: number;
   pageSize?: number;
   q?: string;
+  uniqueByIdpUser?: boolean;
+  excludeAnonymous?: boolean;
 };
 
 export type UsersPaginationMetadata = {
@@ -26,10 +28,12 @@ function useUsers(options?: UsersPaginationOptions) {
   const page = options?.page;
   const pageSize = options?.pageSize ?? 20;
   const q = options?.q?.trim();
+  const uniqueByIdpUser = options?.uniqueByIdpUser;
+  const excludeAnonymous = options?.excludeAnonymous;
 
   const url =
     page !== undefined
-      ? `/api/openstad/api/user?page=${page}&pageSize=${pageSize}${q ? `&q=${encodeURIComponent(q)}` : ''}`
+      ? `/api/openstad/api/user?page=${page}&pageSize=${pageSize}${q ? `&q=${encodeURIComponent(q)}` : ''}${uniqueByIdpUser ? '&uniqueByIdpUser=1' : ''}${excludeAnonymous ? '&excludeAnonymous=1' : ''}`
       : '/api/openstad/api/user';
   const usersSwr = useSWR(url);
   const res = usersSwr.data;

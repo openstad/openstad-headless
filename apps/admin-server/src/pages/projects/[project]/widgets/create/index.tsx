@@ -65,7 +65,6 @@ export default function CreateWidget({}: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Widget overzicht"
         breadcrumbs={[
           {
             name: 'Projecten',

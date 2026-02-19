@@ -205,23 +205,58 @@ export default function WidgetChoiceGuideItems(
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
 
+  const ensureABDefaultsOnWeights = (
+    itemType: string | undefined,
+    weights: Record<string, any>
+  ) => {
+    if (itemType !== 'a-b-slider') return weights;
+
+    const normalized = structuredClone(weights || {});
+
+    Object.keys(normalized).forEach((groupId) => {
+      const groupWeights = normalized[groupId];
+      if (!groupWeights || typeof groupWeights !== 'object') return;
+
+      if (typeof groupWeights.weightAB === 'undefined') {
+        groupWeights.weightAB = 'A';
+      }
+
+      if (
+        typeof groupWeights.weightY !== 'undefined' &&
+        typeof groupWeights.weightABY === 'undefined'
+      ) {
+        groupWeights.weightABY = 'A';
+      }
+    });
+
+    return normalized;
+  };
+
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
-    if (selectedItem) {
-      // Ensure weights are defined
-      const selectedItemWeights = selectedItem.weights || {};
-      const valuesWeights = values.weights || {};
+    const normalizedValuesWeights = ensureABDefaultsOnWeights(
+      values.type,
+      values.weights || {}
+    );
 
-      Object.keys(valuesWeights).forEach((key) => {
-        if (valuesWeights[key] !== undefined) {
-          selectedItemWeights[key] = valuesWeights[key];
-        }
-      });
+    if (selectedItem) {
+      // Merge immutably to avoid mutating references from selectedItem/form state.
+      const selectedItemWeights = structuredClone(selectedItem.weights || {});
+      const valuesWeights = structuredClone(normalizedValuesWeights);
+      const mergedWeights = {
+        ...selectedItemWeights,
+        ...valuesWeights,
+      };
+
+      const normalizedMergedWeights = ensureABDefaultsOnWeights(
+        values.type,
+        mergedWeights
+      );
 
       setItems((currentItems) =>
         currentItems.map((item) =>
           item.trigger === selectedItem.trigger
-            ? { ...item, ...values, weights: selectedItemWeights }
+            ? { ...item, ...values, weights: normalizedMergedWeights }
             : item
         )
       );
@@ -255,7 +290,7 @@ export default function WidgetChoiceGuideItems(
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
           defaultValue: values.defaultValue || '',
-          weights: values.weights || {},
+          weights: normalizedValuesWeights,
           skipQuestion: values.skipQuestion || false,
           skipQuestionAllowExplanation:
             values.skipQuestionAllowExplanation || false,
@@ -793,75 +828,47 @@ export default function WidgetChoiceGuideItems(
                 control={form.control}
                 name={`weights.${group.id}.weight${XY}`}
                 key={`2-${i}`}
-                render={({ field }) => {
-                  const value = field.value ?? 0;
-                  const watchValue = form.watch(
-                    `weights.${group.id}.weight${XY}`
-                  );
-
-                  if (value !== watchValue) {
-                    form.setValue(
-                      `weights.${group.id}.weight${XY}`,
-                      field.value ?? 0
-                    );
-                  }
-
-                  return (
-                    <FormItem>
-                      <FormControl>
-                        <div className={`weight-${XY.toLowerCase()}-container`}>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={100}
-                            {...field}
-                            value={field.value ?? 0}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className={`weight-${XY.toLowerCase()}-container`}>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          {...field}
+                          value={field.value ?? 0}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               <FormField
                 control={form.control}
                 name={`weights.${group.id}.weightAB${weightFieldAppend}`}
                 key={`3-${i}`}
-                render={({ field }) => {
-                  const value = field.value || 'A';
-                  const watchValue = form.watch(
-                    `weights.${group.id}.weightAB${weightFieldAppend}`
-                  );
-
-                  if (value !== watchValue) {
-                    form.setValue(
-                      `weights.${group.id}.weightAB${weightFieldAppend}`,
-                      field.value || 'A'
-                    );
-                  }
-
-                  return (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(e: string) => field.onChange(e)}
-                          value={field.value || 'A'}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Kies een optie" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="A">A</SelectItem>
-                            <SelectItem value="B">B</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        onValueChange={(e: string) => field.onChange(e)}
+                        value={field.value || 'A'}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Kies een optie" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="A">A</SelectItem>
+                          <SelectItem value="B">B</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </>
           );
@@ -1663,17 +1670,18 @@ export default function WidgetChoiceGuideItems(
                                           )}
                                         />
                                       </div>
-
-                                      <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
-                                        <ArrowLeft
-                                          className="cursor-pointer"
-                                          onClick={() => moveUpImage(index)}
-                                        />
-                                        <ArrowRight
-                                          className="cursor-pointer"
-                                          onClick={() => moveDownImage(index)}
-                                        />
-                                      </span>
+                                      {imageFields.length > 1 && (
+                                        <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                          <ArrowLeft
+                                            className="cursor-pointer"
+                                            onClick={() => moveUpImage(index)}
+                                          />
+                                          <ArrowRight
+                                            className="cursor-pointer"
+                                            onClick={() => moveDownImage(index)}
+                                          />
+                                        </span>
+                                      )}
                                     </div>
                                   );
                                 })}
@@ -1800,7 +1808,9 @@ export default function WidgetChoiceGuideItems(
                         </>
                       )}
 
-                      {form.watch('type') !== 'none' && (
+                      {!['none', 'a-b-slider', 'sort', 'scale'].includes(
+                        form.watch('type') || ''
+                      ) && (
                         <FormField
                           control={form.control}
                           name="fieldRequired"

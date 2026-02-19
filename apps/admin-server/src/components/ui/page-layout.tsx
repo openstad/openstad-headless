@@ -1,3 +1,4 @@
+import { useProject } from '@/hooks/use-project';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
@@ -20,7 +21,7 @@ export function PageLayout({
 }: {
   children?: ReactNode;
   className?: string;
-  pageHeader: string;
+  pageHeader?: string;
   breadcrumbs: any;
   action?: ReactNode;
 }) {
@@ -28,6 +29,11 @@ export function PageLayout({
   const [hasProjectSidenav, setHasProjectSidenav] = useState(
     pathIsSpecificProject(router.pathname)
   );
+
+  const { data: projectData } = useProject();
+  const projectName = projectData?.name
+    ? `Projectnaam: ${projectData.name}`
+    : ``;
 
   useEffect(() => {
     setHasProjectSidenav(pathIsSpecificProject(router.pathname));
@@ -45,7 +51,9 @@ export function PageLayout({
                 'flex flex-col items-stretch justify-center mb-4 md:mb-0',
                 className
               )}>
-              <Heading size="2xl">{pageHeader}</Heading>
+              <Heading size="2xl">
+                {!!pageHeader ? pageHeader : projectName}
+              </Heading>
               <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
             {action}

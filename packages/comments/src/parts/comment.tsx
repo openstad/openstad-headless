@@ -36,6 +36,7 @@ function Comment({
   type,
   index,
   adminLabel,
+  editorLabel,
   disableSubmit = false,
   extraReplyButton = false,
   setRefreshComments,
@@ -48,6 +49,7 @@ function Comment({
     comment,
     selected,
     adminLabel,
+    editorLabel,
     ...props,
   } as CommentProps;
 
@@ -161,8 +163,15 @@ function Comment({
           appearance="utrecht-heading-6"
           className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
-          {args.comment.user && args.comment.user.role === 'admin' ? (
+          {args.comment.user &&
+          args.comment.user.role === 'admin' &&
+          adminLabel ? (
             <span className="--isAdmin">{adminLabel}</span>
+          ) : null}
+          {args.comment.user &&
+          args.comment.user.role === 'editor' &&
+          editorLabel ? (
+            <span className="--isEditor">{editorLabel}</span>
           ) : null}
         </Heading>
         {canEdit() || canDelete() ? (

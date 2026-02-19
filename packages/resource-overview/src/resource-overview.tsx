@@ -211,6 +211,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     filterBehaviorInclude?: string;
     onlyShowTheseTagIds?: string;
     displayCollapsibleFilter?: boolean;
+    closeFiltersOnAutoApply?: boolean;
     displayUser?: boolean;
     displayCreatedAt?: boolean;
     allowLikingInOverview?: boolean;
@@ -397,8 +398,8 @@ const defaultItemRenderer = (
         ? resource.tags
         : [];
 
-  resourceFilteredTags = resourceFilteredTags?.length
-    ? resourceFilteredTags?.sort(
+  resourceFilteredTags = resourceFilteredTags.length
+    ? resourceFilteredTags.sort(
         (a: { seqnr?: number }, b: { seqnr?: number }) => {
           if (a.seqnr === undefined || a.seqnr === null) return 1;
           if (b.seqnr === undefined || b.seqnr === null) return -1;
@@ -412,6 +413,7 @@ const defaultItemRenderer = (
       ? resourceFilteredTags[0]
       : null;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
+  const selectedOpinion = resource?.userVote?.opinion;
 
   const TileFooter = ({ doVote }: { doVote?: (value: string) => any }) => {
     const vote = async (sentiment: string) => {
@@ -432,6 +434,7 @@ const defaultItemRenderer = (
               text={resource.yes}
               description="Stemmen voor"
               onClick={() => vote('yes')}
+              className={selectedOpinion === 'yes' ? 'selected' : ''}
             />
 
             {props.likeWidget?.displayDislike && (
@@ -441,6 +444,7 @@ const defaultItemRenderer = (
                 text={resource.no}
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
+                className={selectedOpinion === 'no' ? 'selected' : ''}
               />
             )}
           </>
@@ -449,18 +453,28 @@ const defaultItemRenderer = (
         {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
           <div className="micro-score-container">
             <Icon
-              icon="ri-thumb-up-line"
+              icon={`${
+                selectedOpinion === 'yes'
+                  ? 'ri-triangle-fill'
+                  : 'ri-triangle-line'
+              } micro-score-triangle`}
               variant="big"
               description="Stemmen voor"
               onClick={() => vote('yes')}
+              className={`micro-score-vote micro-score-vote--yes ${selectedOpinion === 'yes' ? 'selected' : ''}`}
             />
             <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
             {props.likeWidget?.displayDislike && (
               <Icon
-                icon="ri-thumb-down-line"
+                icon={`${
+                  selectedOpinion === 'no'
+                    ? 'ri-triangle-fill'
+                    : 'ri-triangle-line'
+                } micro-score-triangle micro-score-triangle-down`}
                 variant="big"
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
+                className={`micro-score-vote micro-score-vote--no ${selectedOpinion === 'no' ? 'selected' : ''}`}
               />
             )}
           </div>
@@ -701,12 +715,14 @@ const defaultItemRenderer = (
                     icon="ri-thumb-up-line"
                     variant="big"
                     text={resource.yes}
+                    className={selectedOpinion === 'yes' ? 'selected' : ''}
                   />
                   {props.likeWidget?.displayDislike && (
                     <Icon
                       icon="ri-thumb-down-line"
                       variant="big"
                       text={resource.no}
+                      className={selectedOpinion === 'no' ? 'selected' : ''}
                     />
                   )}
                 </>
@@ -715,12 +731,28 @@ const defaultItemRenderer = (
             {props.likeWidget?.variant == 'micro-score' &&
               props.displayVote && (
                 <>
-                  <Icon icon="ri-thumb-up-line" variant="big" />
+                  <Icon
+                    icon={`${
+                      selectedOpinion === 'yes'
+                        ? 'ri-triangle-fill'
+                        : 'ri-triangle-line'
+                    } micro-score-triangle`}
+                    variant="big"
+                    className={`micro-score-vote micro-score-vote--yes ${selectedOpinion === 'yes' ? 'selected' : ''}`}
+                  />
                   <Paragraph className="votes-score">
                     {resource.netVotes}
                   </Paragraph>
                   {props.likeWidget?.displayDislike && (
-                    <Icon icon="ri-thumb-down-line" variant="big" />
+                    <Icon
+                      icon={`${
+                        selectedOpinion === 'no'
+                          ? 'ri-triangle-fill'
+                          : 'ri-triangle-line'
+                      } micro-score-triangle micro-score-triangle-down`}
+                      variant="big"
+                      className={`micro-score-vote micro-score-vote--no ${selectedOpinion === 'no' ? 'selected' : ''}`}
+                    />
                   )}
                 </>
               )}
@@ -1427,6 +1459,7 @@ function ResourceOverviewInner({
               preFilterTags={prefilterTagObj}
               displayCollapsibleFilter={displayCollapsibleFilter}
               autoApply={props?.autoApply || false}
+              closeFiltersOnAutoApply={props?.closeFiltersOnAutoApply || false}
             />
           ) : null}
 

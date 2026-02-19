@@ -1810,17 +1810,18 @@ export default function WidgetEnqueteItems(
                                           )}
                                         />
                                       </div>
-
-                                      <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
-                                        <ArrowLeft
-                                          className="cursor-pointer"
-                                          onClick={() => moveUpImage(index)}
-                                        />
-                                        <ArrowRight
-                                          className="cursor-pointer"
-                                          onClick={() => moveDownImage(index)}
-                                        />
-                                      </span>
+                                      {imageFields.length > 1 && (
+                                        <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                          <ArrowLeft
+                                            className="cursor-pointer"
+                                            onClick={() => moveUpImage(index)}
+                                          />
+                                          <ArrowRight
+                                            className="cursor-pointer"
+                                            onClick={() => moveDownImage(index)}
+                                          />
+                                        </span>
+                                      )}
                                     </div>
                                   );
                                 })}
@@ -2087,44 +2088,48 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {form.watch('questionType') !== 'pagination' &&
-                      form.watch('questionType') !== 'sort' &&
-                      form.watch('questionType') !== 'video' && (
-                        <FormField
-                          control={form.control}
-                          name="fieldRequired"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Is dit veld verplicht?</FormLabel>
-                              {form.watch('questionType') === 'matrix' && (
-                                <FormDescription>
-                                  Als je het veld <b>verplicht</b> maakt moeten
-                                  gebruikers bij elke rij een antwoord
-                                  selecteren. Als je het veld{' '}
-                                  <b>niet verplicht</b> maakt kunnen gebruikers
-                                  elke rij overslaan en invullen wat ze willen.
-                                </FormDescription>
-                              )}
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="false">Nee</SelectItem>
-                                  <SelectItem value="true">Ja</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
+                    {![
+                      'pagination',
+                      'sort',
+                      'scale',
+                      'a-b-slider',
+                      'video',
+                    ].includes(form.watch('questionType') || '') && (
+                      <FormField
+                        control={form.control}
+                        name="fieldRequired"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Is dit veld verplicht?</FormLabel>
+                            {form.watch('questionType') === 'matrix' && (
+                              <FormDescription>
+                                Als je het veld <b>verplicht</b> maakt moeten
+                                gebruikers bij elke rij een antwoord selecteren.
+                                Als je het veld <b>niet verplicht</b> maakt
+                                kunnen gebruikers elke rij overslaan en invullen
+                                wat ze willen.
+                              </FormDescription>
+                            )}
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     {form.watch('questionType') === 'matrix' && (
                       <FormField

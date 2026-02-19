@@ -92,7 +92,6 @@ export default function ProjectAreaEdit() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

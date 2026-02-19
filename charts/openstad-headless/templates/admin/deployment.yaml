@@ -81,6 +81,8 @@ spec:
               secretKeyRef:
                 key: hashIpAddresses
                 name: {{ template "openstad.ipaddress.secret.fullname" . }}
+          - name: EXTERNAL_CERTIFICATES_ENABLED
+            value: "{{ .Values.api.externalCertificates.enabled }}"
           # Inject extra environment variables
           {{- if .Values.admin.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.admin.extraEnvVars "context" $) | nindent 10 }}

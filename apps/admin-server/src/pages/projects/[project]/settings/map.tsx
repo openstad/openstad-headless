@@ -126,7 +126,6 @@ export default function ProjectSettingsMap() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -159,7 +159,6 @@ export default function ProjectChoiceGuideResults() {
 
       <div>
         <PageLayout
-          pageHeader="Keuzewijzer inzendingen"
           breadcrumbs={[
             {
               name: 'Projecten',
@@ -328,30 +327,48 @@ export default function ProjectChoiceGuideResults() {
                     <li
                       key={choiceguideResult.id}
                       className="grid grid-cols-3 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() =>
+                        router.push(
+                          `/projects/${project}/widgets/${widgetType}/${choiceguideResult.widgetId}`
+                        )
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          router.push(
+                            `/projects/${project}/widgets/${widgetType}/${choiceguideResult.widgetId}`
+                          );
+                        }
+                      }}
                       style={{
                         gridTemplateColumns: '50px 1fr 1fr 2fr 1fr 1fr',
                       }}>
-                      <Checkbox
-                        className="my-auto"
-                        checked={selectedItems.includes(choiceguideResult.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedItems((prev) => [
-                              ...prev,
-                              choiceguideResult.id,
-                            ]);
-                          } else {
-                            setSelectedItems((prev) =>
-                              prev.filter((id) => id !== choiceguideResult.id)
-                            );
-                          }
-                        }}
-                      />
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          className="my-auto"
+                          checked={selectedItems.includes(choiceguideResult.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedItems((prev) => [
+                                ...prev,
+                                choiceguideResult.id,
+                              ]);
+                            } else {
+                              setSelectedItems((prev) =>
+                                prev.filter((id) => id !== choiceguideResult.id)
+                              );
+                            }
+                          }}
+                        />
+                      </div>
                       <Paragraph className="my-auto -mr-16 lg:mr-0">
                         <a
                           style={{ textDecoration: 'underline' }}
                           onClick={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             router.push(
                               `/projects/${project}/widgets/${widgetType}/${choiceguideResult.widgetId}`
                             );
@@ -364,6 +381,7 @@ export default function ProjectChoiceGuideResults() {
                           style={{ textDecoration: 'underline' }}
                           onClick={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             router.push(`/users/${btoa(currentUserKey)}`);
                           }}>
                           {choiceguideResult.userId}
@@ -380,7 +398,10 @@ export default function ProjectChoiceGuideResults() {
 
                       <div
                         className="hidden lg:flex ml-auto"
-                        onClick={(e) => e.preventDefault()}>
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}>
                         <RemoveResourceDialog
                           header="Resultaat verwijderen"
                           message="Weet je zeker dat je dit resultaat wilt verwijderen?"

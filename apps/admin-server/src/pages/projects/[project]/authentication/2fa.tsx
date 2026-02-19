@@ -139,7 +139,6 @@ export default function ProjectAuthentication2FA() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

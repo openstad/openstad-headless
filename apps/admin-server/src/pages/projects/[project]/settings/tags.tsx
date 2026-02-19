@@ -85,7 +85,6 @@ export default function ProjectSettingsTags() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -53,7 +53,6 @@ export default function ProjectStatusCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

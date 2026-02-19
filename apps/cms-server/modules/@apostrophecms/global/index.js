@@ -85,18 +85,18 @@ module.exports = {
         def: true,
       },
 
-      archiveStatus: {
+      bannerStatus: {
         type: 'boolean',
-        label: 'Zet de site in archief modus',
+        label: 'Toon site banner',
         def: false,
       },
 
-      archiveStatusText: {
+      bannerStatusText: {
         type: 'string',
-        label: 'Tekst die getoond wordt als de site in archief modus staat',
+        label: 'Tekst die getoond wordt als de site banner zichtbaar is',
         def: 'Dit project is afgerond.',
         if: {
-          archiveStatus: true,
+          bannerStatus: true,
         },
       },
 
@@ -393,8 +393,8 @@ module.exports = {
           'hideSiteTitle',
           'siteLogo',
           'logoAltText',
-          'archiveStatus',
-          'archiveStatusText',
+          'bannerStatus',
+          'bannerStatusText',
         ],
       },
       css: {

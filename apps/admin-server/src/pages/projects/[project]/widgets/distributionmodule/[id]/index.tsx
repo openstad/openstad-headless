@@ -37,7 +37,6 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Verdeel module"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -24,15 +24,15 @@
   gap: 1.5rem;
 }
 
-.osc-choiceguide-container.osc-choiceguide-container {
+.osc-choiceguide-container.sticky-top-bar {
   grid-template-columns: 1fr;
   grid-template-rows: auto auto;
 }
 
-.osc-choiceguide-container.osc-choiceguide-container
-  > .osc-choiceguide-sidebar-container {
+.osc-choiceguide-container.sticky-top-bar > .osc-choiceguide-sidebar-container {
   order: -1;
   top: 1rem;
+  z-index: 10;
 }
 
 @media screen and (max-width: 768px) {

@@ -52,7 +52,6 @@ export default function ProjectAreas() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -135,7 +134,7 @@ export default function ProjectAreas() {
               </ListHeading>
             </div>
 
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((item: any) => (
                 <Link
                   href={`/projects/${project}/areas/${item.type === 'Polygoon' ? item.id : `layers/${item.id}`}`}
