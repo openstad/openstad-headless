@@ -124,7 +124,9 @@ export default function Users() {
               <ListHeading className="hidden lg:flex">
                 <button
                   className="filter-button"
-                  onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                  onClick={(e) =>
+                    setFilterData(sortTable('id', e, filterData))
+                  }>
                   ID
                 </button>
               </ListHeading>
