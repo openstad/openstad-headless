@@ -60,6 +60,7 @@ type Props = {
   }>;
   displayLocationFilter?: boolean;
   displayCollapsibleFilter?: boolean;
+  closeFiltersOnAutoApply?: boolean;
 };
 
 export function Filters({
@@ -362,6 +363,14 @@ export function Filters({
       setActiveTags(updatedTags);
     } else {
       setActiveTags(newActiveTagsDraft);
+    }
+
+    if (
+      autoApply &&
+      displayCollapsibleFilter &&
+      props.closeFiltersOnAutoApply
+    ) {
+      setFiltersVisible(false);
     }
   };
 

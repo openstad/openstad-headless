@@ -121,7 +121,6 @@ export default function ProjectResources() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -224,7 +223,7 @@ export default function ProjectResources() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((vote: any) => {
                 const userId = vote.userId;
                 const user =

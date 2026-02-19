@@ -46,7 +46,7 @@ export default function ProjectResourceVotes() {
               Voorkeur
             </ListHeading>
           </div>
-          <ul>
+          <ul className="admin-overview">
             {votes?.map((vote: any) => {
               const userId = vote.userId;
               const user =

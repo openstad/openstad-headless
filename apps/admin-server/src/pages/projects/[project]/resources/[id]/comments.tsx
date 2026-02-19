@@ -17,7 +17,7 @@ export default function ProjectResourceArguments() {
 
   function renderComments(comments: any, pre = '') {
     return (
-      <ul>
+      <ul className="admin-overview">
         {comments?.map((comment: any) => (
           <React.Fragment key={comment.id}>
             <li
@@ -74,7 +74,7 @@ export default function ProjectResourceArguments() {
             <ListHeading className="hidden lg:flex">Sentiment</ListHeading>
             <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
           </div>
-          <ul>{renderComments(data)}</ul>
+          <ul className="admin-overview">{renderComments(data)}</ul>
         </div>
       </div>
     </div>

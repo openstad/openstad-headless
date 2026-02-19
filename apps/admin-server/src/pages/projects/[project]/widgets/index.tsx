@@ -21,8 +21,6 @@ export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
 
-  const { data: projectData } = useProject();
-
   const {
     data: widgets,
     isLoading: isLoadingWidgets,
@@ -47,11 +45,6 @@ export default function ProjectWidgets() {
   return (
     <div>
       <PageLayout
-        pageHeader={
-          projectData?.name
-            ? `Projectnaam: ${projectData.name}`
-            : `Projectnaam niet gevonden`
-        }
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -202,7 +195,7 @@ export default function ProjectWidgets() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {(data as Widget[])?.map((widget) => {
                 return (
                   <Link

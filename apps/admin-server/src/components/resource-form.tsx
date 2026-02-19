@@ -556,21 +556,22 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                             )}
                           />
                         </div>
-
-                        <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
-                          <button
-                            type="button"
-                            onClick={() => moveUpImage(index)}
-                            aria-label="Move image left">
-                            <ArrowLeft className="cursor-pointer" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => moveDownImage(index)}
-                            aria-label="Move image right">
-                            <ArrowRight className="cursor-pointer" />
-                          </button>
-                        </span>
+                        {imageFields.length > 1 && (
+                          <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                            <button
+                              type="button"
+                              onClick={() => moveUpImage(index)}
+                              aria-label="Move image left">
+                              <ArrowLeft className="cursor-pointer" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveDownImage(index)}
+                              aria-label="Move image right">
+                              <ArrowRight className="cursor-pointer" />
+                            </button>
+                          </span>
+                        )}
                       </div>
                     );
                   })}

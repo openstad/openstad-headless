@@ -1,6 +1,6 @@
-{% if data.global.archiveStatus %}
-<div class="archive-status-banner">
-  <p>{{ data.global.archiveStatusText }}</p>
+{% if data.global.bannerStatus %}
+<div class="status-banner">
+  <p class="utrecht-paragraph">{{ data.global.bannerStatusText }}</p>
 </div>
 {% endif %}
 <header
@@ -157,8 +157,9 @@
 
       <div class="header_navbar-container">
         <button class="close-button"><span>Menu tonen</span></button>
-        {% if data.global.compactMenu %} {% set menuData = data.home._children |
-        json | replace("'", "&#39;") %}
+        {% if data.global.compactMenu %} {% set menuData = data.home._children
+        %} {% if not data.home.orphan %} {% set homeData = [{"_url":
+        data.home._url, "title": data.home.title}] %} {% endif %}
         <div
           id="navbar"
           class="--compact"
@@ -167,15 +168,11 @@
           not
           data.home.orphan
           %}
-          data-home='
-                    [{
-                      "_url": "{{ data.home._url }}",
-                      "title": "{{ data.home.title }}"
-                    }]'
+          data-home="{{ homeData | jsonAttribute }}"
           {%
           endif
           %}
-          data-content="{{ menuData }}"
+          data-content="{{ menuData | jsonAttribute }}"
           data-prefix="{{ data.prefix }}"
           data-mobile-menu="{{ data.global.mobileMenu }}"></div>
         {% endif %}

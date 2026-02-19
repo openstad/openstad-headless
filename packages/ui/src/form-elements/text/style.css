@@ -15,6 +15,20 @@
   margin: 0;
 }
 
+.form-container .question .utrecht-form-field__input .help-text--error {
+  color: var(
+    --utrecht-form-field-error-message-color,
+    var(--utrecht-form-control-invalid-border-color, #cd0000)
+  );
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.form-container .question .utrecht-form-field__input .help-text__icon {
+  line-height: 1;
+}
+
 .utrecht-form-field.utrecht-form-field--text:has(.utrecht-textbox[required])
   .utrecht-form-label::after {
   content: '(Verplicht)';

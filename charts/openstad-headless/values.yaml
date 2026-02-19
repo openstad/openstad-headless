@@ -1,3 +1,8 @@
+# Ingress controller type: "nginx" or "traefik"
+global:
+  ingress:
+    type: nginx
+
 # Optional Dependencies
 
 disablePreInstallHelm: false
@@ -154,7 +159,7 @@ admin:
         more_set_headers "X-Robots-Tag: noindex, nofollow";
     extraLabels: {}
     hosts: []
-    ingressClassName: nginx
+    ingressClassName:  # defaults to global.ingress.type
     tls:
       secretName: openstad-tls-admin
       hosts: []
@@ -202,7 +207,7 @@ auth:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
-    ingressClassName: nginx
+    ingressClassName:  # defaults to global.ingress.type
     tls:
       secretName: openstad-tls-auth
       hosts: []
@@ -260,12 +265,18 @@ api:
         more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
-    ingressClassName: nginx
+    ingressClassName:  # defaults to global.ingress.type
     tls:
       secretName: openstad-tls-api
       hosts: []
   createdIngresses:
-    className:
+    className:  # defaults to global.ingress.type
+    # Annotations for dynamically created per-project ingresses.
+    # These are passed as a JSON env var to the API server.
+    # The defaults below are for nginx. When using global.ingress.type: traefik,
+    # override with traefik middleware annotations, e.g.:
+    #   annotations:
+    #     traefik.ingress.kubernetes.io/router.middlewares: "<namespace>-<release>-security-headers@kubernetescrd,<namespace>-<release>-security-headers-hsts@kubernetescrd,<namespace>-<release>-security-headers-noindex@kubernetescrd,<namespace>-<release>-body-size-limit@kubernetescrd,<namespace>-<release>-www-redirect@kubernetescrd"
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -281,6 +292,17 @@ api:
     # You can then set the project.config.tlsSecretName of a project, and it will be set in the ingress.tls
     # Allowing you to have per-project TLS certificates, managed through secrets (e.g. externalSecret operator)
     tlsManagedByOpenstad: false
+  # External certificates feature flag
+  # When enabled, the api-server can create ExternalSecret resources
+  # to load TLS certificates from an external secret store (e.g. Google Secret Manager via ESO)
+  externalCertificates:
+    enabled: false
+    # Prefix pattern for auto-generated secret names. {orgName} is replaced at runtime.
+    secretPrefix: "tls-openstad-prod-{orgName}"
+    # Name of the ClusterSecretStore to reference in ExternalSecret resources
+    secretStoreName: "gcp-secret-store"
+    # Cooldown in seconds between manual retry triggers per project
+    retryCooldownSeconds: 60
   # Inject extra environment variables
   extraEnvVars: []
   disableProjectIssueWarnings: "false"
@@ -336,7 +358,7 @@ image:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
-    ingressClassName: nginx
+    ingressClassName:  # defaults to global.ingress.type
     tls:
       secretName: openstad-tls-image
       hosts: []
@@ -404,7 +426,7 @@ cms:
         more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
-    ingressClassName: nginx
+    ingressClassName:  # defaults to global.ingress.type
     tls:
       secretName: openstad-tls-cms
       hosts: []

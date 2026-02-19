@@ -59,6 +59,15 @@ function Agenda({
   toggleEnd = '',
   ...props
 }: AgendaWidgetProps) {
+  const toDateKey = (value: string | undefined) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+    const date = new Date(trimmed);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString().slice(0, 10);
+  };
+
   const isClosedByDefault = () => {
     if (toggleDefaultClosed) return true;
     if (defaultClosedFromBreakpoint === 'not') return false;
@@ -72,13 +81,15 @@ function Agenda({
   const now = props.useActiveDates
     ? new Date(props.serverTime || Date.now())
     : null;
+  const todayKey = now ? now.toISOString().slice(0, 10) : null;
   const itemsSorted = [...(props.items ?? [])]
     .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
     .map((item) => {
-      if (!now) return item;
-      const from = item.activeFrom ? new Date(item.activeFrom) : null;
-      const to = item.activeTo ? new Date(item.activeTo) : null;
-      const isActive = (!from || now >= from) && (!to || now <= to);
+      if (!todayKey) return item;
+      const fromKey = toDateKey(item.activeFrom);
+      const toKey = toDateKey(item.activeTo);
+      const isActive =
+        (!fromKey || todayKey >= fromKey) && (!toKey || todayKey <= toKey);
       return { ...item, active: isActive };
     });
 

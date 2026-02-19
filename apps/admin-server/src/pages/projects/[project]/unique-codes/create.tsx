@@ -47,7 +47,6 @@ export default function ProjectCodeCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -179,7 +179,7 @@ export default function ProjectComments() {
 
   function renderComments(comments: any, pre = '') {
     return (
-      <ul>
+      <ul className="admin-overview">
         {comments.map((comment: any) => (
           <React.Fragment key={comment.id}>
             <li
@@ -274,7 +274,6 @@ export default function ProjectComments() {
       `}</style>
       <div>
         <PageLayout
-          pageHeader="Projecten"
           breadcrumbs={[
             {
               name: 'Projecten',

@@ -38,7 +38,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Video Slider"
         breadcrumbs={[
           {
             name: 'Projecten',

@@ -82,7 +82,7 @@ function Likes({
   const supportedLikeTypes: Array<{
     type: 'yes' | 'no';
     label: string;
-    icon: string;
+    icon: 'ri-thumb-up-line' | 'ri-thumb-down-line';
   }> = [
     { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
     { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
@@ -164,7 +164,7 @@ function Likes({
                   resource?.userVote?.opinion === likeVariant.type
                     ? 'selected'
                     : ''
-                } ${hideCounters ? 'osc-no-counter' : ''}`}
+                } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
                 disabled={disabled}>
                 <section className="like-kind">
                   <i className={likeVariant.icon}></i>
@@ -213,19 +213,27 @@ function Likes({
 
           <div className={`like-option-container`}>
             {supportedLikeTypes.map((likeVariant, index) => (
-              <>
+              <React.Fragment key={`${likeVariant.type}-${index}`}>
                 <Button
                   appearance="primary-action-button"
-                  key={`${likeVariant.type}-${index}`}
                   onClick={(e) => doVote(e, likeVariant.type)}
                   className={`like-option ${
                     resource?.userVote?.opinion === likeVariant.type
                       ? 'selected'
                       : ''
-                  } ${hideCounters ? 'osc-no-counter' : ''}`}
+                  } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
                   disabled={disabled}>
                   <section className="like-kind">
-                    <i className={likeVariant.icon}></i>{' '}
+                    <i
+                      className={`${
+                        resource?.userVote?.opinion === likeVariant.type
+                          ? 'ri-triangle-fill'
+                          : 'ri-triangle-line'
+                      } micro-score-triangle ${
+                        likeVariant.type === 'no'
+                          ? 'micro-score-triangle-down'
+                          : ''
+                      }`}></i>{' '}
                     <span className="sr-only">{likeVariant.label}</span>
                   </section>
                 </Button>
@@ -235,7 +243,7 @@ function Likes({
                     {resource['netVotes'] ? resource['netVotes'] : '0'}
                   </section>
                 ) : null}
-              </>
+              </React.Fragment>
             ))}
           </div>
 

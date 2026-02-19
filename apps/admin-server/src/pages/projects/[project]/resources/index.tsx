@@ -134,7 +134,6 @@ export default function ProjectResources() {
       `}</style>
       <div>
         <PageLayout
-          pageHeader="Inzendingen"
           breadcrumbs={[
             {
               name: 'Projecten',
@@ -333,33 +332,60 @@ export default function ProjectResources() {
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
               </div>
-              <ul>
+              <ul className="admin-overview">
                 {filterData?.map((resource: any) => (
                   <li
                     key={resource.id}
                     className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      router.push(
+                        `/projects/${project}/resources/${resource.id}`
+                      )
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        router.push(
+                          `/projects/${project}/resources/${resource.id}`
+                        );
+                      }
+                    }}
                     style={{
                       gridTemplateColumns:
                         'repeat(2, 50px) 3fr repeat(5, 1fr) 60px',
                     }}>
-                    <Checkbox
-                      className="my-auto"
-                      checked={selectedWidgets.includes(resource.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedWidgets((prev) => [...prev, resource.id]);
-                        } else {
-                          setSelectedWidgets((prev) =>
-                            prev.filter((id) => id !== resource.id)
-                          );
-                        }
-                      }}
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        className="my-auto"
+                        checked={selectedWidgets.includes(resource.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedWidgets((prev) => [
+                              ...prev,
+                              resource.id,
+                            ]);
+                          } else {
+                            setSelectedWidgets((prev) =>
+                              prev.filter((id) => id !== resource.id)
+                            );
+                          }
+                        }}
+                      />
+                    </div>
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       {resource.id}
                     </Paragraph>
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
-                      {resource.title}
+                      <span className="inline-flex items-center gap-2">
+                        {resource.title}
+                        {resource.isSpam ? (
+                          <span className="inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                            Waarschijnlijk spam
+                          </span>
+                        ) : null}
+                      </span>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
                       {resource.yes || 0}
@@ -376,7 +402,10 @@ export default function ProjectResources() {
 
                     <div
                       className="hidden lg:flex ml-auto"
-                      onClick={(e) => e.preventDefault()}>
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}>
                       <RemoveResourceDialog
                         header="Inzending verwijderen"
                         message="Weet je zeker dat je deze inzending wilt verwijderen?"
@@ -394,7 +423,8 @@ export default function ProjectResources() {
                       />
                     </div>
                     <Link
-                      href={`/projects/${project}/resources/${resource.id}`}>
+                      href={`/projects/${project}/resources/${resource.id}`}
+                      onClick={(e) => e.stopPropagation()}>
                       <ChevronRight
                         strokeWidth={1.5}
                         className="w-5 h-5 my-auto ml-auto"

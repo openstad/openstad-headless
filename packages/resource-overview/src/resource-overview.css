@@ -359,6 +359,14 @@ p.osc-searchtext {
   aspect-ratio: 3 / 4;
 }
 
+.selected > .ri-thumb-up-line:before {
+  content: '\f206';
+}
+
+.selected > .ri-thumb-down-line:before {
+  content: '\f204';
+}
+
 /* Text Colors */
 .color-FFFFFF {
   color: #ffffff;
@@ -502,4 +510,12 @@ p.osc-searchtext {
   margin: 0;
   padding: 0 8px;
   color: inherit;
+}
+
+.micro-score-container .micro-score-triangle {
+  display: inline-block;
+}
+
+.micro-score-container .micro-score-triangle-down {
+  transform: rotate(180deg);
 }

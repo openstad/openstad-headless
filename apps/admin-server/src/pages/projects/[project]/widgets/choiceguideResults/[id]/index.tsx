@@ -36,7 +36,6 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Project naam"
         breadcrumbs={[
           {
             name: 'Projecten',
