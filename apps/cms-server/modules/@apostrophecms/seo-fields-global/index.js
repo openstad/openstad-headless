@@ -22,7 +22,9 @@ function logSafeWarning(self, message, error) {
   const logger = self && self.apos && self.apos.util;
   const details = error && error.message ? error.message : error;
   if (logger && typeof logger.warn === 'function') {
-    logger.warn(`[seo-fields-global] ${message}${details ? `: ${details}` : ''}`);
+    logger.warn(
+      `[seo-fields-global] ${message}${details ? `: ${details}` : ''}`
+    );
     return;
   }
   console.warn('[seo-fields-global]', message, details || '');
@@ -32,7 +34,6 @@ module.exports = {
   improve: '@apostrophecms/seo-fields-global',
 
   init: function (self) {
-
     const applySeoSchemaOverrides = () => {
       if (!Array.isArray(self.schema)) {
         return;
@@ -141,7 +142,11 @@ module.exports = {
             }
           }
         } catch (err) {
-          logSafeWarning(self, 'Startup SEO backfill skipped due to unexpected error', err);
+          logSafeWarning(
+            self,
+            'Startup SEO backfill skipped due to unexpected error',
+            err
+          );
         }
       }
     );
@@ -150,7 +155,11 @@ module.exports = {
       'apostrophe-docs:beforeSave',
       'openstadBackfillSeoGlobalDefaults',
       function (req, doc) {
-        if (!doc || (doc.type !== 'apostrophe-global' && doc.type !== '@apostrophecms/global')) {
+        if (
+          !doc ||
+          (doc.type !== 'apostrophe-global' &&
+            doc.type !== '@apostrophecms/global')
+        ) {
           return;
         }
 
@@ -160,7 +169,10 @@ module.exports = {
           doc.seoSiteCanonicalUrl = defaults.canonicalDefault;
         }
 
-        if (!doc.seoJsonLdOrganization || typeof doc.seoJsonLdOrganization !== 'object') {
+        if (
+          !doc.seoJsonLdOrganization ||
+          typeof doc.seoJsonLdOrganization !== 'object'
+        ) {
           doc.seoJsonLdOrganization = {};
         }
 

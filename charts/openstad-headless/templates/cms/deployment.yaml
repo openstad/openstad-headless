@@ -21,6 +21,37 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+{{- if ne .Values.cms.useS3 "true" }}
+      initContainers:
+      - name: {{ template "openstad.cms.fullname" . }}-uploads-migration
+        image: {{ .Values.cms.deploymentContainer.image }}
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -eu
+            UPLOADS={{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads" }}
+
+            mkdir -p "$UPLOADS" "$UPLOADS/attachments" "$UPLOADS/exports"
+
+            # Idempotent migration for legacy layout where attachment files were at PVC root.
+            for entry in "$UPLOADS"/*; do
+              [ -e "$entry" ] || continue
+              base="$(basename "$entry")"
+              case "$base" in
+                attachments|exports)
+                  continue
+                  ;;
+              esac
+              mv "$entry" "$UPLOADS/attachments/"
+            done
+        securityContext:
+          allowPrivilegeEscalation: false
+        volumeMounts:
+          - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads" }}
+            name: data-vol
+{{- end }}
       containers:
       - name: {{ template "openstad.cms.fullname" . }}
         image: {{ .Values.cms.deploymentContainer.image }}
@@ -125,7 +156,7 @@ spec:
           - mountPath: /opt/openstad-headless/apps/cms-server/data/temp
             name: temp-dir
 {{- if ne .Values.cms.useS3 "true" }}
-          - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/attachments" }}
+          - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads" }}
             name: data-vol
 {{- end }}
       volumes:
