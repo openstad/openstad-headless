@@ -52,6 +52,12 @@ module.exports = {
                     type: 'boolean',
                     label: 'Open in new window?',
                   },
+                  useSitePrefix: {
+                    type: 'boolean',
+                    label: 'Voeg siteprefix toe aan relatieve URL',
+                    help: 'Voegt het subpad van de site (bijv. /voorbeeld) automatisch toe aan de URL. Laat dit uit als je de URL al handmatig hebt aangepast.',
+                    def: false,
+                  },
                 },
               },
             },
