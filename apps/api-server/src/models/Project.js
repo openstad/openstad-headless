@@ -144,7 +144,7 @@ module.exports = function (db, sequelize, DataTypes) {
               current &&
               typeof instance.config.project.projectHasEnded != 'undefined' &&
               current.config.project.projectHasEnded !==
-                instance.config.project.projectHasEnded
+              instance.config.project.projectHasEnded
             ) {
               let config = merge.recursive(true, instance.config);
               if (instance.config.project.projectHasEnded) {
@@ -207,10 +207,10 @@ module.exports = function (db, sequelize, DataTypes) {
         afterCreate: async function (instance, options) {
           if (options.skipDefaultStatuses) return;
 
-          // create a default status
-          let defaultStatus = await db.Status.create({
+          // create default statuses
+          await db.Status.create({
             projectId: instance.id,
-            name: 'open',
+            name: 'Reageer op deze inzending',
             seqnr: 10,
             addToNewResources: true,
             canComment: true,
@@ -219,7 +219,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
           await db.Status.create({
             projectId: instance.id,
-            name: 'closed',
+            name: 'Deze inzending wordt niet uitgevoerd',
             seqnr: 20,
             addToNewResources: false,
             canComment: true,
@@ -228,8 +228,17 @@ module.exports = function (db, sequelize, DataTypes) {
 
           await db.Status.create({
             projectId: instance.id,
-            name: 'accepted',
+            name: 'Deze inzending is door naar de stemronde',
             seqnr: 30,
+            addToNewResources: false,
+            canComment: true,
+            editableByUser: true,
+          });
+
+          await db.Status.create({
+            projectId: instance.id,
+            name: 'Deze inzending wordt uitgevoerd',
+            seqnr: 40,
             addToNewResources: false,
             canComment: true,
             editableByUser: true,
