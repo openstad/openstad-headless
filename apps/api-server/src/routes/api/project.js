@@ -68,6 +68,7 @@ async function getProject(req, res, next, include = []) {
           project.config.auth.provider[provider].allowedDomains =
             client.allowedDomains;
           project.config.auth.provider[provider].config = client.config;
+          project.config.auth.provider[provider].authTypeDefaults = client.authTypeDefaults;
           project.config.auth.provider[provider].client = client;
         }
       }
