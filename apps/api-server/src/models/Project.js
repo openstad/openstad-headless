@@ -144,7 +144,7 @@ module.exports = function (db, sequelize, DataTypes) {
               current &&
               typeof instance.config.project.projectHasEnded != 'undefined' &&
               current.config.project.projectHasEnded !==
-              instance.config.project.projectHasEnded
+                instance.config.project.projectHasEnded
             ) {
               let config = merge.recursive(true, instance.config);
               if (instance.config.project.projectHasEnded) {
