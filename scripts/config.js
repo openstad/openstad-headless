@@ -231,11 +231,11 @@ async function setupEnvVars() {
   process.env.AUTH_SESSION_SECRET =
     process.env.AUTH_SESSION_SECRET || generateRandomToken({ length: 32 });
   // TODO: dev vs prod
-  ((process.env.AUTH_COOKIE_SECURE_OFF =
+  (process.env.AUTH_COOKIE_SECURE_OFF =
     typeof process.env.AUTH_COOKIE_SECURE_OFF != 'undefined'
       ? process.env.AUTH_COOKIE_SECURE_OFF
       : process.env.COOKIE_SECURE_OFF || 'yes'), // TODO: COOKIE_SECURE_OFF;
-    (process.env.AUTH_ADMIN_CLIENT_ID = AUTH_ADMIN_CLIENT_ID));
+    (process.env.AUTH_ADMIN_CLIENT_ID = AUTH_ADMIN_CLIENT_ID);
   process.env.AUTH_ADMIN_CLIENT_SECRET = AUTH_ADMIN_CLIENT_SECRET;
   process.env.AUTH_FIRST_CLIENT_ID = AUTH_FIRST_CLIENT_ID;
   process.env.AUTH_FIRST_CLIENT_SECRET = AUTH_FIRST_CLIENT_SECRET;
@@ -305,7 +305,9 @@ DB_DIALECT=${process.env.DB_DIALECT}
 DB_REQUIRE_SSL=${process.env.DB_REQUIRE_SSL}
 DB_AUTH_METHOD=${process.env.DB_AUTH_METHOD}
 
-MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
+MESSAGESTREAMING_REDIS_URL=${
+      process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'
+    }
 MESSAGESTREAMING_POSTFIX=${process.env.MESSAGESTREAMING_POSTFIX || ''}
 
 BASIC_AUTH_USER=${process.env.BASIC_AUTH_USER}

@@ -692,9 +692,7 @@ function ResourceDetail({
                           return -1;
                         return a.seqnr - b.seqnr;
                       })
-                      ?.map((t) => (
-                        <Pill text={t.name} />
-                      ))}
+                      ?.map((t) => <Pill text={t.name} />)}
                   </div>
                   <Spacer size={2} />
                 </div>

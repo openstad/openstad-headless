@@ -72,7 +72,7 @@ export default {
 
   submitLike: async function ({ projectId }, resources) {
     if (!Array.isArray(resources)) throw new Error('Resources is geen array');
-    if (resources.some((r) => (!'resourceId') in r || (!'opinion') in r))
+    if (resources.some((r) => !'resourceId' in r || !'opinion' in r))
       throw new Error('Ontbrekende velden resourceId of opinion');
 
     let url = `/api/project/${projectId}/vote`;

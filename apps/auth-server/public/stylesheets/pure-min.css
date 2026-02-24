@@ -940,8 +940,7 @@ a.pure-button-selected {
 .pure-menu-can-have-children > .pure-menu-label:after {
   content: '\25B8';
   float: right;
-  font-family:
-    'Lucida Grande', 'Lucida Sans Unicode', 'DejaVu Sans', sans-serif;
+  font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'DejaVu Sans', sans-serif;
   margin-right: -20px;
   margin-top: -1px;
 }

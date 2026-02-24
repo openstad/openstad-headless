@@ -36,8 +36,8 @@ const getExistingValue = (fieldKey, resource, multiple) => {
       return multiple
         ? filteredTags
         : filteredTags.length > 0
-          ? filteredTags[0]
-          : undefined;
+        ? filteredTags[0]
+        : undefined;
     }
   }
   return undefined;

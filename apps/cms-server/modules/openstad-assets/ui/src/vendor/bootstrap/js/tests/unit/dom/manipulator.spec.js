@@ -1,4 +1,5 @@
 import Manipulator from '../../../src/dom/manipulator';
+
 /** Test helpers */
 import { clearFixture, getFixture } from '../../helpers/fixture';
 

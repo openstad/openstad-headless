@@ -32,8 +32,8 @@ const EditorMap = ({
   const initialValue = isValidLocation(overrideDefaultValue)
     ? overrideDefaultValue
     : isValidLocation(defaultValue)
-      ? defaultValue
-      : editorMarker;
+    ? defaultValue
+    : editorMarker;
 
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
     ...initialValue,

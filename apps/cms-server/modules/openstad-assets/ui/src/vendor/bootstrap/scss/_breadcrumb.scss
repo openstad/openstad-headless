@@ -22,12 +22,10 @@
           --#{$variable-prefix}breadcrumb-divider,
           escape-svg($breadcrumb-divider)
         )
-        #{'/* rtl:'}
-        var(
+        #{'/* rtl:'} var(
           --#{$variable-prefix}breadcrumb-divider,
           escape-svg($breadcrumb-divider-flipped)
-        )
-        #{'*/'};
+        ) #{'*/'};
     }
   }
 

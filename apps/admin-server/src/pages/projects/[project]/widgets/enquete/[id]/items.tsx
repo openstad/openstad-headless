@@ -771,8 +771,16 @@ export default function WidgetEnqueteItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary 
-                            ${item.questionType === 'pagination' && item.trigger !== selectedItem?.trigger ? 'bg-[#f8f8f8]' : ''}
-                            ${item.trigger == selectedItem?.trigger && 'bg-secondary'}`}>
+                            ${
+                              item.questionType === 'pagination' &&
+                              item.trigger !== selectedItem?.trigger
+                                ? 'bg-[#f8f8f8]'
+                                : ''
+                            }
+                            ${
+                              item.trigger == selectedItem?.trigger &&
+                              'bg-secondary'
+                            }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
                                 className="cursor-pointer"
@@ -796,7 +804,14 @@ export default function WidgetEnqueteItems(
                                 setSettingOptions(false);
                               }}
                               dangerouslySetInnerHTML={{
-                                __html: `${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : item?.questionType === 'swipe' ? 'Swipe' : 'Geen titel')}`,
+                                __html: `${
+                                  item.title ||
+                                  (item?.questionType === 'pagination'
+                                    ? '--- Nieuwe pagina ---'
+                                    : item?.questionType === 'swipe'
+                                    ? 'Swipe'
+                                    : 'Geen titel')
+                                }`,
                               }}></span>
                             <span className="gap-2 py-3 px-2">
                               <X
@@ -952,8 +967,8 @@ export default function WidgetEnqueteItems(
                               className="w-fit mt-4 bg-secondary text-black hover:text-white"
                               type="button"
                               onClick={() => {
-                                (setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null));
+                                setSettingOptions(() => !settingOptions),
+                                  setMatrixOption(null);
                               }}>
                               Annuleer
                             </Button>
@@ -1378,8 +1393,8 @@ export default function WidgetEnqueteItems(
                         className="w-fit mt-4 bg-secondary text-black hover:text-white"
                         type="button"
                         onClick={() => {
-                          (setSettingOptions(() => !settingOptions),
-                            setOption(null));
+                          setSettingOptions(() => !settingOptions),
+                            setOption(null);
                         }}>
                         Annuleer
                       </Button>
@@ -1740,7 +1755,11 @@ export default function WidgetEnqueteItems(
                                   return (
                                     <div
                                       key={id}
-                                      className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                                      className={`relative grid ${
+                                        index === imageIndexOpen
+                                          ? 'col-span-full'
+                                          : 'tile'
+                                      } gap-x-4 items-center image-gallery`}
                                       style={{
                                         gridTemplateColumns:
                                           index === imageIndexOpen

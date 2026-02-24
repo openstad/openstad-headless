@@ -1,6 +1,7 @@
 import EventHandler from '../../src/dom/event-handler';
 import Dropdown from '../../src/dropdown';
 import { noop } from '../../src/util';
+
 /** Test helpers */
 import {
   clearFixture,

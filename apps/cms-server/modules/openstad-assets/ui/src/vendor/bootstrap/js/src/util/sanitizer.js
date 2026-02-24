@@ -41,7 +41,7 @@ const allowedAttribute = (attribute, allowedAttributeList) => {
     if (uriAttributes.has(attributeName)) {
       return Boolean(
         SAFE_URL_PATTERN.test(attribute.nodeValue) ||
-        DATA_URL_PATTERN.test(attribute.nodeValue)
+          DATA_URL_PATTERN.test(attribute.nodeValue)
       );
     }
 

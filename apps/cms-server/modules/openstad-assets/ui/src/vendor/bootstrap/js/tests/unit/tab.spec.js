@@ -1,4 +1,5 @@
 import Tab from '../../src/tab';
+
 /** Test helpers */
 import { clearFixture, getFixture, jQueryMock } from '../helpers/fixture';
 

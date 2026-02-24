@@ -254,8 +254,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     name={fieldKey}
                     required={fieldRequired}
                     onChange={() => {
-                      (handleRadioChange(choice.value, index),
-                        setCheckInvalid(false));
+                      handleRadioChange(choice.value, index),
+                        setCheckInvalid(false);
                     }}
                     disabled={disabled}
                     value={choice && choice.value}

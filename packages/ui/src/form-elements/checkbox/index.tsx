@@ -106,8 +106,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
     initialValue && Array.isArray(initialValue)
       ? initialValue.map((val) => String(val))
       : typeof initialValue === 'string' || typeof initialValue === 'number'
-        ? [String(initialValue)]
-        : [];
+      ? [String(initialValue)]
+      : [];
 
   const [selectedChoices, setSelectedChoices] =
     useState<string[]>(initialValue);

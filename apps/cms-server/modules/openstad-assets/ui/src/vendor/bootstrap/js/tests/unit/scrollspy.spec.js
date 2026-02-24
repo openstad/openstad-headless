@@ -1,5 +1,6 @@
 import Manipulator from '../../src/dom/manipulator';
 import ScrollSpy from '../../src/scrollspy';
+
 /** Test helpers */
 import {
   clearFixture,

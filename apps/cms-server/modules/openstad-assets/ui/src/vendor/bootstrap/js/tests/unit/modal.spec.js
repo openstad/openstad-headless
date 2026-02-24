@@ -1,6 +1,7 @@
 import EventHandler from '../../src/dom/event-handler';
 import Modal from '../../src/modal';
 import ScrollBarHelper from '../../src/util/scrollbar';
+
 /** Test helpers */
 import {
   clearBodyAndDocument,

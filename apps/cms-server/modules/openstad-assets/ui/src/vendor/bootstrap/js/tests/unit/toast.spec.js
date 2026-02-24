@@ -1,4 +1,5 @@
 import Toast from '../../src/toast';
+
 /** Test helpers */
 import {
   clearFixture,

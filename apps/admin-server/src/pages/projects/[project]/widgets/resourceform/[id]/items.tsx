@@ -611,8 +611,8 @@ export default function WidgetResourceFormItems(
         form.watch('type') === 'documentUpload'
           ? 'documents'
           : form.watch('type') === 'imageUpload'
-            ? 'images'
-            : '';
+          ? 'images'
+          : '';
 
       form.setValue('fieldKey', recommendedFieldKey);
     }
@@ -850,8 +850,8 @@ export default function WidgetResourceFormItems(
                               className="w-fit mt-4 bg-secondary text-black hover:text-white"
                               type="button"
                               onClick={() => {
-                                (setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null));
+                                setSettingOptions(() => !settingOptions),
+                                  setMatrixOption(null);
                               }}>
                               Annuleer
                             </Button>
@@ -994,9 +994,9 @@ export default function WidgetResourceFormItems(
                         className="w-fit mt-4 bg-secondary text-black hover:text-white"
                         type="button"
                         onClick={() => {
-                          (setSettingOptions(() => !settingOptions),
+                          setSettingOptions(() => !settingOptions),
                             setOption(null),
-                            setOptions([]));
+                            setOptions([]);
                         }}>
                         Annuleer
                       </Button>
@@ -1491,8 +1491,8 @@ export default function WidgetResourceFormItems(
                                   required
                                     ? 'true'
                                     : field.value
-                                      ? 'true'
-                                      : 'false'
+                                    ? 'true'
+                                    : 'false'
                                 }
                                 disabled={required}>
                                 <FormControl>

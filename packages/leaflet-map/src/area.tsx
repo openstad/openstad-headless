@@ -192,8 +192,8 @@ export function Area({
   const multiPolygon: any[] = [];
   const areaIds = areas?.map((item: Area) => item.id);
   const safeAllAreas = Array.isArray(allAreas) ? allAreas : [];
-  const filteredAreas = safeAllAreas.filter((item: any) =>
-    areaIds?.includes(item.id)
+  const filteredAreas = safeAllAreas.filter(
+    (item: any) => areaIds?.includes(item.id)
   );
 
   filteredAreas.forEach((item: any) => {
@@ -279,24 +279,25 @@ export function Area({
             </Polygon>
           ))
         : areaRenderMode === 'polygons' ||
-            (areaRenderMode === 'cutout' && cutoutFailed)
-          ? normalizeAreaToPolygons(area).map((polygon, index) => (
-              <Polygon
-                key={`area-${index}`}
-                {...props}
-                pathOptions={areaPolygonStyle}
-                positions={polygon}
-              />
-            ))
-          : poly && (
-              <Polygon
-                {...props}
-                positions={poly.map((ring: any) =>
+          (areaRenderMode === 'cutout' && cutoutFailed)
+        ? normalizeAreaToPolygons(area).map((polygon, index) => (
+            <Polygon
+              key={`area-${index}`}
+              {...props}
+              pathOptions={areaPolygonStyle}
+              positions={polygon}
+            />
+          ))
+        : poly && (
+            <Polygon
+              {...props}
+              positions={poly.map(
+                (ring: any) =>
                   ring?.map(([lng, lat]: [number, number]) => [lat, lng])
-                )}
-                pathOptions={areaPolygonStyle}
-              />
-            )}
+              )}
+              pathOptions={areaPolygonStyle}
+            />
+          )}
       {hiddenOverlays.map((item, index) => (
         <Polygon
           key={`hidden-${index}`}

@@ -217,8 +217,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                           name={fieldKey}
                           required={fieldRequired}
                           onChange={() => {
-                            (handleChoiceChange(choice.value),
-                              setCheckInvalid(false));
+                            handleChoiceChange(choice.value),
+                              setCheckInvalid(false);
                           }}
                           disabled={
                             disabled ||

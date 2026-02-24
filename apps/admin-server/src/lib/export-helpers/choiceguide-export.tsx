@@ -130,7 +130,11 @@ export const exportChoiceGuideToCSV = (
                 option.titles.length > 0 &&
                 option.titles[0].isOtherOption
               ) {
-                const otherTitle = `${option.titles[0].key || option.titles[0].title || 'Anders, namelijk'}`;
+                const otherTitle = `${
+                  option.titles[0].key ||
+                  option.titles[0].title ||
+                  'Anders, namelijk'
+                }`;
                 const otherKey = `${newKey}_${option.trigger}_other`;
 
                 fieldKeyToTitleMap.set(otherKey, otherTitle);

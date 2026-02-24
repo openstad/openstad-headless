@@ -400,8 +400,8 @@ export function Filters({
               const limitedTags = Array.isArray(tagsLimitation)
                 ? tagsLimitation
                 : tagsLimitation && tagsLimitation[tagGroup.type]
-                  ? tagsLimitation[tagGroup.type]
-                  : [];
+                ? tagsLimitation[tagGroup.type]
+                : [];
 
               if (tagGroup.multiple) {
                 return (
@@ -589,7 +589,9 @@ export function Filters({
             </Button>
             <div
               id="filters-container"
-              className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
+              className={`filters-container ${
+                displayCollapsibleFilter ? '--collapsable' : ''
+              } ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
               onClick={(e) => {
                 setFiltersVisible(false);

@@ -315,8 +315,9 @@ function DocumentMap({
         }
 
         if (filterBehavior === 'and') {
-          return finalAllTagsToFilter.every((tagId) =>
-            comment.tags?.some((tag: { id: number }) => tag.id === tagId)
+          return finalAllTagsToFilter.every(
+            (tagId) =>
+              comment.tags?.some((tag: { id: number }) => tag.id === tagId)
           );
         } else {
           return comment.tags?.some((tag: { id: number }) =>
@@ -695,7 +696,11 @@ function DocumentMap({
         ref={markerRef}
         icon={MarkerIcon({
           icon: {
-            className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''} id-${index}`,
+            className: `${
+              index === selectedMarkerIndex
+                ? '--highlightedIcon'
+                : '--defaultIcon'
+            } ${isDefaultColor ? 'basic-icon' : ''} id-${index}`,
             color: !isDefaultColor ? color : undefined,
           },
         })}
@@ -915,7 +920,9 @@ function DocumentMap({
   return !bounds ? null : (
     <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
       <div
-        className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
+        className={`map-container ${
+          !toggleMarker ? '--hideMarkers' : ''
+        } ${displayMapSide}`}>
         {(displayResourceInfo === 'left' ||
           accessibilityUrlVisible ||
           backUrl ||
@@ -1171,7 +1178,9 @@ function DocumentMap({
           {!!args.canComment && (
             <>
               <Button
-                className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                className={`info-trigger ${
+                  infoPopupButtonText ? 'button-has-text' : ''
+                }`}
                 appearance="primary-action-button"
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>

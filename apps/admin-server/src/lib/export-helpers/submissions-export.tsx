@@ -224,7 +224,9 @@ export const exportSubmissionsToCSV = (
         const selectedValues = normalizeToArray(rawValue);
 
         mcConfig.options.forEach((optionLabel) => {
-          const columnHeader = `${mcConfig.title}: ${stripHtmlTags(optionLabel)}`;
+          const columnHeader = `${mcConfig.title}: ${stripHtmlTags(
+            optionLabel
+          )}`;
           const isSelected = selectedValues.some(
             (val) => val.toLowerCase() === optionLabel.toLowerCase()
           );

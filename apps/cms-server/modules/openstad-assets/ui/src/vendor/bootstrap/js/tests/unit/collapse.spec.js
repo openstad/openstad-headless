@@ -1,5 +1,6 @@
 import Collapse from '../../src/collapse';
 import EventHandler from '../../src/dom/event-handler';
+
 /** Test helpers */
 import { clearFixture, getFixture, jQueryMock } from '../helpers/fixture';
 

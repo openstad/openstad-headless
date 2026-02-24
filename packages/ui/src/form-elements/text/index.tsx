@@ -374,7 +374,9 @@ const TextInput: FC<TextInputProps> = ({
       })}
 
       <div
-        className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}
+        className={`utrecht-form-field__input ${
+          fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''
+        }`}
         aria-invalid={checkInvalid}>
         <InputComponent
           id={randomId}
@@ -415,12 +417,18 @@ const TextInput: FC<TextInputProps> = ({
             setHasBlurred(true);
           }}
           autoComplete={getAutocomplete(fieldKey)}
-          aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
+          aria-describedby={`${randomId}_error${
+            (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
+              ? ` ${helpTextId}`
+              : ''
+          }`}
           aria-invalid={checkInvalid}
         />
         {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
           <FormFieldDescription
-            className={`help-text${isOverCharacterLimit ? ' help-text--error' : ''}`}
+            className={`help-text${
+              isOverCharacterLimit ? ' help-text--error' : ''
+            }`}
             id={helpTextId}
             aria-live="polite"
             aria-atomic="true">

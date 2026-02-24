@@ -2,6 +2,7 @@ import EventHandler from '../../src/dom/event-handler';
 import Offcanvas from '../../src/offcanvas';
 import { isVisible } from '../../src/util';
 import ScrollBarHelper from '../../src/util/scrollbar';
+
 /** Test helpers */
 import {
   clearBodyAndDocument,

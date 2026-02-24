@@ -386,7 +386,7 @@ function Form({
               Math.random().toString(36).substring(2, 15);
             const fieldInvalid = Boolean(
               field.fieldKey &&
-              typeof formErrors[field.fieldKey] !== 'undefined'
+                typeof formErrors[field.fieldKey] !== 'undefined'
             );
 
             if (
@@ -401,7 +401,9 @@ function Form({
             return field.type === 'pagination' ? null : (
               <div
                 // @ts-ignore
-                className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`}
+                className={`question question-type-${field.type} --${
+                  field.infoBlockStyle || ''
+                }`}
                 key={uniqueKey}>
                 {renderField(field, index, randomId, fieldInvalid)}
                 <FormFieldErrorMessage className="error-message">

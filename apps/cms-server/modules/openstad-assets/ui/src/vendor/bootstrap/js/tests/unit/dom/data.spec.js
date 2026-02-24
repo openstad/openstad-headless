@@ -1,4 +1,5 @@
 import Data from '../../../src/dom/data';
+
 /** Test helpers */
 import { clearFixture, getFixture } from '../../helpers/fixture';
 

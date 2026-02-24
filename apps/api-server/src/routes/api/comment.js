@@ -288,8 +288,8 @@ router
           confirmation && !req?.results?.parentId
             ? 'notification comment - user'
             : confirmationReplies
-              ? 'notification comment reply - user'
-              : '';
+            ? 'notification comment reply - user'
+            : '';
 
         if (!notificationType) throw new Error('No valid notification type');
 

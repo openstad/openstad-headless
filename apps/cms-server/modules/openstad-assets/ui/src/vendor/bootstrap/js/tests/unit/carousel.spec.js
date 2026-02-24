@@ -1,6 +1,7 @@
 import Carousel from '../../src/carousel';
 import EventHandler from '../../src/dom/event-handler';
 import * as util from '../../src/util';
+
 /** Test helpers */
 import {
   clearFixture,

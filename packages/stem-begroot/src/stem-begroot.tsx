@@ -735,15 +735,15 @@ function StemBegroot({
         !(resource.budget <= props.votes.maxBudget - budgetUsed)
         ? notEnoughBudgetText
         : isInSelected(resource)
-          ? step1Delete || 'Verwijder'
-          : step1Add || 'Voeg toe';
+        ? step1Delete || 'Verwijder'
+        : step1Add || 'Voeg toe';
     }
     return !isInSelected(resource) &&
       !((props.votes.maxResources || 0) > selectedResources.length)
       ? notEnoughBudgetText
       : isInSelected(resource)
-        ? step1Delete || 'Verwijder'
-        : step1Add || 'Voeg toe';
+      ? step1Delete || 'Verwijder'
+      : step1Add || 'Voeg toe';
   };
 
   const steps = [

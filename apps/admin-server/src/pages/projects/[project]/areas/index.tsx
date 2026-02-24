@@ -137,7 +137,9 @@ export default function ProjectAreas() {
             <ul className="admin-overview">
               {filterData?.map((item: any) => (
                 <Link
-                  href={`/projects/${project}/areas/${item.type === 'Polygoon' ? item.id : `layers/${item.id}`}`}
+                  href={`/projects/${project}/areas/${
+                    item.type === 'Polygoon' ? item.id : `layers/${item.id}`
+                  }`}
                   key={item.id}>
                   <li className="grid grid-cols-3 lg:grid-cols-5 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="hidden lg:flex truncate">

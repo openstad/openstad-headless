@@ -506,7 +506,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                     return (
                       <div
                         key={id}
-                        className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                        className={`relative grid ${
+                          index === imageIndexOpen ? 'col-span-full' : 'tile'
+                        } gap-x-4 items-center image-gallery`}
                         style={{
                           gridTemplateColumns:
                             index === imageIndexOpen ? '1fr 2fr 40px' : '1fr',

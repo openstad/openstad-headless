@@ -8,13 +8,13 @@ exports.withAll = (req, res, next) => {
   const limit = isExport
     ? undefined
     : req.query.limit
-      ? parseInt(req.query.limit, 10)
-      : 1000;
+    ? parseInt(req.query.limit, 10)
+    : 1000;
   const offset = isExport
     ? undefined
     : req.query.offset
-      ? parseInt(req.query.offset, 10)
-      : 0;
+    ? parseInt(req.query.offset, 10)
+    : 0;
 
   const search = req.query.search ? req.query.search : false;
 
