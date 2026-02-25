@@ -2,7 +2,20 @@ import { describe, expect, it } from 'vitest';
 
 import spamDetector from './spam-detector.js';
 
-const { isLikelyRandomText, analyzeSpamPayload } = spamDetector;
+const {
+  isLikelyRandomText,
+  analyzeSpamPayload,
+  removeSpamMetaFields,
+  isSpamFilterEnabled,
+} = spamDetector;
+
+function restoreSpamFilterEnv(prev) {
+  if (typeof prev === 'undefined') {
+    delete process.env.SPAM_FILTER_ENABLED;
+    return;
+  }
+  process.env.SPAM_FILTER_ENABLED = prev;
+}
 
 describe('spam-detector', () => {
   it('analyzeSpamPayload returns minimal shape by default', () => {
@@ -13,6 +26,47 @@ describe('spam-detector', () => {
 
     const analysis = analyzeSpamPayload(payload);
     expect(analysis).toEqual({ isProbablySpam: true });
+  });
+
+  it('removeSpamMetaFields removes all time-to-submit variants, also nested', () => {
+    const payload = {
+      __timeToSubmitMs: 1000,
+      timetosubmit: 1200,
+      extraData: {
+        timeToSubmitMs: 1300,
+        nested: {
+          timetosubmit: 1400,
+          value: 'keep-me',
+        },
+      },
+      list: [{ timetosubmit: 1500, value: 'keep-me-too' }],
+    };
+
+    const cleaned = removeSpamMetaFields(payload);
+    expect(cleaned).toEqual({
+      extraData: {
+        nested: {
+          value: 'keep-me',
+        },
+      },
+      list: [{ value: 'keep-me-too' }],
+    });
+  });
+
+  it('isSpamFilterEnabled is false by default', () => {
+    const prev = process.env.SPAM_FILTER_ENABLED;
+    delete process.env.SPAM_FILTER_ENABLED;
+    expect(isSpamFilterEnabled()).toBe(false);
+    restoreSpamFilterEnv(prev);
+  });
+
+  it('isSpamFilterEnabled is true only when env is "true"', () => {
+    const prev = process.env.SPAM_FILTER_ENABLED;
+    process.env.SPAM_FILTER_ENABLED = 'true';
+    expect(isSpamFilterEnabled()).toBe(true);
+    process.env.SPAM_FILTER_ENABLED = 'false';
+    expect(isSpamFilterEnabled()).toBe(false);
+    restoreSpamFilterEnv(prev);
   });
 
   it('isLikelyRandomText flags gibberish-like text', () => {

@@ -14,6 +14,12 @@ export const exportSubmissionsToCSV = (
   selectedWidget: any,
   settings?: ExportSettings
 ) => {
+  const includeSpamColumn =
+    process.env.NEXT_PUBLIC_SPAM_FILTER_ENABLED === 'true';
+  const includeHashedIpColumn = data?.some(
+    (row: any) => !!row?.submittedData?.ipAddress
+  );
+
   function transformString() {
     widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
     widgetName = widgetName.replace(/[^a-z0-9-]/g, '');
@@ -154,7 +160,9 @@ export const exportSubmissionsToCSV = (
       'Aangemaakt op': row.createdAt || ' ',
       'Project ID': row.projectId || ' ',
       Widget: widgetName || ' ',
-      'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee',
+      ...(includeSpamColumn
+        ? { 'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee' }
+        : {}),
       'Gebruikers ID': row.userId || ' ',
       'Gebruikers rol': row.user?.role || ' ',
       'Gebruikers naam': row.user?.name || ' ',
@@ -166,7 +174,7 @@ export const exportSubmissionsToCSV = (
       'Gebruikers postcode': row.user?.postcode || ' ',
     };
 
-    if (process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true') {
+    if (includeHashedIpColumn) {
       rowData['Gebruikers IP-adres (gehasht)'] =
         row?.submittedData?.ipAddress || ' ';
     }
@@ -224,7 +232,9 @@ export const exportSubmissionsToCSV = (
         const selectedValues = normalizeToArray(rawValue);
 
         mcConfig.options.forEach((optionLabel) => {
-          const columnHeader = `${mcConfig.title}: ${stripHtmlTags(optionLabel)}`;
+          const columnHeader = `${mcConfig.title}: ${stripHtmlTags(
+            optionLabel
+          )}`;
           const isSelected = selectedValues.some(
             (val) => val.toLowerCase() === optionLabel.toLowerCase()
           );
