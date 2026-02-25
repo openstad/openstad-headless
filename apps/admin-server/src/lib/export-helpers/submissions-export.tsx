@@ -2,20 +2,20 @@ import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
 import * as XLSX from 'xlsx';
 
 import { fetchMatrixData } from './fetch-matrix-data';
+import { getRuntimeSpamFilterEnabled } from './get-runtime-spam-flag';
 import { normalizeToArray } from './normalize-to-array';
 
 export interface ExportSettings {
   splitMultipleChoice: boolean;
 }
 
-export const exportSubmissionsToCSV = (
+export const exportSubmissionsToCSV = async (
   data: any,
   widgetName: string,
   selectedWidget: any,
   settings?: ExportSettings
 ) => {
-  const includeSpamColumn =
-    process.env.NEXT_PUBLIC_SPAM_FILTER_ENABLED === 'true';
+  const includeSpamColumn = await getRuntimeSpamFilterEnabled();
   const includeHashedIpColumn = data?.some(
     (row: any) => !!row?.submittedData?.ipAddress
   );

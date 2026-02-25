@@ -3,16 +3,8 @@ function getStringValue(value) {
   return value.trim();
 }
 
-const spamFieldKeys = new Set([
-  '__timetosubmitms',
-  'timetosubmitms',
-  'timetosubmit',
-  'timetosubmitinms',
-]);
-
 function isSpamMetaFieldKey(key) {
-  if (typeof key !== 'string') return false;
-  return spamFieldKeys.has(key.toLowerCase());
+  return key === '__timeToSubmitMs';
 }
 
 function stripSpamMetaFieldsDeep(value) {
@@ -31,19 +23,8 @@ function stripSpamMetaFieldsDeep(value) {
 }
 
 function getTimeToSubmitMs(payload = {}) {
-  const valueByPriority = [
-    payload.__timeToSubmitMs,
-    payload.timeToSubmitMs,
-    payload.timetosubmit,
-    payload.timeToSubmitInMs,
-  ];
-
-  for (const value of valueByPriority) {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-
-  return null;
+  const parsed = Number(payload.__timeToSubmitMs);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function isSpamFilterEnabled() {

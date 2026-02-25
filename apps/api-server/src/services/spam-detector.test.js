@@ -28,18 +28,17 @@ describe('spam-detector', () => {
     expect(analysis).toEqual({ isProbablySpam: true });
   });
 
-  it('removeSpamMetaFields removes all time-to-submit variants, also nested', () => {
+  it('removeSpamMetaFields removes __timeToSubmitMs, also nested', () => {
     const payload = {
       __timeToSubmitMs: 1000,
-      timetosubmit: 1200,
       extraData: {
-        timeToSubmitMs: 1300,
+        __timeToSubmitMs: 1300,
         nested: {
-          timetosubmit: 1400,
+          __timeToSubmitMs: 1400,
           value: 'keep-me',
         },
       },
-      list: [{ timetosubmit: 1500, value: 'keep-me-too' }],
+      list: [{ __timeToSubmitMs: 1500, value: 'keep-me-too' }],
     };
 
     const cleaned = removeSpamMetaFields(payload);

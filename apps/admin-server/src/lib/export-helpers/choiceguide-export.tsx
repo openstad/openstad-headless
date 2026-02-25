@@ -5,15 +5,15 @@ import * as XLSX from 'xlsx';
 import { InitializeWeights } from '../../../../../packages/choiceguide/src/parts/init-weights';
 import { calculateScoreForItem } from '../../../../../packages/choiceguide/src/parts/scoreUtils';
 import { fetchMatrixData } from './fetch-matrix-data';
+import { getRuntimeSpamFilterEnabled } from './get-runtime-spam-flag';
 
-export const exportChoiceGuideToCSV = (
+export const exportChoiceGuideToCSV = async (
   widgetName: string,
   selectedWidget: any,
   project: string,
   limit: number
 ) => {
-  const includeSpamColumn =
-    process.env.NEXT_PUBLIC_SPAM_FILTER_ENABLED === 'true';
+  const includeSpamColumn = await getRuntimeSpamFilterEnabled();
 
   const fetchResults = async () => {
     let allData: any = [];
