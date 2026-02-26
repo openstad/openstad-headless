@@ -1,12 +1,14 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -15,15 +17,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Input } from '@/components/ui/input';
-import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   resourceType: z.enum(['resource']),
@@ -120,7 +121,7 @@ export default function WidgetResourceOverviewGeneral(
             )}
           />
 
-          { form.watch('displayType') === 'cardrow' && (
+          {form.watch('displayType') === 'cardrow' && (
             <FormField
               control={form.control}
               name="itemLink"
@@ -130,13 +131,18 @@ export default function WidgetResourceOverviewGeneral(
                     Link (relatief) naar de specifieke inzending
                   </FormLabel>
                   <FormControl>
-
-                    {!!props.widgetName && props.widgetName === 'multiprojectresourceoverview' ? (
-                      <div style={{backgroundColor: 'goldenrod', padding: '15px 20px', margin: '10px 0 20px'}}>
+                    {!!props.widgetName &&
+                    props.widgetName === 'multiprojectresourceoverview' ? (
+                      <div
+                        style={{
+                          backgroundColor: 'goldenrod',
+                          padding: '15px 20px',
+                          margin: '10px 0 20px',
+                        }}>
                         <FormDescription
-                          style={{color: 'black', textAlign: 'center'}}
-                        >
-                          Deze optie is instelbaar per project bij het tabblad &apos;Instellingen multi project&apos;.
+                          style={{ color: 'black', textAlign: 'center' }}>
+                          Deze optie is instelbaar per project bij het tabblad
+                          &apos;Instellingen multi project&apos;.
                         </FormDescription>
                       </div>
                     ) : (
@@ -150,7 +156,6 @@ export default function WidgetResourceOverviewGeneral(
                         }}
                       />
                     )}
-
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,14 +163,15 @@ export default function WidgetResourceOverviewGeneral(
             />
           )}
 
-          { form.watch('displayType') === 'raw' && (
+          {form.watch('displayType') === 'raw' && (
             <FormField
               control={form.control}
               name="rawInput"
               render={({ field }) => (
                 <FormItem className="col-span-full">
                   <FormLabel>
-                    Template voor display: &quot; Creëer je eigen template.&quot;
+                    Template voor display: &quot; Creëer je eigen
+                    template.&quot;
                   </FormLabel>
                   <div className="text-xs pb-4">
                     <h2>Te gebruiken variabelen:</h2>
@@ -188,22 +194,18 @@ export default function WidgetResourceOverviewGeneral(
                       <li className="ml-4">{`{{publishDateHumanized}}`}</li>
                       <li className="ml-4">{`{{resource}} -> Bevat alle data van de resource`}</li>
                     </ul>
-                    <br/>
+                    <br />
                     <h2>Te gebruiken filters:</h2>
                     <ul className="list-disc">
                       <li className="ml-4">{`{{ variable | dump }}: Laat de inhoud van een object zien.`}</li>
-                      <li
-                        className="ml-4">{`{{ variable | cleanArray }}: Maakt van een lijst een tekst met de waardes gescheiden door komma's. Bijvoorbeeld: "['Optie 1', 'Optie 2']" wordt omgezet naar: Optie 1, Optie 2`}</li>
-                      <li
-                        className="ml-4">{`{{ variable | capitalize }}: Zet de eerste letter in hoofdletters.`}</li>
-                      <li
-                        className="ml-4">{`{{ variable | truncate(10) }}: Kort een tekst in tot de opgegeven lengte. Na deze lengte wordt er '...' toegevoegd.`}</li>
+                      <li className="ml-4">{`{{ variable | cleanArray }}: Maakt van een lijst een tekst met de waardes gescheiden door komma's. Bijvoorbeeld: "['Optie 1', 'Optie 2']" wordt omgezet naar: Optie 1, Optie 2`}</li>
+                      <li className="ml-4">{`{{ variable | capitalize }}: Zet de eerste letter in hoofdletters.`}</li>
+                      <li className="ml-4">{`{{ variable | truncate(10) }}: Kort een tekst in tot de opgegeven lengte. Na deze lengte wordt er '...' toegevoegd.`}</li>
                       <li className="ml-4">{`{{ variable | lowercase }}: Zet een tekst om naar kleine letters.`}</li>
                       <li className="ml-4">{`{{ variable | uppercase }}: Zet een tekst om naar hoofdletters.`}</li>
-                      <li
-                        className="ml-4">{`{{ variable | replace('zoek', 'vervang') }}: Vervangt een deel van de tekst door iets anders.`}</li>
+                      <li className="ml-4">{`{{ variable | replace('zoek', 'vervang') }}: Vervangt een deel van de tekst door iets anders.`}</li>
                     </ul>
-                    <br/>
+                    <br />
                     <h2>Overige functies:</h2>
                     <ul className="list-disc">
                       <li className="ml-4">{`{{ resource | tags }}: Laat alle gekoppelde tags zien gescheiden met komma's`}</li>

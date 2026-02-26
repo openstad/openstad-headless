@@ -5,18 +5,18 @@ const outputAccessCode = (req, res, next) => {
 exports.all = (req, res, next) => {
   res.json({
     total: req.totalCodeCount,
-    data: req.codes
+    data: req.codes,
   });
 };
 
 exports.created = [
   (req, res, next) => {
-    res.json({'message': 'Success'})
-  }
+    res.json({ message: 'Success' });
+  },
 ];
 
 exports.delete = [
   (req, res, next) => {
-    res.json({'message': 'Deleted!'})
-  }
+    res.json({ message: 'Deleted!' });
+  },
 ];

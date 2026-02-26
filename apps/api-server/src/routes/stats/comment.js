@@ -1,9 +1,9 @@
-const config    = require('config');
-const dbConfig  = config.get('database');
+const config = require('config');
+const dbConfig = config.get('database');
 const mysql = require('mysql2');
 const express = require('express');
-const createError = require('http-errors')
-const rateLimiter = require("@openstad-headless/lib/rateLimiter");
+const createError = require('http-errors');
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const pool = mysql.createPool({
   host: dbConfig.host,
@@ -12,50 +12,48 @@ const pool = mysql.createPool({
   database: dbConfig.database,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 });
 
-let router = express.Router({mergeParams: true});
+let router = express.Router({ mergeParams: true });
 
 // for all get requests
+router.all('*', function (req, res, next) {
+  return next();
+});
+
 router
-	.all('*', function(req, res, next) {
-    return next();
-	})
+  .route('/total')
 
-router.route('/total')
-
-// count comments
-// ---------------
-	.get(rateLimiter(), function(req, res, next) {
-
+  // count comments
+  // ---------------
+  .get(rateLimiter(), function (req, res, next) {
     let resourceId = req.query.resourceId;
     let sentiment = req.query.sentiment;
 
     let query = `SELECT count(comments.id) AS counted FROM resources LEFT JOIN comments ON comments.resourceId = resources.id `;
-    let bindvars = []
+    let bindvars = [];
     if (sentiment) {
       query += `AND comments.sentiment = ? `;
       bindvars.push(sentiment);
     }
-    query += "WHERE resources.deletedAt IS NULL AND resources.projectId = ? ";
+    query += 'WHERE resources.deletedAt IS NULL AND resources.projectId = ? ';
     bindvars.push(req.params.projectId);
     if (resourceId) {
-      query += "AND resources.id = ? ";
+      query += 'AND resources.id = ? ';
       bindvars.push(resourceId);
     }
 
     pool
       .promise()
       .query(query, bindvars)
-      .then( ([rows,fields]) => {
-        let counted = rows && rows[0] && rows[0].counted || -1;
-        res.json({count: counted})
+      .then(([rows, fields]) => {
+        let counted = (rows && rows[0] && rows[0].counted) || -1;
+        res.json({ count: counted });
       })
-      .catch(err => {
+      .catch((err) => {
         next(err);
-      })
-
-  })
+      });
+  });
 
 module.exports = router;

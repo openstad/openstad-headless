@@ -36,7 +36,8 @@ figure.info-image-container {
   margin: -11px 0 0 -11px;
   width: 20px;
   height: 20px;
-  border: 10px solid var(--utrecht-button-primary-action-background-color, #bed200);
+  border: 10px solid
+    var(--utrecht-button-primary-action-background-color, #bed200);
   border-radius: 10px;
 }
 
@@ -148,7 +149,10 @@ figure.info-image-container {
   top: 0;
   left: 0;
   height: 14px;
-  background-color: var(--utrecht-button-primary-action-background-color, #bed200);
+  background-color: var(
+    --utrecht-button-primary-action-background-color,
+    #bed200
+  );
   border-top-left-radius: 7px;
 }
 
@@ -241,308 +245,914 @@ figure.info-image-container {
   display: none;
 }
 
-.osc-choice-default .osc-choice-bar-progress[data-score="0"] {width: 0%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="1"] {width: 1%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="2"] {width: 2%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="3"] {width: 3%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="4"] {width: 4%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="5"] {width: 5%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="6"] {width: 6%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="7"] {width: 7%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="8"] {width: 8%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="9"] {width: 9%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="10"] {width: 10%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="11"] {width: 11%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="12"] {width: 12%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="13"] {width: 13%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="14"] {width: 14%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="15"] {width: 15%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="16"] {width: 16%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="17"] {width: 17%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="18"] {width: 18%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="19"] {width: 19%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="20"] {width: 20%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="21"] {width: 21%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="22"] {width: 22%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="23"] {width: 23%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="24"] {width: 24%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="25"] {width: 25%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="26"] {width: 26%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="27"] {width: 27%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="28"] {width: 28%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="29"] {width: 29%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="30"] {width: 30%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="31"] {width: 31%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="32"] {width: 32%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="33"] {width: 33%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="34"] {width: 34%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="35"] {width: 35%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="36"] {width: 36%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="37"] {width: 37%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="38"] {width: 38%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="39"] {width: 39%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="40"] {width: 40%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="41"] {width: 41%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="42"] {width: 42%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="43"] {width: 43%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="44"] {width: 44%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="45"] {width: 45%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="46"] {width: 46%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="47"] {width: 47%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="48"] {width: 48%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="49"] {width: 49%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="50"] {width: 50%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="51"] {width: 51%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="52"] {width: 52%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="53"] {width: 53%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="54"] {width: 54%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="55"] {width: 55%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="56"] {width: 56%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="57"] {width: 57%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="58"] {width: 58%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="59"] {width: 59%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="60"] {width: 60%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="61"] {width: 61%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="62"] {width: 62%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="63"] {width: 63%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="64"] {width: 64%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="65"] {width: 65%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="66"] {width: 66%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="67"] {width: 67%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="68"] {width: 68%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="69"] {width: 69%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="70"] {width: 70%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="71"] {width: 71%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="72"] {width: 72%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="73"] {width: 73%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="74"] {width: 74%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="75"] {width: 75%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="76"] {width: 76%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="77"] {width: 77%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="78"] {width: 78%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="79"] {width: 79%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="80"] {width: 80%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="81"] {width: 81%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="82"] {width: 82%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="83"] {width: 83%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="84"] {width: 84%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="85"] {width: 85%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="86"] {width: 86%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="87"] {width: 87%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="88"] {width: 88%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="89"] {width: 89%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="90"] {width: 90%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="91"] {width: 91%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="92"] {width: 92%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="93"] {width: 93%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="94"] {width: 94%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="95"] {width: 95%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="96"] {width: 96%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="97"] {width: 97%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="98"] {width: 98%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="99"] {width: 99%;}
-.osc-choice-default .osc-choice-bar-progress[data-score="100"] {width: 100%;}
+.osc-choice-default .osc-choice-bar-progress[data-score='0'] {
+  width: 0%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='1'] {
+  width: 1%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='2'] {
+  width: 2%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='3'] {
+  width: 3%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='4'] {
+  width: 4%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='5'] {
+  width: 5%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='6'] {
+  width: 6%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='7'] {
+  width: 7%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='8'] {
+  width: 8%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='9'] {
+  width: 9%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='10'] {
+  width: 10%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='11'] {
+  width: 11%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='12'] {
+  width: 12%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='13'] {
+  width: 13%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='14'] {
+  width: 14%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='15'] {
+  width: 15%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='16'] {
+  width: 16%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='17'] {
+  width: 17%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='18'] {
+  width: 18%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='19'] {
+  width: 19%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='20'] {
+  width: 20%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='21'] {
+  width: 21%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='22'] {
+  width: 22%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='23'] {
+  width: 23%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='24'] {
+  width: 24%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='25'] {
+  width: 25%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='26'] {
+  width: 26%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='27'] {
+  width: 27%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='28'] {
+  width: 28%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='29'] {
+  width: 29%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='30'] {
+  width: 30%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='31'] {
+  width: 31%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='32'] {
+  width: 32%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='33'] {
+  width: 33%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='34'] {
+  width: 34%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='35'] {
+  width: 35%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='36'] {
+  width: 36%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='37'] {
+  width: 37%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='38'] {
+  width: 38%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='39'] {
+  width: 39%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='40'] {
+  width: 40%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='41'] {
+  width: 41%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='42'] {
+  width: 42%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='43'] {
+  width: 43%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='44'] {
+  width: 44%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='45'] {
+  width: 45%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='46'] {
+  width: 46%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='47'] {
+  width: 47%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='48'] {
+  width: 48%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='49'] {
+  width: 49%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='50'] {
+  width: 50%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='51'] {
+  width: 51%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='52'] {
+  width: 52%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='53'] {
+  width: 53%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='54'] {
+  width: 54%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='55'] {
+  width: 55%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='56'] {
+  width: 56%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='57'] {
+  width: 57%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='58'] {
+  width: 58%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='59'] {
+  width: 59%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='60'] {
+  width: 60%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='61'] {
+  width: 61%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='62'] {
+  width: 62%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='63'] {
+  width: 63%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='64'] {
+  width: 64%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='65'] {
+  width: 65%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='66'] {
+  width: 66%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='67'] {
+  width: 67%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='68'] {
+  width: 68%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='69'] {
+  width: 69%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='70'] {
+  width: 70%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='71'] {
+  width: 71%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='72'] {
+  width: 72%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='73'] {
+  width: 73%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='74'] {
+  width: 74%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='75'] {
+  width: 75%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='76'] {
+  width: 76%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='77'] {
+  width: 77%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='78'] {
+  width: 78%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='79'] {
+  width: 79%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='80'] {
+  width: 80%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='81'] {
+  width: 81%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='82'] {
+  width: 82%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='83'] {
+  width: 83%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='84'] {
+  width: 84%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='85'] {
+  width: 85%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='86'] {
+  width: 86%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='87'] {
+  width: 87%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='88'] {
+  width: 88%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='89'] {
+  width: 89%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='90'] {
+  width: 90%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='91'] {
+  width: 91%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='92'] {
+  width: 92%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='93'] {
+  width: 93%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='94'] {
+  width: 94%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='95'] {
+  width: 95%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='96'] {
+  width: 96%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='97'] {
+  width: 97%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='98'] {
+  width: 98%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='99'] {
+  width: 99%;
+}
+.osc-choice-default .osc-choice-bar-progress[data-score='100'] {
+  width: 100%;
+}
 
-#choice-plane .osc-point[data-score-x="0"] {left: 0%;}
-#choice-plane .osc-point[data-score-x="1"] {left: 1%;}
-#choice-plane .osc-point[data-score-x="2"] {left: 2%;}
-#choice-plane .osc-point[data-score-x="3"] {left: 3%;}
-#choice-plane .osc-point[data-score-x="4"] {left: 4%;}
-#choice-plane .osc-point[data-score-x="5"] {left: 5%;}
-#choice-plane .osc-point[data-score-x="6"] {left: 6%;}
-#choice-plane .osc-point[data-score-x="7"] {left: 7%;}
-#choice-plane .osc-point[data-score-x="8"] {left: 8%;}
-#choice-plane .osc-point[data-score-x="9"] {left: 9%;}
-#choice-plane .osc-point[data-score-x="10"] {left: 10%;}
-#choice-plane .osc-point[data-score-x="11"] {left: 11%;}
-#choice-plane .osc-point[data-score-x="12"] {left: 12%;}
-#choice-plane .osc-point[data-score-x="13"] {left: 13%;}
-#choice-plane .osc-point[data-score-x="14"] {left: 14%;}
-#choice-plane .osc-point[data-score-x="15"] {left: 15%;}
-#choice-plane .osc-point[data-score-x="16"] {left: 16%;}
-#choice-plane .osc-point[data-score-x="17"] {left: 17%;}
-#choice-plane .osc-point[data-score-x="18"] {left: 18%;}
-#choice-plane .osc-point[data-score-x="19"] {left: 19%;}
-#choice-plane .osc-point[data-score-x="20"] {left: 20%;}
-#choice-plane .osc-point[data-score-x="21"] {left: 21%;}
-#choice-plane .osc-point[data-score-x="22"] {left: 22%;}
-#choice-plane .osc-point[data-score-x="23"] {left: 23%;}
-#choice-plane .osc-point[data-score-x="24"] {left: 24%;}
-#choice-plane .osc-point[data-score-x="25"] {left: 25%;}
-#choice-plane .osc-point[data-score-x="26"] {left: 26%;}
-#choice-plane .osc-point[data-score-x="27"] {left: 27%;}
-#choice-plane .osc-point[data-score-x="28"] {left: 28%;}
-#choice-plane .osc-point[data-score-x="29"] {left: 29%;}
-#choice-plane .osc-point[data-score-x="30"] {left: 30%;}
-#choice-plane .osc-point[data-score-x="31"] {left: 31%;}
-#choice-plane .osc-point[data-score-x="32"] {left: 32%;}
-#choice-plane .osc-point[data-score-x="33"] {left: 33%;}
-#choice-plane .osc-point[data-score-x="34"] {left: 34%;}
-#choice-plane .osc-point[data-score-x="35"] {left: 35%;}
-#choice-plane .osc-point[data-score-x="36"] {left: 36%;}
-#choice-plane .osc-point[data-score-x="37"] {left: 37%;}
-#choice-plane .osc-point[data-score-x="38"] {left: 38%;}
-#choice-plane .osc-point[data-score-x="39"] {left: 39%;}
-#choice-plane .osc-point[data-score-x="40"] {left: 40%;}
-#choice-plane .osc-point[data-score-x="41"] {left: 41%;}
-#choice-plane .osc-point[data-score-x="42"] {left: 42%;}
-#choice-plane .osc-point[data-score-x="43"] {left: 43%;}
-#choice-plane .osc-point[data-score-x="44"] {left: 44%;}
-#choice-plane .osc-point[data-score-x="45"] {left: 45%;}
-#choice-plane .osc-point[data-score-x="46"] {left: 46%;}
-#choice-plane .osc-point[data-score-x="47"] {left: 47%;}
-#choice-plane .osc-point[data-score-x="48"] {left: 48%;}
-#choice-plane .osc-point[data-score-x="49"] {left: 49%;}
-#choice-plane .osc-point[data-score-x="50"] {left: 50%;}
-#choice-plane .osc-point[data-score-x="51"] {left: 51%;}
-#choice-plane .osc-point[data-score-x="52"] {left: 52%;}
-#choice-plane .osc-point[data-score-x="53"] {left: 53%;}
-#choice-plane .osc-point[data-score-x="54"] {left: 54%;}
-#choice-plane .osc-point[data-score-x="55"] {left: 55%;}
-#choice-plane .osc-point[data-score-x="56"] {left: 56%;}
-#choice-plane .osc-point[data-score-x="57"] {left: 57%;}
-#choice-plane .osc-point[data-score-x="58"] {left: 58%;}
-#choice-plane .osc-point[data-score-x="59"] {left: 59%;}
-#choice-plane .osc-point[data-score-x="60"] {left: 60%;}
-#choice-plane .osc-point[data-score-x="61"] {left: 61%;}
-#choice-plane .osc-point[data-score-x="62"] {left: 62%;}
-#choice-plane .osc-point[data-score-x="63"] {left: 63%;}
-#choice-plane .osc-point[data-score-x="64"] {left: 64%;}
-#choice-plane .osc-point[data-score-x="65"] {left: 65%;}
-#choice-plane .osc-point[data-score-x="66"] {left: 66%;}
-#choice-plane .osc-point[data-score-x="67"] {left: 67%;}
-#choice-plane .osc-point[data-score-x="68"] {left: 68%;}
-#choice-plane .osc-point[data-score-x="69"] {left: 69%;}
-#choice-plane .osc-point[data-score-x="70"] {left: 70%;}
-#choice-plane .osc-point[data-score-x="71"] {left: 71%;}
-#choice-plane .osc-point[data-score-x="72"] {left: 72%;}
-#choice-plane .osc-point[data-score-x="73"] {left: 73%;}
-#choice-plane .osc-point[data-score-x="74"] {left: 74%;}
-#choice-plane .osc-point[data-score-x="75"] {left: 75%;}
-#choice-plane .osc-point[data-score-x="76"] {left: 76%;}
-#choice-plane .osc-point[data-score-x="77"] {left: 77%;}
-#choice-plane .osc-point[data-score-x="78"] {left: 78%;}
-#choice-plane .osc-point[data-score-x="79"] {left: 79%;}
-#choice-plane .osc-point[data-score-x="80"] {left: 80%;}
-#choice-plane .osc-point[data-score-x="81"] {left: 81%;}
-#choice-plane .osc-point[data-score-x="82"] {left: 82%;}
-#choice-plane .osc-point[data-score-x="83"] {left: 83%;}
-#choice-plane .osc-point[data-score-x="84"] {left: 84%;}
-#choice-plane .osc-point[data-score-x="85"] {left: 85%;}
-#choice-plane .osc-point[data-score-x="86"] {left: 86%;}
-#choice-plane .osc-point[data-score-x="87"] {left: 87%;}
-#choice-plane .osc-point[data-score-x="88"] {left: 88%;}
-#choice-plane .osc-point[data-score-x="89"] {left: 89%;}
-#choice-plane .osc-point[data-score-x="90"] {left: 90%;}
-#choice-plane .osc-point[data-score-x="91"] {left: 91%;}
-#choice-plane .osc-point[data-score-x="92"] {left: 92%;}
-#choice-plane .osc-point[data-score-x="93"] {left: 93%;}
-#choice-plane .osc-point[data-score-x="94"] {left: 94%;}
-#choice-plane .osc-point[data-score-x="95"] {left: 95%;}
-#choice-plane .osc-point[data-score-x="96"] {left: 96%;}
-#choice-plane .osc-point[data-score-x="97"] {left: 97%;}
-#choice-plane .osc-point[data-score-x="98"] {left: 98%;}
-#choice-plane .osc-point[data-score-x="99"] {left: 99%;}
-#choice-plane .osc-point[data-score-x="100"] {left: 100%;}
+#choice-plane .osc-point[data-score-x='0'] {
+  left: 0%;
+}
+#choice-plane .osc-point[data-score-x='1'] {
+  left: 1%;
+}
+#choice-plane .osc-point[data-score-x='2'] {
+  left: 2%;
+}
+#choice-plane .osc-point[data-score-x='3'] {
+  left: 3%;
+}
+#choice-plane .osc-point[data-score-x='4'] {
+  left: 4%;
+}
+#choice-plane .osc-point[data-score-x='5'] {
+  left: 5%;
+}
+#choice-plane .osc-point[data-score-x='6'] {
+  left: 6%;
+}
+#choice-plane .osc-point[data-score-x='7'] {
+  left: 7%;
+}
+#choice-plane .osc-point[data-score-x='8'] {
+  left: 8%;
+}
+#choice-plane .osc-point[data-score-x='9'] {
+  left: 9%;
+}
+#choice-plane .osc-point[data-score-x='10'] {
+  left: 10%;
+}
+#choice-plane .osc-point[data-score-x='11'] {
+  left: 11%;
+}
+#choice-plane .osc-point[data-score-x='12'] {
+  left: 12%;
+}
+#choice-plane .osc-point[data-score-x='13'] {
+  left: 13%;
+}
+#choice-plane .osc-point[data-score-x='14'] {
+  left: 14%;
+}
+#choice-plane .osc-point[data-score-x='15'] {
+  left: 15%;
+}
+#choice-plane .osc-point[data-score-x='16'] {
+  left: 16%;
+}
+#choice-plane .osc-point[data-score-x='17'] {
+  left: 17%;
+}
+#choice-plane .osc-point[data-score-x='18'] {
+  left: 18%;
+}
+#choice-plane .osc-point[data-score-x='19'] {
+  left: 19%;
+}
+#choice-plane .osc-point[data-score-x='20'] {
+  left: 20%;
+}
+#choice-plane .osc-point[data-score-x='21'] {
+  left: 21%;
+}
+#choice-plane .osc-point[data-score-x='22'] {
+  left: 22%;
+}
+#choice-plane .osc-point[data-score-x='23'] {
+  left: 23%;
+}
+#choice-plane .osc-point[data-score-x='24'] {
+  left: 24%;
+}
+#choice-plane .osc-point[data-score-x='25'] {
+  left: 25%;
+}
+#choice-plane .osc-point[data-score-x='26'] {
+  left: 26%;
+}
+#choice-plane .osc-point[data-score-x='27'] {
+  left: 27%;
+}
+#choice-plane .osc-point[data-score-x='28'] {
+  left: 28%;
+}
+#choice-plane .osc-point[data-score-x='29'] {
+  left: 29%;
+}
+#choice-plane .osc-point[data-score-x='30'] {
+  left: 30%;
+}
+#choice-plane .osc-point[data-score-x='31'] {
+  left: 31%;
+}
+#choice-plane .osc-point[data-score-x='32'] {
+  left: 32%;
+}
+#choice-plane .osc-point[data-score-x='33'] {
+  left: 33%;
+}
+#choice-plane .osc-point[data-score-x='34'] {
+  left: 34%;
+}
+#choice-plane .osc-point[data-score-x='35'] {
+  left: 35%;
+}
+#choice-plane .osc-point[data-score-x='36'] {
+  left: 36%;
+}
+#choice-plane .osc-point[data-score-x='37'] {
+  left: 37%;
+}
+#choice-plane .osc-point[data-score-x='38'] {
+  left: 38%;
+}
+#choice-plane .osc-point[data-score-x='39'] {
+  left: 39%;
+}
+#choice-plane .osc-point[data-score-x='40'] {
+  left: 40%;
+}
+#choice-plane .osc-point[data-score-x='41'] {
+  left: 41%;
+}
+#choice-plane .osc-point[data-score-x='42'] {
+  left: 42%;
+}
+#choice-plane .osc-point[data-score-x='43'] {
+  left: 43%;
+}
+#choice-plane .osc-point[data-score-x='44'] {
+  left: 44%;
+}
+#choice-plane .osc-point[data-score-x='45'] {
+  left: 45%;
+}
+#choice-plane .osc-point[data-score-x='46'] {
+  left: 46%;
+}
+#choice-plane .osc-point[data-score-x='47'] {
+  left: 47%;
+}
+#choice-plane .osc-point[data-score-x='48'] {
+  left: 48%;
+}
+#choice-plane .osc-point[data-score-x='49'] {
+  left: 49%;
+}
+#choice-plane .osc-point[data-score-x='50'] {
+  left: 50%;
+}
+#choice-plane .osc-point[data-score-x='51'] {
+  left: 51%;
+}
+#choice-plane .osc-point[data-score-x='52'] {
+  left: 52%;
+}
+#choice-plane .osc-point[data-score-x='53'] {
+  left: 53%;
+}
+#choice-plane .osc-point[data-score-x='54'] {
+  left: 54%;
+}
+#choice-plane .osc-point[data-score-x='55'] {
+  left: 55%;
+}
+#choice-plane .osc-point[data-score-x='56'] {
+  left: 56%;
+}
+#choice-plane .osc-point[data-score-x='57'] {
+  left: 57%;
+}
+#choice-plane .osc-point[data-score-x='58'] {
+  left: 58%;
+}
+#choice-plane .osc-point[data-score-x='59'] {
+  left: 59%;
+}
+#choice-plane .osc-point[data-score-x='60'] {
+  left: 60%;
+}
+#choice-plane .osc-point[data-score-x='61'] {
+  left: 61%;
+}
+#choice-plane .osc-point[data-score-x='62'] {
+  left: 62%;
+}
+#choice-plane .osc-point[data-score-x='63'] {
+  left: 63%;
+}
+#choice-plane .osc-point[data-score-x='64'] {
+  left: 64%;
+}
+#choice-plane .osc-point[data-score-x='65'] {
+  left: 65%;
+}
+#choice-plane .osc-point[data-score-x='66'] {
+  left: 66%;
+}
+#choice-plane .osc-point[data-score-x='67'] {
+  left: 67%;
+}
+#choice-plane .osc-point[data-score-x='68'] {
+  left: 68%;
+}
+#choice-plane .osc-point[data-score-x='69'] {
+  left: 69%;
+}
+#choice-plane .osc-point[data-score-x='70'] {
+  left: 70%;
+}
+#choice-plane .osc-point[data-score-x='71'] {
+  left: 71%;
+}
+#choice-plane .osc-point[data-score-x='72'] {
+  left: 72%;
+}
+#choice-plane .osc-point[data-score-x='73'] {
+  left: 73%;
+}
+#choice-plane .osc-point[data-score-x='74'] {
+  left: 74%;
+}
+#choice-plane .osc-point[data-score-x='75'] {
+  left: 75%;
+}
+#choice-plane .osc-point[data-score-x='76'] {
+  left: 76%;
+}
+#choice-plane .osc-point[data-score-x='77'] {
+  left: 77%;
+}
+#choice-plane .osc-point[data-score-x='78'] {
+  left: 78%;
+}
+#choice-plane .osc-point[data-score-x='79'] {
+  left: 79%;
+}
+#choice-plane .osc-point[data-score-x='80'] {
+  left: 80%;
+}
+#choice-plane .osc-point[data-score-x='81'] {
+  left: 81%;
+}
+#choice-plane .osc-point[data-score-x='82'] {
+  left: 82%;
+}
+#choice-plane .osc-point[data-score-x='83'] {
+  left: 83%;
+}
+#choice-plane .osc-point[data-score-x='84'] {
+  left: 84%;
+}
+#choice-plane .osc-point[data-score-x='85'] {
+  left: 85%;
+}
+#choice-plane .osc-point[data-score-x='86'] {
+  left: 86%;
+}
+#choice-plane .osc-point[data-score-x='87'] {
+  left: 87%;
+}
+#choice-plane .osc-point[data-score-x='88'] {
+  left: 88%;
+}
+#choice-plane .osc-point[data-score-x='89'] {
+  left: 89%;
+}
+#choice-plane .osc-point[data-score-x='90'] {
+  left: 90%;
+}
+#choice-plane .osc-point[data-score-x='91'] {
+  left: 91%;
+}
+#choice-plane .osc-point[data-score-x='92'] {
+  left: 92%;
+}
+#choice-plane .osc-point[data-score-x='93'] {
+  left: 93%;
+}
+#choice-plane .osc-point[data-score-x='94'] {
+  left: 94%;
+}
+#choice-plane .osc-point[data-score-x='95'] {
+  left: 95%;
+}
+#choice-plane .osc-point[data-score-x='96'] {
+  left: 96%;
+}
+#choice-plane .osc-point[data-score-x='97'] {
+  left: 97%;
+}
+#choice-plane .osc-point[data-score-x='98'] {
+  left: 98%;
+}
+#choice-plane .osc-point[data-score-x='99'] {
+  left: 99%;
+}
+#choice-plane .osc-point[data-score-x='100'] {
+  left: 100%;
+}
 
-#choice-plane .osc-point[data-score-y="0"] {top: 100%;}
-#choice-plane .osc-point[data-score-y="1"] {top: 99%;}
-#choice-plane .osc-point[data-score-y="2"] {top: 98%;}
-#choice-plane .osc-point[data-score-y="3"] {top: 97%;}
-#choice-plane .osc-point[data-score-y="4"] {top: 96%;}
-#choice-plane .osc-point[data-score-y="5"] {top: 95%;}
-#choice-plane .osc-point[data-score-y="6"] {top: 94%;}
-#choice-plane .osc-point[data-score-y="7"] {top: 93%;}
-#choice-plane .osc-point[data-score-y="8"] {top: 92%;}
-#choice-plane .osc-point[data-score-y="9"] {top: 91%;}
-#choice-plane .osc-point[data-score-y="10"] {top: 90%;}
-#choice-plane .osc-point[data-score-y="11"] {top: 89%;}
-#choice-plane .osc-point[data-score-y="12"] {top: 88%;}
-#choice-plane .osc-point[data-score-y="13"] {top: 87%;}
-#choice-plane .osc-point[data-score-y="14"] {top: 86%;}
-#choice-plane .osc-point[data-score-y="15"] {top: 85%;}
-#choice-plane .osc-point[data-score-y="16"] {top: 84%;}
-#choice-plane .osc-point[data-score-y="17"] {top: 83%;}
-#choice-plane .osc-point[data-score-y="18"] {top: 82%;}
-#choice-plane .osc-point[data-score-y="19"] {top: 81%;}
-#choice-plane .osc-point[data-score-y="20"] {top: 80%;}
-#choice-plane .osc-point[data-score-y="21"] {top: 79%;}
-#choice-plane .osc-point[data-score-y="22"] {top: 78%;}
-#choice-plane .osc-point[data-score-y="23"] {top: 77%;}
-#choice-plane .osc-point[data-score-y="24"] {top: 76%;}
-#choice-plane .osc-point[data-score-y="25"] {top: 75%;}
-#choice-plane .osc-point[data-score-y="26"] {top: 74%;}
-#choice-plane .osc-point[data-score-y="27"] {top: 73%;}
-#choice-plane .osc-point[data-score-y="28"] {top: 72%;}
-#choice-plane .osc-point[data-score-y="29"] {top: 71%;}
-#choice-plane .osc-point[data-score-y="30"] {top: 70%;}
-#choice-plane .osc-point[data-score-y="31"] {top: 69%;}
-#choice-plane .osc-point[data-score-y="32"] {top: 68%;}
-#choice-plane .osc-point[data-score-y="33"] {top: 67%;}
-#choice-plane .osc-point[data-score-y="34"] {top: 66%;}
-#choice-plane .osc-point[data-score-y="35"] {top: 65%;}
-#choice-plane .osc-point[data-score-y="36"] {top: 64%;}
-#choice-plane .osc-point[data-score-y="37"] {top: 63%;}
-#choice-plane .osc-point[data-score-y="38"] {top: 62%;}
-#choice-plane .osc-point[data-score-y="39"] {top: 61%;}
-#choice-plane .osc-point[data-score-y="40"] {top: 60%;}
-#choice-plane .osc-point[data-score-y="41"] {top: 59%;}
-#choice-plane .osc-point[data-score-y="42"] {top: 58%;}
-#choice-plane .osc-point[data-score-y="43"] {top: 57%;}
-#choice-plane .osc-point[data-score-y="44"] {top: 56%;}
-#choice-plane .osc-point[data-score-y="45"] {top: 55%;}
-#choice-plane .osc-point[data-score-y="46"] {top: 54%;}
-#choice-plane .osc-point[data-score-y="47"] {top: 53%;}
-#choice-plane .osc-point[data-score-y="48"] {top: 52%;}
-#choice-plane .osc-point[data-score-y="49"] {top: 51%;}
-#choice-plane .osc-point[data-score-y="50"] {top: 50%;}
-#choice-plane .osc-point[data-score-y="51"] {top: 49%;}
-#choice-plane .osc-point[data-score-y="52"] {top: 48%;}
-#choice-plane .osc-point[data-score-y="53"] {top: 47%;}
-#choice-plane .osc-point[data-score-y="54"] {top: 46%;}
-#choice-plane .osc-point[data-score-y="55"] {top: 45%;}
-#choice-plane .osc-point[data-score-y="56"] {top: 44%;}
-#choice-plane .osc-point[data-score-y="57"] {top: 43%;}
-#choice-plane .osc-point[data-score-y="58"] {top: 42%;}
-#choice-plane .osc-point[data-score-y="59"] {top: 41%;}
-#choice-plane .osc-point[data-score-y="60"] {top: 40%;}
-#choice-plane .osc-point[data-score-y="61"] {top: 39%;}
-#choice-plane .osc-point[data-score-y="62"] {top: 38%;}
-#choice-plane .osc-point[data-score-y="63"] {top: 37%;}
-#choice-plane .osc-point[data-score-y="64"] {top: 36%;}
-#choice-plane .osc-point[data-score-y="65"] {top: 35%;}
-#choice-plane .osc-point[data-score-y="66"] {top: 34%;}
-#choice-plane .osc-point[data-score-y="67"] {top: 33%;}
-#choice-plane .osc-point[data-score-y="68"] {top: 32%;}
-#choice-plane .osc-point[data-score-y="69"] {top: 31%;}
-#choice-plane .osc-point[data-score-y="70"] {top: 30%;}
-#choice-plane .osc-point[data-score-y="71"] {top: 29%;}
-#choice-plane .osc-point[data-score-y="72"] {top: 28%;}
-#choice-plane .osc-point[data-score-y="73"] {top: 27%;}
-#choice-plane .osc-point[data-score-y="74"] {top: 26%;}
-#choice-plane .osc-point[data-score-y="75"] {top: 25%;}
-#choice-plane .osc-point[data-score-y="76"] {top: 24%;}
-#choice-plane .osc-point[data-score-y="77"] {top: 23%;}
-#choice-plane .osc-point[data-score-y="78"] {top: 22%;}
-#choice-plane .osc-point[data-score-y="79"] {top: 21%;}
-#choice-plane .osc-point[data-score-y="80"] {top: 20%;}
-#choice-plane .osc-point[data-score-y="81"] {top: 19%;}
-#choice-plane .osc-point[data-score-y="82"] {top: 18%;}
-#choice-plane .osc-point[data-score-y="83"] {top: 17%;}
-#choice-plane .osc-point[data-score-y="84"] {top: 16%;}
-#choice-plane .osc-point[data-score-y="85"] {top: 15%;}
-#choice-plane .osc-point[data-score-y="86"] {top: 14%;}
-#choice-plane .osc-point[data-score-y="87"] {top: 13%;}
-#choice-plane .osc-point[data-score-y="88"] {top: 12%;}
-#choice-plane .osc-point[data-score-y="89"] {top: 11%;}
-#choice-plane .osc-point[data-score-y="90"] {top: 10%;}
-#choice-plane .osc-point[data-score-y="91"] {top: 9%;}
-#choice-plane .osc-point[data-score-y="92"] {top: 8%;}
-#choice-plane .osc-point[data-score-y="93"] {top: 7%;}
-#choice-plane .osc-point[data-score-y="94"] {top: 6%;}
-#choice-plane .osc-point[data-score-y="95"] {top: 5%;}
-#choice-plane .osc-point[data-score-y="96"] {top: 4%;}
-#choice-plane .osc-point[data-score-y="97"] {top: 3%;}
-#choice-plane .osc-point[data-score-y="98"] {top: 2%;}
-#choice-plane .osc-point[data-score-y="99"] {top: 1%;}
-#choice-plane .osc-point[data-score-y="100"] {top: 0%;}
+#choice-plane .osc-point[data-score-y='0'] {
+  top: 100%;
+}
+#choice-plane .osc-point[data-score-y='1'] {
+  top: 99%;
+}
+#choice-plane .osc-point[data-score-y='2'] {
+  top: 98%;
+}
+#choice-plane .osc-point[data-score-y='3'] {
+  top: 97%;
+}
+#choice-plane .osc-point[data-score-y='4'] {
+  top: 96%;
+}
+#choice-plane .osc-point[data-score-y='5'] {
+  top: 95%;
+}
+#choice-plane .osc-point[data-score-y='6'] {
+  top: 94%;
+}
+#choice-plane .osc-point[data-score-y='7'] {
+  top: 93%;
+}
+#choice-plane .osc-point[data-score-y='8'] {
+  top: 92%;
+}
+#choice-plane .osc-point[data-score-y='9'] {
+  top: 91%;
+}
+#choice-plane .osc-point[data-score-y='10'] {
+  top: 90%;
+}
+#choice-plane .osc-point[data-score-y='11'] {
+  top: 89%;
+}
+#choice-plane .osc-point[data-score-y='12'] {
+  top: 88%;
+}
+#choice-plane .osc-point[data-score-y='13'] {
+  top: 87%;
+}
+#choice-plane .osc-point[data-score-y='14'] {
+  top: 86%;
+}
+#choice-plane .osc-point[data-score-y='15'] {
+  top: 85%;
+}
+#choice-plane .osc-point[data-score-y='16'] {
+  top: 84%;
+}
+#choice-plane .osc-point[data-score-y='17'] {
+  top: 83%;
+}
+#choice-plane .osc-point[data-score-y='18'] {
+  top: 82%;
+}
+#choice-plane .osc-point[data-score-y='19'] {
+  top: 81%;
+}
+#choice-plane .osc-point[data-score-y='20'] {
+  top: 80%;
+}
+#choice-plane .osc-point[data-score-y='21'] {
+  top: 79%;
+}
+#choice-plane .osc-point[data-score-y='22'] {
+  top: 78%;
+}
+#choice-plane .osc-point[data-score-y='23'] {
+  top: 77%;
+}
+#choice-plane .osc-point[data-score-y='24'] {
+  top: 76%;
+}
+#choice-plane .osc-point[data-score-y='25'] {
+  top: 75%;
+}
+#choice-plane .osc-point[data-score-y='26'] {
+  top: 74%;
+}
+#choice-plane .osc-point[data-score-y='27'] {
+  top: 73%;
+}
+#choice-plane .osc-point[data-score-y='28'] {
+  top: 72%;
+}
+#choice-plane .osc-point[data-score-y='29'] {
+  top: 71%;
+}
+#choice-plane .osc-point[data-score-y='30'] {
+  top: 70%;
+}
+#choice-plane .osc-point[data-score-y='31'] {
+  top: 69%;
+}
+#choice-plane .osc-point[data-score-y='32'] {
+  top: 68%;
+}
+#choice-plane .osc-point[data-score-y='33'] {
+  top: 67%;
+}
+#choice-plane .osc-point[data-score-y='34'] {
+  top: 66%;
+}
+#choice-plane .osc-point[data-score-y='35'] {
+  top: 65%;
+}
+#choice-plane .osc-point[data-score-y='36'] {
+  top: 64%;
+}
+#choice-plane .osc-point[data-score-y='37'] {
+  top: 63%;
+}
+#choice-plane .osc-point[data-score-y='38'] {
+  top: 62%;
+}
+#choice-plane .osc-point[data-score-y='39'] {
+  top: 61%;
+}
+#choice-plane .osc-point[data-score-y='40'] {
+  top: 60%;
+}
+#choice-plane .osc-point[data-score-y='41'] {
+  top: 59%;
+}
+#choice-plane .osc-point[data-score-y='42'] {
+  top: 58%;
+}
+#choice-plane .osc-point[data-score-y='43'] {
+  top: 57%;
+}
+#choice-plane .osc-point[data-score-y='44'] {
+  top: 56%;
+}
+#choice-plane .osc-point[data-score-y='45'] {
+  top: 55%;
+}
+#choice-plane .osc-point[data-score-y='46'] {
+  top: 54%;
+}
+#choice-plane .osc-point[data-score-y='47'] {
+  top: 53%;
+}
+#choice-plane .osc-point[data-score-y='48'] {
+  top: 52%;
+}
+#choice-plane .osc-point[data-score-y='49'] {
+  top: 51%;
+}
+#choice-plane .osc-point[data-score-y='50'] {
+  top: 50%;
+}
+#choice-plane .osc-point[data-score-y='51'] {
+  top: 49%;
+}
+#choice-plane .osc-point[data-score-y='52'] {
+  top: 48%;
+}
+#choice-plane .osc-point[data-score-y='53'] {
+  top: 47%;
+}
+#choice-plane .osc-point[data-score-y='54'] {
+  top: 46%;
+}
+#choice-plane .osc-point[data-score-y='55'] {
+  top: 45%;
+}
+#choice-plane .osc-point[data-score-y='56'] {
+  top: 44%;
+}
+#choice-plane .osc-point[data-score-y='57'] {
+  top: 43%;
+}
+#choice-plane .osc-point[data-score-y='58'] {
+  top: 42%;
+}
+#choice-plane .osc-point[data-score-y='59'] {
+  top: 41%;
+}
+#choice-plane .osc-point[data-score-y='60'] {
+  top: 40%;
+}
+#choice-plane .osc-point[data-score-y='61'] {
+  top: 39%;
+}
+#choice-plane .osc-point[data-score-y='62'] {
+  top: 38%;
+}
+#choice-plane .osc-point[data-score-y='63'] {
+  top: 37%;
+}
+#choice-plane .osc-point[data-score-y='64'] {
+  top: 36%;
+}
+#choice-plane .osc-point[data-score-y='65'] {
+  top: 35%;
+}
+#choice-plane .osc-point[data-score-y='66'] {
+  top: 34%;
+}
+#choice-plane .osc-point[data-score-y='67'] {
+  top: 33%;
+}
+#choice-plane .osc-point[data-score-y='68'] {
+  top: 32%;
+}
+#choice-plane .osc-point[data-score-y='69'] {
+  top: 31%;
+}
+#choice-plane .osc-point[data-score-y='70'] {
+  top: 30%;
+}
+#choice-plane .osc-point[data-score-y='71'] {
+  top: 29%;
+}
+#choice-plane .osc-point[data-score-y='72'] {
+  top: 28%;
+}
+#choice-plane .osc-point[data-score-y='73'] {
+  top: 27%;
+}
+#choice-plane .osc-point[data-score-y='74'] {
+  top: 26%;
+}
+#choice-plane .osc-point[data-score-y='75'] {
+  top: 25%;
+}
+#choice-plane .osc-point[data-score-y='76'] {
+  top: 24%;
+}
+#choice-plane .osc-point[data-score-y='77'] {
+  top: 23%;
+}
+#choice-plane .osc-point[data-score-y='78'] {
+  top: 22%;
+}
+#choice-plane .osc-point[data-score-y='79'] {
+  top: 21%;
+}
+#choice-plane .osc-point[data-score-y='80'] {
+  top: 20%;
+}
+#choice-plane .osc-point[data-score-y='81'] {
+  top: 19%;
+}
+#choice-plane .osc-point[data-score-y='82'] {
+  top: 18%;
+}
+#choice-plane .osc-point[data-score-y='83'] {
+  top: 17%;
+}
+#choice-plane .osc-point[data-score-y='84'] {
+  top: 16%;
+}
+#choice-plane .osc-point[data-score-y='85'] {
+  top: 15%;
+}
+#choice-plane .osc-point[data-score-y='86'] {
+  top: 14%;
+}
+#choice-plane .osc-point[data-score-y='87'] {
+  top: 13%;
+}
+#choice-plane .osc-point[data-score-y='88'] {
+  top: 12%;
+}
+#choice-plane .osc-point[data-score-y='89'] {
+  top: 11%;
+}
+#choice-plane .osc-point[data-score-y='90'] {
+  top: 10%;
+}
+#choice-plane .osc-point[data-score-y='91'] {
+  top: 9%;
+}
+#choice-plane .osc-point[data-score-y='92'] {
+  top: 8%;
+}
+#choice-plane .osc-point[data-score-y='93'] {
+  top: 7%;
+}
+#choice-plane .osc-point[data-score-y='94'] {
+  top: 6%;
+}
+#choice-plane .osc-point[data-score-y='95'] {
+  top: 5%;
+}
+#choice-plane .osc-point[data-score-y='96'] {
+  top: 4%;
+}
+#choice-plane .osc-point[data-score-y='97'] {
+  top: 3%;
+}
+#choice-plane .osc-point[data-score-y='98'] {
+  top: 2%;
+}
+#choice-plane .osc-point[data-score-y='99'] {
+  top: 1%;
+}
+#choice-plane .osc-point[data-score-y='100'] {
+  top: 0%;
+}

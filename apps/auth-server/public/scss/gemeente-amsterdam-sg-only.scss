@@ -1,15 +1,15 @@
-@import "mixin/amsterdam-vars";
-@import "mixin/sg-vars";
-@import "mixin/fonts";
-@import "mixin/extends";
-@import "mixin/font-faces";
+@import 'mixin/amsterdam-vars';
+@import 'mixin/sg-vars';
+@import 'mixin/fonts';
+@import 'mixin/extends';
+@import 'mixin/font-faces';
 
-@import "../_patterns/10-atoms/sg-only";
+@import '../_patterns/10-atoms/sg-only';
 
 // jquery ui:
-@import "themes/base/core";
-@import "themes/base/theme";
-@import "themes/base/datepicker";
+@import 'themes/base/core';
+@import 'themes/base/theme';
+@import 'themes/base/datepicker';
 
 // Start Tekstbrowser functionaliteit
 .visuallyhidden,
@@ -90,7 +90,7 @@ body {
     display: inline-block;
     margin: 0;
     outline: 1;
-    padding: 1em 0 .3rem;
+    padding: 1em 0 0.3rem;
   }
 }
 
@@ -98,7 +98,7 @@ a.sg-pattern-extra-toggle:focus {
   background-color: transparent;
   margin: 0;
   outline: 1;
-  padding: .65em;
+  padding: 0.65em;
 }
 
 #{$pattern-example} {
@@ -107,14 +107,14 @@ a.sg-pattern-extra-toggle:focus {
   border-radius: 6px;
   padding: 5px 8px 15px;
 
-  [id^="templates-"] &,
-  [id^="pages-"] & {
+  [id^='templates-'] &,
+  [id^='pages-'] & {
     background-color: $color-lightgrey;
   }
 
   &::after {
     clear: both;
-    content: "";
+    content: '';
     display: table;
   }
 }
@@ -141,10 +141,10 @@ a.sg-pattern-extra-toggle:focus {
     border: 1px solid $color-mediumgrey;
     border-radius: 2px;
     flex: auto;
-    margin: 0 .5em .5em 0;
+    margin: 0 0.5em 0.5em 0;
     max-width: 14em;
     min-width: 5em;
-    padding: .3em;
+    padding: 0.3em;
   }
 }
 
@@ -152,7 +152,7 @@ a.sg-pattern-extra-toggle:focus {
   border-radius: 2px;
   display: block;
   height: 4em;
-  margin-bottom: .3em;
+  margin-bottom: 0.3em;
 }
 
 .sg-label {
@@ -214,14 +214,14 @@ a.sg-pattern-extra-toggle:focus {
   .grid-edge {
     .holder h2 {
       &.afbeelding.bestuur {
-        background-image: url("#{$core-svg-path}superlink-loket-sprite.png");
+        background-image: url('#{$core-svg-path}superlink-loket-sprite.png');
       }
     }
 
     &:hover {
       .holder h2 {
         &.afbeelding.bestuur {
-          background-image: url("#{$core-svg-path}superlink-loket-sprite-active.png");
+          background-image: url('#{$core-svg-path}superlink-loket-sprite-active.png');
         }
       }
     }
@@ -358,7 +358,7 @@ ul {
   border-bottom: 1px solid $color-grey;
   color: $color-darkgrey;
   font-family: HelveticaNeue, Helvetica, Arial, sans-serif;
-  font-size: .875em;
+  font-size: 0.875em;
   font-weight: 700;
   padding: 6px 0;
   text-align: center;
@@ -395,7 +395,6 @@ ul {
     float: right;
   }
 }
-
 
 // List Entry Data Card
 ////

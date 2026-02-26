@@ -1,10 +1,11 @@
 'use strict';
 
 let generateToken = function generateToken(params) {
-
   let token = '';
 
-  params.chars = params.chars || 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  params.chars =
+    params.chars ||
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   params.length = params.length || 25;
 
   for (let i = 0; i < params.length; i++) {
@@ -14,7 +15,6 @@ let generateToken = function generateToken(params) {
   }
 
   return token;
-
-}
+};
 
 module.exports = generateToken;

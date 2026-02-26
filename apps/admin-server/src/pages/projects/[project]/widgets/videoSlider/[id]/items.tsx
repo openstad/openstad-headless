@@ -2,12 +2,14 @@ import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -19,18 +21,20 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
-import { Item, Option } from '@openstad-headless/enquete/src/types/enquete-props';
+import {
+  Item,
+  Option,
+} from '@openstad-headless/enquete/src/types/enquete-props';
+import { ProjectSettingProps } from '@openstad-headless/types';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import InfoDialog from '@/components/ui/info-hover';
-import { useRouter } from 'next/router';
-import { YesNoSelect } from "@/lib/form-widget-helpers";
-import { ProjectSettingProps } from "@openstad-headless/types";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -47,14 +51,16 @@ const formSchema = z.object({
     .array(
       z.object({
         trigger: z.string(),
-        titles: z.array(z.object({
-          text: z.string().optional(),
-          key: z.string(),
-          image: z.string().optional(),
-          isOtherOption: z.boolean().optional(),
-          defaultValue: z.boolean().optional(),
-          hideLabel: z.boolean().optional()
-        })),
+        titles: z.array(
+          z.object({
+            text: z.string().optional(),
+            key: z.string(),
+            image: z.string().optional(),
+            isOtherOption: z.boolean().optional(),
+            defaultValue: z.boolean().optional(),
+            hideLabel: z.boolean().optional(),
+          })
+        ),
       })
     )
     .optional(),
@@ -116,10 +122,11 @@ export default function WidgetEnqueteItems(
       setItems((currentItems) => [
         ...currentItems,
         {
-          trigger: `${currentItems.length > 0
-            ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-            : 1
-            }`,
+          trigger: `${
+            currentItems.length > 0
+              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+              : 1
+          }`,
           title: values.title,
           key: values.key,
           description: values.description,
@@ -162,19 +169,21 @@ export default function WidgetEnqueteItems(
   function handleAddOption(values: FormData) {
     if (selectedOption) {
       setOptions((currentOptions) => {
-        const updatedOptions = currentOptions.map((option) => {
-          if (option.trigger === selectedOption.trigger) {
-            const newTitles =
-              values.options?.find((o) => o.trigger === option.trigger)?.titles || [];
+        const updatedOptions = currentOptions
+          .map((option) => {
+            if (option.trigger === selectedOption.trigger) {
+              const newTitles =
+                values.options?.find((o) => o.trigger === option.trigger)
+                  ?.titles || [];
 
-            return {
-              ...option,
-              titles: newTitles,
-            };
-          }
+              return {
+                ...option,
+                titles: newTitles,
+              };
+            }
 
-          return typeof (option?.trigger) !== "undefined" ? option : false;
-        })
+            return typeof option?.trigger !== 'undefined' ? option : false;
+          })
           .filter((option) => option !== false);
 
         return updatedOptions;
@@ -183,10 +192,11 @@ export default function WidgetEnqueteItems(
       setOption(null);
     } else {
       const newOption = {
-        trigger: `${options.length > 0
-          ? parseInt(options[options.length - 1].trigger) + 1
-          : 0
-          }`,
+        trigger: `${
+          options.length > 0
+            ? parseInt(options[options.length - 1].trigger) + 1
+            : 0
+        }`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
@@ -358,7 +368,7 @@ export default function WidgetEnqueteItems(
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith("options.")) {
+      if (key.startsWith('options.')) {
         // @ts-ignore
         delete updatedProps[key];
       }
@@ -367,7 +377,6 @@ export default function WidgetEnqueteItems(
     props.updateConfig({ ...updatedProps, items });
     setOptions([]);
   }
-
 
   const hasOptions = () => {
     switch (form.watch('questionType')) {
@@ -405,16 +414,18 @@ export default function WidgetEnqueteItems(
   }
 
   useEffect(() => {
-    const key = form.watch("fieldKey");
+    const key = form.watch('fieldKey');
 
     if (key) {
-      const isUnique = items.every((item) =>
-        (selectedItem && item.trigger === selectedItem.trigger) || item.fieldKey !== key
+      const isUnique = items.every(
+        (item) =>
+          (selectedItem && item.trigger === selectedItem.trigger) ||
+          item.fieldKey !== key
       );
 
       setIsFieldKeyUnique(isUnique);
     }
-  }, [form.watch("fieldKey"), selectedItem]);
+  }, [form.watch('fieldKey'), selectedItem]);
 
   return (
     <div>
@@ -430,48 +441,49 @@ export default function WidgetEnqueteItems(
                 <div className="flex flex-col gap-1">
                   {items.length > 0
                     ? items
-                      .sort(
-                        (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                      )
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
-                            'bg-secondary'
+                        .sort(
+                          (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+                        )
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className={`flex cursor-pointer justify-between border border-secondary ${
+                              item.trigger == selectedItem?.trigger &&
+                              'bg-secondary'
                             }`}>
-                          <span className="flex gap-2 py-3 px-2">
-                            <ArrowUp
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveUp', item.trigger, true)
-                              }
-                            />
-                            <ArrowDown
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveDown', item.trigger, true)
-                              }
-                            />
-                          </span>
-                          <span
-                            className="gap-2 py-3 px-2 w-full"
-                            onClick={() => {
-                              setItem(item);
-                              setOptions([]);
-                              setSettingOptions(false);
-                            }}>
-                            {`${item.title || 'Geen titel'}`}
-                          </span>
-                          <span className="gap-2 py-3 px-2">
-                            <X
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('delete', item.trigger, true)
-                              }
-                            />
-                          </span>
-                        </div>
-                      ))
+                            <span className="flex gap-2 py-3 px-2">
+                              <ArrowUp
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveUp', item.trigger, true)
+                                }
+                              />
+                              <ArrowDown
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveDown', item.trigger, true)
+                                }
+                              />
+                            </span>
+                            <span
+                              className="gap-2 py-3 px-2 w-full"
+                              onClick={() => {
+                                setItem(item);
+                                setOptions([]);
+                                setSettingOptions(false);
+                              }}>
+                              {`${item.title || 'Geen titel'}`}
+                            </span>
+                            <span className="gap-2 py-3 px-2">
+                              <X
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('delete', item.trigger, true)
+                                }
+                              />
+                            </span>
+                          </div>
+                        ))
                     : 'Geen items'}
                 </div>
               </div>
@@ -491,11 +503,15 @@ export default function WidgetEnqueteItems(
                   <div className="flex flex-col gap-y-2">
                     <Heading size="xl">Antwoordopties</Heading>
                     <Separator className="mt-2" />
-                    {hasList() && (
+                    {hasList() &&
                       (() => {
-                        const currentOption = options.findIndex((option) => option.trigger === selectedOption?.trigger);
-                        const activeOption = currentOption !== -1 ? currentOption : options.length;
-                        return (form.watch("questionType") !== "images" && form.watch("questionType") !== "swipe") ? (
+                        const currentOption = options.findIndex(
+                          (option) => option.trigger === selectedOption?.trigger
+                        );
+                        const activeOption =
+                          currentOption !== -1 ? currentOption : options.length;
+                        return form.watch('questionType') !== 'images' &&
+                          form.watch('questionType') !== 'swipe' ? (
                           <>
                             <FormField
                               control={form.control}
@@ -521,17 +537,23 @@ export default function WidgetEnqueteItems(
                                       alignItems: 'center',
                                       justifyContent: 'flex-start',
                                       flexDirection: 'row',
-                                      marginTop: '10px'
+                                      marginTop: '10px',
                                     }}>
                                     {YesNoSelect(field, props)}
                                     <FormLabel
-                                      style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                      style={{
+                                        marginTop: 0,
+                                        marginLeft: '6px',
+                                      }}>
+                                      Is &apos;Anders, namelijk...&apos;
+                                    </FormLabel>
                                     <FormMessage />
                                   </FormItem>
                                   <FormDescription>
-                                    Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het
-                                    formulier.
-                                    Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                    Als je deze optie selecteert, wordt er
+                                    automatisch een tekstveld toegevoegd aan het
+                                    formulier. Het tekstveld wordt zichtbaar
+                                    wanneer deze optie wordt geselecteerd.
                                   </FormDescription>
                                 </>
                               )}
@@ -550,15 +572,21 @@ export default function WidgetEnqueteItems(
                                         alignItems: 'center',
                                         justifyContent: 'flex-start',
                                         flexDirection: 'row',
-                                        marginTop: '10px'
+                                        marginTop: '10px',
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Standaard aangevinkt?</FormLabel>
+                                        style={{
+                                          marginTop: 0,
+                                          marginLeft: '6px',
+                                        }}>
+                                        Standaard aangevinkt?
+                                      </FormLabel>
                                       <FormMessage />
                                     </FormItem>
                                     <FormDescription>
-                                      Als je deze optie selecteert, wordt deze optie standaard aangevinkt.
+                                      Als je deze optie selecteert, wordt deze
+                                      optie standaard aangevinkt.
                                     </FormDescription>
                                   </>
                                 )}
@@ -572,18 +600,29 @@ export default function WidgetEnqueteItems(
                               project={project as string}
                               fieldName="imageOptionUpload"
                               imageLabel="Afbeelding"
-                              allowedTypes={["image/*"]}
+                              allowedTypes={['image/*']}
                               onImageUploaded={(imageResult) => {
-                                const image = imageResult ? imageResult.url : '';
+                                const image = imageResult
+                                  ? imageResult.url
+                                  : '';
 
-                                form.setValue(`options.${activeOption}.titles.0.image`, image);
+                                form.setValue(
+                                  `options.${activeOption}.titles.0.image`,
+                                  image
+                                );
                                 form.resetField('imageOptionUpload');
                               }}
                             />
 
-                            {!!form.getValues(`options.${activeOption}.titles.0.image`) && (
+                            {!!form.getValues(
+                              `options.${activeOption}.titles.0.image`
+                            ) && (
                               <div style={{ position: 'relative' }}>
-                                <img src={form.getValues(`options.${activeOption}.titles.0.image`)} />
+                                <img
+                                  src={form.getValues(
+                                    `options.${activeOption}.titles.0.image`
+                                  )}
+                                />
                               </div>
                             )}
 
@@ -595,8 +634,12 @@ export default function WidgetEnqueteItems(
                                   <FormLabel>Titel</FormLabel>
                                   {form.watch('questionType') !== 'swipe' && (
                                     <FormDescription>
-                                      Dit veld wordt gebruikt voor de alt tekst van de afbeelding. Dit is nodig voor toegankelijkheid.
-                                      De titel wordt ook gebruikt als bijschrift onder de afbeelding, behalve als je de optie selecteert om de titel te verbergen.
+                                      Dit veld wordt gebruikt voor de alt tekst
+                                      van de afbeelding. Dit is nodig voor
+                                      toegankelijkheid. De titel wordt ook
+                                      gebruikt als bijschrift onder de
+                                      afbeelding, behalve als je de optie
+                                      selecteert om de titel te verbergen.
                                     </FormDescription>
                                   )}
                                   <Input {...field} />
@@ -610,7 +653,6 @@ export default function WidgetEnqueteItems(
                                 control={form.control}
                                 // @ts-ignore
                                 name={`options.${activeOption}.titles.0.hideLabel`}
-
                                 render={({ field }) => (
                                   <>
                                     <FormItem
@@ -619,15 +661,21 @@ export default function WidgetEnqueteItems(
                                         alignItems: 'center',
                                         justifyContent: 'flex-start',
                                         flexDirection: 'row',
-                                        marginTop: '10px'
+                                        marginTop: '10px',
                                       }}>
                                       {YesNoSelect(field, props)}
                                       <FormLabel
-                                        style={{ marginTop: 0, marginLeft: '6px' }}>Titel verbergen?</FormLabel>
+                                        style={{
+                                          marginTop: 0,
+                                          marginLeft: '6px',
+                                        }}>
+                                        Titel verbergen?
+                                      </FormLabel>
                                       <FormMessage />
                                     </FormItem>
                                     <FormDescription>
-                                      Als je deze optie selecteert, wordt de titel van de afbeelding verborgen.
+                                      Als je deze optie selecteert, wordt de
+                                      titel van de afbeelding verborgen.
                                     </FormDescription>
                                   </>
                                 )}
@@ -635,8 +683,7 @@ export default function WidgetEnqueteItems(
                             )}
                           </>
                         );
-                      })()
-                    )}
+                      })()}
 
                     <Button
                       className="w-full bg-secondary text-black hover:text-white mt-4"
@@ -652,8 +699,8 @@ export default function WidgetEnqueteItems(
                       className="w-fit mt-4 bg-secondary text-black hover:text-white"
                       type="button"
                       onClick={() => {
-                        setSettingOptions(() => !settingOptions),
-                          setOption(null);
+                        (setSettingOptions(() => !settingOptions),
+                          setOption(null));
                       }}>
                       Annuleer
                     </Button>
@@ -672,57 +719,58 @@ export default function WidgetEnqueteItems(
                     <div className="flex flex-col gap-1">
                       {options.length > 0
                         ? options
-                          .sort(
-                            (a, b) =>
-                              parseInt(a.trigger) - parseInt(b.trigger)
-                          )
-                          .map((option, index) => (
-                            <div
-                              key={index}
-                              className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
-                                'bg-secondary'
+                            .sort(
+                              (a, b) =>
+                                parseInt(a.trigger) - parseInt(b.trigger)
+                            )
+                            .map((option, index) => (
+                              <div
+                                key={index}
+                                className={`flex cursor-pointer justify-between border border-secondary ${
+                                  option.trigger == selectedOption?.trigger &&
+                                  'bg-secondary'
                                 }`}>
-                              <span className="flex gap-2 py-3 px-2">
-                                <ArrowUp
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'moveUp',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                                <ArrowDown
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'moveDown',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                              </span>
-                              <span
-                                className="py-3 px-2 w-full"
-                                onClick={() => setOption(option)}>
-                                {option?.titles?.[0].key}
-                              </span>
-                              <span className="py-3 px-2">
-                                <X
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'delete',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                              </span>
-                            </div>
-                          ))
+                                <span className="flex gap-2 py-3 px-2">
+                                  <ArrowUp
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveUp',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                  <ArrowDown
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveDown',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                                <span
+                                  className="py-3 px-2 w-full"
+                                  onClick={() => setOption(option)}>
+                                  {option?.titles?.[0].key}
+                                </span>
+                                <span className="py-3 px-2">
+                                  <X
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'delete',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                              </div>
+                            ))
                         : 'Geen options'}
                     </div>
                   </div>
@@ -774,13 +822,21 @@ export default function WidgetEnqueteItems(
                           <FormItem>
                             <FormLabel>
                               Key voor het opslaan
-                              <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                              <InfoDialog
+                                content={
+                                  'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'
+                                }
+                              />
                             </FormLabel>
-                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+                            <em className="text-xs">
+                              Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’
+                            </em>
                             <Input {...field} />
                             {(!field.value || !isFieldKeyUnique) && (
                               <FormMessage>
-                                {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
+                                {!field.value
+                                  ? 'Key is verplicht'
+                                  : 'Key moet uniek zijn'}
                               </FormMessage>
                             )}
                           </FormItem>
@@ -800,7 +856,6 @@ export default function WidgetEnqueteItems(
                     />
 
                     {form.watch('questionType') === 'open' && (
-
                       <FormField
                         control={form.control}
                         name="placeholder"
@@ -843,7 +898,9 @@ export default function WidgetEnqueteItems(
                               </SelectItem>
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
-                              <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
+                              <SelectItem value="imageUpload">
+                                Afbeelding upload
+                              </SelectItem>
                               <SelectItem value="swipe">Swipe</SelectItem>
                             </SelectContent>
                           </Select>
@@ -858,7 +915,9 @@ export default function WidgetEnqueteItems(
                           name="variant"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
+                              <FormLabel>
+                                Is het veld qua grootte 1 regel of een tekstvak?
+                              </FormLabel>
                               <Select
                                 value={field.value || 'text input'}
                                 onValueChange={field.onChange}>
@@ -868,8 +927,12 @@ export default function WidgetEnqueteItems(
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="text input">1 regel</SelectItem>
-                                  <SelectItem value="textarea">Tekstvak</SelectItem>
+                                  <SelectItem value="text input">
+                                    1 regel
+                                  </SelectItem>
+                                  <SelectItem value="textarea">
+                                    Tekstvak
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -908,11 +971,11 @@ export default function WidgetEnqueteItems(
                           project={project as string}
                           fieldName="imageUpload"
                           imageLabel="Afbeelding 1"
-                          allowedTypes={["image/*"]}
+                          allowedTypes={['image/*']}
                           onImageUploaded={(imageResult) => {
                             const image = imageResult ? imageResult.url : '';
 
-                            form.setValue("image", image);
+                            form.setValue('image', image);
                             form.resetField('imageUpload');
                           }}
                         />
@@ -928,7 +991,9 @@ export default function WidgetEnqueteItems(
                           name="imageAlt"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                              <FormLabel>
+                                Afbeelding beschrijving voor screenreaders
+                              </FormLabel>
                               <Input {...field} />
                               <FormMessage />
                             </FormItem>
@@ -945,23 +1010,31 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
-
                       </>
                     )}
 
-                    {(form.watch('questionType') === 'imageUpload' || form.watch('questionType') === 'images') && (
+                    {(form.watch('questionType') === 'imageUpload' ||
+                      form.watch('questionType') === 'images') && (
                       <FormField
                         control={form.control}
                         name="multiple"
                         render={({ field }) => (
                           <FormItem>
                             {form.watch('questionType') === 'imageUpload' ? (
-                              <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
+                              <FormLabel>
+                                Mogen er meerdere afbeeldingen tegelijkertijd
+                                geüpload worden?
+                              </FormLabel>
                             ) : (
-                              <FormLabel>Mogen er meerdere afbeeldingen geselecteerd worden?</FormLabel>
+                              <FormLabel>
+                                Mogen er meerdere afbeeldingen geselecteerd
+                                worden?
+                              </FormLabel>
                             )}
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
                               value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
@@ -978,7 +1051,7 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
-                    {(form.watch('questionType') === 'images') && (
+                    {form.watch('questionType') === 'images' && (
                       <>
                         <FormField
                           control={form.control}
@@ -995,8 +1068,12 @@ export default function WidgetEnqueteItems(
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="default">Standaard weergave</SelectItem>
-                                  <SelectItem value="Jongeren">Jongerenwidget</SelectItem>
+                                  <SelectItem value="default">
+                                    Standaard weergave
+                                  </SelectItem>
+                                  <SelectItem value="Jongeren">
+                                    Jongerenwidget
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -1012,8 +1089,11 @@ export default function WidgetEnqueteItems(
                                 <FormItem>
                                   <FormLabel>Groeperen</FormLabel>
                                   <FormDescription>
-                                    Groepeer meerdere &apos;Antwoordopties met afbeeldingen&apos; onder één item. Dit voegt een slider toe aan de widget, voor elke aparte groep.
-                                    Elke groep moet een unieke naam hebben.
+                                    Groepeer meerdere &apos;Antwoordopties met
+                                    afbeeldingen&apos; onder één item. Dit voegt
+                                    een slider toe aan de widget, voor elke
+                                    aparte groep. Elke groep moet een unieke
+                                    naam hebben.
                                   </FormDescription>
                                   <Input {...field} />
                                   <FormMessage />
@@ -1030,13 +1110,12 @@ export default function WidgetEnqueteItems(
                       name="fieldRequired"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>
-                            Is dit veld verplicht?
-                          </FormLabel>
+                          <FormLabel>Is dit veld verplicht?</FormLabel>
                           <Select
-                            onValueChange={(e: string) => field.onChange(e === 'true')}
-                            value={field.value ? 'true' : 'false'}
-                          >
+                            onValueChange={(e: string) =>
+                              field.onChange(e === 'true')
+                            }
+                            value={field.value ? 'true' : 'false'}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Kies een optie" />
@@ -1062,12 +1141,15 @@ export default function WidgetEnqueteItems(
                               Wil je smileys tonen in plaats van een schaal?
                             </FormLabel>
                             <FormDescription>
-                              De schaal toont normaal gesproken een getal van 1 tot 5. Als je smileys wilt tonen, kies dan voor ja.
+                              De schaal toont normaal gesproken een getal van 1
+                              tot 5. Als je smileys wilt tonen, kies dan voor
+                              ja.
                             </FormDescription>
                             <Select
-                              onValueChange={(e: string) => field.onChange(e === 'true')}
-                              value={field.value ? 'true' : 'false'}
-                            >
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Kies een optie" />
@@ -1168,8 +1250,10 @@ export default function WidgetEnqueteItems(
                         onSubmit(form.getValues());
                         setOptions([]);
                       }}
-                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none'}
-                    >
+                      disabled={
+                        (!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                        form.watch('questionType') !== 'none'
+                      }>
                       {selectedItem
                         ? 'Sla wijzigingen op'
                         : 'Voeg item toe aan lijst'}
@@ -1177,7 +1261,9 @@ export default function WidgetEnqueteItems(
                   </div>
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
                     <FormMessage>
-                      {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
+                      {!form.watch('fieldKey')
+                        ? 'Key is verplicht'
+                        : 'Key moet uniek zijn'}
                     </FormMessage>
                   )}
                 </div>

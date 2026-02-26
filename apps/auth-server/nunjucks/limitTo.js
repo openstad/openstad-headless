@@ -31,27 +31,27 @@
  * @param {String|Array} input  text or list of items to shorten
  * @param {Number} limit        either positive offset from start or negative offset from end
  */
-function limitTo(input, limit){
-	'use strict';
-	if(typeof limit !== 'number'){
-		return input;
-	}
-	if(typeof input === 'string'){
-		if(limit >= 0 && limit < input.length){
-			return input.substring(0, limit) + '...';
-		} else {
-			return input;// input.substr(limit);
-		}
-	}
-	if(Array.isArray(input)){
-		limit = Math.min(limit, input.length);
-		if(limit >= 0){
-			return input.splice(0, limit);
-		} else {
-			return input.splice(input.length + limit, input.length);
-		}
-	}
-	return input;
+function limitTo(input, limit) {
+  'use strict';
+  if (typeof limit !== 'number') {
+    return input;
+  }
+  if (typeof input === 'string') {
+    if (limit >= 0 && limit < input.length) {
+      return input.substring(0, limit) + '...';
+    } else {
+      return input; // input.substr(limit);
+    }
+  }
+  if (Array.isArray(input)) {
+    limit = Math.min(limit, input.length);
+    if (limit >= 0) {
+      return input.splice(0, limit);
+    } else {
+      return input.splice(input.length + limit, input.length);
+    }
+  }
+  return input;
 }
 
 module.exports = limitTo;

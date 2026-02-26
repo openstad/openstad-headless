@@ -1,3 +1,4 @@
-.utrecht-accordion__section.osc-accordion-section .utrecht-accordion__button-icon {
- display: none;
+.utrecht-accordion__section.osc-accordion-section
+  .utrecht-accordion__button-icon {
+  display: none;
 }

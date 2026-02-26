@@ -8,6 +8,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -16,10 +23,9 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import React from "react";
 
 const formSchema = z.object({
   title: z.string(),
@@ -101,7 +107,9 @@ export default function WidgetDistributionModuleGeneral(
             name="afterSubmitUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Url voor redirecten na opslaan (optioneel)</FormLabel>
+                <FormLabel>
+                  Url voor redirecten na opslaan (optioneel)
+                </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -122,9 +130,7 @@ export default function WidgetDistributionModuleGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Progressiebalk tonen?</FormLabel>
-                <FormControl>
-                  {YesNoSelect(field, props)}
-                </FormControl>
+                <FormControl>{YesNoSelect(field, props)}</FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -136,9 +142,7 @@ export default function WidgetDistributionModuleGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Voor wie is de module zichtbaar?</FormLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Kies een optie" />
@@ -146,7 +150,9 @@ export default function WidgetDistributionModuleGeneral(
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="always">Iedereen</SelectItem>
-                    <SelectItem value="users">Ingelogde gebruikers en admins</SelectItem>
+                    <SelectItem value="users">
+                      Ingelogde gebruikers en admins
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

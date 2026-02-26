@@ -3,39 +3,39 @@ module.exports = {
     '@apostrophecms/seo': {},
     '@apostrophecms/rich-text-widget': {
       options: {
-        className: 'bp-rich-text'
-      }
+        className: 'bp-rich-text',
+      },
     },
     '@apostrophecms/global': {},
-    'asset': { },
-    'default-page': { },
+    asset: {},
+    'default-page': {},
     '@apostrophecms/blog': {},
     '@apostrophecms/blog-page': {},
     '@apostrophecms/import-export': {},
     '@apostrophecms/redirect': {},
     // '@apostrophecms/scheduled-publishing': {},
     '@apostrophecms/anchors': {},
-    '@apostrophecms/sitemap': { },
-    'openstad-login': { },
-    'openstad-section-widget': { },
-    'openstad-assets': { },
-    'openstad-auth': { },
-    'openstad-component-widget': { },
-    'openstad-title-widget': { },
-    'openstad-shareLinks-widget': { },
-    'openstad-accordion-widget': { },
-    'openstad-iconSection-widget': { },
-    'openstad-button-widget': { },
-    'openstad-rte-widget': { },
-    'openstad-alertBox-widget': { },
+    '@apostrophecms/sitemap': {},
+    'openstad-login': {},
+    'openstad-section-widget': {},
+    'openstad-assets': {},
+    'openstad-auth': {},
+    'openstad-component-widget': {},
+    'openstad-title-widget': {},
+    'openstad-shareLinks-widget': {},
+    'openstad-accordion-widget': {},
+    'openstad-iconSection-widget': {},
+    'openstad-button-widget': {},
+    'openstad-rte-widget': {},
+    'openstad-alertBox-widget': {},
     'openstad-timeline-widget': {
       options: {
-        label: 'Een agenda'
-      }
+        label: 'Een agenda',
+      },
     },
-    'openstad-image-widget': { },
-    'openstad-carousel-widget': { },
-    'openstad-blog-post-widget': { },
-    'openstad-breadcrumbs-widget': { }
-  }
+    'openstad-image-widget': {},
+    'openstad-carousel-widget': {},
+    'openstad-blog-post-widget': {},
+    'openstad-breadcrumbs-widget': {},
+  },
 };

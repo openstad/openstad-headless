@@ -1,22 +1,22 @@
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
+import { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { useState, useEffect } from 'react';
 import { SWRConfig } from 'swr';
 
-import { SessionContext, type SessionUserType, fetchSessionUser } from '../auth';
+import {
+  SessionContext,
+  type SessionUserType,
+  fetchSessionUser,
+} from '../auth';
 
-export default function App({
-  Component,
-  pageProps,
-}: AppProps) {
-
+export default function App({ Component, pageProps }: AppProps) {
   let [session, setSession] = useState({});
   useEffect(() => {
     fetchSessionUser()
-      .then((result:SessionUserType) => setSession(result))
+      .then((result: SessionUserType) => setSession(result))
       .catch(console.error);
-  }, [])
+  }, []);
 
   return (
     <SessionContext.Provider value={session}>

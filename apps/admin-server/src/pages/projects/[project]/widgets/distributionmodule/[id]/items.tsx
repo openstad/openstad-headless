@@ -20,7 +20,10 @@ import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
-import { Item, Option } from '@openstad-headless/enquete/src/types/enquete-props';
+import {
+  Item,
+  Option,
+} from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -54,10 +57,11 @@ export default function WidgetDistributionModuleItems(
       setItems((currentItems) => [
         ...currentItems,
         {
-          trigger: `${currentItems.length > 0
-            ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-            : 1
-            }`,
+          trigger: `${
+            currentItems.length > 0
+              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+              : 1
+          }`,
           title: values.title,
           key: values.key,
           description: values.description,
@@ -171,44 +175,45 @@ export default function WidgetDistributionModuleItems(
                 <div className="flex flex-col gap-1">
                   {items.length > 0
                     ? items
-                      .sort(
-                        (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                      )
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
-                            'bg-secondary'
+                        .sort(
+                          (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+                        )
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className={`flex cursor-pointer justify-between border border-secondary ${
+                              item.trigger == selectedItem?.trigger &&
+                              'bg-secondary'
                             }`}>
-                          <span className="flex gap-2 py-3 px-2">
-                            <ArrowUp
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveUp', item.trigger, true)
-                              }
-                            />
-                            <ArrowDown
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveDown', item.trigger, true)
-                              }
-                            />
-                          </span>
-                          <span
-                            className="gap-2 py-3 px-2 w-full"
-                            onClick={() => setItem(item)}>
-                            {`${item.title || 'Geen titel'}`}
-                          </span>
-                          <span className="gap-2 py-3 px-2">
-                            <X
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('delete', item.trigger, true)
-                              }
-                            />
-                          </span>
-                        </div>
-                      ))
+                            <span className="flex gap-2 py-3 px-2">
+                              <ArrowUp
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveUp', item.trigger, true)
+                                }
+                              />
+                              <ArrowDown
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveDown', item.trigger, true)
+                                }
+                              />
+                            </span>
+                            <span
+                              className="gap-2 py-3 px-2 w-full"
+                              onClick={() => setItem(item)}>
+                              {`${item.title || 'Geen titel'}`}
+                            </span>
+                            <span className="gap-2 py-3 px-2">
+                              <X
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('delete', item.trigger, true)
+                                }
+                              />
+                            </span>
+                          </div>
+                        ))
                     : 'Geen items'}
                 </div>
               </div>
@@ -272,7 +277,6 @@ export default function WidgetDistributionModuleItems(
                       </FormItem>
                     )}
                   />
-
                 </div>
               </div>
 
@@ -294,9 +298,8 @@ export default function WidgetDistributionModuleItems(
                     type="submit"
                     onClick={(e) => {
                       e.preventDefault();
-                      onSubmit(form.getValues())
-                    }}
-                  >
+                      onSubmit(form.getValues());
+                    }}>
                     {selectedItem
                       ? 'Sla wijzigingen op'
                       : 'Voeg item toe aan lijst'}
@@ -304,7 +307,6 @@ export default function WidgetDistributionModuleItems(
                 </div>
               </div>
             </div>
-
           </div>
         </form>
       </Form>

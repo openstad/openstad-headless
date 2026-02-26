@@ -4,10 +4,12 @@ The API, Auth and Image server all use Sequelize, and are setup in similar fashi
 
 A `db.js` script sets up Sequelize and database connections for the server. It uses models from the `./models/` directory, makes sure all associations and scopes are initialized, etc.
 
-In any other script a simple 
+In any other script a simple
+
 ```
 const db = require('db');
 ```
+
 should suffice; `db.ModelName.whatever` is now available for any action on the database.  
 The Sequelize package and instance are available as `db.Sequelize` and `db.sequelize`.
 
@@ -20,15 +22,18 @@ Depending on the context in which the software is running, you can choose a spec
 
 ### Database initialisation
 
-For each of the servers the database can be setup using the (m.m.) command 
+For each of the servers the database can be setup using the (m.m.) command
+
 ```
 NODE_ENV=development npm run init-database
 ```
+
 This will create the tables and relations.
 
 It will also create initial data from the seeds `directory`. This is split up in default and enviroment data. A file `local.js` here will be run, if available.
 
 Since databases are connected (e.g. the API needs to know clients info on the auth server) these scripts are also available from the headless root directory:
+
 ```
 NODE_ENV=development npm run init-databases
 ```
@@ -37,13 +42,16 @@ NODE_ENV=development npm run init-databases
 
 Updates to the database, that is: changes in the models, should be done through a file in the `./migrations` directory.
 
-The command 
+The command
+
 ```
 npm run migrate-database
 ```
+
 can be run to update your cureent database to the newer version.
 
 A boilerplate migration file could look like this:
+
 ```
 const { Sequelize } = require('sequelize');
 
@@ -72,10 +80,13 @@ module.exports = {
 Filename convention is: sequence number + short description, e.g. `030-add-resource-example-fields`.
 
 To revert migrations use
+
 ```
 npm run migrate-database -- down
 ```
+
 or
+
 ```
 npm run migrate-database -- down step=2
 ```

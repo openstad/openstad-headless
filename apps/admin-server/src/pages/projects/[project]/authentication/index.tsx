@@ -1,10 +1,7 @@
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-
+import { ImageUploader } from '@/components/image-uploader';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -13,21 +10,32 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
-import { useCallback, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import useAuthProvidersList, {
+  useAuthProvidersEnabledCheck,
+} from '@/hooks/use-auth-providers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
+import { useRouter } from 'next/router';
+import * as React from 'react';
+import { useState } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import InfoDialog from '@/components/ui/info-hover';
-import {ImageUploader} from "@/components/image-uploader";
-import {X} from "lucide-react";
-import useAuthProvidersList, { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
-import {Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import * as z from 'zod';
+
+import { useProject } from '../../../../hooks/use-project';
 
 const authTypes = [
   {
@@ -58,37 +66,46 @@ const formSchema = z.object({
   logo: z.string().optional(),
   imageFavicon: z.string().optional(),
   favicon: z.string().optional(),
-  authProviders: z.array( z.string().or(z.number()) ),
+  authProviders: z.array(z.string().or(z.number())),
   cssUrl: z.string().optional(),
   clientDisclaimerUrl: z.string().optional(),
-  clientStylesheets: z.array(z.object({
-    url: z.string().optional(),
-  })).optional(),
+  clientStylesheets: z
+    .array(
+      z.object({
+        url: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export default function ProjectAuthentication() {
-
   const router = useRouter();
   const { project } = router.query;
-  const {
-    data,
-    updateProject,
-  } = useProject(['includeAuthConfig']);
+  const { data, updateProject } = useProject(['includeAuthConfig']);
 
   const defaults = useCallback(
     () => ({
       authTypes: data?.config?.auth?.provider?.openstad?.authTypes,
       fromEmail: data?.config?.auth?.provider?.openstad?.config?.fromEmail,
       fromName: data?.config?.auth?.provider?.openstad?.config?.fromName,
-      contactEmail: data?.config?.auth?.provider?.openstad?.config?.contactEmail,
-      defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
+      contactEmail:
+        data?.config?.auth?.provider?.openstad?.config?.contactEmail,
+      defaultRoleId:
+        data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
       logo: data?.config?.auth?.provider?.openstad?.config?.styling?.logo,
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
       authProviders: data?.config?.authProviders || ['openstad'],
-      clientDisclaimerUrl: data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
-      cssUrl: (Array.isArray(data?.config?.auth?.provider?.openstad?.config?.clientStylesheets) && data?.config?.auth?.provider?.openstad?.config?.clientStylesheets?.length)
-        ? data?.config?.auth?.provider?.openstad?.config?.clientStylesheets[0]?.url
-        : '',
+      clientDisclaimerUrl:
+        data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
+      cssUrl:
+        Array.isArray(
+          data?.config?.auth?.provider?.openstad?.config?.clientStylesheets
+        ) &&
+        data?.config?.auth?.provider?.openstad?.config?.clientStylesheets
+          ?.length
+          ? data?.config?.auth?.provider?.openstad?.config?.clientStylesheets[0]
+              ?.url
+          : '',
     }),
     [data?.config]
   );
@@ -108,7 +125,12 @@ export default function ProjectAuthentication() {
   const [showRequiredFieldsInfo, setShowRequiredFieldsInfo] = useState(false);
 
   useEffect(() => {
-    if (Array.isArray(form.getValues('authProviders')) && form.getValues('authProviders').some((provider) => provider !== 'openstad')) {
+    if (
+      Array.isArray(form.getValues('authProviders')) &&
+      form
+        .getValues('authProviders')
+        .some((provider) => provider !== 'openstad')
+    ) {
       setShowRequiredFieldsInfo(true);
     } else {
       setShowRequiredFieldsInfo(false);
@@ -136,8 +158,8 @@ export default function ProjectAuthentication() {
               };
             };
           };
-        },
-        authProviders?: (string | number)[]
+        };
+        authProviders?: (string | number)[];
       } = {
         auth: {
           provider: {
@@ -152,18 +174,20 @@ export default function ProjectAuthentication() {
                 styling: {
                   logo: values.logo,
                   favicon: values.favicon,
-                }
+                },
               },
-            }
-          }
+            },
+          },
         },
-        authProviders: values.authProviders
-      }
+        authProviders: values.authProviders,
+      };
 
       if (values.cssUrl) {
-        updatedConfig.auth.provider.openstad.config.clientStylesheets = [{
-          url: values.cssUrl,
-        }];
+        updatedConfig.auth.provider.openstad.config.clientStylesheets = [
+          {
+            url: values.cssUrl,
+          },
+        ];
       }
 
       const project = await updateProject(updatedConfig);
@@ -172,7 +196,7 @@ export default function ProjectAuthentication() {
       if (doubleSave && project) {
         toast.success('Project aangepast!');
       } else {
-        toast.error('Er is helaas iets mis gegaan.')
+        toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('Could not update', error);
@@ -182,22 +206,25 @@ export default function ProjectAuthentication() {
   const { watch } = form;
 
   const currentSelectedAuthTypes = watch('authTypes');
-  const showEmailFields = Array.isArray(currentSelectedAuthTypes) && currentSelectedAuthTypes?.includes('Url');
+  const showEmailFields =
+    Array.isArray(currentSelectedAuthTypes) &&
+    currentSelectedAuthTypes?.includes('Url');
 
   const currentSelectedProviders = watch('authProviders');
-  const showAuthSettings = Array.isArray(currentSelectedProviders) && currentSelectedProviders.includes('openstad');
+  const showAuthSettings =
+    Array.isArray(currentSelectedProviders) &&
+    currentSelectedProviders.includes('openstad');
 
   const infoDialogContents: { [key: string]: string } = {
-    'UniqueCode': 'Unieke code',
-    'Url': 'E-mail een inloglink',
-    'Phonenumber': 'SMS verificatie',
-    'Local': 'Wachtwoord',
-  }
+    UniqueCode: 'Unieke code',
+    Url: 'E-mail een inloglink',
+    Phonenumber: 'SMS verificatie',
+    Local: 'Wachtwoord',
+  };
 
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -214,13 +241,13 @@ export default function ProjectAuthentication() {
               <Heading size="xl">Authenticatie instellingen</Heading>
               <Separator className="my-4" />
               <p className="text-gray-500">
-                Hier bepaal je op welke manier gebruikers zich moeten authentificeren voor dit project.
+                Hier bepaal je op welke manier gebruikers zich moeten
+                authentificeren voor dit project.
               </p>
-              <br/>
+              <br />
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6">
-
                 {authProvidersEnabled && (
                   <FormField
                     control={form.control}
@@ -228,166 +255,193 @@ export default function ProjectAuthentication() {
                     render={() => (
                       <FormItem className="col-span-full">
                         <div>
-                          <FormLabel>
-                            Authenticatie provider
-                          </FormLabel>
+                          <FormLabel>Authenticatie provider</FormLabel>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                          {authProviders && Array.isArray(authProviders) &&
-                            [{ id: "openstad", name: "Standaard Openstad authenticatie" }, ...authProviders]
-                              .map((provider: { id: string; name: string }) => (
-                            <FormField
-                              key={provider.id}
-                              control={form.control}
-                              name="authProviders"
-                              render={({ field }) => {
-                                return (
-                                  <FormItem
-                                    key={provider.id}
-                                    className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={field.value?.includes(provider.id)}
-                                        onCheckedChange={(checked: any) => {
-                                          return checked
-                                            ? field.onChange([
-                                              ...(Array.isArray(field.value) ? field.value : []),
-                                              provider.id,
-                                            ])
-                                            : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== provider.id
-                                              )
-                                            );
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      {provider.name}
-                                    </FormLabel>
-                                  </FormItem>
-                                );
-                              }}
-                            />
-                          ))}
+                          {authProviders &&
+                            Array.isArray(authProviders) &&
+                            [
+                              {
+                                id: 'openstad',
+                                name: 'Standaard Openstad authenticatie',
+                              },
+                              ...authProviders,
+                            ].map((provider: { id: string; name: string }) => (
+                              <FormField
+                                key={provider.id}
+                                control={form.control}
+                                name="authProviders"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={provider.id}
+                                      className="flex flex-row items-start space-x-3 space-y-0">
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(
+                                            provider.id
+                                          )}
+                                          onCheckedChange={(checked: any) => {
+                                            return checked
+                                              ? field.onChange([
+                                                  ...(Array.isArray(field.value)
+                                                    ? field.value
+                                                    : []),
+                                                  provider.id,
+                                                ])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) =>
+                                                      value !== provider.id
+                                                  )
+                                                );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {provider.name}
+                                      </FormLabel>
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
                         </div>
                       </FormItem>
                     )}
                   />
                 )}
 
-                { showRequiredFieldsInfo && (
+                {showRequiredFieldsInfo && (
                   <Alert variant="info" className="mb-4">
                     <AlertTitle>Let op!</AlertTitle>
                     <AlertDescription>
-                      Je hebt een andere authenticatie provider geselecteerd dan de standaard Openstad authenticatie. Zorg ervoor dat je bij deze provider ook de verplichte velden hebt ingesteld, anders kunnen gebruikers zich mogelijk niet aanmelden.
+                      Je hebt een andere authenticatie provider geselecteerd dan
+                      de standaard Openstad authenticatie. Zorg ervoor dat je
+                      bij deze provider ook de verplichte velden hebt ingesteld,
+                      anders kunnen gebruikers zich mogelijk niet aanmelden.
                       <br />
-                      De verplichte velden kun je in de kolom links vinden bij <strong>Authenticatie &gt; Verplichte velden</strong>
+                      De verplichte velden kun je in de kolom links vinden bij{' '}
+                      <strong>Authenticatie &gt; Verplichte velden</strong>
                     </AlertDescription>
                   </Alert>
                 )}
 
                 {showAuthSettings && (
                   <>
-                <FormField
-                control={form.control}
-                name="authTypes"
-                render={() => (
-                  <FormItem className="col-span-full">
-                    <div>
-                      <FormLabel>
-                        Toegestaande authenticatie methoden
-                      </FormLabel>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {authTypes.map((item) => (
-                        <FormField
-                          key={item.id}
-                          control={form.control}
-                          name="authTypes"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
+                    <FormField
+                      control={form.control}
+                      name="authTypes"
+                      render={() => (
+                        <FormItem className="col-span-full">
+                          <div>
+                            <FormLabel>
+                              Toegestaande authenticatie methoden
+                            </FormLabel>
+                          </div>
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {authTypes.map((item) => (
+                              <FormField
                                 key={item.id}
-                                className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item.id)}
-                                    onCheckedChange={(checked: any) => {
-                                      return checked
-                                        ? field.onChange([
-                                            ...(Array.isArray(field.value) ? field.value : []),
-                                            item.id,
-                                          ])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== item.id
-                                            )
-                                          );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {item.label}
-                                </FormLabel>
-                                {infoDialogContents[item.id] && <InfoDialog content={infoDialogContents[item.id]} />}
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </FormItem>
+                                control={form.control}
+                                name="authTypes"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={item.id}
+                                      className="flex flex-row items-start space-x-3 space-y-0">
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(
+                                            item.id
+                                          )}
+                                          onCheckedChange={(checked: any) => {
+                                            return checked
+                                              ? field.onChange([
+                                                  ...(Array.isArray(field.value)
+                                                    ? field.value
+                                                    : []),
+                                                  item.id,
+                                                ])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) => value !== item.id
+                                                  )
+                                                );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {item.label}
+                                      </FormLabel>
+                                      {infoDialogContents[item.id] && (
+                                        <InfoDialog
+                                          content={infoDialogContents[item.id]}
+                                        />
+                                      )}
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </>
                 )}
-              />
-              <Separator className="my-4" />
+                <Separator className="my-4" />
 
-              <FormField
-                control={form.control}
-                name="contactEmail"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>E-mailadres voor contact en hulpvragen</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="defaultRoleId"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>
-                      Welke rol krijgt een nieuwe gebruiker toegewezen?
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                <FormField
+                  control={form.control}
+                  name="contactEmail"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>
+                        E-mailadres voor contact en hulpvragen
+                      </FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Standaard gebruiker" />
-                        </SelectTrigger>
+                        <Input placeholder="" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="3">Anoniem</SelectItem>
-                        <SelectItem value="2">
-                          Standaard gebruiker
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="defaultRoleId"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>
+                        Welke rol krijgt een nieuwe gebruiker toegewezen?
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Standaard gebruiker" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="3">Anoniem</SelectItem>
+                          <SelectItem value="2">Standaard gebruiker</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
                   name="cssUrl"
                   render={({ field }) => (
                     <FormItem className="col-span-full">
-                      <FormLabel>CSS url voor de authenticatie omgeving</FormLabel>
+                      <FormLabel>
+                        CSS url voor de authenticatie omgeving
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder="" {...field} />
                       </FormControl>
@@ -401,7 +455,9 @@ export default function ProjectAuthentication() {
                   name="clientDisclaimerUrl"
                   render={({ field }) => (
                     <FormItem className="col-span-full">
-                      <FormLabel>Privacyverklaring URL voor de authenticatie omgeving</FormLabel>
+                      <FormLabel>
+                        Privacyverklaring URL voor de authenticatie omgeving
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder="" {...field} />
                       </FormControl>
@@ -411,21 +467,23 @@ export default function ProjectAuthentication() {
                 />
 
                 <div className="col-span-full grid-cols-2 grid gap-4">
-
                   <div className="col-span-full md:col-span-1 flex flex-col">
-                  <ImageUploader
-                    form={form}
-                    project={project as string}
-                    imageLabel="Upload hier het logo voor de authenticatie omgeving"
-                    fieldName="imageLogo"
-                    allowedTypes={["image/*"]}
-                    onImageUploaded={(imageResult) => {
-                      const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
-                      form.setValue('logo', result);
-                      form.resetField('imageLogo')
-                      form.trigger('logo');
-                    }}
-                  />
+                    <ImageUploader
+                      form={form}
+                      project={project as string}
+                      imageLabel="Upload hier het logo voor de authenticatie omgeving"
+                      fieldName="imageLogo"
+                      allowedTypes={['image/*']}
+                      onImageUploaded={(imageResult) => {
+                        const result =
+                          typeof imageResult.url !== 'undefined'
+                            ? imageResult.url
+                            : '';
+                        form.setValue('logo', result);
+                        form.resetField('imageLogo');
+                        form.trigger('logo');
+                      }}
+                    />
                   </div>
 
                   <div className="col-span-full md:col-span-1 flex flex-col">
@@ -434,22 +492,30 @@ export default function ProjectAuthentication() {
                       project={project as string}
                       imageLabel="Upload hier het favicon voor de authenticatie omgeving"
                       fieldName="imageFavicon"
-                      allowedTypes={["image/*"]}
+                      allowedTypes={['image/*']}
                       onImageUploaded={(imageResult) => {
-                        const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                        const result =
+                          typeof imageResult.url !== 'undefined'
+                            ? imageResult.url
+                            : '';
                         form.setValue('favicon', result);
-                        form.resetField('imageFavicon')
+                        form.resetField('imageFavicon');
                         form.trigger('favicon');
                       }}
                     />
                   </div>
 
                   <div className="col-span-full md:col-span-1 flex flex-col my-2">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Geüploade logo</label>
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Geüploade logo
+                    </label>
                     <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                       {!!form.watch('logo') && (
                         <div style={{ position: 'relative' }}>
-                          <img src={form.watch('logo')} alt={form.watch('logo')} />
+                          <img
+                            src={form.watch('logo')}
+                            alt={form.watch('logo')}
+                          />
                           <Button
                             color="red"
                             onClick={() => {
@@ -468,11 +534,16 @@ export default function ProjectAuthentication() {
                   </div>
 
                   <div className="col-span-full md:col-span-1 flex flex-col my-2">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Geüploade favicon</label>
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Geüploade favicon
+                    </label>
                     <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                       {!!form.watch('favicon') && (
                         <div style={{ position: 'relative' }}>
-                          <img src={form.watch('favicon')} alt={form.watch('favicon')} />
+                          <img
+                            src={form.watch('favicon')}
+                            alt={form.watch('favicon')}
+                          />
                           <Button
                             color="red"
                             onClick={() => {
@@ -489,54 +560,49 @@ export default function ProjectAuthentication() {
                       )}
                     </section>
                   </div>
-
                 </div>
 
-              {showEmailFields ? (
-              <>
+                {showEmailFields ? (
+                  <>
+                    <Separator className="my-4" />
+                    <div>
+                      <FormLabel>
+                        Extra instellingen voor email login:
+                      </FormLabel>
+                    </div>
 
-              <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Extra instellingen voor email login:
-                </FormLabel>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="fromEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Afzender adres van login e-mails
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="fromName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Naam van de afzender van login e-mails
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              </>
-              ) : null}
-                </>)}
+                    <FormField
+                      control={form.control}
+                      name="fromEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Afzender adres van login e-mails
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="fromName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Naam van de afzender van login e-mails
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                ) : null}
 
                 <Button type="submit">Opslaan</Button>
               </form>

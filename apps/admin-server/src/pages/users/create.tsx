@@ -1,7 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-import { PageLayout } from '@/components/ui/page-layout';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,25 +8,25 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import useUsers from '@/hooks/use-users';
+import { PageLayout } from '@/components/ui/page-layout';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
 import projectListSwr from '@/hooks/use-project-list';
+import useUsers from '@/hooks/use-users';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
-  email: z
-    .string()
-    .email('Geen geldig e-mailadres'),
+  email: z.string().email('Geen geldig e-mailadres'),
   projectId: z.string(),
 });
 
 export default function CreateUser() {
-
   const { createUser } = useUsers();
-  const { data:projects } = projectListSwr();
+  const { data: projects } = projectListSwr();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -42,11 +39,11 @@ export default function CreateUser() {
         email: values.email,
         projectId: values.projectId,
       });
-      toast.success('User is toegevoegd')
-      user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`
+      toast.success('User is toegevoegd');
+      user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
       document.location.href = `/users/${btoa(user.key)}`;
-    } catch(err:any) {
-      toast.error(err.message || 'User kon niet worden toegevoegd')
+    } catch (err: any) {
+      toast.error(err.message || 'User kon niet worden toegevoegd');
     }
   }
   if (!projects) return null;
@@ -72,7 +69,6 @@ export default function CreateUser() {
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-auto">
-    
               <FormField
                 control={form.control}
                 name="email"
@@ -86,17 +82,17 @@ export default function CreateUser() {
                   </FormItem>
                 )}
               />
-    
+
               <FormObjectSelectField
                 form={form}
                 fieldName="projectId"
                 fieldLabel="Basisproject (Een gebruiker moet altijd één project hebben.)"
                 items={projects}
                 keyForValue="id"
-                label={(project:any) => `${project.name}`}
+                label={(project: any) => `${project.name}`}
                 noSelection="&nbsp;"
               />
-    
+
               <Button className="col-span-full w-fit" type="submit">
                 Opslaan
               </Button>

@@ -25,6 +25,6 @@ export default async function doFetch(url = '', options = {}) {
     json = await response.json();
     return json || {};
   }
-  
+
   return undefined;
 }

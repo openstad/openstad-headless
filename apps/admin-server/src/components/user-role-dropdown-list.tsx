@@ -9,7 +9,7 @@ import {
 const UserRoleDropdownList = ({
   roleId,
   addProject,
-  disabled = false
+  disabled = false,
 }: {
   roleId?: string;
   addProject: (roleId: string) => void;
@@ -19,15 +19,12 @@ const UserRoleDropdownList = ({
     <Select
       defaultValue={roleId ? roleId : ''}
       onValueChange={(value: string) => addProject(value)}
-      disabled={disabled}
-    >
+      disabled={disabled}>
       <SelectTrigger>
         <SelectValue placeholder="" />
       </SelectTrigger>
       <SelectContent>
-      { roleId ? null : (
-        <SelectItem value={''}></SelectItem>
-      )}
+        {roleId ? null : <SelectItem value={''}></SelectItem>}
         <SelectItem value={'admin'}>Administrator</SelectItem>
         <SelectItem value={'editor'}>Editor</SelectItem>
         {/* currently not available

@@ -8,43 +8,41 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 
 // backwards compatibility
-router.route('/$')
-  .get(function(req, res, next) {
-    res.redirect('/api/template/project');
-  })
+router.route('/$').get(function (req, res, next) {
+  res.redirect('/api/template/project');
+});
 
-router.route('/project')
+router
+  .route('/project')
   .get(pagination.init)
-  .get(function(req, res, next) {
-
-    if (config.templateSource === 'DB' || config.templateSource === 'DATABASE') {
-
-      req.results = {'Too soon': 'Not yet implemented'};
+  .get(function (req, res, next) {
+    if (
+      config.templateSource === 'DB' ||
+      config.templateSource === 'DATABASE'
+    ) {
+      req.results = { 'Too soon': 'Not yet implemented' };
       next();
-
     } else {
-
       return fetch(config.templateSource, {
-	      headers: { "Content-type": "application/json" },
+        headers: { 'Content-type': 'application/json' },
       })
-	      .then((response) => {
-		      if (!response.ok) throw Error(response)
-		      return response.json();
-	      })
-	      .then(json => {
+        .then((response) => {
+          if (!response.ok) throw Error(response);
+          return response.json();
+        })
+        .then((json) => {
           req.results = json;
           return next();
-	      })
-	      .catch((err) => {
-		      console.log('Fetch templates: niet goed');
-		      next({'message': 'Error fetching templates'});
-	      });
-
+        })
+        .catch((err) => {
+          console.log('Fetch templates: niet goed');
+          next({ message: 'Error fetching templates' });
+        });
     }
   })
   .get(pagination.paginateResults)
-  .get(function(req, res, next) {
+  .get(function (req, res, next) {
     res.json(req.results);
-  })
+  });
 
 module.exports = router;

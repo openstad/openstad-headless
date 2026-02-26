@@ -25,6 +25,7 @@ test:unit:image
 ```
 
 ### Component Tests (Cypress)
+
 Component tests are written using Cypress. To run the component tests, use the following command from the root of the project:
 
 ```bash
@@ -59,8 +60,8 @@ docker-compose --env-file .testing.env exec openstad-api-server npm run init-dat
 docker-compose --env-file .testing.env exec openstad-api-server npm run migrate-database
 ```
 
-
 #### Running the end-to-end tests
+
 To run the E2E tests, use the following command from the root of the project:
 
 ```bash

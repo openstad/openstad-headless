@@ -1,19 +1,22 @@
 .osc .banner {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--nlds-banner-background-color, var(--nlds-default-background-color, #F0F4F8));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(
+    --nlds-banner-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
 }
 
 .osc .banner > p {
-
-    color: var(--osc-card-foreground);
+  color: var(--osc-card-foreground);
 }
 
 .osc .banner.big {
-    justify-content: center;
-    padding: 3rem 2rem;
-    border: 1px solid var(--nlds-banner-border-color, var(--nlds-default-border-color, #F0F4F8));
-    border-radius: 0.5rem;
+  justify-content: center;
+  padding: 3rem 2rem;
+  border: 1px solid
+    var(--nlds-banner-border-color, var(--nlds-default-border-color, #f0f4f8));
+  border-radius: 0.5rem;
 }

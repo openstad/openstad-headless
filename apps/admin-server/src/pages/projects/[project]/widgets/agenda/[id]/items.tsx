@@ -13,17 +13,19 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
+import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   trigger: z.string(),
   title: z.string(),
   description: z.string(),
   active: z.boolean(),
+  activeFrom: z.string().optional(),
+  activeTo: z.string().optional(),
   links: z
     .array(
       z.object({
@@ -35,6 +37,16 @@ const formSchema = z.object({
     )
     .optional(),
 });
+
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function toDateInputValue(value?: string) {
+  if (!value) return '';
+  if (DATE_ONLY_REGEX.test(value)) return value;
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
 
 export default function WidgetAgendaItems(
   props: AgendaWidgetProps & EditFieldProps<AgendaWidgetProps>
@@ -67,6 +79,8 @@ export default function WidgetAgendaItems(
           title: values.title,
           description: values.description,
           active: values.active,
+          activeFrom: values.activeFrom,
+          activeTo: values.activeTo,
           links: values.links || [],
         },
       ]);
@@ -116,6 +130,8 @@ export default function WidgetAgendaItems(
     title: '',
     description: '',
     active: true,
+    activeFrom: '',
+    activeTo: '',
     links: [],
   });
 
@@ -129,6 +145,8 @@ export default function WidgetAgendaItems(
     title?: string;
     description: string;
     active: boolean;
+    activeFrom?: string;
+    activeTo?: string;
     links?: Array<Link>;
   };
 
@@ -147,7 +165,7 @@ export default function WidgetAgendaItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-      onFieldChanged('items', items);
+    onFieldChanged('items', items);
   }, [items]);
 
   useEffect(() => {
@@ -157,6 +175,8 @@ export default function WidgetAgendaItems(
         title: selectedItem.title || '',
         description: selectedItem.description,
         active: selectedItem.active,
+        activeFrom: toDateInputValue(selectedItem.activeFrom),
+        activeTo: toDateInputValue(selectedItem.activeTo),
         links: selectedItem.links || [],
       });
       setLinks(selectedItem.links || []);
@@ -363,9 +383,9 @@ export default function WidgetAgendaItems(
                       className="w-fit mt-4 bg-secondary text-black hover:text-white"
                       type="button"
                       onClick={() => {
-                        setSettingLinks(() => !settingLinks),
+                        (setSettingLinks(() => !settingLinks),
                           setLink(null),
-                          setLinks([]);
+                          setLinks([]));
                       }}>
                       Annuleer
                     </Button>
@@ -468,27 +488,69 @@ export default function WidgetAgendaItems(
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="active"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Actief</FormLabel>
-                          <Switch.Root
-                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                            onCheckedChange={(e: boolean) => {
-                              field.onChange(e);
-                              if (props.onFieldChanged) {
-                                props.onFieldChanged(field.name, e);
-                              }
-                            }}
-                            checked={field.value}>
-                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                          </Switch.Root>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {!props.useActiveDates && (
+                      <FormField
+                        control={form.control}
+                        name="active"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Actief</FormLabel>
+                            <Switch.Root
+                              className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                              onCheckedChange={(e: boolean) => {
+                                field.onChange(e);
+                                if (props.onFieldChanged) {
+                                  props.onFieldChanged(field.name, e);
+                                }
+                              }}
+                              checked={field.value}>
+                              <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                            </Switch.Root>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    {props.useActiveDates && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="activeFrom"
+                          render={({ field }) => (
+                            <FormItem className="items-start md:col-span-full">
+                              <FormLabel>
+                                Actief vanaf (hele dag) — laat leeg om direct te
+                                starten
+                              </FormLabel>
+                              <Input
+                                type="date"
+                                {...field}
+                                className="inline-block !w-auto"
+                              />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="activeTo"
+                          render={({ field }) => (
+                            <FormItem className="items-start md:col-span-full">
+                              <FormLabel>
+                                Actief t/m (hele dag) — laat leeg voor geen
+                                einddatum
+                              </FormLabel>
+                              <Input
+                                type="date"
+                                {...field}
+                                className="inline-block !w-auto"
+                              />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
 
                     <FormItem>
                       <Button

@@ -3,6 +3,7 @@
 Dit is een JSON API server
 
 ## Inhoud
+
 [Login](/doc/auth)
 [Site](/doc/site)
 [Idea](/doc/idea)
@@ -27,7 +28,3 @@ Dit is een JSON API server
 - maak een API event server waar andere onderdelen naar kunnen luisteren
 - betere error handling
 - i18n
-
-
-
-

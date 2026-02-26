@@ -1,6 +1,7 @@
-import './video.scss';
-import React, { useState, useEffect, FC, useId, useRef } from 'react';
 import type { BaseProps } from '@openstad-headless/types';
+import React, { FC, useEffect, useId, useRef, useState } from 'react';
+
+import './video.scss';
 
 export type VideoFieldProps = BaseProps &
   VideoProps & {
@@ -15,14 +16,12 @@ export type VideoProps = {
   videoSubtitle?: boolean;
 };
 
-
 const VideoField: FC<VideoFieldProps> = ({
   videoUrl,
   videoLang,
   videoSubtitle,
   ...props
 }) => {
-
   const id = useId();
   function getYouTubeVideoId(url?: string) {
     if (!url) return '';
@@ -47,7 +46,7 @@ const VideoField: FC<VideoFieldProps> = ({
     return true;
   });
   const [muteToggle, setMuteToggle] = useState<boolean>(false);
-
+  const [playing, setPlaying] = useState<boolean>(true);
 
   useEffect(() => {
     setVideoId(getYouTubeVideoId(videoUrl));
@@ -56,7 +55,6 @@ const VideoField: FC<VideoFieldProps> = ({
       setPlayer(null);
     }
   }, [props.currentPage]);
-
 
   useEffect(() => {
     if ((window as any).YT && (window as any).YT.Player) {
@@ -94,6 +92,7 @@ const VideoField: FC<VideoFieldProps> = ({
               } else {
                 event.target.unMute();
               }
+              event.target.playVideo();
             },
           },
         });
@@ -111,37 +110,68 @@ const VideoField: FC<VideoFieldProps> = ({
       if (muted) {
         player.unMute();
         setMuted(false);
-        if (typeof window !== 'undefined') window.sessionStorage.setItem('video-muted', 'false');
+        if (typeof window !== 'undefined')
+          window.sessionStorage.setItem('video-muted', 'false');
       } else {
         player.mute();
         setMuted(true);
-        if (typeof window !== 'undefined') window.sessionStorage.setItem('video-muted', 'true');
+        if (typeof window !== 'undefined')
+          window.sessionStorage.setItem('video-muted', 'true');
+      }
+    }
+  };
+
+  const handlePlayPause = (e: any) => {
+    e.preventDefault();
+    if (player) {
+      if (playing) {
+        player.pauseVideo();
+        setPlaying(false);
+      } else {
+        player.playVideo();
+        setPlaying(true);
       }
     }
   };
 
   return (
-    <div className="video-field">
-      {videoId ? (
-        <>
-          <div className="video-container">
+    <>
+      <button
+        onClick={(e) => handlePlayPause(e)}
+        className={`playPauseToggle ${playing ? '--playing' : '--paused'}`}
+        role="button"
+        tabIndex={0}>
+        <span className="sr-only">{playing ? 'Pause' : 'Play'}</span>
+        <div className="icon"></div>
+      </button>
+      <div className="video-field">
+        {videoId ? (
+          <>
+            <div className="video-container">
+              <div
+                ref={playerRef}
+                id={id}
+                className="video-player"
+                tabIndex={-1}
+              />
+            </div>
             <div
-              ref={playerRef}
-              id={id}
-              className="video-player"
-              tabIndex={-1}
-            />
-          </div>
-          <div onClick={handleVideoClick} className={`muteToggle ${muted ? '--muted' : '--unmuted'} ${muteToggle ? '--toggle' : ''}`} role="button" tabIndex={0}>
-            <span className="sr-only">{muted ? 'Unmute' : 'Mute'}</span>
-            <div className="icon"></div>
-          </div>
-        </>
-      ) : (
-        <div>No video URL provided.</div>
-      )}
-    </div>
+              onClick={handleVideoClick}
+              className={`muteToggle ${muted ? '--muted' : '--unmuted'} ${
+                muteToggle ? '--toggle' : ''
+              }`}
+              role="button"
+              tabIndex={0}>
+              <span className="sr-only">{muted ? 'Unmute' : 'Mute'}</span>
+              <div className="icon"></div>
+            </div>
+          </>
+        ) : (
+          <div>No video URL provided.</div>
+        )}
+      </div>
+    </>
   );
-}
+};
 export { VideoField };
 export default VideoField;

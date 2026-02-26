@@ -11,5 +11,5 @@ module.exports = {
 
   async down({ context: queryInterface }) {
     await queryInterface.removeColumn('tags', 'newSubmitAddress');
-  }
+  },
 };

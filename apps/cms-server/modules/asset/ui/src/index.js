@@ -129,7 +129,6 @@ function adjustMenu() {
     });
   }
 
-
   if (navbar.getAttribute('data-mobile-menu') === 'true') {
     navContainer?.classList.add('--mobile');
     isMobile = true;

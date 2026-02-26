@@ -15,6 +15,7 @@ Alleen als dat mag, natuurlijk. Zie `config.votes.withExisting`.
 voteType 'likes' werkt als een toggle: stuur je een stem op die al bestaat da wordt die verwijderd. Dit is backwards compatible met stemvan.
 
 Payload:
+
 ```
 [
   {
@@ -37,6 +38,7 @@ Payload:
 ```
 
 of 1 stem:
+
 ```
 {
   "ideaId": 7,
@@ -45,11 +47,12 @@ of 1 stem:
 ```
 
 **TODO**
-Er moet  nog een eindpunt komen voor het confirmen van votes
+Er moet nog een eindpunt komen voor het confirmen van votes
 
 ## Configuratie
 
 We hebben momenteel:
+
 - stemvan stemmen: je kunt op elk open plan een voor of tegen stem uitbrengen. Nog een keer stemmen vervangt of annuleert de oude.
 - westbegroot/molenwijk: in principe hetzelfde, maar dan in bulk. Je kunt bovendien niet meer wijzigen.
 - javabrug: ook in bulk, maar je kunt nog wel wijzigen
@@ -99,6 +102,7 @@ Deze waarden gelden bij voteType 'count' resp. 'budgeting', en bepalen de marges
 #### Voorbeeld configuraties
 
 Westbegroot ideeenfase
+
 ```
 {
 	"isActive": true,
@@ -109,6 +113,7 @@ Westbegroot ideeenfase
 ```
 
 Westbegroot stemfase
+
 ```
 {
 	"isActive": true,
@@ -120,6 +125,7 @@ Westbegroot stemfase
 ```
 
 Molenwijk
+
 ```
 {
 	"isActive": true,
@@ -131,6 +137,7 @@ Molenwijk
 ```
 
 Zorg goed voor onze stad
+
 ```
 {
   "isViewable": true,

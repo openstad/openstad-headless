@@ -2,7 +2,6 @@
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-
 }
 
 .bp-welcome__area {
@@ -27,7 +26,7 @@
   display: inline-block;
   color: #300ab7;
   font-size: 12px;
-  box-shadow: 0 25px 50px rgba(64,70,104,.1);
+  box-shadow: 0 25px 50px rgba(64, 70, 104, 0.1);
   font-weight: 500;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -57,8 +56,8 @@
   height: auto;
   text-transform: uppercase;
   font-size: 11px;
-  font-family: code-saver,sans-serif;
-  letter-spacing: .025em;
+  font-family: code-saver, sans-serif;
+  letter-spacing: 0.025em;
   padding: 5px 10px;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -83,7 +82,12 @@ p.bp-welcome__cta {
   display: inline-block;
   padding: 5px 5px;
   font-size: 12px;
-  font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+  font-family:
+    SFMono-Regular,
+    Consolas,
+    Liberation Mono,
+    Menlo,
+    monospace;
   line-height: 10px;
   color: black;
   vertical-align: middle;

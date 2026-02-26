@@ -1,18 +1,18 @@
+import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { useRouter } from 'next/router';
 import useResources from '@/hooks/use-resources';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useCallback, useEffect } from 'react';
-import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
-import { Button } from '@/components/ui/button';
-
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+
 const formSchema = z.object({
   resourceId: z.string().optional(),
 });

@@ -7,19 +7,19 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useResources from '@/hooks/use-resources';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useRouter } from 'next/router';
-import useResources from '@/hooks/use-resources';
-import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useCallback, useEffect, useState } from 'react';
-import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
@@ -36,7 +36,6 @@ const formSchema = z.object({
 export default function WidgetResourceDetailGeneral(
   props: ResourceDetailWidgetProps & EditFieldProps<ResourceDetailWidgetProps>
 ) {
-
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -55,7 +54,7 @@ export default function WidgetResourceDetailGeneral(
     () => ({
       resourceId: props?.resourceId || undefined,
       resourceIdRelativePath: props?.resourceIdRelativePath || undefined,
-       backUrl: props?.backUrl || undefined,
+      backUrl: props?.backUrl || undefined,
     }),
     [props?.resourceId, props?.resourceIdRelativePath, props?.backUrl]
   );
@@ -85,7 +84,7 @@ export default function WidgetResourceDetailGeneral(
             keyForValue="id"
             label={(resource) => `${resource.id} ${resource.title}`}
             onFieldChanged={(e, key) => {
-              props.onFieldChanged
+              props.onFieldChanged;
               setToggle(e + '_' + key);
             }}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
@@ -96,15 +95,20 @@ export default function WidgetResourceDetailGeneral(
               name="resourceIdRelativePath"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Geen specifieke inzending gekoppeld?
-                  </FormLabel>
-                  <em className="text-xs">Beschrijf hoe de inzending gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                  <FormLabel>Geen specifieke inzending gekoppeld?</FormLabel>
+                  <em className="text-xs">
+                    Beschrijf hoe de inzending gehaald wordt uit de url:
+                    (/pad/naar/[id]) of laat leeg om terug te vallen op
+                    ?openstadResourceId
+                  </em>
                   <FormControl>
-                    <Input {...field} onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }} />
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,25 +116,29 @@ export default function WidgetResourceDetailGeneral(
             />
           ) : null}
 
-            <FormField
-              control={form.control}
-              name="backUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Overzicht url:
-                  </FormLabel>
-                  <em className="text-xs">De URL waar het overzicht staat, bijvoorbeeld: &lsquo;/overzicht&rsquo;</em>
-                  <FormControl>
-                    <Input {...field} onChange={(e) => {
+          <FormField
+            control={form.control}
+            name="backUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Overzicht url:</FormLabel>
+                <em className="text-xs">
+                  De URL waar het overzicht staat, bijvoorbeeld:
+                  &lsquo;/overzicht&rsquo;
+                </em>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
                       onFieldChange(field.name, e.target.value);
                       field.onChange(e);
-                    }} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

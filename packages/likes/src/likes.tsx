@@ -1,27 +1,31 @@
+import DataStore from '@openstad-headless/data-store/src';
+import { hasRole } from '@openstad-headless/lib';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { LocalStorage } from '@openstad-headless/lib/local-storage';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { ProgressBar } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
-  Heading5,
-  Paragraph,
   Button,
   Heading4,
+  Heading5,
   Heading6,
+  Paragraph,
 } from '@utrecht/component-library-react';
-import { ProgressBar } from '@openstad-headless/ui/src';
-import { LocalStorage } from '@openstad-headless/lib/local-storage';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
-import { hasRole } from '@openstad-headless/lib';
-import DataStore from '@openstad-headless/data-store/src';
-import React, { useState, useEffect } from 'react';
+import '@utrecht/design-tokens/dist/root.css';
+import React, { useEffect, useState } from 'react';
+
 import './likes.css';
-import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export type LikeWidgetProps = BaseProps &
   LikeProps &
   ProjectSettingProps & {
     resourceId?: string;
     resourceIdRelativePath?: string;
+    children?:
+      | React.ReactNode
+      | ((doVote: (value: string) => void) => React.ReactNode);
   };
 
 export type LikeProps = {
@@ -41,20 +45,21 @@ function Likes({
   title = '',
   variant = 'large',
   hideCounters,
-  yesLabel = 'Voor',
-  noLabel = 'Tegen',
+  yesLabel = 'Ja',
+  noLabel = 'Nee',
   displayDislike = false,
   showProgressBar = true,
   disabled = false,
   refreshResourceLikes,
   ...props
-}: LikeWidgetProps & { children?: (doVote: (value: string) => void) => React.ReactNode }) {
-
-  let resourceId = String(getResourceId({
-    resourceId: parseInt(props.resourceId || ''),
-    url: document.location.href,
-    targetUrl: props.resourceIdRelativePath,
-  })); // todo: make it a number throughout the code
+}: LikeWidgetProps) {
+  let resourceId = String(
+    getResourceId({
+      resourceId: parseInt(props.resourceId || ''),
+      url: document.location.href,
+      targetUrl: props.resourceIdRelativePath,
+    })
+  ); // todo: make it a number throughout the code
 
   const necessaryVotes = props.resources?.minimumYesVotes || 50;
 
@@ -77,16 +82,15 @@ function Likes({
   const supportedLikeTypes: Array<{
     type: 'yes' | 'no';
     label: string;
-    icon: string;
+    icon: 'ri-thumb-up-line' | 'ri-thumb-down-line';
   }> = [
     { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
     { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
   ];
 
   if (!displayDislike) {
-      supportedLikeTypes.pop();
+    supportedLikeTypes.pop();
   }
-
 
   useEffect(() => {
     let pending = storage.get('osc-resource-vote-pending');
@@ -144,7 +148,6 @@ function Likes({
 
   return (
     <div className="osc">
-
       {variant !== 'micro-score' ? (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
@@ -161,10 +164,8 @@ function Likes({
                   resource?.userVote?.opinion === likeVariant.type
                     ? 'selected'
                     : ''
-                  } ${hideCounters ? 'osc-no-counter' : ''}`
-                }
-                disabled={disabled}
-              >
+                } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
+                disabled={disabled}>
                 <section className="like-kind">
                   <i className={likeVariant.icon}></i>
                   {variant === 'small' ? null : likeVariant.label}
@@ -172,7 +173,8 @@ function Likes({
 
                 {!hideCounters ? (
                   <section className="like-counter">
-                    {resource[likeVariant.type] && resource[likeVariant.type] < 10
+                    {resource[likeVariant.type] &&
+                    resource[likeVariant.type] < 10
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
@@ -195,9 +197,11 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6>
-                  {props.progressBarDescription}
-                </Heading6>
+                <Heading6
+                  dangerouslySetInnerHTML={{
+                    __html: props.progressBarDescription,
+                  }}
+                />
               )}
           </div>
         </div>
@@ -209,39 +213,47 @@ function Likes({
 
           <div className={`like-option-container`}>
             {supportedLikeTypes.map((likeVariant, index) => (
-              <>
+              <React.Fragment key={`${likeVariant.type}-${index}`}>
                 <Button
                   appearance="primary-action-button"
-                  key={`${likeVariant.type}-${index}`}
                   onClick={(e) => doVote(e, likeVariant.type)}
                   className={`like-option ${
                     resource?.userVote?.opinion === likeVariant.type
                       ? 'selected'
                       : ''
-                    } ${hideCounters ? 'osc-no-counter' : ''}`
-                  }
-                  disabled={disabled}
-                >
-
+                  } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
+                  disabled={disabled}>
                   <section className="like-kind">
-                    <i className={likeVariant.icon}></i> <span className="sr-only">{likeVariant.label}</span>
+                    <i
+                      className={`${
+                        resource?.userVote?.opinion === likeVariant.type
+                          ? 'ri-triangle-fill'
+                          : 'ri-triangle-line'
+                      } micro-score-triangle ${
+                        likeVariant.type === 'no'
+                          ? 'micro-score-triangle-down'
+                          : ''
+                      }`}></i>{' '}
+                    <span className="sr-only">{likeVariant.label}</span>
                   </section>
-
                 </Button>
                 {!hideCounters && index === 0 ? (
                   <section className="like-counter">
-                    <span className="sr-only">Score</span> {resource['netPositiveVotes'] ? resource['netPositiveVotes']  : '0'}
+                    <span className="sr-only">Score</span>{' '}
+                    {resource['netVotes'] ? resource['netVotes'] : '0'}
                   </section>
                 ) : null}
-              </>
+              </React.Fragment>
             ))}
           </div>
 
           {props?.resources?.minimumYesVotes && showProgressBar ? (
             <div className="progressbar-container">
-              <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
+              <ProgressBar
+                progress={(resource.netVotes / necessaryVotes) * 100}
+              />
               <Paragraph className="progressbar-counter">
-                {resource.yes || 0} /{necessaryVotes}
+                {resource.netVotes || 0} /{necessaryVotes}
               </Paragraph>
             </div>
           ) : null}
@@ -250,9 +262,11 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6>
-                  {props.progressBarDescription}
-                </Heading6>
+                <Heading6
+                  dangerouslySetInnerHTML={{
+                    __html: props.progressBarDescription,
+                  }}
+                />
               )}
           </div>
         </div>

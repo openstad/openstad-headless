@@ -10,10 +10,10 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as Switch from '@radix-ui/react-switch';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   confirmationUser: z.boolean(),
@@ -31,14 +31,17 @@ export default function WidgetResourceFormConfirmation() {
     updateConfig,
   } = useWidgetConfig<any>();
 
-  const defaults = useCallback(
-    () => {
-      const confirmationUser = widget?.config?.[category]?.confirmationUser !== null ? widget?.config?.[category]?.confirmationUser : true;
-      const confirmationAdmin = widget?.config?.[category]?.confirmationAdmin !== null ? widget?.config?.[category]?.confirmationAdmin : true;
-      return { confirmationUser, confirmationAdmin };
-    },
-    [widget?.config]
-  );
+  const defaults = useCallback(() => {
+    const confirmationUser =
+      widget?.config?.[category]?.confirmationUser !== null
+        ? widget?.config?.[category]?.confirmationUser
+        : true;
+    const confirmationAdmin =
+      widget?.config?.[category]?.confirmationAdmin !== null
+        ? widget?.config?.[category]?.confirmationAdmin
+        : true;
+    return { confirmationUser, confirmationAdmin };
+  }, [widget?.config]);
 
   async function onSubmit(values: FormData) {
     try {
@@ -71,16 +74,17 @@ export default function WidgetResourceFormConfirmation() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Krijgt de gebruiker een bevestiging voordat de inzending/het plan opgeleverd wordt?
+                  Krijgt de gebruiker een bevestiging voordat de inzending/het
+                  plan opgeleverd wordt?
                 </FormLabel>
                 <Switch.Root
-                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                      onCheckedChange={(e: boolean) => {
-                        field.onChange(e);
-                      }}
-                      checked={field.value}>
-                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                    </Switch.Root>
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}
@@ -91,16 +95,17 @@ export default function WidgetResourceFormConfirmation() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Krijgt de beheerder een bevestiging voordat de inzending/het plan opgeleverd wordt?
+                  Krijgt de beheerder een bevestiging voordat de inzending/het
+                  plan opgeleverd wordt?
                 </FormLabel>
                 <Switch.Root
-                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                      onCheckedChange={(e: boolean) => {
-                        field.onChange(e);
-                      }}
-                      checked={field.value}>
-                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                    </Switch.Root>
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}

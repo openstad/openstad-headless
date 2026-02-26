@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,10 +26,22 @@ const formSchema = z.object({
   afterSubmitUrl: z.string().optional(),
   finalSlideTitle: z.string().optional(),
   finalSlideDescription: z.string().optional(),
-  minCharactersWarning: z.string().optional().default("Nog minimaal {minCharacters} tekens"),
-  maxCharactersWarning: z.string().optional().default("Je hebt nog {maxCharacters} tekens over"),
-  minCharactersError: z.string().optional().default("Tekst moet minimaal {minCharacters} karakters bevatten"),
-  maxCharactersError: z.string().optional().default("Tekst moet maximaal {maxCharacters} karakters bevatten"),
+  minCharactersWarning: z
+    .string()
+    .optional()
+    .default('Nog minimaal {minCharacters} tekens'),
+  maxCharactersWarning: z
+    .string()
+    .optional()
+    .default('Je hebt nog {maxCharacters} tekens over'),
+  minCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+  maxCharactersError: z
+    .string()
+    .optional()
+    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -49,10 +62,16 @@ export default function WidgetEnqueteGeneral(
       finalSlideTitle: props.finalSlideTitle || '',
       // @ts-ignore
       finalSlideDescription: props.finalSlideDescription || '',
-      minCharactersWarning: props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
-      maxCharactersWarning: props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
-      minCharactersError: props.minCharactersError || 'Tekst moet minimaal {minCharacters} karakters bevatten',
-      maxCharactersError: props.maxCharactersError || 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      minCharactersWarning:
+        props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning:
+        props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
+      minCharactersError:
+        props.minCharactersError ||
+        'Tekst moet minimaal {minCharacters} karakters bevatten',
+      maxCharactersError:
+        props.maxCharactersError ||
+        'Tekst moet maximaal {maxCharacters} karakters bevatten',
     },
   });
 
@@ -89,11 +108,13 @@ export default function WidgetEnqueteGeneral(
             name="afterSubmitUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Url voor redirecten na opslaan (optioneel)</FormLabel>
+                <FormLabel>
+                  Url voor redirecten na opslaan (optioneel)
+                </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder='bijvoorbeeld /enquetes/[id] of laat leeg voor geen redirect'
+                    placeholder="bijvoorbeeld /enquetes/[id] of laat leeg voor geen redirect"
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);

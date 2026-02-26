@@ -8,6 +8,7 @@ import {
 } from '@/lib/server-side-props-definition';
 import type { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
 import { useRouter } from 'next/router';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -33,7 +34,6 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',

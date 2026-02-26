@@ -1,63 +1,63 @@
 .osc-carousel {
-    display: flex;
-    position: relative;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    /* gap: 1rem; */
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  /* gap: 1rem; */
 }
 
 .osc-carousel.width-100 {
-    width: 100%;
+  width: 100%;
 }
 
 .carousel-items {
-    flex: 1;
+  flex: 1;
 }
 
 .osc-carousel-navigation-button-wrapper {
-    flex-grow: 0;
-    flex-basis: 0;
+  flex-grow: 0;
+  flex-basis: 0;
 }
 
 .osc-carousel-previous {
-    position: absolute;
-    left: 10px;
-    z-index: 1;
+  position: absolute;
+  left: 10px;
+  z-index: 1;
 }
 
 .osc-carousel-next {
-    position: absolute;
-    right: 10px;
-    z-index: 1;
+  position: absolute;
+  right: 10px;
+  z-index: 1;
 }
 
 .osc-carousel-pager {
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 10px;
-    top: auto;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 10px;
+  top: auto;
 }
 
 .osc-carousel-pager .osc-carousel-pager-button {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin: 0 5px;
-    cursor: pointer;
-    padding: 0;
-    background-color: white;
-    border: 1px solid var(--osc-primary, #3e3e3e);
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 5px;
+  cursor: pointer;
+  padding: 0;
+  background-color: white;
+  border: 1px solid var(--osc-primary, #3e3e3e);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 .osc-carousel-pager .osc-carousel-pager-button.active {
-    background-color: var(--osc-primary, #3e3e3e);
+  background-color: var(--osc-primary, #3e3e3e);
 }
 
 .osc-carousel .clickable-image {
-    cursor: pointer;
+  cursor: pointer;
 }

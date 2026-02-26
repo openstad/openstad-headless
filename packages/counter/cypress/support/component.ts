@@ -12,11 +12,10 @@
 // You can read more here:
 // https://on.cypress.io/configuration
 // ***********************************************************
-
 // Import commands.js using ES2015 syntax:
-import './commands'
+import { mount } from 'cypress/react';
 
-import { mount } from 'cypress/react'
+import './commands';
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -25,12 +24,12 @@ import { mount } from 'cypress/react'
 declare global {
   namespace Cypress {
     interface Chainable {
-      mount: typeof mount
+      mount: typeof mount;
     }
   }
 }
 
-Cypress.Commands.add('mount', mount)
+Cypress.Commands.add('mount', mount);
 
 // Example use:
 // cy.mount(<MyComponent />)

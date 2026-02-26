@@ -2,7 +2,10 @@ const { Sequelize } = require('sequelize');
 
 module.exports = {
   async up({ context: queryInterface }) {
-    await queryInterface.removeConstraint('choices_guide_results', 'choices_guide_results_ibfk_1');
+    await queryInterface.removeConstraint(
+      'choices_guide_results',
+      'choices_guide_results_ibfk_1'
+    );
   },
 
   async down({ context: queryInterface }) {
@@ -17,5 +20,5 @@ module.exports = {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     });
-  }
+  },
 };

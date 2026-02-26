@@ -20,4 +20,3 @@ Click on "details"
 Look for OSM ID and copy it, example: 2018776
 
 paste the ID in <http://polygons.openstreetmap.fr/index.py> and download the polygon
-

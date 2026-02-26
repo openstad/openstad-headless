@@ -4,21 +4,21 @@ const resources = [
     value: 'idea',
     resourceEndPoint: 'idea',
     //config is used in API config
-    configKey: 'ideas'
+    configKey: 'ideas',
   },
   {
     label: 'Site',
     value: 'site',
     resourceEndPoint: 'site',
     //config is used in API config
-    configKey: 'sites'
+    configKey: 'sites',
   },
   {
     label: 'Article',
     value: 'article',
     resourceEndPoint: 'article',
     //config is used in API config
-    configKey: 'articles'
+    configKey: 'articles',
   },
   // always get the values from the active user
   {
@@ -26,7 +26,7 @@ const resources = [
     value: 'activeUser',
     resourceEndPoint: 'user',
     //config is used in API config
-    configKey: 'users'
+    configKey: 'users',
   },
   // get user from the API
   {
@@ -34,78 +34,78 @@ const resources = [
     value: 'user',
     resourceEndPoint: 'user',
     //config is used in API config
-    configKey: 'users'
+    configKey: 'users',
   },
   {
     label: 'Products',
     value: 'product',
     resourceEndPoint: 'product',
     //config is used in API config
-    configKey: 'products'
+    configKey: 'products',
   },
   {
     label: 'Orders',
     value: 'order',
     resourceEndPoint: 'order',
     //config is used in API config
-    configKey: 'orders'
+    configKey: 'orders',
   },
   {
     label: 'Accounts',
     value: 'account',
     resourceEndPoint: 'account',
     //config is used in API config
-    configKey: 'accounts'
+    configKey: 'accounts',
   },
   {
     label: 'Games',
     value: 'game',
     resourceEndPoint: 'game',
     //config is used in API config
-    configKey: 'game'
+    configKey: 'game',
   },
   {
     label: 'Tour',
     value: 'tour',
     resourceEndPoint: 'tour',
     //config is used in API config
-    configKey: 'tour'
+    configKey: 'tour',
   },
   {
     label: 'Newsletter signup',
     value: 'newslettersignup',
     resourceEndPoint: 'newslettersignup',
     //config is used in API config
-    configKey: 'newslettersignup'
+    configKey: 'newslettersignup',
   },
   {
     label: 'Event',
     value: 'event',
     resourceEndPoint: 'event',
     //config is used in API config
-    configKey: 'event'
+    configKey: 'event',
   },
   {
     label: 'Statistics',
     value: 'statistics',
     resourceEndPoint: 'statistics',
     //config is used in API config
-    configKey: 'statistics'
+    configKey: 'statistics',
   },
   {
     label: 'Actions',
     value: 'action',
     resourceEndPoint: 'action',
     //config is used in API config
-    configKey: 'action'
+    configKey: 'action',
   },
   {
     label: 'Invoice',
     value: 'invoice',
     resourceEndPoint: 'invoice',
     //config is used in API config
-    configKey: 'invoice'
+    configKey: 'invoice',
   },
-]
+];
 
 exports.schemaFormat = resources;

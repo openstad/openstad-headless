@@ -16,7 +16,6 @@ GET :HOSTNAME/stats/site/:SITE_ID/idea/total
 
 Aantal resources.
 
-
 ### Votes
 
 Alleen zichtbaar als `site.config.votes.isViewable` waar is. Of als je admin bent.
@@ -27,7 +26,6 @@ GET :HOSTNAME/stats/site/:SITE_ID/vote/total?opionion=yes
 ```
 
 Aantal stemmen.
-
 
 ```
 GET :HOSTNAME/stats/site/:SITE_ID/vote/no-of-users

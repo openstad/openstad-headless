@@ -3,7 +3,7 @@ module.exports = {
   options: {
     label: 'Breadcrumbs',
     browser: {
-      src: 'ui/src/index.js'
-    }
-  }
+      src: 'ui/src/index.js',
+    },
+  },
 };

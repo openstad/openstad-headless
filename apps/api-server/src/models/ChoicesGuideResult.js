@@ -1,6 +1,5 @@
-module.exports = function( db, sequelize, DataTypes ) {
+module.exports = function (db, sequelize, DataTypes) {
   let ChoicesGuideResult = sequelize.define('choices_guide_result', {
-
     userId: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -22,7 +21,7 @@ module.exports = function( db, sequelize, DataTypes ) {
       type: DataTypes.TEXT,
       allowNull: false,
       defaultValue: '{}',
-      get: function() {
+      get: function () {
         let value = this.getDataValue('result');
         try {
           if (typeof value == 'string') {
@@ -31,8 +30,7 @@ module.exports = function( db, sequelize, DataTypes ) {
         } catch (err) {}
         return value;
       },
-      set: function(value) {
-
+      set: function (value) {
         try {
           if (typeof value == 'string') {
             value = JSON.parse(value);
@@ -54,14 +52,16 @@ module.exports = function( db, sequelize, DataTypes ) {
         });
 
         this.setDataValue('result', JSON.stringify(value));
-
-      }
+      },
     },
-
+    isSpam: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   });
 
   ChoicesGuideResult.scopes = function scopes() {
-
     return {
       defaultScope: {},
 
@@ -86,29 +86,27 @@ module.exports = function( db, sequelize, DataTypes ) {
               'phonenumber',
               'address',
               'city',
-              'postcode'
+              'postcode',
             ],
           },
         ],
       },
-
     };
   };
 
-  ChoicesGuideResult.associate = function( models ) {
+  ChoicesGuideResult.associate = function (models) {
     this.belongsTo(models.Widget);
     this.belongsTo(models.User, { onDelete: 'CASCADE' });
   };
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu
-	ChoicesGuideResult.auth = ChoicesGuideResult.prototype.auth = {
+  ChoicesGuideResult.auth = ChoicesGuideResult.prototype.auth = {
     listableBy: 'editor',
     viewableBy: 'all',
     createableBy: 'all',
     updateableBy: ['editor', 'owner'],
     deleteableBy: 'editor',
-  }
+  };
 
   return ChoicesGuideResult;
-
 };

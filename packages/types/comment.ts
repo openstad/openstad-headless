@@ -13,14 +13,14 @@ export type Comment = {
   label: string;
   yes: number;
   no: number;
-  netPositiveVotes: number;
+  netVotes: number;
   hasUserLiked: boolean;
   hasUserDisliked: boolean;
   createDateHumanized: string;
 
   replies: Array<Comment>;
 
-  user?: { displayName: string, role: string};
+  user?: { displayName: string; role: string };
 
   tags?: Array<{
     id: string;

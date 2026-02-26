@@ -7,10 +7,13 @@ Tags belong to a project. An resource can have multiple tags. Tags can be groupe
 Statuses are technically equal to tags, plus an extraFunctionalty field.
 
 ### List all tags for a project
+
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/tag
 ```
+
 Or by type
+
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/tag?type=theme
 ```
@@ -24,16 +27,19 @@ Grouping resources like this has two main goals: presenting filtered lists of re
 More about voting in the [voting docs](./voting.md) (yet to be written).
 
 ### To list all resources, with their tags
+
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/resource?includeTags=true
 ```
 
 ### List resources filtered by tag(s)
+
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/resource?tags=:TAG_ID1&tags=:TAG_ID2
 ```
 
 ### Update tags on an resource
+
 ```
 PUT :HOSTNAME/api/project/:PROJECT_ID/resource/:RESOURCE_ID
 Content-Type: application/json
@@ -57,12 +63,15 @@ Each new Project wil be created with 1 status tag: `open`.
 ## Tag administration
 
 ### List tags by type
+
 Ordered by seqnr.
+
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/tag?type=:TYPE
 ```
 
 ### Create a tag
+
 ```
 POST :HOSTNAME/api/project/:PROJECT_ID/tag
 Content-Type: application/json
@@ -81,6 +90,7 @@ Authorization: XXX
 ```
 
 ### Edit a tag
+
 ```
 PUT :HOSTNAME/api/project/:PROJECT_ID/tag/1
 Content-Type: application/json
@@ -94,17 +104,13 @@ Authorization: XXX
 ```
 
 ### Delete an tag
-````
+
+```
 DELETE :HOSTNAME/api/project/:PROJECT_ID/tag/7
 Authorization: XXX
-````
-
-
-
+```
 
 ## ToDo
+
 - ik denk dat sommige tags exclusief zouden moeten zijn: een plan maar 1 thema kunnen hangen bijvoorbeeld
 - missschien dat tags in tags mogelijk zou moeten zijn
-
-
-

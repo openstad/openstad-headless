@@ -9,7 +9,7 @@ const contentWidgets = {
       'link',
       '|',
       'bulletList',
-      'orderedList'
+      'orderedList',
     ],
     styles: [
       {
@@ -23,9 +23,9 @@ const contentWidgets = {
       {
         tag: 'h4',
         label: 'Heading 4 (H4)',
-      }
-    ]
-  }
+      },
+    ],
+  },
 };
 
 module.exports = {
@@ -44,7 +44,7 @@ module.exports = {
           { value: 3, label: 'H3' },
           { value: 4, label: 'H4' },
           { value: 5, label: 'H5' },
-          { value: 6, label: 'H6' }
+          { value: 6, label: 'H6' },
         ],
         def: 2,
       },
@@ -57,7 +57,7 @@ module.exports = {
         options: {
           widgets: contentWidgets,
         },
-        max: 1
+        max: 1,
       },
     },
   },

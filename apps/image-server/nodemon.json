@@ -1,8 +1,5 @@
 {
   "verbose": false,
   "ext": "js,json,njk,html",
-  "ignore": [
-    "images/*",
-    "documents/*"
-  ]
+  "ignore": ["images/*", "documents/*"]
 }

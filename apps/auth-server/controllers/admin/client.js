@@ -12,9 +12,9 @@ const authTypes = require('../../config/auth').types;
  */
 exports.all = (req, res, next) => {
   res.render('admin/client/all', {
-    clients: req.clients
+    clients: req.clients,
   });
-}
+};
 
 /**
  * [new description]
@@ -29,8 +29,7 @@ exports.new = (req, res, next) => {
     exposedUserFields: userFields,
     authTypes: authTypes,
   });
-}
-
+};
 
 exports.edit = (req, res, next) => {
   const clientAuthTypes = req.client.authTypes;
@@ -46,9 +45,9 @@ exports.edit = (req, res, next) => {
     clientExposedUserFields: clientExposedUserFields,
     clientRequiredUserFields: clientRequiredUserFields,
     roles: req.roles,
-    clients: req.clients
+    clients: req.clients,
   });
-}
+};
 
 /**
  * [create description]
@@ -58,30 +57,52 @@ exports.edit = (req, res, next) => {
  * @return {[type]}        [description]
  */
 exports.create = (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes } = req.body;
+  const {
+    name,
+    description,
+    exposedUserFields,
+    requiredUserFields,
+    redirectUrl,
+    authTypes,
+  } = req.body;
   const rack = hat.rack();
   const clientId = rack();
   const clientSecret = rack();
 
-  const values = { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes, clientId, clientSecret };
+  const values = {
+    name,
+    description,
+    exposedUserFields,
+    requiredUserFields,
+    redirectUrl,
+    authTypes,
+    clientId,
+    clientSecret,
+  };
 
   values.exposedUserFields = JSON.stringify(values.exposedUserFields);
   values.requiredUserFields = JSON.stringify(values.requiredUserFields);
   values.allowedDomains = JSON.stringify(values.allowedDomains);
 
-
-
-  db.Client
-    .create(values)
+  db.Client.create(values)
     .then((response) => {
-      req.flash('success', { msg: 'Succesfully created '});
-      res.redirect('/admin/client/' + response.id  || '/');
+      req.flash('success', { msg: 'Succesfully created ' });
+      res.redirect('/admin/client/' + response.id || '/');
     })
-    .catch((err) => { next(err); });
-}
+    .catch((err) => {
+      next(err);
+    });
+};
 
 exports.update = (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes } = req.body;
+  const {
+    name,
+    description,
+    exposedUserFields,
+    requiredUserFields,
+    redirectUrl,
+    authTypes,
+  } = req.body;
 
   req.client
     .update({
@@ -93,8 +114,10 @@ exports.update = (req, res, next) => {
       authTypes,
     })
     .then((response) => {
-      req.flash('success', { msg: 'Updated client!'});
-      res.redirect('/admin/client/' + response.get('id')  || '/');
+      req.flash('success', { msg: 'Updated client!' });
+      res.redirect('/admin/client/' + response.get('id') || '/');
     })
-    .catch((err) => { next(err); })
-}
+    .catch((err) => {
+      next(err);
+    });
+};

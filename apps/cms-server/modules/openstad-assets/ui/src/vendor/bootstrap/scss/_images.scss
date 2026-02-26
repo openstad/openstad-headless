@@ -9,7 +9,6 @@
   @include img-fluid();
 }
 
-
 // Image thumbnails
 .img-thumbnail {
   padding: $thumbnail-padding;
@@ -32,7 +31,7 @@
 }
 
 .figure-img {
-  margin-bottom: $spacer * .5;
+  margin-bottom: $spacer * 0.5;
   line-height: 1;
 }
 
@@ -40,7 +39,6 @@
   @include font-size($figure-caption-font-size);
   color: $figure-caption-color;
 }
-
 
 // image component
 .image-component {
@@ -71,7 +69,6 @@
     --image-height: 34.375rem;
   }
 
-
   &.--contain {
     --image-object-fit: contain;
   }
@@ -88,7 +85,6 @@
     --image-object-fit: none;
   }
 }
-
 
 .img-container {
   &.--aspectRatio-16-9 {

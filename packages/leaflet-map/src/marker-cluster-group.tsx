@@ -1,10 +1,10 @@
-import { useEffect, useRef, useCallback } from 'react';
-import LeafletMarkerClusterGroup from 'react-leaflet-cluster'
 import type { MarkerCluster } from 'leaflet';
-import type { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
+import { useCallback, useEffect, useRef } from 'react';
+import LeafletMarkerClusterGroup from 'react-leaflet-cluster';
 
-import Marker from './marker';
 import amapsCreateClusterIcon from './lib/amaps-cluster-icon.js';
+import Marker from './marker';
+import type { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
 
 export default function MarkerClusterGroup({
   maxClusterRadius = 40,
@@ -14,7 +14,6 @@ export default function MarkerClusterGroup({
   markers = [],
   ...props
 }: MarkerClusterGroupProps) {
-
   let categorizeRef = useRef(categorize);
   useEffect(() => {
     categorizeRef.current = categorize;
@@ -27,7 +26,9 @@ export default function MarkerClusterGroup({
         if (typeof globalFunction === 'function') {
           iconCreateFunction = globalFunction;
         } else {
-          console.warn(`Function ${iconCreateFunction} does not exist in the global scope.`);
+          console.warn(
+            `Function ${iconCreateFunction} does not exist in the global scope.`
+          );
           return null;
         }
       }
@@ -44,12 +45,15 @@ export default function MarkerClusterGroup({
 
   return (
     // @ts-ignore
-    <LeafletMarkerClusterGroup {...props} iconCreateFunction={useIconCreateFunction} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover}>
+    <LeafletMarkerClusterGroup
+      {...props}
+      iconCreateFunction={useIconCreateFunction}
+      maxClusterRadius={maxClusterRadius}
+      showCoverageOnHover={showCoverageOnHover}>
       {markers?.map((data) => {
         // @ts-ignore
-        return <Marker {...data} key={`marker-${data.markerId}`}/>
-        })}
+        return <Marker {...data} key={`marker-${data.markerId}`} />;
+      })}
     </LeafletMarkerClusterGroup>
   );
-
 }

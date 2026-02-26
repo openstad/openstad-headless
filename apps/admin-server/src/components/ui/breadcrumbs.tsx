@@ -1,9 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Paragraph } from './typography';
 import Link from 'next/link';
 import React from 'react';
+
+import { Paragraph } from './typography';
 
 export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: any }) {
   return (

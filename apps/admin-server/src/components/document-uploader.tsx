@@ -1,5 +1,7 @@
+import { UploadDocument } from '@/hooks/upload-document';
 import React, { useEffect } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+
 import {
   FormControl,
   FormField,
@@ -8,17 +10,26 @@ import {
   FormMessage,
 } from './ui/form';
 import { Input } from './ui/input';
-import {UploadDocument} from "@/hooks/upload-document";
 
 export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
-  onDocumentUploaded?: (documentObject: {url: string, name?: string} ) => void;
+  onDocumentUploaded?: (documentObject: { url: string; name?: string }) => void;
   documentLabel?: string;
   allowedTypes?: string[];
   project?: string;
-}> = ({ form, fieldName, onDocumentUploaded, allowedTypes, documentLabel = 'Document', project }) => {
-  const [document, setDocument] = React.useState<{url: string, name: string}>();
+}> = ({
+  form,
+  fieldName,
+  onDocumentUploaded,
+  allowedTypes,
+  documentLabel = 'Document',
+  project,
+}) => {
+  const [document, setDocument] = React.useState<{
+    url: string;
+    name: string;
+  }>();
   const [documentUrl, setDocumentUrl] = React.useState<string>('');
 
   async function doUpload(data: any) {
@@ -28,30 +39,38 @@ export const DocumentUploader: React.FC<{
   }
 
   useEffect(() => {
-    if (document ) {
+    if (document) {
       let uploadedDocumentUrl = document.url;
       const lastDotIndex = uploadedDocumentUrl.lastIndexOf('.');
       const lastUnderscoreIndex = uploadedDocumentUrl.lastIndexOf('_');
 
       if (lastDotIndex === -1 && lastUnderscoreIndex > 1) {
-        uploadedDocumentUrl = uploadedDocumentUrl.substring(0, lastUnderscoreIndex) + '.' + uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
+        uploadedDocumentUrl =
+          uploadedDocumentUrl.substring(0, lastUnderscoreIndex) +
+          '.' +
+          uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
       } else if (lastDotIndex > -1 && lastUnderscoreIndex > -1) {
         if (lastDotIndex < lastUnderscoreIndex) {
-          uploadedDocumentUrl = uploadedDocumentUrl.substring(0, lastUnderscoreIndex) + '.' + uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
+          uploadedDocumentUrl =
+            uploadedDocumentUrl.substring(0, lastUnderscoreIndex) +
+            '.' +
+            uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
         }
       }
 
       if (documentUrl !== uploadedDocumentUrl) {
         setDocumentUrl(uploadedDocumentUrl);
         form.setValue(fieldName, uploadedDocumentUrl);
-        onDocumentUploaded && onDocumentUploaded({url: uploadedDocumentUrl, name: document?.name});
+        onDocumentUploaded &&
+          onDocumentUploaded({
+            url: uploadedDocumentUrl,
+            name: document?.name,
+          });
       }
     }
   }, [document, form, fieldName, onDocumentUploaded]);
 
-  const acceptAttribute = allowedTypes
-    ? allowedTypes.join(',')
-    : "";
+  const acceptAttribute = allowedTypes ? allowedTypes.join(',') : '';
 
   return (
     <FormField
@@ -66,7 +85,7 @@ export const DocumentUploader: React.FC<{
               accept={acceptAttribute}
               {...field}
               onChange={(e) => {
-                doUpload(e.target.files?.[0])
+                doUpload(e.target.files?.[0]);
               }}
             />
           </FormControl>
@@ -75,4 +94,4 @@ export const DocumentUploader: React.FC<{
       )}
     />
   );
-}
+};

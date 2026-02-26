@@ -1,5 +1,5 @@
-import {Comment} from '@openstad-headless/types';
-import React, { Dispatch, SetStateAction } from "react";
+import { Comment } from '@openstad-headless/types';
+import React, { Dispatch, SetStateAction } from 'react';
 
 export type CommentProps = {
   comment: Comment;
@@ -10,6 +10,7 @@ export type CommentProps = {
   submitComment?: (e: any) => void;
   setRefreshComments: () => void;
   adminLabel?: string;
+  editorLabel?: string;
   disableSubmit?: boolean;
   extraReplyButton?: boolean;
   variant?: 'micro-score' | 'medium';

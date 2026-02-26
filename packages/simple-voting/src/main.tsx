@@ -1,7 +1,8 @@
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot.jsx';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+
 import { SimpleVoting } from './simple-voting.js';
-import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot.jsx';
 
 const config: StemBegrootWidgetProps = {
   api: {
@@ -45,7 +46,7 @@ const config: StemBegrootWidgetProps = {
     withExisting: 'error',
   },
   displayTagFilters: true,
-  displaySearch:true,
+  displaySearch: true,
   tagGroups: [
     { type: 'status', label: 'Status', multiple: false },
     { type: 'area', label: 'Gebied', multiple: false },

@@ -6,9 +6,9 @@ import './index.css';
 type Props<T> = {
   items: Array<T>;
   renderHeader?: () => React.JSX.Element;
-  renderItem: (item: T, index:number) => React.JSX.Element;
+  renderItem: (item: T, index: number) => React.JSX.Element;
   columns?: number;
-  emptyListText?:string;
+  emptyListText?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export const List = <T extends { [key: string]: any }>({

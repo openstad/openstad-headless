@@ -9,14 +9,17 @@ De basiskaart, en daarmee de specifieke kaarten, kennen de volgende configuratie
 ### project opties
 
 De volgende opties worden op project niveau gezet en zijn in in de standaard headless opzet altijd beschikbaar:
+
 ```
 area: LocationType[]
 ```
+
 Een set van lat/lng waarden wordt getekend als polyline, waarbij het gebied buiten de line wordt verdonkerd.
 
 ```
 areaPolygonStyle?: any,
 ```
+
 Een ongefdefinieerde set van styling opties voor het tekenenen van de area.
 
 ### standaard opties
@@ -32,21 +35,24 @@ tiles?: {
 minZoom?: number,
 maxZoom?: number,
 ```
+
 Attributen van de Leaflet Tileslayer
 
 ```
 tilesVariant?: string,
 ```
+
 Een aantal prefab varianten van tiles settings; voor nu zijn dat:  
 `openstreetmap` voor de standaar OSM tiles  
 `amaps` gebruikt de tegels van de Gemeente Amsterdam  
-`nlmaps` is "Dé officiële kaart van Nederland"  
+`nlmaps` is "Dé officiële kaart van Nederland"
 
 #### markers
 
 ```
 markers?: MarkerProps[]
 ```
+
 Markers kun je meesturen als array van Marker objecten.  
 Per marker zijn de volgende settings beschikbaar; ook hier worden extra settings doorgestuurd naar het Leaflet Marker component.
 
@@ -55,22 +61,28 @@ Per marker zijn de volgende settings beschikbaar; ook hier worden extra settings
   lng?: number,
   location?: Location,
 ```
+
 Verschillende toepassingen gebruiken of het een of het ander; vandaar deze extra flexibiliteit
 
 ```
 isFaded?: boolean,
 isVisible?: boolean,
 ```
+
 Zie [ToDo](#todo)
+
 ```
 icon?: MarkerIcon,
 iconCreateFunction?: () => any,
 ```
+
 Zie [icons](#icons)
+
 ```
 href?: string,
 onClick?: (e: LeafletMouseEvent, map: any) => void,
 ```
+
 `href` genereert automatisch een functie `onClick = (e) => { document.location.href = href }`
 
 #### icons
@@ -79,12 +91,15 @@ onClick?: (e: LeafletMouseEvent, map: any) => void,
   defaultIcon?: string,
   iconCreateFunction?: () => string,
 ```
+
 Moet nog verder uitgewerkt
 
 #### overig
+
 ```
 autoZoomAndCenter?: 'area' | 'markers',
 ```
+
 Bij het laden kan de kaart worden gecentreerd en ingezoomd op de `area` of op de geladen `markers`
 
 ### cluster opties
@@ -97,9 +112,11 @@ Bij het laden kan de kaart worden gecentreerd en ingezoomd op de `area` of op de
   }
 }
 ```
-Voor configuratie van clustering is er de parameter `clustering`. Daarin bepaalt `isActive` of er uberhaubt geclustered wordt. De rest wordt doorgestuurd naar [react-leaflet-cluster](https://akursat.gitbook.io/marker-cluster/api).   
+
+Voor configuratie van clustering is er de parameter `clustering`. Daarin bepaalt `isActive` of er uberhaubt geclustered wordt. De rest wordt doorgestuurd naar [react-leaflet-cluster](https://akursat.gitbook.io/marker-cluster/api).
 
 Individuele markers kun je buiten de clustering houden met de marker optie
+
 ```
 doNotCluster?: boolean
 ```
@@ -118,6 +135,7 @@ De default `iconCreateFunction` is afgeleid van de kaarten van de Gemeente Amste
   }
 }
 ```
+
 Categorisering wordt op twee niveaus gebruikt: het kan bepalen welke marker-icons worden gebruikt, en bepaalt de kleuren in een [cluster icon](#cluster-opties). Voor categorizering wordt het de inhoud van het `data` veld in een marker vergeleken met de waarde van `categorizeByField`.
 
 ## Events
@@ -150,9 +168,8 @@ categorize: {
   categorizeByField: 'theme'
 }
 ```
+
 toont een kaart waarin alle inzendingen op basis van hun gekoppelde thema worden getoond.
-
-
 
 ## ToDo
 
@@ -169,4 +186,3 @@ toont een kaart waarin alle inzendingen op basis van hun gekoppelde thema worden
 - Search opties: adressen en filters
 - De editor map is een input field, en moet gekoppeld worden aan de stndaard forms als die er zijn
 - Meer events?
-

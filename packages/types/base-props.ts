@@ -25,4 +25,5 @@ export type BaseProps = {
     iss: string;
     provider: string;
   };
+  serverTime?: string;
 };

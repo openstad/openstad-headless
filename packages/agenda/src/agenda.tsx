@@ -1,20 +1,20 @@
-import './agenda.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer } from '@openstad-headless/ui/src';
-import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
+import { Accordion } from '@openstad-headless/ui/src/accordion';
+import '@utrecht/component-library-css';
+import {
+  Heading3,
+  Heading4,
+  LinkList,
+  LinkListLink,
+  Paragraph,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import {
-  Heading4,
-  Heading3,
-  Paragraph,
-  LinkListLink,
-  LinkList
-} from "@utrecht/component-library-react";
-import { Accordion } from '@openstad-headless/ui/src/accordion';
+import './agenda.css';
 
 export type AgendaWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -23,11 +23,14 @@ export type AgendaWidgetProps = BaseProps &
   } & {
     displayTitle?: boolean;
     title?: string;
+    useActiveDates?: boolean;
     items?: Array<{
       trigger: string;
       title?: string;
       description: string;
       active: boolean;
+      activeFrom?: string;
+      activeTo?: string;
       links?: Array<{
         trigger: string;
         title: string;
@@ -35,15 +38,15 @@ export type AgendaWidgetProps = BaseProps &
         openInNewWindow: boolean;
       }>;
     }>;
-  displayToggle?: boolean;
-  toggleDefaultClosed?: boolean;
-  toggleShowText?: string;
-  toggleHideText?: string;
-  toggleType?: string;
-  toggleStart?: string;
-  toggleEnd?: string;
-  defaultClosedFromBreakpoint?: 'not' | '480' | '640' | '768' | '1024';
-};
+    displayToggle?: boolean;
+    toggleDefaultClosed?: boolean;
+    toggleShowText?: string;
+    toggleHideText?: string;
+    toggleType?: string;
+    toggleStart?: string;
+    toggleEnd?: string;
+    defaultClosedFromBreakpoint?: 'not' | '480' | '640' | '768' | '1024';
+  };
 
 function Agenda({
   displayToggle = false,
@@ -56,6 +59,15 @@ function Agenda({
   toggleEnd = '',
   ...props
 }: AgendaWidgetProps) {
+  const toDateKey = (value: string | undefined) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+    const date = new Date(trimmed);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString().slice(0, 10);
+  };
+
   const isClosedByDefault = () => {
     if (toggleDefaultClosed) return true;
     if (defaultClosedFromBreakpoint === 'not') return false;
@@ -66,11 +78,25 @@ function Agenda({
     return false;
   };
 
-  const itemsSorted = (props.items ?? [])
-    .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
+  const now = props.useActiveDates
+    ? new Date(props.serverTime || Date.now())
+    : null;
+  const todayKey = now ? now.toISOString().slice(0, 10) : null;
+  const itemsSorted = [...(props.items ?? [])]
+    .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
+    .map((item) => {
+      if (!todayKey) return item;
+      const fromKey = toDateKey(item.activeFrom);
+      const toKey = toDateKey(item.activeTo);
+      const isActive =
+        (!fromKey || todayKey >= fromKey) && (!toKey || todayKey <= toKey);
+      return { ...item, active: isActive };
+    });
 
   let startIdx = isNaN(parseInt(toggleStart)) ? 0 : parseInt(toggleStart);
-  let endIdx = isNaN(parseInt(toggleEnd)) ? itemsSorted.length - 1 : parseInt(toggleEnd);
+  let endIdx = isNaN(parseInt(toggleEnd))
+    ? itemsSorted.length - 1
+    : parseInt(toggleEnd);
 
   if (endIdx < startIdx) endIdx = startIdx;
 
@@ -84,11 +110,9 @@ function Agenda({
         <div
           key={item.trigger}
           className={`osc-agenda-item${item.active ? ' --active-item' : ''}`}
-          aria-current={item.active ? 'true' : undefined}
-        >
+          aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
-
             <Heading4>{item.title}</Heading4>
             <Paragraph>{item.description}</Paragraph>
             {item.links && item.links?.length > 0 && (
@@ -106,7 +130,7 @@ function Agenda({
         </div>
       ))}
     </>
-  )
+  );
 
   const ItemsSection = (
     <section className="osc-agenda">

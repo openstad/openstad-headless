@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -9,17 +8,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AccountWidgetProps } from '@openstad-headless/account/src/account';
+import { over } from 'lodash';
+import { useRouter } from 'next/router';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { AccountWidgetProps } from '@openstad-headless/account/src/account';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { useRouter } from 'next/router';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
-import { over } from 'lodash';
 
 const formSchema = z.object({
   overview_title: z.string().optional(),
@@ -51,8 +51,10 @@ export default function AccountContent(
       overview_description: props.overview_description,
       info_title: props.info_title,
       info_description: props.info_description,
-      user_title: props.user_title  || 'Mijn gegevens voor deze site',
-      user_description: props.user_description || 'Deze gegevens zijn alleen van toepassing op deze website.',
+      user_title: props.user_title || 'Mijn gegevens voor deze site',
+      user_description:
+        props.user_description ||
+        'Deze gegevens zijn alleen van toepassing op deze website.',
     },
   });
 
@@ -65,7 +67,6 @@ export default function AccountContent(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
-
         <FormField
           control={form.control}
           name="overview_title"
@@ -140,7 +141,6 @@ export default function AccountContent(
           )}
         />
 
-
         <FormField
           control={form.control}
           name="user_title"
@@ -167,7 +167,7 @@ export default function AccountContent(
               <FormLabel>Gebruikersnaam beschrijving</FormLabel>
               <FormControl>
                 <Input
-                  defaultValue={field.value }
+                  defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
                     onFieldChange(field.name, e.target.value);

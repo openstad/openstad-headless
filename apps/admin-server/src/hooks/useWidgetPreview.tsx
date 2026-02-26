@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import { useWidgetConfig } from './use-widget-config';
 
-export function useWidgetPreview<T extends {[key:string]:any}>(widgetSettings: Partial<{
-  [key in keyof T]: T[key];
-}>): {
+export function useWidgetPreview<T extends { [key: string]: any }>(
+  widgetSettings: Partial<{
+    [key in keyof T]: T[key];
+  }>
+): {
   previewConfig: T | undefined;
   updatePreview: (arg: T) => void;
 } {
@@ -14,6 +17,8 @@ export function useWidgetPreview<T extends {[key:string]:any}>(widgetSettings: P
   useEffect(() => {
     if (!previewConfig) {
       const config = widget?.config;
+      if (typeof config === 'object')
+        (config as any).showAdminHiddenPolygonStyling = true;
 
       if (config) {
         setPreviewConfig({

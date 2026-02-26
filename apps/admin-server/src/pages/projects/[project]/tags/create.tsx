@@ -1,8 +1,3 @@
-import React, {useEffect, useState} from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -12,16 +7,20 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
-import { getApiFetchMethodNames } from '@openstad-headless/data-store/src/api/index';
+import { Heading } from '@/components/ui/typography';
 import useTag from '@/hooks/use-tags';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { getApiFetchMethodNames } from '@openstad-headless/data-store/src/api/index';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import InfoDialog from '@/components/ui/info-hover';
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -35,8 +34,8 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
 
   const router = useRouter();
   const project = router.query.project;
-  const { createTag } = useTag(isGlobal ? "0" : project as string);
-  const [disabled, setDisabled]  = useState(false);
+  const { createTag } = useTag(isGlobal ? '0' : (project as string));
+  const [disabled, setDisabled] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -44,12 +43,17 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tag = await createTag(values.name, values.type, values.seqnr, values.addToNewResources || false);
+    const tag = await createTag(
+      values.name,
+      values.type,
+      values.seqnr,
+      values.addToNewResources || false
+    );
     if (tag?.id) {
       toast.success('Tag aangemaakt!');
-      router.push(isGlobal ? "/settings" : `/projects/${project}/tags`);
+      router.push(isGlobal ? '/settings' : `/projects/${project}/tags`);
     } else {
-      toast.error('Er is helaas iets mis gegaan.')
+      toast.error('Er is helaas iets mis gegaan.');
     }
   }
 
@@ -58,45 +62,53 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
   useEffect(() => {
     const type = form.watch('type');
 
-    if ( !!apiFetchMethodNames && Array.isArray(apiFetchMethodNames) && apiFetchMethodNames.includes(type) ) {
-      form.setError('type', {type: 'manual', message: `${type} valt onder de benamingen die niet gebruikt mag worden wegens mogelijke conflicten.`});
+    if (
+      !!apiFetchMethodNames &&
+      Array.isArray(apiFetchMethodNames) &&
+      apiFetchMethodNames.includes(type)
+    ) {
+      form.setError('type', {
+        type: 'manual',
+        message: `${type} valt onder de benamingen die niet gebruikt mag worden wegens mogelijke conflicten.`,
+      });
       setDisabled(true);
     } else {
-      form.clearErrors(['type'])
+      form.clearErrors(['type']);
       setDisabled(false);
     }
-
-  }, [ form.watch('type') ] );
+  }, [form.watch('type')]);
 
   return (
     <div>
       <PageLayout
-        pageHeader={isGlobal ? "Instellingen" : "Projecten"}
-        breadcrumbs={isGlobal ? [
-          {
-            name: 'Instellingen',
-            url: '/settings',
-          },
-          {
-            name: 'Tag toevoegen',
-            url: `/settings/globaltags/create`,
-          },
-        ]
-        :
-        [
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Tags',
-            url: `/projects/${project}/tags`,
-          },
-          {
-            name: 'Tag toevoegen',
-            url: `/projects/${project}/tags/create`,
-          },
-        ]}>
+        pageHeader={isGlobal ? 'Instellingen' : 'Projecten'}
+        breadcrumbs={
+          isGlobal
+            ? [
+                {
+                  name: 'Instellingen',
+                  url: '/settings',
+                },
+                {
+                  name: 'Tag toevoegen',
+                  url: `/settings/globaltags/create`,
+                },
+              ]
+            : [
+                {
+                  name: 'Projecten',
+                  url: '/projects',
+                },
+                {
+                  name: 'Tags',
+                  url: `/projects/${project}/tags`,
+                },
+                {
+                  name: 'Tag toevoegen',
+                  url: `/projects/${project}/tags/create`,
+                },
+              ]
+        }>
         <div className="p-6 bg-white rounded-md">
           <Form {...form}>
             <Heading size="xl">Toevoegen</Heading>
@@ -137,8 +149,12 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
                   <FormItem>
                     <FormLabel>
                       Sequence nummer
-                      <InfoDialog content={'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'} />
-                      </FormLabel>
+                      <InfoDialog
+                        content={
+                          'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'
+                        }
+                      />
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="" {...field} />
                     </FormControl>
@@ -149,21 +165,20 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
               <FormField
                 control={form.control}
                 name="addToNewResources"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>
                       Voeg deze status automatisch toe aan nieuwe resources
                     </FormLabel>
                     {YesNoSelect(field, {})}
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <Button
                 className="w-fit col-span-full"
                 disabled={disabled}
-                type="submit"
-              >
+                type="submit">
                 Opslaan
               </Button>
             </form>

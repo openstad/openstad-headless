@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useChoiceGuideWidgets(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -8,5 +8,5 @@ export default function useChoiceGuideWidgets(projectId?: string) {
 
   const choiceGuidesSwr = useSWR(projectNumber ? url : null);
 
-  return {...choiceGuidesSwr}
+  return { ...choiceGuidesSwr };
 }

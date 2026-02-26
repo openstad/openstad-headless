@@ -10,5 +10,5 @@ module.exports = {
       type: Sequelize.JSON,
       allowNull: true,
     });
-  }
+  },
 };

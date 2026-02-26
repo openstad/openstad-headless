@@ -14,6 +14,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+
 import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
@@ -27,8 +28,10 @@ type SchemaKey = keyof typeof formSchema.shape;
 export default function ArgumentsList({
   omitSchemaKeys = [],
   ...props
-}:ArgumentWidgetTabProps &
-  EditFieldProps<ArgumentWidgetTabProps> & { omitSchemaKeys?: Array<SchemaKey> }) {
+}: ArgumentWidgetTabProps &
+  EditFieldProps<ArgumentWidgetTabProps> & {
+    omitSchemaKeys?: Array<SchemaKey>;
+  }) {
   const finalSchema = formSchema.omit(
     omitSchemaKeys.reduce(
       (prev, key) => Object.assign(prev, { [key]: true }),
@@ -43,7 +46,9 @@ export default function ArgumentsList({
     defaultValues: {
       title: props?.title || '',
       emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst.',
-      closedText: props?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
+      closedText:
+        props?.closedText ||
+        'Het insturen van reacties is gesloten, u kunt niet meer reageren',
     },
   });
 
@@ -58,9 +63,7 @@ export default function ArgumentsList({
       <Form {...form}>
         <Heading size="xl">{props.customTitle || 'Titel'}</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="title"
@@ -69,7 +72,7 @@ export default function ArgumentsList({
                 <FormLabel>Titel</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='[[nr]] reacties'
+                    placeholder="[[nr]] reacties"
                     {...field}
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);
@@ -104,7 +107,10 @@ export default function ArgumentsList({
             name="closedText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Welke tekst wil je tonen wanneer het niet meer mogelijk is om te reageren?</FormLabel>
+                <FormLabel>
+                  Welke tekst wil je tonen wanneer het niet meer mogelijk is om
+                  te reageren?
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Dit wordt weergegeven wanneer het reageren niet meer mogelijk is."

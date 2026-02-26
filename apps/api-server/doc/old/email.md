@@ -11,6 +11,7 @@ Het is mogelijk om de transporter methode (SMTP of sendgrid) en de bijbehorende 
 Configureren kan via de site.config
 
 ### Voor SMTP:
+
 ```
 {
     "config": {
@@ -28,7 +29,7 @@ Configureren kan via de site.config
                         "user": "EMAIL@ADDRESS",
                         "pass": "WACHTWOORD"
                     }
-                }            
+                }
             }
         }
     }
@@ -45,10 +46,10 @@ Configureren kan via de site.config
             "transport": {
                 "sendgrid": {
                     "auth": {
-                        "api_user": "SENDGRID_USERNAME",                    
-                        "api_key": "SENDGRID_PASSWORD",                    
+                        "api_user": "SENDGRID_USERNAME",
+                        "api_key": "SENDGRID_PASSWORD",
                     }
-                }            
+                }
             }
         }
     }
@@ -176,4 +177,3 @@ Daarnaast kun je naar attachments verwijzen. Die worden verondersteld in de dir 
 **TODO**
 
 Er is nog geen upload mechanisme; momenteel moet je attachments met de hand in de uploads dir plaatsen.
-

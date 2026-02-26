@@ -46,12 +46,15 @@ You now have four servers, running on localhost:31410, 31430, 31450 and 31470. T
 You are now done. Everything below this line is extra information for the incurably curious.
 
 ### Important notes for the admin server > widget management pages
+
 Each widget management page shows a preview of how the widget will look given a set of configurations.
 To make this work however, one must first use the command "npm run build" in the specific widget (in the packages > [widget] folder). This is only neccesary in development. In production these widgets are already prebuild.
 
 ### Getting the widget preview to work:
+
 There are a few steps to follow when trying to get a new widget rendered for the preview component:
-* In widget-settings.js define the way the api-server should bundle the widget. For example:
+
+- In widget-settings.js define the way the api-server should bundle the widget. For example:
   ```
   resourceoverview: {
     js: ['@openstad-headless/resource-overview/dist/resource-overview.iife.js'],
@@ -63,7 +66,8 @@ There are a few steps to follow when trying to get a new widget rendered for the
     },
   }
   ```
-* In widget-preview.tsx you will need to make sure that the widget-type is in the [type] key of the Props definition. This will be the key how the widget-preview route in the api-server decides which and how the widget should be packaged in a .js script.
+- In widget-preview.tsx you will need to make sure that the widget-type is in the [type] key of the Props definition. This will be the key how the widget-preview route in the api-server decides which and how the widget should be packaged in a .js script.
+
 ```
 type Props = {
   type:
@@ -78,8 +82,10 @@ type Props = {
     ...
 };
 ```
-*  In the api-server add the name at the top of the package.json file of the widget, to the dependencies like so: ``"@openstad-headless/resource-overview": "file:../../packages/resource-overview"``
-*  The last thing you will need to do, is tell vite how you wish to build the react widget. You can do this by adding the following code to the ``vite.config.ts`` file (replace the name of the widget):
+
+- In the api-server add the name at the top of the package.json file of the widget, to the dependencies like so: `"@openstad-headless/resource-overview": "file:../../packages/resource-overview"`
+- The last thing you will need to do, is tell vite how you wish to build the react widget. You can do this by adding the following code to the `vite.config.ts` file (replace the name of the widget):
+
 ```
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -116,6 +122,7 @@ export default defineConfig(({ command }) => {
 });
 
 ```
+
 > In Development, the preview will only work if you have builded the widget with. npm run build, afterwards you should see the widget being rendered, given that you have given it the required config and the widget is not faulty. If you get an error regarding a dependency (for example rollup), try to run npm install for the specific widget.
 
 ### Code

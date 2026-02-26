@@ -18,7 +18,9 @@ module.exports = {
       });
 
       if (deletedCount > 0) {
-        console.log(`[cron] cleanup_pending_budget_votes: deleted ${deletedCount} records older than 48h`);
+        console.log(
+          `[cron] cleanup_pending_budget_votes: deleted ${deletedCount} records older than 48h`
+        );
       }
     } catch (err) {
       console.error('[cron] cleanup_pending_budget_votes error:', err);

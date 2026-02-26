@@ -1,6 +1,6 @@
-import React, { FC } from "react";
+import { FormValue } from '@openstad-headless/form/src/form';
+import React, { FC } from 'react';
 import './style.css';
-import { FormValue } from "@openstad-headless/form/src/form";
 declare global {
     namespace JSX {
         interface IntrinsicElements {
@@ -54,6 +54,8 @@ export type TextInputProps = {
     }>;
     createImageSlider?: boolean;
     imageClickable?: boolean;
+    showMinMaxAfterBlur?: boolean;
+    maxCharactersOverWarning?: string;
 };
 declare const TrixEditor: React.FC<{
     value: string;

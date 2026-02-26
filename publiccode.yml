@@ -1,11 +1,11 @@
-publiccodeYmlVersion: "0.5"
+publiccodeYmlVersion: '0.5'
 
 name: OpenStad headless
 applicationSuite: OpenStad
-url: "https://github.com/openstad/openstad-headless"
-landingURL: "https://openstad.org"
-softwareVersion: "2.0.44"
-releaseDate: "2025-11-11"
+url: 'https://github.com/openstad/openstad-headless'
+landingURL: 'https://openstad.org'
+softwareVersion: '2.0.44'
+releaseDate: '2025-11-11'
 logo: /img/logo.png
 platforms:
   - web
@@ -71,12 +71,12 @@ fundedBy:
   - Gemeente Zwolle
   - Provincie Noord-Holland
   - Werkorganisatie Druten-Wijchen
-roadmap: "https://github.com/openstad/openstad-headless/milestones"
+roadmap: 'https://github.com/openstad/openstad-headless/milestones'
 developmentStatus: stable
-softwareType: "standalone/web"
+softwareType: 'standalone/web'
 
 organisation:
-  uri: "https://amsterdam.nl"
+  uri: 'https://amsterdam.nl'
   name: Gemeente Amsterdam
 
 intendedAudience:
@@ -94,7 +94,7 @@ description:
     shortDescription: >
       OpenStad biedt een open source platform
       waarmee je eenvoudig interactieve websites
-      kunt maken voor jouw participatieprojecten. 
+      kunt maken voor jouw participatieprojecten.
 
     longDescription: >
       OpenStad biedt een open source platform
@@ -116,8 +116,8 @@ description:
       van offline en online participatieprocessen, die we
       graag delen met collega’s uit andere organisaties.
 
-    documentation: "https://docs.openstad.org/openstad"
-    apiDocumentation: "https://docs.openstad.org/openstad/technical"
+    documentation: 'https://docs.openstad.org/openstad'
+    apiDocumentation: 'https://docs.openstad.org/openstad/technical'
 
     features:
       - stemtools en likes
@@ -132,7 +132,7 @@ description:
       - notificaties
       - moderatie
     videos:
-      - "https://www.youtube.com/watch?v=jMT6VujnKLY"
+      - 'https://www.youtube.com/watch?v=jMT6VujnKLY'
     awards:
       - Gemeente Delers 2021
 
@@ -147,7 +147,7 @@ description:
       OpenStad offers an open-source platform
       that allows you to easily create interactive websites
       for your participation projects.
-      
+
       The platform contains widgets specifically
       developed to give residents more influence and control
       over what happens in their city or town in an interactive
@@ -156,15 +156,15 @@ description:
       residents to allocate budgets to plans
       for the area, a selection guide for
       complex public space projects. And more.
-      
+
       In addition, participating municipalities have already
       gained a wealth of knowledge in designing
       and connecting offline and online participation processes,
       which we are happy to share with colleagues from other
       organisations.
 
-    documentation: "https://docs.openstad.org/openstad"
-    apiDocumentation: "https://docs.openstad.org/openstad/technical"
+    documentation: 'https://docs.openstad.org/openstad'
+    apiDocumentation: 'https://docs.openstad.org/openstad/technical'
 
     features:
       - voting tools and likes
@@ -186,28 +186,28 @@ legal:
 maintenance:
   type: contract
   contractors:
-  - name: "Gemeente Amsterdam"
-    until: "2025-12-31"
-    email: "i.rieken\x64amsterdam.nl"
-    website: "https://amsterdam.nl"
-  - name: "Draad"
-    until: "2025-12-31"
-    email: "mail\x64draad.nl"
-    website: "https://draad.nl"
-  - name: "Sniglet"
-    until: "2025-12-31"
-    email: "bauke.huijbers\x64sniglet.nl"
-    website: "https://sniglet.nl"
-  contacts:
-    - name: "Ian Rieken"
+    - name: 'Gemeente Amsterdam'
+      until: '2025-12-31'
       email: "i.rieken\x64amsterdam.nl"
-      affiliation: "Gemeente Amsterdam, maintainer of repository and code"
-    - name: "Rudi van Hierden"
-      email: "rudi\x64draad.nl"
-      affiliation: "Draad, maintainer of repository and code"
-    - name: "Bauke Huijbers"
+      website: 'https://amsterdam.nl'
+    - name: 'Draad'
+      until: '2025-12-31'
+      email: "mail\x64draad.nl"
+      website: 'https://draad.nl'
+    - name: 'Sniglet'
+      until: '2025-12-31'
       email: "bauke.huijbers\x64sniglet.nl"
-      affiliation: "Sniglet, maintainer of community"
+      website: 'https://sniglet.nl'
+  contacts:
+    - name: 'Ian Rieken'
+      email: "i.rieken\x64amsterdam.nl"
+      affiliation: 'Gemeente Amsterdam, maintainer of repository and code'
+    - name: 'Rudi van Hierden'
+      email: "rudi\x64draad.nl"
+      affiliation: 'Draad, maintainer of repository and code'
+    - name: 'Bauke Huijbers'
+      email: "bauke.huijbers\x64sniglet.nl"
+      affiliation: 'Sniglet, maintainer of community'
 
 localisation:
   localisationReady: false
@@ -216,12 +216,12 @@ localisation:
 
 dependsOn:
   open:
-    - name: "NodeJS"
-      versionMin: "18"
+    - name: 'NodeJS'
+      versionMin: '18'
       optional: false
-    - name: "MySQL"
-      versionMin: "8"
+    - name: 'MySQL'
+      versionMin: '8'
       optional: false
-    - name: "MongoDB"
-      versionMin: "8"
+    - name: 'MongoDB'
+      versionMin: '8'
       optional: false

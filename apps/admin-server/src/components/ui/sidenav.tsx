@@ -1,14 +1,22 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, FolderOpen, LogOut, Users, UnplugIcon, Settings } from 'lucide-react';
+import {
+  AlertTriangle,
+  FolderOpen,
+  LogOut,
+  Settings,
+  UnplugIcon,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+
 import { SessionContext } from '../../auth';
 import { Logo } from './logo';
-import { useAuthProvidersEnabledCheck } from '@/hooks/use-auth-providers';
 
 export function Sidenav({
   className,
@@ -58,59 +66,67 @@ export function Sidenav({
           </Button>
         </Link>
         {sessionData?.role == 'superuser' ? (
-        <Link href="/users">
-          <Button
-            variant={location.startsWith('/users') ? 'secondary' : 'ghost'}
-            className={cn(
-              'w-full flex flex-row justify-start',
-              narrow ? 'p-0 h-10 w-10 justify-center' : null
-            )}>
-            <Users
-              size="20"
-              className={
-                location.startsWith('/users') ? 'text-brand' : 'text-foreground'
-              }
-            />
-            {narrow ? '' : 'Gebruikers'}
-          </Button>
-        </Link>
-        ) : null }
+          <Link href="/users">
+            <Button
+              variant={location.startsWith('/users') ? 'secondary' : 'ghost'}
+              className={cn(
+                'w-full flex flex-row justify-start',
+                narrow ? 'p-0 h-10 w-10 justify-center' : null
+              )}>
+              <Users
+                size="20"
+                className={
+                  location.startsWith('/users')
+                    ? 'text-brand'
+                    : 'text-foreground'
+                }
+              />
+              {narrow ? '' : 'Gebruikers'}
+            </Button>
+          </Link>
+        ) : null}
         {sessionData?.role == 'superuser' && authProvidersEnabled === true ? (
-        <Link href="/auth-providers">
-          <Button
-            variant={location.startsWith('/auth-providers') ? 'secondary' : 'ghost'}
-            className={cn(
-              'w-full flex flex-row justify-start',
-              narrow ? 'p-0 h-10 w-10 justify-center' : null
-            )}>
-            <UnplugIcon
-              size="20"
-              className={
-                location.startsWith('/auth-providers') ? 'text-brand' : 'text-foreground'
+          <Link href="/auth-providers">
+            <Button
+              variant={
+                location.startsWith('/auth-providers') ? 'secondary' : 'ghost'
               }
-            />
-            {narrow ? '' : 'Auth providers'}
-          </Button>
-        </Link>
-        ) : null }
+              className={cn(
+                'w-full flex flex-row justify-start',
+                narrow ? 'p-0 h-10 w-10 justify-center' : null
+              )}>
+              <UnplugIcon
+                size="20"
+                className={
+                  location.startsWith('/auth-providers')
+                    ? 'text-brand'
+                    : 'text-foreground'
+                }
+              />
+              {narrow ? '' : 'Auth providers'}
+            </Button>
+          </Link>
+        ) : null}
         {sessionData?.role == 'superuser' ? (
-        <Link href="/issues">
-          <Button
-            variant={location.startsWith('/issues') ? 'secondary' : 'ghost'}
-            className={cn(
-              'w-full flex flex-row justify-start',
-              narrow ? 'p-0 h-10 w-10 justify-center' : null
-            )}>
-            <AlertTriangle
-              size="20"
-              className={
-                location.startsWith('/issues') ? 'text-brand' : 'text-foreground'
-              }
-            />
-            {narrow ? '' : 'Problemen'}
-          </Button>
-        </Link>
-        ) : null }
+          <Link href="/issues">
+            <Button
+              variant={location.startsWith('/issues') ? 'secondary' : 'ghost'}
+              className={cn(
+                'w-full flex flex-row justify-start',
+                narrow ? 'p-0 h-10 w-10 justify-center' : null
+              )}>
+              <AlertTriangle
+                size="20"
+                className={
+                  location.startsWith('/issues')
+                    ? 'text-brand'
+                    : 'text-foreground'
+                }
+              />
+              {narrow ? '' : 'Problemen'}
+            </Button>
+          </Link>
+        ) : null}
         {sessionData?.role == 'superuser' ? (
           <Link href="/settings">
             <Button
@@ -122,13 +138,15 @@ export function Sidenav({
               <Settings
                 size="20"
                 className={
-                  location.startsWith('/settings') ? 'text-brand' : 'text-foreground'
+                  location.startsWith('/settings')
+                    ? 'text-brand'
+                    : 'text-foreground'
                 }
               />
               {narrow ? '' : 'Instellingen'}
             </Button>
           </Link>
-        ) : null }
+        ) : null}
       </div>
       <div className="flex-grow"></div>
       <div
@@ -149,11 +167,14 @@ export function Sidenav({
           </Button>
         </Link>
 
-        {process.env.NEXT_PUBLIC_OPENSTAD_VERSION &&
-          <p className={cn('absolute left-0 right-0 bottom-2 text-center text-gray-400 text-xs')}>
+        {process.env.NEXT_PUBLIC_OPENSTAD_VERSION && (
+          <p
+            className={cn(
+              'absolute left-0 right-0 bottom-2 text-center text-gray-400 text-xs'
+            )}>
             v{process.env.NEXT_PUBLIC_OPENSTAD_VERSION}
           </p>
-        }
+        )}
       </div>
     </nav>
   );

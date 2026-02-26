@@ -30,7 +30,7 @@ services:
     ports:
       - '6379:6379'
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       timeout: 20s
       retries: 10
 
@@ -52,8 +52,8 @@ services:
     restart: unless-stopped
     ports:
       - 16686:16686 # Jaeger UI
-      - 4317:4317   # OTLP gRPC receiver
-      - 4318:4318   # OTLP HTTP receiver
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP HTTP receiver
     environment:
       - COLLECTOR_OTLP_ENABLED=true
 
@@ -275,7 +275,6 @@ services:
       - ENABLE_AUTH_PROVIDERS=${ENABLE_AUTH_PROVIDERS}
       - NEXT_PUBLIC_HASH_IP_ADDRESSES=${NEXT_PUBLIC_HASH_IP_ADDRESSES}
       - HASH_IP_SALT=${HASH_IP_SALT}
-      - BETA_FEATURE_FLAG_BULK_IMPORT=${BETA_FEATURE_FLAG_BULK_IMPORT}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:
@@ -293,7 +292,7 @@ services:
         - PORT=${CMS_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-cms-server}:${RELEASE_VERSION:-latest}
-    command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
+    command: ['npm', 'run', 'dev', '--prefix=apps/cms-server']
     depends_on:
       openstad-redis:
         condition: service_healthy

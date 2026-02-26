@@ -8,24 +8,23 @@ const searchInResults = require('../../middleware/search-in-results');
 const router = express.Router({ mergeParams: true });
 
 // scopes: for all get requests
+router.all('*', function (req, res, next) {
+  req.scope = [];
+  return next();
+});
+
 router
-  .all('*', function(req, res, next) {
-    req.scope = [];
-    return next();
-  })
+  .route('/$')
 
-router.route('/$')
-
-// list locks
-// ----------
+  // list locks
+  // ----------
   .get(auth.can('Lock', 'list'))
-	.get(pagination.init)
-  .get(function(req, res, next) {
+  .get(pagination.init)
+  .get(function (req, res, next) {
     let { dbQuery } = req;
     let where = {};
-    db.Lock
-      .scope(...req.scope)
-			.findAndCountAll({ where, ...dbQuery })
+    db.Lock.scope(...req.scope)
+      .findAndCountAll({ where, ...dbQuery })
       .then((result) => {
         req.results = result.rows;
         req.dbQuery.count = result.count;
@@ -35,34 +34,34 @@ router.route('/$')
   })
   .get(auth.useReqUser)
   .get(searchInResults({ searchfields: ['type'] }))
-	.get(pagination.paginateResults)
-	.get(function(req, res, next) {
-		res.json(req.results);
-  })
+  .get(pagination.paginateResults)
+  .get(function (req, res, next) {
+    res.json(req.results);
+  });
 
 // one lock
 // --------
-router.route('/:lockId(\\d+)')
-  .all(function(req, res, next) {
+router
+  .route('/:lockId(\\d+)')
+  .all(function (req, res, next) {
     let lockId = parseInt(req.params.lockId) || 1;
 
-    db.Lock
-      .scope(...req.scope)
+    db.Lock.scope(...req.scope)
       .findOne({
-        where: { id: lockId }
+        where: { id: lockId },
       })
       .then((found) => {
-        if ( !found ) throw createError(404, 'Lock niet gevonden');
+        if (!found) throw createError(404, 'Lock niet gevonden');
         req.results = found;
         next();
       })
       .catch(next);
   })
 
-// delete lock
-// -----------------------
+  // delete lock
+  // -----------------------
   .delete(auth.can('Lock', 'delete'))
-  .delete(function(req, res, next) {
+  .delete(function (req, res, next) {
     req.results
       .destroy()
       .then(() => {

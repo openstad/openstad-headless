@@ -1,52 +1,36 @@
-{% extends data.outerLayout %}
-{% block locale %}nl{% endblock %}
-{% set title = [ data.piece.title or data.page.title, ' - ', data.global.siteTitle] | join %}
-{% block title %}
-{{ title }}
-{% if not title %}
-{{ apos.log('Looks like you forgot to override the title block in a template that does not have access to an Apostrophe
-page or piece.') }}
-{% endif %}
-{% endblock %}
-
-{% block extraHead %}
+{% extends data.outerLayout %} {% block locale %}nl{% endblock %} {% set title =
+[ data.piece.title or data.page.title, ' - ', data.global.siteTitle] | join %}
+{% block title %} {{ title }} {% if not title %} {{ apos.log('Looks like you
+forgot to override the title block in a template that does not have access to an
+Apostrophe page or piece.') }} {% endif %} {% endblock %} {% block extraHead %}
 <script src="{{data.global.reactCdn}}"></script>
 <script src="{{data.global.reactDomCdn}}"></script>
 
 {% if data.global.favicon %}
-  <link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}"/>
-{% endif %}
+<link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}" />
+{% endif %} {% endblock %} {% block beforeMain %}
+<div
+  id="logout-data"
+  data-logout-url="{{ data.global.logoutUrl | safe }}"></div>
 
-{% endblock %}
-
-{% block beforeMain %}
-<div id="logout-data" data-logout-url="{{ data.global.logoutUrl | safe }}"></div>
-
-<a class="skip-link utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href="#main">
+<a
+  class="skip-link utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action"
+  href="#main">
   Ga naar de hoofdinhoud
 </a>
 
 {% include 'partials/openstaduser.html' %}
 <div class="bp-wrapper" data-apos-level="1">
-  {% include 'partials/css.html' %}
-  {% include 'partials/cookie-warning.html' %}
-  {% include 'partials/header.html' %}
-  {% include 'partials/analytics.html' %}
+  {% include 'partials/css.html' %} {% include 'partials/cookie-warning.html' %}
+  {% include 'partials/header.html' %} {% include 'partials/analytics.html' %}
   {% include 'partials/navbar.html' %}
 
   <main class="page" id="main">
-    {% endblock %}
-
-    {% block main %}
-    {#
-    Usually, your page templates in the @apostrophecms/pages module will override
-    this block. It is safe to assume this is where your page-specific content
-    should go.
-    #}
-    {% endblock %}
-
-    {% block afterMain %}
-    </main>
+    {% endblock %} {% block main %} {# Usually, your page templates in the
+    @apostrophecms/pages module will override this block. It is safe to assume
+    this is where your page-specific content should go. #} {% endblock %} {%
+    block afterMain %}
+  </main>
   {% include 'partials/footer.html' %}
-</div>{# Close .bp-wrapper #}
-{% endblock %}
+</div>
+{# Close .bp-wrapper #} {% endblock %}

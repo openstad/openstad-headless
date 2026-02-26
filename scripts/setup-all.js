@@ -14,18 +14,17 @@ let modules = [
   initAdminServer,
   initCmsServer,
   createNginxConfigExample,
-  function() {
+  function () {
     return new Promise((resolve, reject) => {
       console.log('==============================');
       console.log('Done');
       process.exit();
       resolve();
-    })
-  }
+    });
+  },
 ];
 
 async function init() {
-
   await config.create();
 
   let actions = {
@@ -34,9 +33,9 @@ async function init() {
     'init database': true,
     'init images': true,
     'create certs': true,
-    'build': true,
-  }
-  
+    build: true,
+  };
+
   // command line arguments
   process.argv.forEach((entry) => {
     let match = entry.match(/--no-npm-install/);
@@ -53,11 +52,10 @@ async function init() {
     for (let i = 0; i < modules.length; i++) {
       await modules[i](actions);
     }
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     process.exit();
   }
 }
 
 init();
-

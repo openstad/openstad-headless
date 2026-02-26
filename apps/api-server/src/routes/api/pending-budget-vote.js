@@ -50,7 +50,7 @@ router.get('/:id', async function (req, res, next) {
 
     res.json(result);
   } catch (err) {
-    console.log ('Error fetching pending budget vote:', err);
+    console.log('Error fetching pending budget vote:', err);
     next(err);
   }
 });

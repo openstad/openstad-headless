@@ -5,11 +5,13 @@ All OpenStad apps are configured through environment variables that van be provi
 ### Minimal required configuration options
 
 The url of the application:
+
 ```
 URL=
 ```
 
 Database settings
+
 ```
 DB_USERNAME=
 DB_PASSWORD=
@@ -17,6 +19,7 @@ DB_NAME=
 ```
 
 Authentication: a jwt secret and the url of the openstad auth server
+
 ```
 AUTH_JWTSECRET=
 AUTH_ADAPTER_OPENSTAD_SERVERURL=
@@ -25,6 +28,7 @@ AUTH_ADAPTER_OPENSTAD_SERVERURL=
 Email settings are stricktly speaking not required, for the api will run without these values.
 
 SMTP settings:
+
 ```
 SMTP_HOST=
 SMTP_PORT=
@@ -34,17 +38,16 @@ SMTP_PASSWORD=
 ```
 
 The from address for email sent by the API
+
 ```
 FROM_EMAIL_ADDRESS=
 ```
 
 The default recipient address for notifications sent by the API:
+
 ```
 NOTIFICATIONS_ADMIN_TO_EMAILADDRESS=
 ```
-
-
-
 
 ### All configuration options and defaults
 
@@ -100,7 +103,6 @@ AUTH_FIXEDAUTHTOKENS=[]
 
 Note: the complete auth configuration looks like this (more information in the [auth docs](./auth.md)):
 
-
 ```
 {
   auth: {
@@ -138,7 +140,8 @@ Note: the complete auth configuration looks like this (more information in the [
 ```
 
 Parts of this can be provided as json blocks, so e.g. an environmant variable AUTH_PROVIDER_DEFAULT could contain the stringified value
-``` 
+
+```
 {
   "default": {
     "adapter": "openstad"

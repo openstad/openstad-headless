@@ -18,7 +18,13 @@
     "test:unit:image": "vitest run apps/image-server",
     "test:e2e": "cypress run",
     "test:component": "node ./scripts/run-component-tests.js",
-    "cy:open": "cypress open"
+    "cy:open": "cypress open",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,css,scss,md,json,html,yml,yaml}": "prettier --write"
   },
   "repository": {
     "type": "git",
@@ -37,11 +43,13 @@
   ],
   "private": true,
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/cron": "^2.4.3",
     "cypress": "^15.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "mysql2": "^3.11.3",
-    "prettier": "3.0.3",
+    "prettier": "^3.8.1",
     "vitest": "^3.2.3"
   },
   "dependencies": {
@@ -49,9 +57,27 @@
     "@aws-sdk/client-s3": "3.919.0",
     "@aws-sdk/lib-storage": "3.919.0",
     "express-rate-limit": "^7.5.1",
+    "fast-xml-parser": "5.3.6",
     "knox": "file:vendor/knox-0.9.3.tar.gz",
     "react-leaflet": "^4.2.1",
-    "sharp": "^0.34.5",
+    "tar": "7.5.9",
     "uuid": "^10.0.0"
+  },
+  "overrides": {
+    "vega-lite": "^5.23.0",
+    "tar": "7.5.9",
+    "node-gyp@<10.0.0": "^12.2.0",
+    "xml2js@<=0.5.0": "0.5.0",
+    "pino@<=10.1.1": "10.1.1",
+    "mariadb@<=3.4.3": "3.4.3",
+    "i18next@<=24.1.2": "24.1.2",
+    "glob@<=10.5.0": "10.5.0",
+    "cjs-module-lexer@<=2.2.0": "2.2.0",
+    "cookie@<=0.7.0": "0.7.0",
+    "on-headers@<=1.1.0": "1.1.0",
+    "fast-xml-parser": "5.3.6",
+    "oembetter": {
+      "fast-xml-parser": "$fast-xml-parser"
+    }
   }
 }

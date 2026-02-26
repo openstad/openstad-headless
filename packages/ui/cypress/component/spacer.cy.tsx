@@ -1,11 +1,10 @@
-import React from 'react'
-import { Spacer } from '../../src/spacer'
+import React from 'react';
+
+import { Spacer } from '../../src/spacer';
 
 describe('<Spacer />', () => {
   it('renders', () => {
     // see: https://on.cypress.io/mounting-react
-    cy.mount(
-      <Spacer/>
-    )
+    cy.mount(<Spacer />);
   });
 });

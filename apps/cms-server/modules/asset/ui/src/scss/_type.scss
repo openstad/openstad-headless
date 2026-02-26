@@ -20,7 +20,13 @@ code {
 pre {
   display: flex;
   position: relative;
-  font-family: Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
+  font-family:
+    Menlo,
+    Monaco,
+    Consolas,
+    Liberation Mono,
+    Courier New,
+    monospace;
   color: white;
   font-size: 14px;
   text-align: left;
@@ -50,7 +56,9 @@ pre {
   font-weight: 500;
   background: $color-purple;
   color: white;
-  &:visited, &:hover, &:active {
+  &:visited,
+  &:hover,
+  &:active {
     color: white;
   }
 }

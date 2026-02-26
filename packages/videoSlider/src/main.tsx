@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { VideoSliderProps, VideoSlider } from './videoSlider.js';
+
+import { VideoSlider, VideoSliderProps } from './videoSlider.js';
 
 const config: VideoSliderProps = {
   api: {
@@ -19,7 +20,7 @@ const config: VideoSliderProps = {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <div className="openstad">
-    <VideoSlider {...config} />
+      <VideoSlider {...config} />
     </div>
   </React.StrictMode>
 );

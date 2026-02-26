@@ -1,9 +1,9 @@
-const hat = require("hat");
+const hat = require('hat');
 
 const removeProtocol = (url) => {
   return url
-    ? url.replace("http://", "").replace("https://", "").replace(/\/$/, "")
-    : "";
+    ? url.replace('http://', '').replace('https://', '').replace(/\/$/, '')
+    : '';
 };
 
 module.exports = async function seed(db) {
@@ -32,19 +32,25 @@ module.exports = async function seed(db) {
     : process.env.APP_URL;
   let headlessUrl = process.env.HEADLESS_URL
     ? process.env.HEADLESS_URL
-    : "http://localhost:3000";
+    : 'http://localhost:3000';
 
-  let allowedDomains = process.env.NODE_ENV === "development" ? ["localhost"] : [];
-  let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
+  let allowedDomains =
+    process.env.NODE_ENV === 'development' ? ['localhost'] : [];
+  let apiDomain =
+    process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
   allowedDomains.push(apiDomain);
   let apiDomainWithoutPortnumber = apiDomain.replace(/:\d+/, '');
-  if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
-  let adminDomain = process.env.ADMIN_DOMAIN || removeProtocol(process.env.ADMIN_URL) || '';
+  if (apiDomain != apiDomainWithoutPortnumber)
+    allowedDomains.push(apiDomainWithoutPortnumber);
+  let adminDomain =
+    process.env.ADMIN_DOMAIN || removeProtocol(process.env.ADMIN_URL) || '';
   allowedDomains.push(adminDomain);
   let adminDomainWithoutPortnumber = adminDomain.replace(/:\d+/, '');
-  if (adminDomain != adminDomainWithoutPortnumber) allowedDomains.push(adminDomainWithoutPortnumber);
+  if (adminDomain != adminDomainWithoutPortnumber)
+    allowedDomains.push(adminDomainWithoutPortnumber);
 
-  process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || rack()
+  process.env.AUTH_FIRST_LOGIN_CODE =
+    process.env.AUTH_FIRST_LOGIN_CODE || rack();
   let uniqueCode = process.env.AUTH_FIRST_LOGIN_CODE;
 
   console.log('  creating initial clients');
@@ -54,28 +60,28 @@ module.exports = async function seed(db) {
   try {
     await db.Client.create({
       id: 1,
-      redirectUrl: "", // deprecated
-      name: "Admin panel",
-      description: "Client for managing the admin panel",
+      redirectUrl: '', // deprecated
+      name: 'Admin panel',
+      description: 'Client for managing the admin panel',
       clientId: adminClientId,
       clientSecret: adminClientSecret,
-      authTypes: JSON.stringify(["UniqueCode"]),
-      requiredUserFields: JSON.stringify(["name"]),
+      authTypes: JSON.stringify(['UniqueCode']),
+      requiredUserFields: JSON.stringify(['name']),
       allowedDomains: JSON.stringify(allowedDomains),
       config: JSON.stringify({}),
     });
 
-    console.log("    - default site");
-    console.log("      clientId:", clientId);
+    console.log('    - default site');
+    console.log('      clientId:', clientId);
     await db.Client.create({
       id: 2,
-      redirectUrl: "", // deprecated
-      name: "Default site",
-      description: "Client for managing default site",
+      redirectUrl: '', // deprecated
+      name: 'Default site',
+      description: 'Client for managing default site',
       clientId: clientId,
       clientSecret: clientSecret,
-      authTypes: JSON.stringify(["UniqueCode"]),
-      requiredUserFields: JSON.stringify(["name"]),
+      authTypes: JSON.stringify(['UniqueCode']),
+      requiredUserFields: JSON.stringify(['name']),
       allowedDomains: JSON.stringify(allowedDomains),
       config: JSON.stringify({}),
     });
@@ -83,7 +89,7 @@ module.exports = async function seed(db) {
     console.log(err);
   }
 
-  console.log("  creating initial user");
+  console.log('  creating initial user');
   try {
     await db.User.create({
       id: 1,
@@ -92,37 +98,37 @@ module.exports = async function seed(db) {
     console.log(err);
   }
 
-  console.log("  creating roles");
+  console.log('  creating roles');
   try {
     await db.Role.create({
       id: 1,
-      name: "admin",
+      name: 'admin',
     });
 
     await db.Role.create({
       id: 2,
-      name: "member",
+      name: 'member',
     });
 
     await db.Role.create({
       id: 3,
-      name: "anonymous",
+      name: 'anonymous',
     });
 
     await db.Role.create({
       id: 4,
-      name: "moderator",
+      name: 'moderator',
     });
 
     await db.Role.create({
       id: 5,
-      name: "editor",
+      name: 'editor',
     });
   } catch (err) {
     console.log(err);
   }
 
-  console.log("  creating admin role for user id=1");
+  console.log('  creating admin role for user id=1');
   try {
     await db.UserRole.create({
       roleId: 1,
@@ -145,8 +151,8 @@ module.exports = async function seed(db) {
     console.log(err);
   }
 
-  console.log("  creating unique code for user id=1");
-  console.log("    use this for your first login:", uniqueCode);
+  console.log('  creating unique code for user id=1');
+  console.log('    use this for your first login:', uniqueCode);
   try {
     await db.UniqueCode.create({
       code: uniqueCode,
@@ -166,37 +172,41 @@ module.exports = async function seed(db) {
   } catch (err) {
     console.log(err);
   }
-  
+
   if (process.env.AUTH_INITIAL_USERS) {
     // Initial users from env var, list of e-mails
     const initialUsers = JSON.parse(process.env.AUTH_INITIAL_USERS);
-    console.log ('  creating initial users from AUTH_INITIAL_USERS env var');
+    console.log('  creating initial users from AUTH_INITIAL_USERS env var');
     for (const initialUser of initialUsers) {
       const user = await db.User.create({
         email: initialUser,
       });
-      
+
       // Make user admin on client 1
       await db.UserRole.create({
         roleId: 1,
         clientId: 1,
         userId: user.id,
       });
-      
-      console.log (`    - created user ${initialUser} with admin role on client 1`);
+
+      console.log(
+        `    - created user ${initialUser} with admin role on client 1`
+      );
     }
-    
+
     // Set auth type to URL and set twoFactorRoles to admin
     const adminClient = await db.Client.findOne({ where: { id: 1 } });
     if (!adminClient) {
       throw new Error('Admin client not found');
     }
-    
+
     await adminClient.update({
-      authTypes: JSON.stringify(["Url"]),
-      twoFactorRoles: JSON.stringify(["admin"]),
+      authTypes: JSON.stringify(['Url']),
+      twoFactorRoles: JSON.stringify(['admin']),
     });
-    
-    console.log ('  updated admin client to use URL auth type with twoFactorRoles admin');
+
+    console.log(
+      '  updated admin client to use URL auth type with twoFactorRoles admin'
+    );
   }
 };

@@ -6,6 +6,6 @@ export default () => {
       if (el.dataset['background-image']) {
         el.style.backgroundImage = `url(${el.dataset['background-image']})`;
       }
-    }
+    },
   };
 };

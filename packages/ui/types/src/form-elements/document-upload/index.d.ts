@@ -1,8 +1,8 @@
-import { FC } from "react";
-import 'filepond/dist/filepond.min.css';
-import './document-upload.css';
+import { FormValue } from '@openstad-headless/form/src/form';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
-import { FormValue } from "@openstad-headless/form/src/form";
+import 'filepond/dist/filepond.min.css';
+import { FC } from 'react';
+import './document-upload.css';
 export type DocumentUploadProps = {
     title: string;
     overrideDefaultValue?: FormValue | {

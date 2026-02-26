@@ -1,18 +1,21 @@
-import { MultiSelect } from '@openstad-headless/ui/src';
-import React, {useEffect, useState} from 'react';
 import DataStore from '@openstad-headless/data-store/src';
-import { FormLabel } from "@utrecht/component-library-react";
-
+import { MultiSelect } from '@openstad-headless/ui/src';
+import { FormLabel } from '@utrecht/component-library-react';
+import React, { useEffect, useState } from 'react';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
-// Nasty but make datastore an any type so we can use it without needing an import from a different workspace 
+// Nasty but make datastore an any type so we can use it without needing an import from a different workspace
 type Props = {
-  dataStore:any;
+  dataStore: any;
   tagType: string;
   placeholder?: string;
   selected?: number[];
-  onUpdateFilter?: (filter: any, label?: string, forceSelected?: boolean) => void;
+  onUpdateFilter?: (
+    filter: any,
+    label?: string,
+    forceSelected?: boolean
+  ) => void;
   onlyIncludeIds?: number[];
   tagGroupProjectId?: any;
   preFilterTags?: Array<number>;
@@ -33,9 +36,8 @@ const MultiSelectTagFilter = ({
   inlineOptions = false,
   ...props
 }: Props) => {
-
-  if(!dataStore || !dataStore.useTags) {
-    return <p>Cannot render tagfilter, missing data source</p>
+  if (!dataStore || !dataStore.useTags) {
+    return <p>Cannot render tagfilter, missing data source</p>;
   }
 
   const useTagsConfig: {
@@ -45,16 +47,21 @@ const MultiSelectTagFilter = ({
   } = {
     type: tagType,
     onlyIncludeIds,
-  }
+  };
 
-  if ( typeof props?.tagGroupProjectId === 'string' && props?.tagGroupProjectId === "0"  ) {
+  if (
+    typeof props?.tagGroupProjectId === 'string' &&
+    props?.tagGroupProjectId === '0'
+  ) {
     useTagsConfig.projectId = props.tagGroupProjectId;
   }
-  
-  const {data:tags} = dataStore.useTags(useTagsConfig);
+
+  const { data: tags } = dataStore.useTags(useTagsConfig);
 
   const [stopUsingDefaultValue, setStopUsingDefaultValue] = useState(false);
-  const [prefilterTagsSelected, setPrefilterTagsSelected] = useState<number[]>([]);
+  const [prefilterTagsSelected, setPrefilterTagsSelected] = useState<number[]>(
+    []
+  );
 
   useEffect(() => {
     if (parentStopUsingDefaultValue) {
@@ -65,22 +72,31 @@ const MultiSelectTagFilter = ({
   const randomId = Math.random().toString(36).substring(7);
 
   function getRandomId(placeholder: string | undefined) {
-    if(placeholder && placeholder.length >= 1) {
-    return placeholder.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
+    if (placeholder && placeholder.length >= 1) {
+      return placeholder
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '-');
     } else {
-    return randomId;
+      return randomId;
     }
   }
 
   useEffect(() => {
-    if ((!stopUsingDefaultValue && !parentStopUsingDefaultValue) && preFilterTags && preFilterTags.length > 0 && onUpdateFilter) {
+    if (
+      !stopUsingDefaultValue &&
+      !parentStopUsingDefaultValue &&
+      preFilterTags &&
+      preFilterTags.length > 0 &&
+      onUpdateFilter
+    ) {
       preFilterTags.forEach((tagId) => {
         const tag = tags.find((tag: TagDefinition) => tag.id === tagId);
 
         if (tag) {
           onUpdateFilter(tag.id, tag.name, true);
 
-          setPrefilterTagsSelected(prevTags => {
+          setPrefilterTagsSelected((prevTags) => {
             if (!prevTags.includes(tag.id)) {
               return [...prevTags, tag.id];
             }
@@ -91,26 +107,32 @@ const MultiSelectTagFilter = ({
     }
   }, [preFilterTags]);
 
-  const combinedSelects = stopUsingDefaultValue ? selected : Array.from( new Set([...selected, ...prefilterTagsSelected]) );
+  const combinedSelects = stopUsingDefaultValue
+    ? selected
+    : Array.from(new Set([...selected, ...prefilterTagsSelected]));
 
-  return tags.length > 0 && (
-    <div className="form-element">
-      <FormLabel id={getRandomId(props.placeholder)}>{props.placeholder || `Selecteer ${tagType.toLowerCase()}` }</FormLabel>
-      <MultiSelect
-        id={getRandomId(props.placeholder)}
-        onItemSelected={(value, label) => {
-          setStopUsingDefaultValue(true);
-          onUpdateFilter && onUpdateFilter(value, label);
-        }}
-        options={(tags || []).map((tag: TagDefinition) => ({
-          value: tag.id,
-          label: tag.name,
-          checked: combinedSelects.includes(tag.id),
-        }))}
-        inlineOptions={inlineOptions}
-        defaultOpen={inlineOptions}
-      />
-    </div>
+  return (
+    tags.length > 0 && (
+      <div className="form-element">
+        <FormLabel id={getRandomId(props.placeholder)}>
+          {props.placeholder || `Selecteer ${tagType.toLowerCase()}`}
+        </FormLabel>
+        <MultiSelect
+          id={getRandomId(props.placeholder)}
+          onItemSelected={(value, label) => {
+            setStopUsingDefaultValue(true);
+            onUpdateFilter && onUpdateFilter(value, label);
+          }}
+          options={(tags || []).map((tag: TagDefinition) => ({
+            value: tag.id,
+            label: tag.name,
+            checked: combinedSelects.includes(tag.id),
+          }))}
+          inlineOptions={inlineOptions}
+          defaultOpen={inlineOptions}
+        />
+      </div>
+    )
   );
 };
 export { MultiSelectTagFilter };

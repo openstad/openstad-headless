@@ -3,12 +3,10 @@ const util = require('util');
 const execute = require('./execute');
 
 module.exports = async function setupCmsServer(actions) {
-
   console.log('==============================');
   console.log('Setup CMS server');
-  
-  try {
 
+  try {
     // create local config
     let cmsConfig = `
 PORT=${process.env.CMS_PORT}
@@ -22,7 +20,7 @@ MESSAGESTREAMING_POSTFIX=${process.env.MESSAGESTREAMING_POSTFIX}
 
 API_URL=${process.env.API_URL}
 API_KEY=${process.env.API_FIXED_AUTH_KEY}
-`
+`;
 
     if (actions['create config']) {
       console.log('------------------------------');
@@ -36,12 +34,10 @@ API_KEY=${process.env.API_FIXED_AUTH_KEY}
       console.log('Execute `npm i`');
       await execute('npm', ['i'], { cwd: './apps/cms-server' });
     }
-    
-  } catch(err) {
+  } catch (err) {
     console.log('------------------------------');
     console.log('CMS server initialisatie error');
     console.log(err);
     process.exit();
   }
-}
- 
+};

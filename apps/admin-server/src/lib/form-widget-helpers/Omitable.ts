@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createOmittedSchema = (
   formSchema: z.AnyZodObject,
-  schemaKeysToOmit: Array<keyof typeof formSchema['shape']> = []
+  schemaKeysToOmit: Array<keyof (typeof formSchema)['shape']> = []
 ) =>
   formSchema.omit(
     schemaKeysToOmit.reduce(

@@ -7,6 +7,17 @@
              Terug
           </a>
         </li>
+        {% else %}
+        <li class="nav-link" id="back-button" style="display: none;">
+          <a href="javascript:history.back()" class="backlink">
+             Terug
+          </a>
+        </li>
+        <script>
+          if (history.length > 1) {
+            document.getElementById('back-button').style.display = '';
+          }
+        </script>
         {% endif %}
     </ul>
     <ul class="nav navbar-nav navbar-right">

@@ -64,15 +64,16 @@ export default function BegrootmoduleText(
       step1Add: props.step1Add ?? 'Voeg toe',
       step1MaxText: props.step1MaxText ?? '',
       step2Title: props.step2Title ?? 'Overzicht van mijn selectie',
-      step3Title: props.step3Title ?? "Controleer stemcode",
+      step3Title: props.step3Title ?? 'Controleer stemcode',
       stemCodeTitle: props.stemCodeTitle ?? 'Vul je stemcode in',
-      stemCodeTitleSuccess: props.stemCodeTitleSuccess ?? 'Vul een andere stemcode in',
+      stemCodeTitleSuccess:
+        props.stemCodeTitleSuccess ?? 'Vul een andere stemcode in',
       newsLetterTitle: props.newsLetterTitle ?? 'Hou mij op de hoogte',
       newsLetterLink: props.newsLetterLink ?? '/',
       panelTitle: props.panelTitle ?? '',
-      budgetChosenTitle: props.budgetChosenTitle ?? "Inzendingen gekozen",
-      budgetRemainingTitle: props.budgetRemainingTitle ?? "Nog te kiezen",
-      overviewTitle: props.overviewTitle ?? "Plannen",
+      budgetChosenTitle: props.budgetChosenTitle ?? 'Inzendingen gekozen',
+      budgetRemainingTitle: props.budgetRemainingTitle ?? 'Nog te kiezen',
+      overviewTitle: props.overviewTitle ?? 'Plannen',
     },
   });
 
@@ -84,9 +85,7 @@ export default function BegrootmoduleText(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
-
           <div className="w-full grid-cols-4 grid gap-4">
-
             <FormField
               control={form.control}
               name="step1Tab"
@@ -167,14 +166,16 @@ export default function BegrootmoduleText(
               )}
             />
 
-          <Heading size="lg">Inzendingen overzicht</Heading>
+            <Heading size="lg">Inzendingen overzicht</Heading>
           </div>
           <FormField
             control={form.control}
             name="overviewTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Titel boven het overzicht van alle inzendingen</FormLabel>
+                <FormLabel>
+                  Titel boven het overzicht van alle inzendingen
+                </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -275,9 +276,14 @@ export default function BegrootmoduleText(
             name="step1MaxText"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Tekst wanneer het maximaal aantal om te selecteren is bereikt</FormLabel>
+                <FormLabel>
+                  Tekst wanneer het maximaal aantal om te selecteren is bereikt
+                </FormLabel>
                 <FormDescription>
-                  Voor het type &apos;count&apos; is dit standaard &apos;Maximaal aantal plannen bereikt&apos;. Voor het type &apos;budget&apos; is dit standaard &apos;Onvoldoende budget&apos;.
+                  Voor het type &apos;count&apos; is dit standaard
+                  &apos;Maximaal aantal plannen bereikt&apos;. Voor het type
+                  &apos;budget&apos; is dit standaard &apos;Onvoldoende
+                  budget&apos;.
                 </FormDescription>
                 <FormControl>
                   <Input
@@ -422,7 +428,11 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Titel</FormLabel>
-                <FormDescription>Het panel wordt bovenin stap 1 en 2 getoond en bevat informatie over wat er is gekozen en hoeveel de gebruiker nog kan kiezen.</FormDescription>
+                <FormDescription>
+                  Het panel wordt bovenin stap 1 en 2 getoond en bevat
+                  informatie over wat er is gekozen en hoeveel de gebruiker nog
+                  kan kiezen.
+                </FormDescription>
                 <FormControl>
                   <Input
                     {...field}
@@ -442,7 +452,10 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>&apos;Gekozen&apos; tekst</FormLabel>
-                <FormDescription>Hier komt informatie bij te staan over hoeveel er al is gekozen.</FormDescription>
+                <FormDescription>
+                  Hier komt informatie bij te staan over hoeveel er al is
+                  gekozen.
+                </FormDescription>
                 <FormControl>
                   <Input
                     {...field}
@@ -462,7 +475,10 @@ export default function BegrootmoduleText(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>&apos;Nog over&apos; tekst</FormLabel>
-                <FormDescription>Hier komt informatie bij te staan over hoeveel er nog gekozen kan worden.</FormDescription>
+                <FormDescription>
+                  Hier komt informatie bij te staan over hoeveel er nog gekozen
+                  kan worden.
+                </FormDescription>
                 <FormControl>
                   <Input
                     {...field}

@@ -1,5 +1,5 @@
-import stringFilters from "./nunjucks-filters";
-import {RawResourceWidgetProps} from "../src/raw-resource";
+import { RawResourceWidgetProps } from '../src/raw-resource';
+import stringFilters from './nunjucks-filters';
 
 function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
   let varValue: any = '';
@@ -11,7 +11,7 @@ function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
   // Handle array bracket notation like images[0]
   const firstPart = splitVarName[0];
   const arrayMatch = firstPart.match(/^([^\[]+)\[(\d+)\]$/);
-  
+
   if (arrayMatch) {
     const [, key, index] = arrayMatch;
     varValue = varMapping[key]?.[parseInt(index)];
@@ -25,7 +25,6 @@ function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
 
     splitVarName.forEach((vn) => {
       if (varValue && varValue[vn] !== undefined && varValue[vn] !== null) {
-
         varValue = varValue[vn] as string;
       } else {
         varValue = '';
@@ -41,12 +40,15 @@ function getVariableValue(varName: string, varMapping: { [p: string]: any }) {
   return varValue;
 }
 
-export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource: any, resourceId: number | string, checkForResourceId = false ) => {
+export const renderRawTemplate = (
+  updatedProps: RawResourceWidgetProps,
+  resource: any,
+  resourceId: number | string,
+  checkForResourceId = false
+) => {
   let render = (() => {
     if (updatedProps.rawInput) {
-
       if (resourceId || !checkForResourceId) {
-
         let rendered = updatedProps.rawInput;
 
         const varMapping: { [key: string]: any } = {
@@ -80,7 +82,7 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
         // Which are accompanied by an {% endif %} at the end of the conditional block, and can also have a matching {% else %} block
 
         // Get all if-endif, if-else-endif blocks from the string
-        const ifRegex = /\{%\s*if\s*([^}]*)\s*%\}([\s\S]*?)\{%\s*endif\s*%\}/g
+        const ifRegex = /\{%\s*if\s*([^}]*)\s*%\}([\s\S]*?)\{%\s*endif\s*%\}/g;
 
         const ifBlocks = Array.from(updatedProps.rawInput.matchAll(ifRegex));
 
@@ -99,7 +101,11 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
 
               const varValue = getVariableValue(varName, varMapping);
 
-              if (varValue === value || `'${varValue}'` === value || `"${varValue}"` === value) {
+              if (
+                varValue === value ||
+                `'${varValue}'` === value ||
+                `"${varValue}"` === value
+              ) {
                 conditionIsTrue = true;
               }
             } else {
@@ -120,24 +126,22 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
           }
         }
 
-
-
         // Get all variables fom the string
         const varsInString = extractVars(rendered);
 
         if (varsInString && varsInString.length) {
           for (const match of varsInString) {
-
             let newValue = '';
             const cleanMatches = match.trim().split('|');
             const varName = cleanMatches[0].trim();
-            const filters = cleanMatches.slice(1).map((filter) => filter.trim());
+            const filters = cleanMatches
+              .slice(1)
+              .map((filter) => filter.trim());
 
             newValue = getVariableValue(varName, varMapping);
 
             if (!!newValue && filters && filters.length) {
               for (const filter of filters) {
-
                 // Filter can be in this format: tagGroup('type') or replace('type', 'type2) | cleanArray
                 // So we need to split the filter name and the arguments
                 const filterParts = filter.split('(');
@@ -145,14 +149,22 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
                 let filterArgs: string[] = [];
                 if (filterParts.length > 1) {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  filterArgs = filterParts[1].replace(')', '').split(',').map(f => f.trim().replaceAll("'", "").replaceAll('"', ''));
+                  filterArgs = filterParts[1]
+                    .replace(')', '')
+                    .split(',')
+                    .map((f) =>
+                      f.trim().replaceAll("'", '').replaceAll('"', '')
+                    );
                 }
 
                 // @ts-ignore
                 if (stringFilters[filterName]) {
                   if (filterArgs.length) {
                     // @ts-ignore
-                    newValue = stringFilters[filterName](newValue, ...filterArgs);
+                    newValue = stringFilters[filterName](
+                      newValue,
+                      ...filterArgs
+                    );
                   } else {
                     // @ts-ignore
                     newValue = stringFilters[filterName](newValue);
@@ -162,19 +174,17 @@ export const renderRawTemplate = (updatedProps: RawResourceWidgetProps, resource
             }
 
             rendered = rendered.replaceAll(`{{${match}}}`, newValue);
-
           }
         }
 
         return rendered;
-
       }
     }
     return '';
   })();
 
   return render;
-}
+};
 
 function extractVars(input: string) {
   const vars = [];

@@ -17,20 +17,20 @@
   bottom: 76px;
 } */
 
-.map-container--buttons{
+.map-container--buttons {
   position: relative;
 }
-.map-buttons{
+.map-buttons {
   position: absolute;
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
   bottom: 1rem;
   left: 1rem;
   z-index: 1;
 }
 
-.map-buttons .utrecht-button--secondary-action{
+.map-buttons .utrecht-button--secondary-action {
   scale: 1 !important;
   cursor: default !important;
   border: none !important;

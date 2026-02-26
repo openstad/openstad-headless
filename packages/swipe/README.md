@@ -29,10 +29,7 @@ function App() {
   };
 
   return (
-    <Swipe 
-      onSwipeLeft={handleSwipeLeft}
-      onSwipeRight={handleSwipeRight}
-    />
+    <Swipe onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight} />
   );
 }
 ```
@@ -49,14 +46,14 @@ const cards: SwipeCard[] = [
     description: 'Love hiking and photography',
     age: 25,
     location: 'Amsterdam',
-    image: 'https://example.com/image1.jpg'
+    image: 'https://example.com/image1.jpg',
   },
   // ... more cards
 ];
 
 function App() {
   return (
-    <Swipe 
+    <Swipe
       cards={cards}
       onSwipeLeft={(card) => console.log('Pass:', card)}
       onSwipeRight={(card) => console.log('Like:', card)}
@@ -71,34 +68,36 @@ function App() {
 
 ### SwipeProps
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `cards` | `SwipeCard[]` | Default demo cards | Array of cards to display |
-| `onSwipeLeft` | `(card: SwipeCard) => void` | `undefined` | Callback when card is swiped left (pass) |
-| `onSwipeRight` | `(card: SwipeCard) => void` | `undefined` | Callback when card is swiped right (like) |
-| `showButtons` | `boolean` | `true` | Show action buttons below cards |
-| `enableKeyboard` | `boolean` | `true` | Enable keyboard navigation |
+| Prop             | Type                        | Default            | Description                               |
+| ---------------- | --------------------------- | ------------------ | ----------------------------------------- |
+| `cards`          | `SwipeCard[]`               | Default demo cards | Array of cards to display                 |
+| `onSwipeLeft`    | `(card: SwipeCard) => void` | `undefined`        | Callback when card is swiped left (pass)  |
+| `onSwipeRight`   | `(card: SwipeCard) => void` | `undefined`        | Callback when card is swiped right (like) |
+| `showButtons`    | `boolean`                   | `true`             | Show action buttons below cards           |
+| `enableKeyboard` | `boolean`                   | `true`             | Enable keyboard navigation                |
 
 ### SwipeCard
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `id` | `string` | ✅ | Unique identifier for the card |
-| `title` | `string` | ✅ | Main title/name |
-| `description` | `string` | ✅ | Description text |
-| `image` | `string` | ❌ | Image URL |
-| `age` | `number` | ❌ | Age (displayed next to title) |
-| `location` | `string` | ❌ | Location text |
+| Property      | Type     | Required | Description                    |
+| ------------- | -------- | -------- | ------------------------------ |
+| `id`          | `string` | ✅       | Unique identifier for the card |
+| `title`       | `string` | ✅       | Main title/name                |
+| `description` | `string` | ✅       | Description text               |
+| `image`       | `string` | ❌       | Image URL                      |
+| `age`         | `number` | ❌       | Age (displayed next to title)  |
+| `location`    | `string` | ❌       | Location text                  |
 
 ## Interactions
 
 ### Gestures
+
 - **Swipe Left**: Pass/reject the card
 - **Swipe Right**: Like/accept the card
 - **Click Red Button**: Pass the current card
 - **Click Green Button**: Like the current card
 
 ### Keyboard
+
 - **Arrow Left**: Pass the current card
 - **Arrow Right**: Like the current card
 - **Space/Enter**: Like the current card
@@ -106,6 +105,7 @@ function App() {
 ## Styling
 
 The component includes comprehensive CSS with:
+
 - Card shadows and hover effects
 - Smooth animations and transitions
 - Gradient backgrounds
@@ -123,6 +123,7 @@ The component includes comprehensive CSS with:
 ## Examples
 
 See `example.tsx` for complete usage examples including:
+
 - Default cards usage
 - Custom cards with project data
 - Swipe-only mode without buttons
@@ -138,10 +139,12 @@ See `example.tsx` for complete usage examples including:
 ## Design tokens (Legacy)
 
 <!-- Widget Container  -->
+
 --nlds-likewidget-container-padding
 --nlds-likewidget-container-gap
 --nlds-likewidget-container-margin
 --nlds-likewidget-container-background-color
 
 <!-- Option counter -->
+
 --nlds-likewidget-counter-color

@@ -1,31 +1,35 @@
 const fs = require('fs').promises;
 
 const removeProtocol = (url) => {
-  return url ? url.replace('http://', '').replace('https://', '').replace(/\/$/, "") : '';
-}
+  return url
+    ? url.replace('http://', '').replace('https://', '').replace(/\/$/, '')
+    : '';
+};
 
 module.exports = async function seed(db) {
-
-  let allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost', ] : [];
-  let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
+  let allowedDomains =
+    process.env.NODE_ENV === 'development' ? ['localhost'] : [];
+  let apiDomain =
+    process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
   allowedDomains.push(apiDomain);
   let apiDomainWithoutPortnumber = apiDomain.replace(/:\d+/, '');
-  if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
+  if (apiDomain != apiDomainWithoutPortnumber)
+    allowedDomains.push(apiDomainWithoutPortnumber);
 
-  process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || rack() 
+  process.env.AUTH_FIRST_LOGIN_CODE =
+    process.env.AUTH_FIRST_LOGIN_CODE || rack();
   let uniqueCode = process.env.AUTH_FIRST_LOGIN_CODE;
 
   console.log('  creating development data');
 
   try {
-
     console.log('    - generic uniquecode client');
     console.log('      clientId:', 'uniquecode');
     console.log('      clientSecret:', 'uniquecode123');
     await db.Client.create({
       id: 3,
       redirectUrl: '', // deprecated
-      name: "Default site",
+      name: 'Default site',
       description: 'Client for managing default site',
       clientId: 'uniquecode',
       clientSecret: 'uniquecode123',
@@ -41,7 +45,7 @@ module.exports = async function seed(db) {
     await db.Client.create({
       id: 4,
       redirectUrl: '', // deprecated
-      name: "Default site",
+      name: 'Default site',
       description: 'Client for managing default site',
       clientId: 'anonymous',
       clientSecret: 'anonymous123',
@@ -55,24 +59,24 @@ module.exports = async function seed(db) {
     await db.UserRole.create({
       roleId: 1,
       clientId: 3,
-      userId: 1
+      userId: 1,
     });
     await db.UniqueCode.create({
       code: uniqueCode,
       userId: 1,
-      clientId: 3
+      clientId: 3,
     });
     await db.UserRole.create({
       roleId: 1,
       clientId: 4,
-      userId: 1
+      userId: 1,
     });
     await db.UniqueCode.create({
       code: uniqueCode,
       userId: 1,
-      clientId: 4
+      clientId: 4,
     });
-    
+
     console.log('    - generic admin user');
     console.log('      uniquecode: 123');
     await db.User.create({
@@ -82,12 +86,12 @@ module.exports = async function seed(db) {
     await db.UserRole.create({
       roleId: 1,
       clientId: 3,
-      userId: 2
+      userId: 2,
     });
     await db.UniqueCode.create({
       code: '123',
       userId: 2,
-      clientId: 3
+      clientId: 3,
     });
 
     console.log('    - generic moderator user');
@@ -100,12 +104,12 @@ module.exports = async function seed(db) {
     await db.UserRole.create({
       roleId: 4,
       clientId: 3,
-      userId: 3
+      userId: 3,
     });
     await db.UniqueCode.create({
       code: '456',
       userId: 3,
-      clientId: 3
+      clientId: 3,
     });
 
     console.log('    - generic editor user');
@@ -118,12 +122,12 @@ module.exports = async function seed(db) {
     await db.UserRole.create({
       roleId: 5,
       clientId: 3,
-      userId: 4
+      userId: 4,
     });
     await db.UniqueCode.create({
       code: '457',
       userId: 4,
-      clientId: 3
+      clientId: 3,
     });
 
     console.log('    - generic member user');
@@ -136,24 +140,14 @@ module.exports = async function seed(db) {
     await db.UserRole.create({
       roleId: 2,
       clientId: 3,
-      userId: 5
+      userId: 5,
     });
     await db.UniqueCode.create({
       code: '789',
       userId: 5,
-      clientId: 3
+      clientId: 3,
     });
-    
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
-  
-}
-
-
-
-
-
-
-
-
+};

@@ -1,5 +1,6 @@
-import { LocalStorage } from '../../../lib/local-storage';
 import useSWR from 'swr';
+
+import { LocalStorage } from '../../../lib/local-storage';
 
 export default function useCurrentUser(props) {
   let self = this;
@@ -20,25 +21,25 @@ export default function useCurrentUser(props) {
     if (params.has('openstadlogout')) {
       storage.remove('cmsUser');
       storage.remove('openStadUser');
-      
+
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogout=true`), '');
       history.replaceState(null, '', url);
       self.currentUser = null;
-      return {}
+      return {};
     }
-    
+
     // console.log('GETCURRENTUSER', self.currentUser);
     if (self.currentUser && self.currentUser.id) {
       // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
       return self.currentUser;
     }
-    
+
     // get user from props
     let initialUser = {};
     try {
       initialUser = globalOpenStadUser || props.openStadUser || {};
-    } catch(err) {}
+    } catch (err) {}
 
     if (initialUser.id && initialUser.projectId == self.projectId) {
       return initialUser;
@@ -55,7 +56,7 @@ export default function useCurrentUser(props) {
     let cmsUser = {};
     try {
       cmsUser = globalCmsUser || props.cmsUser || {};
-    } catch(err) {}
+    } catch (err) {}
 
     // get cmsUser from session data - this is a fix for badly written cms logouts
     let sessionCmsUser = storage.get('cmsUser') || {};
@@ -85,7 +86,6 @@ export default function useCurrentUser(props) {
 
     // fetch me for this jwt
     if (jwt) {
-
       self.api.currentUserJWT = jwt; // use current user in subsequent requests
 
       // refresh already fetched data, now with the current user
@@ -102,7 +102,6 @@ export default function useCurrentUser(props) {
         storage.remove('openStadUser');
         return {};
       }
-
     } else {
       return {};
     }
@@ -110,11 +109,11 @@ export default function useCurrentUser(props) {
 
   // add functionality
   if (data) {
-    data.logout = function(params) {
+    data.logout = function (params) {
       const storage = new LocalStorage(props);
       storage.destroy();
       self.api.user.logout(params);
-    }
+    };
   }
 
   return {

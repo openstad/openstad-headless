@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { Icon } from '../icon';
 import '../index.css';
 import './index.css';
-import { Icon } from '../icon';
 
 type Props = {
   checked?: boolean;

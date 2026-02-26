@@ -2,6 +2,7 @@
 
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const utils = require('../utils');
 
 // The access tokens.
 // You will use these to access your end point data through the means outlined
@@ -19,11 +20,18 @@ let tokens = Object.create(null);
  * @returns {Promise} resolved with the token if found, otherwise resolved with undefined
  */
 exports.find = (token) => {
-  const id = jwt.decode(token).jti;
-
   const findAction = new Promise((resolve, reject) => {
-    db.AccessToken
-      .findOne({where: { tokenId: id  } })
+    let decoded;
+    try {
+      decoded = utils.verifyToken(token);
+    } catch (e) {
+      console.warn('Error verifying JWT: ', e);
+      return resolve(undefined);
+    }
+
+    const id = decoded.jti;
+
+    db.AccessToken.findOne({ where: { tokenId: id } })
       .then((token) => {
         if (!token) {
           resolve(undefined);
@@ -31,9 +39,9 @@ exports.find = (token) => {
         return resolve(token);
       })
       .catch((e) => {
-        console.warn('Error finding accesstoken: ', e)
+        console.warn('Error finding accesstoken: ', e);
         return resolve(undefined);
-      })
+      });
   });
 
   return findAction;
@@ -51,24 +59,36 @@ exports.find = (token) => {
  * @returns {Promise} resolved with the saved token
  */
 exports.save = (token, expirationDate, userID, clientID, scope) => {
-  const id = jwt.decode(token).jti;
-
   const saveAction = new Promise((resolve, reject) => {
-    db.AccessToken
-      .create({tokenId: id, userID, expirationDate, clientID, scope})
+    let decoded;
+    try {
+      decoded = utils.verifyToken(token);
+    } catch (e) {
+      console.warn('Error verifying JWT: ', e);
+      return resolve(undefined);
+    }
+
+    const id = decoded.jti;
+
+    db.AccessToken.create({
+      tokenId: id,
+      userID,
+      expirationDate,
+      clientID,
+      scope,
+    })
       .then((token) => {
-        console.log('Savedddd access token')
+        console.log('Savedddd access token');
         if (!token) {
           resolve(undefined);
         }
         return resolve(token);
       })
       .catch((e) => {
-        console.warn('Error creating accesstoken: ', e)
+        console.warn('Error creating accesstoken: ', e);
         return resolve(undefined);
       });
   });
-
 
   return saveAction;
 };
@@ -79,30 +99,36 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
  * @returns {Promise} resolved with the deleted token
  */
 exports.delete = (token) => {
-  const id = jwt.decode(token).jti;
-
   const deleteAction = new Promise((resolve, reject) => {
-    db.AccessToken
-      .findOne({where: { tokenId: id  } })
+    let decoded;
+    try {
+      decoded = utils.verifyToken(token);
+    } catch (e) {
+      console.warn('Error verifying JWT: ', e);
+      return resolve(undefined);
+    }
+
+    const id = decoded.jti;
+
+    db.AccessToken.findOne({ where: { tokenId: id } })
       .then((token) => {
         return token
           .destroy()
           .then(() => {
             return token ? resolve(token) : resolve(undefined);
           })
-          .catch(() =>{
-            console.warn('Error delete accesstoken: ', e)
-            return resolve(undefined)
-          })
+          .catch(() => {
+            console.warn('Error delete accesstoken: ', e);
+            return resolve(undefined);
+          });
       })
       .catch((e) => {
-        console.warn('Error delete accesstoken: ', e)
+        console.warn('Error delete accesstoken: ', e);
         return resolve(undefined);
-      })
+      });
   });
 
   return deleteAction;
-
 };
 
 /**
@@ -112,17 +138,15 @@ exports.delete = (token) => {
  */
 exports.removeExpired = () => {
   const removeExpiredAction = new Promise((resolve, reject) => {
-
-    db.AccessToken
-      .findAll()
+    db.AccessToken.findAll()
       .then(async (tokens) => {
         const deleteActions = [];
 
         tokens.forEach((accessToken) => {
           const expirationDate = accessToken.get('expirationDate');
 
-          if (new Date() > expirationDate)  {
-            deleteActions.push(accessToken.destroy())
+          if (new Date() > expirationDate) {
+            deleteActions.push(accessToken.destroy());
           }
         });
 
@@ -133,16 +157,15 @@ exports.removeExpired = () => {
           })
           .catch((e) => {
             resolve();
-            console.log('e', e)
-          })
-
+            console.log('e', e);
+          });
       })
       .catch((e) => {
-        console.warn('Error delete accesstoken: ', e)
+        console.warn('Error delete accesstoken: ', e);
         return Promise.resolve(undefined);
       });
 
-    resolve(undefined)
+    resolve(undefined);
   });
 
   return removeExpiredAction;
@@ -155,5 +178,5 @@ exports.removeExpired = () => {
 exports.removeAll = () => {
   //const deletedTokens = tokens;
   //tokens              = Object.create(null);
- // return Promise.resolve(deletedTokens);
+  // return Promise.resolve(deletedTokens);
 };

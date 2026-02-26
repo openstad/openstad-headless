@@ -31,6 +31,7 @@ COPY --chown=node:node vendor/ ./vendor
 RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
 RUN npm config set fetch-timeout 300000
+RUN npm config set legacy-peer-deps true
 
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
@@ -38,7 +39,7 @@ ENV BUILD_ENV=${BUILD_ENV}
 # set Cypress cache to a writable temp path (avoids issues with /root/.cache)
 ENV CYPRESS_CACHE_FOLDER=/tmp/CypressCache
 
-RUN npm ci --legacy-peer-deps -ws
+RUN npm ci --safe-chain-skip-minimum-package-age
 
 FROM builder AS base
 

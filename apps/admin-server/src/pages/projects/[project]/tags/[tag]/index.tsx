@@ -1,9 +1,5 @@
-
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
-
+import ColorPicker from '@/components/colorpicker';
+import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,20 +9,22 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { undefinedToTrueOrProp, YesNoSelect } from '@/lib/form-widget-helpers';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Heading } from '@/components/ui/typography';
 import useTag from '@/hooks/use-tag';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
+import { useRouter } from 'next/router';
+import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { ImageUploader } from "@/components/image-uploader";
-import { X } from "lucide-react";
-import InfoDialog from '@/components/ui/info-hover';
-import ColorPicker from '@/components/colorpicker';
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -52,7 +50,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
   const { project, tag } = router.query;
   const isGlobal = !!preset && preset === 'global';
   const { data, isLoading, updateTag } = useTag(
-    isGlobal ? "0" : project as string,
+    isGlobal ? '0' : (project as string),
     tag as string
   );
 
@@ -68,9 +66,13 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
-      useDifferentSubmitAddress: undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
+      useDifferentSubmitAddress: undefinedToTrueOrProp(
+        data?.useDifferentSubmitAddress
+      ),
       emails: data?.newSubmitAddress
-        ? data.newSubmitAddress.split(',').map((address: string) => ({ address: address.trim() }))
+        ? data.newSubmitAddress
+            .split(',')
+            .map((address: string) => ({ address: address.trim() }))
         : [{ address: '' }],
       defaultResourceImage: data?.defaultResourceImage || '',
       documentMapIconColor: data?.documentMapIconColor || '#555588',
@@ -83,8 +85,14 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (values.useDifferentSubmitAddress && values.emails !== undefined && values.emails.length > 0) {
-      const csv = values.emails.map((email: { address: any; }) => email.address).join(',');
+    if (
+      values.useDifferentSubmitAddress &&
+      values.emails !== undefined &&
+      values.emails.length > 0
+    ) {
+      const csv = values.emails
+        .map((email: { address: any }) => email.address)
+        .join(',');
       values.newSubmitAddress = csv;
     }
 
@@ -106,7 +114,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
     if (tag) {
       toast.success('Tag aangepast!');
     } else {
-      toast.error('Er is helaas iets mis gegaan.')
+      toast.error('Er is helaas iets mis gegaan.');
     }
   }
 
@@ -130,49 +138,45 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
   return (
     <div>
       <PageLayout
-        pageHeader={isGlobal ? "Instellingen" : "Projecten"}
-        breadcrumbs={isGlobal ? [
-            {
-              name: 'Instellingen',
-              url: '/settings',
-            },
-            {
-              name: 'Tag aanpassen',
-              url: `/settings/globaltags/${tag}`,
-            },
-          ]
-          :
-          [
-            {
-              name: 'Projecten',
-              url: '/projects',
-            },
-            {
-              name: 'Tags',
-              url: `/projects/${project}/tags`,
-            },
-            {
-              name: 'Tag aanpassen',
-              url: `/projects/${project}/tags/${tag}`,
-            },
-          ]
-        }
-      >
+        pageHeader={isGlobal ? 'Instellingen' : 'Projecten'}
+        breadcrumbs={
+          isGlobal
+            ? [
+                {
+                  name: 'Instellingen',
+                  url: '/settings',
+                },
+                {
+                  name: 'Tag aanpassen',
+                  url: `/settings/globaltags/${tag}`,
+                },
+              ]
+            : [
+                {
+                  name: 'Projecten',
+                  url: '/projects',
+                },
+                {
+                  name: 'Tags',
+                  url: `/projects/${project}/tags`,
+                },
+                {
+                  name: 'Tag aanpassen',
+                  url: `/projects/${project}/tags/${tag}`,
+                },
+              ]
+        }>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Tag</TabsTrigger>
-              <TabsTrigger value="displaysettings">
-                Weergave
-              </TabsTrigger>
-              { !isGlobal && (
+              <TabsTrigger value="displaysettings">Weergave</TabsTrigger>
+              {!isGlobal && (
                 <TabsTrigger value="notification">
                   Notificatie opties
                 </TabsTrigger>
               )}
-              <TabsTrigger value="imagesettings">
-                Afbeelding
-              </TabsTrigger>
+              <TabsTrigger value="imagesettings">Afbeelding</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               <div className="p-6 bg-white rounded-md">
@@ -215,7 +219,11 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                         <FormItem>
                           <FormLabel>
                             Sequence nummer
-                            <InfoDialog content={'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'} />
+                            <InfoDialog
+                              content={
+                                'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'
+                              }
+                            />
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="" {...field} />
@@ -227,13 +235,13 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                     <FormField
                       control={form.control}
                       name="addToNewResources"
-                      render={({field}) => (
+                      render={({ field }) => (
                         <FormItem>
                           <FormLabel>
                             Voeg deze tag automatisch toe aan nieuwe resources
                           </FormLabel>
                           {YesNoSelect(field, {})}
-                          <FormMessage/>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -292,43 +300,47 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                       )}
                     />
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <ImageUploader
-                      form={form}
-                      fieldName="mapIconUploader"
-                      imageLabel="Icoon op de kaart"
-                      description="De geüploade afbeelding wordt automatisch ingesteld als de marker op de kaart voor de resource die aan deze tag is gekoppeld. De ideale afmetingen voor een icoon zijn 45x60 pixels. Het ideale type is een .png of .svg"
-                      allowedTypes={['image/*']}
-                      onImageUploaded={(imageResult) => {
-                        const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
-                        form.setValue('mapIcon', result);
-                        form.resetField('mapIconUploader');
-                        form.trigger('mapIcon');
-                      }}
-                      project={isGlobal ? "0" : project as string}
-                    />
-                    <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
-                      {!!form.watch('mapIcon') && (
-                        <>
-                          <label
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Geüpload icoon</label>
-                          <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                                <div className="relative">
-                                  <img src={form.watch('mapIcon')} alt=""/>
-                                  <Button
-                                    color="red"
-                                    onClick={() => {
-                                      form.setValue('mapIcon', '');
-                                    }}
-                                    className="absolute right-0 top-0">
-                                    <X size={24}/>
-                                  </Button>
-                                </div>
-                          </section>
-                        </>
-                      )}
+                    <div className="grid grid-cols-2 gap-2">
+                      <ImageUploader
+                        form={form}
+                        fieldName="mapIconUploader"
+                        imageLabel="Icoon op de kaart"
+                        description="De geüploade afbeelding wordt automatisch ingesteld als de marker op de kaart voor de resource die aan deze tag is gekoppeld. De ideale afmetingen voor een icoon zijn 45x60 pixels. Het ideale type is een .png of .svg"
+                        allowedTypes={['image/*']}
+                        onImageUploaded={(imageResult) => {
+                          const result =
+                            typeof imageResult.url !== 'undefined'
+                              ? imageResult.url
+                              : '';
+                          form.setValue('mapIcon', result);
+                          form.resetField('mapIconUploader');
+                          form.trigger('mapIcon');
+                        }}
+                        project={isGlobal ? '0' : (project as string)}
+                      />
+                      <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                        {!!form.watch('mapIcon') && (
+                          <>
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                              Geüpload icoon
+                            </label>
+                            <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
+                              <div className="relative">
+                                <img src={form.watch('mapIcon')} alt="" />
+                                <Button
+                                  color="red"
+                                  onClick={() => {
+                                    form.setValue('mapIcon', '');
+                                  }}
+                                  className="absolute right-0 top-0">
+                                  <X size={24} />
+                                </Button>
+                              </div>
+                            </section>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
                     <FormField
                       control={form.control}
@@ -343,18 +355,20 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                         </FormItem>
                       )}
                     />
-                    { !isGlobal && (
+                    {!isGlobal && (
                       <FormField
                         control={form.control}
                         name="documentMapIconColor"
-                        render={({field}) => {
-                          const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                        render={({ field }) => {
+                          const handleColorChange = (
+                            e: React.ChangeEvent<HTMLInputElement>
+                          ) => {
                             const newColor = e.target.value;
                             field.onChange(newColor);
                           };
 
                           const handleResetColor = () => {
-                            const resetColor = "#555588";
+                            const resetColor = '#555588';
                             field.onChange(resetColor);
                           };
 
@@ -363,13 +377,18 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                               <FormLabel>Icon kleur op de kaart</FormLabel>
                               <FormControl>
                                 <div>
-                                  <ColorPicker value={field.value || "#555588"} onChange={handleColorChange}/>
-                                  <button type="button" onClick={handleResetColor}>
+                                  <ColorPicker
+                                    value={field.value || '#555588'}
+                                    onChange={handleColorChange}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={handleResetColor}>
                                     Reset
                                   </button>
                                 </div>
                               </FormControl>
-                              <FormMessage/>
+                              <FormMessage />
                             </FormItem>
                           );
                         }}
@@ -383,38 +402,43 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
               </div>
             </TabsContent>
 
-            { !isGlobal && (
+            {!isGlobal && (
               <TabsContent value="notification" className="p-0">
                 <div className="p-6 bg-white rounded-md">
                   <Form {...form}>
                     <Heading size="xl">Notificatie opties</Heading>
-                    <Separator className="my-4"/>
+                    <Separator className="my-4" />
                     <form
                       onSubmit={form.handleSubmit(onSubmit)}
                       className="lg:w-1/2 grid grid-cols-1 gap-4">
-
                       <FormField
                         control={form.control}
                         name="useDifferentSubmitAddress"
-                        render={({field}) => (
+                        render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              Nieuwe inzendingen van resources met deze tag moeten worden bevestigd via een ander
-                              e-mailadres
+                              Nieuwe inzendingen van resources met deze tag
+                              moeten worden bevestigd via een ander e-mailadres
                             </FormLabel>
                             {YesNoSelect(field, {})}
-                            <FormMessage/>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
                       {form.watch('useDifferentSubmitAddress') && (
                         <>
                           {fields.map((field, index) => (
-                            <div key={field.id} style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+                            <div
+                              key={field.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                marginBottom: '10px',
+                              }}>
                               <Controller
                                 control={form.control}
                                 name={`emails.${index}.address`}
-                                render={({field}) => (
+                                render={({ field }) => (
                                   <input
                                     {...field}
                                     style={{
@@ -429,10 +453,19 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                                   />
                                 )}
                               />
-                              <button type="button" onClick={() => remove(index)}> Verwijderen</button>
+                              <button
+                                type="button"
+                                onClick={() => remove(index)}>
+                                {' '}
+                                Verwijderen
+                              </button>
                             </div>
                           ))}
-                          <button type="button" onClick={() => append({address: ''})}>Add Email</button>
+                          <button
+                            type="button"
+                            onClick={() => append({ address: '' })}>
+                            Add Email
+                          </button>
                         </>
                       )}
                       <Button className="w-fit col-span-full" type="submit">
@@ -452,27 +485,34 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="lg:w-1/2 grid grid-cols-1 gap-4">
-
                     <ImageUploader
                       form={form}
-                      project={isGlobal ? "0" : project as string}
+                      project={isGlobal ? '0' : (project as string)}
                       imageLabel="Upload hier een afbeelding die vervolgens automatisch wordt ingesteld als de standaardafbeelding voor de resource die aan deze tag is gekoppeld"
                       fieldName="image"
-                      allowedTypes={["image/*"]}
+                      allowedTypes={['image/*']}
                       onImageUploaded={(imageResult) => {
-                        const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                        const result =
+                          typeof imageResult.url !== 'undefined'
+                            ? imageResult.url
+                            : '';
                         form.setValue('defaultResourceImage', result);
-                        form.resetField('image')
+                        form.resetField('image');
                         form.trigger('defaultResourceImage');
                       }}
                     />
 
                     <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
-                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
+                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Afbeeldingen
+                      </label>
                       <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                         {!!form.watch('defaultResourceImage') && (
                           <div style={{ position: 'relative' }}>
-                            <img src={form.watch('defaultResourceImage')} alt={form.watch('defaultResourceImage')} />
+                            <img
+                              src={form.watch('defaultResourceImage')}
+                              alt={form.watch('defaultResourceImage')}
+                            />
                             <Button
                               color="red"
                               onClick={() => {
@@ -497,7 +537,6 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                 </Form>
               </div>
             </TabsContent>
-
           </Tabs>
         </div>
       </PageLayout>

@@ -1,7 +1,7 @@
 module.exports = {
   extend: 'base-widget',
   options: {
-    label: 'Button'
+    label: 'Button',
   },
   fields: {
     add: {
@@ -12,13 +12,13 @@ module.exports = {
         choices: [
           {
             label: 'Naast elkaar',
-            value: 'row'
+            value: 'row',
           },
           {
             label: 'Onder elkaar',
-            value: 'column'
-          }
-        ]
+            value: 'column',
+          },
+        ],
       },
       buttons: {
         label: 'Buttons',
@@ -29,11 +29,11 @@ module.exports = {
           add: {
             label: {
               label: 'Label',
-              type: 'string'
+              type: 'string',
             },
             href: {
               label: 'Url',
-              type: 'string'
+              type: 'string',
             },
             appearance: {
               type: 'select',
@@ -42,21 +42,21 @@ module.exports = {
               choices: [
                 {
                   label: 'primary-action-button',
-                  value: 'primary-action-button'
+                  value: 'primary-action-button',
                 },
                 {
                   label: 'secondary-action-button',
-                  value: 'secondary-action-button'
+                  value: 'secondary-action-button',
                 },
                 {
                   label: 'default-button',
-                  value: 'default-button'
+                  value: 'default-button',
                 },
                 {
                   label: 'subtle-button',
-                  value: 'subtle-button'
-                }
-              ]
+                  value: 'subtle-button',
+                },
+              ],
             },
             target: {
               type: 'select',
@@ -65,17 +65,17 @@ module.exports = {
               choices: [
                 {
                   label: 'Zelfde pagina',
-                  value: '_self'
+                  value: '_self',
                 },
                 {
                   label: 'Nieuw tabblad',
-                  value: '_blank'
-                }
-              ]
-            }
-          }
-        }
-      }
+                  value: '_blank',
+                },
+              ],
+            },
+          },
+        },
+      },
     },
-  }
+  },
 };

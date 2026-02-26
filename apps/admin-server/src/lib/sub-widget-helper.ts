@@ -1,13 +1,14 @@
-import { EditFieldProps } from "./form-widget-helpers/EditFieldProps";
-
-
+import { EditFieldProps } from './form-widget-helpers/EditFieldProps';
 
 type ConfigWithFunctions<ChildWidgetProps> = ChildWidgetProps & {
   updateConfig: (config: ChildWidgetProps) => void;
   onFieldChanged: (key: string, value: any) => void;
 };
 
-type ExtractConfigParams<ParentWidgetProps extends {}, ChildWidgetProps extends {}> = {
+type ExtractConfigParams<
+  ParentWidgetProps extends {},
+  ChildWidgetProps extends {},
+> = {
   subWidgetKey: keyof ParentWidgetProps;
   previewConfig: ParentWidgetProps | null;
   updateConfig: (config: ParentWidgetProps) => void;
@@ -16,7 +17,10 @@ type ExtractConfigParams<ParentWidgetProps extends {}, ChildWidgetProps extends 
   widgetName?: string;
 };
 
-export function extractConfig<ParentWidgetProps extends {}, ChildWidgetProps extends {}>(
+export function extractConfig<
+  ParentWidgetProps extends {},
+  ChildWidgetProps extends {},
+>(
   params: ExtractConfigParams<ParentWidgetProps, ChildWidgetProps>
 ): ConfigWithFunctions<ChildWidgetProps> {
   const {
@@ -26,12 +30,12 @@ export function extractConfig<ParentWidgetProps extends {}, ChildWidgetProps ext
     updatePreview,
     extraChildConfig,
   } = params;
-  
+
   if (!previewConfig) throw new Error();
 
   const extractedConfig: ConfigWithFunctions<ChildWidgetProps> = {
     ...extraChildConfig,
-    ...previewConfig[subWidgetKey] as ChildWidgetProps,
+    ...(previewConfig[subWidgetKey] as ChildWidgetProps),
     updateConfig: (config: ChildWidgetProps) =>
       updateConfig({
         ...previewConfig,
@@ -51,6 +55,6 @@ export function extractConfig<ParentWidgetProps extends {}, ChildWidgetProps ext
         });
       }
     },
-  }
+  };
   return extractedConfig;
 }

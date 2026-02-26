@@ -3,6 +3,7 @@
 # Description
 
 Please include
+
 - a summary of the changes
 - relevant motivation and context
 - a list of any dependencies that are required for this change
@@ -27,4 +28,3 @@ Is the documentation updated, maybe a link
 ## Branch
 
 If the branch to merge to is not development
-

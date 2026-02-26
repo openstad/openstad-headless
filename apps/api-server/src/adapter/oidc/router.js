@@ -107,6 +107,7 @@ router
         '/logout?redirectUri=' +
         backToHereUrl;
       console.log('login?', baseUrl, url);
+
       return res.redirect(url);
     } else if (req.query.redirectUri) {
       return next(createError(403, 'redirectUri not found in allowlist.'));
@@ -119,6 +120,7 @@ router
       req.project.id,
       await isRedirectAllowed(req.project.id, req.query.redirectUri)
     );
+
     // Check if redirect domain is allowed
     if (
       req.query.redirectUri &&
@@ -129,9 +131,17 @@ router
       if (!authConfigId)
         return next(createError(403, 'No authConfig for this project.'));
 
-      const projectServerLoginPaths = req.project && req.project.config && req.project.config.authProvidersServerLoginPath;
+      const projectServerLoginPaths =
+        req.project &&
+        req.project.config &&
+        req.project.config.authProvidersServerLoginPath;
       if (!projectServerLoginPaths || !projectServerLoginPaths[authConfigId])
-          return next(createError(403, 'No serverLoginPath for this project and authConfig.'));
+        return next(
+          createError(
+            403,
+            'No serverLoginPath for this project and authConfig.'
+          )
+        );
 
       req.authConfig.serverLoginPath = projectServerLoginPaths[authConfigId];
 
@@ -200,13 +210,22 @@ router
         secure: true,
       });
 
+      console.log('req authconfig', req.authConfig, url);
+
+      url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
+      url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
       url = url.replace(
         /\[\[redirectUri\]\]/,
         encodeURIComponent(
-          apiUrl + '/auth/digest-login'
+          config.url +
+            '/auth/project/' +
+            req.project.id +
+            '/digest-login?useAuth=' +
+            req.authConfig.provider +
+            '\&returnTo=' +
+            req.query.redirectUri
         )
       );
-      console.log('req authconfig', req.authConfig, url);
       res.redirect(url);
     } else if (req.query.redirectUri) {
       return next(createError(403, 'redirectUri not found in allowlist.'));
@@ -253,7 +272,7 @@ router
       if (!verifier || !verifier.verifier) {
         throw new Error('PKCE Verifier not found for given UUID');
       }
-      
+
       data.code_verifier = verifier.verifier;
     }
 
@@ -267,7 +286,13 @@ router
       )}&code=${encodeURIComponent(
         code
       )}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(
-        config.url + '/auth/digest-login'
+        config.url +
+          '/auth/project/' +
+          req.project.id +
+          '/digest-login?useAuth=' +
+          req.authConfig.provider +
+          '\&returnTo=' +
+          req.query.returnTo
       )}`;
 
     fetch(url, {
@@ -284,14 +309,14 @@ router
       })
       .then((json) => {
         let accessToken = json.access_token;
-        console.log ('json from oidc', json, json.access_token);
+        console.log('json from oidc', json, json.access_token);
         if (!accessToken)
           return next(
             createError(403, 'Inloggen niet gelukt: geen accessToken')
           );
 
         req.userAccessToken = accessToken;
-        console.log ('id_token', json.id_token)
+        console.log('id_token', json.id_token);
         return next();
       })
       .catch((err) => {
@@ -388,34 +413,36 @@ router
       } catch (err) {
         return false;
       }
-    }
+    };
 
     const allowedDomains = req.project?.config?.allowedDomains || [];
 
-    const redirectUriFromCookies = (req.cookies && req.cookies['redirectUri']) || '';
+    const redirectUriFromCookies =
+      (req.cookies && req.cookies['redirectUri']) || '';
     const afterLoginRedirect = req.authConfig?.afterLoginRedirectUri || '';
 
     let returnTo = String(afterLoginRedirect);
-    
+
     if (req.query.returnTo) {
       if (isSafeRedirectUrl(req.query.returnTo, allowedDomains)) {
         returnTo = String(req.query.returnTo);
       }
     }
-    
+
     if (redirectUriFromCookies) {
       if (isSafeRedirectUrl(redirectUriFromCookies, allowedDomains)) {
         returnTo = String(redirectUriFromCookies);
       }
     }
-    
+
     res.clearCookie('redirectUri', { path: '/' });
     res.clearCookie('useAuth', { path: '/' });
     res.clearCookie('projectId', { path: '/' });
-    
+
     let redirectUrl = returnTo;
     if (redirectUrl && !redirectUrl.includes('openstadlogintoken=[[jwt]]')) {
-      redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
+      redirectUrl +=
+        (redirectUrl.includes('?') ? '&' : '?') + 'openstadlogintoken=[[jwt]]';
     }
     redirectUrl = redirectUrl || '/';
 
@@ -423,41 +450,61 @@ router
       return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
 
-    console.log ('[!!!!!] redirectUrl', redirectUrl, 'allowedDomains', allowedDomains, 'contains [[jwt]]', redirectUrl.indexOf('[[jwt]]') > -1);
-    
+    console.log(
+      '[!!!!!] redirectUrl',
+      redirectUrl,
+      'allowedDomains',
+      allowedDomains,
+      'contains [[jwt]]',
+      redirectUrl.indexOf('[[jwt]]') > -1
+    );
+
     //check if redirect domain is allowed
-    if (redirectUrl.indexOf('[[jwt]]') > -1) {
+    if (redirectUrl.match('[[jwt]]')) {
       jwt.sign(
         { userId: req.userData.id, authProvider: req.authConfig.provider },
         req.authConfig.jwtSecret,
         { expiresIn: 182 * 24 * 60 * 60 },
         (err, token) => {
           if (err) {
-            console.log ('error in jwt creation');
+            console.log('error in jwt creation');
             return next(err);
           }
           redirectUrl = redirectUrl.replace('[[jwt]]', token);
-          console.log ('[!!!! jwt cb] redirectUrl after jwt', redirectUrl, 'token', token, 'err', err);
-          
+          console.log(
+            '[!!!! jwt cb] redirectUrl after jwt',
+            redirectUrl,
+            'token',
+            token,
+            'err',
+            err
+          );
+
           // Revalidate redirectUrl after adding the token
           if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
-            return res.status(500).json({ status: 'Redirect domain not allowed' });
+            return res
+              .status(500)
+              .json({ status: 'Redirect domain not allowed' });
           }
-          
+
           return res.redirect(redirectUrl);
         }
       );
+    }
+
+    // Revalidate redirectUrl after modification
+    if (isSafeRedirectUrl(redirectUrl, allowedDomains)) {
+      return res.redirect(redirectUrl);
     } else {
-      console.log ('[!!!! no jwt cb] redirectUrl without jwt', redirectUrl);
+      console.log('[!!!! no jwt cb] redirectUrl without jwt', redirectUrl);
       // Revalidate redirectUrl before redirecting
       if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
         return res.status(500).json({ status: 'Redirect domain not allowed' });
       }
-      
+
       return res.redirect(redirectUrl);
     }
-    
-  })
+  });
 
 // ----------------------------------------------------------------------------------------------------
 // logout
@@ -488,13 +535,18 @@ router
       }
       return res.redirect(url);
     }*/
-    
-    console.log ('logout, req.query.redirectUri', req.query.redirectUri, req.project.id, await isRedirectAllowed(req.project.id, req.query.redirectUri));
+
+    console.log(
+      'logout, req.query.redirectUri',
+      req.query.redirectUri,
+      req.project.id,
+      await isRedirectAllowed(req.project.id, req.query.redirectUri)
+    );
 
     res.clearCookie('useAuthProvider', { path: '/' });
     res.clearCookie('useAuth', { path: '/' });
     res.clearCookie('pkce_uuid', { path: '/' });
-    
+
     // Check if redirect domain is allowed
     if (
       req.query.redirectUri &&

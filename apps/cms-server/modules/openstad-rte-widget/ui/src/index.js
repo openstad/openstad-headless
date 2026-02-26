@@ -3,6 +3,6 @@ export default () => {
     selector: '[data-openstad-rte]',
     player: function (el) {
       ApostropheWidgetsRTE.RTE.loadWidgetOnElement(el, { ...el.dataset });
-    }
+    },
   };
 };

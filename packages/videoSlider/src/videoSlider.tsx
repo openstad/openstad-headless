@@ -1,20 +1,19 @@
-import './videoSlider.css';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import SwipeField from '@openstad-headless/swipe/src/swipe';
 import type { BaseProps } from '@openstad-headless/types';
-import { Pagination, A11y } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import ImageChoiceField from '@openstad-headless/ui/src/form-elements/image-choice';
+import TickmarkSlider from '@openstad-headless/ui/src/form-elements/tickmark-slider';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
-
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-import SwipeField from '@openstad-headless/swipe/src/swipe';
-import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-slider";
-import ImageChoiceField from '@openstad-headless/ui/src/form-elements/image-choice';
+import { A11y, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
+import './videoSlider.css';
 
 export type VideoSliderWidgetProps = BaseProps &
   VideoSliderProps & {
@@ -34,7 +33,8 @@ const defaultSlides = [
   {
     src: 'https://www.w3schools.com/html/mov_bbb.mp4',
     type: 'intro',
-    content: 'Mijn naam is Jasmijn en doe een project over sporten in Den Haag. Hoe maken we dit toegankelijker voor jongeren? Jouw mening telt, dus scroll naar beneden en beantwoord de vragen: hoe jij meer zou gaan sporten?',
+    content:
+      'Mijn naam is Jasmijn en doe een project over sporten in Den Haag. Hoe maken we dit toegankelijker voor jongeren? Jouw mening telt, dus scroll naar beneden en beantwoord de vragen: hoe jij meer zou gaan sporten?',
   },
   {
     src: 'https://www.w3schools.com/html/mov_bbb.mp4',
@@ -56,9 +56,8 @@ const defaultSlides = [
       {
         title: 'Dichter bij huis',
         id: 'closer_to_home',
-      }
-
-    ]
+      },
+    ],
   },
   {
     src: 'https://www.w3schools.com/html/mov_bbb.mp4',
@@ -72,36 +71,40 @@ const defaultSlides = [
       {
         title: '10 nieuwe sportplekken in jouw wijk',
         id: 'new_sport_locations',
-      }
-    ]
-  }
-]
+      },
+    ],
+  },
+];
 
-function Swipe({ 
-  slide, 
-  active, 
-  muted, 
-  autoPlay, 
-  formAnswers, 
-  updateAnswer, 
+function Swipe({
+  slide,
+  active,
+  muted,
+  autoPlay,
+  formAnswers,
+  updateAnswer,
   updateMultipleAnswer,
-  updateSwipeAnswer
-}: { 
-  slide: any, 
-  active: boolean, 
-  muted: boolean, 
-  autoPlay: boolean,
-  formAnswers: { [key: string]: any },
-  updateAnswer: (fieldKey: string, value: any) => void,
-  updateMultipleAnswer: (fieldKey: string, value: string, checked: boolean) => void,
-  updateSwipeAnswer: (fieldKey: string, swipeData: any) => void
+  updateSwipeAnswer,
+}: {
+  slide: any;
+  active: boolean;
+  muted: boolean;
+  autoPlay: boolean;
+  formAnswers: { [key: string]: any };
+  updateAnswer: (fieldKey: string, value: any) => void;
+  updateMultipleAnswer: (
+    fieldKey: string,
+    value: string,
+    checked: boolean
+  ) => void;
+  updateSwipeAnswer: (fieldKey: string, swipeData: any) => void;
 }) {
   const [isActive, setActive] = useState(active);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setActive(active);
-    
+
     if (videoRef.current) {
       if (active) {
         // Reset video to beginning when slide becomes active
@@ -118,18 +121,22 @@ function Swipe({
 
   return (
     <div className="swiper-video-container">
-      <div className="swiper-video-content" style={{ display: isActive ? 'block' : 'none' }}>
+      <div
+        className="swiper-video-content"
+        style={{ display: isActive ? 'block' : 'none' }}>
         <div className="swiper-video-question">
           <div className="--intro">
-            {slide.title && (<h2>{slide.title}</h2>)}
-            {slide.description && (<p>{slide.description}</p>)}
+            {slide.title && <h2>{slide.title}</h2>}
+            {slide.description && <p>{slide.description}</p>}
           </div>
           {slide.questionType === 'multiple' && (
             <ul className="swiper-video-question-list">
               {slide.options?.map((q, key) => {
                 const fieldKey = `${slide.id || slide.trigger}_multiple`;
-                const isChecked = (formAnswers[fieldKey] || []).includes(q.titles[0].key);
-                
+                const isChecked = (formAnswers[fieldKey] || []).includes(
+                  q.titles[0].key
+                );
+
                 return (
                   <li key={q.id}>
                     <input
@@ -138,10 +145,18 @@ function Swipe({
                       name={fieldKey}
                       value={q.titles[0].key}
                       checked={isChecked}
-                      onChange={(e) => updateMultipleAnswer(fieldKey, q.titles[0].key, e.target.checked)}
+                      onChange={(e) =>
+                        updateMultipleAnswer(
+                          fieldKey,
+                          q.titles[0].key,
+                          e.target.checked
+                        )
+                      }
                     />
-                    <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
-                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
+                    <label
+                      htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span>{' '}
+                      {q.titles[0].key}
                     </label>
                   </li>
                 );
@@ -154,7 +169,7 @@ function Swipe({
               {slide.options?.map((q, key) => {
                 const fieldKey = `${slide.id || slide.trigger}_multiplechoice`;
                 const isChecked = formAnswers[fieldKey] === q.titles[0].key;
-                
+
                 return (
                   <li key={q.id}>
                     <input
@@ -165,8 +180,10 @@ function Swipe({
                       checked={isChecked}
                       onChange={(e) => updateAnswer(fieldKey, e.target.value)}
                     />
-                    <label htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
-                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span> {q.titles[0].key}
+                    <label
+                      htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span>{' '}
+                      {q.titles[0].key}
                     </label>
                   </li>
                 );
@@ -185,13 +202,13 @@ function Swipe({
                     image: card.titles[0].image || '',
                   }))}
                   onSwipeLeft={(card) => {
-                    console.log(card)
+                    console.log(card);
                     const fieldKey = `${slide.id || slide.trigger}_swipe`;
                     //Still bugged..
                     // updateSwipeAnswer(fieldKey, { action: 'left', card: card });
                   }}
                   onSwipeRight={(card) => {
-                    console.log(card)
+                    console.log(card);
                     const fieldKey = `${slide.id || slide.trigger}_swipe`;
                     //Still bugged..
                     // updateSwipeAnswer(fieldKey, { action: 'right', card: card });
@@ -212,11 +229,40 @@ function Swipe({
                 index={0}
                 title=""
                 fieldOptions={[
-                  { value: '1', label: slide.showSmileys ? <><div>😡</div><span className="value">Slecht</span></> as any : '1' },
-                  { value: '2', label: slide.showSmileys ? <div>🙁</div> as any : '2' },
-                  { value: '3', label: slide.showSmileys ? <div>😐</div> as any : '3' },
-                  { value: '4', label: slide.showSmileys ? <div>😀</div> as any : '4' },
-                  { value: '5', label: slide.showSmileys ? <><div>😍</div><span className="value">Goed</span></> as any : '5' },
+                  {
+                    value: '1',
+                    label: slide.showSmileys
+                      ? ((
+                          <>
+                            <div>😡</div>
+                            <span className="value">Slecht</span>
+                          </>
+                        ) as any)
+                      : '1',
+                  },
+                  {
+                    value: '2',
+                    label: slide.showSmileys ? ((<div>🙁</div>) as any) : '2',
+                  },
+                  {
+                    value: '3',
+                    label: slide.showSmileys ? ((<div>😐</div>) as any) : '3',
+                  },
+                  {
+                    value: '4',
+                    label: slide.showSmileys ? ((<div>😀</div>) as any) : '4',
+                  },
+                  {
+                    value: '5',
+                    label: slide.showSmileys
+                      ? ((
+                          <>
+                            <div>😍</div>
+                            <span className="value">Goed</span>
+                          </>
+                        ) as any)
+                      : '5',
+                  },
                 ]}
                 fieldRequired={false}
                 fieldKey=""
@@ -249,7 +295,6 @@ function Swipe({
               </div>
             </div>
           )}
-
         </div>
         {slide.videoUrl && (
           <div className="vid-container">
@@ -277,9 +322,8 @@ function Swipe({
         </div>
       )}
     </div>
-  )
+  );
 }
-
 
 function VideoSlider({
   baseSlides = defaultSlides,
@@ -289,34 +333,39 @@ function VideoSlider({
   const [muted, setMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
-  const [horizontalSlideIndex, setHorizontalSlideIndex] = useState<{ [key: number]: number }>({});
+  const [horizontalSlideIndex, setHorizontalSlideIndex] = useState<{
+    [key: number]: number;
+  }>({});
   const [formAnswers, setFormAnswers] = useState<{ [key: string]: any }>({});
   const swiperRef = useRef<SwiperType | null>(null);
 
   const slides = props?.items || baseSlides;
 
-
   // Helper function to update answers in state
   const updateAnswer = (fieldKey: string, value: any) => {
-    setFormAnswers(prev => ({
+    setFormAnswers((prev) => ({
       ...prev,
-      [fieldKey]: value
+      [fieldKey]: value,
     }));
   };
 
   // Helper function to handle multiple choice answers (checkboxes)
-  const updateMultipleAnswer = (fieldKey: string, value: string, checked: boolean) => {
-    setFormAnswers(prev => {
+  const updateMultipleAnswer = (
+    fieldKey: string,
+    value: string,
+    checked: boolean
+  ) => {
+    setFormAnswers((prev) => {
       const currentAnswers = prev[fieldKey] || [];
       if (checked) {
         return {
           ...prev,
-          [fieldKey]: [...currentAnswers, value]
+          [fieldKey]: [...currentAnswers, value],
         };
       } else {
         return {
           ...prev,
-          [fieldKey]: currentAnswers.filter((item: string) => item !== value)
+          [fieldKey]: currentAnswers.filter((item: string) => item !== value),
         };
       }
     });
@@ -324,21 +373,23 @@ function VideoSlider({
 
   // Helper function to handle swipe answers (accumulating all swipes)
   const updateSwipeAnswer = (fieldKey: string, swipeData: any) => {
-    setFormAnswers(prev => {
+    setFormAnswers((prev) => {
       const currentAnswers = prev[fieldKey] || [];
-      const existingIndex = currentAnswers.findIndex((item: any) => item.card.id === swipeData.card.id);
-      
+      const existingIndex = currentAnswers.findIndex(
+        (item: any) => item.card.id === swipeData.card.id
+      );
+
       if (existingIndex !== -1) {
         const updatedAnswers = [...currentAnswers];
         updatedAnswers[existingIndex] = swipeData;
         return {
           ...prev,
-          [fieldKey]: updatedAnswers
+          [fieldKey]: updatedAnswers,
         };
       } else {
         return {
           ...prev,
-          [fieldKey]: [...currentAnswers, swipeData]
+          [fieldKey]: [...currentAnswers, swipeData],
         };
       }
     });
@@ -346,7 +397,7 @@ function VideoSlider({
 
   // Group slides by their group property
   const groupedSlides = useMemo(() => {
-    const groups: { [key: string]: { slides: any[], firstIndex: number } } = {};
+    const groups: { [key: string]: { slides: any[]; firstIndex: number } } = {};
     const result: any[] = [];
 
     slides.forEach((slide, index) => {
@@ -361,14 +412,16 @@ function VideoSlider({
     });
 
     // Insert grouped slides at their first occurrence position
-    Object.entries(groups).forEach(([groupName, { slides: groupSlides, firstIndex }]) => {
-      result.splice(firstIndex, 0, { 
-        type: 'group', 
-        group: groupName, 
-        slides: groupSlides,
-        originalIndex: firstIndex
-      });
-    });
+    Object.entries(groups).forEach(
+      ([groupName, { slides: groupSlides, firstIndex }]) => {
+        result.splice(firstIndex, 0, {
+          type: 'group',
+          group: groupName,
+          slides: groupSlides,
+          originalIndex: firstIndex,
+        });
+      }
+    );
 
     return result.sort((a, b) => a.originalIndex - b.originalIndex);
   }, [slides]);
@@ -411,35 +464,49 @@ function VideoSlider({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     // Use the state-managed form answers instead of FormData
     const allData = {
       formInputs: formAnswers,
     };
-    
+
     // TODO: Handle form submission
     console.log('Form submitted with data:', allData);
   };
 
   return (
-    <div className="video-slider" role="region" aria-label="Video slider widget">
-      <form className="video-slider-form" onSubmit={handleSubmit} aria-label="Video slider formulier">
+    <div
+      className="video-slider"
+      role="region"
+      aria-label="Video slider widget">
+      <form
+        className="video-slider-form"
+        onSubmit={handleSubmit}
+        aria-label="Video slider formulier">
         <Swiper
           modules={[A11y]}
-          direction='vertical'
+          direction="vertical"
           pagination={{ clickable: false }}
-          onSwiper={(swiper) => { swiperRef.current = swiper; }}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
           onSlideChange={(e) => setCurrent(e.activeIndex)}
           role="list"
-          aria-label="Slides"
-        >
+          aria-label="Slides">
           {groupedSlides.map((item, index) => (
-            <SwiperSlide key={index} role="listitem" aria-label={item.type === 'single' ? (item.slide?.title || `Slide ${index + 1}`) : `Groep ${item.group}` }>
+            <SwiperSlide
+              key={index}
+              role="listitem"
+              aria-label={
+                item.type === 'single'
+                  ? item.slide?.title || `Slide ${index + 1}`
+                  : `Groep ${item.group}`
+              }>
               {item.type === 'single' ? (
-                <Swipe 
-                  slide={item.slide} 
-                  active={index === current} 
-                  muted={muted} 
+                <Swipe
+                  slide={item.slide}
+                  active={index === current}
+                  muted={muted}
                   autoPlay={autoPlay}
                   formAnswers={formAnswers}
                   updateAnswer={updateAnswer}
@@ -448,19 +515,27 @@ function VideoSlider({
                 />
               ) : (
                 <Swiper
-                  direction='horizontal'
+                  direction="horizontal"
                   pagination={{ clickable: true }}
                   onSlideChange={(swiper) => {
-                    setHorizontalSlideIndex(prev => ({ ...prev, [index]: swiper.activeIndex }));
+                    setHorizontalSlideIndex((prev) => ({
+                      ...prev,
+                      [index]: swiper.activeIndex,
+                    }));
                   }}
                   role="list"
-                  aria-label={`Slides groep ${item.group}`}
-                >
+                  aria-label={`Slides groep ${item.group}`}>
                   {item.slides.map((slide: any, slideIndex: number) => (
-                    <SwiperSlide key={slideIndex} role="listitem" aria-label={slide?.title || `Slide ${slideIndex + 1}` }>
+                    <SwiperSlide
+                      key={slideIndex}
+                      role="listitem"
+                      aria-label={slide?.title || `Slide ${slideIndex + 1}`}>
                       <Swipe
                         slide={slide}
-                        active={index === current && (horizontalSlideIndex[index] ?? 0) === slideIndex}
+                        active={
+                          index === current &&
+                          (horizontalSlideIndex[index] ?? 0) === slideIndex
+                        }
                         muted={muted}
                         autoPlay={autoPlay}
                         formAnswers={formAnswers}
@@ -474,12 +549,13 @@ function VideoSlider({
                           type="button"
                           aria-label={`Ga naar volgende slide (${slideIndex + 2})`}
                           onClick={() => {
-                            const swiperEl = document.querySelector('.swiper-horizontal') as any;
+                            const swiperEl = document.querySelector(
+                              '.swiper-horizontal'
+                            ) as any;
                             if (swiperEl && swiperEl.swiper) {
                               swiperEl.swiper.slideNext();
                             }
-                          }}
-                        >
+                          }}>
                           Volgende
                         </button>
                       )}
@@ -489,20 +565,33 @@ function VideoSlider({
               )}
             </SwiperSlide>
           ))}
-          <SwiperSlide key={'final-slide'} role="listitem" aria-label="Laatste slide">
-            <div className="final-slide" role="region" aria-label="Laatste slide">
+          <SwiperSlide
+            key={'final-slide'}
+            role="listitem"
+            aria-label="Laatste slide">
+            <div
+              className="final-slide"
+              role="region"
+              aria-label="Laatste slide">
               <h2>{props?.finalSlideTitle}</h2>
               <p>{props?.finalSlideDescription}</p>
-              <button type="submit" aria-label="Versturen antwoorden">Versturen</button>
+              <button type="submit" aria-label="Versturen antwoorden">
+                Versturen
+              </button>
             </div>
           </SwiperSlide>
         </Swiper>
 
-        <div className="video-slider-controls" role="group" aria-label="Video bediening">
+        <div
+          className="video-slider-controls"
+          role="group"
+          aria-label="Video bediening">
           <button
             onClick={() => {
-              const videos = document.querySelectorAll('.vid-container video') as NodeListOf<HTMLVideoElement>;
-              videos.forEach(video => {
+              const videos = document.querySelectorAll(
+                '.vid-container video'
+              ) as NodeListOf<HTMLVideoElement>;
+              videos.forEach((video) => {
                 setAutoPlay(!autoPlay);
                 if (video.paused) {
                   video.play();
@@ -513,16 +602,16 @@ function VideoSlider({
             }}
             className={`video-slider-play-button ${autoPlay ? '--autoplay' : ''}`}
             aria-label={autoPlay ? 'Pauzeer alle videos' : 'Speel alle videos'}
-            type="button"
-          >
-            <span>{autoPlay ? 'Pauzeer alle Videos' : 'Speel alle Videos'}</span>
+            type="button">
+            <span>
+              {autoPlay ? 'Pauzeer alle Videos' : 'Speel alle Videos'}
+            </span>
           </button>
-          <button 
-            onClick={() => setMuted(!muted)} 
+          <button
+            onClick={() => setMuted(!muted)}
             className={`video-slider-mute-button ${muted ? '--muted' : ''}`}
             aria-label={muted ? 'Geluid aanzetten' : 'Geluid uitzetten'}
-            type="button"
-          >
+            type="button">
             <span>{muted ? 'Geluid aanzetten' : 'Geluid uitzetten'}</span>
           </button>
           <button
@@ -541,26 +630,27 @@ function VideoSlider({
             }}
             className={`video-slider-fullscreen-button${isFullscreen ? ' --fullscreen' : ''}`}
             aria-label={isFullscreen ? 'Venster verlaten' : 'Volledig scherm'}
-            type="button"
-          >
+            type="button">
             <span>{isFullscreen ? 'Venster verlaten' : 'Volledig scherm'}</span>
           </button>
         </div>
 
         {/* Debug section - remove in production */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="video-slider-debug" style={{ 
-            position: 'fixed', 
-            top: '10px', 
-            right: '10px', 
-            background: 'rgba(0,0,0,0.8)', 
-            color: 'white', 
-            padding: '10px', 
-            borderRadius: '5px',
-            maxWidth: '300px',
-            fontSize: '12px',
-            zIndex: 1000
-          }}>
+          <div
+            className="video-slider-debug"
+            style={{
+              position: 'fixed',
+              top: '10px',
+              right: '10px',
+              background: 'rgba(0,0,0,0.8)',
+              color: 'white',
+              padding: '10px',
+              borderRadius: '5px',
+              maxWidth: '300px',
+              fontSize: '12px',
+              zIndex: 1000,
+            }}>
             <h4>Debug - Form Answers:</h4>
             <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
               {JSON.stringify(formAnswers, null, 2)}
@@ -571,7 +661,6 @@ function VideoSlider({
     </div>
   );
 }
-
 
 VideoSlider.loadWidget = loadWidget;
 

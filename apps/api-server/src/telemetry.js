@@ -1,8 +1,16 @@
 const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const {
+  getNodeAutoInstrumentations,
+} = require('@opentelemetry/auto-instrumentations-node');
+const {
+  OTLPTraceExporter,
+} = require('@opentelemetry/exporter-trace-otlp-http');
 const { Resource } = require('@opentelemetry/resources');
-const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION, ATTR_DEPLOYMENT_ENVIRONMENT } = require('@opentelemetry/semantic-conventions');
+const {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+  ATTR_DEPLOYMENT_ENVIRONMENT,
+} = require('@opentelemetry/semantic-conventions');
 const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 
 class TelemetryManager {
@@ -12,7 +20,9 @@ class TelemetryManager {
       serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-api-server',
       serviceVersion: process.env.OTEL_SERVICE_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'development',
-      otlpEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://openstad-jaeger:4318/v1/traces',
+      otlpEndpoint:
+        process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
+        'http://openstad-jaeger:4318/v1/traces',
       ...config,
     };
     this.sdk = null;
@@ -104,4 +114,4 @@ module.exports = {
   TelemetryManager,
   telemetryManager,
   setupGracefulShutdown,
-}; 
+};

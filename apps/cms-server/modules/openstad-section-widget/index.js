@@ -12,17 +12,16 @@ const contentWidgets = {
   'openstad-iconSection': {},
   'openstad-carousel': {},
   'openstad-blog-post': {},
-  'openstad-breadcrumbs': {}
+  'openstad-breadcrumbs': {},
 };
 
 module.exports = {
   extend: 'base-widget',
   options: {
-    label: 'Sectie'
+    label: 'Sectie',
   },
   fields: {
     add: {
-
       displayType: {
         name: 'displayType',
         label: 'Columns',
@@ -33,57 +32,57 @@ module.exports = {
         choices: [
           {
             label: 'Full page width ',
-            value: 'full-width'
+            value: 'full-width',
           },
           {
             label: 'One column: 100%',
-            value: 'columns-one'
+            value: 'columns-one',
           },
           {
             label: 'Two Columns: 50% - 50%',
-            value: 'columns-half'
+            value: 'columns-half',
           },
           {
             label: 'Two Columns: 33% - 66%',
-            value: 'columns-onethird'
+            value: 'columns-onethird',
           },
           {
             label: 'Two Columns: 66% - 33%',
-            value: 'columns-twothird-onethird'
+            value: 'columns-twothird-onethird',
           },
           {
             label: 'Two Columns: 75% - 25%',
-            value: 'columns-twothird-full'
+            value: 'columns-twothird-full',
           },
           {
             label: 'Two Columns: 25% - 75%',
-            value: 'columns-onefourth'
+            value: 'columns-onefourth',
           },
           {
             label: 'Two Columns: Desktop: 75% - 25%, Tablet:  66% - 33%',
-            value: 'columns-twothird'
+            value: 'columns-twothird',
           },
           {
             label: 'Three Columns: 25% - 50% - 25%',
-            value: 'columns-onefourth-half'
+            value: 'columns-onefourth-half',
           },
           {
             label: 'Three columns: 33% - 33% - 33%',
-            value: 'columns-three'
+            value: 'columns-three',
           },
           {
             label: 'Four Columns: 25% - 25% - 25% - 25%',
-            value: 'columns-four'
+            value: 'columns-four',
           },
           {
             label: 'Full screen (vertical & horizontal)',
-            value: 'full-screen'
+            value: 'full-screen',
           },
           /*  {
                   label: 'icons',
                   value: 'icons',
                 }, */
-        ]
+        ],
       },
       column1: {
         name: 'column1',
@@ -92,8 +91,8 @@ module.exports = {
         contextual: true,
         options: {
           widgets: contentWidgets,
-          contextual: true
-        }
+          contextual: true,
+        },
       },
       column2: {
         name: 'column2',
@@ -101,7 +100,7 @@ module.exports = {
         label: 'Kolom 2',
         contextual: true,
         options: {
-          widgets: contentWidgets
+          widgets: contentWidgets,
         },
         if: {
           $or: [
@@ -114,7 +113,7 @@ module.exports = {
             { displayType: 'columns-onefourth-half' },
             { displayType: 'columns-three' },
             { displayType: 'columns-four' },
-          ]
+          ],
         },
       },
       column3: {
@@ -123,14 +122,14 @@ module.exports = {
         label: 'Kolom 3',
         contextual: true,
         options: {
-          widgets: contentWidgets
+          widgets: contentWidgets,
         },
         if: {
           $or: [
             { displayType: 'columns-onefourth-half' },
             { displayType: 'columns-three' },
             { displayType: 'columns-four' },
-          ]
+          ],
         },
       },
       column4: {
@@ -139,12 +138,10 @@ module.exports = {
         label: 'Kolom 4',
         contextual: true,
         options: {
-          widgets: contentWidgets
+          widgets: contentWidgets,
         },
         if: {
-          $or: [
-            { displayType: 'columns-four' },
-          ]
+          $or: [{ displayType: 'columns-four' }],
         },
       },
 
@@ -178,20 +175,18 @@ module.exports = {
         label: 'Sectie over vorige element plaatsen',
         def: false,
       },
-
     },
 
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: [ 'displayType' ],
+        fields: ['displayType'],
       },
       styles: {
         label: 'Vormgeving',
-        fields: [ 'backgroundColor' ],
+        fields: ['backgroundColor'],
       },
-    }
-
+    },
   },
   methods: function (self) {
     return {
@@ -200,7 +195,7 @@ module.exports = {
         widgets.forEach((widget) => {
           widget.containerId = this.apos.util.generateId();
         });
-      }
-    }
-  }
+      },
+    };
+  },
 };

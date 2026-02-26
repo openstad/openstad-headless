@@ -18,7 +18,10 @@ header {
       width: 100%;
       height: var(--nlds-header-compact-height, 1.5rem);
       display: block;
-      background: var(--nlds-header-compact-background-color, var(--utrecht-button-primary-action-background-color));
+      background: var(
+        --nlds-header-compact-background-color,
+        var(--utrecht-button-primary-action-background-color)
+      );
       left: 0;
       bottom: calc(var(--nlds-header-compact-height, 1.5rem) * -1);
     }
@@ -53,7 +56,6 @@ header {
     }
 
     @media screen and (max-width: 341px) {
-
       font-size: 15px;
     }
 
@@ -204,15 +206,11 @@ header {
 			padding-top: 20px;*/
     }
   }
-
 }
-
-
 
 * {
   box-sizing: border-box;
 }
-
 
 /* Create two equal columns that floats next to each other */
 .column {
@@ -244,7 +242,6 @@ header.amsterdam-header {
     padding: 0;
   }
 }
-
 
 // Mobile menu
 
@@ -305,7 +302,7 @@ body:has(.--mobile.--show) {
   }
 }
 
-header:has(.header_navbar-container.--show)~#navbar {
+header:has(.header_navbar-container.--show) ~ #navbar {
   align-self: start;
   width: 100%;
   background: transparent;
@@ -442,6 +439,44 @@ header:has(.header_navbar-container.--show)~#navbar {
   }
 }
 
+// Archive status banner
+.status-banner {
+  background: var(
+    --nlds-bannerStatus-backgroundColor,
+    var(--utrecht-button-primary-action-background-color)
+  );
+  padding: 8px 0;
+  text-align: center;
+  margin: 0;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+
+  p {
+    display: inline-flex;
+    color: var(
+      --nlds-bannerStatus-color,
+      var(--utrecht-button-primary-action-color)
+    );
+    margin: 0;
+    gap: 0.5rem;
+    align-items: center;
+    line-height: 1;
+
+    &:before {
+      content: '';
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3C!--!Font Awesome Pro v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2026 Fonticons, Inc.--%3E%3Cpath d='M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM280 400C266.7 400 256 410.7 256 424C256 437.3 266.7 448 280 448L360 448C373.3 448 384 437.3 384 424C384 410.7 373.3 400 360 400L352 400L352 312C352 298.7 341.3 288 328 288L280 288C266.7 288 256 298.7 256 312C256 325.3 266.7 336 280 336L304 336L304 400L280 400zM320 256C337.7 256 352 241.7 352 224C352 206.3 337.7 192 320 192C302.3 192 288 206.3 288 224C288 241.7 302.3 256 320 256z'/%3E%3C/svg%3E");
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background-color: var(
+        --nlds-bannerStatus-color,
+        var(--utrecht-button-primary-action-color)
+      );
+    }
+  }
+}
+
 // top bar buttons
 .header-top-bar {
   background: #fff;
@@ -458,7 +493,7 @@ header:has(.header_navbar-container.--show)~#navbar {
     align-items: center;
     gap: 10px;
 
-    &>div {
+    & > div {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -471,7 +506,6 @@ header:has(.header_navbar-container.--show)~#navbar {
     display: inline-block;
   }
 }
-
 
 #navbar.--compact {
   margin-right: -10px !important;
@@ -486,7 +520,6 @@ header:has(.header_navbar-container.--show)~#navbar {
 }
 
 .cta-buttons {
-
   .utrecht-button-link.utrecht-button-link--account,
   .utrecht-button-link.utrecht-button-link--menu-button {
     padding: unset;
@@ -505,8 +538,14 @@ header:has(.header_navbar-container.--show)~#navbar {
     &:hover,
     &:focus-visible {
       scale: 1;
-      color: var(--nlds-main-menu-item-color--hover, var(--utrecht-link-hover-color));
-      border-color: var(--nlds-main-menu-item-border-color--hover, var(--utrecht-link-hover-color));
+      color: var(
+        --nlds-main-menu-item-color--hover,
+        var(--utrecht-link-hover-color)
+      );
+      border-color: var(
+        --nlds-main-menu-item-border-color--hover,
+        var(--utrecht-link-hover-color)
+      );
     }
   }
 }

@@ -22,9 +22,9 @@ module.exports = {
       ancestors: {
         children: {
           depth: 2,
-          relationships: false
-        }
-      }
-    }
+          relationships: false,
+        },
+      },
+    },
   },
 };

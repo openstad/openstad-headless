@@ -1,17 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import CodeMirror from '@uiw/react-codemirror';
 import { langs } from '@uiw/codemirror-extensions-langs';
+import CodeMirror from '@uiw/react-codemirror';
+import React, { useEffect, useState } from 'react';
 
 export interface CodeEditorProps {
   initValue?: string | object;
   onValueChange?: (value: string) => void;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ initValue = '', onValueChange }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({
+  initValue = '',
+  onValueChange,
+}) => {
   const formatJSON = (input: string | object) => {
     try {
       // If input is an object, stringify with formatting, otherwise parse and then stringify with formatting
-      const jsonString = typeof input === 'object' ? JSON.stringify(input, null, 2) : JSON.stringify(JSON.parse(input), null, 2);
+      const jsonString =
+        typeof input === 'object'
+          ? JSON.stringify(input, null, 2)
+          : JSON.stringify(JSON.parse(input), null, 2);
       return jsonString;
     } catch (error) {
       console.error('Error formatting JSON:', error);
@@ -20,7 +26,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ initValue = '', onValueChange }
     }
   };
 
-  if (typeof initValue === 'object' || (typeof initValue === 'string' && initValue.trim().startsWith('{'))) {
+  if (
+    typeof initValue === 'object' ||
+    (typeof initValue === 'string' && initValue.trim().startsWith('{'))
+  ) {
     initValue = formatJSON(initValue);
   }
 
@@ -28,22 +37,35 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ initValue = '', onValueChange }
 
   // Update state when initValue changes
   useEffect(() => {
-    if (typeof initValue === 'object' || (typeof initValue === 'string' && initValue.trim().startsWith('{'))) {
+    if (
+      typeof initValue === 'object' ||
+      (typeof initValue === 'string' && initValue.trim().startsWith('{'))
+    ) {
       setValue(formatJSON(initValue));
     } else {
       setValue(initValue);
     }
   }, [initValue]);
 
-  const onChange = React.useCallback((val: React.SetStateAction<string>, viewUpdate: any) => {
-    const formattedValue = formatJSON(val);
-    if (onValueChange) {
-      onValueChange(formattedValue);
-    }
-    setValue(formattedValue);
-  }, [onValueChange]);
+  const onChange = React.useCallback(
+    (val: React.SetStateAction<string>, viewUpdate: any) => {
+      const formattedValue = formatJSON(val);
+      if (onValueChange) {
+        onValueChange(formattedValue);
+      }
+      setValue(formattedValue);
+    },
+    [onValueChange]
+  );
 
-  return <CodeMirror value={value} height="400px" extensions={[langs.json()]} onChange={onChange} />;
+  return (
+    <CodeMirror
+      value={value}
+      height="400px"
+      extensions={[langs.json()]}
+      onChange={onChange}
+    />
+  );
 };
 
 export { CodeEditor };

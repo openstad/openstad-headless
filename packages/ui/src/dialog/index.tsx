@@ -1,8 +1,9 @@
 import * as RadixDialog from '@radix-ui/react-dialog';
+import React, { PropsWithChildren, useEffect } from 'react';
+
+import { IconButton } from '../iconbutton';
 import '../index.css';
 import './index.css';
-import React, { PropsWithChildren, useEffect } from 'react';
-import { IconButton } from '../iconbutton';
 
 const focusActiveResource = () => {
   const activeResource = document.getElementsByClassName('active-resource')[0];
@@ -20,9 +21,11 @@ export const Dialog = ({
   onOpenChange,
   className,
   ...props
-}: PropsWithChildren<RadixDialog.DialogProps & {
-  className?: string;
-}>) => {
+}: PropsWithChildren<
+  RadixDialog.DialogProps & {
+    className?: string;
+  }
+>) => {
   useEffect(() => {
     if (!open) {
       focusActiveResource();

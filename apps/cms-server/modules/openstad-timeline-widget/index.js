@@ -13,11 +13,11 @@ module.exports = {
             title: {
               type: 'string',
               label: 'Title',
-              help: 'For example: \'March 8th\''
+              help: "For example: 'March 8th'",
             },
             actionText: {
               type: 'string',
-              label: 'Description'
+              label: 'Description',
             },
             period: {
               type: 'select',
@@ -26,13 +26,13 @@ module.exports = {
               choices: [
                 {
                   value: 'period',
-                  label: 'Period'
+                  label: 'Period',
                 },
                 {
                   value: 'moment',
-                  label: 'Moment'
-                }
-              ]
+                  label: 'Moment',
+                },
+              ],
             },
             links: {
               name: 'links',
@@ -42,32 +42,32 @@ module.exports = {
                 add: {
                   title: {
                     label: 'Link title',
-                    type: 'string'
+                    type: 'string',
                   },
                   url: {
                     label: 'Link URL',
-                    type: 'string'
+                    type: 'string',
                   },
                   openInNewWindow: {
                     type: 'boolean',
-                    label: 'Open in new window?'
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    label: 'Open in new window?',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     group: {
       generalGroup: {
         label: 'General',
-        fields: [ 'items' ]
+        fields: ['items'],
       },
       stylingGroup: {
         label: 'Styling',
-        fields: [ 'containerStyles' ]
-      }
-    }
-  }
+        fields: ['containerStyles'],
+      },
+    },
+  },
 };

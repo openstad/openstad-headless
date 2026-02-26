@@ -75,6 +75,7 @@ spec:
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
+            readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /home/keys
               name: keys-volume

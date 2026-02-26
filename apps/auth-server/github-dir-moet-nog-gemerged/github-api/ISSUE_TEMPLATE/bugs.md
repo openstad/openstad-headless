@@ -4,7 +4,6 @@ about: Create a report to help us improve
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
 Provide a general summary of the issue
@@ -21,6 +20,7 @@ Not obligatory, but suggest a fix/reason for the bug,
 **Steps to Reproduce**
 Provide a link to a live example, or an unambiguous set of steps to
 reproduce this bug. Include code to reproduce, if relevant
+
 1.
 2.
 3.

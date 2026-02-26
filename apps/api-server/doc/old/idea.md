@@ -1,6 +1,7 @@
 # Idea
 
 ## Inhoud
+
 [Endpoints](#endpoints)
 [ExtraData](#extradata)
 [ToDo](#todo)
@@ -33,6 +34,7 @@ Je kunt aan de GETs query parameters meegeven. Die werken als scopes voor Sequel
 `includeUserVote`
 
 ## extraData
+
 ideas hebben een extraData veld dat een JSON object bevat. De toegestane waarden daarin worden gedefinieerd in de config van de API van de site.
 
 Ondersteunde veldtypen:
@@ -50,6 +52,7 @@ Het verwijderen van velden doe je door ze mee te sturen met de waarde `null`.
 #### Voorbeelden
 
 Voorbeeld definitie:
+
 ```
   "config": {
     "ideas": {
@@ -89,6 +92,7 @@ Voorbeeld definitie:
 ```
 
 Dat zou dan deze voorbeeld data ondersteunen:
+
 ```
   "extraData": {
     "zomaar": {
@@ -102,6 +106,6 @@ Dat zou dan deze voorbeeld data ondersteunen:
   }
 ```
 
-
 ## TODO
+
 - Ik denk dat er een overkoepelend idea zou moeten zijn, maar even overleggen

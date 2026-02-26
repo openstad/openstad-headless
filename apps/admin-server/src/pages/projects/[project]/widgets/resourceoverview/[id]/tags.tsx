@@ -1,33 +1,39 @@
+import { CheckboxList } from '@/components/checkbox-list';
+import AccordionUI from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
-  FormControl, FormDescription,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
-
-import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import _ from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import InfoDialog from "@/components/ui/info-hover";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import AccordionUI from "@/components/ui/accordion";
-import {CheckboxList} from "@/components/checkbox-list";
-import { Spacer } from '@/components/ui/spacer';
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
@@ -107,11 +113,11 @@ export default function WidgetResourceOverviewTags(
           <FormField
             control={form.control}
             name="displayTagFilters"
-            render={({field}) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Filteren op tags weergeven?</FormLabel>
                 {YesNoSelect(field, props)}
-                <FormMessage/>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -119,9 +125,17 @@ export default function WidgetResourceOverviewTags(
           <FormField
             control={form.control}
             name="showActiveTags"
-            render={({field}) => (
+            render={({ field }) => (
               <FormItem>
-                <FormLabel style={{display: 'flex'}}>Wil je onder de filters de actieve tags zien waar op is gefilterd? <InfoDialog content={"Dit geeft je de mogelijkheid om de actieve tags te zien waarop momenteel is gefilterd. Dit is vooral handig bij filters waar je meerdere opties kunt selecteren binnen één dropdown. Zo kun je snel een overzicht krijgen van de geselecteerde tags en eenvoudig aanpassen of verwijderen. De actieve tags worden alleen weergegeven bij filteropties die het toestaan om meerdere keuzes tegelijk te selecteren."} /></FormLabel>
+                <FormLabel style={{ display: 'flex' }}>
+                  Wil je onder de filters de actieve tags zien waar op is
+                  gefilterd?{' '}
+                  <InfoDialog
+                    content={
+                      'Dit geeft je de mogelijkheid om de actieve tags te zien waarop momenteel is gefilterd. Dit is vooral handig bij filters waar je meerdere opties kunt selecteren binnen één dropdown. Zo kun je snel een overzicht krijgen van de geselecteerde tags en eenvoudig aanpassen of verwijderen. De actieve tags worden alleen weergegeven bij filteropties die het toestaan om meerdere keuzes tegelijk te selecteren.'
+                    }
+                  />
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -135,13 +149,16 @@ export default function WidgetResourceOverviewTags(
               <FormItem>
                 <FormLabel>Kies hoe je filter-tags combineert</FormLabel>
                 <FormDescription>
-                  <strong>Of</strong>: Toon inzendingen die met minstens één actieve tag overeenkomen (tagtype maakt niet uit).<br />
-                  <strong>En</strong>: Toon alleen inzendingen die per geselecteerd tagtype (filtergroep) minstens één actieve tag matchen.
+                  <strong>Of</strong>: Toon inzendingen die met minstens één
+                  actieve tag overeenkomen (tagtype maakt niet uit).
+                  <br />
+                  <strong>En</strong>: Toon alleen inzendingen die per
+                  geselecteerd tagtype (filtergroep) minstens één actieve tag
+                  matchen.
                 </FormDescription>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || 'or'}
-                >
+                  value={field.value || 'or'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Of" />
@@ -167,8 +184,7 @@ export default function WidgetResourceOverviewTags(
                 </div>
                 <div
                   className="grid grid-cols-1 lg:grid-cols-4 gap-x-4 gap-y-2 items-center"
-                  style={{gridTemplateColumns: '1fr 1fr 120px 1fr'}}
-                >
+                  style={{ gridTemplateColumns: '1fr 1fr 120px 1fr' }}>
                   {(tagGroupNames || []).map((groupName) => (
                     <>
                       <FormField
@@ -189,7 +205,8 @@ export default function WidgetResourceOverviewTags(
                                   }
                                   onCheckedChange={(checked: any) => {
                                     const projectId = tags.find(
-                                      (tag: {type: string}) => tag.type === groupName
+                                      (tag: { type: string }) =>
+                                        tag.type === groupName
                                     )?.projectId;
 
                                     const updatedFields =
@@ -317,7 +334,8 @@ export default function WidgetResourceOverviewTags(
                                   checked={
                                     field.value?.findIndex(
                                       (el) =>
-                                        el.type === groupName && el.inlineOptions
+                                        el.type === groupName &&
+                                        el.inlineOptions
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
@@ -339,7 +357,6 @@ export default function WidgetResourceOverviewTags(
                           );
                         }}
                       />
-
                     </>
                   ))}
                 </div>
@@ -349,42 +366,55 @@ export default function WidgetResourceOverviewTags(
 
           <Spacer />
 
-          <AccordionUI items={[
-            {
-              header: 'Bepaal of er alleen een selectie van tags getoond moet worden per type',
-              content:(<>
-                <p>Standaard worden alle tags getoond binnen de geselecteerde types.
-                  Je kunt hier instellen dat er alleen een specifieke selectie van tags getoond wordt binnen de types.
-                  Je hoeft hiervoor alleen de tags te selecteren die je getoond wilt hebben binnen een type.</p>
-                <br />
-                <CheckboxList
-                  form={form}
-                  fieldName="onlyShowTheseTagIds"
-                  fieldLabel=""
-                  label={(t) => t.name}
-                  keyForGrouping="type"
-                  keyPerItem={(t) => `${t.id}`}
-                  items={allTags}
-                  selectedPredicate={(t) =>
-                    // @ts-ignore
-                    form
-                      ?.getValues('onlyShowTheseTagIds')
-                      ?.split(',')
-                      ?.findIndex((tg) => tg === `${t.id}`) > -1
-                  }
-                  onValueChange={(tag, checked) => {
-                    const ids = form.getValues('onlyShowTheseTagIds')?.split(',') ?? [];
-                    const idsToSave = (checked
-                      ? [...ids, tag.id]
-                      : ids.filter((id) => id !== `${tag.id}`)).join(',');
+          <AccordionUI
+            items={[
+              {
+                header:
+                  'Bepaal of er alleen een selectie van tags getoond moet worden per type',
+                content: (
+                  <>
+                    <p>
+                      Standaard worden alle tags getoond binnen de geselecteerde
+                      types. Je kunt hier instellen dat er alleen een specifieke
+                      selectie van tags getoond wordt binnen de types. Je hoeft
+                      hiervoor alleen de tags te selecteren die je getoond wilt
+                      hebben binnen een type.
+                    </p>
+                    <br />
+                    <CheckboxList
+                      form={form}
+                      fieldName="onlyShowTheseTagIds"
+                      fieldLabel=""
+                      label={(t) => t.name}
+                      keyForGrouping="type"
+                      keyPerItem={(t) => `${t.id}`}
+                      items={allTags}
+                      selectedPredicate={(t) =>
+                        // @ts-ignore
+                        form
+                          ?.getValues('onlyShowTheseTagIds')
+                          ?.split(',')
+                          ?.findIndex((tg) => tg === `${t.id}`) > -1
+                      }
+                      onValueChange={(tag, checked) => {
+                        const ids =
+                          form.getValues('onlyShowTheseTagIds')?.split(',') ??
+                          [];
+                        const idsToSave = (
+                          checked
+                            ? [...ids, tag.id]
+                            : ids.filter((id) => id !== `${tag.id}`)
+                        ).join(',');
 
-                    form.setValue('onlyShowTheseTagIds', idsToSave);
-                    props.onFieldChanged("onlyShowTheseTagIds", idsToSave);
-                  }}
-                />
-              </>)
-            }
-          ]} />
+                        form.setValue('onlyShowTheseTagIds', idsToSave);
+                        props.onFieldChanged('onlyShowTheseTagIds', idsToSave);
+                      }}
+                    />
+                  </>
+                ),
+              },
+            ]}
+          />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

@@ -1,22 +1,19 @@
 const execute = require('./execute');
 
 async function start() {
-
   console.log('==============================');
 
   let command = 'node';
-  
+
   try {
     console.log('Test for nodemon');
     await execute('nodemon', ['--version'], { cwd: '.' });
-    command = 'nodemon'
+    command = 'nodemon';
   } catch (err) {
     console.log('nodemon not found');
   }
 
-  
   try {
-    
     console.log('Start auth server');
     execute(command, ['app.js'], { cwd: './apps/auth-server' });
 
@@ -28,14 +25,11 @@ async function start() {
 
     console.log('Start admin server');
     execute('npm', ['run', 'dev'], { cwd: './apps/admin-server' });
-
   } catch (err) {
     console.log('ERROR');
     console.log(err);
     process.exit();
   }
-
 }
 
 start();
-

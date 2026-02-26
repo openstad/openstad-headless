@@ -5,13 +5,13 @@
 module.exports = {
   extend: 'base-widget',
   options: {
-    label: 'Titel'
+    label: 'Titel',
   },
   fields: {
     add: {
       title: {
         type: 'string',
-        label: 'Titel'
+        label: 'Titel',
       },
       mode: {
         type: 'select',
@@ -20,36 +20,41 @@ module.exports = {
         choices: [
           {
             label: 'Heading 1',
-            value: 'h1'
+            value: 'h1',
           },
           {
             label: 'Heading 2',
-            value: 'h2'
+            value: 'h2',
           },
           {
             label: 'Heading 3',
-            value: 'h3'
+            value: 'h3',
           },
           {
             label: 'Heading 4',
-            value: 'h4'
-          }
-        ]
+            value: 'h4',
+          },
+        ],
       },
       classNameCustom: {
         type: 'string',
-        label: 'CSS class'
+        label: 'CSS class',
       },
     },
     group: {
       generalGroup: {
         label: 'General',
-        fields: [ 'title', 'mode' ]
+        fields: ['title', 'mode'],
       },
       stylingGroup: {
         label: 'Styling',
-        fields: [ 'className', 'classNameCustom', 'containerStyles', 'cssHelperClasses' ]
-      }
-    }
-  }
+        fields: [
+          'className',
+          'classNameCustom',
+          'containerStyles',
+          'cssHelperClasses',
+        ],
+      },
+    },
+  },
 };

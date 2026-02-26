@@ -1,6 +1,6 @@
-import { FC } from "react";
-import "./sort.css";
-import { FormValue } from "@openstad-headless/form/src/form";
+import { FormValue } from '@openstad-headless/form/src/form';
+import { FC } from 'react';
+import './sort.css';
 type OptionTitle = {
     key: string;
 };

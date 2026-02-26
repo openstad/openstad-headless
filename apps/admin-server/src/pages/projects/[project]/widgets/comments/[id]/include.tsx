@@ -1,28 +1,39 @@
 import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
 import {
-  Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]/index';
 import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React from "react";
-import {Spacer} from "@/components/ui/spacer";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {ArgumentWidgetTabProps} from "@/pages/projects/[project]/widgets/comments/[id]/index";
 
 const formSchema = z.object({
   includeOrExclude: z.string().optional(),
-  onlyIncludeOrExcludeTagIds: z.string().optional()
+  onlyIncludeOrExcludeTagIds: z.string().optional(),
 });
 
 export default function ArgumentsInclude(
-  props: ArgumentWidgetTabProps &
-  EditFieldProps<ArgumentWidgetTabProps>
+  props: ArgumentWidgetTabProps & EditFieldProps<ArgumentWidgetTabProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
@@ -49,10 +60,7 @@ export default function ArgumentsInclude(
       <Form {...form} className="p-6 bg-white rounded-md">
         <Heading size="xl">Inclusief/Exclusief</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid gap-4">
-
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
           <FormField
             control={form.control}
             name="includeOrExclude"
@@ -62,30 +70,34 @@ export default function ArgumentsInclude(
                   Toon reacties gekoppeld aan onderstaande tags
                 </FormLabel>
                 <FormDescription>
-                  Gebruik het selectievakje om te kiezen hoe de geselecteerde tags de weergave van reacties
-                  beïnvloeden:
-                  <br/>
-                  <br/>
-                  Maak je keuze op basis van hoe je de reacties wilt filteren in relatie tot de geselecteerde tags.
-                  <br/>
-                  <br/>
+                  Gebruik het selectievakje om te kiezen hoe de geselecteerde
+                  tags de weergave van reacties beïnvloeden:
+                  <br />
+                  <br />
+                  Maak je keuze op basis van hoe je de reacties wilt filteren in
+                  relatie tot de geselecteerde tags.
+                  <br />
+                  <br />
                 </FormDescription>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || 'include'}
-                >
+                  value={field.value || 'include'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Inclusief" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="include"><strong>Inclusief</strong>: Als je deze optie kiest, worden alleen de
-                      reacties getoond die gekoppeld zijn aan de
-                      geselecteerde tags.</SelectItem>
-                    <SelectItem value="exclude"><strong>Exclusief</strong>: Als je deze optie kiest, worden juist de
-                      reacties die gekoppeld zijn aan de
-                      geselecteerde tags niet getoond.</SelectItem>
+                    <SelectItem value="include">
+                      <strong>Inclusief</strong>: Als je deze optie kiest,
+                      worden alleen de reacties getoond die gekoppeld zijn aan
+                      de geselecteerde tags.
+                    </SelectItem>
+                    <SelectItem value="exclude">
+                      <strong>Exclusief</strong>: Als je deze optie kiest,
+                      worden juist de reacties die gekoppeld zijn aan de
+                      geselecteerde tags niet getoond.
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -111,14 +123,17 @@ export default function ArgumentsInclude(
                 ?.findIndex((tg) => tg === `${t.id}`) > -1
             }
             onValueChange={(tag, checked) => {
-              const ids = form.getValues('onlyIncludeOrExcludeTagIds')?.split(',') ?? [];
+              const ids =
+                form.getValues('onlyIncludeOrExcludeTagIds')?.split(',') ?? [];
 
-              const idsToSave = (checked
-                ? [...ids, tag.id]
-                : ids.filter((id) => id !== `${tag.id}`)).join(',');
+              const idsToSave = (
+                checked
+                  ? [...ids, tag.id]
+                  : ids.filter((id) => id !== `${tag.id}`)
+              ).join(',');
 
               form.setValue('onlyIncludeOrExcludeTagIds', idsToSave);
-              props.onFieldChanged("onlyIncludeOrExcludeTagIds", idsToSave);
+              props.onFieldChanged('onlyIncludeOrExcludeTagIds', idsToSave);
             }}
           />
 

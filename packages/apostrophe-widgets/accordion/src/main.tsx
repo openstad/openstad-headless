@@ -1,12 +1,13 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { Accordion } from './accordion.tsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+import { Accordion } from './accordion.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Accordion 
+    <Accordion
       headingLevel={3}
-      label='test label' 
+      label="test label"
       content='
       <h3>Utrecht heading 3</h3>
       <h4>Utrecht heading 4</h4>
@@ -35,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         Nam feugiat neque sed bibendum tristique.
       </a>
       </p>
-      ' 
+      '
     />
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

@@ -1,8 +1,8 @@
-import React from 'react';
+import ResourceForm from '@/components/resource-form';
 import { PageLayout } from '@/components/ui/page-layout';
 import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
-import ResourceForm from '@/components/resource-form';
+import React from 'react';
 
 export default function ProjectResourceCreate() {
   const router = useRouter();
@@ -12,7 +12,6 @@ export default function ProjectResourceCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Resources"
         breadcrumbs={[
           {
             name: 'Projecten',

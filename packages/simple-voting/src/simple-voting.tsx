@@ -1,14 +1,16 @@
-import './simple-voting.css';
-import React from 'react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import {
+  StemBegroot,
+  StemBegrootWidgetProps,
+} from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { StemBegroot, StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
-
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
+import React from 'react';
+
+import './simple-voting.css';
 
 function SimpleVoting({ ...props }: StemBegrootWidgetProps) {
-
   const config = {
     ...props,
     votes: {
@@ -25,14 +27,12 @@ function SimpleVoting({ ...props }: StemBegrootWidgetProps) {
       withExisting: 'error',
     },
     isSimpleView: true,
-  }
+  };
   return (
     <>
-      <StemBegroot
-        {...config}
-      />
+      <StemBegroot {...config} />
     </>
-  )
+  );
 }
 
 SimpleVoting.loadWidget = loadWidget;

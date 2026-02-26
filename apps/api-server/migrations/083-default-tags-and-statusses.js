@@ -2,15 +2,15 @@ const { Sequelize } = require('sequelize');
 const db = require('../src/db');
 
 module.exports = {
-  async up ({ context: queryInterface }) {
-
+  async up({ context: queryInterface }) {
     try {
-
       let projects = await db.Project.findAll();
       for (let project of projects) {
-
-        let defaultStatusIds = project.config?.resources?.defaultStatusIds || [];
-        let statuses = await db.Status.findAll({ where: { id: defaultStatusIds } });
+        let defaultStatusIds =
+          project.config?.resources?.defaultStatusIds || [];
+        let statuses = await db.Status.findAll({
+          where: { id: defaultStatusIds },
+        });
 
         for (let status of statuses) {
           await status.update({ addToNewResources: true });
@@ -23,21 +23,19 @@ module.exports = {
           await tag.update({ addToNewResources: true });
         }
 
-        project.update({ config: { resources: { defaultStatusIds: null, defaultTagIds: null } } });
-
+        project.update({
+          config: {
+            resources: { defaultStatusIds: null, defaultTagIds: null },
+          },
+        });
       }
-
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       process.exit();
     }
-
   },
 
-  async down ({ context: queryInterface }) {
+  async down({ context: queryInterface }) {
     console.log('Sorry, default tags and status down is not implemented');
-  }
-
+  },
 };
-
-

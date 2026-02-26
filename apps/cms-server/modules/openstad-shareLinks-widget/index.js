@@ -5,15 +5,14 @@
 module.exports = {
   extend: 'base-widget',
   options: {
-    label: 'Share Links'
+    label: 'Share Links',
   },
   fields: {
     add: {
       title: {
         type: 'string',
-        label: 'Titel'
+        label: 'Titel',
       },
-  
     },
-  }
+  },
 };

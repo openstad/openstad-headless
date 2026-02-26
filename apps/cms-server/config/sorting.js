@@ -2,17 +2,17 @@ exports.options = [
   {
     value: 'createdtime,desc',
     label: 'Newest',
-  //  label: 'Nieuwste eerst'
+    //  label: 'Nieuwste eerst'
   },
   {
     value: 'createdtime,asc',
-   label: 'Oldest',
-//    label: 'Oudste eerst'
+    label: 'Oldest',
+    //    label: 'Oudste eerst'
   },
   {
     value: 'random',
     label: 'Random',
-//    label: 'Willekeurig'
+    //    label: 'Willekeurig'
   },
   {
     value: 'likes,desc',
@@ -22,7 +22,7 @@ exports.options = [
   {
     value: 'likes,asc',
     label: 'Least liked',
-  //  label: 'Minste likes'
+    //  label: 'Minste likes'
   },
   {
     value: 'ranking,asc',
@@ -32,15 +32,14 @@ exports.options = [
   {
     value: 'budget,desc',
     label: 'Highest amount',
- //   label: 'Hoogste bedrag'
+    //   label: 'Hoogste bedrag'
   },
   {
     value: 'budget,asc',
     label: 'Lowest amount',
-//    label: 'Laagste bedrag'
+    //    label: 'Laagste bedrag'
   },
 ];
-
 
 //new resource-overview-widget dont using sorting on the client, but via the api
 //above client options will be phased out
@@ -48,79 +47,74 @@ exports.apiOptions = [
   {
     value: 'createdate_desc',
     label: 'Newest',
-
   },
   {
     value: 'createdate_asc',
     label: 'Oldest',
-
   },
   {
     value: 'random',
     label: 'Random',
-
   },
   {
     value: 'votes_desc',
     label: 'Most popular',
-
   },
   {
     value: 'votes_asc',
     label: 'Least popular',
-
   },
-/*  {
+  /*  {
     value: 'ranking,asc',
     label: 'Ranglijst'
   },*/
   {
     value: 'budget_desc',
-//    label: 'Highest amount',
-    label: 'Hoogste bedrag'
+    //    label: 'Highest amount',
+    label: 'Hoogste bedrag',
   },
   {
     value: 'budget_asc',
-//    label: 'Lowest amount',
-    label: 'Laagste bedrag'
+    //    label: 'Lowest amount',
+    label: 'Laagste bedrag',
   },
 ];
 
 exports.ideasOnMapOptions = [
   {
     value: 'createdtime,desc',
-    label: 'Nieuwste eerst'
+    label: 'Nieuwste eerst',
   },
   {
     value: 'createdtime,asc',
-    label: 'Oudste eerst'
+    label: 'Oudste eerst',
   },
   {
     value: 'title',
-    label: 'Titel'
+    label: 'Titel',
   },
   {
     value: 'random',
-    label: 'Willekeurig'
+    label: 'Willekeurig',
   },
   {
     value: 'likes,desc',
-    label: 'Meeste likes'
+    label: 'Meeste likes',
   },
   {
     value: 'likes,asc',
-    label: 'Minste likes'
+    label: 'Minste likes',
   },
   {
     value: 'args,desc',
-    label: 'Meeste reacties'
+    label: 'Meeste reacties',
   },
   {
     value: 'args,asc',
-    label: 'Minste reacties'
+    label: 'Minste reacties',
   },
   {
     value: 'ranking,asc',
-    label: 'Ranglijst'
+    label: 'Ranglijst',
   },
 ];

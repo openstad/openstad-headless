@@ -1,13 +1,10 @@
-
 %headerfont {
-  @if $media-type == "screen" {
+  @if $media-type == 'screen' {
     font-weight: 700;
-  }
-  @else if $media-type == "print" {
+  } @else if $media-type == 'print' {
     font-family: $printfont-heading;
     font-weight: 700;
-  }
-  @else {
+  } @else {
     @media screen {
       font-weight: 700;
     }
@@ -23,14 +20,12 @@
 }
 
 %textfont {
-  @if $media-type == "screen" {
+  @if $media-type == 'screen' {
     font-weight: 400;
-  }
-  @else if $media-type == "print" {
+  } @else if $media-type == 'print' {
     font-family: $printfont-text;
     font-weight: 400;
-  }
-  @else {
+  } @else {
     @media screen {
       font-weight: 400;
     }
@@ -46,14 +41,12 @@
 }
 
 %navfont {
-  @if $media-type == "screen" {
+  @if $media-type == 'screen' {
     font-weight: 500;
-  }
-  @else if $media-type == "print" {
+  } @else if $media-type == 'print' {
     font-family: $printfont-text;
     font-weight: 700;
-  }
-  @else {
+  } @else {
     @media screen {
       font-weight: 500;
     }

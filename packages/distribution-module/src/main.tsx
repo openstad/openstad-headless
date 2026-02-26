@@ -1,6 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { DistributionModule, DistributionModuleWidgetProps } from './enquete.js';
+
+import {
+  DistributionModule,
+  DistributionModuleWidgetProps,
+} from './enquete.js';
 
 const config: DistributionModuleWidgetProps = {
   api: {
@@ -157,9 +161,9 @@ const config: DistributionModuleWidgetProps = {
       title: 'Kies een mooie afbeelding',
       key: 'image',
       questionType: 'imageUpload',
-    }
+    },
   ],
-  afterSubmitUrl: "http://localhost:5173/enquetes/[id]"
+  afterSubmitUrl: 'http://localhost:5173/enquetes/[id]',
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

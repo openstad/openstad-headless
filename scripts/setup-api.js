@@ -3,7 +3,6 @@ const apiDb = require('mysql2/promise');
 const execute = require('./execute');
 
 module.exports = async function setupApi(actions) {
-
   console.log('==============================');
   console.log('Setup API');
 
@@ -11,31 +10,26 @@ module.exports = async function setupApi(actions) {
 
   let doCreateDB;
   try {
-    
     connection = await apiDb.createConnection({
-      host     : process.env.API_DB_HOST,
-      user     : process.env.API_DB_USERNAME,
-      password : process.env.API_DB_PASSWORD,
-      dialect  : process.env.API_DB_DIALECT,
+      host: process.env.API_DB_HOST,
+      user: process.env.API_DB_USERNAME,
+      password: process.env.API_DB_PASSWORD,
+      dialect: process.env.API_DB_DIALECT,
     });
-    
-    await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
 
-  } catch(err) {
+    await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
+  } catch (err) {
     doCreateDB = true;
   }
 
   try {
-
     // create database?
     if (doCreateDB) {
-
       console.log('------------------------------');
       console.log('Create database');
 
-      await connection.query(`CREATE DATABASE \`${process.env.API_DB_NAME}\`;`)
+      await connection.query(`CREATE DATABASE \`${process.env.API_DB_NAME}\`;`);
       await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
-      
     } else {
       console.log('------------------------------');
       console.log('Database exists');
@@ -43,12 +37,14 @@ module.exports = async function setupApi(actions) {
 
     // check database
     let doCreateDBTables = false;
-    let rows = await connection.query('SHOW TABLES;')
+    let rows = await connection.query('SHOW TABLES;');
     if (!(rows && rows.length)) {
       doCreateDBTables = true;
     }
 
-    let fixed_auth_tokens = process.env.API_AUTH_FIXEDAUTHTOKENS || '[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]';
+    let fixed_auth_tokens =
+      process.env.API_AUTH_FIXEDAUTHTOKENS ||
+      '[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]';
 
     // create local config
     let apiConfig = `
@@ -80,26 +76,29 @@ AUTH_FIXEDAUTHTOKENS='${fixed_auth_tokens}'
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_VERIFICATION_TOKEN=${process.env.IMAGE_VERIFICATION_TOKEN}
 ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
-`
+`;
     if (actions['create config']) {
       console.log('------------------------------');
       console.log('Create config file');
       await fs.writeFileSync('./apps/api-server/.env', apiConfig);
     }
-    
+
     // npm i
     if (actions['npm install']) {
       console.log('------------------------------');
       console.log('Execute `npm i`');
       await execute('npm', ['i'], { cwd: './apps/api-server' });
     }
-    
+
     // init db
     if (actions['init database']) {
-      if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd
+      if (1 || doCreateDBTables) {
+        // TODO: hij update voor nu altijd
         console.log('------------------------------');
         console.log('Init API database');
-        await execute('npm', ['run', 'init-database'], { cwd: './apps/api-server' });
+        await execute('npm', ['run', 'init-database'], {
+          cwd: './apps/api-server',
+        });
       } else {
         console.log('------------------------------');
         console.log('API database already initialized');
@@ -108,12 +107,10 @@ ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
       // console.log('Update database records');
       // TODO: je kunt met process.env.WHATEVER de seeds vullen vanaf hier, en zo de hele basis setup configureerbar maken
     }
-    
-  } catch(err) {
+  } catch (err) {
     console.log('------------------------------');
     console.log('API initialisatie error');
     console.log(err);
     process.exit();
   }
-
-}
+};

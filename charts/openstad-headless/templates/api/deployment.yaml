@@ -18,9 +18,16 @@ spec:
       labels:
         app: {{ .Values.api.label }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
       containers:
-        - env:
+        - securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          env:
           - name: URL
             value: https://{{ template "openstad.api.url" . }}
 
@@ -247,13 +254,25 @@ spec:
             value: "{{ .Values.clusterIssuer.prodIssuerName }}"
 
           - name: KUBERNETES_INGRESS_CLASS_NAME
-            value: "{{ .Values.api.createdIngresses.className | default "" }}"
+            value: "{{ .Values.api.createdIngresses.className | default (include "openstad.ingress.type" .) }}"
 
           - name: KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS
-            value: '{{ .Values.api.createdIngresses.annotations | default "{}" | toJson }}'
+            value: '{{ include "openstad.createdIngresses.annotations" . }}'
 
           - name: KUBERNETES_INGRESS_TLS_MANAGED_BY_OPENSTAD
             value: "{{ .Values.api.createdIngresses.tlsManagedByOpenstad }}"
+
+          - name: EXTERNAL_CERTIFICATES_ENABLED
+            value: "{{ .Values.api.externalCertificates.enabled }}"
+
+          - name: EXTERNAL_CERT_SECRET_PREFIX
+            value: "{{ .Values.api.externalCertificates.secretPrefix }}"
+
+          - name: EXTERNAL_CERT_SECRET_STORE
+            value: "{{ .Values.api.externalCertificates.secretStoreName }}"
+
+          - name: EXTERNAL_CERT_RETRY_COOLDOWN
+            value: "{{ .Values.api.externalCertificates.retryCooldownSeconds }}"
 
           - name: RATE_LIMIT
             valueFrom:
@@ -283,6 +302,9 @@ spec:
           {{- if .Values.api.customWorkingDir }}
           workingDir: {{ .Values.api.customWorkingDir }}
           {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
           resources:
 {{ toYaml .Values.api.resources | indent 12 }}
           readinessProbe:
@@ -297,6 +319,9 @@ spec:
             periodSeconds: {{ .Values.api.probe.liveness.periodSeconds }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}
       dnsPolicy: ClusterFirst
       initContainers:
         - command: ["/bin/bash", "-c"]

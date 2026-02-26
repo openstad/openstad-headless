@@ -13,7 +13,10 @@ const updateCommentScore = async (vote, options) => {
     if (options && options.transaction && options.transaction.afterCommit) {
       options.transaction.afterCommit(() => {
         run().catch((err) =>
-          console.error('Failed to recalculate comment score after transaction commit:', err)
+          console.error(
+            'Failed to recalculate comment score after transaction commit:',
+            err
+          )
         );
       });
     } else {
@@ -22,88 +25,90 @@ const updateCommentScore = async (vote, options) => {
   } catch (err) {
     console.error('Update comment score failed in hook for CommentVote:', err);
   }
-}
+};
 
-module.exports = function( db, sequelize, DataTypes ) {
-  var CommentVote = sequelize.define('comment_vote', {
+module.exports = function (db, sequelize, DataTypes) {
+  var CommentVote = sequelize.define(
+    'comment_vote',
+    {
+      commentId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
 
-    commentId: {
-      type         : DataTypes.INTEGER,
-      allowNull    : false
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+
+      opinion: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        defaultValue: 'yes',
+      },
+
+      ip: {
+        type: DataTypes.STRING(64),
+        allowNull: true,
+        validate: {
+          isIP: true,
+        },
+      },
+
+      // This will be true if the vote validation CRON determined this
+      // vote is valid.
+      checked: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+      },
     },
+    {
+      indexes: [
+        {
+          fields: ['commentId', 'userId'],
+          unique: true,
+        },
+      ],
+      hooks: {
+        afterCreate: async (vote, options) => {
+          await updateCommentScore(vote, options);
+        },
 
-    userId: {
-      type         : DataTypes.INTEGER,
-      allowNull    : false,
-      defaultValue: 0,
-    },
+        afterUpdate: async function (vote, options) {
+          await updateCommentScore(vote, options);
+        },
 
-    opinion: {
-      type         : DataTypes.STRING(64),
-      allowNull    : false,
-      defaultValue : "yes"
-    },
-    
-    ip: {
-      type         : DataTypes.STRING(64),
-      allowNull    : true,
-      validate     : {
-        isIP: true
-      }
-    },
+        afterDestroy: async function (vote, options) {
+          await updateCommentScore(vote, options);
+        },
 
-    // This will be true if the vote validation CRON determined this
-    // vote is valid.
-    checked : {
-      type         : DataTypes.BOOLEAN,
-      allowNull    : true
+        afterUpsert: async function (vote, options) {
+          await updateCommentScore(vote, options);
+        },
+      },
     }
+  );
 
-  }, {
-    indexes: [{
-      fields : ['commentId', 'userId'],
-      unique : true
-    }],
-    hooks: {
-      afterCreate: async (vote, options) => {
-        await updateCommentScore(vote, options);
-      },
-
-      afterUpdate: async function (vote, options) {
-        await updateCommentScore(vote, options);
-      },
-      
-      afterDestroy: async function (vote, options) {
-        await updateCommentScore(vote, options);
-      },
-      
-      afterUpsert: async function (vote, options) {
-        await updateCommentScore(vote, options);
-      }
-      
-    },
-  });
-
-  CommentVote.associate = function( models ) {
+  CommentVote.associate = function (models) {
     CommentVote.belongsTo(models.Comment, { onDelete: 'CASCADE' });
     CommentVote.belongsTo(models.User, { onDelete: 'CASCADE' });
-  }
+  };
 
-  CommentVote.prototype.toggle = function() {
+  CommentVote.prototype.toggle = function () {
     var checked = this.get('checked');
     return this.update({
-      checked: checked === null ? false : !checked
+      checked: checked === null ? false : !checked,
     });
-  }
+  };
 
   CommentVote.auth = CommentVote.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
-    updateableBy: ['editor','owner'],
-    deleteableBy: ['editor','owner'],
-  }
+    updateableBy: ['editor', 'owner'],
+    deleteableBy: ['editor', 'owner'],
+  };
 
   return CommentVote;
-
 };

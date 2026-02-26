@@ -16,7 +16,6 @@ view one argument
 
 `POST /api/site/:SITE_ID/idea/:IDEA_ID/argument`
 create an argument
-			 
 `PUT /api/site/:SITE_ID/idea/:IDEA_ID/argument/:ARG_ID`
 update one argument
 
@@ -29,10 +28,12 @@ delete one argument
 GET request zijn public, de anderen alleen voor admin en de eigenaar
 
 #### TODO
+
 - Je moet nu member zijn om argumenten te mogen maken. Dat zal ook anomniem moeten kunnen, waarbij hij dan automatisch een gebruiker aanmaakt (ook in mijnopenstad). Aanpassen rolePlay daarop.
 - Dit is nog heel simpel en straightforward; je moet dit met de site coonfiguratie kunnen sturen
 
 ## Algemeen TODO
+
 - Error handling loopt nog via de standaards van de monolith. Dat moet anders want ze zijn nu niet in JSON.
 - De mijnopenstad config verondersteld een paar urls die nog niet zijn ingericht
 - PUT requests werken nu als PATCH reuqests; dat zou je voor heel netjes een keer uit elkaar moeten trekken

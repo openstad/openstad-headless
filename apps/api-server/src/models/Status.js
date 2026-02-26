@@ -1,4 +1,3 @@
-
 const sanitize = require('../util/sanitize');
 const config = require('config');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
@@ -65,10 +64,9 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: {},
       },
 
-		  extraData: getExtraDataConfig(DataTypes.JSON, 'statuses'),
-
-	  }, {
-
+      extraData: getExtraDataConfig(DataTypes.JSON, 'statuses'),
+    },
+    {
       defaultScope: {
         order: ['seqnr'],
       },

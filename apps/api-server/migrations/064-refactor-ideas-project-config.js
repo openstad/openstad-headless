@@ -1,7 +1,7 @@
 let db = require('../src/db').sequelize;
 
 module.exports = {
-  up: function() {
+  up: function () {
     try {
       return db.query(`
         UPDATE projects set config = REPLACE(config, 'idea', 'resource');
@@ -9,8 +9,8 @@ module.exports = {
         UPDATE projects set emailConfig = REPLACE(emailConfig, 'idea', 'resource');
         UPDATE projects set emailConfig = REPLACE(emailConfig, 'Idea', 'Resource');
 `);
-    } catch(e) {
+    } catch (e) {
       return true;
     }
-  }
-}
+  },
+};

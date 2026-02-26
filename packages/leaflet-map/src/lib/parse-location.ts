@@ -1,17 +1,20 @@
-import type { MarkerProps } from '../types/marker-props';
-import type { LocationType } from '../types/location';
 import { LatLng } from 'leaflet';
 
-export default function parseLocation(point: LocationType | MarkerProps | Array<LocationType | MarkerProps>) : LatLng | LatLng[] {
+import type { LocationType } from '../types/location';
+import type { MarkerProps } from '../types/marker-props';
+
+export default function parseLocation(
+  point: LocationType | MarkerProps | Array<LocationType | MarkerProps>
+): LatLng | LatLng[] {
   // Controleer of het punt een array is
   if (Array.isArray(point)) {
-    return point.map(p => parseSingleLocation(p));
+    return point.map((p) => parseSingleLocation(p));
   } else {
     return parseSingleLocation(point);
   }
 }
 
-function parseSingleLocation(point: LocationType | MarkerProps) : LatLng {
+function parseSingleLocation(point: LocationType | MarkerProps): LatLng {
   // location can be given in a range of different formats but should be translated to { lat, lng }
   let lat = 0;
   let lng = 0;

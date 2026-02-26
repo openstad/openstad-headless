@@ -1,7 +1,4 @@
-export default function useChoiceGuideResults({
-  projectId,
-  choiceGuideId,
-}) {
+export default function useChoiceGuideResults({ projectId, choiceGuideId }) {
   let self = this;
 
   if (!choiceGuideId) {

@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -6,8 +7,11 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useRouter } from 'next/router';
+import React from 'react';
+
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -15,13 +19,11 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
+import WidgetEnqueteConfirmation from './confirmation';
 import WidgetEnqueteDisplay from './display';
 import WidgetEnqueteGeneral from './general';
 import WidgetEnqueteItems from './items';
-import React from "react";
-import WidgetEnqueteConfirmation from "./confirmation";
-import WidgetResourcesMapDatalayers from "@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers";
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import WidgetEnquetePolygons from './polygons';
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
@@ -39,7 +41,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Enquête"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -62,6 +63,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="display">Weergave</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
+              <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -127,7 +129,8 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
                   <Alert variant="info" className="mb-4">
                     <AlertTitle>Let op!</AlertTitle>
                     <AlertDescription>
-                      De kaartopties zijn alleen van toepassing als je een veld hebt die een kaart bevat.
+                      De kaartopties zijn alleen van toepassing als je een veld
+                      hebt die een kaart bevat.
                     </AlertDescription>
                   </Alert>
                   <WidgetResourcesMapDatalayers
@@ -145,6 +148,24 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
                     }}
                   />
                 </>
+              )}
+            </TabsContent>
+            <TabsContent value="polygons" className="p-0">
+              {previewConfig && (
+                <WidgetEnquetePolygons
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
               )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">

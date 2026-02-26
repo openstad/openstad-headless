@@ -9,13 +9,17 @@ kind: Ingress
 
 metadata:
 
-{{- if .Values.image.ingress.annotations }}
   annotations:
     {{- if .Values.clusterIssuer.enabled }}
     cert-manager.io/cluster-issuer: {{ template "openstad.clusterIssuer.name" . }}
     {{- end }}
-{{ toYaml .Values.image.ingress.annotations | indent 4 }}
-{{- end }}
+    {{- if eq (include "openstad.ingress.type" .) "traefik" }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ include "openstad.traefik.middlewares.image" . }}
+    {{- else }}
+    {{- with .Values.image.ingress.annotations }}
+{{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- end }}
 
   labels:
   {{- include "openstad.labels" . | nindent 4 }}
@@ -28,7 +32,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 
 spec:
-  ingressClassName: {{ .Values.image.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.image.ingress.ingressClassName | default (include "openstad.ingress.type" .) }}
   rules:
 {{- range $host := .Values.image.ingress.hosts }}
     - host: {{ $host }}

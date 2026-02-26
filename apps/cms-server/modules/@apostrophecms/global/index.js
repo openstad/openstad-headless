@@ -85,6 +85,21 @@ module.exports = {
         def: true,
       },
 
+      bannerStatus: {
+        type: 'boolean',
+        label: 'Toon site banner',
+        def: false,
+      },
+
+      bannerStatusText: {
+        type: 'string',
+        label: 'Tekst die getoond wordt als de site banner zichtbaar is',
+        def: 'Dit project is afgerond.',
+        if: {
+          bannerStatus: true,
+        },
+      },
+
       siteLogo: {
         type: 'attachment',
         label: 'Site logo',
@@ -169,7 +184,7 @@ module.exports = {
         def: 'false',
         label: 'Toon login knop',
       },
-      
+
       showLoginInCTA: {
         type: 'boolean',
         def: 'false',
@@ -373,7 +388,14 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle', 'siteLogo', 'logoAltText'],
+        fields: [
+          'siteTitle',
+          'hideSiteTitle',
+          'siteLogo',
+          'logoAltText',
+          'bannerStatus',
+          'bannerStatusText',
+        ],
       },
       css: {
         label: 'Vormgeving',
@@ -391,7 +413,7 @@ module.exports = {
           'logoutButtonLabel',
           'ctaButtons',
           'topMenuButtons',
-        ,
+          ,
         ],
       },
       cookies: {

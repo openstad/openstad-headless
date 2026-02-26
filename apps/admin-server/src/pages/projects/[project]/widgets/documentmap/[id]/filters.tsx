@@ -1,29 +1,35 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-    Form,
-    FormControl, FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
+import _ from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   tagGroups: z
@@ -47,15 +53,13 @@ type Tag = {
 };
 
 export default function DocumentFilters(
-  props: DocumentMapProps &
-    EditFieldProps<DocumentMapProps>
+  props: DocumentMapProps & EditFieldProps<DocumentMapProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-
 
   useEffect(() => {
     if (Array.isArray(tags)) {
@@ -85,7 +89,6 @@ export default function DocumentFilters(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
-
           <FormField
             control={form.control}
             name="filterBehavior"
@@ -95,13 +98,19 @@ export default function DocumentFilters(
                   Kies de manier waarop je de filters wilt combineren
                 </FormLabel>
                 <FormDescription>
-                  <strong>Of</strong>: Als er meerdere filters actief zijn, wordt alleen één van de filters toegepast. Bijvoorbeeld, als je zoekt op meerdere eigenschappen, wordt er een resultaat getoond als één van die eigenschappen overeenkomt.<br />
-                  <strong>En</strong>: Als er meerdere filters actief zijn, moeten alle filters tegelijkertijd van toepassing zijn. Alleen resultaten die aan alle geselecteerde criteria voldoen, worden getoond.
+                  <strong>Of</strong>: Als er meerdere filters actief zijn,
+                  wordt alleen één van de filters toegepast. Bijvoorbeeld, als
+                  je zoekt op meerdere eigenschappen, wordt er een resultaat
+                  getoond als één van die eigenschappen overeenkomt.
+                  <br />
+                  <strong>En</strong>: Als er meerdere filters actief zijn,
+                  moeten alle filters tegelijkertijd van toepassing zijn. Alleen
+                  resultaten die aan alle geselecteerde criteria voldoen, worden
+                  getoond.
                 </FormDescription>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || 'or'}
-                >
+                  value={field.value || 'or'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Of" />
@@ -124,10 +133,13 @@ export default function DocumentFilters(
               <FormItem className="col-span-full">
                 <div>
                   <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
-                    <FormDescription>
-                        Selecteer de gewenste tag groepen die als filter verschijnen boven de reacties.<br />
-                        Het label veld fungeert als een titel boven de dropdown van het filter.
-                    </FormDescription>
+                  <FormDescription>
+                    Selecteer de gewenste tag groepen die als filter verschijnen
+                    boven de reacties.
+                    <br />
+                    Het label veld fungeert als een titel boven de dropdown van
+                    het filter.
+                  </FormDescription>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-4">
                   {(tagGroupNames || []).map((groupName, index) => (
@@ -178,7 +190,6 @@ export default function DocumentFilters(
                         control={form.control}
                         name="tagGroups"
                         render={({ field }) => {
-
                           const defaultValue = field.value.find(
                             (g) => g.type === groupName
                           )?.label;

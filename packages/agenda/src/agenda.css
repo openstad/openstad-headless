@@ -1,8 +1,7 @@
-
 .osc-agenda {
   --icon-size: 20px;
-  --padding-x: .8rem;
-  --padding-y: .5rem;
+  --padding-x: 0.8rem;
+  --padding-y: 0.5rem;
   --padding: var(--padding-y) var(--padding-x);
 
   display: flex;
@@ -13,21 +12,28 @@
 }
 
 .osc-agenda-item {
-  background-color: var(--nlds-agenda-background-color,var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(
+    --nlds-agenda-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
   padding: var(--nlds-agenda-padding, var(--padding));
   display: flex;
   position: relative;
-
 }
 
 .osc-agenda-item::before {
   content: '';
   width: 2px;
-  background-color: var(--nlds-agenda-item-background-color, var(--utrecht-button-primary-action-background-color));
+  background-color: var(
+    --nlds-agenda-item-background-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
   position: absolute;
   top: 1rem;
   height: calc(100% + 1rem);
-  left: calc((var(--icon-size) + var(--padding-x) - (var(--icon-size) / 2) - 1px));
+  left: calc(
+    (var(--icon-size) + var(--padding-x) - (var(--icon-size) / 2) - 1px)
+  );
   z-index: 1;
 }
 
@@ -37,12 +43,15 @@
   gap: 0.3rem;
 }
 
-.osc-agenda-item.--active-item .osc-date-circle:before{
-  content:'';
+.osc-agenda-item.--active-item .osc-date-circle:before {
+  content: '';
   width: calc(var(--icon-size) / 2);
   height: calc(var(--icon-size) / 2);
   border-radius: 50%;
-  background-color: var(--nlds-agenda-item-background-color, var(--utrecht-button-primary-action-background-color));
+  background-color: var(
+    --nlds-agenda-item-background-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
   inset: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -52,9 +61,20 @@
 .osc-date-circle {
   width: var(--icon-size);
   height: var(--icon-size);
-  background-color: var(--nlds-agenda-background-color,var(--nlds-default-background-color, #F0F4F8));
-  border: 2px solid var(--nlds-agenda-item-background-color, var(--utrecht-button-primary-action-background-color));
-  outline: 2px solid var(--nlds-agenda-background-color,var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(
+    --nlds-agenda-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+  border: 2px solid
+    var(
+      --nlds-agenda-item-background-color,
+      var(--utrecht-button-primary-action-background-color)
+    );
+  outline: 2px solid
+    var(
+      --nlds-agenda-background-color,
+      var(--nlds-default-background-color, #f0f4f8)
+    );
   border-radius: 50%;
   margin-right: 1rem;
   margin-top: 0.2rem;
@@ -63,11 +83,13 @@
   flex-shrink: 0;
 }
 
-
 /* The last item should not have a line extending down */
 .osc-agenda > .osc-agenda-item:last-child::before,
-.osc-agenda > .osc-agenda-item:has(+.utrecht-accordion__section)::before,
+.osc-agenda > .osc-agenda-item:has(+ .utrecht-accordion__section)::before,
 .osc-agenda > :nth-last-child(1 of .osc-agenda-item)::before,
-.osc-agenda > .utrecht-accordion__section > .utrecht-accordion__panel > :nth-last-child(1 of .osc-agenda-item)::before {
+.osc-agenda
+  > .utrecht-accordion__section
+  > .utrecht-accordion__panel
+  > :nth-last-child(1 of .osc-agenda-item)::before {
   content: none;
 }

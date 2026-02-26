@@ -1,5 +1,5 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
-import {validateProjectNumber} from "@/lib/validateProjectNumber";
 
 export default function useExport(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -8,5 +8,5 @@ export default function useExport(projectId?: string) {
 
   const exportSWR = useSWR(projectNumber ? url : null);
 
-  return {...exportSWR}
+  return { ...exportSWR };
 }

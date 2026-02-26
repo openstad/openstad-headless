@@ -1,9 +1,12 @@
+import '@utrecht/component-library-css';
+import {
+  Select as NLDS_Select,
+  SelectOption,
+} from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
 import React, { forwardRef } from 'react';
-import './index.css';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Select as NLDS_Select, SelectOption } from "@utrecht/component-library-react";
+import './index.css';
 
 type Props = {
   onValueChange?: (resource: any, label?: string) => void;
@@ -23,19 +26,27 @@ const Select = forwardRef<HTMLSelectElement, Props>(
         className={`select ${props.className}`}
         onChange={
           props.onChange ||
-          ((e) => onValueChange && onValueChange(e.target.value, e.target?.selectedOptions[0]?.dataset?.label || ''))
+          ((e) =>
+            onValueChange &&
+            onValueChange(
+              e.target.value,
+              e.target?.selectedOptions[0]?.dataset?.label || ''
+            ))
         }>
         {props.children}
 
-          {!disableDefaultOption && (
-              <SelectOption className="select-item" value={''}>
-                Selecteer optie
-              </SelectOption>
-          )}
+        {!disableDefaultOption && (
+          <SelectOption className="select-item" value={''}>
+            Selecteer optie
+          </SelectOption>
+        )}
 
         {selectOptions.map((option) => (
           <React.Fragment key={`select-item-${option.label}`}>
-            <SelectOption className="select-item" value={option.value} data-label={option.label}>
+            <SelectOption
+              className="select-item"
+              value={option.value}
+              data-label={option.label}>
               {option.label}
             </SelectOption>
           </React.Fragment>

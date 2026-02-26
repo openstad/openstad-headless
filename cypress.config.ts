@@ -1,12 +1,12 @@
-import { defineConfig } from "cypress";
-
+import { defineConfig } from 'cypress';
 // Load environment variables from .testing.env file
-import dotenv from "dotenv";
-dotenv.config({ path: ".testing.env" });
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.testing.env' });
 // Cypress configuration
 
 export default defineConfig({
-  projectId: "vqxz36",
+  projectId: 'vqxz36',
 
   e2e: {
     setupNodeEvents(on, config) {
@@ -18,8 +18,8 @@ export default defineConfig({
 
   component: {
     devServer: {
-      framework: "react",
-      bundler: "vite",
+      framework: 'react',
+      bundler: 'vite',
     },
   },
 });

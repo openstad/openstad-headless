@@ -1,14 +1,21 @@
 import React from 'react';
+
 import { Checkbox } from '../ui/checkbox';
 
-const ImportUseIdCheckboxLine = (props: { 
-  checked: boolean; 
-  handleCheckBoxChange: (checked: boolean) => void 
+const ImportUseIdCheckboxLine = (props: {
+  checked: boolean;
+  handleCheckBoxChange: (checked: boolean) => void;
 }) => {
   const { checked, handleCheckBoxChange } = props;
 
   return (
-    <div style={{ margin: '10px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div
+      style={{
+        margin: '10px 0',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}>
       <Checkbox
         id="useId"
         checked={checked}

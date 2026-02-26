@@ -1,6 +1,7 @@
 # Article
 
 ## Inhoud
+
 [Inleiding](#inleiding)
 [Endpoints](#endpoints)
 [ExtraData - zie Idea](/doc/idea#extradata)
@@ -11,11 +12,13 @@
 Article is een nieuwe resource die vergelijkbaar is met Idea maar daar toch weer los van staat.
 
 Dat wil zeggen:
+
 - een eigen set van routes
 - een eigen configuratie
 - maar wel met votes en arguments
 
 De drie meest voor de hand liggende oplossingen manieren om dit op te lossen:
+
 1. maak een eigen Article model, in de basis een kopie van Idea, en breid Vote en Argument uit zodat ze met beide om kunnen gaan
 2. maak een eigen Article model, en maak er ook eigen een Vote en Argument bij
 3. geef Idea een resourceType veld, maak wel eigen routes en configuratie voor article maar gebruik daar gewoon het Ideas model. Misschien moet idea dan hernoemd naar Resource.
@@ -56,4 +59,5 @@ Je kunt aan de GETs query parameters meegeven. Die werken als scopes voor Sequel
 ExtraData werkt exact hetzelfde als in Idea - [zie daar](/doc/idea#extradata) voor meer informatie
 
 ## TODO
+
 - Zie inleiding: maak een keuze voor een definitieve oplossing.

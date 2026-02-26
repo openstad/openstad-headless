@@ -1,4 +1,3 @@
-
 @inward-easing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 @outward-easing: cubic-bezier(0.77, 0, 0.175, 1);
 @downward-easing: cubic-bezier(0.47, 0, 0.745, 0.715);
@@ -20,29 +19,28 @@
   &-relative {
     position: relative;
   }
-  
+
   @media screen and (max-width: @screen-sm) {
     bottom: auto;
     top: 7px;
   }
 }
 
-
 .flash-message {
-    background: #f3f3f3;
-    border-radius: 0;
-    color: #ffffff;
-    cursor: default;
-    display: flex;
-    max-width: 400px;
-    pointer-events: auto;
-    position: relative;
-    font-weight: 700;
-    line-height: 1.25;
+  background: #f3f3f3;
+  border-radius: 0;
+  color: #ffffff;
+  cursor: default;
+  display: flex;
+  max-width: 400px;
+  pointer-events: auto;
+  position: relative;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .flash-message .flash-message {
-  margin-bottom: .75rem;
+  margin-bottom: 0.75rem;
 }
 
 .flash-message--error {
@@ -68,11 +66,11 @@
   top: 4px;
 }
 
-.flash-message__close-button  .close-button {
+.flash-message__close-button .close-button {
   background: transparent;
   appearance: none;
   border: 0;
-  color: rgba(0, 0, 0, .88);
+  color: rgba(0, 0, 0, 0.88);
   cursor: pointer;
   font-size: 16px;
   font-weight: 400;
@@ -96,7 +94,6 @@
   animation-name: flashAnimateDown;
   animation-timing-function: @downward-easing;
 }
-
 
 /*================ animations ================*/
 

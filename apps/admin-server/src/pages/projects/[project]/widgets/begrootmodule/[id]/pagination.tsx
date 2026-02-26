@@ -14,9 +14,9 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import * as Switch from '@radix-ui/react-switch';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   itemsPerPage: z.coerce.number(),
@@ -24,8 +24,7 @@ const formSchema = z.object({
 });
 
 export default function WidgetStemBegrootPagination(
-  props: StemBegrootWidgetProps &
-    EditFieldProps<StemBegrootWidgetProps>
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
@@ -79,13 +78,16 @@ export default function WidgetStemBegrootPagination(
                 <FormItem>
                   <FormLabel>Hoeveelheid items per pagina</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field}
+                    <Input
+                      type="number"
+                      {...field}
                       placeholder="30"
                       {...field}
                       onChange={(e) => {
                         onFieldChange(field.name, e.target.value);
                         field.onChange(e);
-                      }} />
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

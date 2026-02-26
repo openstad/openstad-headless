@@ -7,13 +7,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:component": "cypress run --component"
   },
   "dependencies": {
     "@openstad-headless/data-store": "*",
+    "@openstad-headless/dilemma": "^0.0.0",
     "@openstad-headless/lib": "*",
     "@openstad-headless/swipe": "^0.0.0",
-    "@openstad-headless/dilemma": "^0.0.0",
     "@openstad-headless/types": "*",
     "@openstad-headless/ui": "*",
     "react": "^18.2.0",
@@ -27,6 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "cypress": "^15.8.1",
     "eslint": "^8.45.0",
     "eslint-config-custom": "*",
     "eslint-plugin-react-hooks": "^4.6.0",

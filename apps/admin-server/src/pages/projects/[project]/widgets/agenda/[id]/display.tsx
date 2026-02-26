@@ -1,23 +1,30 @@
 import { Button } from '@/components/ui/button';
 import {
-  Form, FormControl,
+  Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
+import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import * as React from "react";
-import {Input} from "@/components/ui/input";
-import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   displayTitle: z.boolean(),
@@ -28,7 +35,9 @@ const formSchema = z.object({
   toggleType: z.string().optional(),
   toggleStart: z.string().optional(),
   toggleEnd: z.string().optional(),
-  defaultClosedFromBreakpoint: z.enum(['not', '480', '640', '768', '1024']).optional()
+  defaultClosedFromBreakpoint: z
+    .enum(['not', '480', '640', '768', '1024'])
+    .optional(),
 });
 
 export default function WidgetAgendaDisplay(
@@ -63,8 +72,7 @@ export default function WidgetAgendaDisplay(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6"
-        >
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6">
           <FormField
             control={form.control}
             name="displayTitle"
@@ -91,7 +99,7 @@ export default function WidgetAgendaDisplay(
             )}
           />
 
-          { form.watch('displayToggle') && (
+          {form.watch('displayToggle') && (
             <>
               <FormField
                 control={form.control}
@@ -111,9 +119,7 @@ export default function WidgetAgendaDisplay(
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="full">
-                          Hele agenda
-                        </SelectItem>
+                        <SelectItem value="full">Hele agenda</SelectItem>
                         <SelectItem value="items">
                           Alleen agenda-items
                         </SelectItem>
@@ -127,9 +133,7 @@ export default function WidgetAgendaDisplay(
                 name="toggleDefaultClosed"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Standaard ingeklapt weergeven?
-                    </FormLabel>
+                    <FormLabel>Standaard ingeklapt weergeven?</FormLabel>
                     {YesNoSelect(field, props)}
                     <FormMessage />
                   </FormItem>
@@ -174,14 +178,15 @@ export default function WidgetAgendaDisplay(
                 )}
               />
 
-              { !form.watch('toggleDefaultClosed') && (
+              {!form.watch('toggleDefaultClosed') && (
                 <FormField
                   control={form.control}
                   name="defaultClosedFromBreakpoint"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Breekpunt vanaf wanneer de inhoud standaard ingeklapt wordt weergegeven
+                        Breekpunt vanaf wanneer de inhoud standaard ingeklapt
+                        wordt weergegeven
                       </FormLabel>
                       <Select
                         onValueChange={(value) => {
@@ -205,10 +210,12 @@ export default function WidgetAgendaDisplay(
                             <b>640 px</b>: Kleine schermen (mobiel) en kleiner
                           </SelectItem>
                           <SelectItem value="768">
-                            <b>768 px</b>: Middelgrote schermen (tablet) en kleiner
+                            <b>768 px</b>: Middelgrote schermen (tablet) en
+                            kleiner
                           </SelectItem>
                           <SelectItem value="1024">
-                            <b>1024 px</b>: Grote schermen (laptop/desktop) en kleiner
+                            <b>1024 px</b>: Grote schermen (laptop/desktop) en
+                            kleiner
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -217,7 +224,7 @@ export default function WidgetAgendaDisplay(
                 />
               )}
 
-              { form.watch('toggleType') === 'items' && (
+              {form.watch('toggleType') === 'items' && (
                 <>
                   <FormField
                     control={form.control}
@@ -239,11 +246,13 @@ export default function WidgetAgendaDisplay(
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            { props?.items?.map((item, index) => (
-                              <SelectItem key={item.trigger} value={item.trigger}>
+                            {props?.items?.map((item, index) => (
+                              <SelectItem
+                                key={item.trigger}
+                                value={item.trigger}>
                                 {index + 1}. {item.title || 'Geen titel'}
                               </SelectItem>
-                            )) }
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -269,11 +278,13 @@ export default function WidgetAgendaDisplay(
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            { props?.items?.map((item, index) => (
-                              <SelectItem key={item.trigger} value={item.trigger}>
+                            {props?.items?.map((item, index) => (
+                              <SelectItem
+                                key={item.trigger}
+                                value={item.trigger}>
                                 {index + 1}. {item.title || 'Geen titel'}
                               </SelectItem>
-                            )) }
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -281,10 +292,8 @@ export default function WidgetAgendaDisplay(
                   />
                 </>
               )}
-
             </>
           )}
-
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

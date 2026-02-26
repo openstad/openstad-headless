@@ -1,35 +1,32 @@
-
-#cookiewarning-container-top.cookie-container-fixed{
-	position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 1000000;
-    background: rgba(255, 255, 255, 1);
-    padding: 10px;
-    box-shadow: 0 -10px 5px rgba(0,0,0,0.1);
-		left: 0;
+#cookiewarning-container-top.cookie-container-fixed {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000000;
+  background: rgba(255, 255, 255, 1);
+  padding: 10px;
+  box-shadow: 0 -10px 5px rgba(0, 0, 0, 0.1);
+  left: 0;
 }
 
 #cookiewarning-container {
-	box-sizing: border-box;
-	width: 100%;
+  box-sizing: border-box;
+  width: 100%;
   width: 100%;
   height: 193px;
   background-color: white;
-  border-bottom: 4px solid  #787979;
+  border-bottom: 4px solid #787979;
 
-	// @media @phone {
+  // @media @phone {
   //   height: 285px;
   // }
 
   &.hidden {
     display: none;
   }
-
 }
 
 .cookie-consent {
-
   font-size: 16px;
   line-height: 1.38;
 
@@ -43,10 +40,9 @@
     max-width: 870px;
     margin: 0 auto;
 
-	  // @media @phone {
+    // @media @phone {
     //   padding: 0 12px;
     // }
-
   }
 
   h3 {
@@ -54,14 +50,13 @@
     padding: 16px 0 13px 0;
     text-align: left;
 
-	  // @media @phone {
+    // @media @phone {
     //   margin: 0;
     //   padding: 16px 0 13px 0;
     // }
-
   }
 
-	a.cookie-button {
+  a.cookie-button {
     display: inline-block;
     box-sizing: border-box;
     padding: 0 10px;
@@ -101,10 +96,8 @@
       &:hover {
         border: 2px solid #004699;
       }
-
     }
-
-	}
+  }
 
   &.placeholder-no-cookie-consent {
     width: 100%;
@@ -113,12 +106,18 @@
 
     &.placeholder-type-default,
     &.placeholder-type-video {
-      background: repeating-linear-gradient(135deg,#eee,#eee 20px,#fcfcfc 20px,#fcfcfc 40px);
+      background: repeating-linear-gradient(
+        135deg,
+        #eee,
+        #eee 20px,
+        #fcfcfc 20px,
+        #fcfcfc 40px
+      );
     }
 
     &.placeholder-type-map {
       background-size: cover;
-      Background-image: url(/modules/openstad-assets/img/placeholders/kaart-blur-image@3x.png)
+      background-image: url(/modules/openstad-assets/img/placeholders/kaart-blur-image@3x.png);
     }
 
     .placeholder-content {
@@ -136,9 +135,7 @@
         margin-top: 0;
         padding-top: 0;
       }
-
     }
-
   }
 
   .cookie-consent-change-container {
@@ -150,5 +147,4 @@
     a.cookie-button {
     }
   }
-
 }

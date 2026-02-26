@@ -1,9 +1,9 @@
 @function best-contrast-on($color, $dark: $color-black, $light: $color-white) {
   @if $color == null {
     @return null;
-  }
-  @else {
-    $yiq: (red($color) * 299 + green($color) * 587 + blue($color) * 114) / 1000; // sass-lint:disable-line no-color-keywords
+  } @else {
+    $yiq: (red($color) * 299 + green($color) * 587 + blue($color) * 114) /
+      1000; // sass-lint:disable-line no-color-keywords
     @return if($yiq >= 128, $dark, $light);
   }
 }
@@ -24,9 +24,7 @@
   * {
     @if best-contrast-on($color) == #000 {
       color: $color-black;
-    }
-
-    @else if best-contrast-on($color) == #fff {
+    } @else if best-contrast-on($color) == #fff {
       color: $color-white;
     }
   }

@@ -1,100 +1,107 @@
-require('dotenv').config({ path: '../../.env' })
-require('dotenv').config({ path: '.env' })
+require('dotenv').config({ path: '../../.env' });
+require('dotenv').config({ path: '.env' });
 
 const db = require('../db');
 
 const { Umzug, SequelizeStorage } = require('umzug');
 
-const { AUTH_ADMIN_CLIENT_ID: authId, AUTH_ADMIN_CLIENT_SECRET: authSecret } = process.env;
+const { AUTH_ADMIN_CLIENT_ID: authId, AUTH_ADMIN_CLIENT_SECRET: authSecret } =
+  process.env;
 
-if ((typeof authId !== "undefined" && authId.includes(':')) || (typeof authSecret !== "undefined" && authSecret.includes(':'))) {
+if (
+  (typeof authId !== 'undefined' && authId.includes(':')) ||
+  (typeof authSecret !== 'undefined' && authSecret.includes(':'))
+) {
   throw new Error("Auth client id/secret must not contain ':'");
 }
 
 (async () => {
   const resetDatabase = async () => {
     try {
-    
       const umzug = new Umzug({
         migrations: {
           glob: './migrations/*.js',
           params: [
-                  db.sequelize.getQueryInterface(),
-                  db.Sequelize // Sequelize constructor - the required module
-              ],
-           },
+            db.sequelize.getQueryInterface(),
+            db.Sequelize, // Sequelize constructor - the required module
+          ],
+        },
         context: db.sequelize.getQueryInterface(),
-        storage: new SequelizeStorage({ sequelize: db.sequelize, tableName : 'migrations' }),
+        storage: new SequelizeStorage({
+          sequelize: db.sequelize,
+          tableName: 'migrations',
+        }),
         logger: console,
       });
-      
+
       console.log('Create database...');
-      await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true })
-      console.log ('Syncing models')
+      await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true });
+      console.log('Syncing models');
       await db.sequelize.sync();
-    
+
       console.log('Marking migrations as done...');
       let pendingMigrations = await umzug.pending();
       for (let migration of pendingMigrations) {
-        await umzug.storage.logMigration(migration)
+        await umzug.storage.logMigration(migration);
       }
-    
+
       console.log('Adding data...');
-    
+
       let datafile = 'default';
       try {
         await require(`../seeds/${datafile}`)(db);
-      } catch(err) {
+      } catch (err) {
         console.log(err);
       }
-    
+
       datafile = process.env.NODE_ENV || 'development';
       try {
         await require(`../seeds/${datafile}`)(db);
-      } catch(err) {
+      } catch (err) {
         if (err && err.message && err.message.match(/Cannot find module/)) {
           console.log(`  no ${datafile} data seeds found`);
         } else {
           console.log(err.message);
         }
       }
-    
+
       datafile = 'local';
       try {
         await require(`../seeds/${datafile}`)(db);
-      } catch(err) {
+      } catch (err) {
         if (err && err.message && err.message.match(/Cannot find module/)) {
           console.log('  no local data seeds found');
         } else {
           console.log(err.message);
         }
       }
-    
     } catch (err) {
       console.log(err);
     } finally {
       db.sequelize.close();
       process.exit(0);
     }
-  }
-  
+  };
+
   const args = process.argv.slice(2);
-  
+
   const isDatabaseEmpty = async () => {
     try {
       const tables = await db.sequelize.query('SHOW TABLES');
-      return tables[0].length === 0
+      return tables[0].length === 0;
     } catch (err) {
-      console.error("Error while checking database tables:", err);
+      console.error('Error while checking database tables:', err);
       process.exit(0);
     }
-  }
+  };
 
-  if (await isDatabaseEmpty() || args?.includes('--force')) {
+  if ((await isDatabaseEmpty()) || args?.includes('--force')) {
     console.log('Initializing the database...');
     await resetDatabase();
   } else {
-    console.log('Skipping database initialization, because tables already exist. To force reset the database, use the --force flag.')
+    console.log(
+      'Skipping database initialization, because tables already exist. To force reset the database, use the --force flag.'
+    );
     process.exit(0);
   }
 })();

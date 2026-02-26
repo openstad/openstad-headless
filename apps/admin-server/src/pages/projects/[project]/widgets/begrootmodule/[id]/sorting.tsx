@@ -27,24 +27,24 @@ import * as z from 'zod';
 // Defines the types allowed to go to the frontend
 const SortingTypes = [
   {
-    value: "title",
-    label: "Titel"
+    value: 'title',
+    label: 'Titel',
   },
   {
-    value: "createdAt_desc",
-    label: "Nieuwste eerst"
+    value: 'createdAt_desc',
+    label: 'Nieuwste eerst',
   },
   {
-    value: "createdAt_asc",
-    label: "Oudste eerst"
+    value: 'createdAt_asc',
+    label: 'Oudste eerst',
   },
   {
-    value: "votes_desc",
-    label: "Meeste stemmen"
+    value: 'votes_desc',
+    label: 'Meeste stemmen',
   },
   {
-    value: "votes_asc",
-    label: "Minste stemmen"
+    value: 'votes_asc',
+    label: 'Minste stemmen',
   },
   // {
   //   value: "comments_desc",
@@ -55,13 +55,13 @@ const SortingTypes = [
   //   label: "Minste reacties"
   // },
   {
-    value: "ranking",
-    label: "Ranglijst"
+    value: 'ranking',
+    label: 'Ranglijst',
   },
   {
-    value: "random",
-    label: "Willekeurig"
-  }
+    value: 'random',
+    label: 'Willekeurig',
+  },
 ];
 
 const formSchema = z.object({
@@ -70,12 +70,11 @@ const formSchema = z.object({
   sorting: z
     .array(z.object({ value: z.string(), label: z.string() }))
     .optional()
-    .default([])
+    .default([]),
 });
 
 export default function WidgetStemBegrootSorting(
-  props: StemBegrootWidgetProps &
-    EditFieldProps<StemBegrootWidgetProps>
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
 

@@ -20,4 +20,3 @@ Deze opzet heeft als bijkomend voordeel dat je, als ingelogde gebruiker op een p
 - unique codes moet via de api gaan lopen
 - het hoofdmenu moet nog context gevoelig worden
 - het zou duidelijker moeten zijn op de auth server waar je inlogt
-

@@ -60,7 +60,7 @@
     "@openstad-headless/stem-begroot": "*",
     "@openstad-headless/ui": "*",
     "@radix-ui/react-separator": "^1.1.0",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.2",
     "co": "^4.6.0",
@@ -109,7 +109,6 @@
     "eslint-plugin-sonarjs": "^0.10.0",
     "jest": "^27.5.1",
     "npm-commands": "^1.1.0",
-    "prettier": "^2.6.2",
     "sequelize-mock": "^0.10.2",
     "supertest": "^4.0.2"
   },

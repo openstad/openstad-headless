@@ -1,22 +1,20 @@
-import { useState } from 'react';
-import { DialogClose } from '@radix-ui/react-dialog';
-import { MoreHorizontal, Trash } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
-import { Heading, Paragraph } from '@/components/ui/typography';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Heading, Paragraph } from '@/components/ui/typography';
+import { DialogClose } from '@radix-ui/react-dialog';
+import { MoreHorizontal, Trash } from 'lucide-react';
+import { useState } from 'react';
 
 type Props = {
   header: string;
@@ -37,11 +35,13 @@ export function RemoveResourceDialog({
 
   return (
     <Dialog open={open} modal={true} onOpenChange={setOpen}>
-      <div className="flex items-center" onClick={(e) => {
+      <div
+        className="flex items-center"
+        onClick={(e) => {
           e.preventDefault();
           setOpen(true);
         }}>
-        <Trash  className="mr-2 h-4 w-4" /> Verwijder
+        <Trash className="mr-2 h-4 w-4" /> Verwijder
       </div>
       <DialogContent
         onEscapeKeyDown={(e: KeyboardEvent) => {

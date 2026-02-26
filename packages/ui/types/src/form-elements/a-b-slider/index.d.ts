@@ -1,6 +1,6 @@
+import { FormValue } from '@openstad-headless/form/src/form';
 import { FC } from 'react';
 import './a-b-slider.css';
-import { FormValue } from "@openstad-headless/form/src/form";
 export type RangeSliderProps = {
     title: string;
     overrideDefaultValue?: FormValue | valueObject;

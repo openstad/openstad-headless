@@ -1,6 +1,7 @@
-import './index.css';
-import '../index.css';
 import React from 'react';
+
+import '../index.css';
+import './index.css';
 
 export function Banner(
   props: React.HTMLAttributes<HTMLDivElement> & { big?: boolean }

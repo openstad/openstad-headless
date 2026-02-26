@@ -33,17 +33,18 @@ export type ProjectSettingProps = {
     types: Array<string>;
   };
   comments: {
-    canComment: boolean,
-    canLike: boolean,
-    canDislike: boolean,
-    canReply: boolean,
+    canComment: boolean;
+    canLike: boolean;
+    canDislike: boolean;
+    canReply: boolean;
     closedText: string;
-    requiredUserRole: string,
-    descriptionMinLength: number,
-    descriptionMaxLength: number,
-    adminLabel: string,
-    minCharactersWarning?: string,
-    maxCharactersWarning?: string,
+    requiredUserRole: string;
+    descriptionMinLength: number;
+    descriptionMaxLength: number;
+    adminLabel: string;
+    editorLabel?: string;
+    minCharactersWarning?: string;
+    maxCharactersWarning?: string;
     minCharactersError?: string;
     maxCharactersError?: string;
     variant?: 'micro-score' | 'medium';
@@ -81,6 +82,6 @@ export type ProjectSettingProps = {
     areaId: string;
     tilesVariant?: string;
     customUrl?: string;
-    autoZoomAndCenter?: "area" | "markers";
+    autoZoomAndCenter?: 'area' | 'markers';
   };
 };

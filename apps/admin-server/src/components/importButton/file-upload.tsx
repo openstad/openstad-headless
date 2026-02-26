@@ -1,13 +1,18 @@
-import React from 'react';
-import { Button } from '../ui/button';
 import { Trash } from 'lucide-react';
+import React from 'react';
+
+import { Button } from '../ui/button';
 
 const FileUpload = (props: {
   onFileAdded: (e: React.ChangeEvent<HTMLInputElement>) => void;
   clear: () => void;
   fileName: string;
 }) => {
-  const { onFileAdded, clear, fileName }: {
+  const {
+    onFileAdded,
+    clear,
+    fileName,
+  }: {
     onFileAdded: (e: React.ChangeEvent<HTMLInputElement>) => void;
     clear: () => void;
     fileName: string;
@@ -35,8 +40,7 @@ const FileUpload = (props: {
             cursor: fileName ? 'pointer' : 'not-allowed',
             color: fileName ? 'red' : 'grey',
           }}
-          onClick={clear}
-        >
+          onClick={clear}>
           <Trash className="inline-block mr-2 h-5 w-5" />
         </span>
       </span>

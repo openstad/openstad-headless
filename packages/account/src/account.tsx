@@ -1,22 +1,24 @@
+import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { Banner, Spacer } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
-import '@utrecht/design-tokens/dist/root.css';
 import {
-  FormFieldTextbox,
-  Heading,
-  Paragraph,
   Button,
   Checkbox,
+  Fieldset,
   FieldsetLegend,
-  FormLabel, FormField,
-  Fieldset
+  FormField,
+  FormFieldTextbox,
+  FormLabel,
+  Heading,
+  Paragraph,
 } from '@utrecht/component-library-react';
+import '@utrecht/design-tokens/dist/root.css';
 import React, { useEffect, useState } from 'react';
+
+import hasRole from '../../lib/has-role';
 import './account.css';
-import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
-import DataStore from '@openstad-headless/data-store/src';
-import hasRole from "../../lib/has-role";
-import { Banner, Spacer } from '@openstad-headless/ui/src';
 
 export type AccountWidgetProps = BaseProps &
   AccountProps &
@@ -83,7 +85,7 @@ type FormData = {
     value: boolean | undefined;
     description?: string | undefined;
   };
-}
+};
 function Account({
   allowNickname = false,
   minLength = 2,
@@ -134,8 +136,9 @@ function Account({
     emailNotificationConsent: {
       value: false,
       label: 'E-mail toestemming',
-      description: 'Toestemming om e-mail notificaties te ontvangen wanneer er een reactie is geplaatst op jouw inzending of reactie.',
-    }
+      description:
+        'Toestemming om e-mail notificaties te ontvangen wanneer er een reactie is geplaatst op jouw inzending of reactie.',
+    },
   },
   loginButtonText = undefined,
   loginRequiredText = undefined,
@@ -144,12 +147,18 @@ function Account({
   ...props
 }: AccountWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
-  const resourceId = urlParams.get('openstadResourceId') || props.resourceId || '';
+  const resourceId =
+    urlParams.get('openstadResourceId') || props.resourceId || '';
 
   const [canEditNickname, setCanEditNickname] = useState(false);
   const [canEditUser, setCanEditUser] = useState(false);
-  const [editButtonText] = useState([['Gegevens bewerken'], ['Gegevens opslaan']]);
-  const [userFormData, setUserFormData] = useState<FormData>(formData as FormData);
+  const [editButtonText] = useState([
+    ['Gegevens bewerken'],
+    ['Gegevens opslaan'],
+  ]);
+  const [userFormData, setUserFormData] = useState<FormData>(
+    formData as FormData
+  );
   const [fetchedUser, setFetchedUser] = useState(false);
 
   const datastore = new DataStore({
@@ -157,7 +166,10 @@ function Account({
     api: props.api,
   });
 
-  const currentUser = datastore.useCurrentUser({ ...props, projectId: props.projectId });
+  const currentUser = datastore.useCurrentUser({
+    ...props,
+    projectId: props.projectId,
+  });
 
   const saveUserData = async (data: any) => {
     if (currentUser?.data?.id === undefined) {
@@ -171,7 +183,7 @@ function Account({
       copyObj.address = {
         label: 'Adres',
         value: `${copyObj.straatnaam.value ?? ''} ${copyObj.huisnummer.value ?? ''}`,
-      }
+      };
       delete copyObj.huisnummer; // Remove huisnummer from the object
       delete copyObj.straatnaam; // Remove straatnaam from the object
     }
@@ -184,7 +196,10 @@ function Account({
     // only get values and add id using the modified copyObj
     let updatedData = {
       ...Object.fromEntries(
-        Object.entries(copyObj).map(([key, value]) => [key, typeof value === 'object' && value !== null ? value.value : value])
+        Object.entries(copyObj).map(([key, value]) => [
+          key,
+          typeof value === 'object' && value !== null ? value.value : value,
+        ])
       ),
       id: currentUser?.data?.id,
     };
@@ -193,12 +208,16 @@ function Account({
       projectId: props.projectId,
       user: {
         ...updatedData,
-      }
+      },
     });
-  }
+  };
 
   useEffect(() => {
-    if (currentUser !== undefined && currentUser?.data !== undefined && fetchedUser === false) {
+    if (
+      currentUser !== undefined &&
+      currentUser?.data !== undefined &&
+      fetchedUser === false
+    ) {
       setFetchedUser(currentUser);
 
       // Assuming address is a string like "Main Street 24"
@@ -249,8 +268,8 @@ function Account({
             label: prev?.emailNotificationConsent?.label,
             value: currentUser?.data?.emailNotificationConsent || false,
             description: prev?.emailNotificationConsent?.description,
-          }
-        }
+          },
+        };
       });
     }
   }, [currentUser]);
@@ -265,15 +284,16 @@ function Account({
       {!hasRole(currentUser?.data, 'member') ? (
         <>
           <Banner className="big">
-            <Heading level={4} appearance='utrecht-heading-6'>{loginRequiredText || 'Je moet ingelogd zijn om verder te gaan.'}</Heading>
+            <Heading level={4} appearance="utrecht-heading-6">
+              {loginRequiredText || 'Je moet ingelogd zijn om verder te gaan.'}
+            </Heading>
             <Spacer size={1} />
             <Button
               type="button"
               onClick={() => {
                 document.location.href = props.login?.url || '';
               }}
-              appearance="primary-action-button"
-            >
+              appearance="primary-action-button">
               {loginButtonText || 'Inloggen'}
             </Button>
           </Banner>
@@ -283,140 +303,153 @@ function Account({
         <>
           <div>
             {overview_title && <Heading level={2}>{overview_title}</Heading>}
-            {overview_description && <Paragraph>{overview_description}</Paragraph>}
+            {overview_description && (
+              <Paragraph>{overview_description}</Paragraph>
+            )}
 
-            {Object.entries(formData).map((field, index) => (
-              field[0] === 'email' && (
-                <FormFieldTextbox
-                  label={field[1].label}
-                  name={field[1].label}
-                  description="Niet aanpasbaar"
-                  placeholder={field[1].label}
-                  maxLength={maxLength}
-                  minLength={minLength}
-                  value={userFormData?.email?.value}
-                  readOnly
-                  key={index}
-                />
-              )
-            ))}
+            {Object.entries(formData).map(
+              (field, index) =>
+                field[0] === 'email' && (
+                  <FormFieldTextbox
+                    label={field[1].label}
+                    name={field[1].label}
+                    description="Niet aanpasbaar"
+                    placeholder={field[1].label}
+                    maxLength={maxLength}
+                    minLength={minLength}
+                    value={userFormData?.email?.value}
+                    readOnly
+                    key={index}
+                  />
+                )
+            )}
           </div>
           <div>
             {info_title && <Heading level={2}>{info_title}</Heading>}
             {info_description && <Paragraph> {info_description} </Paragraph>}
 
             {Object.entries(userFormData).map((field, index) => {
-              return ( field[0] === 'emailNotificationConsent' ) ? (
-                showEmailConsentField && (
-                  <Fieldset role="group" className="consent-checkbox-container">
-                    <FieldsetLegend>
-                      {field[1].label}
-                    </FieldsetLegend>
-                    <FormField type="checkbox" key={index}>
-                      <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
-                        <FormLabel htmlFor={field[0]} type="checkbox" className="--label-grid" disabled={!canEditUser}>
-                          <Checkbox
-                            className="utrecht-form-field__input"
-                            id={field[0]}
-                            name={field[0]}
-                            checked={field[1].value as boolean}
-                            onChange={(e) => {
-                              const target = e.target as HTMLInputElement; // Type assertion
-                              setUserFormData((prev) => ({
-                                ...prev,
-                                [field[0]]: {
-                                  label: field[1].label,
-                                  value: target.checked,
-                                  description: field[1].description,
-                                },
-                              }));
-                            }}
-                            disabled={!canEditUser}
-                          />
-                          <span>{field[1]?.description}</span>
-                        </FormLabel>
-                      </Paragraph>
-                    </FormField>
-                  </Fieldset>
-                )
-              ) : ( field[0] !== 'nickname' && field[0] !== 'email' ) && (
-                <FormFieldTextbox
-                  label={field[1].label}
-                  name={field[1].label}
-                  placeholder={field[1].label}
-                  maxLength={maxLength}
-                  minLength={minLength}
-                  value={field[1].value as string}
-                  onChange={(e) => {
-                    const target = e.target as HTMLInputElement; // Type assertion
-                    setUserFormData((prev) => ({
-                      ...prev,
-                      [field[0]]: {
-                        label: target.name,
-                        value: target.value,
-                        description: field[1].description,
-                      },
-                    }));
-                  }}
-                  readOnly={!canEditUser}
-                  key={index}
-                />
-              )
-            }
-          )}
+              return field[0] === 'emailNotificationConsent'
+                ? showEmailConsentField && (
+                    <Fieldset
+                      role="group"
+                      className="consent-checkbox-container">
+                      <FieldsetLegend>{field[1].label}</FieldsetLegend>
+                      <FormField type="checkbox" key={index}>
+                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                          <FormLabel
+                            htmlFor={field[0]}
+                            type="checkbox"
+                            className="--label-grid"
+                            disabled={!canEditUser}>
+                            <Checkbox
+                              className="utrecht-form-field__input"
+                              id={field[0]}
+                              name={field[0]}
+                              checked={field[1].value as boolean}
+                              onChange={(e) => {
+                                const target = e.target as HTMLInputElement; // Type assertion
+                                setUserFormData((prev) => ({
+                                  ...prev,
+                                  [field[0]]: {
+                                    label: field[1].label,
+                                    value: target.checked,
+                                    description: field[1].description,
+                                  },
+                                }));
+                              }}
+                              disabled={!canEditUser}
+                            />
+                            <span>{field[1]?.description}</span>
+                          </FormLabel>
+                        </Paragraph>
+                      </FormField>
+                    </Fieldset>
+                  )
+                : field[0] !== 'nickname' && field[0] !== 'email' && (
+                    <FormFieldTextbox
+                      label={field[1].label}
+                      name={field[1].label}
+                      placeholder={field[1].label}
+                      maxLength={maxLength}
+                      minLength={minLength}
+                      value={field[1].value as string}
+                      onChange={(e) => {
+                        const target = e.target as HTMLInputElement; // Type assertion
+                        setUserFormData((prev) => ({
+                          ...prev,
+                          [field[0]]: {
+                            label: target.name,
+                            value: target.value,
+                            description: field[1].description,
+                          },
+                        }));
+                      }}
+                      readOnly={!canEditUser}
+                      key={index}
+                    />
+                  );
+            })}
 
             {allowUserEdit && (
-              <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-                if (canEditUser) {
-                  saveUserData(userFormData);
-                }
-                setCanEditUser(!canEditUser);
-              }}>{canEditUser ? editButtonText[1] : editButtonText[0]}</Button>
+              <Button
+                className="account-edit-button"
+                appearance={'primary-action-button'}
+                onClick={() => {
+                  if (canEditUser) {
+                    saveUserData(userFormData);
+                  }
+                  setCanEditUser(!canEditUser);
+                }}>
+                {canEditUser ? editButtonText[1] : editButtonText[0]}
+              </Button>
             )}
-
-
           </div>
           {allowNickname && (
             <div>
               {user_title && <Heading level={2}>{user_title}</Heading>}
               {user_description && <Paragraph>{user_description}</Paragraph>}
 
-              {Object.entries(formData).map((field, index) => (
-                field[0] === 'nickname' && (
-                  <FormFieldTextbox
-                    label={field[1].label}
-                    name={field[1].label}
-                    maxLength={maxLength}
-                    minLength={minLength}
-                    placeholder={field[1].label}
-                    value={userFormData?.nickname?.value}
-                    onChange={(e) => {
-                      const target = e.target as HTMLInputElement; // Type assertion
-                      setUserFormData({
-                        ...userFormData,
-                        nickname: {
-                          value: target.value,
-                          label: userFormData?.nickname?.label || '', // Use optional chaining and default to an empty string if undefined
-                          description: field[1].description,
-                        },
-                      });
-                    }}
-                    readOnly={!canEditNickname}
-                    key={index}
-                  />
-                )
-              ))}
-
-
-              {allowUserEdit && (
-                <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-                  if (canEditNickname) {
-                    saveUserData(userFormData);
-                  }
-                  setCanEditNickname(!canEditNickname)
-                }}>{canEditNickname ? editButtonText[1] : editButtonText[0]}</Button>
+              {Object.entries(formData).map(
+                (field, index) =>
+                  field[0] === 'nickname' && (
+                    <FormFieldTextbox
+                      label={field[1].label}
+                      name={field[1].label}
+                      maxLength={maxLength}
+                      minLength={minLength}
+                      placeholder={field[1].label}
+                      value={userFormData?.nickname?.value}
+                      onChange={(e) => {
+                        const target = e.target as HTMLInputElement; // Type assertion
+                        setUserFormData({
+                          ...userFormData,
+                          nickname: {
+                            value: target.value,
+                            label: userFormData?.nickname?.label || '', // Use optional chaining and default to an empty string if undefined
+                            description: field[1].description,
+                          },
+                        });
+                      }}
+                      readOnly={!canEditNickname}
+                      key={index}
+                    />
+                  )
               )}
 
+              {allowUserEdit && (
+                <Button
+                  className="account-edit-button"
+                  appearance={'primary-action-button'}
+                  onClick={() => {
+                    if (canEditNickname) {
+                      saveUserData(userFormData);
+                    }
+                    setCanEditNickname(!canEditNickname);
+                  }}>
+                  {canEditNickname ? editButtonText[1] : editButtonText[0]}
+                </Button>
+              )}
             </div>
           )}
 
@@ -427,13 +460,11 @@ function Account({
                 appearance="primary-action-button"
                 onClick={() => {
                   document.location.href = props.logout?.url || '';
-                }}
-              >
+                }}>
                 Uitloggen
               </Button>
             </div>
           )}
-
         </>
       )}
     </section>

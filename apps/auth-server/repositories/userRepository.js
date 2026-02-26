@@ -1,13 +1,11 @@
 const db = require('../db');
 
-exports.getUserByClientAndRoles = function(email, clientId, roles) {
-
-  return db.User
-    .findOne({where: { email }})
-    .then( user => {
-      return user
-        .getRoleForClient(clientId)
-        .then( userrole => roles.find(role => role == userrole) ? user : undefined );
-    })
-
-}
+exports.getUserByClientAndRoles = function (email, clientId, roles) {
+  return db.User.findOne({ where: { email } }).then((user) => {
+    return user
+      .getRoleForClient(clientId)
+      .then((userrole) =>
+        roles.find((role) => role == userrole) ? user : undefined
+      );
+  });
+};

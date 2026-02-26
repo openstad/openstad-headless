@@ -19,7 +19,7 @@ export default function useChoiceGuideResultCount({
       let event = new window.CustomEvent('osc-error', { detail: newError });
       document.dispatchEvent(event);
     }
-    
+
     return { data: data?.count || 0, error, isLoading };
   } catch (e) {
     return {

@@ -1,66 +1,65 @@
 .osc-gridder-resource-detail {
-    display: flex;
-    gap: 2rem;
+  display: flex;
+  gap: 2rem;
 }
 
 @media screen and (max-width: 768px) {
-    .osc-gridder-resource-detail {
-        flex-direction: column;
-    }
-    
+  .osc-gridder-resource-detail {
+    flex-direction: column;
+  }
 }
 
 .osc-gridder-resource-detail-budget-theme-bar {
-    /* display: flex;
+  /* display: flex;
     justify-content: space-between; */
 }
 
 .osc-gridder-resource-detail-budget-theme-bar > div {
-    /* display: flex;
+  /* display: flex;
     justify-content: center;
     gap: .5rem; */
 }
 
 .osc-gridder-resource-detail-photo {
-    display: flex;
-    flex: 2;
-    gap: 1rem;
-    flex-direction: column;
-    justify-content: start;
+  display: flex;
+  flex: 2;
+  gap: 1rem;
+  flex-direction: column;
+  justify-content: start;
 }
 
 .osc-gridder-resource-detail-texts-and-actions-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    flex: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 3;
 }
 
 .osc-gridder-resource-detail-actions {
-    display: flex;
-    flex-direction: row;
-    align-items: end;
-    justify-content: space-between;
-    flex: 3;
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: space-between;
+  flex: 3;
 }
 
 .osc-gridder-resource-detail-share-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .osc-load-map-button {
-    height: 5rem;
-    width: 5rem;
-    background-color: black !important;
+  height: 5rem;
+  width: 5rem;
+  background-color: black !important;
 }
 
 .pill-grid {
-    display: flex;
-    gap: .5rem;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 .pill-grid p {
-    margin: 0;
+  margin: 0;
 }

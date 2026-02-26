@@ -1,13 +1,14 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { Footer } from './footer.tsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+import { Footer } from './footer.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <div className="openstad">
       <div id="footer-container">
-      <Footer
-        content='[
+        <Footer
+          content='[
         {
           "title": "Over deze site",
           "items": [
@@ -56,7 +57,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           ]
         }
       ]'
-        logo='
+          logo='
       {
    "_id":"et81sbf6f48k3hf9l5skhaiu",
    "crop":null,
@@ -93,7 +94,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
    }
 }
       '
-      /></div>
+        />
       </div>
-  </React.StrictMode>,
-)
+    </div>
+  </React.StrictMode>
+);
