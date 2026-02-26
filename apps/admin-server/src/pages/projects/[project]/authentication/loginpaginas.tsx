@@ -34,6 +34,9 @@ const formSchema = z.object({
   UrlLabel: z.string().optional(),
   UrlButtonText: z.string().optional(),
   UrlHelpText: z.string().optional(),
+  UrlConfirmedTitle: z.string().optional(),
+  UrlConfirmedDescription: z.string().optional(),
+  UrlConfirmedHelpText: z.string().optional(),
   SMS1Title: z.string().optional(),
   SMS1Subtitle: z.string().optional(),
   SMS1Description: z.string().optional(),
@@ -93,6 +96,15 @@ export default function ProjectAuthentication() {
       UrlHelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
           ?.helpText || '',
+      UrlConfirmedTitle:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.confirmedTitle || '',
+      UrlConfirmedDescription:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.confirmedDescription || '',
+      UrlConfirmedHelpText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.confirmedHelpText || '',
       SMS1Title:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
           ?.loginTitle || '',
@@ -183,6 +195,9 @@ export default function ProjectAuthentication() {
                   label: values.UrlLabel,
                   buttonText: values.UrlButtonText,
                   helpText: values.UrlHelpText,
+                  confirmedTitle: values.UrlConfirmedTitle,
+                  confirmedDescription: values.UrlConfirmedDescription,
+                  confirmedHelpText: values.UrlConfirmedHelpText,
                 },
                 Phonenumber: {
                   loginTitle: values.SMS1Title,
@@ -415,6 +430,56 @@ export default function ProjectAuthentication() {
                     <FormField
                       control={form.control}
                       name="UrlHelpText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Help tekst</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Separator className="my-4" />
+                    <div>
+                      <FormLabel>
+                        Teksten voor de bevestigingspagina na het versturen van
+                        de e-mail:
+                      </FormLabel>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="UrlConfirmedTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Titel</FormLabel>
+                          <FormControl>
+                            <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="UrlConfirmedDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Beschrijving</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="UrlConfirmedHelpText"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
