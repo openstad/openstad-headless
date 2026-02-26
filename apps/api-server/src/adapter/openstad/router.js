@@ -391,23 +391,28 @@ router
     }
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     if (!req.query.ipdlogout) {
-      // redirect to idp server
-      let redirectUri = encodeURIComponent(
-        config.url +
-          '/auth/project/' +
-          req.project.id +
-          '/logout?ipdlogout=done&useAuth=' +
-          req.query.useAuth +
-          '&redirectUri=' +
-          encodeURIComponent(req.query.redirectUri)
-      );
+      // Validate redirectUri against project allowlist before redirecting to auth server
+      let finalRedirect = req.query.redirectUri || '';
+      if (finalRedirect) {
+        const projectId = req.params.projectId;
+        if (
+          !projectId ||
+          !(await isRedirectAllowed(projectId, finalRedirect))
+        ) {
+          return next(createError(403, 'redirectUri not found in allowlist.'));
+        }
+        finalRedirect +=
+          (finalRedirect.includes('?') ? '&' : '?') + 'openstadlogout=true';
+      }
+      let redirectUri = encodeURIComponent(finalRedirect);
       let url = `${req.authConfig.serverUrl}/logout?redirectUrl=${redirectUri}&client_id=${req.authConfig.clientId}`;
       return res.redirect(url);
     }
     return next();
   })
+  // Backward-compatible fallback: only reached if auth server redirects back with ?ipdlogout=done
   .get(async function (req, res, next) {
     const projectId = req.params.projectId;
     if (
