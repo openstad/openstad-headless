@@ -1578,7 +1578,7 @@ export default function WidgetEnqueteItems(
                                 Antwoordopties met afbeeldingen
                               </SelectItem>
                               <SelectItem value="multiplechoice">
-                                Multiplechoice
+                                Enkele keuze
                               </SelectItem>
                               <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">
