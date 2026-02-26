@@ -341,7 +341,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer een beschrijving in" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -383,7 +386,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer helptekst in" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -435,7 +441,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer een beschrijving in" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -477,7 +486,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer helptekst in" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -536,7 +548,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Subtitle</FormLabel>
                           <FormControl>
-                            <Input placeholder="Voer een ondertitel in" {...field} />
+                            <Input
+                              placeholder="Voer een ondertitel in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -550,7 +565,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer een beschrijving in" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -592,7 +610,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer helptekst in" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -626,7 +647,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Subtitle</FormLabel>
                           <FormControl>
-                            <Input placeholder="Voer een ondertitel in" {...field} />
+                            <Input
+                              placeholder="Voer een ondertitel in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -640,7 +664,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer een beschrijving in" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -682,7 +709,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer helptekst in" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -732,7 +762,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer een beschrijving in" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -792,7 +825,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Voer helptekst in" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
