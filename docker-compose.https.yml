@@ -30,7 +30,7 @@ services:
     ports:
       - '6379:6379'
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       timeout: 20s
       retries: 10
 
@@ -228,7 +228,7 @@ services:
         - PORT=${ADMIN_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-admin-server}:${RELEASE_VERSION:-latest}
-    command: ["npm", "run", "dev-https", "--prefix=apps/admin-server"]
+    command: ['npm', 'run', 'dev-https', '--prefix=apps/admin-server']
     container_name: openstad-admin-server
     restart: unless-stopped
     environment:
@@ -261,7 +261,7 @@ services:
         - PORT=${CMS_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-cms-server}:${RELEASE_VERSION:-latest}
-    command: ["npm", "run", "dev", "--prefix=apps/cms-server"]
+    command: ['npm', 'run', 'dev', '--prefix=apps/cms-server']
     depends_on:
       openstad-redis:
         condition: service_healthy

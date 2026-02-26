@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next/types";
+import { NextApiRequest, NextApiResponse } from 'next/types';
 
 /**
  * This handler returns the run-time environment variable ENABLE_AUTH_PROVIDERS

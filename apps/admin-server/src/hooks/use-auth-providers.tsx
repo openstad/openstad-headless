@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 let cachedAuthProvidersEnabled: boolean | null = null;
 
 export function useAuthProvidersEnabledCheck() {
-  const [authProvidersEnabled, setAuthProvidersEnabled] = useState<boolean | null>(null);
+  const [authProvidersEnabled, setAuthProvidersEnabled] = useState<
+    boolean | null
+  >(null);
 
   useEffect(() => {
     if (cachedAuthProvidersEnabled !== null) {
@@ -31,8 +33,7 @@ export function useAuthProvidersEnabledCheck() {
 }
 
 export default function useAuthProvidersList() {
-
-  let authProvidersListSwrKey =`/api/openstad/api/auth-provider?includeConfig=1`;
+  let authProvidersListSwrKey = `/api/openstad/api/auth-provider?includeConfig=1`;
 
   let authProvidersListSwr = useSWR(authProvidersListSwrKey);
 
@@ -44,13 +45,16 @@ export default function useAuthProvidersList() {
       throw new Error('Deze auth provider kan niet worden bewerkt');
     }
 
-    const res = await fetch(`/api/openstad/api/project/${projectId}/update-server-login-path/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) throw new Error('Auth provider update failed')
+    const res = await fetch(
+      `/api/openstad/api/project/${projectId}/update-server-login-path/${id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (!res.ok) throw new Error('Auth provider update failed');
 
     return await res.json();
   }
@@ -63,7 +67,6 @@ export function useAuthProvider(id?: string) {
   let authProviderSwr = useSWR(id ? authProviderSwrKey : null);
 
   async function updateAuthProvider(body: any) {
-
     let id = !!body?.id ? parseInt(body.id, 10) : null;
 
     if (!id) {
@@ -78,10 +81,9 @@ export function useAuthProvider(id?: string) {
       },
       body: JSON.stringify({ ...body }),
     });
-    if (!res.ok) throw new Error('Auth provider update failed')
+    if (!res.ok) throw new Error('Auth provider update failed');
 
     return await res.json();
-
   }
 
   async function updateServerLoginPathForEachAffectedProject(body: any) {
@@ -91,19 +93,22 @@ export function useAuthProvider(id?: string) {
       throw new Error('Deze auth provider kan niet worden bewerkt');
     }
 
-    const res = await fetch(`/api/openstad/api/project/update-server-login-paths-for-auth-provider/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) throw new Error('Auth provider update failed')
+    const res = await fetch(
+      `/api/openstad/api/project/update-server-login-paths-for-auth-provider/${id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (!res.ok) throw new Error('Auth provider update failed');
 
     return await res.json();
   }
 
   async function createAuthProvider(name: string, config: object) {
-    console.log ('create auth provider');
+    console.log('create auth provider');
     const res = await fetch('/api/openstad/api/auth-provider', {
       method: 'POST',
       headers: {
@@ -111,24 +116,29 @@ export function useAuthProvider(id?: string) {
       },
       body: JSON.stringify({
         name,
-        config
+        config,
       }),
     });
     return await res.json();
   }
 
   async function deleteAuthProvider(id: string) {
-    console.log ('delete auth provider', id);
+    console.log('delete auth provider', id);
     const res = await fetch(`/api/openstad/api/auth-provider/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     });
 
     return await res.json();
-
   }
 
-  return { ...authProviderSwr, updateAuthProvider, createAuthProvider, deleteAuthProvider, updateServerLoginPathForEachAffectedProject};
+  return {
+    ...authProviderSwr,
+    updateAuthProvider,
+    createAuthProvider,
+    deleteAuthProvider,
+    updateServerLoginPathForEachAffectedProject,
+  };
 }

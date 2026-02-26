@@ -1,22 +1,7 @@
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { RenameResourceDialog } from '@/components/dialog-resource-rename';
-import { PageLayout } from '@/components/ui/page-layout';
-import { ListHeading, Paragraph } from '@/components/ui/typography';
-import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
-import { WidgetDefinitions } from '@/lib/widget-definitions';
-import { ChevronRight, Plus } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-
 import { Button } from '@/components/ui/button';
-import { useAuthProvider } from '@/hooks/use-auth-providers';
-import { fetchBrokerConfig } from '@/lib/fetch-broker-config';
-
-
-import { useCallback, useEffect } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useForm } from 'react-hook-form';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -26,14 +11,32 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
-import { toast } from 'react-hot-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InfoDialog from '@/components/ui/info-hover';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { PageLayout } from '@/components/ui/page-layout';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ListHeading, Paragraph } from '@/components/ui/typography';
+import { Heading } from '@/components/ui/typography';
+import { useAuthProvider } from '@/hooks/use-auth-providers';
+import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
+import { fetchBrokerConfig } from '@/lib/fetch-broker-config';
+import { WidgetDefinitions } from '@/lib/widget-definitions';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ChevronRight, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import * as z from 'zod';
 
 const formSchema = z.object({
   name: z.string(),
@@ -55,7 +58,6 @@ const formSchema = z.object({
 });
 
 function CreateAuthProvider() {
-
   const router = useRouter();
   const { createAuthProvider: createAuthProviderSwr } = useAuthProvider();
 
@@ -65,7 +67,7 @@ function CreateAuthProvider() {
       type: 'oidc',
       config: {},
     }),
-    [],
+    []
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -80,13 +82,20 @@ function CreateAuthProvider() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('submit');
     try {
-      const brokerConfigLoaded = await fetchBrokerConfig(null, values, form.setValue);
+      const brokerConfigLoaded = await fetchBrokerConfig(
+        null,
+        values,
+        form.setValue
+      );
       if (!brokerConfigLoaded) {
         throw new Error('Kon broker configuratie niet ophalen');
       }
 
       const newValues = form.getValues();
-      const provider = await createAuthProviderSwr(newValues.name, newValues.config);
+      const provider = await createAuthProviderSwr(
+        newValues.name,
+        newValues.config
+      );
       toast.success('Auth provider is aangemaakt');
       await router.push(`/auth-providers/${provider.id}`);
     } catch (err: any) {
@@ -99,16 +108,18 @@ function CreateAuthProvider() {
       <Form {...form}>
         <Heading size="xl">Algemene instellingen</Heading>
         <FormDescription>
-          Configureer hier de authenticate provider die je wilt gebruiken voor een project. <br />
-          Dit kan momenteel alleen een OpenID Connect provider zijn, bijvoorbeeld Signicat. <br />
-          Het is verplicht een clientId en clientSecret op te geven. De overige gegevens kunnen ofwel handmatig, of
-          via de Broker configuration opgegeven worden.
+          Configureer hier de authenticate provider die je wilt gebruiken voor
+          een project. <br />
+          Dit kan momenteel alleen een OpenID Connect provider zijn,
+          bijvoorbeeld Signicat. <br />
+          Het is verplicht een clientId en clientSecret op te geven. De overige
+          gegevens kunnen ofwel handmatig, of via de Broker configuration
+          opgegeven worden.
         </FormDescription>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-2/3 grid grid-cols-1 gap-4 ">
-
           <FormField
             control={form.control}
             name="name"
@@ -155,9 +166,13 @@ function CreateAuthProvider() {
             name="config.brokerConfiguration"
             render={({ field }) => (
               <FormItem className="mt-auto">
-                <FormLabel>Broker configuration
+                <FormLabel>
+                  Broker configuration
                   <InfoDialog
-                    content={'De Broker configuration is een URL naar een JSON bestand dat de configuratie bevat van de provider, deze eindigt meestal op ".well-known/openid-configuration"'} />
+                    content={
+                      'De Broker configuration is een URL naar een JSON bestand dat de configuratie bevat van de provider, deze eindigt meestal op ".well-known/openid-configuration"'
+                    }
+                  />
                 </FormLabel>
                 <FormControl className={'col-2'}>
                   <Input {...field} />
@@ -227,9 +242,7 @@ function CreateAuthProvider() {
   );
 }
 
-
 export default function AuthProviderCreate() {
-
   return (
     <div>
       <PageLayout
