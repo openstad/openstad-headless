@@ -883,6 +883,9 @@ router
 router
   .route('/update-server-login-paths-for-auth-provider/:authProviderId')
   .put(async function (req, res, next) {
+    const isAdmin = hasRole(req.user, 'admin');
+    if (!isAdmin) return next(new Error('Not authorized'));
+
     const authProviderId = parseInt(req.params.authProviderId);
     if (isNaN(authProviderId)) return next(new Error('Invalid authProviderId'));
 

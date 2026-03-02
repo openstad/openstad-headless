@@ -58,7 +58,11 @@ router
 
       // TODO: iss moet gecontroleerd
       jwt.sign(
-        { userId: openStadUser.id, authProvider: req.authConfig.provider },
+        {
+          userId: openStadUser.id,
+          authProvider: req.authConfig.provider,
+          authProviderId: req.authConfig.authProviderId,
+        },
         config.auth['jwtSecret'],
         { expiresIn: 182 * 24 * 60 * 60 },
         (err, token) => {
@@ -461,8 +465,12 @@ router
 
     //check if redirect domain is allowed
     if (redirectUrl.match('[[jwt]]')) {
-      jwt.sign(
-        { userId: req.userData.id, authProvider: req.authConfig.provider },
+      return jwt.sign(
+        {
+          userId: req.userData.id,
+          authProvider: req.authConfig.provider,
+          authProviderId: req.authConfig.authProviderId,
+        },
         req.authConfig.jwtSecret,
         { expiresIn: 182 * 24 * 60 * 60 },
         (err, token) => {

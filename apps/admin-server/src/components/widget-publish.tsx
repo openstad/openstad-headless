@@ -9,8 +9,11 @@ import { toast } from 'react-hot-toast';
 export default function WidgetPublish({ apiUrl }: { apiUrl: string }) {
   const router = useRouter();
   const id = router.query.id;
-  const widgetScriptTag = `<script src="${apiUrl}/widget/${id}" type="text/javascript"></script>`;
-  const widgetUrl = `${apiUrl}/widget/${id}`;
+  // Temporary mixed-content guard for local HTTPS setups:
+  // publish protocol-relative widget URLs so browser uses current page scheme.
+  const protocolRelativeApiUrl = apiUrl.replace(/^https?:/, '');
+  const widgetScriptTag = `<script src="${protocolRelativeApiUrl}/widget/${id}" type="text/javascript"></script>`;
+  const widgetUrl = `${protocolRelativeApiUrl}/widget/${id}`;
 
   const onCopy = (textToBeCopied: string, toastStart: string) => {
     navigator.clipboard.writeText(textToBeCopied);

@@ -193,7 +193,7 @@ async function getSessionSecret(projectUrl, projectId) {
 async function run(id, projectData, options, callback) {
   // Get host from projectData url
   const url = Url.parse(projectData.url);
-  const protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+  const protocol = process.env.FORCE_HTTP === 'yes' ? 'http://' : 'https://';
   projectData.url = protocol + url.hostname + (url.port ? ':' + url.port : '');
 
   const sessionSecret = await getSessionSecret(projectData.url, projectData.id);

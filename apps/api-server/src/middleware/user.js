@@ -36,12 +36,22 @@ module.exports = async function getUser(req, res, next) {
         req.headers['authorization'] = `Bearer ${uploadJwt}`;
       }
     }
-    let { userId, isFixed, authProvider } = parseAuthHeader(
+    let { userId, isFixed, authProvider, authProviderId } = parseAuthHeader(
       req.headers['authorization']
     );
-    // Set authProvider in cookies
-    console.log('set auth provider in cookie', authProvider);
-    req.cookies['useAuthProvider'] = authProvider || 'default';
+    // Preserve provider context across requests.
+    // Prefer explicit provider id from JWT, then existing cookie, then provider name.
+    const existingUseAuthProvider = req.cookies['useAuthProvider'];
+    const resolvedUseAuthProvider =
+      authProviderId || existingUseAuthProvider || authProvider || 'default';
+    console.log(
+      'set auth provider in cookie',
+      authProvider,
+      authProviderId,
+      existingUseAuthProvider,
+      resolvedUseAuthProvider
+    );
+    req.cookies['useAuthProvider'] = resolvedUseAuthProvider;
     let authConfig = await authSettings.config({
       project: req.project,
       useAuth: authProvider,
@@ -99,7 +109,11 @@ function parseAuthHeader(authorizationHeader) {
   if (authorizationHeader.match(/^bearer /i)) {
     const jwt = parseJwt(authorizationHeader);
     return jwt && jwt.userId
-      ? { userId: jwt.userId, authProvider: jwt.authProvider }
+      ? {
+          userId: jwt.userId,
+          authProvider: jwt.authProvider,
+          authProviderId: jwt.authProviderId,
+        }
       : {};
   }
 

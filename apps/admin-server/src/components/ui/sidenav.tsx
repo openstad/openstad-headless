@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 
 import { SessionContext } from '../../auth';
 import { Logo } from './logo';
@@ -26,7 +26,7 @@ export function Sidenav({
   narrow?: boolean;
 }) {
   const router = useRouter();
-  const [location, setLocation] = useState('');
+  const location = router.asPath || router.pathname || '';
   const sessionData = useContext(SessionContext);
   const authProvidersEnabled = useAuthProvidersEnabledCheck();
 

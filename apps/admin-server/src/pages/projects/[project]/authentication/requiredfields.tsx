@@ -517,135 +517,6 @@ export default function ProjectAuthenticationRequiredFields() {
                     </form>
                   </Form>
                 </TabsContent>
-                <TabsContent value="velden-ap" className="p-0">
-                  <Form {...userForm} className="p-6 bg-white rounded-md">
-                    <Heading size="xl">
-                      Verplichte velden per Auth Provider
-                    </Heading>
-                    <Separator className="my-4" />
-                    <p>
-                      Geef hier aan welke velden een gebruiker moet invullen als
-                      die zich aanmeldt. Laat je dit leeg, dan wordt deze
-                      informatie niet opgevraagd bij registratie.
-                      <br />
-                    </p>
-                    <form
-                      onSubmit={userForm.handleSubmit(onUserSubmit)}
-                      className="space-y-4 lg:w-2/3 mt-4">
-                      {authProviders && authProviders.length > 0 ? (
-                        authProviders.map(
-                          (provider: {
-                            id: string;
-                            name: string;
-                            config: {
-                              userFieldMapping?: Record<string, string>;
-                            };
-                          }) => {
-                            const providerId = provider.id;
-                            const providerName = provider.name;
-
-                            return (
-                              <div key={providerId} className="mb-6">
-                                <Heading size="lg">{providerName}</Heading>
-                                <Separator className="my-4" />
-                                <FormField
-                                  control={userForm.control}
-                                  name={`authProvidersRequiredUserFields.${providerId}`}
-                                  render={() => (
-                                    <>
-                                      <FormItem className="col-span-full">
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                          {requiredUserFields.map((item) => {
-                                            return item.id ===
-                                              'suffix' ? null : (
-                                              <FormField
-                                                key={`field_${providerId}_${item.id}`}
-                                                control={userForm.control}
-                                                name={`authProvidersRequiredUserFields.${providerId}`}
-                                                render={({ field }) => {
-                                                  const checked =
-                                                    Array.isArray(
-                                                      field.value
-                                                    ) &&
-                                                    field.value.includes(
-                                                      item.id
-                                                    );
-
-                                                  return (
-                                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                                                      <FormControl>
-                                                        <Checkbox
-                                                          checked={checked}
-                                                          onCheckedChange={(
-                                                            checked: any
-                                                          ) => {
-                                                            const userFieldMapping =
-                                                              provider.config
-                                                                ?.userFieldMapping ||
-                                                              {};
-                                                            if (
-                                                              checked &&
-                                                              !userFieldMapping[
-                                                                item.id
-                                                              ]
-                                                            ) {
-                                                              toast.error(
-                                                                `Het veld ${item.label} is geselecteerd als verplicht, maar er is geen mapping voor opgegeven in deze Auth Provider.`
-                                                              );
-                                                              return;
-                                                            }
-
-                                                            const newValue =
-                                                              checked
-                                                                ? [
-                                                                    ...(field.value ||
-                                                                      []),
-                                                                    item.id,
-                                                                  ]
-                                                                : (
-                                                                    field.value ||
-                                                                    []
-                                                                  ).filter(
-                                                                    (
-                                                                      value: string
-                                                                    ) =>
-                                                                      value !==
-                                                                      item.id
-                                                                  );
-
-                                                            field.onChange(
-                                                              newValue
-                                                            );
-                                                          }}
-                                                        />
-                                                      </FormControl>
-                                                      <FormLabel className="font-normal">
-                                                        {item.label}
-                                                      </FormLabel>
-                                                    </FormItem>
-                                                  );
-                                                }}
-                                              />
-                                            );
-                                          })}
-                                        </div>
-                                      </FormItem>
-                                      {/*  <Spacer size={3} />*/}
-                                      {/*</>*/}
-                                    </>
-                                  )}
-                                />
-                              </div>
-                            );
-                          }
-                        )
-                      ) : (
-                        <div>Geen Auth Providers gevonden</div>
-                      )}
-                      <Button type="submit">Opslaan</Button>
-                    </form>
-                  </Form>
-                </TabsContent>
                 <TabsContent value="anonymous" className="p-0">
                   <Form {...anonymousForm} className="p-6 bg-white rounded-md">
                     <Heading size="xl">
@@ -849,6 +720,124 @@ export default function ProjectAuthenticationRequiredFields() {
                   </Form>
                 </TabsContent>
               </Tabs>
+            </TabsContent>
+            <TabsContent value="velden-ap" className="p-0">
+              <Form {...userForm} className="p-6 bg-white rounded-md">
+                <Heading size="xl">Verplichte velden per Auth Provider</Heading>
+                <Separator className="my-4" />
+                <p>
+                  Geef hier aan welke velden een gebruiker moet invullen als die
+                  zich aanmeldt. Laat je dit leeg, dan wordt deze informatie
+                  niet opgevraagd bij registratie.
+                  <br />
+                </p>
+                <form
+                  onSubmit={userForm.handleSubmit(onUserSubmit)}
+                  className="space-y-4 lg:w-2/3 mt-4">
+                  {authProviders && authProviders.length > 0 ? (
+                    authProviders.map(
+                      (provider: {
+                        id: string;
+                        name: string;
+                        config: {
+                          userFieldMapping?: Record<string, string>;
+                        };
+                      }) => {
+                        const providerId = provider.id;
+                        const providerName = provider.name;
+
+                        return (
+                          <div key={providerId} className="mb-6">
+                            <Heading size="lg">{providerName}</Heading>
+                            <Separator className="my-4" />
+                            <FormField
+                              control={userForm.control}
+                              name={`authProvidersRequiredUserFields.${providerId}`}
+                              render={() => (
+                                <>
+                                  <FormItem className="col-span-full">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                      {requiredUserFields.map((item) => {
+                                        return item.id === 'suffix' ? null : (
+                                          <FormField
+                                            key={`field_${providerId}_${item.id}`}
+                                            control={userForm.control}
+                                            name={`authProvidersRequiredUserFields.${providerId}`}
+                                            render={({ field }) => {
+                                              const checked =
+                                                Array.isArray(field.value) &&
+                                                field.value.includes(item.id);
+
+                                              return (
+                                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                                  <FormControl>
+                                                    <Checkbox
+                                                      checked={checked}
+                                                      onCheckedChange={(
+                                                        checked: any
+                                                      ) => {
+                                                        const userFieldMapping =
+                                                          provider.config
+                                                            ?.userFieldMapping ||
+                                                          {};
+                                                        if (
+                                                          checked &&
+                                                          !userFieldMapping[
+                                                            item.id
+                                                          ]
+                                                        ) {
+                                                          toast.error(
+                                                            `Het veld ${item.label} is geselecteerd als verplicht, maar er is geen mapping voor opgegeven in deze Auth Provider.`
+                                                          );
+                                                          return;
+                                                        }
+
+                                                        const newValue = checked
+                                                          ? [
+                                                              ...(field.value ||
+                                                                []),
+                                                              item.id,
+                                                            ]
+                                                          : (
+                                                              field.value || []
+                                                            ).filter(
+                                                              (value: string) =>
+                                                                value !==
+                                                                item.id
+                                                            );
+
+                                                        field.onChange(
+                                                          newValue
+                                                        );
+                                                      }}
+                                                    />
+                                                  </FormControl>
+                                                  <FormLabel className="font-normal">
+                                                    {item.label}
+                                                  </FormLabel>
+                                                </FormItem>
+                                              );
+                                            }}
+                                          />
+                                        );
+                                      })}
+                                    </div>
+                                  </FormItem>
+                                  {/*  <Spacer size={3} />*/}
+                                  {/*</>*/}
+                                </>
+                              )}
+                            />
+                          </div>
+                        );
+                      }
+                    )
+                  ) : (
+                    <div>Geen Auth Providers gevonden</div>
+                  )}
+                  <Button type="submit">Opslaan</Button>
+                </form>
+              </Form>
             </TabsContent>
           </Tabs>
         </div>
