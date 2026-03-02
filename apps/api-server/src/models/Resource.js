@@ -947,6 +947,10 @@ module.exports = function (db, sequelize, DataTypes) {
     // canEditAfterFirstLikeOrComment is handled in the validate hook
   };
 
+  let canViewModeratorOnlyExtraData = function (user, self) {
+    return userHasRole(user, 'moderator', self.userId);
+  };
+
   Resource.auth = Resource.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
@@ -1007,6 +1011,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       delete data.project;
       delete data.config;
+      delete data.moderatorOnlyExtraDataKeys;
       // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
 
@@ -1022,6 +1027,24 @@ module.exports = function (db, sequelize, DataTypes) {
       // needs to move to definition per key
       if (!canMutate(user, self) && data.extraData && data.extraData.phone) {
         delete data.extraData.phone;
+      }
+
+      const moderatorOnlyExtraDataKeys = Array.isArray(
+        self.moderatorOnlyExtraDataKeys
+      )
+        ? self.moderatorOnlyExtraDataKeys
+        : [];
+      if (
+        user &&
+        user.role &&
+        user.role !== 'all' &&
+        !canViewModeratorOnlyExtraData(user, self) &&
+        data.extraData &&
+        typeof data.extraData === 'object'
+      ) {
+        moderatorOnlyExtraDataKeys.forEach((key) => {
+          delete data.extraData[key];
+        });
       }
 
       if (data.commentsAgainst) {
