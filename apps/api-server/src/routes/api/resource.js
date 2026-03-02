@@ -18,6 +18,71 @@ const userhasModeratorRights = (user) => {
   return hasRole(user, 'editor');
 };
 
+function getModeratorOnlyExtraDataKeys(widgetConfig) {
+  const items = Array.isArray(widgetConfig?.items) ? widgetConfig.items : [];
+  const uniqueFieldKeys = new Set();
+
+  for (const item of items) {
+    if (!item?.onlyForModerator) continue;
+    if (typeof item.fieldKey !== 'string') continue;
+    uniqueFieldKeys.add(item.fieldKey);
+  }
+
+  return Array.from(uniqueFieldKeys);
+}
+
+async function attachModeratorOnlyExtraDataKeys(resources) {
+  const records = Array.isArray(resources) ? resources : [resources];
+  const activeRecords = records.filter(Boolean);
+  if (!activeRecords.length) return;
+
+  const projectIds = Array.from(
+    new Set(
+      activeRecords
+        .map((resource) => Number(resource.projectId))
+        .filter((id) => Number.isInteger(id) && id > 0)
+    )
+  );
+  const widgetIds = Array.from(
+    new Set(
+      activeRecords
+        .map((resource) => Number(resource.widgetId))
+        .filter((widgetId) => Number.isInteger(widgetId) && widgetId > 0)
+    )
+  );
+
+  if (!widgetIds.length || !projectIds.length) {
+    activeRecords.forEach((resource) => {
+      resource.moderatorOnlyExtraDataKeys = [];
+    });
+    return;
+  }
+
+  const widgets = await db.Widget.findAll({
+    where: {
+      id: { [Op.in]: widgetIds },
+      projectId: { [Op.in]: projectIds },
+      type: 'resourceform',
+    },
+    attributes: ['id', 'projectId', 'config'],
+  });
+
+  const moderatorOnlyFieldKeysByWidgetId = new Map();
+  widgets.forEach((widget) => {
+    const widgetLookupKey = `${widget.projectId}:${widget.id}`;
+    moderatorOnlyFieldKeysByWidgetId.set(
+      widgetLookupKey,
+      getModeratorOnlyExtraDataKeys(widget.config || {})
+    );
+  });
+
+  activeRecords.forEach((resource) => {
+    const resourceLookupKey = `${resource.projectId}:${resource.widgetId}`;
+    resource.moderatorOnlyExtraDataKeys =
+      moderatorOnlyFieldKeysByWidgetId.get(resourceLookupKey) || [];
+  });
+}
+
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
   req.scope = [
@@ -166,12 +231,13 @@ router
 
     db.Resource.scope(...req.scope)
       .findAndCountAll(dbQuery)
-      .then(function (result) {
+      .then(async function (result) {
         result.rows.forEach((resource) => {
           resource.project = req.project;
           if (req.query.includePoll && resource.poll)
             resource.poll.countVotes(!req.query.includeVotes);
         });
+        await attachModeratorOnlyExtraDataKeys(result.rows);
         const { rows } = result;
         req.results = rows;
         req.dbQuery.count = result.count;
@@ -277,11 +343,13 @@ router
       .then((resourceInstance) => {
         db.Resource.scope(...req.scope)
           .findByPk(resourceInstance.id)
-          .then((result) => {
+          .then(async (result) => {
             result.project = req.project;
+            await attachModeratorOnlyExtraDataKeys(result);
             req.results = result;
             return next();
-          });
+          })
+          .catch(next);
       })
       .catch(function (error) {
         // todo: dit komt uit de oude routes; maak het generieker
@@ -355,13 +423,16 @@ router
       .findOne({
         where: { id: req.results.id, projectId: req.params.projectId },
       })
-      .then((result) => {
+      .then(async (result) => {
+        await attachModeratorOnlyExtraDataKeys(result);
         req.results = result;
         return next();
-      });
+      })
+      .catch(next);
   })
 
   // TODO: Add notifications
+  .post(auth.useReqUser)
   .post(async function (req, res, next) {
     const sendConfirmationToUser =
       typeof req.body['confirmationUser'] !== 'undefined'
@@ -456,11 +527,12 @@ router
       .findOne({
         where: { id: resourceId, projectId: req.params.projectId },
       })
-      .then((found) => {
+      .then(async (found) => {
         if (!found) {
           return next(createError(404, 'Resource not found'));
         }
         found.project = req.project;
+        await attachModeratorOnlyExtraDataKeys(found);
         if (req.query.includePoll) {
           // TODO: naar poll hooks
           if (found.poll) found.poll.countVotes(!req.query.includeVotes);
@@ -554,8 +626,9 @@ router
     resource
       .authorizeData(data, 'update')
       .update(data)
-      .then((result) => {
+      .then(async (result) => {
         result.project = req.project;
+        await attachModeratorOnlyExtraDataKeys(result);
         req.results = result;
         next();
       })
@@ -583,7 +656,7 @@ router
         .findOne({
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
-        .then((found) => {
+        .then(async (found) => {
           if (!found) {
             return next(createError(404, 'Resource not found'));
           }
@@ -593,6 +666,7 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
         })
@@ -631,7 +705,7 @@ router
         .findOne({
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
-        .then((found) => {
+        .then(async (found) => {
           if (!found) {
             return next(createError(404, 'Resource not found'));
           }
@@ -641,6 +715,7 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
         })
@@ -668,6 +743,7 @@ router
     }
     next();
   })
+  .put(auth.useReqUser)
   .put(function (req, res, next) {
     res.json(req.results);
   })
