@@ -1011,6 +1011,8 @@ module.exports = function (db, sequelize, DataTypes) {
 
       delete data.project;
       delete data.config;
+      delete data.hasResourceFormConfig;
+      delete data.resourceFormFieldKeys;
       delete data.moderatorOnlyExtraDataKeys;
       // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
@@ -1034,6 +1036,10 @@ module.exports = function (db, sequelize, DataTypes) {
       )
         ? self.moderatorOnlyExtraDataKeys
         : [];
+      const resourceFormFieldKeys = Array.isArray(self.resourceFormFieldKeys)
+        ? self.resourceFormFieldKeys
+        : [];
+      const hasResourceFormConfig = !!self.hasResourceFormConfig;
       if (
         user &&
         user.role &&
@@ -1042,6 +1048,16 @@ module.exports = function (db, sequelize, DataTypes) {
         data.extraData &&
         typeof data.extraData === 'object'
       ) {
+        if (hasResourceFormConfig) {
+          Object.keys(data.extraData).forEach((key) => {
+            if (!resourceFormFieldKeys.includes(key)) {
+              delete data.extraData[key];
+            }
+          });
+        } else {
+          data.extraData = {};
+        }
+
         moderatorOnlyExtraDataKeys.forEach((key) => {
           delete data.extraData[key];
         });

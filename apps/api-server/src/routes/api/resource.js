@@ -23,17 +23,23 @@ const userhasModeratorRights = (user) => {
   return hasRole(user, 'editor');
 };
 
-function getModeratorOnlyExtraDataKeys(widgetConfig) {
+function getResourceFormExtraDataConfig(widgetConfig) {
   const items = Array.isArray(widgetConfig?.items) ? widgetConfig.items : [];
   const uniqueFieldKeys = new Set();
+  const moderatorOnlyFieldKeys = new Set();
 
   for (const item of items) {
-    if (!item?.onlyForModerator) continue;
     if (typeof item.fieldKey !== 'string') continue;
     uniqueFieldKeys.add(item.fieldKey);
+    if (item?.onlyForModerator) {
+      moderatorOnlyFieldKeys.add(item.fieldKey);
+    }
   }
 
-  return Array.from(uniqueFieldKeys);
+  return {
+    fieldKeys: Array.from(uniqueFieldKeys),
+    moderatorOnlyFieldKeys: Array.from(moderatorOnlyFieldKeys),
+  };
 }
 
 async function attachModeratorOnlyExtraDataKeys(resources) {
@@ -58,6 +64,8 @@ async function attachModeratorOnlyExtraDataKeys(resources) {
 
   if (!widgetIds.length || !projectIds.length) {
     activeRecords.forEach((resource) => {
+      resource.hasResourceFormConfig = false;
+      resource.resourceFormFieldKeys = [];
       resource.moderatorOnlyExtraDataKeys = [];
     });
     return;
@@ -72,19 +80,22 @@ async function attachModeratorOnlyExtraDataKeys(resources) {
     attributes: ['id', 'projectId', 'config'],
   });
 
-  const moderatorOnlyFieldKeysByWidgetId = new Map();
+  const extraDataConfigByWidgetId = new Map();
   widgets.forEach((widget) => {
     const widgetLookupKey = `${widget.projectId}:${widget.id}`;
-    moderatorOnlyFieldKeysByWidgetId.set(
+    extraDataConfigByWidgetId.set(
       widgetLookupKey,
-      getModeratorOnlyExtraDataKeys(widget.config || {})
+      getResourceFormExtraDataConfig(widget.config || {})
     );
   });
 
   activeRecords.forEach((resource) => {
     const resourceLookupKey = `${resource.projectId}:${resource.widgetId}`;
+    const extraDataConfig = extraDataConfigByWidgetId.get(resourceLookupKey);
+    resource.hasResourceFormConfig = !!extraDataConfig;
+    resource.resourceFormFieldKeys = extraDataConfig?.fieldKeys || [];
     resource.moderatorOnlyExtraDataKeys =
-      moderatorOnlyFieldKeysByWidgetId.get(resourceLookupKey) || [];
+      extraDataConfig?.moderatorOnlyFieldKeys || [];
   });
 }
 
