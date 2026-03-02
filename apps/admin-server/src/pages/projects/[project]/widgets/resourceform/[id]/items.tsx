@@ -1715,8 +1715,7 @@ export default function WidgetResourceFormItems(
                           return (
                             <FormItem>
                               <FormLabel>
-                                Is dit veld zichtbaar voor iedereen of alleen
-                                admin gebruikers?
+                                Wie mag de ingevulde waarde van dit veld zien?
                               </FormLabel>
                               <Select
                                 onValueChange={(e: string) =>
