@@ -195,13 +195,6 @@ export default function CreateUserProjects() {
                     (user: any) => user.projectId == project.id
                   );
                 }
-<<<<<<< HEAD
-
-                const cannotCreateNewUsers =
-                  project?.config?.users?.canCreateNewUsers === false;
-
-=======
->>>>>>> parent of 2530b0b58 (feat: Disallow changing user roles for ended projects)
                 return (
                   <li
                     key={project.id}
