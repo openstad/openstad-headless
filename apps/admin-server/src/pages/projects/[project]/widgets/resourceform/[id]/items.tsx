@@ -1838,8 +1838,8 @@ export default function WidgetResourceFormItems(
                                       borderBottomRightRadius: '5px',
                                       marginTop: '12px',
                                     }}>
-                                    Je hebt nog geen meerkeuze, enkele keuze
-                                    of afbeelding keuze vragen toegevoegd. Voeg
+                                    Je hebt nog geen meerkeuze, enkele keuze of
+                                    afbeelding keuze vragen toegevoegd. Voeg
                                     deze eerst toe om deze vraag te kunnen tonen
                                     op basis van een ander antwoord.
                                   </p>
