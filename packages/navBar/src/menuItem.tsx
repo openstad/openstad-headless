@@ -58,7 +58,8 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
               console.log('Submenu toggle clicked', { index, open });
               setOpenIndex(index);
             }}
-            aria-expanded={open}>
+            aria-expanded={open}
+            aria-controls={`submenu-${index}`}>
             <i className="ri-arrow-down-s-line"></i>
             <span className="sr-only">
               {open
@@ -66,25 +67,25 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
                 : "Toon onderliggende pagina's"}
             </span>
           </button>
-          {open && (
-            <div
-              className="submenu"
-              onMouseLeave={() => setOpenIndex(null)}
-              onBlur={handleBlur}
-              tabIndex={-1}
-              ref={ref}>
-              {item._children &&
-                item._children.map((child: any, childIndex: number) => (
-                  <Link
-                    className="level-2"
-                    key={`${index}-${childIndex}`}
-                    href={`${prefix}${child.slug}`}
-                    aria-current={getCurrentPage(child.title)}>
-                    {child.title}
-                  </Link>
-                ))}
-            </div>
-          )}
+          <div
+            className="submenu"
+            id={`submenu-${index}`}
+            hidden={!open}
+            onMouseLeave={() => setOpenIndex(null)}
+            onBlur={handleBlur}
+            tabIndex={-1}
+            ref={ref}>
+            {item._children &&
+              item._children.map((child: any, childIndex: number) => (
+                <Link
+                  className="level-2"
+                  key={`${index}-${childIndex}`}
+                  href={`${prefix}${child.slug}`}
+                  aria-current={getCurrentPage(child.title)}>
+                  {child.title}
+                </Link>
+              ))}
+          </div>
         </>
       )}
     </div>

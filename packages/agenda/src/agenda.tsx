@@ -113,7 +113,15 @@ function Agenda({
           aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
-            <Heading4>{item.title}</Heading4>
+            <Heading4>
+              {item.activeFrom ? (
+                <time dateTime={toDateKey(item.activeFrom) ?? undefined}>
+                  {item.title}
+                </time>
+              ) : (
+                item.title
+              )}
+            </Heading4>
             <Paragraph>{item.description}</Paragraph>
             {item.links && item.links?.length > 0 && (
               <LinkList className="osc-agenda-list">
@@ -122,6 +130,9 @@ function Agenda({
                     href={link.url}
                     target={link.openInNewWindow ? '_blank' : '_self'}>
                     {link.title}
+                    {link.openInNewWindow && (
+                      <span className="sr-only"> (opent in nieuw tabblad)</span>
+                    )}
                   </LinkListLink>
                 ))}
               </LinkList>
@@ -133,7 +144,7 @@ function Agenda({
   );
 
   const ItemsSection = (
-    <section className="osc-agenda">
+    <section className="osc-agenda" aria-label="Agenda">
       {displayToggle && toggleType === 'items' ? (
         <>
           {renderItems(beforeItems)}
