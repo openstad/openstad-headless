@@ -27,6 +27,7 @@ function Accordion({ content, label, headingLevel = 2 }: Item) {
           ),
           expanded: false,
           label: label,
+          section: true,
         },
       ]}
     />
