@@ -25,7 +25,7 @@ Apostrophe page or piece.') }} {% endif %} {% endblock %} {% block extraHead %}
   {% include 'partials/header.html' %} {% include 'partials/analytics.html' %}
   {% include 'partials/navbar.html' %}
 
-  <main class="page" id="main">
+  <main class="page" id="main" tabindex="-1">
     {% endblock %} {% block main %} {# Usually, your page templates in the
     @apostrophecms/pages module will override this block. It is safe to assume
     this is where your page-specific content should go. #} {% endblock %} {%
