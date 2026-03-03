@@ -699,8 +699,8 @@ export default function WidgetEnqueteItems(
                       className="w-fit mt-4 bg-secondary text-black hover:text-white"
                       type="button"
                       onClick={() => {
-                        setSettingOptions(() => !settingOptions),
-                          setOption(null);
+                        (setSettingOptions(() => !settingOptions),
+                          setOption(null));
                       }}>
                       Annuleer
                     </Button>

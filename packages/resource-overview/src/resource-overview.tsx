@@ -403,8 +403,8 @@ const defaultItemRenderer = (
           overviewTagGroups.includes(tag.type)
         )
       : Array.isArray(resource?.tags)
-      ? resource.tags
-      : [];
+        ? resource.tags
+        : [];
 
   resourceFilteredTags = resourceFilteredTags.length
     ? resourceFilteredTags.sort(
@@ -542,7 +542,9 @@ const defaultItemRenderer = (
                     }>
                   )
                     ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => <Pill text={t.name} />)}
+                    ?.map((t) => (
+                      <Pill text={t.name} />
+                    ))}
                 </div>
               </>
             )}
@@ -688,7 +690,9 @@ const defaultItemRenderer = (
                     }>
                   )
                     ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => <Pill text={t.name} />)}
+                    ?.map((t) => (
+                      <Pill text={t.name} />
+                    ))}
                 </div>
               </>
             )}

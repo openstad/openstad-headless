@@ -1,7 +1,6 @@
 import EventHandler from '../../src/dom/event-handler';
 import Tooltip from '../../src/tooltip';
 import { noop } from '../../src/util/index';
-
 /** Test helpers */
 import {
   clearFixture,

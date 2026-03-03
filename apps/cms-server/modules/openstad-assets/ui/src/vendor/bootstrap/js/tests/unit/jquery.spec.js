@@ -11,7 +11,6 @@ import ScrollSpy from '../../src/scrollspy';
 import Tab from '../../src/tab';
 import Toast from '../../src/toast';
 import Tooltip from '../../src/tooltip';
-
 /** Test helpers */
 import { clearFixture, getFixture } from '../helpers/fixture';
 

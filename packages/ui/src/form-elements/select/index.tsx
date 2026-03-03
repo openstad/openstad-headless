@@ -91,8 +91,8 @@ const SelectField: FC<SelectFieldProps> = ({
   let initialValue = multiple
     ? defaultValue
     : Array.isArray(defaultValue) && defaultValue.length > 0
-    ? defaultValue[0]
-    : '';
+      ? defaultValue[0]
+      : '';
 
   initialValue = overrideDefaultValue
     ? (overrideDefaultValue as string | string[])

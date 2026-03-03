@@ -315,9 +315,8 @@ function DocumentMap({
         }
 
         if (filterBehavior === 'and') {
-          return finalAllTagsToFilter.every(
-            (tagId) =>
-              comment.tags?.some((tag: { id: number }) => tag.id === tagId)
+          return finalAllTagsToFilter.every((tagId) =>
+            comment.tags?.some((tag: { id: number }) => tag.id === tagId)
           );
         } else {
           return comment.tags?.some((tag: { id: number }) =>

@@ -1153,8 +1153,8 @@ export default function WidgetChoiceGuideItems(
                               className="w-fit mt-4 bg-secondary text-black hover:text-white"
                               type="button"
                               onClick={() => {
-                                setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null);
+                                (setSettingOptions(() => !settingOptions),
+                                  setMatrixOption(null));
                               }}>
                               Annuleer
                             </Button>
@@ -1370,9 +1370,9 @@ export default function WidgetChoiceGuideItems(
                         className="w-fit mt-4 bg-secondary text-black hover:text-white"
                         type="button"
                         onClick={() => {
-                          setSettingOptions(() => !settingOptions),
+                          (setSettingOptions(() => !settingOptions),
                             setOption(null),
-                            setOptions([]);
+                            setOptions([]));
                         }}>
                         Annuleer
                       </Button>

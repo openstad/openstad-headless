@@ -60,8 +60,8 @@ export const resolveMapPolygons = ({
       ? allAllowedPolygons
       : visibleAllowedPolygons
     : showHiddenPolygonsForAdmin
-    ? projectPolygon
-    : visibleProjectPolygon;
+      ? projectPolygon
+      : visibleProjectPolygon;
   const renderPolygon = hasAllowedPolygons
     ? visibleAllowedPolygons
     : visibleProjectPolygon;
@@ -69,8 +69,8 @@ export const resolveMapPolygons = ({
   const adminPolygons = hasAllowedPolygons
     ? allowedAreas
     : projectArea
-    ? [projectArea]
-    : [];
+      ? [projectArea]
+      : [];
   const hasHiddenAdminPolygons = adminPolygons.some(
     (area) => area?.hidePolygon === true
   );

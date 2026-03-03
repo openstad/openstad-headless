@@ -3681,8 +3681,11 @@
 .utrecht-form-field--checkbox
   .utrecht-form-field__label:has(.utrecht-form-field__input) {
   margin-inline-start: calc(
-    -1 * (var(--utrecht-checkbox-size) +
-          var(--utrecht-checkbox-margin-inline-end, 12px))
+    -1 *
+      (
+        var(--utrecht-checkbox-size) +
+          var(--utrecht-checkbox-margin-inline-end, 12px)
+      )
   );
 }
 .utrecht-form-field--checkbox
@@ -3699,8 +3702,11 @@
 .utrecht-form-field--radio
   .utrecht-form-field__label:has(.utrecht-form-field__input) {
   margin-inline-start: calc(
-    -1 * (var(--utrecht-radio-button-size) +
-          var(--utrecht-radio-button-margin-inline-end, 12px))
+    -1 *
+      (
+        var(--utrecht-radio-button-size) +
+          var(--utrecht-radio-button-margin-inline-end, 12px)
+      )
   );
 }
 .utrecht-form-field--radio
@@ -5129,8 +5135,8 @@
   border-block-end: none;
 }
 .utrecht-sidenav__item-separator:not(
-    .utrecht-sidenav__item--last .utrecht-sidenav__item-separator
-  ) {
+  .utrecht-sidenav__item--last .utrecht-sidenav__item-separator
+) {
   border-block-end: 1px solid var(--utrecht-color-grey-80);
   display: block;
   margin-inline-start: var(--utrecht-space-inline-lg);
@@ -9498,7 +9504,8 @@
 }
 .utrecht-table-container--overflow-inline {
   background-attachment: local, local, scroll, scroll;
-  background-image: linear-gradient(to right, #fff, #fff),
+  background-image:
+    linear-gradient(to right, #fff, #fff),
     linear-gradient(to right, #fff, #fff),
     linear-gradient(to right, #00000040, #fff0),
     linear-gradient(to left, #00000040, #fff0);
@@ -10248,7 +10255,8 @@
       var(
         --utrecht-textbox-border-width,
         var(--utrecht-form-control-border-width, 0)
-      ) + var(--utrecht-textbox-autocomplete-ui-size, 44px)
+      ) +
+      var(--utrecht-textbox-autocomplete-ui-size, 44px)
   );
   background-color: var(
     --utrecht-textbox-background-color,
@@ -10884,8 +10892,8 @@
   --utrecht-typography-scale-sm-font-size: 0.875rem;
   --utrecht-typography-scale-xs-font-size: 0.75rem;
   --utrecht-typography-scale-2xs-font-size: 0.5rem;
-  --utrecht-typography-sans-serif-font-family: 'Lucida Grande',
-    'Lucida Sans Unicode', 'Lucida Sans', 'Arial', sans-serif;
+  --utrecht-typography-sans-serif-font-family:
+    'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Arial', sans-serif;
   --utrecht-icon-scale-4xl: 48px;
   --utrecht-icon-scale-3xl: 36px;
   --utrecht-icon-scale-2xl: 30px;

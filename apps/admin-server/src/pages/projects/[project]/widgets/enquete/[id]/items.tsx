@@ -809,8 +809,8 @@ export default function WidgetEnqueteItems(
                                   (item?.questionType === 'pagination'
                                     ? '--- Nieuwe pagina ---'
                                     : item?.questionType === 'swipe'
-                                    ? 'Swipe'
-                                    : 'Geen titel')
+                                      ? 'Swipe'
+                                      : 'Geen titel')
                                 }`,
                               }}></span>
                             <span className="gap-2 py-3 px-2">
@@ -967,8 +967,8 @@ export default function WidgetEnqueteItems(
                               className="w-fit mt-4 bg-secondary text-black hover:text-white"
                               type="button"
                               onClick={() => {
-                                setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null);
+                                (setSettingOptions(() => !settingOptions),
+                                  setMatrixOption(null));
                               }}>
                               Annuleer
                             </Button>
@@ -1393,8 +1393,8 @@ export default function WidgetEnqueteItems(
                         className="w-fit mt-4 bg-secondary text-black hover:text-white"
                         type="button"
                         onClick={() => {
-                          setSettingOptions(() => !settingOptions),
-                            setOption(null);
+                          (setSettingOptions(() => !settingOptions),
+                            setOption(null));
                         }}>
                         Annuleer
                       </Button>

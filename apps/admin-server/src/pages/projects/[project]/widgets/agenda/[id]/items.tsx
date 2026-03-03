@@ -383,9 +383,9 @@ export default function WidgetAgendaItems(
                       className="w-fit mt-4 bg-secondary text-black hover:text-white"
                       type="button"
                       onClick={() => {
-                        setSettingLinks(() => !settingLinks),
+                        (setSettingLinks(() => !settingLinks),
                           setLink(null),
-                          setLinks([]);
+                          setLinks([]));
                       }}>
                       Annuleer
                     </Button>

@@ -400,8 +400,8 @@ export function Filters({
               const limitedTags = Array.isArray(tagsLimitation)
                 ? tagsLimitation
                 : tagsLimitation && tagsLimitation[tagGroup.type]
-                ? tagsLimitation[tagGroup.type]
-                : [];
+                  ? tagsLimitation[tagGroup.type]
+                  : [];
 
               if (tagGroup.multiple) {
                 return (

@@ -127,11 +127,8 @@ export const StemBegrootResourceList = ({
         : resources.filter((resource: any) => {
             if (tags.length > 0) {
               if (filterBehavior === 'and') {
-                return tagIntegers.every(
-                  (tagId) =>
-                    resource.tags?.some(
-                      (tag: { id: number }) => tag.id === tagId
-                    )
+                return tagIntegers.every((tagId) =>
+                  resource.tags?.some((tag: { id: number }) => tag.id === tagId)
                 );
               } else {
                 return resource.tags?.some((tag: { id: number }) =>
@@ -306,7 +303,9 @@ export const StemBegrootResourceList = ({
                             return a.seqnr - b.seqnr;
                           }
                         )
-                        ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
+                        ?.map((t) => (
+                          <span>{t.name || 'Geen thema'}</span>
+                        ))}
                     </div>
                   </div>
                 </section>

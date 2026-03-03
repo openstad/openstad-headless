@@ -1,5 +1,4 @@
 import EventHandler from '../../../src/dom/event-handler';
-
 /** Test helpers */
 import { clearFixture, getFixture } from '../../helpers/fixture';
 

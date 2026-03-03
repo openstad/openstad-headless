@@ -79,12 +79,12 @@ export default function ProjectResourceCreateArgument() {
           let icon = '✅',
             text = 'Notificatie naar gebruiker is verzonden';
           if (newComment.confirmationSent === false) {
-            (icon = '⚠️'),
+            ((icon = '⚠️'),
               (text =
-                'Notificatie naar gebruiker is niet verzonden, omdat de gebruiker geen toestemming heeft gegeven voor e-mailnotificaties.');
+                'Notificatie naar gebruiker is niet verzonden, omdat de gebruiker geen toestemming heeft gegeven voor e-mailnotificaties.'));
           } else if (newComment.confirmationSent === undefined) {
-            (icon = '❌'),
-              (text = 'Notificatie naar gebruiker kon niet worden verzonden');
+            ((icon = '❌'),
+              (text = 'Notificatie naar gebruiker kon niet worden verzonden'));
           }
 
           notify(text, icon);

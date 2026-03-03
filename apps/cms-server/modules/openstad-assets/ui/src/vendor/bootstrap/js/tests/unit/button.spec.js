@@ -1,5 +1,4 @@
 import Button from '../../src/button';
-
 /** Test helpers */
 import { clearFixture, getFixture, jQueryMock } from '../helpers/fixture';
 

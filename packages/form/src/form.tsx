@@ -386,7 +386,7 @@ function Form({
               Math.random().toString(36).substring(2, 15);
             const fieldInvalid = Boolean(
               field.fieldKey &&
-                typeof formErrors[field.fieldKey] !== 'undefined'
+              typeof formErrors[field.fieldKey] !== 'undefined'
             );
 
             if (

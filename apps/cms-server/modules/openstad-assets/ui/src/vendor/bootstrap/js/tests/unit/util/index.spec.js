@@ -1,5 +1,4 @@
 import * as Util from '../../../src/util/index';
-
 /** Test helpers */
 import { clearFixture, getFixture } from '../../helpers/fixture';
 

@@ -6,9 +6,8 @@ const sendMessage = require('../notifications/send-engines');
 let nunjucksEnv;
 
 (async () => {
-  const { applyFilters } = await import(
-    '../../../../packages/raw-resource/includes/nunjucks-filters-js.cjs'
-  );
+  const { applyFilters } =
+    await import('../../../../packages/raw-resource/includes/nunjucks-filters-js.cjs');
 
   nunjucksEnv = new nunjucks.Environment();
   applyFilters(nunjucksEnv);

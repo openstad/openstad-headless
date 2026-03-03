@@ -231,11 +231,11 @@ async function setupEnvVars() {
   process.env.AUTH_SESSION_SECRET =
     process.env.AUTH_SESSION_SECRET || generateRandomToken({ length: 32 });
   // TODO: dev vs prod
-  (process.env.AUTH_COOKIE_SECURE_OFF =
+  ((process.env.AUTH_COOKIE_SECURE_OFF =
     typeof process.env.AUTH_COOKIE_SECURE_OFF != 'undefined'
       ? process.env.AUTH_COOKIE_SECURE_OFF
       : process.env.COOKIE_SECURE_OFF || 'yes'), // TODO: COOKIE_SECURE_OFF;
-    (process.env.AUTH_ADMIN_CLIENT_ID = AUTH_ADMIN_CLIENT_ID);
+    (process.env.AUTH_ADMIN_CLIENT_ID = AUTH_ADMIN_CLIENT_ID));
   process.env.AUTH_ADMIN_CLIENT_SECRET = AUTH_ADMIN_CLIENT_SECRET;
   process.env.AUTH_FIRST_CLIENT_ID = AUTH_FIRST_CLIENT_ID;
   process.env.AUTH_FIRST_CLIENT_SECRET = AUTH_FIRST_CLIENT_SECRET;

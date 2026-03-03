@@ -198,8 +198,8 @@ module.exports = {
         const groupName = req.data.isAdmin
           ? 'admin'
           : req.data.isEditor
-          ? 'editor'
-          : false;
+            ? 'editor'
+            : false;
 
         // openstad user is the object authenticated by the openstad system
         //

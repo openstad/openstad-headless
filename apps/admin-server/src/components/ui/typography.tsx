@@ -47,7 +47,8 @@ const headingVariants = cva('font-futura font-bold tracking-tight', {
 });
 
 export interface HeadingProps
-  extends React.HTMLAttributes<HTMLHeadingElement>,
+  extends
+    React.HTMLAttributes<HTMLHeadingElement>,
     VariantProps<typeof headingVariants> {
   asChild?: boolean;
   size: 'lg' | '2xl' | 'xl' | null | undefined;

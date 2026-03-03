@@ -70,8 +70,8 @@ export const GridderResourceDetail = ({
           dialogTagGroups.includes(tag.type)
         )
       : Array.isArray(resource?.tags)
-      ? resource.tags
-      : [];
+        ? resource.tags
+        : [];
 
   resourceFilteredTags = resourceFilteredTags.length
     ? resourceFilteredTags.sort(
@@ -167,7 +167,9 @@ export const GridderResourceDetail = ({
                     }>
                   )
                     ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => <Pill text={t.name} />)}
+                    ?.map((t) => (
+                      <Pill text={t.name} />
+                    ))}
                 </div>
               </>
             )}

@@ -93,10 +93,10 @@ export default function WidgetEnqueteConfirmation() {
     (items.length === 0
       ? 'Je moet eerst velden aanmaken om dit te kunnen doen.'
       : !items.some(
-          (item: { questionType: string }) => item.questionType === 'open'
-        )
-      ? 'Je moet eerst een tekstveld aanmaken om dit te kunnen doen.'
-      : null);
+            (item: { questionType: string }) => item.questionType === 'open'
+          )
+        ? 'Je moet eerst een tekstveld aanmaken om dit te kunnen doen.'
+        : null);
 
   return (
     <div className="p-6 bg-white rounded-md">
