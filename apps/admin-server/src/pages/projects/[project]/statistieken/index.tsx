@@ -1,6 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  type StatsData,
+  getCount,
+  getStatByKey,
+  getTimeSeries,
+} from '@/lib/statistieken/stats-helpers';
 import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { useRouter } from 'next/router';
@@ -14,13 +20,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-
-import {
-  type StatsData,
-  getCount,
-  getStatByKey,
-  getTimeSeries,
-} from './stats-helpers';
 
 export default function Statistieken() {
   const router = useRouter();
