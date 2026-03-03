@@ -62,7 +62,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/);
   if (match) targetProjectId = parseInt(match[1]);
   match = req.nextUrl.pathname.match(
-    /^\/api\/openstad\/(?:api|auth)\/project\/(\d+)/
+    /^\/api\/openstad\/(?:api|auth|stats)\/project\/(\d+)/
   );
   if (match) targetProjectId = parseInt(match[1]);
 
