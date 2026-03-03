@@ -938,6 +938,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                         <Paragraph>{card.infoField}</Paragraph>
                         <Button
                           appearance="primary-action-button"
+                          tabIndex={
+                            infoVisibleCardId !== card.id ? -1 : undefined
+                          }
                           onClick={() => {
                             setInfoVisibleCardId(null);
                           }}>

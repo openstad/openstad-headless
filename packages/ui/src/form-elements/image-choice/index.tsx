@@ -280,6 +280,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
               <Button
                 appearance="primary-action-button"
+                tabIndex={!isInfoVisible ? -1 : undefined}
                 onClick={() => {
                   setIsInfoVisible(false);
                 }}>
