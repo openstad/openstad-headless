@@ -131,7 +131,14 @@ export function Filters({
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
   const [disableTransition, setDisableTransition] = useState(true);
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
+  const filtersContainerRef = useRef<HTMLDivElement>(null);
   const [resetCounter, setResetCounter] = useState(0);
+
+  useEffect(() => {
+    if (filtersContainerRef.current) {
+      filtersContainerRef.current.inert = !filtersVisible;
+    }
+  }, [filtersVisible]);
 
   useEffect(() => {
     if (filtersVisible && disableTransition) {
@@ -589,6 +596,7 @@ export function Filters({
             </Button>
             <div
               id="filters-container"
+              ref={filtersContainerRef}
               className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
               onClick={(e) => {
