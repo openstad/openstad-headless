@@ -3,6 +3,34 @@ function getStringValue(value) {
   return value.trim();
 }
 
+function isSpamMetaFieldKey(key) {
+  return key === '__timeToSubmitMs';
+}
+
+function stripSpamMetaFieldsDeep(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => stripSpamMetaFieldsDeep(entry));
+  }
+
+  if (!value || typeof value !== 'object') return value;
+
+  const cleaned = {};
+  Object.entries(value).forEach(([key, entryValue]) => {
+    if (isSpamMetaFieldKey(key)) return;
+    cleaned[key] = stripSpamMetaFieldsDeep(entryValue);
+  });
+  return cleaned;
+}
+
+function getTimeToSubmitMs(payload = {}) {
+  const parsed = Number(payload.__timeToSubmitMs);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isSpamFilterEnabled() {
+  return process.env.SPAM_FILTER_ENABLED === 'true';
+}
+
 function isLikelyRandomText(value) {
   const text = getStringValue(value);
   if (!text || text.length < 12) return false;
@@ -44,9 +72,7 @@ function isLikelyRandomText(value) {
 }
 
 function removeSpamMetaFields(payload = {}) {
-  const cleaned = { ...payload };
-  delete cleaned.__timeToSubmitMs;
-  return cleaned;
+  return stripSpamMetaFieldsDeep(payload);
 }
 
 function analyzeSpamPayload(payload = {}, options = {}) {
@@ -76,12 +102,10 @@ function analyzeSpamPayload(payload = {}, options = {}) {
   }).length;
 
   // Metadata signal: submissions sent very quickly after form load are more likely bot traffic.
-  // __timeToSubmitMs is injected upstream and removed before persistence.
-  const timeToSubmitMs = Number(payload.__timeToSubmitMs);
+  // Time-to-submit metadata is injected upstream and removed before persistence.
+  const timeToSubmitMs = getTimeToSubmitMs(payload);
   const veryFastSubmit =
-    Number.isFinite(timeToSubmitMs) &&
-    timeToSubmitMs > 0 &&
-    timeToSubmitMs < 2500;
+    timeToSubmitMs !== null && timeToSubmitMs > 0 && timeToSubmitMs < 2500;
 
   const candidateCount = textCandidates.length;
   const suspiciousCount = Math.max(randomLikeCount, compactMixedCaseCount);
@@ -134,7 +158,7 @@ function analyzeSpamPayload(payload = {}, options = {}) {
     compactMixedCaseCount,
     suspiciousRatio,
     veryFastSubmit,
-    timeToSubmitMs: Number.isFinite(timeToSubmitMs) ? timeToSubmitMs : null,
+    timeToSubmitMs,
     candidateCount,
   };
 }
@@ -162,10 +186,20 @@ function logSpamAnalysis({ routeName, req, analysis }) {
     isProbablySpam: !!analysis?.isProbablySpam,
     totalSpamScore: `${analysis?.spamScore || 0}/${scoreThreshold}`,
     scoreSignals: {
-      'Fields with random-like text': `${randomLikeCount}/${randomLikeThreshold} -> ${scoreBreakdown.randomLikePoints || 0} points`,
-      'Fields with suspicious upper/lowercase pattern': `${compactMixedCaseCount}/${randomLikeThreshold} -> ${scoreBreakdown.compactMixedCasePoints || 0} points`,
-      'Suspicious signal ratio': `${suspiciousRatio.toFixed(3)}/${ratioThreshold} -> ${scoreBreakdown.ratioPoints || 0} points`,
-      'Time to submit (ms)': `${timeToSubmitMs ?? 'n/a'}/${timeThresholdMs} -> ${scoreBreakdown.veryFastSubmitPoints || 0} points`,
+      'Fields with random-like text': `${randomLikeCount}/${randomLikeThreshold} -> ${
+        scoreBreakdown.randomLikePoints || 0
+      } points`,
+      'Fields with suspicious upper/lowercase pattern': `${compactMixedCaseCount}/${randomLikeThreshold} -> ${
+        scoreBreakdown.compactMixedCasePoints || 0
+      } points`,
+      'Suspicious signal ratio': `${suspiciousRatio.toFixed(
+        3
+      )}/${ratioThreshold} -> ${scoreBreakdown.ratioPoints || 0} points`,
+      'Time to submit (ms)': `${
+        timeToSubmitMs ?? 'n/a'
+      }/${timeThresholdMs} -> ${
+        scoreBreakdown.veryFastSubmitPoints || 0
+      } points`,
     },
     evaluatedFieldCount: candidateCount,
     timestamp: new Date().toISOString(),
@@ -175,6 +209,7 @@ function logSpamAnalysis({ routeName, req, analysis }) {
 module.exports = {
   analyzeSpamPayload,
   isLikelyRandomText,
+  isSpamFilterEnabled,
   logSpamAnalysis,
   removeSpamMetaFields,
 };

@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
-import flattenObject from '@/lib/export-helpers/flattenObject';
+import { getRuntimeSpamFilterEnabled } from '@/lib/export-helpers/get-runtime-spam-flag';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import { keyMap } from '@/lib/keyMap';
 import { Paginator } from '@openstad-headless/ui/src';
@@ -60,7 +60,9 @@ const prepareDataForExport = (data: any[]) => {
           const createString = values
             .map((value: any) => {
               return key.startsWith('images')
-                ? `${value.url}${value.description ? ` (${value.description})` : ''}`
+                ? `${value.url}${
+                    value.description ? ` (${value.description})` : ''
+                  }`
                 : `${value.url}${value.name ? ` (${value.name})` : ''}`;
             })
             .filter(Boolean)
@@ -96,11 +98,17 @@ export default function ProjectResources() {
 
     const allData = await fetchAll(totalCount, pageLimit);
     const preparedData = prepareDataForExport(allData);
+    const includeSpamColumn = await getRuntimeSpamFilterEnabled();
+    const exportKeyMap = includeSpamColumn
+      ? keyMap
+      : Object.fromEntries(
+          Object.entries(keyMap).filter(([key]) => key !== 'isSpam')
+        );
 
     exportToXLSX(
       preparedData,
       `${projectId}_resources_${formattedDate}.xlsx`,
-      keyMap
+      exportKeyMap
     );
   }
 
@@ -165,8 +173,12 @@ export default function ProjectResources() {
             <div className="mb-2">
               <span className="text-sm text-gray-500">
                 {selectedWidgets.length > 0
-                  ? `${selectedWidgets.length} van ${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'} geselecteerd`
-                  : `${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'}`}
+                  ? `${selectedWidgets.length} van ${totalCount} ${
+                      totalCount === 1 ? 'inzending' : 'inzendingen'
+                    } geselecteerd`
+                  : `${totalCount} ${
+                      totalCount === 1 ? 'inzending' : 'inzendingen'
+                    }`}
               </span>
             </div>
             <div className="flex justify-between mb-4 gap-4">
