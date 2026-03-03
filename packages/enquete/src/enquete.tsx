@@ -509,11 +509,19 @@ function Enquete(props: EnqueteWidgetProps) {
             labelOptions[4] = <span key={5}>😍</span>;
           }
 
+          const ariaValueTexts = [
+            'Heel slecht',
+            'Slecht',
+            'Neutraal',
+            'Goed',
+            'Heel goed',
+          ];
           fieldData['fieldOptions'] = labelOptions.map((label, index) => {
             const currentValue = index + 1;
             return {
               value: currentValue.toString(),
               label: item.showSmileys ? label : currentValue,
+              ariaValueText: ariaValueTexts[index],
             };
           });
 

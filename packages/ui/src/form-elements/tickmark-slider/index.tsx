@@ -16,7 +16,7 @@ export type TickmarkSliderProps = {
   overrideDefaultValue?: FormValue;
   index: number;
   title: string;
-  fieldOptions?: { value: string; label: string }[];
+  fieldOptions?: { value: string; label: any; ariaValueText?: string }[];
   images?: Array<{
     url: string;
     name?: string;
@@ -176,6 +176,12 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         disabled={disabled}
         aria-invalid={checkInvalid}
         aria-describedby={`${randomId}_error`}
+        aria-valuetext={(() => {
+          const opt = fieldOptions.find((opt) => opt.value === value);
+          if (!opt) return value;
+          if (opt.ariaValueText) return opt.ariaValueText;
+          return typeof opt.label === 'string' ? opt.label : value;
+        })()}
       />
       <div
         className={`range-slider-labels ${showSmileys && 'smiley-scale'}`}
