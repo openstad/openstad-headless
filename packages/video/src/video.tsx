@@ -147,7 +147,7 @@ const VideoField: FC<VideoFieldProps> = ({
       <div className="video-field">
         {videoId ? (
           <>
-            <div className="video-container">
+            <div className="video-container" aria-hidden="true">
               <div
                 ref={playerRef}
                 id={id}

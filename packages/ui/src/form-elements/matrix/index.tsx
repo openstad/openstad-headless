@@ -184,15 +184,16 @@ const MatrixField: FC<MatrixFieldProps> = ({
         })}
 
         <Table
-          role="presentation"
           data-columns={matrix?.columns?.length || 0}
           data-rows={matrix?.rows?.length || 0}>
-          <TableHeader role="presentation">
+          <TableHeader>
             <TableRow>
               <TableHeaderCell key={`column--1`}></TableHeaderCell>
 
               {matrix?.columns?.map((column, index) => (
-                <TableHeaderCell key={`column-${index}`}>
+                <TableHeaderCell
+                  key={`column-${index}`}
+                  id={`${fieldKey}-col-${index}`}>
                   <span className="column-text">{column?.text || ''}</span>
                 </TableHeaderCell>
               ))}
@@ -201,9 +202,12 @@ const MatrixField: FC<MatrixFieldProps> = ({
           <TableBody>
             {matrix?.rows?.map((row, ri) => (
               <TableRow>
-                <TableCell key={`row-${ri}`}>
+                <TableHeaderCell
+                  key={`row-${ri}`}
+                  id={`${fieldKey}-row-${ri}`}
+                  scope="row">
                   <span className="row-text">{row?.text || ''}</span>
-                </TableCell>
+                </TableHeaderCell>
 
                 {matrix?.columns?.map((column, ci) => {
                   const cellIndex =
@@ -239,8 +243,9 @@ const MatrixField: FC<MatrixFieldProps> = ({
                                     (maxReached &&
                                       !selectedChoices.includes(cellIndex))
                                   }
+                                  aria-labelledby={`${fieldKey}-row-${ri} ${fieldKey}-col-${ci}`}
                                 />
-                                <span className="cell-text">
+                                <span className="cell-text" aria-hidden="true">
                                   {column?.text || ''}
                                 </span>
                               </>
@@ -257,8 +262,9 @@ const MatrixField: FC<MatrixFieldProps> = ({
                                   }
                                   disabled={disabled}
                                   checked={selectedChoices.includes(cellIndex)}
+                                  aria-labelledby={`${fieldKey}-row-${ri} ${fieldKey}-col-${ci}`}
                                 />
-                                <span className="cell-text">
+                                <span className="cell-text" aria-hidden="true">
                                   {column?.text || ''}
                                 </span>
                               </>

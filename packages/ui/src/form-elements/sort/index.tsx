@@ -68,15 +68,16 @@ type SortableItemProps = {
 };
 
 const SortableItem: FC<SortableItemProps> = ({ id, dragHandle, children }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+  const { listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      <span {...listeners}>{dragHandle}</span>
+    <div ref={setNodeRef} style={style}>
+      <span {...listeners} aria-hidden="true" tabIndex={-1} role="presentation">
+        {dragHandle}
+      </span>
       {children}
     </div>
   );
@@ -181,51 +182,73 @@ const SortField: FC<SortFieldProps> = ({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}>
+          onDragEnd={handleDragEnd}
+          accessibility={{
+            screenReaderInstructions: {
+              draggable:
+                'Gebruik de knoppen "Zet omhoog" en "Zet omlaag" om de volgorde aan te passen.',
+            },
+          }}>
           <SortableContext
             items={items.map((opt) => opt.titles?.[0]?.key || '')}
             strategy={verticalListSortingStrategy}>
-            <ol>
-              {items.map((option, index) => (
-                <li>
-                  <SortableItem
-                    key={option.titles?.[0]?.key || index}
-                    id={option.titles?.[0]?.key || String(index)}
-                    dragHandle={<i className="ri-draggable"></i>}>
-                    <Paragraph className="sortable-item-title">
-                      {option.titles?.[0]?.key}
-                    </Paragraph>
-                    <div className="sortable-item-actions">
-                      <button
-                        aria-label="Zet omhoog"
-                        disabled={index === 0}
-                        onClick={(e) => {
-                          if (index > 0) {
-                            const newItems = arrayMove(items, index, index - 1);
-                            setItems(newItems);
-                            if (onSort) onSort(newItems);
-                          }
-                          e.preventDefault();
-                        }}>
-                        <i className="ri-arrow-up-line"></i>
-                      </button>
-                      <button
-                        aria-label="Zet omlaag"
-                        disabled={index === items.length - 1}
-                        onClick={(e) => {
-                          if (index < items.length - 1) {
-                            const newItems = arrayMove(items, index, index + 1);
-                            setItems(newItems);
-                            if (onSort) onSort(newItems);
-                          }
-                          e.preventDefault();
-                        }}>
-                        <i className="ri-arrow-down-line"></i>
-                      </button>
-                    </div>
-                  </SortableItem>
-                </li>
-              ))}
+            <p id={`${fieldKey}-sort-instructions`} className="sr-only">
+              Gebruik de knoppen &ldquo;Zet omhoog&rdquo; en &ldquo;Zet
+              omlaag&rdquo; om de volgorde aan te passen.
+            </p>
+            <ol aria-label="Sorteerlijst">
+              {items.map((option, index) => {
+                const itemName = option.titles?.[0]?.key || '';
+                return (
+                  <li
+                    key={itemName || index}
+                    aria-describedby={`${fieldKey}-sort-instructions`}>
+                    <SortableItem
+                      id={itemName || String(index)}
+                      dragHandle={<i className="ri-draggable"></i>}>
+                      <Paragraph className="sortable-item-title">
+                        {itemName}
+                      </Paragraph>
+                      <div className="sortable-item-actions">
+                        <button
+                          aria-label={`Zet omhoog: ${itemName}`}
+                          disabled={index === 0}
+                          onClick={(e) => {
+                            if (index > 0) {
+                              const newItems = arrayMove(
+                                items,
+                                index,
+                                index - 1
+                              );
+                              setItems(newItems);
+                              if (onSort) onSort(newItems);
+                            }
+                            e.preventDefault();
+                          }}>
+                          <i className="ri-arrow-up-line"></i>
+                        </button>
+                        <button
+                          aria-label={`Zet omlaag: ${itemName}`}
+                          disabled={index === items.length - 1}
+                          onClick={(e) => {
+                            if (index < items.length - 1) {
+                              const newItems = arrayMove(
+                                items,
+                                index,
+                                index + 1
+                              );
+                              setItems(newItems);
+                              if (onSort) onSort(newItems);
+                            }
+                            e.preventDefault();
+                          }}>
+                          <i className="ri-arrow-down-line"></i>
+                        </button>
+                      </div>
+                    </SortableItem>
+                  </li>
+                );
+              })}
             </ol>
           </SortableContext>
         </DndContext>
