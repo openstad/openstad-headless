@@ -149,11 +149,20 @@ router
 
       req.authConfig.serverLoginPath = projectServerLoginPaths[authConfigId];
 
-      let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath; // + '&acr_values=loa:low';
-      url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
-      const apiUrl = config.url;
+      // Keep callback URL fixed to satisfy strict redirect URI allowlists
+      // (e.g. Signicat broker legacy connections).
+      const callbackUrl = config.url + '/auth/digest-login';
+      const redirectUri = encodeURIComponent(callbackUrl);
 
       const pkceEnabled = !!req.authConfig.pkceEnabled || false;
+      const apiUrl = config.url;
+      let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath; // + '&acr_values=loa:low';
+      url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
+      url = url.replace(/\[\[redirectUri\]\]/, redirectUri);
+      // Backward compatibility for previously stored malformed scope templates
+      // (e.g. `openid%%20...` becoming `openid%25%2520...` in browser URLs).
+      url = url.replace(/(scope=[^&]*?)%25%2520/g, '$1%20');
+      url = url.replace(/scope=openid%%20/g, 'scope=openid%20');
 
       console.log('pkce enabled', pkceEnabled);
 
@@ -216,20 +225,6 @@ router
 
       console.log('req authconfig', req.authConfig, url);
 
-      url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
-      url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
-      url = url.replace(
-        /\[\[redirectUri\]\]/,
-        encodeURIComponent(
-          config.url +
-            '/auth/project/' +
-            req.project.id +
-            '/digest-login?useAuth=' +
-            req.authConfig.provider +
-            '\&returnTo=' +
-            req.query.redirectUri
-        )
-      );
       res.redirect(url);
     } else if (req.query.redirectUri) {
       return next(createError(403, 'redirectUri not found in allowlist.'));
@@ -290,13 +285,7 @@ router
       )}&code=${encodeURIComponent(
         code
       )}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(
-        config.url +
-          '/auth/project/' +
-          req.project.id +
-          '/digest-login?useAuth=' +
-          req.authConfig.provider +
-          '\&returnTo=' +
-          req.query.returnTo
+        config.url + '/auth/digest-login'
       )}`;
 
     fetch(url, {
