@@ -467,7 +467,8 @@ function Form({
             <Button
               appearance="primary-action-button"
               onClick={() => secondaryHandler(formValues)}
-              type="button">
+              type="button"
+              aria-label={secondaryLabel}>
               <span>{secondaryLabel}</span>
             </Button>
           )}
@@ -477,6 +478,7 @@ function Form({
                 appearance="secondary-action-button"
                 type="button"
                 className="osc-prev-button"
+                aria-label={prevPageText || 'vorige'}
                 onClick={() => {
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
@@ -489,6 +491,7 @@ function Form({
               type="submit"
               disabled={submitDisabled}
               data-label="Overslaan"
+              aria-label={submitText}
               onClick={() => {
                 scrollTop();
               }}>
