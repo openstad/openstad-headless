@@ -211,27 +211,26 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     }
 
-    return {
-      defaultScope: {
-        include: [
-          {
-            model: db.User,
-            attributes: [
-              'id',
-              'role',
-              'displayName',
-              'nickName',
-              'name',
-              'email',
-              'extraData',
-              'phonenumber',
-              'address',
-              'city',
-              'postcode',
-            ],
-          },
-        ],
-      },
+		return {
+
+			defaultScope: {
+				include: [{
+					model      : db.User,
+					attributes : [
+						'id',
+						'role',
+						'displayName',
+						'nickName',
+						'name',
+						'email',
+						'extraData',
+						'phoneNumber',
+						'address',
+						'city',
+						'postcode'
+					]
+				}]
+			},
 
       forProjectId: function (projectId) {
         return {
@@ -289,29 +288,29 @@ module.exports = function (db, sequelize, DataTypes) {
         };
       },
 
-      includeAllComments: function () {
-        return {
-          include: [
-            {
-              model: db.User,
-              attributes: [
-                'id',
-                'role',
-                'displayName',
-                'nickName',
-                'name',
-                'email',
-                'extraData',
-                'phonenumber',
-                'address',
-                'city',
-                'postcode',
-              ],
-            },
-          ],
-          order: [['createdAt', 'ASC']],
-        };
-      },
+			includeAllComments: function() {
+				return {
+					include: [{
+						model: db.User,
+						attributes: [
+							'id',
+							'role',
+							'displayName',
+							'nickName',
+							'name',
+							'email',
+							'extraData',
+							'phoneNumber',
+							'address',
+							'city',
+							'postcode'
+						]
+					}],
+					order: [
+						['createdAt', 'ASC']
+					]
+				};
+			},
 
       includeTags: {
         include: [
