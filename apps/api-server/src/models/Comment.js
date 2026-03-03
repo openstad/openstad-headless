@@ -191,7 +191,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 						'name',
 						'email',
 						'extraData',
-						'phonenumber',
+						'phoneNumber',
 						'address',
 						'city',
 						'postcode'
@@ -245,7 +245,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 							'name',
 							'email',
 							'extraData',
-							'phonenumber',
+							'phoneNumber',
 							'address',
 							'city',
 							'postcode'
