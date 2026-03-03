@@ -90,6 +90,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   >({});
 
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
+  const [interacted, setInteracted] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] =
     useState<boolean>(false);
   const [explanations, setExplanations] = useState<Record<string, string>>(
@@ -107,6 +108,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     (option: 'a' | 'b') => {
       if (!currentDilemma) return;
 
+      setInteracted(true);
       const optionToSet = option === selectedOption ? null : option;
       setSelectedOption(optionToSet);
     },
@@ -134,6 +136,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }
 
     setSelectedOption(null);
+    setInteracted(false);
 
     // Find next unanswered dilemma index
     const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
@@ -177,6 +180,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }));
 
     setSelectedOption(null);
+    setInteracted(false);
 
     const futureUnanswered = dilemmaCards.filter(
       (dilemma) => !newDilemmaAnswers[dilemma.id]
@@ -420,13 +424,21 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       role="region"
       aria-label="Dilemma keuze"
       aria-invalid={
-        required && !dilemmaAnswers[currentDilemma.id] ? 'true' : 'false'
+        required &&
+        interacted &&
+        !selectedOption &&
+        !previousAnswers[currentDilemma.id]
+          ? 'true'
+          : 'false'
       }
       data-required={required}>
       <div className="dilemma-intro">
         <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
-        <div className="dilemma-progress">
-          <span>
+        <div
+          className="dilemma-progress"
+          role="status"
+          aria-label={`Stap ${currentIndex + 1} van ${dilemmas.length}`}>
+          <span aria-hidden="true">
             {currentIndex + 1} van {dilemmas.length}
           </span>
         </div>
@@ -510,8 +522,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
           type="button"
           disabled={!currentDilemma?.infoField}
-          aria-expanded={infoDialog}>
-          <span>Info</span>
+          aria-expanded={infoDialog}
+          aria-controls="dilemma-info-panel"
+          aria-label="Meer informatie over deze vraag">
+          <span aria-hidden="true">Info</span>
         </button>
 
         <div className="dilemma-navigation-buttons">
@@ -577,7 +591,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
       )}
 
-      <div className="info-card dilemma-info-field" aria-hidden={!infoDialog}>
+      <div
+        id="dilemma-info-panel"
+        className="info-card dilemma-info-field"
+        aria-hidden={!infoDialog}>
         <div className="info-card-container">
           <Paragraph
             dangerouslySetInnerHTML={{
