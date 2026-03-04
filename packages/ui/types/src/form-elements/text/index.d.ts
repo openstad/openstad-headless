@@ -60,6 +60,8 @@ export type TextInputProps = {
 declare const TrixEditor: React.FC<{
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    onFocus?: () => void;
+    onBlur?: () => void;
 }>;
 declare const TextInput: FC<TextInputProps>;
 export { TrixEditor };
