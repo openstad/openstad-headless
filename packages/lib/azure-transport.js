@@ -107,7 +107,9 @@ class AzureTransport {
       };
 
       const response = await fetch(
-        `${this.graphEndpoint}/v1.0/users/${this.returnOnlyEmail(from)}/sendMail`,
+        `${this.graphEndpoint}/v1.0/users/${this.returnOnlyEmail(
+          from
+        )}/sendMail`,
         {
           method: 'POST',
           headers: {

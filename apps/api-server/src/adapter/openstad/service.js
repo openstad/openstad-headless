@@ -18,14 +18,18 @@ service.fetchUserData = async function fetchUserData({
   if (userId) {
     path = `/api/admin/user/${userId}?client_id=${authConfig.clientId}`;
     headers = {
-      Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      Authorization: `Basic ${Buffer.from(
+        `${authConfig.clientId}:${authConfig.clientSecret}`
+      ).toString('base64')}`,
     };
   }
 
   if (email) {
     path = `/api/admin/users?email=${encodeURIComponent(email)}`;
     headers = {
-      Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      Authorization: `Basic ${Buffer.from(
+        `${authConfig.clientId}:${authConfig.clientSecret}`
+      ).toString('base64')}`,
     };
   }
 
@@ -87,7 +91,9 @@ service.createUser = async function ({ authConfig, userData = {} }) {
   try {
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -160,7 +166,9 @@ service.updateUser = async function ({ authConfig, userData = {} }) {
   try {
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -193,7 +201,9 @@ service.deleteUser = async function ({ authConfig, userData = {} }) {
   try {
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -219,7 +229,9 @@ service.fetchClient = async function ({ authConfig, project }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
     });
     if (!response.ok) {
@@ -274,7 +286,9 @@ service.createClient = async function ({ authConfig, project }) {
     let url = `${adminAuthConfig.serverUrlInternal}/api/admin/client`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${adminAuthConfig.clientId}:${adminAuthConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${adminAuthConfig.clientId}:${adminAuthConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -431,7 +445,9 @@ service.updateClient = async function ({ authConfig, project }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -460,7 +476,9 @@ service.fetchUniqueCode = async function ({ authConfig, isExport = false }) {
 
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
     });
     if (!response.ok) {
@@ -483,7 +501,9 @@ service.createUniqueCode = async function ({ authConfig, amount }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/unique-code?clientId=${clientId}&amount=${amount}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',
@@ -516,7 +536,9 @@ service.resetUniqueCode = async function ({ authConfig, uniqueCodeId }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/unique-code/${uniqueCodeId}/reset?clientId=${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',
@@ -541,7 +563,9 @@ service.fetchAccessCode = async function ({ authConfig }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/access-code?clientId=${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
     });
     if (!response.ok) {
@@ -564,7 +588,9 @@ service.createAccessCode = async function ({ authConfig, code }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/access-code?clientId=${clientId}&code=${code}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',
@@ -597,7 +623,9 @@ service.deleteAccessCode = async function ({ authConfig, accessCodeId }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/access-code/${accessCodeId}/delete?clientId=${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',

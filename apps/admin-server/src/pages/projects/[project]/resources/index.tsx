@@ -60,7 +60,9 @@ const prepareDataForExport = (data: any[]) => {
           const createString = values
             .map((value: any) => {
               return key.startsWith('images')
-                ? `${value.url}${value.description ? ` (${value.description})` : ''}`
+                ? `${value.url}${
+                    value.description ? ` (${value.description})` : ''
+                  }`
                 : `${value.url}${value.name ? ` (${value.name})` : ''}`;
             })
             .filter(Boolean)
@@ -165,8 +167,12 @@ export default function ProjectResources() {
             <div className="mb-2">
               <span className="text-sm text-gray-500">
                 {selectedWidgets.length > 0
-                  ? `${selectedWidgets.length} van ${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'} geselecteerd`
-                  : `${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'}`}
+                  ? `${selectedWidgets.length} van ${totalCount} ${
+                      totalCount === 1 ? 'inzending' : 'inzendingen'
+                    } geselecteerd`
+                  : `${totalCount} ${
+                      totalCount === 1 ? 'inzending' : 'inzendingen'
+                    }`}
               </span>
             </div>
             <div className="flex justify-between mb-4 gap-4">

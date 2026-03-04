@@ -162,10 +162,20 @@ function logSpamAnalysis({ routeName, req, analysis }) {
     isProbablySpam: !!analysis?.isProbablySpam,
     totalSpamScore: `${analysis?.spamScore || 0}/${scoreThreshold}`,
     scoreSignals: {
-      'Fields with random-like text': `${randomLikeCount}/${randomLikeThreshold} -> ${scoreBreakdown.randomLikePoints || 0} points`,
-      'Fields with suspicious upper/lowercase pattern': `${compactMixedCaseCount}/${randomLikeThreshold} -> ${scoreBreakdown.compactMixedCasePoints || 0} points`,
-      'Suspicious signal ratio': `${suspiciousRatio.toFixed(3)}/${ratioThreshold} -> ${scoreBreakdown.ratioPoints || 0} points`,
-      'Time to submit (ms)': `${timeToSubmitMs ?? 'n/a'}/${timeThresholdMs} -> ${scoreBreakdown.veryFastSubmitPoints || 0} points`,
+      'Fields with random-like text': `${randomLikeCount}/${randomLikeThreshold} -> ${
+        scoreBreakdown.randomLikePoints || 0
+      } points`,
+      'Fields with suspicious upper/lowercase pattern': `${compactMixedCaseCount}/${randomLikeThreshold} -> ${
+        scoreBreakdown.compactMixedCasePoints || 0
+      } points`,
+      'Suspicious signal ratio': `${suspiciousRatio.toFixed(
+        3
+      )}/${ratioThreshold} -> ${scoreBreakdown.ratioPoints || 0} points`,
+      'Time to submit (ms)': `${
+        timeToSubmitMs ?? 'n/a'
+      }/${timeThresholdMs} -> ${
+        scoreBreakdown.veryFastSubmitPoints || 0
+      } points`,
     },
     evaluatedFieldCount: candidateCount,
     timestamp: new Date().toISOString(),

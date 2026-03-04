@@ -731,7 +731,9 @@ module.exports = function (db, sequelize, DataTypes) {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_statuses
-                WHERE statusId IN (${statuses.map((status) => `'${status}'`).join(', ')}))
+                WHERE statusId IN (${statuses
+                  .map((status) => `'${status}'`)
+                  .join(', ')}))
               `),
             },
           },

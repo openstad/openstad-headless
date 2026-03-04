@@ -589,7 +589,9 @@ export function Filters({
             </Button>
             <div
               id="filters-container"
-              className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
+              className={`filters-container ${
+                displayCollapsibleFilter ? '--collapsable' : ''
+              } ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
               onClick={(e) => {
                 setFiltersVisible(false);

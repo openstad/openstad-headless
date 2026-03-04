@@ -47,7 +47,9 @@ MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 AUTH_DB_NAME=${process.env.AUTH_DB_NAME}
 API_DB_NAME=${process.env.API_DB_NAME}
 
-MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
+MESSAGESTREAMING_REDIS_URL=${
+      process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'
+    }
 MESSAGESTREAMING_POSTFIX=${process.env.MESSAGESTREAMING_POSTFIX || ''}
 
 API_URL=${process.env.API_URL}
@@ -106,8 +108,14 @@ AUTH_COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF}
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_PORT_API=${process.env.IMAGE_PORT_API}
 IMAGE_PORT_IMAGE_SERVER=${process.env.IMAGE_PORT_IMAGE_SERVER}
-IMAGE_IMAGES_DIR=${process.env.DOCUMENTS_DIR || '/opt/openstad-headless/apps/image-server/documents'}
-IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR || '/opt/openstad-headless/apps/image-server/images'}
+IMAGE_IMAGES_DIR=${
+      process.env.DOCUMENTS_DIR ||
+      '/opt/openstad-headless/apps/image-server/documents'
+    }
+IMAGE_IMAGES_DIR=${
+      process.env.IMAGE_IMAGES_DIR ||
+      '/opt/openstad-headless/apps/image-server/images'
+    }
 IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}
 IMAGE_THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 IMAGE_THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
@@ -121,7 +129,9 @@ ADMIN_COOKIE_SECRET=${process.env.ADMIN_COOKIE_SECRET}
 CMS_URL=${process.env.CMS_URL}
 CMS_PORT=${process.env.CMS_PORT}
 CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}
-CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI || 'mongodb://openstad-mongo:27017/{database}'}
+CMS_MONGODB_URI=${
+      process.env.CMS_MONGODB_URI || 'mongodb://openstad-mongo:27017/{database}'
+    }
 CMS_DEFAULT_SETTINGS=${process.env.CMS_DEFAULT_SETTINGS}
 CMS_DISABLE_WIDGET_PREVIEW=${process.env.CMS_DISABLE_WIDGET_PREVIEW || 'false'}
 `;

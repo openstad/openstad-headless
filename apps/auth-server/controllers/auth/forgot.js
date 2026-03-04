@@ -86,7 +86,9 @@ exports.postReset = (req, res, next) => {
           });
           res.redirect(
             authLocalConfig.loginUrl +
-              `?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+              `?clientId=${
+                req.client.clientId
+              }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
           );
         })
         .catch((err) => {
