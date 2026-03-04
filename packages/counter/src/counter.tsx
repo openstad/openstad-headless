@@ -194,10 +194,17 @@ function Counter({
           </span>
         ));
     };
+    const fullText = `${amountDisplayed || 0} ${label || ''}`.trim();
     return (
-      <Paragraph>
-        <span className="amount">{renderAmount(amountDisplayed || 0)}</span>
-        {label ? <span className="label">{label}</span> : null}
+      <Paragraph aria-label={fullText}>
+        <span className="amount" aria-hidden="true">
+          {renderAmount(amountDisplayed || 0)}
+        </span>
+        {label ? (
+          <span className="label" aria-hidden="true">
+            {label}
+          </span>
+        ) : null}
       </Paragraph>
     );
   };
