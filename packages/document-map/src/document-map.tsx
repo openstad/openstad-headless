@@ -273,6 +273,7 @@ function DocumentMap({
   const [filteredComments, setFilteredComments] =
     useState<Array<Comment>>(comments);
   const [commentValue, setCommentValue] = useState<string>('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [refreshComments, setRefreshComments] = useState(false);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -491,11 +492,13 @@ function DocumentMap({
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isSubmittingComment) return;
 
     if (
       commentValue.length >= props.comments?.descriptionMinLength &&
       commentValue.length <= props.comments?.descriptionMaxLength
     ) {
+      setIsSubmittingComment(true);
       try {
         const defaultTagsArray = defaultTags
           ? defaultTags
@@ -538,6 +541,8 @@ function DocumentMap({
       } catch (error) {
         notifyFailed();
         console.error('Error creating comment:', error);
+      } finally {
+        setIsSubmittingComment(false);
       }
     } else {
       return;
@@ -634,9 +639,10 @@ function DocumentMap({
         const currentComment = filteredComments?.findIndex(
           (comment: any) => parseInt(comment.id) === index
         );
-        const commentPage = Math.floor(currentComment / itemsPerPage);
-
-        setoverridePage(commentPage);
+        if (typeof currentComment === 'number' && currentComment >= 0) {
+          const commentPage = Math.floor(currentComment / itemsPerPage);
+          setoverridePage(commentPage);
+        }
       }
 
       const commentElement = document.getElementById(`comment-${index}`);
@@ -1064,7 +1070,10 @@ function DocumentMap({
                     </Button>
                   </>
                 ) : (
-                  <form>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                    }}>
                     <div>
                       <FormLabel htmlFor="commentBox">
                         {addCommentText}
@@ -1158,7 +1167,7 @@ function DocumentMap({
                       )}
                     <Button
                       appearance="primary-action-button"
-                      type="submit"
+                      type="button"
                       onClick={(e) => addComment(e, popupPosition)}>
                       {submitCommentText}
                     </Button>
