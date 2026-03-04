@@ -217,22 +217,28 @@ jobs:
         name: Set correct build target
         run: echo "BUILD_TARGET=${{ matrix.build-target}}" >> $GITHUB_ENV
 
-      - name: Determine image tags
-        id: set_tags
+      - name: Compute Docker tags
+        id: docker_tags
+        shell: bash
         run: |
-          echo "tags<<EOF" >> $GITHUB_OUTPUT
-          echo "type=ref,event=branch,suffix=-{{sha}},priority=700" >> $GITHUB_OUTPUT
-          echo "type=ref,event=tag" >> $GITHUB_OUTPUT
-          echo "type=ref,event=pr,suffix=-{{sha}}" >> $GITHUB_OUTPUT
-          echo "type=raw,value=latest,enable={{is_default_branch}}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          SHA_SHORT="${GITHUB_SHA::7}"
+          REF_SANITIZED="$(echo "${GITHUB_REF_NAME}" | tr '/' '-')"
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE }}
-          tags: ${{ steps.set_tags.outputs.tags }}
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            PRIMARY_TAG="pr-${{ github.event.pull_request.number }}-${SHA_SHORT}"
+          elif [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            PRIMARY_TAG="${REF_SANITIZED}"
+          else
+            PRIMARY_TAG="${REF_SANITIZED}-${SHA_SHORT}"
+          fi
+
+          echo "version=${PRIMARY_TAG}" >> "$GITHUB_OUTPUT"
+          echo "tags<<EOF" >> "$GITHUB_OUTPUT"
+          echo "${IMAGE}:${PRIMARY_TAG}" >> "$GITHUB_OUTPUT"
+          if [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF_NAME}" == "${{ github.event.repository.default_branch }}" ]]; then
+            echo "${IMAGE}:latest" >> "$GITHUB_OUTPUT"
+          fi
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         id: buildx
@@ -251,7 +257,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: 'ghcr.io/${{ steps.meta.outputs.tags }}'
+          tags: ${{ steps.docker_tags.outputs.tags }}
           build-args: |
             APP=${{ matrix.app }}
             OPENSTAD_VERSION=${{ needs.get-openstad-version.outputs.openstad_version }}
@@ -259,7 +265,7 @@ jobs:
 
       - name: Add image output
         id: image_output
-        run: echo "image_tag=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
+        run: echo "image_tag=${{ steps.docker_tags.outputs.version }}" >> "$GITHUB_OUTPUT"
 
   e2e-test:
     name: Run E2E tests
