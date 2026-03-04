@@ -391,37 +391,51 @@ router
     }
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     if (!req.query.ipdlogout) {
-      // redirect to idp server
-      let redirectUri = encodeURIComponent(
-        config.url +
-          '/auth/project/' +
-          req.project.id +
-          '/logout?ipdlogout=done&useAuth=' +
-          req.query.useAuth +
-          '&redirectUri=' +
-          encodeURIComponent(req.query.redirectUri)
-      );
-      let url = `${req.authConfig.serverUrl}/logout?redirectUrl=${redirectUri}&client_id=${req.authConfig.clientId}`;
+      // Validate redirectUri against project allowlist before redirecting to auth server
+      let finalRedirect = Array.isArray(req.query.redirectUri)
+        ? req.query.redirectUri[0]
+        : req.query.redirectUri || '';
+      if (finalRedirect) {
+        const projectId = req.params.projectId;
+        if (
+          projectId &&
+          (await isRedirectAllowed(projectId, finalRedirect))
+        ) {
+          finalRedirect +=
+            (finalRedirect.includes('?') ? '&' : '?') + 'openstadlogout=true';
+        } else {
+          // Invalid redirectUri: fall back to admin homepage
+          finalRedirect = config.admin?.domain
+            ? `http://${config.admin.domain}?openstadlogout=true`
+            : '';
+        }
+      }
+      let url = `${req.authConfig.serverUrl}/logout?client_id=${req.authConfig.clientId}`;
+      if (finalRedirect) {
+        url += `&redirectUrl=${encodeURIComponent(finalRedirect)}`;
+      }
       return res.redirect(url);
     }
     return next();
   })
+  // Backward-compatible fallback: only reached if auth server redirects back with ?ipdlogout=done
   .get(async function (req, res, next) {
     const projectId = req.params.projectId;
+    const rawRedirectUri = Array.isArray(req.query.redirectUri)
+      ? req.query.redirectUri[0]
+      : req.query.redirectUri;
     if (
-      req.query.redirectUri &&
+      rawRedirectUri &&
       projectId &&
-      (await isRedirectAllowed(projectId, req.query.redirectUri))
+      (await isRedirectAllowed(projectId, rawRedirectUri))
     ) {
       const redirectUri =
-        req.query.redirectUri +
-        (req.query.redirectUri.includes('?') ? '&' : '?') +
+        rawRedirectUri +
+        (rawRedirectUri.includes('?') ? '&' : '?') +
         'openstadlogout=true';
       return res.redirect(redirectUri);
-    } else if (req.query.redirectUri) {
-      return next(createError(403, 'redirectUri not found in allowlist.'));
     }
 
     return res.json({ logout: 'success' });
