@@ -400,20 +400,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     ]
   );
 
-  useEffect(() => {
-    if (!enableKeyboard) return;
-
-    const handleKeyPress = (event: KeyboardEvent) => {
+  const handleCardKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!enableKeyboard) return;
       if (event.key === 'ArrowLeft') {
+        event.preventDefault();
         handleSwipeLeft();
       } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
         handleSwipeRight();
       }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [enableKeyboard, handleSwipeLeft, handleSwipeRight]);
+    },
+    [enableKeyboard, handleSwipeLeft, handleSwipeRight]
+  );
 
   const removeCurrentCard = () => {
     setInfoVisibleCardId(null);
@@ -840,7 +839,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   return (
     <>
-      <div className="swipe-progress">
+      <div className="swipe-progress" aria-live="polite" aria-atomic="true">
         <span>
           {currentIndex + 1} van {swipeCards.length}
         </span>
@@ -875,6 +874,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     style={{ zIndex, ...(transform ? { transform } : {}) }}
                     {...(isTop
                       ? {
+                          onKeyDown: handleCardKeyDown,
                           onPointerDown: handlePointerDown,
                           onPointerMove: handlePointerMove,
                           onPointerUp: handlePointerUp,

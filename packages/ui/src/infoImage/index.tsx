@@ -52,7 +52,7 @@ const InfoImage = ({
     <figure className="info-image-container">
       <img
         src={image}
-        alt={imageAlt}
+        alt={imageAlt || ''}
         onClick={
           imageClickable ? () => window.open(image, '_blank') : undefined
         }
