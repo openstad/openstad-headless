@@ -3,7 +3,7 @@
   width: 100%;
   background-color: var(--nlds-progressbar-background-color, #a9b2ba);
   border-radius: var(--nlds-progressbar-border-radius, 50px);
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .osc .progressbar-tracker {

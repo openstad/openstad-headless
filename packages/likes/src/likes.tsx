@@ -165,7 +165,8 @@ function Likes({
                     ? 'selected'
                     : ''
                 } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
-                disabled={disabled}>
+                disabled={disabled}
+                aria-pressed={resource?.userVote?.opinion === likeVariant.type}>
                 <section className="like-kind">
                   <i className={likeVariant.icon}></i>
                   {variant === 'small' ? null : likeVariant.label}
@@ -178,6 +179,7 @@ function Likes({
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
+                    <span className="sr-only"> stemmen</span>
                   </section>
                 ) : null}
               </Button>
@@ -186,7 +188,10 @@ function Likes({
 
           {props?.resources?.minimumYesVotes && showProgressBar ? (
             <div className="progressbar-container">
-              <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
+              <ProgressBar
+                progress={(resource.yes / necessaryVotes) * 100}
+                aria-label="Likes nodig voor dit voorstel"
+              />
               <Paragraph className="progressbar-counter">
                 {resource.yes || 0} /{necessaryVotes}
               </Paragraph>
@@ -222,7 +227,10 @@ function Likes({
                       ? 'selected'
                       : ''
                   } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
-                  disabled={disabled}>
+                  disabled={disabled}
+                  aria-pressed={
+                    resource?.userVote?.opinion === likeVariant.type
+                  }>
                   <section className="like-kind">
                     <i
                       className={`${
@@ -251,6 +259,7 @@ function Likes({
             <div className="progressbar-container">
               <ProgressBar
                 progress={(resource.netVotes / necessaryVotes) * 100}
+                aria-label="Likes nodig voor dit voorstel"
               />
               <Paragraph className="progressbar-counter">
                 {resource.netVotes || 0} /{necessaryVotes}
