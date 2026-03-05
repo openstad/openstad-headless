@@ -270,6 +270,7 @@ const BaseMap = ({
   }
 >) => {
   const [isMapReady, setIsMapReady] = useState(false);
+  const hasInitialZoomedRef = useRef(false);
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -522,7 +523,18 @@ const BaseMap = ({
     if (!mapRef || !autoZoomAndCenter) return;
     if (!zoomAfterInit && isMapReady) return;
 
+    // Prevent re-zooming after initial zoom
+    if (hasInitialZoomedRef.current) return;
+
+    if (
+      autoZoomAndCenter === 'markers' &&
+      (!currentMarkers || currentMarkers.length === 0)
+    ) {
+      return; // Wait for markers to load
+    }
+
     centerAndZoomHandler();
+    hasInitialZoomedRef.current = true;
   }, [
     isMapReady,
     mapRef,
