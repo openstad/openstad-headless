@@ -198,16 +198,19 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
 
     // Prevent directory traversal or illegal characters
     const baseName = path.basename(unsafePath); // strips directory components
-    const extension = baseName.split('.').pop().toLowerCase();
+    const hasExtension = baseName.includes('.');
+    const extension = hasExtension
+      ? baseName.split('.').pop().toLowerCase()
+      : null;
     if (
       baseName !== unsafePath || // directory component detected
       !safeImageNamePattern.test(baseName) || // unsafe chars present
-      !ALLOWED_EXTENSIONS.includes(extension) // extension not allowed
+      (hasExtension && !ALLOWED_EXTENSIONS.includes(extension)) // extension present but not allowed
     ) {
       return res.status(400).send('Invalid image filename or path');
     }
 
-    const mimeType = mime.lookup(extension);
+    const mimeType = hasExtension ? mime.lookup(extension) : null;
 
     const endpoint = process.env.S3_ENDPOINT.replace(
       'https://',
@@ -242,7 +245,11 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
           .send('File not found');
       }
 
-      res.setHeader('Content-Type', mimeType);
+      const contentType =
+        mimeType ||
+        response.headers.get('content-type') ||
+        'application/octet-stream';
+      res.setHeader('Content-Type', contentType);
       const contentLength = response.headers.get('content-length');
       if (contentLength) res.setHeader('Content-Length', contentLength);
 
