@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate:plugin-registry": "node -e \"require('./next.config.js')\""
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
@@ -31,6 +32,7 @@
     "@openstad-headless/leaflet-map": "*",
     "@openstad-headless/likes": "*",
     "@openstad-headless/multi-project-resource-overview": "*",
+    "@openstad-headless/plugin-loader": "*",
     "@openstad-headless/raw-resource": "*",
     "@openstad-headless/resource-detail": "*",
     "@openstad-headless/resource-detail-with-map": "*",

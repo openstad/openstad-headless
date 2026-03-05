@@ -8,9 +8,9 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
+import { useWidgetDefinitions } from '@/hooks/use-widget-definitions';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
 import { HasAccess } from '@/lib/hasAccess';
-import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
+  const widgetDefinitions = useWidgetDefinitions();
 
   const {
     data: widgets,
@@ -235,7 +236,7 @@ export default function ProjectWidgets() {
                       <div className="">
                         <strong className="">{widget.description}</strong>
                         <Paragraph className="my-auto -mr-16 lg:mr-0">
-                          {WidgetDefinitions[widget.type]?.name}
+                          {widgetDefinitions[widget.type]?.name}
                         </Paragraph>
                       </div>
                       <Paragraph className="hidden lg:flex truncate my-auto">

@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "name": "metkoos",
+      "packageName": "@draadnl/metkoos-plugin",
+      "enabled": true
+    }
+  ]
+}
