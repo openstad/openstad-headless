@@ -1,5 +1,15 @@
 require('dotenv').config();
 
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: 'openstad-cms-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const apostrophe = require('apostrophe');
 const express = require('express');
 const app = express();
