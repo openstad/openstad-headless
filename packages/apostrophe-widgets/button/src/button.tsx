@@ -9,29 +9,45 @@ import './button.css';
 interface Item {
   direction: string;
   buttons: string;
+  prefix?: string;
 }
 
-const renderButtons = (buttons) => {
-  return JSON.parse(buttons).map((element: any, index) => {
+function applyPrefix(href: string, prefix: string): string {
+  if (prefix && href && href.startsWith('/')) {
+    return prefix + href;
+  }
+  return href;
+}
+
+const renderButtons = (buttons: string, prefix: string) => {
+  return JSON.parse(buttons).map((element: any, index: number) => {
+    const href = element.useSitePrefix
+      ? applyPrefix(element.href, prefix)
+      : element.href;
+
     return (
       <ButtonLink
         key={index}
         appearance={element.appearance}
         target={element.target}
-        href={element.href}>
+        href={href}>
         {element.label}
       </ButtonLink>
     );
   });
 };
 
-function Button({ buttons, direction }: Item) {
+function Button({ buttons, direction, prefix }: Item) {
+  const sitePrefix = prefix || '';
+
   if (buttons.length > 1) {
     return (
-      <ButtonGroup direction={direction}>{renderButtons(buttons)}</ButtonGroup>
+      <ButtonGroup direction={direction}>
+        {renderButtons(buttons, sitePrefix)}
+      </ButtonGroup>
     );
   } else {
-    return renderButtons(buttons);
+    return renderButtons(buttons, sitePrefix);
   }
 }
 
@@ -48,4 +64,4 @@ Button.loadWidgetOnElement = function (
   }
 };
 
-export { Button };
+export { Button, applyPrefix };

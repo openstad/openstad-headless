@@ -13,8 +13,10 @@
       <ul class="link-list timeline-link-list">
         {% for link in item.links %} {% if link.url %}
         <li>
+          {% set linkUrl = data.prefix + link.url if (link.useSitePrefix and
+          link.url and link.url.startsWith('/')) else link.url %}
           <a
-            href="{{ link.url }}"
+            href="{{ linkUrl }}"
             title="{{ link.title }}"
             {%
             if
