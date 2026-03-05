@@ -531,7 +531,9 @@ app.use(async function (req, res, next) {
   res
     .status(404)
     .send(
-      `Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`
+      `Error: No project found for given URL ${escapeHtml(
+        req.openstadDomain
+      )}${escapeHtml(req.url)}`
     );
 });
 

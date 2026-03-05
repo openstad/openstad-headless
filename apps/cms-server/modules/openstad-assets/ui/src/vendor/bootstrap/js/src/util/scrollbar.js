@@ -62,8 +62,9 @@ class ScrollBarHelper {
 
       this._saveInitialAttribute(element, styleProp);
       const calculatedValue = window.getComputedStyle(element)[styleProp];
-      element.style[styleProp] =
-        `${callback(Number.parseFloat(calculatedValue))}px`;
+      element.style[styleProp] = `${callback(
+        Number.parseFloat(calculatedValue)
+      )}px`;
     };
 
     this._applyManipulationCallback(selector, manipulationCallBack);

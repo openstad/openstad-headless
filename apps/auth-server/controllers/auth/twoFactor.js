@@ -124,7 +124,11 @@ exports.configure = async (req, res, next) => {
       twoFactorSecret = twoFactor.secret;
     }
 
-    const otpAuthUrl = `otpauth://totp/${encodeURIComponent(issuer)}:%20${encodeURIComponent(accountName)}?secret=${twoFactorSecret}&issuer=${encodeURIComponent(issuer)}`;
+    const otpAuthUrl = `otpauth://totp/${encodeURIComponent(
+      issuer
+    )}:%20${encodeURIComponent(
+      accountName
+    )}?secret=${twoFactorSecret}&issuer=${encodeURIComponent(issuer)}`;
 
     const qrCode = await QRCode.toDataURL(otpAuthUrl);
 

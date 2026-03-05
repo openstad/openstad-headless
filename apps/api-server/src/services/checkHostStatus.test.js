@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   buildIngressConfig,
   getCertificateConfig,
+  normalizeProjectUrlForIngress,
 } from './checkHostStatusHelpers.js';
 
 // ---- Env helpers ----
@@ -150,5 +151,31 @@ describe('buildIngressConfig', () => {
     expect(annotations['cert-manager.io/cluster-issuer']).toBe(
       'pre-existing-issuer'
     );
+  });
+});
+
+// ---- normalizeProjectUrlForIngress ----
+describe('normalizeProjectUrlForIngress', () => {
+  test('detects host-only values as non-subpath', () => {
+    expect(normalizeProjectUrlForIngress('site.openstad.nl')).toEqual({
+      host: 'site.openstad.nl',
+      hasPath: false,
+    });
+  });
+
+  test('detects subdirectory values and extracts host', () => {
+    expect(normalizeProjectUrlForIngress('site.openstad.nl/demo')).toEqual({
+      host: 'site.openstad.nl',
+      hasPath: true,
+    });
+  });
+
+  test('supports protocol-prefixed URLs', () => {
+    expect(
+      normalizeProjectUrlForIngress('https://site.openstad.nl/demo')
+    ).toEqual({
+      host: 'site.openstad.nl',
+      hasPath: true,
+    });
   });
 });

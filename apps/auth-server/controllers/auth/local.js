@@ -45,7 +45,9 @@ exports.login = (req, res) => {
   res.render('auth/local/login', {
     loginUrl:
       authLocalConfig.loginUrl +
-      `?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`,
+      `?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(
+        req.query.redirect_uri
+      )}`,
     clientId: req.client.clientId,
     client: req.client,
     redirectUrl: encodeURIComponent(req.query.redirect_uri),

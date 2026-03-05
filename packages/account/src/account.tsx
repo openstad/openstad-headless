@@ -182,7 +182,9 @@ function Account({
       console.log(copyObj.straatnaam);
       copyObj.address = {
         label: 'Adres',
-        value: `${copyObj.straatnaam.value ?? ''} ${copyObj.huisnummer.value ?? ''}`,
+        value: `${copyObj.straatnaam.value ?? ''} ${
+          copyObj.huisnummer.value ?? ''
+        }`,
       };
       delete copyObj.huisnummer; // Remove huisnummer from the object
       delete copyObj.straatnaam; // Remove straatnaam from the object

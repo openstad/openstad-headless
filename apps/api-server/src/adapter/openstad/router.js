@@ -126,7 +126,7 @@ router
           req.project.id +
           '/digest-login?useAuth=' +
           req.authConfig.provider +
-          '\&returnTo=' +
+          '&returnTo=' +
           req.query.redirectUri
       );
       let url = `${req.authConfig.serverUrl}/dialog/authorize`;

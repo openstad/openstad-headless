@@ -22,7 +22,9 @@ const createFilename = (originalFileName) => {
 };
 
 const getFileUrl = (file, fileType = 'image') => {
-  let url = `${process.env.APP_URL}/${fileType}/${sanitizeFileName(file.filename)}`;
+  let url = `${process.env.APP_URL}/${fileType}/${sanitizeFileName(
+    file.filename
+  )}`;
 
   if (s3.isEnabled()) {
     // fileName is already sanitized in S3 setup

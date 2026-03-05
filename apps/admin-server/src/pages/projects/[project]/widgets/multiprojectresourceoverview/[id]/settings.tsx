@@ -171,7 +171,11 @@ export default function WidgetMultiProjectSettings(
                           <Spacer size={2} />
                           <FormField
                             control={form.control}
-                            name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.includeProjectsInOverview`}
+                            name={`selectedProjects.${
+                              field.value?.findIndex(
+                                (p) => p.id === project.id
+                              ) ?? 0
+                            }.includeProjectsInOverview`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
@@ -187,13 +191,20 @@ export default function WidgetMultiProjectSettings(
                       )}
 
                       {form.watch(
-                        `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.includeProjectsInOverview`
+                        `selectedProjects.${
+                          field.value?.findIndex((p) => p.id === project.id) ??
+                          0
+                        }.includeProjectsInOverview`
                       ) === true && (
                         <>
                           <Spacer size={2} />
                           <FormField
                             control={form.control}
-                            name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.excludeResourcesInOverview`}
+                            name={`selectedProjects.${
+                              field.value?.findIndex(
+                                (p) => p.id === project.id
+                              ) ?? 0
+                            }.excludeResourcesInOverview`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
@@ -225,7 +236,11 @@ export default function WidgetMultiProjectSettings(
                           }}>
                           <FormField
                             control={form.control}
-                            name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.detailPageLink`}
+                            name={`selectedProjects.${
+                              field.value?.findIndex(
+                                (p) => p.id === project.id
+                              ) ?? 0
+                            }.detailPageLink`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
@@ -240,7 +255,11 @@ export default function WidgetMultiProjectSettings(
                           />
                           <FormField
                             control={form.control}
-                            name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.label`}
+                            name={`selectedProjects.${
+                              field.value?.findIndex(
+                                (p) => p.id === project.id
+                              ) ?? 0
+                            }.label`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Label in overzicht</FormLabel>
@@ -255,7 +274,10 @@ export default function WidgetMultiProjectSettings(
                       )}
 
                       {form.watch(
-                        `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.includeProjectsInOverview`
+                        `selectedProjects.${
+                          field.value?.findIndex((p) => p.id === project.id) ??
+                          0
+                        }.includeProjectsInOverview`
                       ) === true &&
                         isChecked && (
                           <>
@@ -270,7 +292,11 @@ export default function WidgetMultiProjectSettings(
                               }}>
                               <FormField
                                 control={form.control}
-                                name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewTitle`}
+                                name={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewTitle`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -285,7 +311,11 @@ export default function WidgetMultiProjectSettings(
                               />
                               <FormField
                                 control={form.control}
-                                name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewSummary`}
+                                name={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewSummary`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -301,7 +331,11 @@ export default function WidgetMultiProjectSettings(
 
                               <FormField
                                 control={form.control}
-                                name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewDescription`}
+                                name={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewDescription`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -317,7 +351,11 @@ export default function WidgetMultiProjectSettings(
 
                               <FormField
                                 control={form.control}
-                                name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewUrl`}
+                                name={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewUrl`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -333,7 +371,11 @@ export default function WidgetMultiProjectSettings(
 
                               <FormField
                                 control={form.control}
-                                name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.projectLat`}
+                                name={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.projectLat`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -363,7 +405,11 @@ export default function WidgetMultiProjectSettings(
 
                               <FormField
                                 control={form.control}
-                                name={`selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.projectLng`}
+                                name={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.projectLng`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -403,7 +449,11 @@ export default function WidgetMultiProjectSettings(
                                     : '';
 
                                   form.setValue(
-                                    `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewMarkerIcon`,
+                                    `selectedProjects.${
+                                      field.value?.findIndex(
+                                        (p) => p.id === project.id
+                                      ) ?? 0
+                                    }.overviewMarkerIcon`,
                                     image
                                   );
                                   form.resetField('markerIconProjectUpload');
@@ -422,7 +472,11 @@ export default function WidgetMultiProjectSettings(
                                     : '';
 
                                   form.setValue(
-                                    `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewImage`,
+                                    `selectedProjects.${
+                                      field.value?.findIndex(
+                                        (p) => p.id === project.id
+                                      ) ?? 0
+                                    }.overviewImage`,
                                     image
                                   );
                                   form.resetField('imageProjectUpload');
@@ -430,7 +484,11 @@ export default function WidgetMultiProjectSettings(
                               />
 
                               {!!form.getValues(
-                                `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewMarkerIcon`
+                                `selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewMarkerIcon`
                               ) ? (
                                 <div
                                   style={{
@@ -439,7 +497,11 @@ export default function WidgetMultiProjectSettings(
                                   }}>
                                   <img
                                     src={form.getValues(
-                                      `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewMarkerIcon`
+                                      `selectedProjects.${
+                                        field.value?.findIndex(
+                                          (p) => p.id === project.id
+                                        ) ?? 0
+                                      }.overviewMarkerIcon`
                                     )}
                                     style={{
                                       position: 'relative',
@@ -452,7 +514,11 @@ export default function WidgetMultiProjectSettings(
                                     color="red"
                                     onClick={() => {
                                       form.setValue(
-                                        `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewMarkerIcon`,
+                                        `selectedProjects.${
+                                          field.value?.findIndex(
+                                            (p) => p.id === project.id
+                                          ) ?? 0
+                                        }.overviewMarkerIcon`,
                                         ''
                                       );
                                       form.resetField(
@@ -468,7 +534,11 @@ export default function WidgetMultiProjectSettings(
                               )}
 
                               {!!form.getValues(
-                                `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewImage`
+                                `selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewImage`
                               ) && (
                                 <div
                                   style={{
@@ -477,7 +547,11 @@ export default function WidgetMultiProjectSettings(
                                   }}>
                                   <img
                                     src={form.getValues(
-                                      `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewImage`
+                                      `selectedProjects.${
+                                        field.value?.findIndex(
+                                          (p) => p.id === project.id
+                                        ) ?? 0
+                                      }.overviewImage`
                                     )}
                                     style={{
                                       position: 'relative',
@@ -490,7 +564,11 @@ export default function WidgetMultiProjectSettings(
                                     color="red"
                                     onClick={() => {
                                       form.setValue(
-                                        `selectedProjects.${field.value?.findIndex((p) => p.id === project.id) ?? 0}.overviewImage`,
+                                        `selectedProjects.${
+                                          field.value?.findIndex(
+                                            (p) => p.id === project.id
+                                          ) ?? 0
+                                        }.overviewImage`,
                                         ''
                                       );
                                       form.resetField('imageProjectUpload');

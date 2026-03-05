@@ -207,8 +207,12 @@ export default function ProjectChoiceGuideResults() {
             <div className="mb-2">
               <span className="text-sm text-gray-500">
                 {selectedItems.length > 0
-                  ? `${selectedItems.length} van ${totalCount} ${totalCount === 1 ? 'resultaat' : 'resultaten'} geselecteerd`
-                  : `${totalCount} ${totalCount === 1 ? 'resultaat' : 'resultaten'}`}
+                  ? `${selectedItems.length} van ${totalCount} ${
+                      totalCount === 1 ? 'resultaat' : 'resultaten'
+                    } geselecteerd`
+                  : `${totalCount} ${
+                      totalCount === 1 ? 'resultaat' : 'resultaten'
+                    }`}
               </span>
             </div>
             <div className="flex justify-between mb-4 gap-4">

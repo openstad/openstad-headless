@@ -297,7 +297,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         redirectAfterSaveOrCreate(result);
       }
       setDisableSubmit(false);
-    } catch (e) {
+    } catch {
       notifyFailed();
       setDisableSubmit(false);
     }

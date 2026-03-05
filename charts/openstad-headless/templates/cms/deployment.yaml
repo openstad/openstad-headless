@@ -21,6 +21,51 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+{{- if ne .Values.cms.useS3 "true" }}
+      initContainers:
+      - name: {{ template "openstad.cms.fullname" . }}-uploads-migration
+        image: busybox:1.37
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -eu
+            UPLOADS="{{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads" }}"
+
+            mkdir -p "$UPLOADS" "$UPLOADS/attachments" "$UPLOADS/exports"
+
+            if [ ! -f "$UPLOADS/.uploads-folder-migrated" ]; then
+              # One-time migration for legacy layout where attachment files were at PVC root.
+              for entry in "$UPLOADS"/*; do
+                [ -e "$entry" ] || continue
+                base="$(basename "$entry")"
+                case "$base" in
+                  attachments|exports) continue ;;
+                esac
+                if [ ! -e "$UPLOADS/attachments/$base" ]; then
+                  echo "Migrating $base to attachments/"
+                  mv "$entry" "$UPLOADS/attachments/"
+                else
+                  echo "Skipping $base (already exists in attachments/)"
+                fi
+              done
+              touch "$UPLOADS/.uploads-folder-migrated"
+            fi
+        securityContext:
+          allowPrivilegeEscalation: false
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 32Mi
+        volumeMounts:
+          - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads" }}
+            name: data-vol
+{{- end }}
       containers:
       - name: {{ template "openstad.cms.fullname" . }}
         image: {{ .Values.cms.deploymentContainer.image }}
@@ -124,14 +169,18 @@ spec:
             name: tmp-dir
           - mountPath: /opt/openstad-headless/apps/cms-server/data/temp
             name: temp-dir
+          - mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/exports
+            name: exports-dir
 {{- if ne .Values.cms.useS3 "true" }}
-          - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/attachments" }}
+          - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads" }}
             name: data-vol
 {{- end }}
       volumes:
         - name: tmp-dir
           emptyDir: {}
         - name: temp-dir
+          emptyDir: {}
+        - name: exports-dir
           emptyDir: {}
 {{- if ne .Values.cms.useS3 "true" }}
         - name: data-vol
