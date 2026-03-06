@@ -309,10 +309,10 @@ router
       delete req.body.submittedData;
     }
 
-    req.body = removeSpamMetaFields(req.body);
     const analysis = analyzeSpamPayload(req.body, { withDetails: true });
     logSpamAnalysis({ routeName: 'resource', req, analysis });
     req.isSpamSubmission = analysis.isProbablySpam;
+    req.body = removeSpamMetaFields(req.body);
     if (req.isSpamSubmission) {
       req.body.publishDate = null;
     }

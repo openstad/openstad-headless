@@ -269,12 +269,11 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
   async function onSubmit(formData: any) {
     setDisableSubmit(true);
-    formData.__timeToSubmitMs = Math.max(
+    const finalFormData = configureFormData(formData, true);
+    finalFormData.__timeToSubmitMs = Math.max(
       Date.now() - formStartTimeRef.current,
       0
     );
-
-    const finalFormData = configureFormData(formData, true);
 
     try {
       if (editMode) {
