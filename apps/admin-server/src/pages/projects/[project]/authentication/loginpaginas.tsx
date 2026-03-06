@@ -57,6 +57,8 @@ const formSchema = z.object({
 
 export default function ProjectAuthentication() {
   const { data, updateProject } = useProject(['includeAuthConfig']);
+  const authTypeDefaults =
+    data?.config?.auth?.provider?.openstad?.authTypeDefaults;
 
   const router = useRouter();
   const { project } = router.query;
@@ -65,91 +67,147 @@ export default function ProjectAuthentication() {
     () => ({
       UniqueCodeTitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
-          ?.title || '',
+          ?.title ||
+        authTypeDefaults?.UniqueCode?.title ||
+        '',
       UniqueCodeDescription:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
-          ?.description || '',
+          ?.description ||
+        authTypeDefaults?.UniqueCode?.description ||
+        '',
       UniqueCodeLabel:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
-          ?.label || '',
+          ?.label ||
+        authTypeDefaults?.UniqueCode?.label ||
+        '',
       UniqueCodeButtonText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
-          ?.buttonText || '',
+          ?.buttonText ||
+        authTypeDefaults?.UniqueCode?.buttonText ||
+        '',
       UniqueCodeHelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode
-          ?.helpText || '',
+          ?.helpText ||
+        authTypeDefaults?.UniqueCode?.helpText ||
+        '',
       UrlTitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.title ||
+        authTypeDefaults?.Url?.title ||
         '',
       UrlDescription:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
-          ?.description || '',
+          ?.description ||
+        authTypeDefaults?.Url?.description ||
+        '',
       UrlLabel:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.label ||
+        authTypeDefaults?.Url?.label ||
         '',
       UrlButtonText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
-          ?.buttonText || '',
+          ?.buttonText ||
+        authTypeDefaults?.Url?.buttonText ||
+        '',
       UrlHelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
-          ?.helpText || '',
+          ?.helpText ||
+        authTypeDefaults?.Url?.helpText ||
+        '',
       SMS1Title:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.loginTitle || '',
+          ?.loginTitle ||
+        authTypeDefaults?.Phonenumber?.title ||
+        '',
       SMS1Subtitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.loginSubtitle || '',
+          ?.loginSubtitle ||
+        authTypeDefaults?.Phonenumber?.loginSubtitle ||
+        '',
       SMS1Description:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.loginDescription || '',
+          ?.loginDescription ||
+        authTypeDefaults?.Phonenumber?.loginDescription ||
+        '',
       SMS1Label:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.loginLabel || '',
+          ?.loginLabel ||
+        authTypeDefaults?.Phonenumber?.loginLabel ||
+        '',
       SMS1ButtonText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.loginButtonText || '',
+          ?.loginButtonText ||
+        authTypeDefaults?.Phonenumber?.loginButtonText ||
+        '',
       SMS1HelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.loginHelpText || '',
+          ?.loginHelpText ||
+        authTypeDefaults?.Phonenumber?.loginHelpText ||
+        '',
       SMS2Title:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.smsCodeTitle || '',
+          ?.smsCodeTitle ||
+        authTypeDefaults?.Phonenumber?.smsCodeTitle ||
+        '',
       SMS2Subtitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.smsCodeSubtitle || '',
+          ?.smsCodeSubtitle ||
+        authTypeDefaults?.Phonenumber?.smsCodeSubtitle ||
+        '',
       SMS2Description:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.smsCodeDescription || '',
+          ?.smsCodeDescription ||
+        authTypeDefaults?.Phonenumber?.smsCodeDescription ||
+        '',
       SMS2Label:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.smsCodeLabel || '',
+          ?.smsCodeLabel ||
+        authTypeDefaults?.Phonenumber?.smsCodeLabel ||
+        '',
       SMS2ButtonText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.smsCodeButtonText || '',
+          ?.smsCodeButtonText ||
+        authTypeDefaults?.Phonenumber?.smsCodeButtonText ||
+        '',
       SMS2HelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
-          ?.smsCodeHelpText || '',
+          ?.smsCodeHelpText ||
+        authTypeDefaults?.Phonenumber?.smsCodeHelpText ||
+        '',
       LocalTitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.title || '',
+          ?.title ||
+        authTypeDefaults?.Local?.title ||
+        '',
       LocalDescription:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.description || '',
+          ?.description ||
+        authTypeDefaults?.Local?.description ||
+        '',
       LocalEmailLabel:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.emailLabel || '',
+          ?.emailLabel ||
+        authTypeDefaults?.Local?.emailLabel ||
+        '',
       LocalPasswordLabel:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.passwordLabel || '',
+          ?.passwordLabel ||
+        authTypeDefaults?.Local?.passwordLabel ||
+        '',
       LocalButtonText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.buttonText || '',
+          ?.buttonText ||
+        authTypeDefaults?.Local?.buttonText ||
+        '',
       LocalHelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.helpText || '',
+          ?.helpText ||
+        authTypeDefaults?.Local?.helpText ||
+        '',
       LocalForgotPasswordText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.forgotPasswordText || '',
+          ?.forgotPasswordText ||
+        authTypeDefaults?.Local?.forgotPasswordText ||
+        '',
     }),
     [data?.config]
   );
@@ -269,7 +327,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Titel</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een titel in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -283,7 +341,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -297,7 +358,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Label bij het invoerveld</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een label in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -311,7 +372,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Knoptekst</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer knoptekst in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -325,7 +386,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -363,7 +427,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Titel</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een titel in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -377,7 +441,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -391,7 +458,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Label bij het invoerveld</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een label in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -405,7 +472,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Knoptekst</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer knoptekst in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -419,7 +486,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -464,7 +534,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Titel</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een titel in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -478,7 +548,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Subtitle</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input
+                              placeholder="Voer een ondertitel in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -492,7 +565,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -506,7 +582,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Label bij het invoerveld</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een label in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -520,7 +596,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Knoptekst</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer knoptekst in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -534,7 +610,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -554,7 +633,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Titel</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een titel in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -568,7 +647,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Subtitle</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input
+                              placeholder="Voer een ondertitel in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -582,7 +664,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -596,7 +681,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Label bij het invoerveld</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een label in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -610,7 +695,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Knoptekst</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer knoptekst in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -624,7 +709,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -660,7 +748,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Titel</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een titel in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -674,7 +762,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -690,7 +781,7 @@ export default function ProjectAuthentication() {
                             Label bij het invoerveld gebruikers naam / e-mail
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een label in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -706,7 +797,7 @@ export default function ProjectAuthentication() {
                             Label bij het invoerveld wachtwoord
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer een label in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -720,7 +811,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Knoptekst</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Voer knoptekst in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -734,7 +825,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Voer helptekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -750,7 +844,7 @@ export default function ProjectAuthentication() {
                             Tekst voor &apos;wachtwoord vergeten&apos;
                           </FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea placeholder="Voer tekst in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
