@@ -48,7 +48,12 @@ export function Carousel({
   };
 
   return (
-    <div {...props} className={`osc ${props.className} osc-carousel width-100`}>
+    <div
+      {...props}
+      className={`osc ${props.className} osc-carousel width-100`}
+      role="region"
+      aria-label={props['aria-label'] || 'Carrousel'}
+      aria-roledescription="carrousel">
       {items.length > 1 && (
         <div className="carousel-button-container">
           <div className="osc-carousel-navigation-button-wrapper osc-carousel-previous">
@@ -75,6 +80,10 @@ export function Carousel({
       )}
 
       <div className="carousel-items">{itemRenderer(items.at(index))}</div>
+
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {`Slide ${index + 1} van ${items.length}`}
+      </div>
 
       {pager && items.length > 1 && (
         <div className="osc-carousel-pager">

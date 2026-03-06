@@ -150,7 +150,9 @@ const NumberInput: FC<NumberInputProps> = ({
 
       <div className={`utrecht-form-field__input`}>
         {prepend && (
-          <span className="utrecht-form-field__prepend">{prepend}</span>
+          <span className="utrecht-form-field__prepend" aria-hidden="true">
+            {prepend}
+          </span>
         )}
         <Textbox
           id={randomID}

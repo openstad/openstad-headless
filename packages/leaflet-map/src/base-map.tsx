@@ -845,7 +845,10 @@ const BaseMap = ({
           ))}
         </ul>
       )}
-      <div className="map-container osc-map">
+      <div
+        className="map-container osc-map"
+        role="application"
+        aria-label="Interactieve kaart">
         <MapContainer
           ref={mapContainerRef}
           center={[definedCenterPoint.lat, definedCenterPoint.lng]}

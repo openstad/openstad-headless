@@ -993,7 +993,10 @@ function DocumentMap({
             </section>
           </div>
         )}
-        <div className="document-container">
+        <div
+          className="document-container"
+          role="application"
+          aria-label="Interactieve afbeelding">
           <MapContainer
             ref={mapRef}
             center={[0, 0]}

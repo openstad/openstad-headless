@@ -42,7 +42,9 @@ function ShareLinks({
                     target="_blank"
                     title={'Facebook'}>
                     <i className="icon --facebook"></i>
-                    <span className="sr-only">Facebook</span>
+                    <span className="sr-only">
+                      Facebook (opent in nieuw tabblad)
+                    </span>
                   </LinkSocial>
                 );
               case 'x':
@@ -56,7 +58,7 @@ function ShareLinks({
                     target="_blank"
                     title={'X'}>
                     <i className="icon --twitter"></i>
-                    <span className="sr-only">X</span>
+                    <span className="sr-only">X (opent in nieuw tabblad)</span>
                   </LinkSocial>
                 );
               case 'mail':
@@ -86,7 +88,9 @@ function ShareLinks({
                     target="_blank"
                     title={'Whatsapp'}>
                     <i className="icon --whatsapp"></i>
-                    <span className="sr-only">Whatsapp</span>
+                    <span className="sr-only">
+                      Whatsapp (opent in nieuw tabblad)
+                    </span>
                   </LinkSocial>
                 );
               case 'linkedin':
@@ -100,7 +104,9 @@ function ShareLinks({
                     target="_blank"
                     title={'LinkedIn'}>
                     <i className="icon --linkedin"></i>
-                    <span className="sr-only">LinkedIn</span>
+                    <span className="sr-only">
+                      LinkedIn (opent in nieuw tabblad)
+                    </span>
                   </LinkSocial>
                 );
               case 'copylink':

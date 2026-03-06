@@ -69,24 +69,21 @@ export function MultiSelect({
           }}
           test-id="multi-select-button"
           aria-labelledby={id}
-          aria-expanded={isOpen}
-          role="combobox"
-          aria-haspopup="listbox">
+          aria-expanded={isOpen}>
           {openButtonLabel}
           <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
         </Button>
       )}
 
       {isOpen && (
-        <section
+        <fieldset
           className={`multiselect-container ${inlineOptions ? 'multiselect-container--inline' : ''}`}
-          role="listbox"
-          aria-multiselectable="true">
+          role="group"
+          aria-label={label}>
           {options?.map((option, index) => {
+            const checkboxId = `${id}-option-${index}`;
             return (
               <div
-                role="option"
-                aria-selected={option.checked}
                 onClick={() => {
                   const value = option.value;
                   const label = option.label;
@@ -97,15 +94,19 @@ export function MultiSelect({
                   <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
                     <Checkbox
                       className="utrecht-form-field__input"
+                      id={checkboxId}
                       checked={option.checked}
+                      aria-label={option.label}
                     />
-                    <FormLabel type="checkbox">{option.label}</FormLabel>
+                    <FormLabel type="checkbox" htmlFor={checkboxId}>
+                      {option.label}
+                    </FormLabel>
                   </Paragraph>
                 </FormField>
               </div>
             );
           })}
-        </section>
+        </fieldset>
       )}
     </div>
   );
