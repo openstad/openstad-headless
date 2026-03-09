@@ -51,7 +51,7 @@ async function getProject(req, res, next, include = []) {
           useAuth: provider,
         });
         let adapter = await authSettings.adapter({ authConfig });
-        if (adapter.service.fetchClient) {
+        if (adapter.service.fetchClient && authConfig.clientId) {
           let client = await adapter.service.fetchClient({
             authConfig,
             project,
