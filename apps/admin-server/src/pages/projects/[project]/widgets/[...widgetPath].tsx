@@ -19,11 +19,16 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
   const segments = router.query.widgetPath;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const widgetId =
+    Array.isArray(segments) && segments.length >= 2 ? segments[1] : undefined;
+  const { data: widget, updateConfig } = useWidgetConfig(widgetId);
   const widgetDefinitions = useWidgetDefinitions();
-  const { previewConfig, updatePreview } = useWidgetPreview({
-    projectId,
-  });
+  const { previewConfig, updatePreview } = useWidgetPreview(
+    {
+      projectId,
+    },
+    widgetId
+  );
 
   if (!Array.isArray(segments) || segments.length < 2) {
     return <p>Widget niet gevonden</p>;
@@ -77,7 +82,7 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
               ) : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
-              <WidgetPublish apiUrl={apiUrl} />
+              <WidgetPublish apiUrl={apiUrl} idOverride={widgetId} />
             </TabsContent>
           </Tabs>
 
