@@ -1,8 +1,10 @@
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetDefinitions } from '@/hooks/use-widget-definitions';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { getPluginComponent } from '@/lib/generated-plugin-registry';
 import {
   WithApiUrlProps,
@@ -19,6 +21,9 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const widgetDefinitions = useWidgetDefinitions();
+  const { previewConfig, updatePreview } = useWidgetPreview({
+    projectId,
+  });
 
   if (!Array.isArray(segments) || segments.length < 2) {
     return <p>Widget niet gevonden</p>;
@@ -49,7 +54,15 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
               {widget && AdminComponent ? (
                 <AdminComponent
                   config={widget.config}
-                  updateConfig={(config: any) => updateConfig(config)}
+                  updateConfig={(config: any) => {
+                    updateConfig(config);
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        ...config,
+                      });
+                    }
+                  }}
                 />
               ) : widget && !AdminComponent ? (
                 <div className="p-6 bg-white rounded-md">
@@ -67,6 +80,16 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
+
+          <div className="py-6 mt-6 bg-white rounded-md">
+            {previewConfig && (
+              <WidgetPreview
+                type={widgetType}
+                config={previewConfig}
+                projectId={projectId}
+              />
+            )}
+          </div>
         </div>
       </PageLayout>
     </div>

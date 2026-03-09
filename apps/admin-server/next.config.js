@@ -190,6 +190,10 @@ generatePluginRegistry(enabledPlugins);
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@openstad-headless/*', ...pluginPackageNames],
+  serverExternalPackages: [
+    '@openstad-headless/plugin-loader',
+    ...pluginPackageNames,
+  ],
   images: { domains: ['localhost', 'localhost:31470'] },
   async rewrites() {
     return [
@@ -199,7 +203,7 @@ const nextConfig = {
       },
     ];
   },
-  webpack(config) {
+  webpack(config, { isServer }) {
     // Resolve @openstad-headless packages from the monorepo packages dir,
     // which is mounted at ../../packages in both local dev and Docker.
     config.resolve.alias['@openstad-headless/plugin-loader'] = path.resolve(
@@ -214,6 +218,16 @@ const nextConfig = {
       'node_modules',
       ...(config.resolve.modules || []),
     ];
+
+    // Keep the plugin-loader and plugin packages as native Node requires on the
+    // server so that the loader's dynamic require(packageName) works correctly.
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push(
+        '@openstad-headless/plugin-loader',
+        ...pluginPackageNames
+      );
+    }
 
     return config;
   },
