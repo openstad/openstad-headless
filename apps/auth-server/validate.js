@@ -2,7 +2,7 @@
 const process = require('process');
 const bcrypt = require('bcrypt');
 const config = require('./config');
-const memoryStorage = require('./memoryStorage');
+const databaseStorage = require('./databaseStorage');
 const utils = require('./utils');
 const db = require('./db');
 const saltRounds = 10;
@@ -183,7 +183,7 @@ validate.generateRefreshToken = ({ userId, clientID, scope }) => {
     sub: userId,
     exp: config.refreshToken.expiresIn,
   });
-  return memoryStorage.refreshTokens
+  return databaseStorage.refreshTokens
     .save(refreshToken, userId, clientID, scope)
     .then(() => refreshToken);
 };
@@ -198,7 +198,7 @@ validate.generateRefreshToken = ({ userId, clientID, scope }) => {
 validate.generateToken = ({ userID, clientID, scope }) => {
   const token = utils.createToken({ sub: userID, exp: config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
-  return memoryStorage.accessTokens
+  return databaseStorage.accessTokens
     .save(token, expiration, userID, clientID, scope)
     .then(() => token);
 };
