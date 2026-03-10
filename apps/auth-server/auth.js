@@ -1,6 +1,6 @@
 'use strict';
 
-const memoryStorage = require('./memoryStorage');
+const databaseStorage = require('./databaseStorage');
 const passport = require('passport');
 const { Strategy: LocalStrategy } = require('passport-local');
 const { BasicStrategy } = require('passport-http');
@@ -237,7 +237,7 @@ passport.use(
  */
 passport.use(
   new BearerStrategy((accessToken, done) => {
-    memoryStorage.accessTokens
+    databaseStorage.accessTokens
       .find(accessToken)
       .then((token) => validate.token(token, accessToken))
       .then((token) => {
