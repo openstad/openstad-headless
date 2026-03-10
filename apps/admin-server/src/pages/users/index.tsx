@@ -11,18 +11,19 @@ import * as XLSX from 'xlsx';
 import { PageLayout } from '../../components/ui/page-layout';
 import { ListHeading, Paragraph } from '../../components/ui/typography';
 
-const PAGE_SIZE_OPTIONS = [10, 20, 25, 50, 100];
-const DEFAULT_PAGE_SIZE = 20;
+const PAGE_SIZE_OPTIONS: number[] = [25, 50, 100, 250, 500];
+const DEFAULT_PAGE_SIZE = 25;
 const SEARCH_DEBOUNCE_MS = 600;
 
 export default function Users() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [apiSearch] = useDebouncedValue(searchQuery, SEARCH_DEBOUNCE_MS);
 
-  const { data, metadata, isValidating } = useUsers({
+  const { data, metadata, isValidating, fetchAll } = useUsers({
     page: currentPage,
     pageSize,
     q: apiSearch || undefined,
@@ -46,6 +47,12 @@ export default function Users() {
   }, [data]);
 
   useEffect(() => {
+    if (!showAll || !metadata?.totalCount) return;
+    if (pageSize === metadata.totalCount) return;
+    setPageSize(metadata.totalCount);
+  }, [metadata?.totalCount, pageSize, showAll]);
+
+  useEffect(() => {
     setCurrentPage(0);
   }, [apiSearch, pageSize]);
 
@@ -65,11 +72,30 @@ export default function Users() {
     XLSX.writeFile(workbook, fileName);
   };
 
-  function transform() {
+  async function transform() {
     const today = new Date();
-    const projectId = router.query.project;
+    const allUsers = await fetchAll();
+    const projectId = router.query.project ?? 'users';
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportData(data, `${projectId}_gebruikers_${formattedDate}.xlsx`);
+    exportData(allUsers, `${projectId}_gebruikers_${formattedDate}.xlsx`);
+  }
+
+  function handlePageSizeChange(value: string) {
+    if (value === 'all') {
+      setShowAll(true);
+      setPageSize(
+        Math.max(
+          metadata?.totalCount ??
+            lastDataRef.current?.length ??
+            DEFAULT_PAGE_SIZE,
+          1
+        )
+      );
+      return;
+    }
+
+    setShowAll(false);
+    setPageSize(Number(value));
   }
 
   return (
@@ -187,13 +213,14 @@ export default function Users() {
                     </Paragraph>
                     <select
                       className="p-2 rounded border"
-                      value={pageSize}
-                      onChange={(e) => setPageSize(Number(e.target.value))}>
+                      value={showAll ? 'all' : pageSize}
+                      onChange={(e) => handlePageSizeChange(e.target.value)}>
                       {PAGE_SIZE_OPTIONS.map((size) => (
                         <option key={size} value={size}>
                           {size}
                         </option>
                       ))}
+                      <option value={'all'}>Alle</option>
                     </select>
                   </div>
                   {metadata.pageCount > 1 && (
