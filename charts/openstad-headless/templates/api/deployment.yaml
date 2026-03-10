@@ -23,31 +23,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
-      {{- if .Values.api.podAntiAffinity.enabled }}
-      affinity:
-        podAntiAffinity:
-          {{- if eq .Values.api.podAntiAffinity.mode "required" }}
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app: {{ .Values.api.label }}
-              topologyKey: kubernetes.io/hostname
-              namespaceSelector: {}
-              namespaces:
-                - {{ .Release.Namespace }}
-          {{- else }}
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app: {{ .Values.api.label }}
-                topologyKey: kubernetes.io/hostname
-                namespaceSelector: {}
-                namespaces:
-                  - {{ .Release.Namespace }}
-          {{- end }}
-      {{- end }}
+      {{- include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.api.label) | nindent 6 }}
       containers:
         - securityContext:
             allowPrivilegeEscalation: false

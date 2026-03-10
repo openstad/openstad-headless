@@ -2,6 +2,11 @@
 global:
   ingress:
     type: nginx
+  # Pod anti-affinity to spread replicas of each deployment across nodes.
+  # mode: "preferred" (best-effort) or "required" (hard constraint, use with cluster autoscaler)
+  podAntiAffinity:
+    enabled: false
+    mode: preferred
 
 # Optional Dependencies
 
@@ -312,11 +317,6 @@ api:
   # How often the K8s CronJob runs (in minutes). Each run picks up all
   # application-level cron jobs that were scheduled within this window.
   cronWindowMinutes: 15
-  # Pod anti-affinity to spread replicas across nodes.
-  # mode: "preferred" (best-effort) or "required" (hard constraint, use with cluster autoscaler)
-  podAntiAffinity:
-    enabled: false
-    mode: preferred
   # Resources:
   resources:
     # Max resources
