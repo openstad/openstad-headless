@@ -46,6 +46,16 @@ export const WidgetDefinitions = {
     description: 'Kaart met details van een specifieke inzending',
     image: '/widget_preview/resource_map_preview.png',
   },
+  basemap: {
+    name: 'Base Map',
+    description: 'Een basiskaart',
+    image: '/widget_preview/resource_map_preview.png',
+  },
+  editormap: {
+    name: 'Editor Map',
+    description: 'Een bewerkbare kaart',
+    image: '/widget_preview/resource_map_preview.png',
+  },
   counter: {
     name: 'Teller',
     description: 'Een teller die verschillende variabelen kan tellen',

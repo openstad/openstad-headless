@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { MapDimensionFields } from '@/components/ui/map-dimension-fields';
 import {
   Select,
   SelectContent,
@@ -283,49 +284,7 @@ export default function WidgetResourcesMapMap(
             />
           )}
 
-          <FormField
-            control={form.control}
-            name="width"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Breedte</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Bijv: 100%"
-                    type="text"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="height"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hoogte</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Bijv: 350px"
-                    type="text"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <MapDimensionFields form={form} onFieldChange={onFieldChange} />
 
           <Button type="submit">Opslaan</Button>
         </form>

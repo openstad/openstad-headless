@@ -6,8 +6,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { MapDimensionFields } from '@/components/ui/map-dimension-fields';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,6 +31,8 @@ const formSchema = z.object({
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
   displayLikes: z.boolean(),
+  width: z.string().optional(),
+  height: z.string().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -39,6 +43,8 @@ export default function WidgetResourceDetailDisplay(
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -58,6 +64,8 @@ export default function WidgetResourceDetailDisplay(
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
+      width: props?.width || '',
+      height: props?.height || '',
     },
   });
 
@@ -217,6 +225,8 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          <MapDimensionFields form={form} onFieldChange={onFieldChange} />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

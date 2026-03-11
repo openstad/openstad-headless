@@ -118,6 +118,8 @@ export type DocumentMapProps = BaseProps &
     defaultSorting?: string;
     sorting?: Array<{ value: string; label: string }>;
     displaySearchBar?: boolean;
+    width?: string;
+    height?: string;
   };
 
 function DocumentMap({

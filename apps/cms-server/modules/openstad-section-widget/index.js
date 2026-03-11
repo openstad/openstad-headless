@@ -157,13 +157,6 @@ module.exports = {
         help: 'Voeg een custom class toe aan de sectie',
       },
 
-      customCSS: {
-        type: 'string',
-        textarea: true,
-        label: 'Custom CSS',
-        help: 'Voeg custom CSS toe aan de sectie',
-      },
-
       removeTopMargin: {
         type: 'boolean',
         label: 'Witruimte boven sectie verwijderen',

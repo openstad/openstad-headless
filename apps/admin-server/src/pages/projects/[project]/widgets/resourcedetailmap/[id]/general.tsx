@@ -2,9 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Input } from '@/components/ui/input';
+import { MapDimensionFields } from '@/components/ui/map-dimension-fields';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
@@ -15,6 +17,8 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
+  width: z.string().optional(),
+  height: z.string().optional(),
 });
 
 export default function WidgetResourceDetailMapGeneral(
@@ -32,11 +36,15 @@ export default function WidgetResourceDetailMapGeneral(
   const { data: resourceList } = useResources(projectId as string);
   const resources = resourceList as { id: string; title: string }[];
 
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+
   const defaults = useCallback(
     () => ({
       resourceId: props?.resourceId || undefined,
+      width: props?.width || '',
+      height: props?.height || '',
     }),
-    [props?.resourceId]
+    [props?.resourceId, props?.width, props?.height]
   );
 
   const form = useForm<FormData>({
@@ -66,6 +74,7 @@ export default function WidgetResourceDetailMapGeneral(
             onFieldChanged={props.onFieldChanged}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
           />
+          <MapDimensionFields form={form} onFieldChange={onFieldChange} />
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

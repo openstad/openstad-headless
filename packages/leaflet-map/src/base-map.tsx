@@ -763,8 +763,13 @@ const BaseMap = ({
     maxZoom,
   };
 
+  const mapWrapperRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    document.documentElement.style.setProperty('--basemap-map-width', width);
+    const el = mapWrapperRef.current;
+    if (!el) return;
+
+    el.style.setProperty('--basemap-map-width', width);
 
     const heightValue = height
       ? height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
@@ -772,14 +777,28 @@ const BaseMap = ({
         : `${height}px`
       : 'auto';
 
-    document.documentElement.style.setProperty(
-      '--basemap-map-height',
-      heightValue
-    );
-    document.documentElement.style.setProperty(
+    el.style.setProperty('--basemap-map-height', heightValue);
+    el.style.setProperty(
       '--basemap-map-aspect-ratio',
       height ? 'unset' : '16 / 9'
     );
+
+    let raf1: number, raf2: number;
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        const map = mapContainerRef.current;
+        if (map && typeof map.invalidateSize === 'function') {
+          map.invalidateSize();
+        } else {
+          window.dispatchEvent(new Event('resize'));
+        }
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
   }, [width, height]);
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -845,7 +864,7 @@ const BaseMap = ({
           ))}
         </ul>
       )}
-      <div className="map-container osc-map">
+      <div ref={mapWrapperRef} className="map-container osc-map">
         <MapContainer
           ref={mapContainerRef}
           center={[definedCenterPoint.lat, definedCenterPoint.lng]}

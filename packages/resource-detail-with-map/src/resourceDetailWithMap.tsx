@@ -54,6 +54,8 @@ export type ResourceDetailWidgetProps = {
       href?: string;
     };
   } & booleanProps & {
+    width?: string;
+    height?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'

@@ -8,6 +8,7 @@
   width: var(--basemap-map-width);
   height: var(--basemap-map-height);
   aspect-ratio: var(--basemap-map-aspect-ratio);
+  margin: 0 auto;
 }
 
 .osc-base-map-widget-container {

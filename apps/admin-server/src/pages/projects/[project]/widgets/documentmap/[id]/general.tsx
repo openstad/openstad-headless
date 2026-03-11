@@ -1,5 +1,6 @@
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import InfoDialog from '@/components/ui/info-hover';
+import { MapDimensionFields } from '@/components/ui/map-dimension-fields';
 import {
   Select,
   SelectContent,
@@ -42,6 +43,8 @@ const formSchema = z.object({
   displayPagination: z.boolean().optional(),
   displaySearchBar: z.boolean().optional(),
   onlyAllowClickOnImage: z.boolean().optional(),
+  width: z.string().optional(),
+  height: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -77,6 +80,8 @@ export default function DocumentGeneral(
       displayPagination: props?.displayPagination || false,
       onlyAllowClickOnImage: props?.onlyAllowClickOnImage || false,
       displaySearchBar: props?.displaySearchBar || false,
+      width: props.width || '',
+      height: props.height || '',
     },
   });
 
@@ -358,6 +363,8 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
+
+        <MapDimensionFields form={form} onFieldChange={onFieldChange} />
 
         <Button type="submit" disabled={disabled}>
           Opslaan
