@@ -38,9 +38,9 @@ export function SidenavProject({ className }: { className?: string }) {
         </Link>
       </div>
       <div className="p-4 flex flex-col gap-2">
-        <Link href={`/projects/${project}/statistieken`}>
+        <Link href={`/projects/${project}/statistics`}>
           <Button
-            variant={location.includes('/statistieken') ? 'secondary' : 'ghost'}
+            variant={location.includes('/statistics') ? 'secondary' : 'ghost'}
             size="default"
             className="w-full flex justify-start">
             <span className="truncate">Statistieken</span>

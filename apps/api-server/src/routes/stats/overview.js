@@ -112,54 +112,75 @@ router
      *      }]
      */
 
+    // Optional date range filter via query params (?from=YYYY-MM-DD&to=YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const fromDate = dateRegex.test(req.query.from) ? req.query.from : null;
+    const toDate = dateRegex.test(req.query.to) ? req.query.to : null;
+
+    const resourceDateFilter =
+      fromDate && toDate
+        ? ' AND resources.createdAt >= ? AND resources.createdAt < DATE_ADD(?, INTERVAL 1 DAY)'
+        : '';
+    const voteDateFilter =
+      fromDate && toDate
+        ? ' AND votes.createdAt >= ? AND votes.createdAt < DATE_ADD(?, INTERVAL 1 DAY)'
+        : '';
+    const commentDateFilter =
+      fromDate && toDate
+        ? ' AND comments.createdAt >= ? AND comments.createdAt < DATE_ADD(?, INTERVAL 1 DAY)'
+        : '';
+    const choicesGuideDateFilter =
+      fromDate && toDate
+        ? ' AND choices_guide_results.createdAt >= ? AND choices_guide_results.createdAt < DATE_ADD(?, INTERVAL 1 DAY)'
+        : '';
+    const dateVars = fromDate && toDate ? [fromDate, toDate] : [];
+
     const queries = [
       {
         key: 'resourceTotal',
         description: 'Amount of resources',
-        sql: 'SELECT count(resources.id) AS counted FROM resources WHERE resources.deletedAt IS NULL AND resources.projectId=?',
-        variables: [req.params.projectId],
+        sql: `SELECT count(resources.id) AS counted FROM resources WHERE resources.deletedAt IS NULL AND resources.projectId=?${resourceDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
         resultType: 'count',
-        // will be filled after running the query
       },
       {
         key: 'resourcesSubmittedPerDay',
         description: 'Resources submitted per day',
         sql: `SELECT count(resources.id) AS counted, DATE_FORMAT(resources.createdAt, '%Y-%m-%d') as date
-                    FROM resources 
-                    WHERE resources.deletedAt IS NULL 
-                    AND resources.deletedAt IS NULL AND resources.projectId=?
+                    FROM resources
+                    WHERE resources.deletedAt IS NULL
+                    AND resources.deletedAt IS NULL AND resources.projectId=?${resourceDateFilter}
                     GROUP BY date
                     ORDER BY date ASC`,
-        variables: [req.params.projectId],
+        variables: [req.params.projectId, ...dateVars],
         formatResults: addMissingDays,
       },
       {
         key: 'userVoteTotal',
         description: 'Amount of users that voted',
-        sql: 'SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?',
-        variables: [req.params.projectId],
+        sql: `SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?${voteDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
         resultType: 'count',
-        // will be filled after running the query
       },
       {
         key: 'resourceVotesCountTotal',
         description: 'Amount of votes on resources',
-        sql: 'SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?',
-        variables: [req.params.projectId],
+        sql: `SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?${voteDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
         resultType: 'count',
       },
       {
         key: 'resourceVotesCountForTotal',
         description: 'Amount of votes for an resource',
-        sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=? AND votes.opinion = 'yes'",
-        variables: [req.params.projectId],
+        sql: `SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=? AND votes.opinion = 'yes'${voteDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
         resultType: 'count',
       },
       {
         key: 'resourceVotesCountAgainstTotal',
         description: 'Amount of votes against an resource',
-        sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?  AND votes.opinion = 'no'",
-        variables: [req.params.projectId],
+        sql: `SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=? AND votes.opinion = 'no'${voteDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
         resultType: 'count',
       },
       {
@@ -167,53 +188,53 @@ router
         description: 'Amount of users that voted per day.',
         help: 'This is not the same as total votes per days, since a user can often vote on more then one resource.',
         sql: `SELECT count(DISTINCT votes.userId) AS counted, DATE_FORMAT(votes.createdAt, '%Y-%m-%d') as date
-                    FROM votes  
-                    LEFT JOIN resources ON votes.resourceId = resources.id 
-                    WHERE votes.deletedAt IS NULL 
+                    FROM votes
+                    LEFT JOIN resources ON votes.resourceId = resources.id
+                    WHERE votes.deletedAt IS NULL
                     AND (votes.checked IS NULL OR votes.checked = 1)
-                    AND resources.deletedAt IS NULL AND resources.projectId=?
+                    AND resources.deletedAt IS NULL AND resources.projectId=?${voteDateFilter}
                     GROUP BY date
                     ORDER BY date ASC`,
-        variables: [req.params.projectId],
+        variables: [req.params.projectId, ...dateVars],
         formatResults: addMissingDays,
       },
       {
         key: 'votesPerDay',
         description: 'Amount of votes per day',
         sql: `SELECT count(votes.id) AS counted, DATE_FORMAT(votes.createdAt, '%Y-%m-%d') as date
-                    FROM votes 
-                    LEFT JOIN resources ON votes.resourceId = resources.id 
-                    WHERE votes.deletedAt IS NULL 
+                    FROM votes
+                    LEFT JOIN resources ON votes.resourceId = resources.id
+                    WHERE votes.deletedAt IS NULL
                     AND (votes.checked IS NULL OR votes.checked = 1)
-                    AND resources.deletedAt IS NULL AND resources.projectId=?
+                    AND resources.deletedAt IS NULL AND resources.projectId=?${voteDateFilter}
                     GROUP BY date
                     ORDER BY date ASC`,
-        variables: [req.params.projectId],
+        variables: [req.params.projectId, ...dateVars],
         formatResults: addMissingDays,
       },
       {
         key: 'commentCountTotal',
         description: 'Amount of comments, total count',
-        sql: 'SELECT count(comments.id) AS counted FROM comments LEFT JOIN resources ON resources.id = comments.resourceId WHERE comments.deletedAt IS NULL AND resources.deletedAt IS NULL AND resources.projectId=?',
-        variables: [req.params.projectId],
+        sql: `SELECT count(comments.id) AS counted FROM comments LEFT JOIN resources ON resources.id = comments.resourceId WHERE comments.deletedAt IS NULL AND resources.deletedAt IS NULL AND resources.projectId=?${commentDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
       },
       {
         key: 'commentForCountTotal',
         description: 'Amount of comments for an resource, total count',
-        sql: "SELECT count(comments.id) AS counted FROM comments LEFT JOIN resources ON resources.id = comments.resourceId WHERE comments.deletedAt IS NULL AND resources.deletedAt IS NULL AND resources.projectId=? AND comments.sentiment = 'for'",
-        variables: [req.params.projectId],
+        sql: `SELECT count(comments.id) AS counted FROM comments LEFT JOIN resources ON resources.id = comments.resourceId WHERE comments.deletedAt IS NULL AND resources.deletedAt IS NULL AND resources.projectId=? AND comments.sentiment = 'for'${commentDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
       },
       {
         key: 'commentAgainstCountTotal',
         description: 'Amount of comments against an resource, total count',
-        sql: "SELECT count(comments.id) AS counted FROM comments LEFT JOIN resources ON resources.id = comments.resourceId WHERE comments.deletedAt IS NULL AND resources.deletedAt IS NULL AND resources.projectId=? AND comments.sentiment = 'against'",
-        variables: [req.params.projectId],
+        sql: `SELECT count(comments.id) AS counted FROM comments LEFT JOIN resources ON resources.id = comments.resourceId WHERE comments.deletedAt IS NULL AND resources.deletedAt IS NULL AND resources.projectId=? AND comments.sentiment = 'against'${commentDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
       },
       {
         key: 'choicesguideresultsCountTotal',
         description: 'Amount of choices guide results',
-        sql: 'SELECT count(choices_guide_results.id) AS counted FROM choices_guide_results WHERE choices_guide_results.deletedAt IS NULL AND choices_guide_results.projectId=?',
-        variables: [req.params.projectId],
+        sql: `SELECT count(choices_guide_results.id) AS counted FROM choices_guide_results WHERE choices_guide_results.deletedAt IS NULL AND choices_guide_results.projectId=?${choicesGuideDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
       },
     ];
 
