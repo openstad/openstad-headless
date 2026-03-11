@@ -6,9 +6,18 @@ Apostrophe page or piece.') }} {% endif %} {% endblock %} {% block extraHead %}
 <script src="{{data.global.reactCdn}}"></script>
 <script src="{{data.global.reactDomCdn}}"></script>
 
-{% if data.global.favicon %}
-<link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}" />
-{% endif %} {% endblock %} {% block beforeMain %}
+{% if data.global.favicon %} {% set faviconUrl = data.global.favicon._url or
+data.global.favicon %} {% set faviconExtension = data.global.favicon.extension
+or '' %} {% if faviconExtension == 'svg' %}
+<link rel="icon" type="image/svg+xml" href="{{ faviconUrl }}" sizes="any" />
+{% elseif faviconExtension == 'png' %}
+<link rel="icon" type="image/png" href="{{ faviconUrl }}" />
+{% elseif faviconExtension == 'gif' %}
+<link rel="icon" type="image/gif" href="{{ faviconUrl }}" />
+{% else %}
+<link rel="icon" type="image/x-icon" href="{{ faviconUrl }}" />
+<link rel="shortcut icon" href="{{ faviconUrl }}" />
+{% endif %} {% endif %} {% endblock %} {% block beforeMain %}
 <div
   id="logout-data"
   data-logout-url="{{ data.global.logoutUrl | safe }}"></div>
