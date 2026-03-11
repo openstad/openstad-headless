@@ -82,6 +82,10 @@ exports.confirmation = (req, res) => {
       configAuthType && configAuthType.confirmedDescription
         ? configAuthType.confirmedDescription
         : false,
+    helpText:
+      configAuthType && configAuthType.confirmedHelpText
+        ? configAuthType.confirmedHelpText
+        : false,
   });
 };
 
