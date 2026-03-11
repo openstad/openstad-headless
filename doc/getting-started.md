@@ -151,7 +151,7 @@ Some tasks use the `tools` profile and are run on demand (they do not start with
 docker compose --profile tools run --rm openstad-update-lock
 ```
 
-This runs `npm install --package-lock-only --ignore-scripts` in the repo root inside a container and writes the updated lock file to your host.
+
 
 ### Initial data
 

@@ -288,7 +288,7 @@ services:
     profiles:
       - tools
     working_dir: /opt/openstad-headless
-    command: npm install --package-lock-only --ignore-scripts
+    command: npm run update-lock
     volumes:
       - .:/opt/openstad-headless
 
