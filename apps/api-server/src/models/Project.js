@@ -309,6 +309,8 @@ module.exports = function (db, sequelize, DataTypes) {
       onDelete: 'CASCADE',
       hooks: true,
     });
+    this.hasMany(models.Tag, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Widget, { onDelete: 'CASCADE', hooks: true });
     this.belongsTo(models.Area, { onDelete: 'CASCADE' });
   };
 
