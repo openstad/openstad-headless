@@ -1,4 +1,7 @@
-export const WidgetDefinitions = {
+export const CoreWidgetDefinitions: Record<
+  string,
+  { name: string; description: string; image: string }
+> = {
   agenda: {
     name: 'Agenda',
     description: 'Een tijdlijn van aankomende gebeurtenissen',
@@ -131,7 +134,7 @@ export const WidgetDefinitions = {
   // },
 };
 
-export type WidgetDefinition = keyof typeof WidgetDefinitions;
+export type WidgetDefinition = keyof typeof CoreWidgetDefinitions;
 
 // export const WidgetDefinitions = {
 //   agenda: 'Agenda',

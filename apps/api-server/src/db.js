@@ -1,5 +1,6 @@
 var Sequelize = require('sequelize');
 var _ = require('lodash');
+var path = require('path');
 var util = require('./util');
 
 var config = require('config');
@@ -119,6 +120,39 @@ let db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 let models = require('./models')(db, sequelize, Sequelize.DataTypes);
+
+// Load plugin models
+try {
+  var PluginLoader = require('@openstad-headless/plugin-loader');
+  var pluginLoader = PluginLoader.getInstance();
+  pluginLoader.load();
+
+  for (var plugin of pluginLoader.getApiHooks()) {
+    if (plugin.api.models) {
+      for (var modelDef of plugin.api.models) {
+        try {
+          var pluginPkg = require.resolve(plugin.packageName);
+          var pluginDir = path.dirname(pluginPkg);
+          var modelFactory = require(path.join(pluginDir, modelDef.path));
+          var model = modelFactory(db, sequelize, Sequelize.DataTypes);
+          if (model && model.name) {
+            models[model.name] = model;
+          }
+        } catch (err) {
+          console.error(
+            `[plugin-loader] Failed to load model "${modelDef.name}" from plugin "${plugin.name}":`,
+            err.message
+          );
+        }
+      }
+    }
+  }
+} catch (err) {
+  // Plugin loader not available or no plugins configured
+  if (err.code !== 'MODULE_NOT_FOUND') {
+    console.error('[plugin-loader] Error loading plugin models:', err.message);
+  }
+}
 
 // authentication mixins
 const mixins = require('./lib/sequelize-authorization/mixins');

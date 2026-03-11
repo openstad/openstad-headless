@@ -1,0 +1,14 @@
+{
+  "name": "@openstad-headless/plugin-loader",
+  "version": "1.0.0",
+  "description": "Manifest-driven plugin loader for OpenStad Headless",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "openstad",
+    "plugin"
+  ],
+  "license": "MIT"
+}

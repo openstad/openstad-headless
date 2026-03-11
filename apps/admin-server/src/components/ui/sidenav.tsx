@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   FolderOpen,
   LogOut,
+  Plug,
   Settings,
   Users,
 } from 'lucide-react';
@@ -14,6 +15,8 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
 import { SessionContext } from '../../auth';
+import hasRole from '../../lib/hasRole';
+import type { Role } from '../../lib/roles';
 import { Logo } from './logo';
 
 export function Sidenav({
@@ -26,10 +29,20 @@ export function Sidenav({
   const router = useRouter();
   const [location, setLocation] = useState('');
   const sessionData = useContext(SessionContext);
+  const [pluginMenuItems, setPluginMenuItems] = useState<
+    Array<{ label: string; href: string; role?: string }>
+  >([]);
 
   useEffect(() => {
     setLocation(router.pathname);
   }, [router]);
+
+  useEffect(() => {
+    fetch('/api/plugin-menu-items')
+      .then((res) => res.json())
+      .then((items) => setPluginMenuItems(items))
+      .catch(() => {});
+  }, []);
 
   return (
     <nav
@@ -126,6 +139,32 @@ export function Sidenav({
             </Button>
           </Link>
         ) : null}
+        {pluginMenuItems.map((item) =>
+          sessionData?.role &&
+          hasRole(
+            { role: sessionData.role as Role },
+            (item.role || 'superuser') as Role
+          ) ? (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant={location.startsWith(item.href) ? 'secondary' : 'ghost'}
+                className={cn(
+                  'w-full flex flex-row justify-start',
+                  narrow ? 'p-0 h-10 w-10 justify-center' : null
+                )}>
+                <Plug
+                  size="20"
+                  className={
+                    location.startsWith(item.href)
+                      ? 'text-brand'
+                      : 'text-foreground'
+                  }
+                />
+                {narrow ? '' : item.label}
+              </Button>
+            </Link>
+          ) : null
+        )}
       </div>
       <div className="flex-grow"></div>
       <div
