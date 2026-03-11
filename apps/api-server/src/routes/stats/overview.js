@@ -180,7 +180,7 @@ router
       {
         key: 'votesPerDay',
         description: 'Amount of votes per day',
-        sql: `SELECT count(votes.id) AS counted, DATE_FORMAT(resources.createdAt, '%Y-%m-%d') as date
+        sql: `SELECT count(votes.id) AS counted, DATE_FORMAT(votes.createdAt, '%Y-%m-%d') as date
                     FROM votes 
                     LEFT JOIN resources ON votes.resourceId = resources.id 
                     WHERE votes.deletedAt IS NULL 
@@ -212,7 +212,7 @@ router
       {
         key: 'choicesguideresultsCountTotal',
         description: 'Amount of choices guide results',
-        sql: 'SELECT count(choicesGuideResults.id) AS counted FROM choicesGuideResults LEFT JOIN choicesGuides ON choicesGuides.id = choicesGuideResults.choicesGuideId WHERE choicesGuideResults.deletedAt IS NULL AND choicesGuides.deletedAt IS NULL AND choicesGuides.projectId=?',
+        sql: 'SELECT count(choices_guide_results.id) AS counted FROM choices_guide_results WHERE choices_guide_results.deletedAt IS NULL AND choices_guide_results.projectId=?',
         variables: [req.params.projectId],
       },
     ];
