@@ -236,6 +236,7 @@ module.exports = {
         type: 'attachment',
         label: 'Favicon',
         fileGroup: 'icons',
+        help: 'Gebruik bij voorkeur een vierkante .png of .ico van minstens 48x48 pixels. Google toont deze doorgaans betrouwbaarder in zoekresultaten.',
       },
       // cssExtras: {
       //   type: 'string',
