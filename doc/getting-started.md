@@ -141,6 +141,18 @@ Six docker containers have been created:
 - openstad-admin-server
 - openstad-cms-server
 
+### One-off Docker Compose commands
+
+Some tasks use the `tools` profile and are run on demand (they do not start with `docker compose up`).
+
+**Regenerate `package-lock.json` (root only, no install):**
+
+```bash
+docker compose --profile tools run --rm openstad-update-lock
+```
+
+This runs `npm install --package-lock-only --ignore-scripts` in the repo root inside a container and writes the updated lock file to your host.
+
 ### Initial data
 
 During setup the databases are filled with some initial data, as described in the [databases](./databases.md) documentation.
