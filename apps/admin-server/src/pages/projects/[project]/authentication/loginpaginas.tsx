@@ -98,10 +98,11 @@ export default function ProjectAuthentication() {
           ?.helpText || '',
       UrlConfirmedTitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
-          ?.confirmedTitle || '',
+          ?.confirmedTitle || 'E-mail verstuurd!',
       UrlConfirmedDescription:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
-          ?.confirmedDescription || '',
+          ?.confirmedDescription ||
+        'Bekijk uw inbox om in te loggen. Het kan enkele minuten duren voor de e-mail verschijnt. Geen mail gekregen na het versturen van de link? Kijk dan in uw spam-folder of probeer het opnieuw. Lukt het alsnog niet? Neem contact met ons op.',
       UrlConfirmedHelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
           ?.confirmedHelpText || '',
@@ -456,7 +457,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Titel</FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input placeholder="Vul een titel in" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -470,7 +471,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Vul een beschrijving in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -484,7 +488,10 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="" {...field} />
+                            <Textarea
+                              placeholder="Vul een help tekst in"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
