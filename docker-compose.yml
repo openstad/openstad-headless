@@ -47,15 +47,34 @@ services:
       - 8025:8025 # web ui
 
   openstad-jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/jaeger:2.8.0
     container_name: openstad-jaeger
     restart: unless-stopped
     ports:
-      - 16686:16686 # Jaeger UI
-      - 4317:4317 # OTLP gRPC receiver
-      - 4318:4318 # OTLP HTTP receiver
+      - 16686:16686
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+
+  openstad-otel-collector:
+    build:
+      context: otel-collector
+    image: openstad-headless-otel-collector:local
+    volumes:
+      - ./otel-collector/config.local.yaml:/etc/otelcol-contrib/config.yaml
+    depends_on:
+      openstad-jaeger:
+        condition: service_started
+    ports:
+      - 4317:4317 # OTLP gRPC
+      - 4318:4318 # OTLP HTTP
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 128M
 
   openstad-api-server:
     build:
@@ -73,6 +92,8 @@ services:
         condition: service_healthy
       openstad-redis:
         condition: service_healthy
+      openstad-otel-collector:
+        condition: service_started
     container_name: openstad-api-server
     restart: unless-stopped
     environment:
@@ -119,6 +140,8 @@ services:
       - HASH_IP_ADDRESSES=${HASH_IP_ADDRESSES}
       - HASH_IP_SALT=${HASH_IP_SALT}
       - USER_ID_SALT=${USER_ID_SALT}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-api-server}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4318/v1/traces}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:

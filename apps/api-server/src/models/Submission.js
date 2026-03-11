@@ -49,7 +49,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'name',
               'displayName',
               'email',
-              'phonenumber',
+              'phoneNumber',
               'address',
               'city',
               'postcode',

@@ -6,9 +6,9 @@
   "author": "Gemeente Amsterdam",
   "license": "MIT",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node -r ./telemetry-preload.js ../../node_modules/.bin/next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node -r ./telemetry-preload.js ../../node_modules/.bin/next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.28.4",
     "@hookform/resolvers": "^3.3.1",
+    "@openstad-headless/lib": "*",
     "@openstad-headless/account": "*",
     "@openstad-headless/activity": "*",
     "@openstad-headless/agenda": "*",
