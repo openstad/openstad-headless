@@ -1,8 +1,7 @@
-{% set apostrophe3Content = data.widget.content | jsonAttribute %}
-
 <div
   data-openstad-iconSection
   data-expandable="{{ data.widget.expandable }}"
   data-expanded="{{ data.widget.expanded }}"
   data-expandablelabel="{{ data.widget.expandablelabel }}"
-  data-content="{{ apostrophe3Content }}"></div>
+  data-content="{{ data.widget.content | dump }}"
+  data-prefix="{{ data.prefix }}"></div>

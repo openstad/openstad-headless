@@ -18,16 +18,27 @@ interface Item {
   expandable: string;
   expandablelabel: string;
   expanded: string;
+  prefix?: string;
 }
 
-const renderCards = (items) => {
+function applyPrefix(href: string, prefix: string): string {
+  if (prefix && href && href.startsWith('/')) {
+    return prefix + href;
+  }
+  return href;
+}
+
+const renderCards = (items: any[], prefix: string) => {
   return (
     <div className="icon-section-grid">
       <div className="container u-small-dropdowns">
         {items.map((item: any, index: number) => {
-          const linkProps = item.href
+          const itemHref = item.useSitePrefix
+            ? applyPrefix(item.href, prefix)
+            : item.href;
+          const linkProps = itemHref
             ? {
-                href: item.href,
+                href: itemHref,
                 target:
                   typeof item.target !== 'undefined' && item.target === false
                     ? '_self'
@@ -52,7 +63,7 @@ const renderCards = (items) => {
               <div className="icon-section-content">
                 {item.title && <Heading3>{item.title}</Heading3>}
                 {item.description && <Paragraph>{item.description}</Paragraph>}
-                {item.href && (
+                {itemHref && (
                   <div>
                     <Link {...linkProps}>{item.linkText}</Link>
                   </div>
@@ -66,9 +77,16 @@ const renderCards = (items) => {
   );
 };
 
-function IconSection({ content, expandable, expandablelabel, expanded }: Item) {
+function IconSection({
+  content,
+  expandable,
+  expandablelabel,
+  expanded,
+  prefix,
+}: Item) {
+  const sitePrefix = prefix || '';
   const items = JSON.parse(content);
-  const renderedCards = renderToString(renderCards(items));
+  const renderedCards = renderToString(renderCards(items, sitePrefix));
   return (
     <section className="icon-section">
       {expandable === 'true' ? (
@@ -110,4 +128,4 @@ IconSection.loadWidgetOnElement = function (
   }
 };
 
-export { IconSection };
+export { IconSection, applyPrefix };

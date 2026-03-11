@@ -1,6 +1,9 @@
-{% if data.widget.uploadedImageLink %}
+{% if data.widget.uploadedImageLink %} {% set imageHref = data.prefix +
+data.widget.uploadedImageLink if (data.widget.useSitePrefix and
+data.widget.uploadedImageLink and data.widget.uploadedImageLink.startsWith('/'))
+else data.widget.uploadedImageLink %}
 <a
-  href="{{ data.widget.uploadedImageLink }}"
+  href="{{ imageHref }}"
   class="osc-image-link"
   {%
   if
