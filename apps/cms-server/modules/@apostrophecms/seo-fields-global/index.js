@@ -1,3 +1,31 @@
+function normalizeCanonicalUrl(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return '';
+  }
+
+  const candidate = /^https?:\/\//i.test(trimmedValue)
+    ? trimmedValue
+    : `https://${trimmedValue}`;
+
+  try {
+    const parsed = new URL(candidate);
+    parsed.hash = '';
+
+    if (parsed.pathname === '/') {
+      parsed.pathname = '';
+    }
+
+    return parsed.toString();
+  } catch (err) {
+    return '';
+  }
+}
+
 function getDefaults(self, req) {
   const project =
     (req && req.project) ||
@@ -6,7 +34,7 @@ function getDefaults(self, req) {
   const global = (req && req.data && req.data.global) || {};
 
   return {
-    canonicalDefault: project.url || '',
+    canonicalDefault: normalizeCanonicalUrl(project.url),
     organizationDefault:
       project.title ||
       global.projectTitle ||
