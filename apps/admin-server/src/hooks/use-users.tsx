@@ -13,6 +13,7 @@ export type UsersPaginationOptions = {
   page?: number;
   pageSize?: number;
   q?: string;
+  sort?: string;
   uniqueByIdpUser?: boolean;
   excludeAnonymous?: boolean;
 };
@@ -35,6 +36,9 @@ function buildUsersUrl(options?: UsersPaginationOptions) {
   }
   if (options?.q?.trim()) {
     params.set('q', options.q.trim());
+  }
+  if (options?.sort?.trim()) {
+    params.set('sort', options.sort.trim());
   }
   if (options?.uniqueByIdpUser) {
     params.set('uniqueByIdpUser', '1');
