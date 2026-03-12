@@ -5,7 +5,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const config = require('config');
 const merge = require('merge');
 const bruteForce = require('../../middleware/brute-force');
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const pagination = require('../../middleware/pagination');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
@@ -116,6 +116,11 @@ router
     let { dbQuery } = req;
 
     let where = { ...dbQuery.where };
+    let voteId = parseInt(req.query.id);
+    if (voteId) {
+      where.id = voteId;
+    }
+
     let resourceId = parseInt(req.query.resourceId);
     if (resourceId) {
       where.resourceId = resourceId;
@@ -128,6 +133,26 @@ router
 
     if (opinion && (opinion == 'yes' || opinion == 'no')) {
       where.opinion = opinion;
+    }
+
+    const ip =
+      typeof req.query.ip === 'string' ? req.query.ip.trim() : undefined;
+    if (ip) {
+      where.ip = { [Op.like]: `%${ip}%` };
+    }
+
+    const createdAt =
+      typeof req.query.createdAt === 'string'
+        ? req.query.createdAt.trim()
+        : undefined;
+    if (createdAt) {
+      const existingAnd = Array.isArray(where[Op.and]) ? where[Op.and] : [];
+      where[Op.and] = [
+        ...existingAnd,
+        Sequelize.where(Sequelize.cast(Sequelize.col('createdAt'), 'CHAR'), {
+          [Op.like]: `%${createdAt}%`,
+        }),
+      ];
     }
 
     /**

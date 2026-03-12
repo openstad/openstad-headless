@@ -186,7 +186,19 @@ router
       .catch(next);
   })
   .get(auth.useReqUser)
-  .get(searchInResults({}))
+  .get(
+    searchInResults({
+      searchfields: [
+        'id',
+        'title',
+        'summary',
+        'description',
+        'createdAt',
+        'yes',
+        'no',
+      ],
+    })
+  )
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     res.json(req.results);
