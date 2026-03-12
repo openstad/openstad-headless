@@ -8,6 +8,7 @@
     "setup": "node ./scripts/setup-all.js",
     "start": "node ./scripts/start-all.js",
     "init-databases": "node ./scripts/init-databases.js",
+    "update-lock": "npm install --package-lock-only --ignore-scripts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
@@ -64,6 +65,8 @@
     "uuid": "^10.0.0"
   },
   "overrides": {
+    "minimatch@>=7.0.0 <=7.4.7": "7.4.9",
+    "minimatch@>=9.0.0 <=9.0.6": "9.0.9",
     "vega-lite": "^5.23.0",
     "tar": "7.5.9",
     "node-gyp@<10.0.0": "^12.2.0",

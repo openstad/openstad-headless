@@ -41,6 +41,12 @@ ENV CYPRESS_CACHE_FOLDER=/tmp/CypressCache
 
 RUN npm ci --safe-chain-skip-minimum-package-age
 
+# Minimal target for update-lock. It only serves to update the lock file.
+FROM node:24-slim AS update-lock
+WORKDIR /opt/openstad-headless
+RUN npm update -g npm
+CMD ["npm", "run", "update-lock"]
+
 FROM builder AS base
 
 ARG APP
