@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useChoiceGuideResults from '@/hooks/use-choiceguide-results';
 import useUsers from '@/hooks/use-users';
@@ -18,9 +17,26 @@ import { Paginator } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useDebouncedValue } from 'rooks';
 
 import { Button } from '../../../../components/ui/button';
 import { PageLayout } from '../../../../components/ui/page-layout';
+
+type SortDirection = 'asc' | 'desc';
+
+const CHOICEGUIDE_SORT_MAP: Record<string, string> = {
+  widgetId: 'widgetId',
+  userId: 'userId',
+  result: 'result',
+  createdAt: 'createdAt',
+};
+
+const CHOICEGUIDE_SEARCH_FIELD_MAP: Record<string, string> = {
+  id: 'widgetId',
+  user: 'userId',
+  result: 'result',
+  createdAt: 'createdAt',
+};
 
 export default function ProjectChoiceGuideResults() {
   const router = useRouter();
@@ -31,11 +47,14 @@ export default function ProjectChoiceGuideResults() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const pageLimit = 100;
-  const [filterData, setFilterData] = useState<
+  const [resultsData, setResultsData] = useState<
     { createdAt: string; id?: string }[]
   >([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
-  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [apiSearchTerm] = useDebouncedValue(searchTerm, 400);
+  const [sortField, setSortField] = useState('createdAt');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [activeWidget, setActiveWidget] = useState('0');
@@ -59,11 +78,23 @@ export default function ProjectChoiceGuideResults() {
         return;
       }
 
-      let url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=${pageLimit}`;
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pageLimit.toString(),
+        sort: `${CHOICEGUIDE_SORT_MAP[sortField] || 'createdAt'}_${sortDirection}`,
+      });
 
       if (selectedWidget?.id && selectedWidget?.id !== '0') {
-        url += `&widgetId=${selectedWidget?.id}`;
+        params.set('widgetId', selectedWidget.id.toString());
       }
+
+      if (apiSearchTerm) {
+        const searchField =
+          CHOICEGUIDE_SEARCH_FIELD_MAP[filterSearchType] || 'text';
+        params.set(`search[${searchField}]`, apiSearchTerm);
+      }
+
+      const url = `/api/openstad/api/project/${projectNumber}/choicesguide?${params.toString()}`;
 
       const response = await fetch(url);
       return response.json();
@@ -74,7 +105,7 @@ export default function ProjectChoiceGuideResults() {
     try {
       await remove(id);
 
-      setFilterData((prevData) => prevData.filter((item) => item.id !== id));
+      setResultsData((prevData) => prevData.filter((item) => item.id !== id));
       setTotalCount((prev) => prev - 1);
 
       toast.success('Resultaat succesvol verwijderd');
@@ -86,7 +117,7 @@ export default function ProjectChoiceGuideResults() {
   const handleBulkDelete = async () => {
     try {
       await remove(0, true, selectedItems);
-      setFilterData((prevData) =>
+      setResultsData((prevData) =>
         prevData.filter((item) => !selectedItems.includes(Number(item.id)))
       );
       setTotalCount((prev) => prev - selectedItems.length);
@@ -106,16 +137,23 @@ export default function ProjectChoiceGuideResults() {
         const pageCount = Math.ceil(totalCount / pageLimit);
         setTotalPages(pageCount);
 
-        let loadedChoiceGuideResults = (data || []) as { createdAt: string }[];
-        const sortedData = loadedChoiceGuideResults.sort(
-          (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
-        );
-
         setTotalCount(totalCount);
-        setFilterData(sortedData);
+        setResultsData(data);
       }
     });
-  }, [page, selectedWidget, project]);
+  }, [
+    apiSearchTerm,
+    filterSearchType,
+    page,
+    project,
+    selectedWidget,
+    sortDirection,
+    sortField,
+  ]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [apiSearchTerm, filterSearchType, selectedWidget]);
 
   useEffect(() => {
     if (!!widgetData) {
@@ -143,6 +181,22 @@ export default function ProjectChoiceGuideResults() {
       (widget: any) => widget.id.toString() === ID
     );
     setSelectedWidget(selectedWidget);
+    setPage(0);
+  };
+
+  const handleSort = (field: string) => {
+    if (field === sortField) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+    setPage(0);
+  };
+
+  const getSortButtonClass = (field: string) => {
+    if (field !== sortField) return 'filter-button';
+    return `filter-button font-bold text-black ${sortDirection === 'asc' ? '--up' : ''}`;
   };
 
   return (
@@ -235,6 +289,7 @@ export default function ProjectChoiceGuideResults() {
                 </p>
                 <select
                   className="p-2 rounded"
+                  value={filterSearchType}
                   onChange={(e) => setFilterSearchType(e.target.value)}>
                   <option value="">Alles</option>
                   <option value="id">Widget ID</option>
@@ -242,6 +297,13 @@ export default function ProjectChoiceGuideResults() {
                   <option value="result">Ingezonden Data</option>
                   <option value="createdAt">Datum aangemaakt</option>
                 </select>
+                <input
+                  type="text"
+                  className="p-2 rounded"
+                  placeholder="Zoeken..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
             </div>
 
@@ -251,12 +313,12 @@ export default function ProjectChoiceGuideResults() {
                 style={{ gridTemplateColumns: '50px 1fr 1fr 2fr 1fr 1fr' }}>
                 <Checkbox
                   checked={
-                    filterData?.length > 0 &&
-                    filterData.every((r: any) => selectedItems.includes(r.id))
+                    resultsData?.length > 0 &&
+                    resultsData.every((r: any) => selectedItems.includes(r.id))
                   }
                   onCheckedChange={(checked) => {
                     const currentPageIds =
-                      filterData?.map((r: any) => r.id) || [];
+                      resultsData?.map((r: any) => r.id) || [];
                     if (checked) {
                       setSelectedItems((prev) =>
                         Array.from(new Set([...prev, ...currentPageIds]))
@@ -270,44 +332,36 @@ export default function ProjectChoiceGuideResults() {
                 />
                 <ListHeading className="hidden lg:flex">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('widgetId', e, filterData))
-                    }>
+                    className={getSortButtonClass('widgetId')}
+                    onClick={() => handleSort('widgetId')}>
                     Widget ID | Naam
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('userId', e, filterData))
-                    }>
+                    className={getSortButtonClass('userId')}
+                    onClick={() => handleSort('userId')}>
                     Gebruiker ID
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden w-full lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('result', e, filterData))
-                    }>
+                    className={getSortButtonClass('result')}
+                    onClick={() => handleSort('result')}>
                     Ingezonden Data
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('createdAt', e, filterData))
-                    }>
+                    className={getSortButtonClass('createdAt')}
+                    onClick={() => handleSort('createdAt')}>
                     Datum aangemaakt
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
               </div>
               <ul>
-                {filterData?.map((choiceguideResult: any) => {
+                {resultsData?.map((choiceguideResult: any) => {
                   const userId = choiceguideResult.userId;
                   const user =
                     usersData?.find((user: any) => user.id === userId) || null;

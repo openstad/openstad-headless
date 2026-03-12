@@ -13,6 +13,7 @@ export type UsersPaginationOptions = {
   page?: number;
   pageSize?: number;
   q?: string;
+  sort?: string;
   uniqueByIdpUser?: boolean;
   excludeAnonymous?: boolean;
 };
@@ -24,17 +25,40 @@ export type UsersPaginationMetadata = {
   totalCount: number;
 };
 
-function useUsers(options?: UsersPaginationOptions) {
-  const page = options?.page;
-  const pageSize = options?.pageSize ?? 20;
-  const q = options?.q?.trim();
-  const uniqueByIdpUser = options?.uniqueByIdpUser;
-  const excludeAnonymous = options?.excludeAnonymous;
+function buildUsersUrl(options?: UsersPaginationOptions) {
+  const params = new URLSearchParams();
 
-  const url =
-    page !== undefined
-      ? `/api/openstad/api/user?page=${page}&pageSize=${pageSize}${q ? `&q=${encodeURIComponent(q)}` : ''}${uniqueByIdpUser ? '&uniqueByIdpUser=1' : ''}${excludeAnonymous ? '&excludeAnonymous=1' : ''}`
-      : '/api/openstad/api/user';
+  if (options?.page !== undefined) {
+    params.set('page', options.page.toString());
+  }
+  if (options?.pageSize !== undefined) {
+    params.set('pageSize', options.pageSize.toString());
+  }
+  if (options?.q?.trim()) {
+    params.set('q', options.q.trim());
+  }
+  if (options?.sort?.trim()) {
+    params.set('sort', options.sort.trim());
+  }
+  if (options?.uniqueByIdpUser) {
+    params.set('uniqueByIdpUser', '1');
+  }
+  if (options?.excludeAnonymous) {
+    params.set('excludeAnonymous', '1');
+  }
+
+  const query = params.toString();
+  return `/api/openstad/api/user${query ? `?${query}` : ''}`;
+}
+
+function useUsers(options?: UsersPaginationOptions) {
+  const url = buildUsersUrl({
+    ...options,
+    pageSize:
+      options?.page !== undefined
+        ? (options?.pageSize ?? 20)
+        : options?.pageSize,
+  });
   const usersSwr = useSWR(url);
   const res = usersSwr.data;
   const data = res?.records ?? res;
@@ -55,7 +79,25 @@ function useUsers(options?: UsersPaginationOptions) {
     return await res.json();
   }
 
-  return { ...usersSwr, data, metadata, createUser };
+  async function fetchAll(fetchOptions?: UsersPaginationOptions) {
+    const response = await fetch(
+      buildUsersUrl({
+        ...options,
+        ...fetchOptions,
+        page: undefined,
+        pageSize: undefined,
+      })
+    );
+
+    if (!response.ok) {
+      throw new Error('Could not fetch all users');
+    }
+
+    const results = await response.json();
+    return results?.records ?? results ?? [];
+  }
+
+  return { ...usersSwr, data, metadata, createUser, fetchAll };
 }
 
 export { useUsers as default, useUsers, type userType };
