@@ -309,7 +309,6 @@ module.exports = function (db, sequelize, DataTypes) {
               ],
             },
           ],
-          order: [['createdAt', 'ASC']],
         };
       },
 
