@@ -283,7 +283,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: builder
+      target: update-lock
     container_name: openstad-update-lock
     profiles:
       - tools
