@@ -1578,7 +1578,7 @@ export default function WidgetEnqueteItems(
                                 Antwoordopties met afbeeldingen
                               </SelectItem>
                               <SelectItem value="multiplechoice">
-                                Multiplechoice
+                                Enkele keuze
                               </SelectItem>
                               <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">
@@ -2391,8 +2391,8 @@ export default function WidgetEnqueteItems(
                                       borderBottomRightRadius: '5px',
                                       marginTop: '12px',
                                     }}>
-                                    Je hebt nog geen meerkeuze, multiplechoice
-                                    of afbeelding keuze vragen toegevoegd. Voeg
+                                    Je hebt nog geen meerkeuze, enkele keuze of
+                                    afbeelding keuze vragen toegevoegd. Voeg
                                     deze eerst toe om deze vraag te kunnen tonen
                                     op basis van een ander antwoord.
                                   </p>

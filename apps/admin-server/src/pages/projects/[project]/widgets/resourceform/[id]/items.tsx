@@ -1098,11 +1098,11 @@ export default function WidgetResourceFormItems(
                                 Informatie blok
                               </SelectItem>
                               <SelectItem value="radiobox">
-                                Radio buttons
+                                Enkele keuze
                               </SelectItem>
                               <SelectItem value="text">Tekstveld</SelectItem>
                               <SelectItem value="checkbox">
-                                Checkboxes
+                                Meerkeuze
                               </SelectItem>
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="imageUpload">
@@ -1838,8 +1838,8 @@ export default function WidgetResourceFormItems(
                                       borderBottomRightRadius: '5px',
                                       marginTop: '12px',
                                     }}>
-                                    Je hebt nog geen meerkeuze, multiplechoice
-                                    of afbeelding keuze vragen toegevoegd. Voeg
+                                    Je hebt nog geen meerkeuze, enkele keuze of
+                                    afbeelding keuze vragen toegevoegd. Voeg
                                     deze eerst toe om deze vraag te kunnen tonen
                                     op basis van een ander antwoord.
                                   </p>
