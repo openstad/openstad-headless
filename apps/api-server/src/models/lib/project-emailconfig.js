@@ -48,6 +48,10 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         type: 'string', // todo: add type email/list of emails
         default: apiConfig.notifications.admin.emailAddress,
       },
+      sendUpdatedResourceAdminEmail: {
+        type: 'boolean',
+        default: false,
+      },
       sendEndDateNotifications: {
         type: 'object',
         subset: {
