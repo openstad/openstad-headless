@@ -13,7 +13,7 @@ import WidgetChoiceGuidePolygons from '@/pages/projects/[project]/widgets/choice
 import WidgetChoiceGuideGeneralSettings from '@/pages/projects/[project]/widgets/choiceguide/[id]/settings';
 import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { ChoiceGuideProps } from '../../../../../../../../../packages/choiceguide/src/props';
 import { PageLayout } from '../../../../../../components/ui/page-layout';

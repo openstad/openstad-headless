@@ -1,5 +1,4 @@
 import { ImageUploader } from '@/components/image-uploader';
-import AccordionUI from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import {
   Form,

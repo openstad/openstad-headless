@@ -14,7 +14,6 @@ import useComments from '@/hooks/use-comments';
 import useResources from '@/hooks/use-resources';
 import { exportComments } from '@/lib/export-helpers/comments-export';
 import { Paginator } from '@openstad-headless/ui/src';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';

@@ -12,7 +12,6 @@ import {
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
-import { ObjectListSelect } from '@/components/ui/object-select';
 import {
   Select,
   SelectContent,
@@ -27,10 +26,8 @@ import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
-import * as Switch from '@radix-ui/react-switch';
 import _ from 'lodash';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
