@@ -25,6 +25,7 @@ const bruteForce = require('../middleware/bruteForce');
 const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
 const logMw = require('../middleware/log');
+const currentClientAuthMw = require('../middleware/currentClientAuth');
 
 //UTILS
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
@@ -164,7 +165,7 @@ module.exports = function (app) {
   /**
    * Shared middleware for all auth routes, adding client and bruteforce
    */
-  app.use('/auth', [clientMw.withOne, bruteForce.global]);
+  app.use('/auth', [clientMw.withOne, currentClientAuthMw, bruteForce.global]);
 
   /**
    * Login & register with local login
@@ -376,10 +377,11 @@ module.exports = function (app) {
   /**
    * Show account, add client, but not obligated
    */
-  app.use('/user', [clientMw.withOne, authMw.check]);
+  app.use('/user', [clientMw.withOne, currentClientAuthMw, authMw.check]);
   app.get(
     '/account',
     clientMw.withOne,
+    currentClientAuthMw,
     authMw.check,
     csrfProtection,
     addCsrfGlobal,
@@ -388,6 +390,7 @@ module.exports = function (app) {
   app.post(
     '/account',
     clientMw.withOne,
+    currentClientAuthMw,
     authMw.check,
     csrfProtection,
     addCsrfGlobal,
@@ -397,6 +400,7 @@ module.exports = function (app) {
   app.post(
     '/password',
     clientMw.withOne,
+    currentClientAuthMw,
     authMw.check,
     csrfProtection,
     addCsrfGlobal,
@@ -404,7 +408,11 @@ module.exports = function (app) {
     userController.postAccount
   );
 
-  app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
+  app.use('/auth/required-fields', [
+    authMw.check,
+    clientMw.withOne,
+    currentClientAuthMw,
+  ]);
   app.get(
     '/auth/required-fields',
     clientMw.withOne,
@@ -455,6 +463,7 @@ module.exports = function (app) {
   app.get(
     '/dialog/authorize',
     clientMw.withOne,
+    currentClientAuthMw,
     authMw.check,
     userMw.withRoleForClient,
     clientMw.checkRequiredUserFields,
@@ -469,6 +478,7 @@ module.exports = function (app) {
   app.post(
     '/dialog/authorize/decision',
     clientMw.withOne,
+    currentClientAuthMw,
     userMw.withRoleForClient,
     clientMw.checkPhonenumberAuth(),
     clientMw.checkUniqueCodeAuth(),
@@ -483,6 +493,7 @@ module.exports = function (app) {
     '/api/userinfo',
     passport.authenticate('bearer', { session: false }),
     clientMw.withOne,
+    currentClientAuthMw,
     userMw.withRoleForClient,
     clientMw.checkIfAccessTokenBelongToCurrentClient,
     clientMw.checkPhonenumberAuth(),

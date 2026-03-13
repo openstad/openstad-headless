@@ -5,6 +5,7 @@ const privilegedRoles = require('../config/roles').privilegedRoles;
 const defaultRole = require('../config/roles').defaultRole;
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 const configAuthTypes = require('../config/auth.js').types;
+const clientAuth = require('../utils/clientAuth');
 
 exports.withAll = (req, res, next) => {
   db.Client.findAll()
@@ -220,9 +221,11 @@ exports.checkPhonenumberAuth = (errorCallback) => {
  */
 exports.check2FA = (req, res, next) => {
   const twoFactorRoles = req.client.twoFactorRoles;
+  const twoFactorValid =
+    req.currentClientAuth?.twoFactorValid || req.session?.twoFactorValid;
 
   // if no role is present, assume default role
-  const userRole = req.user.role ? req.user.role : defaultRole;
+  const userRole = req.currentClientRole || req.user.role || defaultRole;
 
   /**
    * In case no 2factor roles are defined all is good and check is passed
@@ -241,16 +244,12 @@ exports.check2FA = (req, res, next) => {
   }
 
   // check two factor is validated otherwise send to 2factor screen
-  if (
-    twoFactorRoles &&
-    twoFactorRoles.includes(userRole) &&
-    req.session.twoFactorValid
-  ) {
+  if (twoFactorRoles && twoFactorRoles.includes(userRole) && twoFactorValid) {
     return next();
   } else if (
     twoFactorRoles &&
     twoFactorRoles.includes(userRole) &&
-    !req.session.twoFactorValid
+    !twoFactorValid
   ) {
     return res.redirect(
       `/auth/two-factor?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`

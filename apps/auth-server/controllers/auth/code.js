@@ -9,6 +9,7 @@ const db = require('../../db');
 const tokenUrl = require('../../services/tokenUrl');
 const emailService = require('../../services/email');
 const authCodeConfig = require('../../config/auth').get(authType);
+const clientAuth = require('../../utils/clientAuth');
 
 exports.login = (req, res, next) => {
   const config = req.client.config ? req.client.config : {};
@@ -79,8 +80,18 @@ exports.postLogin = (req, res, next) => {
             userId: user.id,
           },
         }).then((userRole) => {
+          const initializeClientContext = () =>
+            clientAuth
+              .initializeClientAuth(req.session, req.client, user, {
+                authType,
+                twoFactorValid: false,
+              })
+              .then(() => clientAuth.saveSession(req.session));
+
           if (userRole) {
-            redirectToAuthorize();
+            initializeClientContext()
+              .then(() => redirectToAuthorize())
+              .catch(next);
           } else {
             const defaultRoleId = req.client.config.defaultRoleId
               ? req.client.config.defaultRoleId
@@ -90,6 +101,9 @@ exports.postLogin = (req, res, next) => {
               roleId: defaultRoleId,
               userId: user.id,
             })
+              .then(() => {
+                return initializeClientContext();
+              })
               .then(() => {
                 redirectToAuthorize();
               })

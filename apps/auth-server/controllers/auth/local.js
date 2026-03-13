@@ -13,6 +13,7 @@ const login = require('connect-ensure-login');
 const db = require('../../db');
 const authLocalConfig = require('../../config/auth').get('Local');
 const URL = require('url').URL;
+const clientAuth = require('../../utils/clientAuth');
 const authType = 'Local';
 
 /**
@@ -135,16 +136,22 @@ exports.postLogin = (req, res, next) => {
       if (err) {
         return next(err);
       }
-      const redirectUrl = req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
-        : req.client.redirectUrl;
-      const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+      clientAuth
+        .initializeClientAuth(req.session, req.client, user, {
+          authType,
+          twoFactorValid: false,
+        })
+        .then(() => clientAuth.saveSession(req.session))
+        .then(() => {
+          const redirectUrl = req.query.redirect_uri
+            ? encodeURIComponent(req.query.redirect_uri)
+            : req.client.redirectUrl;
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
-      //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
-
-      // Redirect if it succeeds to authorize screen
-      req.brute.resetKey(req.bruteKey);
-      return res.redirect(authorizeUrl);
+          req.brute.resetKey(req.bruteKey);
+          return res.redirect(authorizeUrl);
+        })
+        .catch(next);
     });
   })(req, res, next);
 };
@@ -156,9 +163,12 @@ exports.postLogin = (req, res, next) => {
  * @returns {undefined}
  */
 exports.logout = async (req, res) => {
-  let userId = req.user && req.user.id;
-  if (userId) {
-    await db.AccessToken.destroy({ where: { userId } });
+  let userId = (req.user && req.user.id) || req.session?.passport?.user || null;
+  let clientId = req.client && req.client.id;
+  if (userId && clientId) {
+    await db.AccessToken.destroy({
+      where: { userID: userId, clientID: clientId },
+    });
   }
 
   await req.session.destroy();

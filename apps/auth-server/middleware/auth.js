@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const loginFields = require('../config/user').loginFields;
 const db = require('../db');
+const clientAuth = require('../utils/clientAuth');
 
 exports.validateLogin = async (req, res, next) => {
   await body('email').isEmail().run(req);
@@ -16,7 +17,10 @@ exports.validateLogin = async (req, res, next) => {
 };
 
 exports.check = (req, res, next) => {
-  if (!req.isAuthenticated || !req.isAuthenticated()) {
+  const isAuthenticated =
+    typeof req.isAuthenticated === 'function' ? req.isAuthenticated() : false;
+
+  if (!req.isAuthenticated || !isAuthenticated) {
     let url = '/login?clientId=' + req.client.clientId;
 
     if (req.query.redirect_uri) {
@@ -30,9 +34,42 @@ exports.check = (req, res, next) => {
     return res.redirect(url);
   } else {
     db.User.findOne({ where: { id: req.user.id } })
-      .then((user) => {
+      .then(async (user) => {
         req.user = user;
-        next();
+
+        if (req.client && req.currentClientAuth) {
+          const currentRole = await clientAuth.resolveRoleForClient(
+            req.user,
+            req.client
+          );
+
+          const isExpired = clientAuth.isClientAuthExpired(
+            req.currentClientAuth,
+            currentRole
+          );
+
+          if (isExpired) {
+            clientAuth.clearClientAuth(req.session, req.client);
+            await clientAuth.saveSession(req.session);
+
+            let url = '/login?clientId=' + req.client.clientId;
+
+            if (req.query.redirect_uri) {
+              url =
+                url +
+                '&redirect_uri=' +
+                encodeURIComponent(req.query.redirect_uri);
+            }
+
+            if (req.session) {
+              req.session.returnTo = req.originalUrl || req.url;
+            }
+
+            return res.redirect(url);
+          }
+        }
+
+        return next();
       })
       .catch((err) => {
         next(err);

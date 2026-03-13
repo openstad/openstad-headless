@@ -10,6 +10,7 @@ const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');
 const verificationService = require('../../services/verificationService');
 const authUrlConfig = require('../../config/auth').get('Url');
+const clientAuth = require('../../utils/clientAuth');
 
 const setNoCachHeadersMw = (req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
@@ -283,8 +284,13 @@ exports.postAuthenticate = (req, res, next) => {
       req.brute.resetKey(req.bruteKey);
 
       //log the succesfull login
-      authService
-        .logSuccessFullLogin(req)
+      clientAuth
+        .initializeClientAuth(req.session, req.client, user, {
+          authType,
+          twoFactorValid: false,
+        })
+        .then(() => clientAuth.saveSession(req.session))
+        .then(() => authService.logSuccessFullLogin(req))
         .then(() => {
           redirectToAuthorisation();
         })
