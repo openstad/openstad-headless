@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';

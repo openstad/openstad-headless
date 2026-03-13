@@ -19,7 +19,6 @@ import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/res
 import WidgetResourcesMapMap from '@/pages/projects/[project]/widgets/resourcesmap/[id]/map';
 import WidgetResourcesMapPolygons from '@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import { useRouter } from 'next/router';
 import React from 'react';
 
