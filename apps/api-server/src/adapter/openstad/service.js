@@ -263,7 +263,7 @@ service.createClient = async function ({ authConfig, project }) {
     if (!Array.isArray(authTypes)) authTypes = [authTypes];
     let twoFactorRoles =
       authConfig.twoFactorRoles ||
-      (authConfig.provider == 'openstad' && ['admin']);
+      (authConfig.provider == 'openstad' && ['admin', 'moderator', 'editor']);
     if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [authTypes];
     let requiredUserFields =
       authConfig.requiredUserFields ||
