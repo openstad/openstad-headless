@@ -4,12 +4,12 @@ import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import PluginLoader from './index.js';
+import PluginLoader from './index';
 
 /**
  * Builds a minimal valid plugin manifest.
  */
-function validManifest(overrides = {}) {
+function validManifest(overrides: Record<string, unknown> = {}) {
   return {
     name: 'test-plugin',
     version: '1.0.0',
@@ -19,14 +19,17 @@ function validManifest(overrides = {}) {
 
 // Use Node's Module system to register fake modules in the require cache.
 const require_ = createRequire(import.meta.url);
-const Module = require_('module');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Module = require_('module') as typeof import('module') & {
+  _resolveFilename: (...args: unknown[]) => string;
+};
 const originalResolve = Module._resolveFilename;
 
 /** Set of package names registered as fake modules. */
-let fakeModules = new Set();
+let fakeModules = new Set<string>();
 
 /** Temp file path for plugins.json */
-let tmpFile;
+let tmpFile: string;
 
 beforeEach(() => {
   PluginLoader.reset();
@@ -37,9 +40,14 @@ beforeEach(() => {
   );
 
   // Patch Module._resolveFilename to intercept our fake plugin packages
-  Module._resolveFilename = function (request, parent, isMain, options) {
-    if (fakeModules.has(request)) {
-      return request;
+  Module._resolveFilename = function (
+    request: unknown,
+    parent: unknown,
+    isMain: unknown,
+    options: unknown
+  ) {
+    if (fakeModules.has(request as string)) {
+      return request as string;
     }
     return originalResolve.call(this, request, parent, isMain, options);
   };
@@ -64,7 +72,7 @@ afterEach(() => {
 /**
  * Write plugins config to temp file and return the path.
  */
-function writePluginsJson(config) {
+function writePluginsJson(config: Record<string, unknown>): string {
   fs.writeFileSync(tmpFile, JSON.stringify(config));
   return tmpFile;
 }
@@ -72,14 +80,17 @@ function writePluginsJson(config) {
 /**
  * Register a fake plugin package that require() will resolve to.
  */
-function registerFakeModule(packageName, moduleExports) {
+function registerFakeModule(
+  packageName: string,
+  moduleExports: Record<string, unknown>
+): void {
   fakeModules.add(packageName);
   require_.cache[packageName] = {
     id: packageName,
     filename: packageName,
     loaded: true,
     exports: moduleExports,
-  };
+  } as unknown as NodeModule;
 }
 
 describe('PluginLoader', () => {

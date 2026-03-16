@@ -1,13 +1,17 @@
+import PluginComponentLoader from '@/components/plugin-component-loader';
 import { PageLayout } from '@/components/ui/page-layout';
-import {
-  getPluginComponent,
-  getPluginPageMeta,
-} from '@/lib/generated-plugin-registry';
 import { GetServerSideProps } from 'next';
 
+type PluginPageInfo = {
+  path: string;
+  componentName: string;
+  pluginName: string;
+  label: string;
+};
+
 type Props = {
-  pagePath: string;
-  pageHeader: string;
+  page: PluginPageInfo;
+  apiUrl: string;
   breadcrumbs: { name: string; url: string }[];
 };
 
@@ -20,40 +24,49 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   }
 
   const requestPath = segments.join('/');
-  const meta = getPluginPageMeta(requestPath);
+  const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL || '';
 
-  if (!meta) {
+  try {
+    const res = await fetch(`${apiUrl}/api/plugin/registry`);
+    if (!res.ok) {
+      return { notFound: true };
+    }
+
+    const registry = await res.json();
+    const page = (registry.pages || []).find(
+      (p: PluginPageInfo) => p.path === requestPath
+    );
+
+    if (!page) {
+      return { notFound: true };
+    }
+
+    return {
+      props: {
+        page,
+        apiUrl: process.env.API_URL || '',
+        breadcrumbs: [
+          { name: 'Home', url: '/' },
+          { name: page.label, url: `/${requestPath}` },
+        ],
+      },
+    };
+  } catch {
     return { notFound: true };
   }
-
-  return {
-    props: {
-      pagePath: meta.pagePath,
-      pageHeader: meta.pageHeader,
-      breadcrumbs: [
-        { name: 'Home', url: '/' },
-        { name: meta.pageHeader, url: `/${requestPath}` },
-      ],
-    },
-  };
 };
 
-export default function PluginPage({
-  pagePath,
-  pageHeader,
-  breadcrumbs,
-}: Props) {
-  const PluginComponent = getPluginComponent(pagePath);
-
+export default function PluginPage({ page, apiUrl, breadcrumbs }: Props) {
   return (
     <div>
-      <PageLayout pageHeader={pageHeader} breadcrumbs={breadcrumbs}>
+      <PageLayout pageHeader={page.label} breadcrumbs={breadcrumbs}>
         <div className="container py-6">
-          {PluginComponent ? (
-            <PluginComponent />
-          ) : (
-            <p>Plugin page not found: {pagePath}</p>
-          )}
+          <PluginComponentLoader
+            pluginName={page.pluginName}
+            bundleType="admin"
+            componentName={page.componentName}
+            apiUrl={apiUrl}
+          />
         </div>
       </PageLayout>
     </div>

@@ -143,10 +143,6 @@ services:
       - /opt/openstad-headless/packages/resource-with-detail-map/node_modules
       - /opt/openstad-headless/packages/types/node_modules
       - /opt/openstad-headless/packages/ui/node_modules
-      # Plugin mounts (dev-only — production installs plugins via npm)
-      - ./plugins.json:/opt/openstad-headless/plugins.json:ro
-      - ./packages/plugin-loader:/opt/openstad-headless/apps/api-server/node_modules/@openstad-headless/plugin-loader:ro
-      - ${METKOOS_PLUGIN_DIR:-../metkoos-plugin}:/opt/openstad-headless/apps/api-server/node_modules/@draadnl/metkoos-plugin:ro
 
   openstad-auth-server:
     build:
@@ -282,10 +278,6 @@ services:
       - ./apps/admin-server:/opt/openstad-headless/apps/admin-server
       - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
       - ./packages:/opt/openstad-headless/packages
-      # Plugin mounts (dev-only — production installs plugins via npm)
-      - ./plugins.json:/opt/openstad-headless/plugins.json:ro
-      - ./packages/plugin-loader:/opt/openstad-headless/apps/admin-server/node_modules/@openstad-headless/plugin-loader:ro
-      - ${METKOOS_PLUGIN_DIR:-../metkoos-plugin}:/opt/openstad-headless/apps/admin-server/node_modules/@draadnl/metkoos-plugin:ro
 
   openstad-cms-server:
     build:

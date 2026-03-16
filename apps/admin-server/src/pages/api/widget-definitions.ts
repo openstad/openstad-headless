@@ -1,39 +1,37 @@
 import { CoreWidgetDefinitions } from '@/lib/widget-definitions';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default function handler(_req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  _req: NextApiRequest,
+  res: NextApiResponse
+) {
   const merged: Record<
     string,
     { name: string; description: string; image: string }
   > = { ...CoreWidgetDefinitions };
 
-  try {
-    const PluginLoader = require('@openstad-headless/plugin-loader');
-    const pluginLoader = PluginLoader.getInstance();
-    pluginLoader.load();
-    const pluginWidgets = pluginLoader.getWidgetDefinitions();
+  const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL || '';
 
-    for (const [key, definition] of Object.entries(pluginWidgets) as [
-      string,
-      any,
-    ][]) {
-      if (merged[key]) {
-        continue;
+  try {
+    const response = await fetch(`${apiUrl}/api/plugin/registry`);
+    if (response.ok) {
+      const registry = await response.json();
+      const widgetAdminComponents = registry.widgetAdminComponents || {};
+
+      for (const [key, component] of Object.entries(widgetAdminComponents)) {
+        if (!merged[key]) {
+          merged[key] = {
+            name: (component as any).name || key,
+            description: (component as any).description || '',
+            image:
+              (component as any).image ||
+              '/widget_preview/resource_overview_preview.png',
+          };
+        }
       }
-      merged[key] = {
-        name: definition.name || key,
-        description: definition.description || '',
-        image:
-          definition.image || '/widget_preview/resource_overview_preview.png',
-      };
     }
-  } catch (err: any) {
-    if (err.code !== 'MODULE_NOT_FOUND') {
-      console.error(
-        '[widget-definitions] Error loading plugin widgets:',
-        err.message
-      );
-    }
+  } catch {
+    // Plugin registry unavailable — continue with core widgets only
   }
 
   res.status(200).json(merged);

@@ -1,3 +1,4 @@
+import PluginComponentLoader from '@/components/plugin-component-loader';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WidgetPreview from '@/components/widget-preview';
@@ -5,12 +6,21 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetDefinitions } from '@/hooks/use-widget-definitions';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { getPluginComponent } from '@/lib/generated-plugin-registry';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { useRouter } from 'next/router';
+import { useEffect, useMemo, useState } from 'react';
+
+type WidgetAdminComponent = {
+  pluginName: string;
+  componentName: string;
+};
+
+type PluginRegistry = {
+  widgetAdminComponents: Record<string, WidgetAdminComponent>;
+};
 
 export const getServerSideProps = withApiUrl;
 
@@ -30,13 +40,41 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
     widgetId
   );
 
+  const [pluginRegistry, setPluginRegistry] = useState<PluginRegistry | null>(
+    null
+  );
+
+  useEffect(() => {
+    fetch('/api/openstad/api/plugin/registry')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setPluginRegistry(data))
+      .catch(() => {});
+  }, []);
+
+  const pluginProps = useMemo(
+    () => ({
+      config: widget?.config || {},
+      updateConfig: (config: any) => {
+        updateConfig(config);
+        if (previewConfig) {
+          updatePreview({
+            ...previewConfig,
+            ...config,
+          });
+        }
+      },
+    }),
+    [widget?.config, previewConfig, updateConfig, updatePreview]
+  );
+
   if (!Array.isArray(segments) || segments.length < 2) {
     return <p>Widget niet gevonden</p>;
   }
 
   const widgetType = segments[0];
   const widgetDisplayName = widgetDefinitions[widgetType]?.name || widgetType;
-  const AdminComponent = getPluginComponent(`widget:${widgetType}`);
+
+  const pluginWidgetAdmin = pluginRegistry?.widgetAdminComponents?.[widgetType];
 
   return (
     <div>
@@ -56,20 +94,15 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="settings" className="p-0">
-              {widget && AdminComponent ? (
-                <AdminComponent
-                  config={widget.config}
-                  updateConfig={(config: any) => {
-                    updateConfig(config);
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        ...config,
-                      });
-                    }
-                  }}
+              {widget && pluginWidgetAdmin ? (
+                <PluginComponentLoader
+                  pluginName={pluginWidgetAdmin.pluginName}
+                  bundleType="widget-admin"
+                  componentName={pluginWidgetAdmin.componentName}
+                  props={pluginProps}
+                  apiUrl={apiUrl}
                 />
-              ) : widget && !AdminComponent ? (
+              ) : widget && !pluginWidgetAdmin ? (
                 <div className="p-6 bg-white rounded-md">
                   <p>
                     Geen configuratiepagina beschikbaar voor widget type &quot;

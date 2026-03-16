@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { validateManifest } from './validate.js';
+import { validateManifest } from './validate';
 
 describe('validateManifest', () => {
   it('accepts a valid complete manifest', () => {
@@ -69,7 +69,7 @@ describe('validateManifest', () => {
   it('rejects a manifest with both name and version missing', () => {
     const result = validateManifest({});
     expect(result.valid).toBe(false);
-    expect(result.errors.length).toBe(2);
+    expect(result.errors!.length).toBe(2);
   });
 
   it('rejects a non-object manifest', () => {
@@ -204,7 +204,7 @@ describe('validateManifest', () => {
     );
   });
 
-  it('rejects admin.pages missing required fields', () => {
+  it('rejects admin.pages missing both componentName and componentPath', () => {
     const result = validateManifest({
       name: 'test',
       version: '1.0.0',
@@ -215,12 +215,39 @@ describe('validateManifest', () => {
     expect(result.valid).toBe(false);
     expect(result.errors).toContainEqual(
       expect.stringContaining(
-        'admin.pages[0]: missing required field "componentPath"'
+        'admin.pages[0]: missing required field "componentName" or "componentPath"'
       )
     );
-    expect(result.errors).toContainEqual(
-      expect.stringContaining('admin.pages[0]: missing required field "entry"')
-    );
+  });
+
+  it('accepts admin.pages with componentName (runtime IIFE)', () => {
+    const result = validateManifest({
+      name: 'test',
+      version: '1.0.0',
+      admin: {
+        pages: [{ path: '/settings', componentName: 'SettingsPage' }],
+        menuItems: [{ label: 'Settings', href: '/settings' }],
+      },
+    });
+    expect(result).toEqual({ valid: true });
+  });
+
+  it('accepts admin.pages with componentPath (build-time)', () => {
+    const result = validateManifest({
+      name: 'test',
+      version: '1.0.0',
+      admin: {
+        pages: [
+          {
+            path: '/settings',
+            componentPath: './admin/Settings.tsx',
+            entry: 'settings',
+          },
+        ],
+        menuItems: [{ label: 'Settings', href: '/settings' }],
+      },
+    });
+    expect(result).toEqual({ valid: true });
   });
 
   it('rejects admin.menuItems missing label', () => {

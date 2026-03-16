@@ -1,11 +1,65 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const { validateManifest } = require('./validate');
+import fs from 'fs';
+import path from 'path';
 
-/** @type {PluginLoader | null} */
-let instance = null;
+import { ValidationResult, validateManifest } from './validate';
+
+export { ValidationResult };
+
+export interface PluginManifest {
+  name: string;
+  version: string;
+  packageName?: string;
+  config?: Record<string, unknown>;
+  api?: PluginApiSection;
+  admin?: PluginAdminSection;
+  widgets?: Record<string, PluginWidgetDefinition>;
+  cms?: Record<string, unknown>;
+}
+
+export interface PluginApiSection {
+  models?: Array<{ name: string; path: string }>;
+  routes?: Array<{ method: string; path: string; handler: string }>;
+  middleware?: Array<{ path: string; position?: string; priority?: number }>;
+  migrations?: { directory: string };
+  envVars?: string[];
+}
+
+export interface PluginAdminSection {
+  bundle?: { js: string; css?: string };
+  pages?: Array<{ path: string; componentName: string; label?: string }>;
+  menuItems?: Array<{ label: string; href: string; role?: string }>;
+}
+
+export interface PluginWidgetDefinition {
+  packageName: string;
+  directory: string;
+  js: string | string[];
+  css: string | string[];
+  functionName: string;
+  componentName: string;
+  defaultConfig: Record<string, unknown>;
+  name?: string;
+  description?: string;
+  image?: string;
+  adminBundle?: { js: string; componentName: string };
+}
+
+export interface PluginEntry {
+  name?: string;
+  packageName?: string;
+  package?: string;
+  enabled: boolean;
+  config?: Record<string, unknown>;
+}
+
+interface LoadedPlugin extends PluginManifest {
+  packageName: string;
+  config: Record<string, unknown>;
+}
+
+let instance: PluginLoader | null = null;
 
 /**
  * Manifest-driven plugin loader for OpenStad Headless.
@@ -15,18 +69,18 @@ let instance = null;
  * widget systems.
  */
 class PluginLoader {
+  _plugins: LoadedPlugin[];
+  _loaded: boolean;
+
   constructor() {
-    /** @type {Array<object>} */
     this._plugins = [];
-    /** @type {boolean} */
     this._loaded = false;
   }
 
   /**
    * Returns the singleton PluginLoader instance.
-   * @returns {PluginLoader}
    */
-  static getInstance() {
+  static getInstance(): PluginLoader {
     if (!instance) {
       instance = new PluginLoader();
     }
@@ -36,7 +90,7 @@ class PluginLoader {
   /**
    * Resets the singleton instance. Intended for testing only.
    */
-  static reset() {
+  static reset(): void {
     instance = null;
   }
 
@@ -49,15 +103,17 @@ class PluginLoader {
    * - Checks that required env vars are present.
    * - A broken plugin is logged but never crashes the server.
    *
-   * @param {string} [pluginsJsonPath] - Path to plugins.json.
-   *   Defaults to `<repo-root>/plugins.json`.
-   * @returns {void}
+   * @param pluginsJsonPath - Path to plugins.json.
+   *   Defaults to `OPENSTAD_PLUGINS_PATH` env var, or searches up from __dirname.
    */
-  load(pluginsJsonPath) {
+  load(pluginsJsonPath?: string): void {
     if (this._loaded) return;
     this._loaded = true;
 
     let filePath = pluginsJsonPath;
+    if (!filePath && process.env.OPENSTAD_PLUGINS_PATH) {
+      filePath = process.env.OPENSTAD_PLUGINS_PATH;
+    }
     if (!filePath) {
       // Search up from __dirname to find plugins.json at the repo root
       let dir = __dirname;
@@ -74,14 +130,15 @@ class PluginLoader {
       }
     }
 
-    let pluginsConfig;
+    let pluginsConfig: { plugins?: PluginEntry[] };
     try {
       const raw = fs.readFileSync(filePath, 'utf-8');
       pluginsConfig = JSON.parse(raw);
-    } catch (err) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       console.error(
         `[plugin-loader] Failed to read plugins.json at ${filePath}:`,
-        err.message
+        message
       );
       return;
     }
@@ -93,15 +150,17 @@ class PluginLoader {
       const packageName = entry.packageName || entry.package;
 
       try {
-        const pluginModule = require(packageName);
-        const manifest = pluginModule.manifest || pluginModule;
+        const pluginModule = require(packageName as string);
+        const manifest: PluginManifest = pluginModule.manifest || pluginModule;
 
         // Validate the manifest
-        const validation = validateManifest(manifest);
+        const validation = validateManifest(
+          manifest as unknown as Record<string, unknown>
+        );
         if (!validation.valid) {
           console.error(
             `[plugin-loader] Invalid manifest for "${packageName}":`,
-            validation.errors.join('; ')
+            validation.errors!.join('; ')
           );
           continue;
         }
@@ -123,23 +182,40 @@ class PluginLoader {
 
         this._plugins.push({
           ...manifest,
-          packageName: packageName,
+          packageName: packageName as string,
           config: entry.config || {},
         });
-      } catch (err) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
         console.error(
           `[plugin-loader] Failed to load plugin "${packageName}":`,
-          err.message
+          message
         );
       }
     }
   }
 
   /**
-   * Returns plugins that expose an `api` section.
-   * @returns {Array<{ name: string, version: string, config: object, api: object }>}
+   * Reloads plugins from plugins.json, clearing the current state.
+   * Only reloads the registry metadata (pages, menu items, widget admin).
+   * API hooks (models, routes, middleware) registered at startup are NOT affected.
    */
-  getApiHooks() {
+  reload(pluginsJsonPath?: string): void {
+    this._plugins = [];
+    this._loaded = false;
+    this.load(pluginsJsonPath);
+  }
+
+  /**
+   * Returns plugins that expose an `api` section.
+   */
+  getApiHooks(): Array<{
+    name: string;
+    version: string;
+    packageName: string;
+    config: Record<string, unknown>;
+    api: PluginApiSection;
+  }> {
     return this._plugins
       .filter((p) => p.api)
       .map((p) => ({
@@ -147,15 +223,20 @@ class PluginLoader {
         version: p.version,
         packageName: p.packageName,
         config: p.config,
-        api: p.api,
+        api: p.api!,
       }));
   }
 
   /**
    * Returns plugins that expose an `admin` section.
-   * @returns {Array<{ name: string, version: string, config: object, admin: object }>}
    */
-  getAdminHooks() {
+  getAdminHooks(): Array<{
+    name: string;
+    version: string;
+    packageName: string;
+    config: Record<string, unknown>;
+    admin: PluginAdminSection;
+  }> {
     return this._plugins
       .filter((p) => p.admin)
       .map((p) => ({
@@ -163,18 +244,16 @@ class PluginLoader {
         version: p.version,
         packageName: p.packageName,
         config: p.config,
-        admin: p.admin,
+        admin: p.admin!,
       }));
   }
 
   /**
    * Merges all plugins' `widgets` entries into a single object.
    * Warns on key conflicts and skips duplicates (first plugin wins).
-   *
-   * @returns {object} Merged widget definitions keyed by widget name.
    */
-  getWidgetDefinitions() {
-    const merged = {};
+  getWidgetDefinitions(): Record<string, PluginWidgetDefinition> {
+    const merged: Record<string, PluginWidgetDefinition> = {};
 
     for (const plugin of this._plugins) {
       if (!plugin.widgets) continue;
@@ -195,9 +274,14 @@ class PluginLoader {
 
   /**
    * Returns plugins that expose a `cms` section.
-   * @returns {Array<{ name: string, version: string, config: object, cms: object }>}
    */
-  getCmsHooks() {
+  getCmsHooks(): Array<{
+    name: string;
+    version: string;
+    packageName: string;
+    config: Record<string, unknown>;
+    cms: Record<string, unknown>;
+  }> {
     return this._plugins
       .filter((p) => p.cms)
       .map((p) => ({
@@ -205,15 +289,14 @@ class PluginLoader {
         version: p.version,
         packageName: p.packageName,
         config: p.config,
-        cms: p.cms,
+        cms: p.cms!,
       }));
   }
 
   /**
    * Returns all loaded plugins.
-   * @returns {Array<object>}
    */
-  getLoadedPlugins() {
+  getLoadedPlugins(): LoadedPlugin[] {
     return this._plugins;
   }
 }
@@ -222,10 +305,10 @@ class PluginLoader {
  * Returns migration glob patterns from all loaded plugins that have
  * an `api.migrations.directory` configured.
  *
- * @param {string[]} [baseGlobs=['./migrations/*.js']] - Core migration globs.
- * @returns {string[]} Array of glob patterns including plugin migration dirs.
+ * @param baseGlobs - Core migration globs. Defaults to `['./migrations/*.js']`.
+ * @returns Array of glob patterns including plugin migration dirs.
  */
-function getPluginMigrationGlobs(baseGlobs) {
+function getPluginMigrationGlobs(baseGlobs?: string[]): string[] {
   const globs = baseGlobs ? [...baseGlobs] : ['./migrations/*.js'];
 
   try {
@@ -244,11 +327,13 @@ function getPluginMigrationGlobs(baseGlobs) {
         globs.push(migrationsDir);
       }
     }
-  } catch (err) {
-    if (err.code !== 'MODULE_NOT_FOUND') {
+  } catch (err: unknown) {
+    const nodeErr = err as NodeJS.ErrnoException;
+    if (nodeErr.code !== 'MODULE_NOT_FOUND') {
+      const message = err instanceof Error ? err.message : String(err);
       console.error(
         '[plugin-loader] Error loading plugin migrations:',
-        err.message
+        message
       );
     }
   }
@@ -256,6 +341,10 @@ function getPluginMigrationGlobs(baseGlobs) {
   return globs;
 }
 
+// CJS compatibility: require() returns PluginLoader class with static methods
+// and getPluginMigrationGlobs attached as a property
 module.exports = PluginLoader;
 module.exports.getInstance = PluginLoader.getInstance;
+module.exports.reset = PluginLoader.reset;
 module.exports.getPluginMigrationGlobs = getPluginMigrationGlobs;
+module.exports.PluginLoader = PluginLoader;

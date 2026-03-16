@@ -1,16 +1,20 @@
 'use strict';
 
+export interface ValidationResult {
+  valid: boolean;
+  errors?: string[];
+}
+
 /**
  * Validates a plugin manifest object.
  *
  * Checks required top-level fields and validates nested sections
  * (api.models, api.routes, api.middleware, widgets, admin.pages, admin.menuItems).
- *
- * @param {object} manifest - The plugin manifest to validate.
- * @returns {{ valid: boolean, errors?: string[] }}
  */
-function validateManifest(manifest) {
-  const errors = [];
+export function validateManifest(
+  manifest: Record<string, unknown> | null | undefined
+): ValidationResult {
+  const errors: string[] = [];
 
   // Required top-level fields
   if (!manifest || typeof manifest !== 'object') {
@@ -30,9 +34,10 @@ function validateManifest(manifest) {
   }
 
   // Validate api section
-  if (manifest.api) {
-    if (Array.isArray(manifest.api.models)) {
-      manifest.api.models.forEach((model, i) => {
+  const api = manifest.api as Record<string, unknown> | undefined;
+  if (api) {
+    if (Array.isArray(api.models)) {
+      (api.models as Array<Record<string, unknown>>).forEach((model, i) => {
         if (!model.name) {
           errors.push(`api.models[${i}]: missing required field "name"`);
         }
@@ -42,8 +47,8 @@ function validateManifest(manifest) {
       });
     }
 
-    if (Array.isArray(manifest.api.routes)) {
-      manifest.api.routes.forEach((route, i) => {
+    if (Array.isArray(api.routes)) {
+      (api.routes as Array<Record<string, unknown>>).forEach((route, i) => {
         if (!route.method) {
           errors.push(`api.routes[${i}]: missing required field "method"`);
         }
@@ -56,8 +61,8 @@ function validateManifest(manifest) {
       });
     }
 
-    if (Array.isArray(manifest.api.middleware)) {
-      manifest.api.middleware.forEach((mw, i) => {
+    if (Array.isArray(api.middleware)) {
+      (api.middleware as Array<Record<string, unknown>>).forEach((mw, i) => {
         if (!mw.path) {
           errors.push(`api.middleware[${i}]: missing required field "path"`);
         }
@@ -66,7 +71,10 @@ function validateManifest(manifest) {
   }
 
   // Validate widgets section
-  if (manifest.widgets) {
+  const widgets = manifest.widgets as
+    | Record<string, Record<string, unknown>>
+    | undefined;
+  if (widgets) {
     const requiredWidgetKeys = [
       'packageName',
       'directory',
@@ -77,7 +85,7 @@ function validateManifest(manifest) {
       'defaultConfig',
     ];
 
-    Object.entries(manifest.widgets).forEach(([key, widget]) => {
+    Object.entries(widgets).forEach(([key, widget]) => {
       requiredWidgetKeys.forEach((reqKey) => {
         if (widget[reqKey] === undefined || widget[reqKey] === null) {
           errors.push(`widgets["${key}"]: missing required field "${reqKey}"`);
@@ -87,25 +95,24 @@ function validateManifest(manifest) {
   }
 
   // Validate admin section
-  if (manifest.admin) {
-    if (Array.isArray(manifest.admin.pages)) {
-      manifest.admin.pages.forEach((page, i) => {
+  const admin = manifest.admin as Record<string, unknown> | undefined;
+  if (admin) {
+    if (Array.isArray(admin.pages)) {
+      (admin.pages as Array<Record<string, unknown>>).forEach((page, i) => {
         if (!page.path) {
           errors.push(`admin.pages[${i}]: missing required field "path"`);
         }
-        if (!page.componentPath) {
+        // Runtime IIFE pages use componentName; build-time pages use componentPath + entry
+        if (!page.componentName && !page.componentPath) {
           errors.push(
-            `admin.pages[${i}]: missing required field "componentPath"`
+            `admin.pages[${i}]: missing required field "componentName" or "componentPath"`
           );
-        }
-        if (!page.entry) {
-          errors.push(`admin.pages[${i}]: missing required field "entry"`);
         }
       });
     }
 
-    if (Array.isArray(manifest.admin.menuItems)) {
-      manifest.admin.menuItems.forEach((item, i) => {
+    if (Array.isArray(admin.menuItems)) {
+      (admin.menuItems as Array<Record<string, unknown>>).forEach((item, i) => {
         if (!item.label) {
           errors.push(`admin.menuItems[${i}]: missing required field "label"`);
         }
@@ -122,5 +129,3 @@ function validateManifest(manifest) {
 
   return { valid: true };
 }
-
-module.exports = { validateManifest };
