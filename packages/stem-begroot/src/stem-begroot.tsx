@@ -1293,7 +1293,17 @@ function StemBegroot({
                     }
                   }}
                   disabled={(() => {
-                    if (currentStep === 0 && selectedResources.length < props.votes.minResources) return true;
+                    if (
+                      props.votes.voteType === 'count' &&
+                      selectedResources.length < props.votes.minResources
+                    )
+                      return true;
+
+                    if (
+                      props.votes.voteType === 'budgeting' &&
+                      budgetUsed < props.votes.minBudget
+                    )
+                      return true;
 
                     if (
                       props.votes.voteType === 'countPerTag' ||
