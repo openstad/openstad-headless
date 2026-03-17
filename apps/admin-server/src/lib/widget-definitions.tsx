@@ -46,11 +46,6 @@ export const WidgetDefinitions = {
     description: 'Bekijk de kaart met een overzicht van inzendingen.',
     image: '/widget_preview/resource_map_preview.png',
   },
-  resourcedetailmap: {
-    name: 'Inzending kaart',
-    description: 'Bekijk één inzending op de kaart.',
-    image: '/widget_preview/resource_map_preview.png',
-  },
   counter: {
     name: 'Teller',
     description:
@@ -108,6 +103,13 @@ export const WidgetDefinitions = {
     description:
       'Bekijk de openbare pagina van een inzending op de interactieve kaart.',
     image: '/widget_preview/resource_detail_with_map_preview.png',
+    hidden: true,
+  },
+  resourcedetailmap: {
+    name: 'Inzending kaart',
+    description: 'Bekijk één inzending op de kaart.',
+    image: '/widget_preview/resource_map_preview.png',
+    hidden: true,
   },
   documentmap: {
     name: 'Interactieve afbeelding',
