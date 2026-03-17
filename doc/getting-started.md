@@ -145,11 +145,13 @@ Six docker containers have been created:
 
 Some tasks use the `tools` profile and are run on demand (they do not start with `docker compose up`).
 
-**Regenerate `package-lock.json` (root only, no install):**
+**Regenerate `package-lock.json` (lock file only, no install):**
 
-````bash
-docker compose --profile tools run --rm openstad-update-lock
-      ```
+Remove `node_modules` first to avoid EACCES on the Docker mount, then run the update-lock container:
+
+```bash
+rm -rf node_modules && docker compose --profile tools run --rm openstad-update-lock`
+```
 
 ### Initial data
 
@@ -226,3 +228,4 @@ docker-compose down -v
 - De db's zijn nu een kopie van docker-compose.deps-only.yml; die zou je willen hergebruiken ipv kopieren
 - Ik heb de Dockerfiles in de apps wat opgeschoond, maar er moet natuurlijk gechecked of die nou nog goed werken
 ```
+````
