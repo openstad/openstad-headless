@@ -141,7 +141,7 @@ services:
       - HASH_IP_SALT=${HASH_IP_SALT}
       - USER_ID_SALT=${USER_ID_SALT}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-api-server}
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4318/v1/traces}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:

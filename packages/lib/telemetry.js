@@ -4,7 +4,7 @@ const {
 } = require('@opentelemetry/auto-instrumentations-node');
 const {
   OTLPTraceExporter,
-} = require('@opentelemetry/exporter-trace-otlp-http');
+} = require('@opentelemetry/exporter-trace-otlp-grpc');
 const { Resource } = require('@opentelemetry/resources');
 // Use standard OTel resource attribute names (semantic-conventions exports can vary by version)
 const SERVICE_NAME = 'service.name';
@@ -19,7 +19,7 @@ const defaultConfig = {
   environment: process.env.NODE_ENV || 'development',
   otlpEndpoint:
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
-    'http://openstad-otel-collector:4318/v1/traces',
+    'http://openstad-otel-collector:4317',
 };
 
 function mergeConfig(config = {}) {
@@ -48,7 +48,6 @@ function createTelemetry(config = {}) {
 
       const traceExporter = new OTLPTraceExporter({
         url: merged.otlpEndpoint,
-        headers: merged.otlpHeaders || {},
       });
 
       sdk = new NodeSDK({
