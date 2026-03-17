@@ -577,16 +577,12 @@ router
     }
     return next();
   })
-  .put(async function (req, res, next) {
-    try {
-      const value =
-        typeof req.body?.anonymizeUserName === 'string'
-          ? req.body.anonymizeUserName.trim()
-          : '';
-      req.anonymizeUserName = value || undefined;
-    } catch (err) {
-      return next(err);
-    }
+  .put(function (req, res, next) {
+    const value =
+      typeof req.body?.anonymizeUserName === 'string'
+        ? req.body.anonymizeUserName.trim()
+        : '';
+    req.anonymizeUserName = value || undefined;
     return next();
   })
   .put(async function (req, res, next) {
@@ -598,7 +594,7 @@ router
         req.targetUser.can('update', req.user)
       )
     )
-      return next(new Error('You cannot update this User'));
+      return next(createError(403, 'You cannot update this User'));
     if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
       req.results = {
         resources: [],
@@ -611,7 +607,9 @@ router
     }
     try {
       if (req.params.willOrDo == 'do') {
-        result = await req.targetUser.doAnonymize(req.anonymizeUserName);
+        result = await req.targetUser.doAnonymize(req.anonymizeUserName, {
+          deleteVotes: false,
+        });
       } else {
         result = await req.targetUser.willAnonymize();
       }
@@ -633,9 +631,11 @@ router
         if (!req.onlyUserIds || req.onlyUserIds.includes(user.id)) {
           let result;
           if (!(user && user.can && user.can('update', req.user)))
-            return next(new Error('You cannot update this User'));
+            return next(createError(403, 'You cannot update this User'));
           if (req.params.willOrDo == 'do') {
-            result = await user.doAnonymize(req.anonymizeUserName);
+            result = await user.doAnonymize(req.anonymizeUserName, {
+              deleteVotes: false,
+            });
           } else {
             result = await user.willAnonymize();
           }

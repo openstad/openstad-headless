@@ -1,7 +1,13 @@
 import { ResetResourceDialog } from '@/components/dialog-resource-reset';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -346,21 +352,21 @@ export default function CreateUserGeneral() {
         onOpenChange={setIsAnonymizeDialogOpen}>
         <DialogContent
           onEscapeKeyDown={(e: KeyboardEvent) => {
-            e.stopPropagation();
+            if (isAnonymizing) e.preventDefault();
           }}
           onInteractOutside={(e: Event) => {
-            e.stopPropagation();
-            if (isAnonymizing) return;
-            setIsAnonymizeDialogOpen(false);
+            if (isAnonymizing) e.preventDefault();
           }}>
           <div>
-            <Heading size="lg">Weet je het zeker?</Heading>
-            <p className="mt-3 mb-6 text-sm text-muted-foreground">
+            <DialogTitle asChild>
+              <Heading size="lg">Weet je het zeker?</Heading>
+            </DialogTitle>
+            <DialogDescription className="mt-3 mb-6 text-sm text-muted-foreground">
               Deze actie verwijdert persoonlijke gegevens (zoals e-mail,
               telefoon, adres en naam) en maakt de gebruiker anoniem in alle
               projecten waarin dit account voorkomt. Deze actie kan niet
               ongedaan worden gemaakt.
-            </p>
+            </DialogDescription>
 
             <div className="space-y-2 mb-6">
               <label
