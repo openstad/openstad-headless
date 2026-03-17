@@ -240,6 +240,7 @@ const defaultHeaderRenderer = (
           {...widgetProps}
           {...widgetProps.resourceOverviewMapWidget}
           givenResources={resources}
+          noFetch={true}
           selectedProjects={selectedProjects}
           locationProx={location}
           onMarkerClick={
