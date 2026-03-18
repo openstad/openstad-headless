@@ -45,10 +45,12 @@ exports.login = (req, res) => {
   res.render('auth/local/login', {
     loginUrl:
       authLocalConfig.loginUrl +
-      `?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`,
+      `?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`,
     clientId: req.client.clientId,
     client: req.client,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
     title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
     description: configAuthType.description
       ? configAuthType.description
@@ -138,6 +140,12 @@ exports.postLogin = (req, res, next) => {
       const redirectUrl = req.query.redirect_uri
         ? encodeURIComponent(req.query.redirect_uri)
         : req.client.redirectUrl;
+      if (!redirectUrl)
+        return next(
+          new Error(
+            'No redirect_uri provided and no default redirectUrl configured for this client'
+          )
+        );
       const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
       //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
