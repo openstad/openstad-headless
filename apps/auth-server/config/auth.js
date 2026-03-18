@@ -27,7 +27,7 @@ const types = [
       'Vul hieronder je unieke code in om een OpenStad account aan te maken. Deze code heb je thuis gestuurd gekregen van ons.',
     label: 'Mijn stemcode',
     helpText:
-      'Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet? <a href="mailto:[[contactEmail]]">Neem contact met ons op.</a>',
+      'Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet? <a href="mailto:{{clientEmail}}">Neem contact met ons op.</a>',
     errorMessage:
       'Vul een geldige stemcode in. Heb je een typefout gemaakt? Stemcodes zijn hoofdlettergevoelig.',
     displaySidebar: false,
@@ -67,7 +67,7 @@ const types = [
     smsCodeLabel: 'Mijn sms-stemcode:',
     smsCodeButtonText: 'Controleer de sms-code',
     smsCodeHelpText:
-      'Het kan enkele minuten duren voordat u de sms-code ontvangt. Een sms-code is 60 minuten geldig. Geen sms gekregen na het invoeren van uw telefoonnummer?<br/><a href="javascript:history.back()">Vraag nog een sms-code aan</a> of <a href="mailto: placemakingsluisbuurt@amsterdam.nl">neem contact met ons op.</a>',
+      'Het kan enkele minuten duren voordat u de sms-code ontvangt. Een sms-code is 60 minuten geldig. Geen sms gekregen na het invoeren van uw telefoonnummer?<br/><a href="javascript:history.back()">Vraag nog een sms-code aan</a> of <a href="mailto:{{clientEmail}}">neem contact met ons op.</a>',
     smsCodeErrorMessage:
       'Dat is niet de stemcode die u toegestuurd hebt gekregen. Vraag een een nieuwe code aan. Vul hieronder nogmaals uw telefoonnummer in.',
     smsCodeUrl: formatSMSCodeUrl('phonenumber'),
@@ -82,13 +82,13 @@ const types = [
     key: 'Url',
     label: 'E-mail een inloglink',
     loginUrl: formatLoginUrl('url'),
-    title: 'Registreren of inloggen per e-mail',
+    title: 'Bevestig jouw e-mailadres',
     description:
-      'Je ontvangt per email een link waarmee je kan inloggen. Hierna ben je gelijk ingelogd voor 6 maanden of totdat je uitlogt. Je hoeft je hiervoor niet apart te registreren.',
-    label: 'Emailadres:',
-    buttonText: 'Stuur link',
+      'Je ontvangt per e-mail een link waarmee je kan inloggen. Daarna kom je automatisch terug op de pagina waar je hebt ingelogd.',
+    label: 'E-mailadres:',
+    buttonText: 'Verstuur e-mail',
     helpText:
-      'Geen mail gekregen na het versturen van de link? Kijk dan in je spam-folder of neem contact met ons op.',
+      'Geen e-mail gekregen na het versturen van de link? Kijk dan in je ongewenste e-mails of <a href="mailto:{{clientEmail}}">neem contact met ons op.</a>',
     displayBackbutton: true,
     displaySidebar: true,
     displayAccountLink: false,

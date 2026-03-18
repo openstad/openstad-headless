@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Copy, Info } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
@@ -22,6 +24,25 @@ import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
+
+function CopyableVar({ name }: { name: string }) {
+  const value = `{{${name}}}`;
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        navigator.clipboard?.writeText(value).catch(() => null);
+        toast('Tekst gekopieerd', {
+          icon: <Info className="h-4 w-4 text-blue-500" />,
+        });
+      }}
+      title={`Kopieer ${value}`}
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted font-mono text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-copy">
+      {value}
+      <Copy className="h-3 w-3" />
+    </button>
+  );
+}
 
 const formSchema = z.object({
   UniqueCodeTitle: z.string().optional(),
@@ -34,6 +55,9 @@ const formSchema = z.object({
   UrlLabel: z.string().optional(),
   UrlButtonText: z.string().optional(),
   UrlHelpText: z.string().optional(),
+  UrlConfirmedTitle: z.string().optional(),
+  UrlConfirmedDescription: z.string().optional(),
+  UrlConfirmedHelpText: z.string().optional(),
   SMS1Title: z.string().optional(),
   SMS1Subtitle: z.string().optional(),
   SMS1Description: z.string().optional(),
@@ -51,7 +75,6 @@ const formSchema = z.object({
   LocalEmailLabel: z.string().optional(),
   LocalPasswordLabel: z.string().optional(),
   LocalButtonText: z.string().optional(),
-  LocalHelpText: z.string().optional(),
   LocalForgotPasswordText: z.string().optional(),
 });
 
@@ -93,25 +116,40 @@ export default function ProjectAuthentication() {
       UrlTitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.title ||
         authTypeDefaults?.Url?.title ||
-        '',
+        'Bevestig jouw e-mailadres',
       UrlDescription:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
           ?.description ||
         authTypeDefaults?.Url?.description ||
-        '',
+        'Je ontvangt per e-mail een link waarmee je kan inloggen. Daarna kom je automatisch terug op de pagina waar je hebt ingelogd.',
       UrlLabel:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.label ||
         authTypeDefaults?.Url?.label ||
-        '',
+        'E-mailadres:',
       UrlButtonText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
           ?.buttonText ||
         authTypeDefaults?.Url?.buttonText ||
-        '',
+        'Verstuur e-mail',
       UrlHelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
           ?.helpText ||
         authTypeDefaults?.Url?.helpText ||
+        'Geen e-mail gekregen na het versturen van de link? Kijk dan in je ongewenste e-mails of <a href="mailto:{{clientEmail}}">neem contact met ons op.</a>',
+      UrlConfirmedTitle:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.confirmedTitle ||
+        authTypeDefaults?.Url?.confirmedTitle ||
+        'E-mail verstuurd!',
+      UrlConfirmedDescription:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.confirmedDescription ||
+        authTypeDefaults?.Url?.confirmedDescription ||
+        'Bekijk je Postvak IN om in te loggen. Het kan enkele minuten duren voordat de e-mail verschijnt.<br/><br/>Geen mail gekregen na het versturen van de link? Kijk dan in je ongewenste e-mails of <a href="{{retryUrl}}">probeer het opnieuw</a>.<br/><br/>Lukt het alsnog niet? <a href="mailto:{{clientEmail}}">Neem contact met ons op.</a>',
+      UrlConfirmedHelpText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
+          ?.confirmedHelpText ||
+        authTypeDefaults?.Url?.confirmedHelpText ||
         '',
       SMS1Title:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
@@ -198,11 +236,6 @@ export default function ProjectAuthentication() {
           ?.buttonText ||
         authTypeDefaults?.Local?.buttonText ||
         '',
-      LocalHelpText:
-        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
-          ?.helpText ||
-        authTypeDefaults?.Local?.helpText ||
-        '',
       LocalForgotPasswordText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
           ?.forgotPasswordText ||
@@ -241,6 +274,9 @@ export default function ProjectAuthentication() {
                   label: values.UrlLabel,
                   buttonText: values.UrlButtonText,
                   helpText: values.UrlHelpText,
+                  confirmedTitle: values.UrlConfirmedTitle,
+                  confirmedDescription: values.UrlConfirmedDescription,
+                  confirmedHelpText: values.UrlConfirmedHelpText,
                 },
                 Phonenumber: {
                   loginTitle: values.SMS1Title,
@@ -262,7 +298,6 @@ export default function ProjectAuthentication() {
                   emailLabel: values.LocalEmailLabel,
                   passwordLabel: values.LocalPasswordLabel,
                   buttonText: values.LocalButtonText,
-                  helpText: values.LocalHelpText,
                   forgotPasswordText: values.LocalForgotPasswordText,
                 },
               },
@@ -391,6 +426,13 @@ export default function ProjectAuthentication() {
                               {...field}
                             />
                           </FormControl>
+                          <FormDescription>
+                            HTML is toegestaan. Klik een variabele om te
+                            kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -491,6 +533,80 @@ export default function ProjectAuthentication() {
                               {...field}
                             />
                           </FormControl>
+                          <FormDescription>
+                            HTML is toegestaan. Klik een variabele om te
+                            kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Separator className="my-4" />
+                    <p className="text-sm font-medium leading-none">
+                      Teksten voor de bevestigingspagina na het versturen van de
+                      e-mail:
+                    </p>
+
+                    <FormField
+                      control={form.control}
+                      name="UrlConfirmedTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Titel</FormLabel>
+                          <FormControl>
+                            <Input placeholder="E-mail verstuurd!" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Laat leeg om de standaardtekst te gebruiken.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="UrlConfirmedDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Beschrijving</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            HTML is toegestaan. Klik een variabele om te
+                            kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="retryUrl" />
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="UrlConfirmedHelpText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Help tekst</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            HTML is toegestaan. Klik een variabele om te
+                            kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="retryUrl" />
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -615,6 +731,13 @@ export default function ProjectAuthentication() {
                               {...field}
                             />
                           </FormControl>
+                          <FormDescription>
+                            HTML is toegestaan. Klik een variabele om te
+                            kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -714,6 +837,13 @@ export default function ProjectAuthentication() {
                               {...field}
                             />
                           </FormControl>
+                          <FormDescription>
+                            HTML is toegestaan. Klik een variabele om te
+                            kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -812,23 +942,6 @@ export default function ProjectAuthentication() {
                           <FormLabel>Knoptekst</FormLabel>
                           <FormControl>
                             <Input placeholder="Voer knoptekst in" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="LocalHelpText"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Help tekst</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Voer helptekst in"
-                              {...field}
-                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
