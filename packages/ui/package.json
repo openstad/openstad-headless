@@ -24,7 +24,7 @@
     "html-to-react": "^1.7.0",
     "react-transition-group": "^4.4.5",
     "tailwind-merge": "^1.14.0",
-    "trix": "^2.1.15",
+    "trix": "^2.1.17",
     "vite": "^6.4.1"
   },
   "devDependencies": {
