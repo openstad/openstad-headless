@@ -10,6 +10,7 @@ export default {
       statuses,
       projectIds,
       allowMultipleProjects,
+      seed,
     },
     options
   ) {
@@ -30,6 +31,14 @@ export default {
     if (sort) {
       if (!Array.isArray(sort)) sort = [sort];
       sort.map((criterium) => params.append('sort', criterium));
+    }
+
+    if (
+      seed != null &&
+      sort &&
+      (Array.isArray(sort) ? sort.includes('random') : sort === 'random')
+    ) {
+      params.append('seed', String(seed));
     }
 
     if (page >= 0 && pageSize) {

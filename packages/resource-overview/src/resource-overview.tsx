@@ -979,7 +979,8 @@ function ResourceOverviewInner({
     ...props,
     search,
     tags: [],
-    sort: undefined,
+    sort: sort === 'random' ? 'random' : undefined,
+    seed: sort === 'random' ? randomSortSeed : undefined,
     projectIds: projectIds || [],
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1,
   });
@@ -1166,12 +1167,16 @@ function ResourceOverviewInner({
           return a.yes - b.yes;
         }
         if (sort === 'random') {
-          return deterministicRandomSort(
-            a,
-            b,
-            randomSortSeed,
-            getResourceStableKey
-          );
+          // Multi-project resources overview
+          if (uniqueResources.length > 0) {
+            return deterministicRandomSort(
+              a,
+              b,
+              randomSortSeed,
+              getResourceStableKey
+            );
+          }
+          return 0;
         }
         if (sort === 'score') {
           return (b.score || 0) - (a.score || 0);
