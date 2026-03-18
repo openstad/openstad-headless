@@ -41,6 +41,9 @@ ENV CYPRESS_CACHE_FOLDER=/tmp/CypressCache
 
 RUN npm ci --safe-chain-skip-minimum-package-age
 
+# Build plugin-loader (TypeScript → dist/) before app builds need it
+RUN npm run build --if-present -w packages/plugin-loader
+
 FROM builder AS base
 
 ARG APP

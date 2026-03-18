@@ -286,6 +286,15 @@ spec:
                 key: rateWindowMs
                 name: {{ template "openstad.ratelimit.secret.fullname" . }}
 
+          {{- if .Values.plugins.enabled }}
+          - name: NODE_PATH
+            value: "{{ .Values.plugins.installPath }}/node_modules"
+          - name: PLUGIN_JSON_OVERRIDE
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "openstad.fullname" . }}-plugins
+                key: plugins.json
+          {{- end }}
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
@@ -305,6 +314,10 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-dir
+            {{- if .Values.plugins.enabled }}
+            - mountPath: {{ .Values.plugins.installPath }}
+              name: plugin-modules
+            {{- end }}
           resources:
 {{ toYaml .Values.api.resources | indent 12 }}
           readinessProbe:
@@ -322,8 +335,39 @@ spec:
       volumes:
         - name: tmp-dir
           emptyDir: {}
+        {{- if .Values.plugins.enabled }}
+        - name: plugin-modules
+          emptyDir: {}
+        {{- if .Values.plugins.npmrcSecret }}
+        - name: npmrc-secret
+          secret:
+            secretName: {{ .Values.plugins.npmrcSecret }}
+        {{- end }}
+        {{- end }}
       dnsPolicy: ClusterFirst
       initContainers:
+        {{- if .Values.plugins.enabled }}
+        - name: install-plugins
+          image: {{ .Values.plugins.nodeImage }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              cd {{ .Values.plugins.installPath }}
+              echo '{"private":true}' > package.json
+              {{- if .Values.plugins.npmrcSecret }}
+              cp /etc/npmrc-secret/.npmrc .npmrc
+              {{- end }}
+              npm install --no-save {{ range .Values.plugins.items }}{{ if .enabled }}{{ .packageName }}{{ if .version }}@{{ .version }}{{ end }} {{ end }}{{ end }}
+          volumeMounts:
+            - name: plugin-modules
+              mountPath: {{ .Values.plugins.installPath }}
+            {{- if .Values.plugins.npmrcSecret }}
+            - name: npmrc-secret
+              mountPath: /etc/npmrc-secret
+              readOnly: true
+            {{- end }}
+        {{- end }}
         - command: ["/bin/bash", "-c"]
           args:
             - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server
@@ -518,12 +562,26 @@ spec:
             - name: BASE_DOMAIN
               value: {{ .Values.host.base }}
 
+            {{- if .Values.plugins.enabled }}
+            - name: NODE_PATH
+              value: "{{ .Values.plugins.installPath }}/node_modules"
+            - name: PLUGIN_JSON_OVERRIDE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "openstad.fullname" . }}-plugins
+                  key: plugins.json
+            {{- end }}
             {{- if .Values.api.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
           image: {{ .Values.api.deploymentContainer.image }}
           imagePullPolicy: IfNotPresent
           name: init-db-ready
+          {{- if .Values.plugins.enabled }}
+          volumeMounts:
+            - name: plugin-modules
+              mountPath: {{ .Values.plugins.installPath }}
+          {{- end }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       restartPolicy: Always

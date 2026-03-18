@@ -83,6 +83,15 @@ spec:
                 name: {{ template "openstad.ipaddress.secret.fullname" . }}
           - name: EXTERNAL_CERTIFICATES_ENABLED
             value: "{{ .Values.api.externalCertificates.enabled }}"
+          {{- if .Values.plugins.enabled }}
+          - name: NODE_PATH
+            value: "{{ .Values.plugins.installPath }}/node_modules"
+          - name: PLUGIN_JSON_OVERRIDE
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "openstad.fullname" . }}-plugins
+                key: plugins.json
+          {{- end }}
           # Inject extra environment variables
           {{- if .Values.admin.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.admin.extraEnvVars "context" $) | nindent 10 }}
@@ -93,5 +102,41 @@ spec:
         {{- if .Values.admin.customWorkingDir }}
         workingDir: {{ .Values.admin.customWorkingDir }}
         {{- end }}
+        {{- if .Values.plugins.enabled }}
+        volumeMounts:
+          - name: plugin-modules
+            mountPath: {{ .Values.plugins.installPath }}
+        {{- end }}
         resources:
 {{ toYaml .Values.admin.resources | indent 12 }}
+      {{- if .Values.plugins.enabled }}
+      volumes:
+        - name: plugin-modules
+          emptyDir: {}
+        {{- if .Values.plugins.npmrcSecret }}
+        - name: npmrc-secret
+          secret:
+            secretName: {{ .Values.plugins.npmrcSecret }}
+        {{- end }}
+      initContainers:
+        - name: install-plugins
+          image: {{ .Values.plugins.nodeImage }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              cd {{ .Values.plugins.installPath }}
+              echo '{"private":true}' > package.json
+              {{- if .Values.plugins.npmrcSecret }}
+              cp /etc/npmrc-secret/.npmrc .npmrc
+              {{- end }}
+              npm install --no-save {{ range .Values.plugins.items }}{{ if .enabled }}{{ .packageName }}{{ if .version }}@{{ .version }}{{ end }} {{ end }}{{ end }}
+          volumeMounts:
+            - name: plugin-modules
+              mountPath: {{ .Values.plugins.installPath }}
+            {{- if .Values.plugins.npmrcSecret }}
+            - name: npmrc-secret
+              mountPath: /etc/npmrc-secret
+              readOnly: true
+            {{- end }}
+      {{- end }}

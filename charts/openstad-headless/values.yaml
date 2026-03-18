@@ -568,3 +568,28 @@ secrets:
   ipAddress:
     hashIpAddresses: "false"
     hashIpSalt:
+
+# Plugin configuration
+# Plugins are installed at runtime via an init container.
+plugins:
+  enabled: false
+  # Node.js image used by the init container to run npm install
+  nodeImage: node:22-slim
+  # Install path inside the shared volume
+  installPath: /opt/openstad-plugins
+  # Optional: name of an existing Secret containing .npmrc for private registries
+  # The secret should have a key named ".npmrc"
+  npmrcSecret: ""
+  # Plugin list (same format as plugins.json)
+  items: []
+  # Example:
+  # items:
+  #   - name: metkoos
+  #     packageName: "@draadnl/metkoos-plugin"
+  #     version: "1.2.3"
+  #     enabled: true
+  #   - name: my-plugin
+  #     packageName: "@myorg/my-plugin"
+  #     enabled: true
+  #     config:
+  #       someKey: someValue

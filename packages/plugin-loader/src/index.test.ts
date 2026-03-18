@@ -61,6 +61,9 @@ afterEach(() => {
     delete require_.cache[name];
   }
 
+  // Clean up env var
+  delete process.env.PLUGIN_JSON_OVERRIDE;
+
   // Clean up temp file
   try {
     fs.unlinkSync(tmpFile);
@@ -314,6 +317,84 @@ describe('PluginLoader', () => {
       expect(loaded).toHaveLength(1);
       expect(loaded[0].name).toBe('alias-plugin');
       expect(loaded[0].packageName).toBe('alias-plugin');
+    });
+  });
+
+  describe('PLUGIN_JSON_OVERRIDE', () => {
+    it('loads plugins from env var instead of file', () => {
+      const manifest = validManifest({ name: 'env-loaded' });
+      registerFakeModule('env-loaded', { manifest });
+
+      process.env.PLUGIN_JSON_OVERRIDE = JSON.stringify({
+        plugins: [{ packageName: 'env-loaded', enabled: true }],
+      });
+
+      const loader = PluginLoader.getInstance();
+      loader.load();
+
+      const loaded = loader.getLoadedPlugins();
+      expect(loaded).toHaveLength(1);
+      expect(loaded[0].name).toBe('env-loaded');
+    });
+
+    it('takes priority over file path argument', () => {
+      const envManifest = validManifest({ name: 'from-env' });
+      registerFakeModule('from-env', { manifest: envManifest });
+
+      const fileManifest = validManifest({ name: 'from-file' });
+      registerFakeModule('from-file', { manifest: fileManifest });
+
+      process.env.PLUGIN_JSON_OVERRIDE = JSON.stringify({
+        plugins: [{ packageName: 'from-env', enabled: true }],
+      });
+
+      const jsonPath = writePluginsJson({
+        plugins: [{ packageName: 'from-file', enabled: true }],
+      });
+
+      const loader = PluginLoader.getInstance();
+      loader.load(jsonPath);
+
+      const loaded = loader.getLoadedPlugins();
+      expect(loaded).toHaveLength(1);
+      expect(loaded[0].name).toBe('from-env');
+    });
+
+    it('handles malformed JSON gracefully', () => {
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      process.env.PLUGIN_JSON_OVERRIDE = '{ invalid json }';
+
+      const loader = PluginLoader.getInstance();
+      loader.load();
+
+      expect(loader.getLoadedPlugins()).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to parse PLUGIN_JSON_OVERRIDE'),
+        expect.any(String)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('ignores empty string and falls through to file-based loading', () => {
+      const manifest = validManifest({ name: 'file-plugin' });
+      registerFakeModule('file-plugin', { manifest });
+
+      process.env.PLUGIN_JSON_OVERRIDE = '   ';
+
+      const jsonPath = writePluginsJson({
+        plugins: [{ packageName: 'file-plugin', enabled: true }],
+      });
+
+      const loader = PluginLoader.getInstance();
+      loader.load(jsonPath);
+
+      const loaded = loader.getLoadedPlugins();
+      expect(loaded).toHaveLength(1);
+      expect(loaded[0].name).toBe('file-plugin');
     });
   });
 
