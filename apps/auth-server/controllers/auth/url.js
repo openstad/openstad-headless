@@ -10,6 +10,7 @@ const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');
 const verificationService = require('../../services/verificationService');
 const authUrlConfig = require('../../config/auth').get('Url');
+const interpolate = require('../../utils/interpolate');
 
 const setNoCachHeadersMw = (req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
@@ -61,11 +62,6 @@ exports.login = [
     });
   },
 ];
-
-const interpolate = (text, vars) => {
-  if (!text) return false;
-  return text.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
-};
 
 exports.confirmation = (req, res) => {
   const config = req.client.config ? req.client.config : {};
