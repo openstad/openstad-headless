@@ -110,12 +110,32 @@ class PluginLoader {
     if (this._loaded) return;
     this._loaded = true;
 
+    // Priority 1: inline JSON from env var (used in Kubernetes via ConfigMap)
+    const override = process.env.PLUGIN_JSON_OVERRIDE;
+    if (override && override.trim()) {
+      let pluginsConfig: { plugins?: PluginEntry[] };
+      try {
+        pluginsConfig = JSON.parse(override);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          '[plugin-loader] Failed to parse PLUGIN_JSON_OVERRIDE:',
+          message
+        );
+        return;
+      }
+      this._loadEntries(pluginsConfig.plugins || []);
+      return;
+    }
+
+    // Priority 2: explicit path argument
+    // Priority 3: OPENSTAD_PLUGINS_PATH env var
+    // Priority 4: search up from __dirname
     let filePath = pluginsJsonPath;
     if (!filePath && process.env.OPENSTAD_PLUGINS_PATH) {
       filePath = process.env.OPENSTAD_PLUGINS_PATH;
     }
     if (!filePath) {
-      // Search up from __dirname to find plugins.json at the repo root
       let dir = __dirname;
       while (dir !== path.dirname(dir)) {
         const candidate = path.join(dir, 'plugins.json');
@@ -143,7 +163,13 @@ class PluginLoader {
       return;
     }
 
-    const entries = pluginsConfig.plugins || [];
+    this._loadEntries(pluginsConfig.plugins || []);
+  }
+
+  /**
+   * Loads enabled plugin entries by requiring their packages and validating manifests.
+   */
+  private _loadEntries(entries: PluginEntry[]): void {
     const enabledEntries = entries.filter((entry) => entry.enabled === true);
 
     for (const entry of enabledEntries) {
@@ -153,7 +179,6 @@ class PluginLoader {
         const pluginModule = require(packageName as string);
         const manifest: PluginManifest = pluginModule.manifest || pluginModule;
 
-        // Validate the manifest
         const validation = validateManifest(
           manifest as unknown as Record<string, unknown>
         );
@@ -165,7 +190,6 @@ class PluginLoader {
           continue;
         }
 
-        // Check required env vars
         if (
           manifest.api &&
           Array.isArray(manifest.api.envVars) &&

@@ -49,6 +49,9 @@ RUN npm update -g npm
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
 CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
 
+# Build plugin-loader (TypeScript → dist/) before app builds need it
+RUN npm run build --if-present -w packages/plugin-loader
+
 FROM builder AS base
 
 ARG APP
