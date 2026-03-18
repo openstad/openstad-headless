@@ -391,30 +391,32 @@ router
     }
     return next();
   })
-  .get(async function (req, res, next) {
+  .get(function (req, res, next) {
     if (!req.query.ipdlogout) {
-      // Validate redirectUri against project allowlist before redirecting to auth server
-      let finalRedirect = Array.isArray(req.query.redirectUri)
+      const rawRedirectUri = Array.isArray(req.query.redirectUri)
         ? req.query.redirectUri[0]
         : req.query.redirectUri || '';
-      if (finalRedirect) {
-        const projectId = req.params.projectId;
-        if (
-          projectId &&
-          (await isRedirectAllowed(projectId, finalRedirect))
-        ) {
-          finalRedirect +=
-            (finalRedirect.includes('?') ? '&' : '?') + 'openstadlogout=true';
-        } else {
-          // Invalid redirectUri: fall back to admin homepage
-          finalRedirect = config.admin?.domain
-            ? `http://${config.admin.domain}?openstadlogout=true`
-            : '';
-        }
-      }
       let url = `${req.authConfig.serverUrl}/logout?client_id=${req.authConfig.clientId}`;
-      if (finalRedirect) {
-        url += `&redirectUrl=${encodeURIComponent(finalRedirect)}`;
+      if (rawRedirectUri) {
+        // Use ADMIN_URL if set, otherwise fall back to the origin of the redirectUri.
+        // Only the admin-server passes redirectUri; no allowlist lookup needed.
+        if (!process.env.ADMIN_URL) {
+          console.warn(
+            'ADMIN_URL is not set; falling back to redirectUri origin for logout redirect'
+          );
+        }
+        let safeRedirect;
+        try {
+          safeRedirect =
+            process.env.ADMIN_URL || new URL(rawRedirectUri).origin;
+        } catch (e) {
+          safeRedirect = process.env.ADMIN_URL || '';
+        }
+        if (safeRedirect) {
+          safeRedirect +=
+            (safeRedirect.includes('?') ? '&' : '?') + 'openstadlogout=true';
+          url += `&redirectUrl=${encodeURIComponent(safeRedirect)}`;
+        }
       }
       return res.redirect(url);
     }
