@@ -461,6 +461,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             project={project as string}
             fieldName="image"
             allowedTypes={['image/*']}
+            allowMultiple={true}
             onImageUploaded={(imageResult) => {
               let array = [...(form.getValues('images') || [])];
               array.push(imageResult);

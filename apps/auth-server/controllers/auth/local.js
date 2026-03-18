@@ -165,16 +165,24 @@ exports.logout = async (req, res) => {
 
   const config = req.client.config;
   const allowedDomains = req.client.allowedDomains
-    ? req.client.allowedDomains
-    : false;
+    ? [...req.client.allowedDomains]
+    : [];
+
+  // Always allow the admin domain for logout redirects
+  if (process.env.ADMIN_URL) {
+    try {
+      allowedDomains.push(new URL(process.env.ADMIN_URL).hostname);
+    } catch (e) {
+      console.warn('Invalid ADMIN_URL env var:', process.env.ADMIN_URL);
+    }
+  }
+
   let redirectURL = req.query.redirectUrl;
 
   try {
     const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
     redirectURL =
-      redirectUrlHost &&
-      allowedDomains &&
-      allowedDomains.indexOf(redirectUrlHost) !== -1
+      redirectUrlHost && allowedDomains.includes(redirectUrlHost)
         ? redirectURL
         : false;
   } catch (e) {
