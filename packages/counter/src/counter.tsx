@@ -117,7 +117,8 @@ function Counter({
   });
 
   const { data: projectVotedUsersCount } = datastore.useProjectVotedUsersCount({
-    projectId: counterType === 'votedUsersPerProject' ? props.projectId : undefined,
+    projectId:
+      counterType === 'votedUsersPerProject' ? props.projectId : undefined,
   });
 
   const {
