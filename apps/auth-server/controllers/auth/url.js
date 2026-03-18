@@ -10,6 +10,7 @@ const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');
 const verificationService = require('../../services/verificationService');
 const authUrlConfig = require('../../config/auth').get('Url');
+const interpolate = require('../../utils/interpolate');
 
 const setNoCachHeadersMw = (req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
@@ -69,19 +70,25 @@ exports.confirmation = (req, res) => {
       ? config.authTypes[authType]
       : {};
 
-  res.render('auth/url/confirmation', {
-    clientId: req.query.clientId,
-    client: req.client,
+  const clientId = req.query.clientId;
+  const redirectUrl = encodeURIComponent(req.query.redirect_uri);
+
+  const vars = {
     loginUrl: '/login',
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
-    title:
-      configAuthType && configAuthType.confirmedTitle
-        ? configAuthType.confirmedTitle
-        : false,
+    clientId,
+    redirectUrl,
+    retryUrl: `/login?clientId=${clientId}&redirect_uri=${redirectUrl}`,
+    clientEmail: config.contactEmail || '',
+  };
+
+  res.render('auth/url/confirmation', {
+    client: req.client,
+    retryUrl: vars.retryUrl,
+    clientEmail: vars.clientEmail,
+    title: interpolate(configAuthType.confirmedTitle, vars) || false,
     description:
-      configAuthType && configAuthType.confirmedDescription
-        ? configAuthType.confirmedDescription
-        : false,
+      interpolate(configAuthType.confirmedDescription, vars) || false,
+    helpText: interpolate(configAuthType.confirmedHelpText, vars) || false,
   });
 };
 
