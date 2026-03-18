@@ -71,6 +71,7 @@ exports.confirmation = (req, res) => {
 
   const clientId = req.query.clientId;
   const redirectUrl = encodeURIComponent(req.query.redirect_uri);
+
   const vars = {
     loginUrl: '/login',
     clientId,
