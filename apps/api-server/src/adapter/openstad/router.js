@@ -422,24 +422,7 @@ router
     }
     return next();
   })
-  // Backward-compatible fallback: only reached if auth server redirects back with ?ipdlogout=done
-  .get(async function (req, res, next) {
-    const projectId = req.params.projectId;
-    const rawRedirectUri = Array.isArray(req.query.redirectUri)
-      ? req.query.redirectUri[0]
-      : req.query.redirectUri;
-    if (
-      rawRedirectUri &&
-      projectId &&
-      (await isRedirectAllowed(projectId, rawRedirectUri))
-    ) {
-      const redirectUri =
-        rawRedirectUri +
-        (rawRedirectUri.includes('?') ? '&' : '?') +
-        'openstadlogout=true';
-      return res.redirect(redirectUri);
-    }
-
+  .get(function (req, res) {
     return res.json({ logout: 'success' });
   });
 
