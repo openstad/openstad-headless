@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Copy, Info } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
@@ -22,6 +24,25 @@ import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
+
+function CopyableVar({ name }: { name: string }) {
+  const value = `{{${name}}}`;
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        navigator.clipboard?.writeText(value).catch(() => null);
+        toast('Tekst gekopieerd', {
+          icon: <Info className="h-4 w-4 text-blue-500" />,
+        });
+      }}
+      title={`Kopieer ${value}`}
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted font-mono text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-copy">
+      {value}
+      <Copy className="h-3 w-3" />
+    </button>
+  );
+}
 
 const formSchema = z.object({
   UniqueCodeTitle: z.string().optional(),
@@ -102,7 +123,7 @@ export default function ProjectAuthentication() {
       UrlConfirmedDescription:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
           ?.confirmedDescription ||
-        'Bekijk uw inbox om in te loggen. Het kan enkele minuten duren voor de e-mail verschijnt. Geen mail gekregen na het versturen van de link? Kijk dan in uw spam-folder of probeer het opnieuw. Lukt het alsnog niet? Neem contact met ons op.',
+        'Bekijk je Postvak IN om in te loggen. Het kan enkele minuten duren voordat de e-mail verschijnt.<br/><br/>Geen mail gekregen na het versturen van de link? Kijk dan in je ongewenste e-mails of <a href="{{retryUrl}}">probeer het opnieuw</a>.<br/><br/>Lukt het alsnog niet? <a href="mailto:{{clientEmail}}">Neem contact met ons op.</a>',
       UrlConfirmedHelpText:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url
           ?.confirmedHelpText || '',
@@ -443,12 +464,10 @@ export default function ProjectAuthentication() {
                     />
 
                     <Separator className="my-4" />
-                    <div>
-                      <FormLabel>
-                        Teksten voor de bevestigingspagina na het versturen van
-                        de e-mail:
-                      </FormLabel>
-                    </div>
+                    <p className="text-sm font-medium leading-none">
+                      Teksten voor de bevestigingspagina na het versturen van de
+                      e-mail:
+                    </p>
 
                     <FormField
                       control={form.control}
@@ -457,8 +476,11 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Titel</FormLabel>
                           <FormControl>
-                            <Input placeholder="Vul een titel in" {...field} />
+                            <Input placeholder="E-mail verstuurd!" {...field} />
                           </FormControl>
+                          <FormDescription>
+                            Laat leeg om de standaardtekst te gebruiken.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -471,11 +493,16 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Vul een beschrijving in"
-                              {...field}
-                            />
+                            <Textarea placeholder="" {...field} />
                           </FormControl>
+                          <FormDescription>
+                            Laat leeg om de standaardtekst te gebruiken. HTML is
+                            toegestaan. Klik een variabele om te kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="retryUrl" />
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -488,11 +515,16 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>Help tekst</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Vul een help tekst in"
-                              {...field}
-                            />
+                            <Textarea placeholder="" {...field} />
                           </FormControl>
+                          <FormDescription>
+                            HTML is toegestaan. Klik een variabele om te
+                            kopiëren:{' '}
+                            <span className="inline-flex flex-wrap gap-1 mt-1">
+                              <CopyableVar name="retryUrl" />
+                              <CopyableVar name="clientEmail" />
+                            </span>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
