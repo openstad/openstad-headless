@@ -38,6 +38,8 @@ exports.login = [
         req.query.priviligedRoute === 'admin') ||
       false;
 
+    const loginVars = { clientEmail: config.contactEmail || '' };
+
     res.render('auth/url/login', {
       clientId: req.query.clientId,
       client: req.client,
@@ -50,10 +52,7 @@ exports.login = [
           : false,
       label:
         configAuthType && configAuthType.label ? configAuthType.label : false,
-      helpText:
-        configAuthType && configAuthType.helpText
-          ? configAuthType.helpText
-          : false,
+      helpText: interpolate(configAuthType.helpText, loginVars) || false,
       buttonText:
         configAuthType && configAuthType.buttonText
           ? configAuthType.buttonText
