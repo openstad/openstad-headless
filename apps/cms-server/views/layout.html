@@ -14,9 +14,9 @@ data.global.siteTitle %} {% set ogDescription = data.activeResource.summary or
 data.piece.summary or data.piece.seoDescription or data.page.seoDescription or
 '' %} {% set ogType = 'article' if (data.activeResource or data.piece) else
 'website' %} {% if data.activeResource and data.activeResource.id %} {% set
-ogUrl = (data.page._url or data.baseUrl or '') ~ '?openstadResourceId=' ~
-data.activeResource.id %} {% else %} {% set ogUrl = data.piece._url or
-data.page._url or data.baseUrl or '' %} {% endif %}
+ogUrl = (data.baseUrl or '') ~ (data.originalUrl or data.page._url or '') %} {%
+else %} {% set ogUrl = data.piece._url or data.page._url or data.baseUrl or ''
+%} {% endif %}
 
 <meta property="og:title" content="{{ ogTitle | e }}" />
 <meta property="og:type" content="{{ ogType }}" />
