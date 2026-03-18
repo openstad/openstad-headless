@@ -615,7 +615,7 @@ secrets:
 plugins:
   enabled: false
   # Node.js image used by the init container to run npm install
-  nodeImage: node:22-slim
+  nodeImage: node:24-slim
   # Install path inside the shared volume
   installPath: /opt/openstad-plugins
   # Optional: name of an existing Secret containing .npmrc for private registries
