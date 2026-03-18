@@ -574,7 +574,7 @@ secrets:
 plugins:
   enabled: false
   # Node.js image used by the init container to run npm install
-  nodeImage: node:22-slim
+  nodeImage: node:24-slim
   # Install path inside the shared volume
   installPath: /opt/openstad-plugins
   # Optional: name of an existing Secret containing .npmrc for private registries
@@ -584,10 +584,6 @@ plugins:
   items: []
   # Example:
   # items:
-  #   - name: metkoos
-  #     packageName: "@draadnl/metkoos-plugin"
-  #     version: "1.2.3"
-  #     enabled: true
   #   - name: my-plugin
   #     packageName: "@myorg/my-plugin"
   #     enabled: true
