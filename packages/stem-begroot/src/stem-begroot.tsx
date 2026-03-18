@@ -306,7 +306,8 @@ function StemBegroot({
   const { data: resources, submitVotes } = datastore.useResources({
     projectId: props.projectId,
     tags,
-    sort: sort === 'random' ? undefined : sort,
+    sort,
+    seed: sort === 'random' ? randomSortSeed : undefined,
     search,
     pageSize: 999,
   });

@@ -1,5 +1,4 @@
 import { canLikeResource } from '@openstad-headless/lib';
-import { deterministicRandomSort } from '@openstad-headless/lib';
 import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
 import {
   Carousel,
@@ -84,12 +83,6 @@ export const StemBegrootResourceList = ({
   displayTitle?: boolean;
   displaySummary?: boolean;
 }) => {
-  const getResourceStableKey = (resource: any) =>
-    String(
-      resource?.id ||
-        `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
-    );
-
   // Memoize intTags to avoid creating new array on every render
   const intTags = useMemo(() => {
     // @ts-ignore
@@ -184,12 +177,7 @@ export const StemBegrootResourceList = ({
             return a.title.localeCompare(b.title);
           }
           if (sort === 'random') {
-            return deterministicRandomSort(
-              a,
-              b,
-              randomSortSeed,
-              getResourceStableKey
-            );
+            return 0;
           }
           return 0;
         })

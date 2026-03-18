@@ -9,6 +9,7 @@ export default function useResources(
     statuses = [],
     projectIds = [],
     allowMultipleProjects = false,
+    seed,
   },
   options
 ) {
@@ -40,6 +41,7 @@ export default function useResources(
       statuses,
       projectIds,
       allowMultipleProjects,
+      seed,
     },
     'resources.fetch',
     options

@@ -2,11 +2,13 @@ const MAX_INT_UNSIGNED = 4294967295;
 const UINT32_MODULUS = MAX_INT_UNSIGNED + 1;
 const DEFAULT_RANDOM_SORT_SEED_STORAGE_PREFIX = 'openstadRandomSortSeed';
 
-function getNavigationType() {
-  if (typeof window === 'undefined' || !window.performance?.getEntriesByType)
-    return '';
-  const [entry] = window.performance.getEntriesByType('navigation') as any[];
-  return entry?.type || '';
+function getSeedStorage(): Pick<Storage, 'getItem' | 'setItem'> | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    if (window.localStorage) return window.localStorage;
+  } catch (e) {}
+  return null;
 }
 
 export function getScopedSessionRandomSortSeed(
@@ -15,15 +17,18 @@ export function getScopedSessionRandomSortSeed(
 ) {
   if (typeof window === 'undefined') return 1;
 
-  const storageKey = `${storagePrefix}:${scope}`;
-  const isReload = getNavigationType() === 'reload';
+  const storage = getSeedStorage();
+  if (!storage) return 1;
 
-  if (isReload || !window.sessionStorage.getItem(storageKey)) {
+  const storageKey = `${storagePrefix}:${scope}`;
+  // Keep the same seed for the selected storage lifetime.
+  // A refresh should NOT reshuffle; only generate if missing.
+  if (!storage.getItem(storageKey)) {
     const nextSeed = `${Math.floor(Math.random() * MAX_INT_UNSIGNED)}`;
-    window.sessionStorage.setItem(storageKey, nextSeed);
+    storage.setItem(storageKey, nextSeed);
   }
 
-  return Number.parseInt(window.sessionStorage.getItem(storageKey) || '1', 10);
+  return Number.parseInt(storage.getItem(storageKey) || '1', 10);
 }
 
 export function deterministicRandomNumber(seed: number, key: string) {
