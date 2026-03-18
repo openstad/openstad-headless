@@ -8,6 +8,41 @@ Apostrophe page or piece.') }} {% endif %} {% endblock %} {% block extraHead %}
 
 {% if data.global.favicon %}
 <link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}" />
+{% endif %} {# Open Graph meta tags for social sharing #} {% set ogTitle =
+data.activeResource.title or data.piece.title or data.page.title or
+data.global.siteTitle %} {% set ogDescription = data.activeResource.summary or
+data.piece.summary or data.piece.seoDescription or data.page.seoDescription or
+'' %} {% set ogType = 'article' if (data.activeResource or data.piece) else
+'website' %} {% if data.activeResource and data.activeResource.id %} {% set
+ogUrl = (data.baseUrl or '') ~ (data.originalUrl or data.page._url or '') %} {%
+else %} {% set ogUrl = data.piece._url or data.page._url or data.baseUrl or ''
+%} {% endif %}
+
+<meta property="og:title" content="{{ ogTitle | e }}" />
+<meta property="og:type" content="{{ ogType }}" />
+<meta property="og:locale" content="nl_NL" />
+<meta property="og:url" content="{{ ogUrl | e }}" />
+{% if data.global.siteTitle %}
+<meta property="og:site_name" content="{{ data.global.siteTitle | e }}" />
+{% endif %} {% if ogDescription %}
+<meta property="og:description" content="{{ ogDescription | e }}" />
+{% endif %} {% if data.activeResource and data.activeResource.images and
+data.activeResource.images[0] and data.activeResource.images[0].url %}
+<meta
+  property="og:image"
+  content="{{ data.activeResource.images[0].url | e }}" />
+{% elif data.piece and data.piece.image %}
+<meta
+  property="og:image"
+  content="{{ data.baseUrl }}{{ apos.attachment.url(data.piece.image, { size: 'full' }) }}" />
+{% elif data.page and data.page.ogImage %}
+<meta
+  property="og:image"
+  content="{{ data.baseUrl }}{{ apos.attachment.url(data.page.ogImage, { size: 'full' }) }}" />
+{% elif data.global.fbImage %}
+<meta
+  property="og:image"
+  content="{{ data.baseUrl }}{{ apos.attachment.url(data.global.fbImage, { size: 'full' }) }}" />
 {% endif %} {% endblock %} {% block beforeMain %}
 <div
   id="logout-data"
