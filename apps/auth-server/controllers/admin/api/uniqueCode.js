@@ -1,4 +1,4 @@
-const Tasks = require('../../../memoryStorage/tasks');
+const Tasks = require('../../../databaseStorage/tasks');
 
 const outputUniqueCode = (req, res, next) => {
   res.json(req.code);

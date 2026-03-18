@@ -359,6 +359,38 @@ nginx
     When traefik, returns a dict with the traefik middleware annotation.
     When nginx, returns the user-provided annotations from values.
 */}}
+{{/*
+    Pod anti-affinity block. Pass the app label as .appLabel.
+    Usage: {{ include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.api.label) }}
+*/}}
+{{- define "openstad.podAntiAffinity" -}}
+{{- if .Values.global.podAntiAffinity.enabled }}
+affinity:
+  podAntiAffinity:
+    {{- if eq .Values.global.podAntiAffinity.mode "required" }}
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: {{ .appLabel }}
+        topologyKey: kubernetes.io/hostname
+        namespaceSelector: {}
+        namespaces:
+          - {{ .Release.Namespace }}
+    {{- else }}
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app: {{ .appLabel }}
+          topologyKey: kubernetes.io/hostname
+          namespaceSelector: {}
+          namespaces:
+            - {{ .Release.Namespace }}
+    {{- end }}
+{{- end }}
+{{- end -}}
+
 {{- define "openstad.createdIngresses.annotations" -}}
 {{- if eq (include "openstad.ingress.type" .) "traefik" -}}
 {{- $user := .Values.api.createdIngresses.annotations | default dict -}}

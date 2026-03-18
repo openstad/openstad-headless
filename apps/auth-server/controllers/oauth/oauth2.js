@@ -5,7 +5,7 @@ const passport = require('passport');
 const URL = require('url').URL;
 const db = require('../../db');
 const config = require('../../config');
-const memoryStorage = require('../../memoryStorage');
+const databaseStorage = require('../../databaseStorage');
 const utils = require('../../utils');
 const validate = require('../../validate');
 
@@ -83,7 +83,7 @@ server.grant(
       sub: user.id,
       exp: config.codeToken.expiresIn,
     });
-    memoryStorage.authorizationCodes
+    databaseStorage.authorizationCodes
       .save(code, client.id, redirectURI, user.id, client.scope)
       .then(() => done(null, code))
       .catch((err) => done(err));
@@ -106,7 +106,7 @@ server.grant(
     });
     const expiration = config.token.calculateExpirationDate();
 
-    memoryStorage.accessTokens
+    databaseStorage.accessTokens
       .save(token, expiration, user.id, client.id, client.scope)
       .then(() => done(null, token, expiresIn))
       .catch((err) => done(err));
@@ -123,7 +123,7 @@ server.grant(
  */
 server.exchange(
   oauth2orize.exchange.code((client, code, redirectURI, done) => {
-    memoryStorage.authorizationCodes
+    databaseStorage.authorizationCodes
       .delete(code)
       .then((authCode) =>
         validate.authCode(code, authCode, client, redirectURI)
@@ -191,7 +191,7 @@ server.exchange(
     const expiration = config.token.calculateExpirationDate();
     // Pass in a null for user id since there is no user when using this grant type
 
-    memoryStorage.accessTokens
+    databaseStorage.accessTokens
       .save(token, expiration, null, client.id, scope)
       .then(() => done(null, token, null, expiresIn))
       .catch((err) => done(err));
@@ -207,7 +207,7 @@ server.exchange(
  */
 server.exchange(
   oauth2orize.exchange.refreshToken((client, refreshToken, scope, done) => {
-    memoryStorage.refreshTokens
+    databaseStorage.refreshTokens
       .find(refreshToken)
       .then((foundRefreshToken) =>
         validate.refreshToken(foundRefreshToken, refreshToken, client)
