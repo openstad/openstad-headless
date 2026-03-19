@@ -391,30 +391,32 @@ router
     }
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     if (!req.query.ipdlogout) {
       const rawRedirectUri = Array.isArray(req.query.redirectUri)
         ? req.query.redirectUri[0]
         : req.query.redirectUri || '';
       let url = `${req.authConfig.serverUrl}/logout?client_id=${req.authConfig.clientId}`;
       if (rawRedirectUri) {
-        // Use ADMIN_URL if set, otherwise fall back to the origin of the redirectUri.
-        // Only the admin-server passes redirectUri; no allowlist lookup needed.
-        if (!process.env.ADMIN_URL) {
-          console.warn(
-            'ADMIN_URL is not set; falling back to redirectUri origin for logout redirect'
-          );
-        }
         let safeRedirect;
         try {
-          safeRedirect =
-            process.env.ADMIN_URL || new URL(rawRedirectUri).origin;
+          const parsedRedirect = new URL(rawRedirectUri);
+          if (parsedRedirect.origin === new URL(config.url).origin) {
+            // internal redirect (e.g. forceNewLogin loop): use the full URL as-is
+            safeRedirect = rawRedirectUri;
+          } else {
+            // external caller (CMS, admin): validate against project allowlist
+            const projectId = req.params.projectId;
+            const allowed =
+              projectId && (await isRedirectAllowed(projectId, rawRedirectUri));
+            if (allowed) {
+              safeRedirect = parsedRedirect.origin + '?openstadlogout=true';
+            }
+          }
         } catch (e) {
-          safeRedirect = process.env.ADMIN_URL || '';
+          safeRedirect = '';
         }
         if (safeRedirect) {
-          safeRedirect +=
-            (safeRedirect.includes('?') ? '&' : '?') + 'openstadlogout=true';
           url += `&redirectUrl=${encodeURIComponent(safeRedirect)}`;
         }
       }

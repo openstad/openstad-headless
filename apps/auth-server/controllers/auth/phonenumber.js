@@ -47,7 +47,9 @@ exports.login = (req, res) => {
   res.render('auth/phonenumber/login', {
     loginUrl: authPhonenumberConfig.loginUrl,
     clientId: req.client.clientId,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
     client: req.client,
     title:
       configAuthType.loginTitle ||
@@ -117,10 +119,18 @@ exports.postLogin = async (req, res, next) => {
   req.redirectUrl =
     clientConfig && clientConfig.emailRedirectUrl
       ? clientConfig.emailRedirectUrl
-      : encodeURIComponent(req.query.redirect_uri);
+      : req.query.redirect_uri
+        ? encodeURIComponent(req.query.redirect_uri)
+        : '';
   const redirectUrl = req.query.redirect_uri
     ? req.query.redirect_uri
     : req.client.redirectUrl;
+  if (!redirectUrl)
+    return next(
+      new Error(
+        'No redirect_uri provided and no default redirectUrl configured for this client'
+      )
+    );
 
   try {
     // phoneNumber
@@ -183,7 +193,9 @@ exports.smsCode = (req, res) => {
   res.render('auth/phonenumber/sms-code', {
     loginUrl: authPhonenumberConfig.smsCodeUrl,
     clientId: req.client.clientId,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
     client: req.client,
     title:
       configAuthType.smsCodeTitle ||
@@ -225,6 +237,12 @@ exports.postSmsCode = (req, res, next) => {
       const redirectUrl = req.query.redirect_uri
         ? req.query.redirect_uri
         : req.client.redirectUrl;
+      if (!redirectUrl)
+        return next(
+          new Error(
+            'No redirect_uri provided and no default redirectUrl configured for this client'
+          )
+        );
 
       // Redirect if it fails to the original auth screen
       if (!user) {
