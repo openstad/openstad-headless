@@ -286,6 +286,9 @@ spec:
                 key: rateWindowMs
                 name: {{ template "openstad.ratelimit.secret.fullname" . }}
 
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{ .Values.api.otelExporterOtlpEndpoint | quote }}
+
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}

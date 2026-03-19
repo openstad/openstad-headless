@@ -100,6 +100,10 @@ spec:
                 key: cmsSecret
                 name: {{ template "openstad.s3.secret.fullname" . }}
 {{- end }}
+          - name: OTEL_SERVICE_NAME
+            value: {{ .Values.image.otelServiceName | quote }}
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{ .Values.image.otelExporterOtlpEndpoint | quote }}
           # Inject extra environment variables
           {{- if .Values.image.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}

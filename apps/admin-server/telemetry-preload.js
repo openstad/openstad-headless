@@ -8,7 +8,7 @@ const {
 } = require('@openstad-headless/lib/telemetry');
 
 const telemetryManager = createTelemetry({
-  serviceName: 'openstad-admin-server',
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-admin-server',
 });
 
 telemetryManager.initialize();
