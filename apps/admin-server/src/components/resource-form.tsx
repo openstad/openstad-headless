@@ -780,13 +780,13 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="modBreak"
             render={({ field }) => (
-              <FormItem className="col-span-1">
+              <FormItem className="lg:col-span-2 col-span-2">
                 <FormLabel>Inhoud van de Modbreak</FormLabel>
                 <FormDescription>
                   Laat dit veld leeg om geen Modbreak bij deze resource te tonen
                 </FormDescription>
                 <FormControl>
-                  <Input placeholder="" {...field} />
+                  <Textarea rows={5} placeholder="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
