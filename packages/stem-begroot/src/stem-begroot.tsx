@@ -153,12 +153,13 @@ function StemBegroot({
 
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
+  const url = new URL(window.location.href);
+  const pendingUuidFromUrl = url.searchParams.get('pendingBudgetVote');
+  let hasToRestoreVotesFromServer = pendingUuidFromUrl !== null;
+
   // Restore pending-budget-vote from server if UUID is in URL
   useEffect(() => {
     if (pendingVoteFetched) return;
-
-    const url = new URL(window.location.href);
-    const pendingUuidFromUrl = url.searchParams.get('pendingBudgetVote');
 
     async function restoreFromServer(uuid: string) {
       try {
@@ -179,6 +180,7 @@ function StemBegroot({
         // Remove pendingBudgetVote from URL
         url.searchParams.delete('pendingBudgetVote');
         window.history.replaceState({}, document.title, url.toString());
+        hasToRestoreVotesFromServer = false;
 
         if (!pendingBudgetVote.ok || !pendingBudgetVote) {
           console.error(
@@ -371,16 +373,6 @@ function StemBegroot({
     }
   }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
 
-  // Save selectedResources to storage whenever they change
-  useEffect(() => {
-    if (
-      props.votes.voteType !== 'countPerTag' &&
-      props.votes.voteType !== 'budgetingPerTag'
-    ) {
-      selectedResourcesStorage.setSelectedResources(selectedResources);
-    }
-  }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
-
   useEffect(() => {
     if (props.isSimpleView && currentStep === 1 && lastStep > currentStep) {
       setCurrentStep(0); // Skip step 2
@@ -482,7 +474,19 @@ function StemBegroot({
       return;
     }
 
-    if (hasPendingSelection && currentStep < 4) {
+    // wait for votes from server to be retrieved before continuing to vote
+    if (hasPendingSelection && hasToRestoreVotesFromServer) {
+      if (currentStep < 3) {
+        setCurrentStep(3);
+      }
+      return;
+    }
+
+    if (
+      !hasToRestoreVotesFromServer &&
+      hasPendingSelection &&
+      currentStep < 4
+    ) {
       // Show in-progress state while submitting and only advance on successful submit
       if (currentStep < 3) {
         setCurrentStep(3);
@@ -503,6 +507,7 @@ function StemBegroot({
     voteAfterLoggingIn,
     props.votes.voteType,
     votePendingStorage,
+    hasToRestoreVotesFromServer,
   ]);
 
   async function submitVoteAndCleanup() {
@@ -544,12 +549,14 @@ function StemBegroot({
           submitted = true;
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
+          setSelectedResources([]);
         }
       } else {
         if (selectedResources.length > 0) {
           votePendingStorage.clearVotePending();
           await doVote(selectedResources);
           selectedResourcesStorage.clearSelectedResources();
+          setSelectedResources([]);
           submitted = true;
         }
       }
@@ -1287,15 +1294,19 @@ function StemBegroot({
                         setCurrentStep(4);
                       }
                     } else if (currentStep === 4) {
-                      currentUser.logout({ url: location.href });
+                      const currentUrl = new URL(location.href);
+                      const params = currentUrl.searchParams;
+                      params.delete('openstadlogintoken');
+                      await currentUser.logout({ url: currentUrl.toString() });
                     } else {
                       setCurrentStep(currentStep + 1);
                     }
                   }}
                   disabled={(() => {
                     if (
-                      props.votes.voteType === 'countPerTag' ||
-                      props.votes.voteType === 'budgetingPerTag'
+                      (props.votes.voteType === 'countPerTag' ||
+                        props.votes.voteType === 'budgetingPerTag') &&
+                      currentStep === 0
                     ) {
                       const unmetTags = tagCounter.filter((tagObj) => {
                         const key = Object.keys(tagObj)[0];
@@ -1317,7 +1328,8 @@ function StemBegroot({
                     return (
                       (props?.votes?.voteType === 'likes' ||
                         props?.votes?.voteType === 'budgeting') &&
-                      selectedResources.length === 0
+                      selectedResources.length === 0 &&
+                      currentStep === 0
                     );
                   })()}>
                   {(() => {
