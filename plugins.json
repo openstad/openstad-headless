@@ -3,7 +3,11 @@
     {
       "name": "metkoos",
       "packageName": "@draadnl/metkoos-plugin",
-      "enabled": true
+      "enabled": true,
+      "config": {
+        "label": 1,
+        "adminUrl": "https://nlds.metkoos.nl"
+      }
     }
   ]
 }
