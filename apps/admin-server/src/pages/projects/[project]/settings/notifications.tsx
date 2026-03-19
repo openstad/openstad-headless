@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -10,6 +11,7 @@ import {
 } from '@/components/ui/form';
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
   Select,
@@ -41,6 +43,7 @@ const formSchema = z.object({
   fromAddress: z.string().email(),
   projectmanagerAddress: z.string().email(),
   fromName: z.string().optional(),
+  sendUpdatedResourceAdminEmail: z.boolean().optional(),
 });
 
 export default function ProjectSettingsNotifications({
@@ -57,6 +60,8 @@ export default function ProjectSettingsNotifications({
       fromName: data?.emailConfig?.[category]?.fromName || '',
       projectmanagerAddress:
         data?.emailConfig?.[category]?.projectmanagerAddress || null,
+      sendUpdatedResourceAdminEmail:
+        data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
     }),
     [data?.emailConfig]
   );
@@ -77,6 +82,8 @@ export default function ProjectSettingsNotifications({
           fromAddress: values.fromAddress,
           projectmanagerAddress: values.projectmanagerAddress,
           fromName: values.fromName,
+          sendUpdatedResourceAdminEmail:
+            values.sendUpdatedResourceAdminEmail || false,
         },
       });
       if (project) {
@@ -112,7 +119,7 @@ export default function ProjectSettingsNotifications({
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 gap-4">
+              className="lg:w-fit grid grid-cols-1 gap-6">
               <FormField
                 control={form.control}
                 name="fromAddress"
@@ -161,6 +168,37 @@ export default function ProjectSettingsNotifications({
                     </FormDescription>
                     <FormControl>
                       <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sendUpdatedResourceAdminEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Notificatie bij bewerken van inzendingen
+                    </FormLabel>
+                    <FormDescription>
+                      Standaard uitgeschakeld. Schakel dit alleen in als je per
+                      wijziging een e-mail wilt ontvangen.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
+                        />
+                        <Label htmlFor={field.name} className="cursor-pointer">
+                          E-mail sturen naar beheerder als een inzending is
+                          bijgewerkt
+                        </Label>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

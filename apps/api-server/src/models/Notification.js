@@ -1,5 +1,35 @@
 const merge = require('merge');
 
+function deriveNotificationTemplateData(instance) {
+  const normalizeBaseUrl = (url) => {
+    if (!url || typeof url !== 'string') return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `https://${url}`;
+  };
+
+  const adminBaseUrl = normalizeBaseUrl(
+    process.env.ADMIN_URL || process.env.ADMIN_DOMAIN
+  );
+  const adminResourceUrl =
+    adminBaseUrl && instance.projectId && instance.data?.resourceId
+      ? `${adminBaseUrl.replace(/\/+$/, '')}/projects/${instance.projectId}/resources/${instance.data.resourceId}`
+      : '';
+
+  const isAdminResourceNotification = [
+    'new published resource - admin update',
+    'updated resource - admin update',
+  ].includes(instance.type);
+
+  const redirectUrl =
+    instance.data?.redirectUrl ||
+    (isAdminResourceNotification ? adminResourceUrl : '');
+
+  return {
+    redirectUrl,
+    adminResourceUrl,
+  };
+}
+
 module.exports = (db, sequelize, DataTypes) => {
   const Notification = sequelize.define(
     'notification',
@@ -141,6 +171,9 @@ module.exports = (db, sequelize, DataTypes) => {
             ];
 
             if (immediateTypes.find((type) => type == instance.type)) {
+              const derivedTemplateData =
+                deriveNotificationTemplateData(instance);
+
               let messageData = {
                 projectId: instance.projectId,
                 engine: instance.engine,
@@ -148,6 +181,7 @@ module.exports = (db, sequelize, DataTypes) => {
                 from: instance.from,
                 data: {
                   ...instance.data,
+                  ...derivedTemplateData,
                 },
               };
 
