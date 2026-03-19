@@ -79,10 +79,16 @@ const TrixEditor: React.FC<{
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-}> = ({ value, onChange }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
+  onFocus?: () => void;
+  onBlur?: () => void;
+}> = ({ value, onChange, onFocus, onBlur }) => {
+  const editorRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const editorInstance = useRef<any>(null);
+  const onChangeRef = useRef(onChange);
+  const onFocusRef = useRef(onFocus);
+  const onBlurRef = useRef(onBlur);
+  const valueRef = useRef(value);
 
   const idRef = useRef(
     `trix-editor-${Math.random().toString(36).substring(2, 9)}`
@@ -106,6 +112,22 @@ const TrixEditor: React.FC<{
   }, []);
 
   useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    onFocusRef.current = onFocus;
+  }, [onFocus]);
+
+  useEffect(() => {
+    onBlurRef.current = onBlur;
+  }, [onBlur]);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     const editorEl = editorRef.current;
     const inputEl = inputRef.current;
@@ -126,30 +148,41 @@ const TrixEditor: React.FC<{
       }
 
       // Load initial content
-      if (value && editorInstance.current) {
-        editorInstance.current.loadHTML(value);
+      if (valueRef.current && editorInstance.current) {
+        editorInstance.current.loadHTML(valueRef.current);
       }
+    };
 
-      // Listen for changes and send change event
-      editorEl.addEventListener('trix-change', () => {
-        if (editorInstance.current && inputEl) {
-          const html = inputEl.value;
+    const handleTrixChange = () => {
+      const html = inputEl.value;
+      const syntheticEvent = {
+        target: { value: html },
+      } as React.ChangeEvent<HTMLInputElement>;
 
-          // Create a synthetic React-like ChangeEvent
-          const syntheticEvent = {
-            target: { value: html },
-          } as React.ChangeEvent<HTMLInputElement>;
+      onChangeRef.current(syntheticEvent);
+    };
 
-          onChange(syntheticEvent);
-        }
-      });
+    const handleTrixFocus = () => {
+      if (onFocusRef.current) onFocusRef.current();
+    };
+
+    const handleTrixBlur = () => {
+      if (onBlurRef.current) onBlurRef.current();
     };
 
     editorEl.addEventListener('trix-initialize', handleTrixInitialize);
+    editorEl.addEventListener('trix-change', handleTrixChange);
+    inputEl.addEventListener('input', handleTrixChange);
+    editorEl.addEventListener('trix-focus', handleTrixFocus);
+    editorEl.addEventListener('trix-blur', handleTrixBlur);
     return () => {
       editorEl.removeEventListener('trix-initialize', handleTrixInitialize);
+      editorEl.removeEventListener('trix-change', handleTrixChange);
+      inputEl.removeEventListener('input', handleTrixChange);
+      editorEl.removeEventListener('trix-focus', handleTrixFocus);
+      editorEl.removeEventListener('trix-blur', handleTrixBlur);
     };
-  }, [onChange]);
+  }, []);
 
   // Keep editor content in sync with external value
   useEffect(() => {
@@ -329,6 +362,42 @@ const TextInput: FC<TextInputProps> = ({
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
   const isOverCharacterLimit = !!maxCharacters && value.length > maxCharacters;
   const helpTextId = `${randomId}_help`;
+  const updateFieldValue = (nextValue: string) => {
+    setValue(nextValue);
+    const valueLength = nextValue.length;
+    const hasMax = maxCharacters > 0;
+    const exceedsMax = hasMax && valueLength > maxCharacters;
+
+    if (fieldRequired && valueLength === 0) {
+      setCheckInvalid(true);
+    } else if (exceedsMax) {
+      setCheckInvalid(true);
+    } else {
+      setCheckInvalid(false);
+    }
+
+    if (onChange) {
+      onChange({
+        name: fieldKey,
+        value: nextValue,
+      });
+    }
+
+    characterHelpText(valueLength);
+  };
+
+  const handleFieldChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | React.FormEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const nextValue =
+      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement | undefined)
+        ?.value ??
+      (e.target as HTMLInputElement | HTMLTextAreaElement | undefined)?.value ??
+      '';
+    updateFieldValue(nextValue);
+  };
 
   return (
     <FormField type="text">
@@ -377,7 +446,9 @@ const TextInput: FC<TextInputProps> = ({
       })}
 
       <div
-        className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}
+        className={`utrecht-form-field__input ${
+          fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''
+        }`}
         aria-invalid={checkInvalid}>
         <InputComponent
           id={randomId}
@@ -389,26 +460,14 @@ const TextInput: FC<TextInputProps> = ({
           onChange={(
             e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
           ) => {
-            setValue(e.target.value);
-            const valueLength = e.target.value.length;
-            const hasMax = maxCharacters > 0;
-            const exceedsMax = hasMax && valueLength > maxCharacters;
-
-            if (fieldRequired && valueLength === 0) {
-              setCheckInvalid(true);
-            } else if (exceedsMax) {
-              setCheckInvalid(true);
-            } else {
-              setCheckInvalid(false);
-            }
-
-            if (onChange) {
-              onChange({
-                name: fieldKey,
-                value: e.target.value,
-              });
-            }
-            characterHelpText(valueLength);
+            if (variant === 'textarea') return;
+            handleFieldChange(e);
+          }}
+          onInput={(
+            e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>
+          ) => {
+            if (variant !== 'textarea') return;
+            handleFieldChange(e);
           }}
           disabled={disabled}
           rows={rows}
@@ -418,12 +477,18 @@ const TextInput: FC<TextInputProps> = ({
             setHasBlurred(true);
           }}
           autoComplete={variant === 'email' ? 'email' : getAutocomplete(fieldKey)}
-          aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
+          aria-describedby={`${randomId}_error${
+            (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
+              ? ` ${helpTextId}`
+              : ''
+          }`}
           aria-invalid={checkInvalid}
         />
         {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
           <FormFieldDescription
-            className={`help-text${isOverCharacterLimit ? ' help-text--error' : ''}`}
+            className={`help-text${
+              isOverCharacterLimit ? ' help-text--error' : ''
+            }`}
             id={helpTextId}
             aria-live="polite"
             aria-atomic="true">

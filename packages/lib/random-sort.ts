@@ -1,6 +1,7 @@
 const MAX_INT_UNSIGNED = 4294967295;
-const UINT32_MODULUS = MAX_INT_UNSIGNED + 1;
 const DEFAULT_RANDOM_SORT_SEED_STORAGE_PREFIX = 'openstadRandomSortSeed';
+const HASH_MODULUS = 2147483647;
+const HASH_MULTIPLIER = 48271;
 
 function getNavigationType() {
   if (typeof window === 'undefined' || !window.performance?.getEntriesByType)
@@ -27,17 +28,25 @@ export function getScopedSessionRandomSortSeed(
 }
 
 export function deterministicRandomNumber(seed: number, key: string) {
-  const seedAndKey = `${seed}:${key}`;
-  let hash = 0;
-  const primeMultiplier = 31;
+  // Keep state in a prime modulus domain; avoids bitwise ops and stays deterministic.
+  let state = Math.abs(Math.floor(seed)) % (HASH_MODULUS - 1);
+  state += 1;
 
-  // Build a stable 32-bit-like hash without bitwise operators.
-  for (let index = 0; index < seedAndKey.length; index += 1) {
-    const characterCode = seedAndKey.charCodeAt(index);
-    hash = (hash * primeMultiplier + characterCode) % UINT32_MODULUS;
+  for (let index = 0; index < key.length; index += 1) {
+    const characterCode = key.charCodeAt(index) + 1;
+    const characterPosition = index + 1;
+    const seedStep =
+      (state * HASH_MULTIPLIER + (seed % 1000003) + characterPosition * 97) %
+      HASH_MODULUS;
+
+    // Mix current state, seed and position; this avoids monotonic ordering on similar keys.
+    state =
+      (seedStep * (characterCode + 37 + (seedStep % 97)) +
+        characterPosition * 101) %
+      HASH_MODULUS;
   }
 
-  return hash / MAX_INT_UNSIGNED;
+  return (state - 1) / (HASH_MODULUS - 1);
 }
 
 export function deterministicRandomSort(

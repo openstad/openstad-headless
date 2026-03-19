@@ -164,7 +164,9 @@ function Likes({
                   resource?.userVote?.opinion === likeVariant.type
                     ? 'selected'
                     : ''
-                } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
+                } like-option--${likeVariant.type} ${
+                  hideCounters ? 'osc-no-counter' : ''
+                }`}
                 disabled={disabled}>
                 <section className="like-kind">
                   <i className={likeVariant.icon}></i>
@@ -221,7 +223,9 @@ function Likes({
                     resource?.userVote?.opinion === likeVariant.type
                       ? 'selected'
                       : ''
-                  } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
+                  } like-option--${likeVariant.type} ${
+                    hideCounters ? 'osc-no-counter' : ''
+                  }`}
                   disabled={disabled}>
                   <section className="like-kind">
                     <i

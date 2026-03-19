@@ -306,6 +306,8 @@ api:
     retryCooldownSeconds: 60
   # Inject extra environment variables
   extraEnvVars: []
+  # Enable spam detection and spam flags
+  spamFilterEnabled: "false"
   disableProjectIssueWarnings: "false"
   # Resources:
   resources:

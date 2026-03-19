@@ -158,7 +158,9 @@ exports.postLogin = async (req, res, next) => {
     req.user = user;
 
     // Redirect if it succeeds to authorize screen
-    const authorizeUrl = `/auth/phonenumber/sms-code?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+    const authorizeUrl = `/auth/phonenumber/sms-code?redirect_uri=${encodeURIComponent(
+      redirectUrl
+    )}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
     // send sms
     req.user.phoneNumber = phoneNumber;
@@ -171,7 +173,9 @@ exports.postLogin = async (req, res, next) => {
     console.log('===> err', err);
     req.flash('error', { msg: authPhonenumberConfig.loginErrorMessage });
     res.redirect(
-      `${authPhonenumberConfig.loginUrl}?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`
+      `${authPhonenumberConfig.loginUrl}?redirect_uri=${encodeURIComponent(
+        redirectUrl
+      )}&response_type=code&client_id=${req.client.clientId}&scope=offline`
     );
   }
 };
@@ -248,7 +252,9 @@ exports.postSmsCode = (req, res, next) => {
       if (!user) {
         req.flash('error', { msg: authPhonenumberConfig.smsCodeErrorMessage });
         return res.redirect(
-          `${authPhonenumberConfig.loginUrl}?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`
+          `${authPhonenumberConfig.loginUrl}?redirect_uri=${encodeURIComponent(
+            redirectUrl
+          )}&response_type=code&client_id=${req.client.clientId}&scope=offline`
         );
       }
 
@@ -265,7 +271,11 @@ exports.postSmsCode = (req, res, next) => {
             const redirectToAuthorisation = () => {
               // Redirect if it succeeds to authorize screen
               //check if allowed url will be done by authorize screen
-              const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+              const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(
+                redirectUrl
+              )}&response_type=code&client_id=${
+                req.client.clientId
+              }&scope=offline`;
               return res.redirect(authorizeUrl);
             };
 

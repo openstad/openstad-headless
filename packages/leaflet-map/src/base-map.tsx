@@ -656,7 +656,9 @@ const BaseMap = ({
                       lng: long,
                       title: Objectnaam,
                       description: Locatieaanduiding,
-                      markerId: `feature-${lat}-${long}-${Objectnaam || 'marker'}`,
+                      markerId: `feature-${lat}-${long}-${
+                        Objectnaam || 'marker'
+                      }`,
                       isVisible: true,
                       isClustered: false,
                       icon: L.icon({

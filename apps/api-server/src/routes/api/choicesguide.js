@@ -10,6 +10,7 @@ const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const crypto = require('crypto');
 const {
   analyzeSpamPayload,
+  isSpamFilterEnabled,
   logSpamAnalysis,
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
@@ -241,11 +242,14 @@ router
     const sanitizedSubmittedData = removeSpamMetaFields(
       req.body.submittedData || {}
     );
-    const analysis = analyzeSpamPayload(req.body.submittedData || {}, {
-      withDetails: true,
-    });
-    logSpamAnalysis({ routeName: 'choicesguide', req, analysis });
-    const isSpamSubmission = analysis.isProbablySpam;
+    let isSpamSubmission = false;
+    if (isSpamFilterEnabled()) {
+      const analysis = analyzeSpamPayload(req.body.submittedData || {}, {
+        withDetails: true,
+      });
+      logSpamAnalysis({ routeName: 'choicesguide', req, analysis });
+      isSpamSubmission = analysis.isProbablySpam;
+    }
 
     let data = {
       userId: req.user && req.user.id,

@@ -76,7 +76,9 @@ exports.register = (req, res, next) => {
                 'No redirect_uri provided and no default redirectUrl configured for this client'
               )
             );
-          const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(req.query.redirect_uri)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(
+            req.query.redirect_uri
+          )}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
           try {
             db.ActionLog.create(values)

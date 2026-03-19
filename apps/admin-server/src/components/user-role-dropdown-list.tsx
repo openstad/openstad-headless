@@ -17,14 +17,14 @@ const UserRoleDropdownList = ({
 }) => {
   return (
     <Select
-      defaultValue={roleId ? roleId : ''}
+      value={roleId ? roleId : ''}
       onValueChange={(value: string) => addProject(value)}
       disabled={disabled}>
       <SelectTrigger>
         <SelectValue placeholder="" />
       </SelectTrigger>
       <SelectContent>
-        {roleId ? null : <SelectItem value={''}></SelectItem>}
+        {roleId ? null : <SelectItem value={''}>Geen rol</SelectItem>}
         <SelectItem value={'admin'}>Administrator</SelectItem>
         <SelectItem value={'editor'}>Editor</SelectItem>
         {/* currently not available

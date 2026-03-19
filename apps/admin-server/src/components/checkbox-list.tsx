@@ -55,7 +55,11 @@ export const CheckboxList = <T extends { [key: string]: any }>({
             name={fieldName}
             render={({ field }) => (
               <FormItem
-                className={`col-span-full ${layout === 'vertical' ? 'flex flex-col' : 'flex flex-row flex-wrap'}`}>
+                className={`col-span-full ${
+                  layout === 'vertical'
+                    ? 'flex flex-col'
+                    : 'flex flex-row flex-wrap'
+                }`}>
                 {items?.map((item: any) => (
                   <FormField
                     key={keyPerItem(item)}

@@ -101,7 +101,9 @@ export const StemBegrootResourceDetailDialog = ({
   const getResourceStableKey = (resource: any) =>
     String(
       resource?.id ||
-        `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+        `${resource?.projectId || ''}:${resource?.title || ''}:${
+          resource?.createdAt || ''
+        }`
     );
 
   const [carouselIndexSetter, setCarouselIndexSetter] = useState<

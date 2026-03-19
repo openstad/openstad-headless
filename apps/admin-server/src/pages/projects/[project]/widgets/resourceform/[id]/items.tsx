@@ -589,7 +589,7 @@ export default function WidgetResourceFormItems(
         form.setValue('fieldType', defaultFormItem.fieldType || '');
       }
 
-      if (defaultFormItem.fieldType === 'text') {
+      if (defaultFormItem.fieldType === 'text' && !form.watch('variant')) {
         const variant =
           defaultFormItem.type === 'summary' ||
           defaultFormItem.type === 'description'
@@ -1714,8 +1714,7 @@ export default function WidgetResourceFormItems(
                           return (
                             <FormItem>
                               <FormLabel>
-                                Is dit veld zichtbaar voor iedereen of alleen
-                                admin gebruikers?
+                                Wie mag de ingevulde waarde van dit veld zien?
                               </FormLabel>
                               <Select
                                 onValueChange={(e: string) =>

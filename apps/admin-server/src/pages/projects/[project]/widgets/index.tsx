@@ -162,7 +162,9 @@ export default function ProjectWidgets() {
             <div
               className={`grid grid-cols-2 items-left py-2 px-2 border-b border-border`}
               style={{
-                gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 40px) repeat(5, 1fr) 60px`,
+                gridTemplateColumns: `repeat(${
+                  bulkSelectActive ? 2 : 1
+                }, 40px) repeat(5, 1fr) 60px`,
               }}>
               {bulkSelectActive && <ListHeading />}
               <ListHeading className="hidden lg:flex">
@@ -208,7 +210,9 @@ export default function ProjectWidgets() {
                     <li
                       className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
                       style={{
-                        gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 40px) repeat(5, 1fr) 60px`,
+                        gridTemplateColumns: `repeat(${
+                          bulkSelectActive ? 2 : 1
+                        }, 40px) repeat(5, 1fr) 60px`,
                       }}>
                       {bulkSelectActive && (
                         <Checkbox

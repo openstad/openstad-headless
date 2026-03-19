@@ -254,7 +254,9 @@ exports.check2FA = (req, res, next) => {
     !req.session.twoFactorValid
   ) {
     return res.redirect(
-      `/auth/two-factor?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      `/auth/two-factor?clientId=${
+        req.client.clientId
+      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   }
 
@@ -297,7 +299,9 @@ exports.checkRequiredUserFields = (req, res, next) => {
   // if error redirect to register
   if (error) {
     res.redirect(
-      `/auth/required-fields?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      `/auth/required-fields?clientId=${
+        req.client.clientId
+      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   } else {
     next();

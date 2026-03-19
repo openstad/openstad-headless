@@ -5,6 +5,7 @@ const externalCertificatesManager = require('./externalCertificatesManager');
 const {
   getCertificateConfig,
   buildIngressConfig,
+  normalizeProjectUrlForIngress,
 } = require('./checkHostStatusHelpers');
 
 const getK8sApi = async () => {
@@ -233,14 +234,28 @@ const checkHostStatus = async (conditions) => {
         return;
       }
 
-      if (project.url === defaultProjectHost) {
+      // Clone to avoid Sequelize JSON mutation trap: mutating the
+      // original reference in-place makes Sequelize think nothing changed.
+      let hostStatus = project.hostStatus ? { ...project.hostStatus } : {};
+      const { host: ingressHost, hasPath: hasSubPath } =
+        normalizeProjectUrlForIngress(project.url);
+
+      if (!ingressHost) {
+        console.error('Invalid project url found for project: ', project.id);
+        return;
+      }
+
+      if (ingressHost === defaultProjectHost) {
         console.log('Skipping default project host: ', project.url);
         return;
       }
 
-      // Clone to avoid Sequelize JSON mutation trap: mutating the
-      // original reference in-place makes Sequelize think nothing changed.
-      let hostStatus = project.hostStatus ? { ...project.hostStatus } : {};
+      // Subdirectory projects share an existing ingress on the parent host.
+      if (hasSubPath) {
+        hostStatus.ingress = true;
+        await project.update({ hostStatus });
+        return;
+      }
 
       const k8sApi = await getK8sApi();
       let ingress = '';
@@ -286,7 +301,7 @@ const checkHostStatus = async (conditions) => {
       if (useExternalCerts) {
         const slugOverride = certConfig.externalCertSlug || null;
         const secretName = externalCertificatesManager.generateSecretName(
-          project.url,
+          ingressHost,
           namespace,
           slugOverride
         );
@@ -328,7 +343,7 @@ const checkHostStatus = async (conditions) => {
               await createIngress(
                 k8sApi,
                 project.config.uniqueId,
-                project.url,
+                ingressHost,
                 namespace,
                 secretName,
                 tlsExtraDomains,
@@ -339,7 +354,7 @@ const checkHostStatus = async (conditions) => {
               await createIngress(
                 k8sApi,
                 project.config.uniqueId,
-                project.url,
+                ingressHost,
                 namespace,
                 null,
                 tlsExtraDomains,
@@ -361,7 +376,7 @@ const checkHostStatus = async (conditions) => {
                 ingress,
                 k8sApi,
                 project.config.uniqueId,
-                project.url,
+                ingressHost,
                 namespace,
                 secretName,
                 tlsExtraDomains,
@@ -373,7 +388,7 @@ const checkHostStatus = async (conditions) => {
                 ingress,
                 k8sApi,
                 project.config.uniqueId,
-                project.url,
+                ingressHost,
                 namespace,
                 null,
                 tlsExtraDomains,
@@ -398,7 +413,7 @@ const checkHostStatus = async (conditions) => {
           const response = await createIngress(
             k8sApi,
             project.config.uniqueId,
-            project.url,
+            ingressHost,
             namespace,
             tlsSecretName,
             tlsExtraDomains,
@@ -418,7 +433,7 @@ const checkHostStatus = async (conditions) => {
             ingress,
             k8sApi,
             project.config.uniqueId,
-            project.url,
+            ingressHost,
             namespace,
             tlsSecretName,
             tlsExtraDomains,
