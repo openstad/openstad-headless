@@ -1,4 +1,3 @@
-import { marker } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useState } from 'react';
 
@@ -95,7 +94,10 @@ const MapInput: React.FC<MapComponentProps> = ({
         zoom={7}
         scrollWheelZoom={false}
         style={{ height: '600px', width: '100%' }}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
         {markerPosition && (
           <Marker position={markerPosition} icon={dynamicMarkerIcon} />
         )}

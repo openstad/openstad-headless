@@ -11,6 +11,7 @@ const db = require('../../db');
 const authService = require('../../services/authService');
 const tokenSMS = require('../../services/tokenSMS');
 const authPhonenumberConfig = require('../../config/auth').get('Phonenumber');
+const interpolate = require('../../utils/interpolate');
 const verificationService = require('../../services/verificationService');
 const URL = require('url').URL;
 
@@ -41,7 +42,7 @@ exports.login = (req, res) => {
     config.authTypes && config.authTypes['Phonenumber']
       ? config.authTypes['Phonenumber']
       : {};
-  const contactEmail = config.contactEmail || '';
+  const vars = { clientEmail: config.contactEmail || '' };
 
   res.render('auth/phonenumber/login', {
     loginUrl: authPhonenumberConfig.loginUrl,
@@ -65,12 +66,13 @@ exports.login = (req, res) => {
       configAuthType.label ||
       authPhonenumberConfig.loginLabel ||
       authPhonenumberConfig.label,
-    helpText: (
+    helpText: interpolate(
       configAuthType.loginHelpText ||
-      configAuthType.helpText ||
-      authPhonenumberConfig.loginHelpText ||
-      authPhonenumberConfig.helpText
-    ).replace(/\[\[contactEmail\]\]/g, contactEmail),
+        configAuthType.helpText ||
+        authPhonenumberConfig.loginHelpText ||
+        authPhonenumberConfig.helpText,
+      vars
+    ),
     buttonText:
       configAuthType.loginButtonText ||
       configAuthType.buttonText ||
@@ -176,7 +178,7 @@ exports.smsCode = (req, res) => {
     config.authTypes && config.authTypes['Phonenumber']
       ? config.authTypes['Phonenumber']
       : {};
-  const contactEmail = config.contactEmail || '';
+  const smsVars = { clientEmail: config.contactEmail || '' };
 
   res.render('auth/phonenumber/sms-code', {
     loginUrl: authPhonenumberConfig.smsCodeUrl,
@@ -200,12 +202,13 @@ exports.smsCode = (req, res) => {
       configAuthType.label ||
       authPhonenumberConfig.smsCodeLabel ||
       authPhonenumberConfig.label,
-    helpText: (
+    helpText: interpolate(
       configAuthType.smsCodeHelpText ||
-      configAuthType.helpText ||
-      authPhonenumberConfig.smsCodeHelpText ||
-      authPhonenumberConfig.helpText
-    ).replace(/\[\[contactEmail\]\]/g, contactEmail),
+        configAuthType.helpText ||
+        authPhonenumberConfig.smsCodeHelpText ||
+        authPhonenumberConfig.helpText,
+      smsVars
+    ),
     buttonText:
       configAuthType.smsCodeButtonText ||
       configAuthType.buttonText ||

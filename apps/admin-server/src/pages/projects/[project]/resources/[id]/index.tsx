@@ -18,6 +18,7 @@ export default function ProjectResource() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
+  const tab = (router.query.tab as string) || 'info';
 
   return (
     <div>
@@ -37,7 +38,15 @@ export default function ProjectResource() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="info">
+          <Tabs
+            value={tab}
+            onValueChange={(val) =>
+              router.replace(
+                { query: { ...router.query, tab: val } },
+                undefined,
+                { shallow: true }
+              )
+            }>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="votes">Stemmen</TabsTrigger>

@@ -38,6 +38,8 @@ COOKIE_SECURE_OFF = process.env.FORCE_HTTP ? 'yes' : ''
 DB_REQUIRE_SSL = false
 DB_AUTH_METHOD = ''
 
+WHITELISTED_EMAILS=''
+
 // api server
 API_DOMAIN = 'api.' + process.env.BASE_DOMAIN
 API_URL = 'http://' + API_DOMAIN

@@ -456,6 +456,12 @@ cms:
     data:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
+    exports:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/exports
+    bigUploads:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/big-uploads
+    importExport:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/import-export
   disableRateLimiter: "false" # Whether to disable the rate limiter for this service
 # Overwrite Secrets
 

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 import * as React from 'react';
@@ -56,6 +57,46 @@ const SelectContent = React.forwardRef<
 ));
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
+const SelectContentScrollable = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = 'popper', ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        'relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+        position === 'popper' &&
+          'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
+        className
+      )}
+      position={position}
+      {...props}>
+      <ScrollAreaPrimitive.Root
+        className="max-h-60 w-full"
+        style={{ height: '240px', overflowY: 'auto' }}
+        type="auto">
+        <SelectPrimitive.Viewport asChild>
+          <ScrollAreaPrimitive.Viewport
+            className={cn(
+              'p-1',
+              position === 'popper' &&
+                'min-w-[var(--radix-select-trigger-width)]'
+            )}>
+            {children}
+          </ScrollAreaPrimitive.Viewport>
+        </SelectPrimitive.Viewport>
+        <ScrollAreaPrimitive.Scrollbar
+          className="flex w-1.5 touch-none select-none p-px"
+          orientation="vertical">
+          <ScrollAreaPrimitive.Thumb className="relative flex-1 rounded-full bg-border" />
+        </ScrollAreaPrimitive.Scrollbar>
+      </ScrollAreaPrimitive.Root>
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+));
+SelectContentScrollable.displayName = SelectPrimitive.Content.displayName;
+
 const SelectLabel = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
@@ -108,6 +149,7 @@ export {
   SelectValue,
   SelectTrigger,
   SelectContent,
+  SelectContentScrollable,
   SelectLabel,
   SelectItem,
   SelectSeparator,

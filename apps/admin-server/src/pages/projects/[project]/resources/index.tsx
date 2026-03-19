@@ -5,7 +5,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
-import flattenObject from '@/lib/export-helpers/flattenObject';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import { keyMap } from '@/lib/keyMap';
 import { Paginator } from '@openstad-headless/ui/src';
@@ -14,7 +13,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import * as XLSX from 'xlsx';
 
 import { Button } from '../../../../components/ui/button';
 import { PageLayout } from '../../../../components/ui/page-layout';
