@@ -288,6 +288,7 @@ async function setupEnvVars() {
   process.env.MAIL_MS_CLIENT_ID = process.env.MAIL_MS_CLIENT_ID || '';
   process.env.MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
   process.env.MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
+  process.env.WHITELISTED_EMAILS = process.env.WHITELISTED_EMAILS || '';
 }
 
 async function writeEnvFile() {
@@ -317,6 +318,8 @@ SMTP_HOST=${process.env.SMTP_HOST}
 SMTP_SECURE=${process.env.SMTP_SECURE || ''}
 SMTP_USERNAME=${process.env.SMTP_USERNAME}
 SMTP_PASSWORD=${process.env.SMTP_PASSWORD}
+
+WHITELISTED_EMAILS=${process.env.WHITELISTED_EMAILS}
 
 MONGO_HOST=localhost
 
