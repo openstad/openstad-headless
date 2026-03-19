@@ -524,9 +524,13 @@ module.exports = function (app) {
       if (req.query.client_id)
         querystring += `&client_id=${req.query.client_id}`;
       if (req.query.redirectUrl)
-        querystring += `&redirectUrl=${encodeURIComponent(req.query.redirectUrl)}`;
+        querystring += `&redirectUrl=${encodeURIComponent(
+          req.query.redirectUrl
+        )}`;
       if (req.query.redirect_uri)
-        querystring += `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`;
+        querystring += `&redirect_uri=${encodeURIComponent(
+          req.query.redirect_uri
+        )}`;
       if (req.query.token) querystring += `&token=${req.query.token}`;
       if (req.query.access_token)
         querystring += `&access_token=${req.query.access_token}`;

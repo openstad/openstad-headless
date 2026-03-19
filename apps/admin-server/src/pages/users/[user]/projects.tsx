@@ -195,6 +195,10 @@ export default function CreateUserProjects() {
                     (user: any) => user.projectId == project.id
                   );
                 }
+                const roleOverride = projectRoles.find(
+                  (pr) => pr.projectId == project.id
+                );
+                const effectiveRole = roleOverride?.roleId || user?.role || '';
 
                 const cannotCreateNewUsers =
                   project?.config?.users?.canCreateNewUsers === false;
@@ -206,7 +210,7 @@ export default function CreateUserProjects() {
                     <Paragraph className="truncate">{project.name}</Paragraph>
                     <Paragraph className="truncate mr-4">
                       <UserRoleDropdownList
-                        roleId={user?.role || ''}
+                        roleId={effectiveRole}
                         addProject={(roleId) => {
                           addProject(project.id, roleId);
                         }}
@@ -215,7 +219,7 @@ export default function CreateUserProjects() {
                     </Paragraph>
 
                     <Paragraph className="text-sm text-muted-foreground grid items-center gap-2 grid-cols-[15px_1fr]">
-                      {!!user?.role && (
+                      {!!effectiveRole && (
                         <>
                           <Checkbox
                             defaultChecked={

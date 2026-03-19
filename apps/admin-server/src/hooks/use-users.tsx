@@ -33,7 +33,11 @@ function useUsers(options?: UsersPaginationOptions) {
 
   const url =
     page !== undefined
-      ? `/api/openstad/api/user?page=${page}&pageSize=${pageSize}${q ? `&q=${encodeURIComponent(q)}` : ''}${uniqueByIdpUser ? '&uniqueByIdpUser=1' : ''}${excludeAnonymous ? '&excludeAnonymous=1' : ''}`
+      ? `/api/openstad/api/user?page=${page}&pageSize=${pageSize}${
+          q ? `&q=${encodeURIComponent(q)}` : ''
+        }${uniqueByIdpUser ? '&uniqueByIdpUser=1' : ''}${
+          excludeAnonymous ? '&excludeAnonymous=1' : ''
+        }`
       : '/api/openstad/api/user';
   const usersSwr = useSWR(url);
   const res = usersSwr.data;

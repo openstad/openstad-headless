@@ -20,7 +20,9 @@ function getUniqueUserKey(user) {
     return `${provider}-*-${identifier}`;
   }
   if (user?.id) return `user-${user.id}`;
-  return `user-${user?.email || ''}-${user?.name || ''}-${user?.createdAt || ''}`;
+  return `user-${user?.email || ''}-${user?.name || ''}-${
+    user?.createdAt || ''
+  }`;
 }
 
 function getRecencyValue(user) {

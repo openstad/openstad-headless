@@ -313,8 +313,12 @@ export default function ProjectComments() {
             <div className="mb-2">
               <span className="text-sm text-gray-500">
                 {selectedItems.length > 0
-                  ? `${selectedItems.length} van ${totalCount} ${totalCount === 1 ? 'reactie' : 'reacties'} geselecteerd`
-                  : `${totalCount} ${totalCount === 1 ? 'reactie' : 'reacties'}`}
+                  ? `${selectedItems.length} van ${totalCount} ${
+                      totalCount === 1 ? 'reactie' : 'reacties'
+                    } geselecteerd`
+                  : `${totalCount} ${
+                      totalCount === 1 ? 'reactie' : 'reacties'
+                    }`}
               </span>
             </div>
             <div className="flex justify-between mb-4 gap-4">

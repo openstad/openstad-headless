@@ -5,6 +5,13 @@ export default function useComments(props) {
   const sentiment = props.sentiment || null;
   const onlyIncludeTagIds = props.onlyIncludeTagIds || null;
   const search = props.search || '';
+  const commentsCacheKey = {
+    projectId,
+    resourceId,
+    sentiment,
+    onlyIncludeTagIds,
+    search,
+  };
 
   let dataToReturn = [];
   let errorToReturn = undefined;
@@ -12,7 +19,7 @@ export default function useComments(props) {
 
   if (resourceId && resourceId !== '0') {
     const { data, error, isLoading } = self.useSWR(
-      { projectId, resourceId, sentiment, onlyIncludeTagIds, search },
+      commentsCacheKey,
       'comments.fetch'
     );
 
@@ -24,78 +31,51 @@ export default function useComments(props) {
   // add functionality
   let comments = dataToReturn || [];
   comments.create = function (newData) {
-    return self.mutate(
-      { projectId, resourceId, sentiment },
-      'comments.create',
-      newData,
-      { action: 'create' }
-    );
+    return self.mutate(commentsCacheKey, 'comments.create', newData, {
+      action: 'create',
+    });
   };
   comments.map(async (comment) => {
     comment.update = function (newData) {
-      return self.mutate(
-        { projectId, resourceId, sentiment },
-        'comments.update',
-        newData,
-        { action: 'update' }
-      );
+      return self.mutate(commentsCacheKey, 'comments.update', newData, {
+        action: 'update',
+      });
     };
     comment.delete = function (newData) {
-      return self.mutate(
-        { projectId, resourceId, sentiment },
-        'comments.delete',
-        comment,
-        { action: 'delete' }
-      );
+      return self.mutate(commentsCacheKey, 'comments.delete', comment, {
+        action: 'delete',
+      });
     };
     comment.submitLike = function () {
-      return self.mutate(
-        { projectId, resourceId, sentiment },
-        'comments.submitLike',
-        comment,
-        { action: 'update' }
-      );
+      return self.mutate(commentsCacheKey, 'comments.submitLike', comment, {
+        action: 'update',
+      });
     };
     comment.submitDislike = function () {
-      return self.mutate(
-        { projectId, resourceId, sentiment },
-        'comments.submitDislike',
-        comment,
-        { action: 'update' }
-      );
+      return self.mutate(commentsCacheKey, 'comments.submitDislike', comment, {
+        action: 'update',
+      });
     };
     comment.replies?.map(async (reply) => {
       reply.update = function (newData) {
-        return self.mutate(
-          { projectId, resourceId, sentiment },
-          'comments.update',
-          newData,
-          { action: 'update' }
-        );
+        return self.mutate(commentsCacheKey, 'comments.update', newData, {
+          action: 'update',
+        });
       };
       reply.delete = function (newData) {
-        return self.mutate(
-          { projectId, resourceId, sentiment },
-          'comments.delete',
-          reply,
-          { action: 'delete' }
-        );
+        return self.mutate(commentsCacheKey, 'comments.delete', reply, {
+          action: 'delete',
+        });
       };
       reply.submitLike = function () {
-        return self.mutate(
-          { projectId, resourceId, sentiment },
-          'comments.submitLike',
-          reply,
-          { action: 'update' }
-        );
+        return self.mutate(commentsCacheKey, 'comments.submitLike', reply, {
+          action: 'update',
+        });
       };
       reply.submitDislike = function () {
-        return self.mutate(
-          { projectId, resourceId, sentiment },
-          'comments.submitLike',
-          reply,
-          { action: 'update' }
-        );
+        return self.mutate(commentsCacheKey, 'comments.submitDislike', reply, {
+          action: 'update',
+        });
       };
     });
   });

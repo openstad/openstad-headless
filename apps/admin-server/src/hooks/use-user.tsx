@@ -20,7 +20,9 @@ export default function useUser() {
   if (userDecode) {
     const match = userDecode.match(/^(.+)-\*-(.+)$/);
     if (match) {
-      url = `/api/openstad/api/user?uniqueByIdpUser=0&byIdpUser[identifier]=${encodeURIComponent(match[2])}&byIdpUser[provider]=${encodeURIComponent(match[1])}`;
+      url = `/api/openstad/api/user?uniqueByIdpUser=0&byIdpUser[identifier]=${encodeURIComponent(
+        match[2]
+      )}&byIdpUser[provider]=${encodeURIComponent(match[1])}`;
     } else {
       url = `/api/openstad/api/user/${encodeURIComponent(userDecode)}`;
     }

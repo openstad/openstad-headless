@@ -324,7 +324,9 @@ async function waitForSecretReady(secretName, namespace, options = {}) {
 
     if (attempt < maxRetries) {
       console.log(
-        `[external-certificates] Secret not ready (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs / 1000}s...`
+        `[external-certificates] Secret not ready (attempt ${attempt}/${maxRetries}), retrying in ${
+          retryDelayMs / 1000
+        }s...`
       );
       await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
     }
