@@ -1,4 +1,3 @@
-import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 

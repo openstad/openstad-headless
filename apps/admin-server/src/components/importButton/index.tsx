@@ -20,18 +20,9 @@ import { translateHeaders } from './translate-headers';
 import {
   extractUniqueStatuses,
   prepareStatuses,
-  processStatuses,
 } from './utils/status-import-helper';
-import {
-  extractUniqueTags,
-  prepareTags,
-  processTags,
-} from './utils/tags-import-helper';
-import {
-  extractUniqueUserIds,
-  prepareUsers,
-  processUserId,
-} from './utils/user-import-helper';
+import { extractUniqueTags, prepareTags } from './utils/tags-import-helper';
+import { extractUniqueUserIds, prepareUsers } from './utils/user-import-helper';
 import validateFileData from './validate-file-data';
 import { processXlsFile } from './xls-extractor';
 
