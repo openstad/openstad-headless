@@ -112,15 +112,6 @@ function Counter({
     sentiment: opinion,
   });
 
-  const { data: votes } = datastore.useUserVote({
-    projectId: counterType === 'votedUsers' ? props.projectId : undefined,
-  });
-
-  const { data: projectVotedUsersCount } = datastore.useProjectVotedUsersCount({
-    projectId:
-      counterType === 'votedUsersPerProject' ? props.projectId : undefined,
-  });
-
   const {
     data: results,
     error,
@@ -135,6 +126,16 @@ function Counter({
     projectId: props.projectId,
     widgetToFetchId:
       counterType === 'enqueteResults' ? props.widgetToFetchId : undefined,
+  });
+
+  const { data: projectVotedUsersCount } = datastore.useProjectVotedUsersCount({
+    projectId:
+      counterType === 'votedUsersPerProject' ||
+      (counterType === 'votedUsers' && resourceId)
+        ? props.projectId
+        : undefined,
+    resourceId:
+      counterType === 'votedUsers' && resourceId ? resourceId : undefined,
   });
 
   if (counterType === 'resource') {
@@ -152,7 +153,7 @@ function Counter({
   }
 
   if (counterType === 'votedUsers') {
-    amountDisplayed = votes.length || 0;
+    amountDisplayed = projectVotedUsersCount || 0;
   }
 
   if (counterType === 'votedUsersPerProject') {
