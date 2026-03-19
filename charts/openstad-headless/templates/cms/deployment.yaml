@@ -127,6 +127,12 @@ spec:
 {{- if ne .Values.cms.useS3 "true" }}
           - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/attachments" }}
             name: data-vol
+          - mountPath: {{ .Values.cms.volumes.exports.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/exports" }}
+            name: exports-dir
+          - mountPath: {{ .Values.cms.volumes.bigUploads.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/big-uploads" }}
+            name: big-uploads-dir
+          - mountPath: {{ .Values.cms.volumes.importExport.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/import-export" }}
+            name: import-export-dir
 {{- end }}
       volumes:
         - name: tmp-dir
@@ -137,4 +143,10 @@ spec:
         - name: data-vol
           persistentVolumeClaim:
             claimName: cms-data-claim
+        - name: exports-dir
+          emptyDir: {}
+        - name: big-uploads-dir
+          emptyDir: {}
+        - name: import-export-dir
+          emptyDir: {}
 {{- end }}
