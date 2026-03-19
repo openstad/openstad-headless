@@ -386,7 +386,9 @@ const TextInput: FC<TextInputProps> = ({
           rows={rows}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          autoComplete={getAutocomplete(fieldKey)}
+          autoComplete={
+            variant === 'email' ? 'email' : getAutocomplete(fieldKey)
+          }
           aria-describedby={`${randomId}_error`}
         />
         {isFocused && helpText && (
