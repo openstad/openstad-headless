@@ -9,7 +9,12 @@ const normalizeUnicodeText = (text) => {
     return '';
   }
 
-  return _.deburr(text.normalize('NFKD'));
+  // Remove 4-byte characters (emoji, supplementary Unicode planes) that MySQL utf8 cannot store
+  const stripped = text.replace(
+    /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g,
+    ''
+  );
+  return _.deburr(stripped.normalize('NFKD'));
 };
 
 // Decorator for the sanitize function
