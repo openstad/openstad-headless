@@ -3,6 +3,7 @@ const fs = require('fs');
 const fields = require('./lib/fields');
 const arrangeFields = require('./lib/arrangeFields');
 const projectService = require('../../../services/projects');
+const resourceService = require('../../../services/resources');
 
 module.exports = {
   options: {
@@ -66,6 +67,29 @@ module.exports = {
         req.data.global.cookieConsent = req.data.global.useCookieWarning
           ? req.cookies && req.cookies['openstad-cookie-consent'] == 1
           : true;
+
+        // Fetch resource data for OG meta tags when openstadResourceId is in the query.
+        // Note: projects using a custom resourceIdRelativePath (e.g. ?articleId=[id])
+        // are not yet supported here. That requires a configurable param name setting.
+        const resourceId = req.query && req.query.openstadResourceId;
+        if (
+          resourceId &&
+          /^\d+$/.test(resourceId) &&
+          req.project &&
+          req.project.id
+        ) {
+          const resource = await resourceService.fetchOne(
+            req.project.id,
+            resourceId
+          );
+          if (resource) {
+            req.data.activeResource = resource;
+          }
+        }
+
+        // Pass the original URL so templates can build og:url without losing
+        // existing query parameters.
+        req.data.originalUrl = req.originalUrl;
 
         return next();
       },

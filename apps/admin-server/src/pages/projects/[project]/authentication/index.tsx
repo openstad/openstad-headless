@@ -21,6 +21,11 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import {
+  WithWhitelistedEmailsProps,
+  withWhitelistedEmails,
+} from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -32,6 +37,8 @@ import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
+
+export const getServerSideProps = withWhitelistedEmails;
 
 const authTypes = [
   {
@@ -73,7 +80,9 @@ const formSchema = z.object({
     .optional(),
 });
 
-export default function ProjectAuthentication() {
+export default function ProjectAuthentication({
+  whitelistedEmails,
+}: WithWhitelistedEmailsProps) {
   const router = useRouter();
   const { project } = router.query;
   const { data, updateProject } = useProject(['includeAuthConfig']);
@@ -467,7 +476,14 @@ export default function ProjectAuthentication() {
                             Afzender adres van login e-mails
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            {whitelistedEmails.length > 0 ? (
+                              <WhitelistedEmailSelect
+                                field={field}
+                                whitelistedEmails={whitelistedEmails}
+                              />
+                            ) : (
+                              <Input placeholder="" {...field} />
+                            )}
                           </FormControl>
                           <FormMessage />
                         </FormItem>

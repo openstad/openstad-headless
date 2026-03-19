@@ -475,6 +475,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             form={form}
             project={project as string}
             fieldName="document"
+            allowMultiple={true}
             allowedTypes={[
               'application/pdf',
               'application/msword',
