@@ -166,13 +166,14 @@ function Account({
     api: props.api,
   });
 
-  const currentUser = datastore.useCurrentUser({
-    ...props,
-    projectId: props.projectId,
-  });
+  const { data: currentUser, isLoading: currentUserIsLoading } =
+    datastore.useCurrentUser({
+      ...props,
+      projectId: props.projectId,
+    });
 
   const saveUserData = async (data: any) => {
-    if (currentUser?.data?.id === undefined) {
+    if (currentUser?.id === undefined) {
       return;
     }
 
@@ -203,7 +204,7 @@ function Account({
           typeof value === 'object' && value !== null ? value.value : value,
         ])
       ),
-      id: currentUser?.data?.id,
+      id: currentUser?.id,
     };
 
     await datastore.api.user.update({
@@ -217,13 +218,13 @@ function Account({
   useEffect(() => {
     if (
       currentUser !== undefined &&
-      currentUser?.data !== undefined &&
+      currentUser !== undefined &&
       fetchedUser === false
     ) {
       setFetchedUser(currentUser);
 
       // Assuming address is a string like "Main Street 24"
-      const address = currentUser?.data?.address;
+      const address = currentUser?.address;
       const addressParts = address?.split(' ');
       const huisnummer = addressParts?.pop();
       const straatnaam = addressParts?.join(' ');
@@ -233,12 +234,12 @@ function Account({
           ...prev,
           email: {
             label: prev?.email?.label,
-            value: currentUser?.data?.email,
+            value: currentUser?.email,
             description: prev?.email?.description,
           },
           name: {
             label: prev?.name?.label,
-            value: currentUser?.data?.name,
+            value: currentUser?.name,
             description: prev?.name?.description,
           },
           straatnaam: {
@@ -253,22 +254,22 @@ function Account({
           },
           postalCode: {
             label: prev?.postalCode?.label,
-            value: currentUser?.data?.postcode,
+            value: currentUser?.postcode,
             description: prev?.postalCode?.description,
           },
           city: {
             label: prev?.city?.label,
-            value: currentUser?.data?.city,
+            value: currentUser?.city,
             description: prev?.city?.description,
           },
           nickname: {
             label: prev?.nickname?.label,
-            value: currentUser?.data?.nickName,
+            value: currentUser?.nickName,
             description: prev?.nickname?.description,
           },
           emailNotificationConsent: {
             label: prev?.emailNotificationConsent?.label,
-            value: currentUser?.data?.emailNotificationConsent || false,
+            value: currentUser?.emailNotificationConsent || false,
             description: prev?.emailNotificationConsent?.description,
           },
         };
@@ -283,7 +284,7 @@ function Account({
 
   return (
     <section className="account osc">
-      {!hasRole(currentUser?.data, 'member') ? (
+      {currentUserIsLoading ? null : !hasRole(currentUser, 'member') ? (
         <>
           <Banner className="big">
             <Heading level={4} appearance="utrecht-heading-6">
@@ -293,7 +294,9 @@ function Account({
             <Button
               type="button"
               onClick={() => {
-                document.location.href = props.login?.url || '';
+                if (props.login?.url) {
+                  document.location.href = props.login.url;
+                }
               }}
               appearance="primary-action-button">
               {loginButtonText || 'Inloggen'}
@@ -461,7 +464,14 @@ function Account({
                 className="account-logout-button"
                 appearance="primary-action-button"
                 onClick={() => {
-                  document.location.href = props.logout?.url || '';
+                  if (currentUser?.logout) {
+                    currentUser.logout({ url: props.logout?.url });
+                    return;
+                  }
+
+                  if (props.logout?.url) {
+                    document.location.href = props.logout.url;
+                  }
                 }}>
                 Uitloggen
               </Button>
