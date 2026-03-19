@@ -20,7 +20,7 @@ import {
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-function unwrapSingleRootDiv(content) {
+export function unwrapSingleRootDiv(content) {
   if (typeof content !== 'string') return content;
   const trimmed = content.trim();
   if (!trimmed) return trimmed;
