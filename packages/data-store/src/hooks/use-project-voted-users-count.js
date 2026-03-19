@@ -1,4 +1,4 @@
-export default function useProjectVotedUsersCount({ projectId }) {
+export default function useProjectVotedUsersCount({ projectId, resourceId }) {
   let self = this;
 
   if (!projectId) {
@@ -7,7 +7,7 @@ export default function useProjectVotedUsersCount({ projectId }) {
 
   try {
     const { data, error, isLoading } = self.useSWR(
-      { projectId },
+      { projectId, resourceId },
       'projectVotedUsersCount.fetch'
     );
 

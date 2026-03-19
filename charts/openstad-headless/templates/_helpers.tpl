@@ -312,46 +312,46 @@ nginx
     Each returns the full comma-separated middleware chain for that service.
 */}}
 
-{{/* admin: security-headers + noindex + body-size-limit */}}
+{{/* admin: security-headers + noindex + body-size-limit + compress */}}
 {{- define "openstad.traefik.middlewares.admin" -}}
 {{- $ns := .Release.Namespace -}}
 {{- $fn := include "openstad.fullname" . -}}
-{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn $ns $fn -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-compress-response@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn -}}
 {{- end -}}
 
-{{/* auth: security-headers only */}}
+{{/* auth: security-headers + noindex + compress */}}
 {{- define "openstad.traefik.middlewares.auth" -}}
 {{- $ns := .Release.Namespace -}}
 {{- $fn := include "openstad.fullname" . -}}
-{{- printf "%s-%s-security-headers@kubernetescrd" $ns $fn -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-compress-response@kubernetescrd" $ns $fn $ns $fn $ns $fn -}}
 {{- end -}}
 
-{{/* api: security-headers + hsts + body-size-limit */}}
+{{/* api: security-headers + hsts + noindex + body-size-limit + compress */}}
 {{- define "openstad.traefik.middlewares.api" -}}
 {{- $ns := .Release.Namespace -}}
 {{- $fn := include "openstad.fullname" . -}}
-{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn $ns $fn -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-compress-response@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn $ns $fn -}}
 {{- end -}}
 
-{{/* image: security-headers + body-size-limit */}}
+{{/* image: security-headers + noindex + body-size-limit + compress */}}
 {{- define "openstad.traefik.middlewares.image" -}}
 {{- $ns := .Release.Namespace -}}
 {{- $fn := include "openstad.fullname" . -}}
-{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-compress-response@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn -}}
 {{- end -}}
 
-{{/* cms: security-headers + hsts + body-size-limit */}}
+{{/* cms: security-headers + hsts + body-size-limit + compress */}}
 {{- define "openstad.traefik.middlewares.cms" -}}
 {{- $ns := .Release.Namespace -}}
 {{- $fn := include "openstad.fullname" . -}}
-{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-body-size-limit@kubernetescrd" $ns $fn $ns $fn $ns $fn -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-compress-response@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn -}}
 {{- end -}}
 
-{{/* createdIngresses: security-headers + hsts + noindex + body-size-limit + www-redirect */}}
+{{/* createdIngresses: security-headers + hsts + body-size-limit + compress + www-redirect */}}
 {{- define "openstad.traefik.middlewares.createdIngresses" -}}
 {{- $ns := .Release.Namespace -}}
 {{- $fn := include "openstad.fullname" . -}}
-{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-www-redirect@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn $ns $fn -}}
+{{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-hsts@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-compress-response@kubernetescrd,%s-%s-www-redirect@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn $ns $fn -}}
 {{- end -}}
 
 {{/*

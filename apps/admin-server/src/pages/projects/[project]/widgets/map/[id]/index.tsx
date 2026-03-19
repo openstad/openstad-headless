@@ -1,4 +1,3 @@
-import Preview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import {
   WithApiUrlProps,

@@ -1,4 +1,4 @@
-import _, { uniqueId } from 'lodash';
+import _ from 'lodash';
 import React, { Fragment, useEffect } from 'react';
 
 import { Checkbox } from './ui/checkbox';

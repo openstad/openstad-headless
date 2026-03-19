@@ -57,6 +57,12 @@ router
       'SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE resources.projectId=? AND votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL';
     let bindvars = [req.params.projectId];
 
+    const resourceId = parseInt(req.query.resourceId);
+    if (resourceId) {
+      query += ' AND votes.resourceId=?';
+      bindvars.push(resourceId);
+    }
+
     try {
       const [rows] = await sequelize.query(query, {
         replacements: bindvars,

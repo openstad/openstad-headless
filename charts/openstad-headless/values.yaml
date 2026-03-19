@@ -205,6 +205,7 @@ auth:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
     extraLabels: {}
     hosts: []
     ingressClassName:  # defaults to global.ingress.type
@@ -262,6 +263,7 @@ api:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
         more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
@@ -276,7 +278,7 @@ api:
     # The defaults below are for nginx. When using global.ingress.type: traefik,
     # override with traefik middleware annotations, e.g.:
     #   annotations:
-    #     traefik.ingress.kubernetes.io/router.middlewares: "<namespace>-<release>-security-headers@kubernetescrd,<namespace>-<release>-security-headers-hsts@kubernetescrd,<namespace>-<release>-security-headers-noindex@kubernetescrd,<namespace>-<release>-body-size-limit@kubernetescrd,<namespace>-<release>-www-redirect@kubernetescrd"
+    #     traefik.ingress.kubernetes.io/router.middlewares: "<namespace>-<release>-security-headers@kubernetescrd,<namespace>-<release>-security-headers-hsts@kubernetescrd,<namespace>-<release>-compress-response@kubernetescrd,<namespace>-<release>-body-size-limit@kubernetescrd,<namespace>-<release>-www-redirect@kubernetescrd"
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -284,7 +286,6 @@ api:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
-        more_set_headers "X-Robots-Tag: noindex, nofollow";
         more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     # Is the TLS for this ingress managed by Openstad?
     # Set to `false` if the secrets are managed manually -- compatible with older versions of Openstad
@@ -356,6 +357,7 @@ image:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
     extraLabels: {}
     hosts: []
     ingressClassName:  # defaults to global.ingress.type
@@ -456,6 +458,12 @@ cms:
     data:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
+    exports:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/exports
+    bigUploads:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/big-uploads
+    importExport:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/import-export
   disableRateLimiter: "false" # Whether to disable the rate limiter for this service
 # Overwrite Secrets
 
