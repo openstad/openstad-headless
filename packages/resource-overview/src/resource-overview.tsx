@@ -1167,7 +1167,7 @@ function ResourceOverviewInner({
           return a.yes - b.yes;
         }
         if (sort === 'random') {
-          // Multi-project resources overview
+          // Frontend deterministic sort; DB random sort doesn't support multi-project.
           if (uniqueResources.length > 0) {
             return deterministicRandomSort(
               a,
