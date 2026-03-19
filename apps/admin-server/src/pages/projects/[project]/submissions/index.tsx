@@ -12,14 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useSubmissions from '@/hooks/use-submission';
 import useUsers from '@/hooks/use-users';
 import { useWidgetsHook } from '@/hooks/use-widgets';
 import { exportSubmissionsToCSV } from '@/lib/export-helpers/submissions-export';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { Button } from '../../../../components/ui/button';
@@ -41,9 +40,10 @@ export default function ProjectSubmissions() {
   const { project } = router.query;
   const { data, remove } = useSubmissions(project as string);
 
-  const [filterData, setFilterData] = useState<Submission[]>(data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
-  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<string>('createdAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [activeWidget, setActiveWidget] = useState('0');
@@ -56,13 +56,6 @@ export default function ProjectSubmissions() {
   const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
-    let loadedSubmissions = (data || []) as Submission[];
-
-    const sortedData = loadedSubmissions.sort(
-      (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
-    );
-
-    setFilterData(sortedData);
     setTotalCount(data?.length || 0);
   }, [data]);
 
@@ -96,20 +89,100 @@ export default function ProjectSubmissions() {
 
   const selectClick = (value: any) => {
     const ID = value !== '0' ? value?.split(' - ')[0] : '0';
-    const filteredData =
-      ID === '0'
-        ? data
-        : data?.filter(
-            (submission: any) => (submission.widgetId || 0).toString() === ID
-          );
-
-    setFilterData(filteredData);
     setActiveWidget(value);
 
     const selectedWidget = widgetData.find(
       (widget: any) => widget.id.toString() === ID
     );
     setSelectedWidget(selectedWidget);
+  };
+
+  const filteredSubmissions = useMemo(() => {
+    const submissions = [...((data || []) as Submission[])];
+    const selectedWidgetId =
+      activeWidget !== '0' ? activeWidget.split(' - ')[0] : null;
+
+    const widgetFiltered = selectedWidgetId
+      ? submissions.filter(
+          (submission: any) =>
+            (submission.widgetId || 0).toString() === selectedWidgetId
+        )
+      : submissions;
+
+    const term = searchTerm.trim().toLowerCase();
+    const searched = !term
+      ? widgetFiltered
+      : widgetFiltered.filter((submission: any) => {
+          const submittedDataText = JSON.stringify(
+            submission.submittedData || {}
+          ).toLowerCase();
+
+          const searchable: Record<string, string> = {
+            id: String(submission.widgetId ?? ''),
+            user: String(submission.userId ?? ''),
+            submittedData: submittedDataText,
+            createdAt: String(submission.createdAt ?? '').toLowerCase(),
+            all: [
+              String(submission.widgetId ?? ''),
+              String(submission.userId ?? ''),
+              submittedDataText,
+              String(submission.createdAt ?? '').toLowerCase(),
+            ].join(' '),
+          };
+
+          const target =
+            filterSearchType && searchable[filterSearchType]
+              ? searchable[filterSearchType]
+              : searchable.all;
+
+          return target.includes(term);
+        });
+
+    const sorted = [...searched].sort((a: any, b: any) => {
+      const toComparable = (value: any) => {
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'object')
+          return JSON.stringify(value).toLowerCase();
+        return String(value).toLowerCase();
+      };
+
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+      if (sortField === 'submittedData') {
+        aValue = a.submittedData;
+        bValue = b.submittedData;
+      }
+
+      const aCmp = toComparable(aValue);
+      const bCmp = toComparable(bValue);
+
+      if (aCmp < bCmp) return sortDirection === 'asc' ? -1 : 1;
+      if (aCmp > bCmp) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [
+    activeWidget,
+    data,
+    filterSearchType,
+    searchTerm,
+    sortDirection,
+    sortField,
+  ]);
+
+  const handleSort = (field: string) => {
+    if (field === sortField) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'createdAt' ? 'desc' : 'asc');
+    }
+  };
+
+  const getSortButtonClass = (field: string) => {
+    if (field !== sortField) return 'filter-button';
+    return `filter-button font-bold text-black ${sortDirection === 'asc' ? '--up' : ''}`;
   };
 
   if (!data) return null;
@@ -147,7 +220,7 @@ export default function ProjectSubmissions() {
               disabled={activeWidget === '0'}
               onExport={(settings: ExportSettings) =>
                 exportSubmissionsToCSV(
-                  filterData,
+                  filteredSubmissions,
                   activeWidget,
                   selectedWidget,
                   settings
@@ -180,11 +253,6 @@ export default function ProjectSubmissions() {
                   onConfirmAccepted={() => {
                     remove(0, true, selectedItems)
                       .then(() => {
-                        setFilterData((prev) =>
-                          prev.filter(
-                            (item: any) => !selectedItems.includes(item.id)
-                          )
-                        );
                         setTotalCount((prev) => prev - selectedItems.length);
                         toast.success('Inzendingen succesvol verwijderd');
                         setSelectedItems([]);
@@ -203,6 +271,7 @@ export default function ProjectSubmissions() {
               </p>
               <select
                 className="p-2 rounded"
+                value={filterSearchType}
                 onChange={(e) => setFilterSearchType(e.target.value)}>
                 <option value="">Alles</option>
                 <option value="id">Widget ID</option>
@@ -214,9 +283,8 @@ export default function ProjectSubmissions() {
                 type="text"
                 className="p-2 rounded"
                 placeholder="Zoeken..."
-                onChange={(e) =>
-                  debouncedSearchTable(e.target.value, filterData, data)
-                }
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
@@ -227,12 +295,14 @@ export default function ProjectSubmissions() {
               style={{ gridTemplateColumns: '50px 1fr 1fr 2fr 1fr 1fr' }}>
               <Checkbox
                 checked={
-                  filterData?.length > 0 &&
-                  filterData.every((s: any) => selectedItems.includes(s.id))
+                  filteredSubmissions?.length > 0 &&
+                  filteredSubmissions.every((s: any) =>
+                    selectedItems.includes(s.id)
+                  )
                 }
                 onCheckedChange={(checked) => {
                   const currentPageIds =
-                    filterData?.map((s: any) => s.id) || [];
+                    filteredSubmissions?.map((s: any) => s.id) || [];
                   if (checked) {
                     setSelectedItems((prev) =>
                       Array.from(new Set([...prev, ...currentPageIds]))
@@ -246,44 +316,36 @@ export default function ProjectSubmissions() {
               />
               <ListHeading className="hidden lg:flex">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('widgetId', e, filterData))
-                  }>
+                  className={getSortButtonClass('widgetId')}
+                  onClick={() => handleSort('widgetId')}>
                   Widget ID | Naam
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('userId', e, filterData))
-                  }>
+                  className={getSortButtonClass('userId')}
+                  onClick={() => handleSort('userId')}>
                   Gebruiker ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden w-full lg:flex lg:col-span-1">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('submittedData', e, filterData))
-                  }>
+                  className={getSortButtonClass('submittedData')}
+                  onClick={() => handleSort('submittedData')}>
                   Ingezonden Data
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('createdAt', e, filterData))
-                  }>
+                  className={getSortButtonClass('createdAt')}
+                  onClick={() => handleSort('createdAt')}>
                   Datum aangemaakt
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
             <ul className="admin-overview">
-              {filterData?.map((submission: any) => {
+              {filteredSubmissions?.map((submission: any) => {
                 const userId = submission.userId;
                 const user =
                   usersData?.find((user: any) => user.id === userId) || null;
@@ -382,11 +444,6 @@ export default function ProjectSubmissions() {
                         onDeleteAccepted={() =>
                           remove(submission.id)
                             .then(() => {
-                              setFilterData((prev) =>
-                                prev.filter(
-                                  (item: any) => item.id !== submission.id
-                                )
-                              );
                               setTotalCount((prev) => prev - 1);
                               toast.success('Inzending succesvol verwijderd');
                             })
