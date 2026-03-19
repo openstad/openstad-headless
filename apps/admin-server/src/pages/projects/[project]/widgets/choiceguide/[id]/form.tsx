@@ -1,16 +1,12 @@
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ChoiceGuide,
-  ChoiceGuideProps,
-} from '@openstad-headless/choiceguide/src/props';
+import { ChoiceGuideProps } from '@openstad-headless/choiceguide/src/props';
 import dynamic from 'next/dynamic';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 

@@ -329,14 +329,6 @@ export const StemBegrootResourceList = ({
                   __html: elipsizeHTML(resource.description, 200),
                 }}
               />
-              {showOriginalResource && originalUrl ? (
-                <Paragraph className="strong">
-                  Dit is een vervolg op plan:&nbsp;
-                  <Link target="_blank" href={originalUrl}>
-                    {originalUrl}
-                  </Link>
-                </Paragraph>
-              ) : null}
 
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (

@@ -1,7 +1,7 @@
 import 'leaflet-draw/dist/leaflet.draw.css';
 // import { EditControl } from "react-leaflet-draw"
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FeatureGroup, MapContainer, Polygon, TileLayer } from 'react-leaflet';
 import useSWR from 'swr';
 
@@ -36,7 +36,10 @@ export default function BaseMap({
             }}
             /> */}
       </FeatureGroup>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
       <Polygon positions={data.polygon} />
     </MapContainer>
   );

@@ -98,6 +98,25 @@ async function attachModeratorOnlyExtraDataKeys(resources) {
     resource.moderatorOnlyExtraDataKeys =
       extraDataConfig?.moderatorOnlyFieldKeys || [];
   });
+
+async function shouldSendUpdatedResourceAdminEmail(req) {
+  const projectId = req.project?.id || Number(req.params.projectId);
+
+  try {
+    const project =
+      await db.Project.scope('includeEmailConfig').findByPk(projectId);
+    const value =
+      project?.emailConfig?.notifications?.sendUpdatedResourceAdminEmail ===
+      true;
+
+    return value;
+  } catch (err) {
+    console.error(
+      `Failed to read sendUpdatedResourceAdminEmail for project ${projectId}:`,
+      err
+    );
+    return false;
+  }
 }
 
 // scopes: for all get requests
@@ -264,7 +283,19 @@ router
       .catch(next);
   })
   .get(auth.useReqUser)
-  .get(searchInResults({}))
+  .get(
+    searchInResults({
+      searchfields: [
+        'id',
+        'title',
+        'summary',
+        'description',
+        'createdAt',
+        'yes',
+        'no',
+      ],
+    })
+  )
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     res.json(req.results);
@@ -755,15 +786,17 @@ router
         .catch(next);
     });
   })
-  .put(function (req, res, next) {
-    db.Notification.create({
-      type: 'updated resource - admin update',
-      projectId: req.project.id,
-      data: {
-        userId: req.user.id,
-        resourceId: req.results.id,
-      },
-    });
+  .put(async function (req, res, next) {
+    if (await shouldSendUpdatedResourceAdminEmail(req)) {
+      db.Notification.create({
+        type: 'updated resource - admin update',
+        projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id,
+        },
+      });
+    }
     if (req.changedToPublished) {
       db.Notification.create({
         type: 'new published resource - user feedback',

@@ -11,6 +11,7 @@ const db = require('../../db');
 const authService = require('../../services/authService');
 const tokenSMS = require('../../services/tokenSMS');
 const authPhonenumberConfig = require('../../config/auth').get('Phonenumber');
+const interpolate = require('../../utils/interpolate');
 const verificationService = require('../../services/verificationService');
 const URL = require('url').URL;
 
@@ -41,12 +42,14 @@ exports.login = (req, res) => {
     config.authTypes && config.authTypes['Phonenumber']
       ? config.authTypes['Phonenumber']
       : {};
-  const contactEmail = config.contactEmail || '';
+  const vars = { clientEmail: config.contactEmail || '' };
 
   res.render('auth/phonenumber/login', {
     loginUrl: authPhonenumberConfig.loginUrl,
     clientId: req.client.clientId,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
     client: req.client,
     title:
       configAuthType.loginTitle ||
@@ -65,12 +68,13 @@ exports.login = (req, res) => {
       configAuthType.label ||
       authPhonenumberConfig.loginLabel ||
       authPhonenumberConfig.label,
-    helpText: (
+    helpText: interpolate(
       configAuthType.loginHelpText ||
-      configAuthType.helpText ||
-      authPhonenumberConfig.loginHelpText ||
-      authPhonenumberConfig.helpText
-    ).replace(/\[\[contactEmail\]\]/g, contactEmail),
+        configAuthType.helpText ||
+        authPhonenumberConfig.loginHelpText ||
+        authPhonenumberConfig.helpText,
+      vars
+    ),
     buttonText:
       configAuthType.loginButtonText ||
       configAuthType.buttonText ||
@@ -115,10 +119,18 @@ exports.postLogin = async (req, res, next) => {
   req.redirectUrl =
     clientConfig && clientConfig.emailRedirectUrl
       ? clientConfig.emailRedirectUrl
-      : encodeURIComponent(req.query.redirect_uri);
+      : req.query.redirect_uri
+        ? encodeURIComponent(req.query.redirect_uri)
+        : '';
   const redirectUrl = req.query.redirect_uri
     ? req.query.redirect_uri
     : req.client.redirectUrl;
+  if (!redirectUrl)
+    return next(
+      new Error(
+        'No redirect_uri provided and no default redirectUrl configured for this client'
+      )
+    );
 
   try {
     // phoneNumber
@@ -180,12 +192,14 @@ exports.smsCode = (req, res) => {
     config.authTypes && config.authTypes['Phonenumber']
       ? config.authTypes['Phonenumber']
       : {};
-  const contactEmail = config.contactEmail || '';
+  const smsVars = { clientEmail: config.contactEmail || '' };
 
   res.render('auth/phonenumber/sms-code', {
     loginUrl: authPhonenumberConfig.smsCodeUrl,
     clientId: req.client.clientId,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
     client: req.client,
     title:
       configAuthType.smsCodeTitle ||
@@ -204,12 +218,13 @@ exports.smsCode = (req, res) => {
       configAuthType.label ||
       authPhonenumberConfig.smsCodeLabel ||
       authPhonenumberConfig.label,
-    helpText: (
+    helpText: interpolate(
       configAuthType.smsCodeHelpText ||
-      configAuthType.helpText ||
-      authPhonenumberConfig.smsCodeHelpText ||
-      authPhonenumberConfig.helpText
-    ).replace(/\[\[contactEmail\]\]/g, contactEmail),
+        configAuthType.helpText ||
+        authPhonenumberConfig.smsCodeHelpText ||
+        authPhonenumberConfig.helpText,
+      smsVars
+    ),
     buttonText:
       configAuthType.smsCodeButtonText ||
       configAuthType.buttonText ||
@@ -226,6 +241,12 @@ exports.postSmsCode = (req, res, next) => {
       const redirectUrl = req.query.redirect_uri
         ? req.query.redirect_uri
         : req.client.redirectUrl;
+      if (!redirectUrl)
+        return next(
+          new Error(
+            'No redirect_uri provided and no default redirectUrl configured for this client'
+          )
+        );
 
       // Redirect if it fails to the original auth screen
       if (!user) {

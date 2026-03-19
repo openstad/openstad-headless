@@ -8,19 +8,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import useResources from '@/hooks/use-resources';
 import { exportComments } from '@/lib/export-helpers/comments-export';
 import { Paginator } from '@openstad-headless/ui/src';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useDebouncedValue } from 'rooks';
 
 import { Button } from '../../../../components/ui/button';
 import { PageLayout } from '../../../../components/ui/page-layout';
+
+type SortDirection = 'asc' | 'desc';
+
+const COMMENT_SORT_MAP: Record<string, string> = {
+  id: 'id',
+  resourceId: 'resourceId',
+  description: 'description',
+  createdAt: 'createdAt',
+  sentiment: 'sentiment',
+  'voted-yes': 'yes',
+  'voted-no': 'no',
+  score: 'score',
+};
+
+const COMMENT_SEARCH_FIELD_MAP: Record<string, string> = {
+  description: 'description',
+  id: 'text',
+  resourceId: 'text',
+  createdAt: 'text',
+  sentiment: 'text',
+};
 
 export default function ProjectComments() {
   const router = useRouter();
@@ -30,16 +50,39 @@ export default function ProjectComments() {
   const [totalPages, setTotalPages] = useState(0);
   const [pageLimit, setPageLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<string>('createdAt');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [activeResource, setActiveResource] = useState('0');
+  const [allResources, setAllResources] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [apiSearchTerm] = useDebouncedValue(searchTerm, 400);
+  const activeResourceId =
+    activeResource !== '0' ? activeResource.split(' - ')[0] : '0';
 
   const { data, pagination, removeComment, fetchAll } = useComments(
     project as string,
     '?includeAllComments=1&includeVoteCount=1&includeTags',
     true,
     page,
-    pageLimit
+    pageLimit,
+    {
+      sort: `${COMMENT_SORT_MAP[sortField] || 'createdAt'}_${sortDirection}`,
+      searchField: COMMENT_SEARCH_FIELD_MAP[filterSearchType] || 'text',
+      searchTerm: apiSearchTerm || undefined,
+      sentiment:
+        filterSearchType === 'sentiment' && apiSearchTerm
+          ? apiSearchTerm
+          : undefined,
+      resourceId: activeResourceId,
+    }
   );
   const { data: resources } = useResources(project as string);
   const [comments, setComments] = useState<any[]>([]);
+  const [nestedComments, setNestedComments] = useState<any[]>([]);
 
   async function transform() {
     const today = new Date();
@@ -105,66 +148,55 @@ export default function ProjectComments() {
     return nestedComments;
   }
 
-  const [filterData, setFilterData] = useState(comments);
-  const [filterSearchType, setFilterSearchType] = useState<string>('');
-  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-
-  const [activeResource, setActiveResource] = useState('0');
-  const [allResources, setAllResources] = useState<
-    { id: number; name: string }[]
-  >([]);
-
   useEffect(() => {
     const nested = nestComments(comments);
-    setFilterData(nested);
+    setNestedComments(nested);
   }, [comments]);
 
   useEffect(() => {
-    if (!!comments && !!resources) {
-      let resourceArray: { id: number; name: string }[] = [];
+    setPage(0);
+  }, [apiSearchTerm, filterSearchType, activeResourceId]);
 
-      comments.forEach((comment: any) => {
-        const resourceId = comment.resourceId;
-        const usedResource = resources.find(
-          (resource: any) => resource.id === resourceId
-        );
-
-        if (
-          usedResource &&
-          !resourceArray.some(
-            (resource: any) => resource.id === usedResource.id
-          )
-        ) {
-          let title = usedResource?.title ? usedResource?.title : '';
-
-          title =
-            !!title && title.length > 50 ? title.slice(0, 50) + '...' : title;
-
-          resourceArray.push({
-            id: usedResource.id,
-            name: title,
-          });
-        }
+  useEffect(() => {
+    if (!!resources) {
+      const resourceArray = resources.map((resource: any) => {
+        const title =
+          resource?.title && resource.title.length > 50
+            ? `${resource.title.slice(0, 50)}...`
+            : resource?.title || '';
+        return {
+          id: resource.id,
+          name: title,
+        };
       });
 
       setAllResources(resourceArray);
     }
-  }, [comments, resources]);
+  }, [resources]);
 
   const selectClick = (value: any) => {
-    const ID = value !== '0' ? value?.split(' - ')[0] : '0';
-    const filteredData =
-      ID === '0'
-        ? comments
-        : comments?.filter(
-            (comment: any) => comment.resourceId.toString() === ID
-          );
-
-    const nested = nestComments(filteredData);
-    setFilterData(nested);
     setActiveResource(value);
   };
+
+  const handleSort = (field: string) => {
+    if (field === sortField) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+    setPage(0);
+  };
+
+  const getSortButtonClass = (field: string) => {
+    if (field !== sortField) return 'filter-button';
+    return `filter-button font-bold text-black ${sortDirection === 'asc' ? '--up' : ''}`;
+  };
+
+  // Threaded rendering (parent + replies) is only meaningful on date sorting.
+  // For field sorting (id/score/yes/no/etc.) render the flat server-sorted list.
+  const displayedComments =
+    sortField === 'createdAt' ? nestedComments : comments;
 
   function getAllCommentIds(comments: any[]): number[] {
     let ids: number[] = [];
@@ -355,6 +387,7 @@ export default function ProjectComments() {
                 </p>
                 <select
                   className="p-2 rounded"
+                  value={filterSearchType}
                   onChange={(e) => setFilterSearchType(e.target.value)}>
                   <option value="">Alles</option>
                   <option value="id">Reactie ID</option>
@@ -367,9 +400,8 @@ export default function ProjectComments() {
                   type="text"
                   className="p-2 rounded"
                   placeholder="Zoeken..."
-                  onChange={(e) =>
-                    debouncedSearchTable(e.target.value, filterData, comments)
-                  }
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
@@ -379,13 +411,13 @@ export default function ProjectComments() {
                 <Checkbox
                   className="col-span-1"
                   checked={
-                    filterData?.length > 0 &&
-                    getAllCommentIds(filterData).every((id: number) =>
+                    displayedComments?.length > 0 &&
+                    getAllCommentIds(displayedComments).every((id: number) =>
                       selectedItems.includes(id)
                     )
                   }
                   onCheckedChange={(checked) => {
-                    const currentPageIds = getAllCommentIds(filterData);
+                    const currentPageIds = getAllCommentIds(displayedComments);
                     if (checked) {
                       setSelectedItems((prev) =>
                         Array.from(new Set([...prev, ...currentPageIds]))
@@ -399,87 +431,62 @@ export default function ProjectComments() {
                 />
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) => {
-                      const sortedData = sortTable('id', e, filterData);
-                      setFilterData(sortedData ? sortedData : []);
-                    }}>
+                    className={getSortButtonClass('id')}
+                    onClick={() => handleSort('id')}>
                     Reactie ID
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) => {
-                      const sortedData = sortTable('resourceId', e, filterData);
-                      setFilterData(sortedData ? sortedData : []);
-                    }}>
+                    className={getSortButtonClass('resourceId')}
+                    onClick={() => handleSort('resourceId')}>
                     Inzending ID
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-2">
                   <button
-                    className="filter-button"
-                    onClick={(e) => {
-                      const sortedData = sortTable(
-                        'description',
-                        e,
-                        filterData
-                      );
-                      setFilterData(sortedData ? sortedData : []);
-                    }}>
+                    className={getSortButtonClass('description')}
+                    onClick={() => handleSort('description')}>
                     Reactie
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-2">
                   <button
-                    className="filter-button"
-                    onClick={(e) => {
-                      const sortedData = sortTable('createdAt', e, filterData);
-                      setFilterData(sortedData ? sortedData : []);
-                    }}>
+                    className={getSortButtonClass('createdAt')}
+                    onClick={() => handleSort('createdAt')}>
                     Geplaatst op
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) => {
-                      const sortedData = sortTable('sentiment', e, filterData);
-                      setFilterData(sortedData ? sortedData : []);
-                    }}>
+                    className={getSortButtonClass('sentiment')}
+                    onClick={() => handleSort('sentiment')}>
                     Sentiment
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('voted-yes', e, filterData))
-                    }>
+                    className={getSortButtonClass('voted-yes')}
+                    onClick={() => handleSort('voted-yes')}>
                     Gestemd op ja
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('voted-no', e, filterData))
-                    }>
+                    className={getSortButtonClass('voted-no')}
+                    onClick={() => handleSort('voted-no')}>
                     Gestemd op nee
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('score', e, filterData))
-                    }>
+                    className={getSortButtonClass('score')}
+                    onClick={() => handleSort('score')}>
                     Wilson score interval
                   </button>
                 </ListHeading>
               </div>
-              {renderComments(filterData)}
+              {renderComments(displayedComments)}
 
               {totalPages > 0 && (
                 <div className="flex flex-col items-center gap-4 mt-4">

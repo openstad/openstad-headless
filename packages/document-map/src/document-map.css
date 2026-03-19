@@ -161,6 +161,53 @@
   font-size: 14px;
 }
 
+.leaflet-popup.document-map-comment-popup .comment-item {
+  background: rgb(255, 255, 255);
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-popup.document-map-comment-popup .comment-item .comment-reaction-text {
+  margin: 0;
+}
+
+.leaflet-popup.document-map-comment-popup .comment-item-header {
+  align-items: flex-start;
+}
+
+.leaflet-popup.document-map-comment-popup
+  .comment-item-header
+  .edit-delete-button-group {
+  top: -12px;
+  margin-left: 10px;
+}
+
+.leaflet-popup.document-map-comment-popup .comment-item-header .reaction-name {
+  margin: 0;
+}
+
+.leaflet-popup.document-map-comment-popup
+  .comment-item-header
+  .edit-delete-button-group
+  > button {
+  min-width: 24px;
+  min-height: 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-popup.document-map-comment-popup
+  .comment-item-header
+  .edit-delete-button-group
+  > button
+  i {
+  line-height: 1;
+}
+
 .leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
   bottom: 10px !important;
 }

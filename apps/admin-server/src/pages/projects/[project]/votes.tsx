@@ -1,6 +1,5 @@
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { Button } from '@/components/ui/button';
-import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useUsers from '@/hooks/use-users';
 import useVotes from '@/hooks/use-votes';
@@ -9,18 +8,22 @@ import { Paginator } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useDebouncedValue } from 'rooks';
 
 import { PageLayout } from '../../../components/ui/page-layout';
+
+type SortDirection = 'asc' | 'desc';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { remove } = useVotes(project as string);
-  const [filterData, setFilterData] = useState<
-    { createdAt: string; id?: string }[]
-  >([]);
+  const [votes, setVotes] = useState<{ createdAt: string; id?: string }[]>([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
-  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [apiSearchTerm] = useDebouncedValue(searchTerm, 400);
+  const [sortField, setSortField] = useState('createdAt');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   async function transform() {
     const today = new Date();
@@ -68,7 +71,10 @@ export default function ProjectResources() {
   const pageLimit = 200;
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchResults = async (page: number) => {
+  const fetchResults = async (
+    page: number,
+    options?: { includeFilters?: boolean; includeSorting?: boolean }
+  ) => {
     try {
       const projectNumber = parseInt(project as string);
 
@@ -76,7 +82,45 @@ export default function ProjectResources() {
         return;
       }
 
-      let url = `/api/openstad/api/project/${projectNumber}/vote?page=${page}&limit=${pageLimit}&includeResource&pageSize=${pageLimit}`;
+      const includeFilters = options?.includeFilters ?? true;
+      const includeSorting = options?.includeSorting ?? true;
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pageLimit.toString(),
+        pageSize: pageLimit.toString(),
+        includeResource: '1',
+      });
+
+      if (includeSorting) {
+        params.set('sortBy', sortField);
+        params.set('orderBy', sortDirection.toUpperCase());
+      }
+
+      if (includeFilters && filterSearchType && apiSearchTerm) {
+        if (filterSearchType === 'id' && Number(apiSearchTerm) > 0) {
+          params.set('id', apiSearchTerm);
+        }
+        if (filterSearchType === 'createdAt') {
+          params.set('createdAt', apiSearchTerm);
+        }
+        if (filterSearchType === 'resourceId' && Number(apiSearchTerm) > 0) {
+          params.set('resourceId', apiSearchTerm);
+        }
+        if (filterSearchType === 'userId' && Number(apiSearchTerm) > 0) {
+          params.set('userId', apiSearchTerm);
+        }
+        if (filterSearchType === 'ip') {
+          params.set('ip', apiSearchTerm);
+        }
+        if (
+          filterSearchType === 'opinion' &&
+          (apiSearchTerm === 'yes' || apiSearchTerm === 'no')
+        ) {
+          params.set('opinion', apiSearchTerm);
+        }
+      }
+
+      const url = `/api/openstad/api/project/${projectNumber}/vote?${params.toString()}`;
 
       const response = await fetch(url);
       return response.json();
@@ -87,21 +131,26 @@ export default function ProjectResources() {
     fetchResults(page).then((results) => {
       if (results) {
         const data = results?.records || [];
-        const totalCount = results?.metadata?.totalCount || 50;
+        const totalCount = results?.metadata?.totalCount ?? 0;
 
         const pageCount = Math.ceil(totalCount / pageLimit);
         setTotalPages(pageCount);
-
-        let loadedVotesResults = (data || []) as { createdAt: string }[];
-        const sortedData = loadedVotesResults.sort(
-          (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
-        );
-
         setTotalCount(totalCount);
-        setFilterData(sortedData);
+        setVotes(data);
       }
     });
-  }, [page, project]);
+  }, [
+    apiSearchTerm,
+    filterSearchType,
+    page,
+    project,
+    sortDirection,
+    sortField,
+  ]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [apiSearchTerm, filterSearchType, sortDirection, sortField]);
 
   const fetchAllResults = async () => {
     let allData: any[] = [];
@@ -109,13 +158,30 @@ export default function ProjectResources() {
     let totalPages = Math.ceil(totalCount / pageLimit);
     while (currentPage < totalPages) {
       // eslint-disable-next-line no-await-in-loop
-      const results = await fetchResults(currentPage);
+      const results = await fetchResults(currentPage, {
+        includeFilters: false,
+        includeSorting: false,
+      });
       const data = results?.records || [];
       allData = allData.concat(data);
       currentPage += 1;
     }
 
     return allData;
+  };
+
+  const handleSort = (field: string) => {
+    if (field === sortField) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const getSortButtonClass = (field: string) => {
+    if (field !== sortField) return 'filter-button';
+    return `filter-button font-bold text-black ${sortDirection === 'asc' ? '--up' : ''}`;
   };
 
   return (
@@ -142,12 +208,18 @@ export default function ProjectResources() {
           </div>
         }>
         <div className="container py-6">
+          <div className="mb-2">
+            <span className="text-sm text-muted-foreground">
+              {`${totalCount} ${totalCount === 1 ? 'stem' : 'stemmen'}`}
+            </span>
+          </div>
           <div className="float-right mb-4 flex gap-4">
             <p className="text-xs font-medium text-muted-foreground self-center">
               Filter op:
             </p>
             <select
               className="p-2 rounded"
+              value={filterSearchType}
               onChange={(e) => setFilterSearchType(e.target.value)}>
               <option value="">Alles</option>
               <option value="id">Stem ID</option>
@@ -157,74 +229,62 @@ export default function ProjectResources() {
               <option value="ip">Gebruiker IP</option>
               <option value="opinion">Voorkeur</option>
             </select>
-            {/*  --- Search werkt voor even niet ---  */}
-            {/*<input*/}
-            {/*  type="text"*/}
-            {/*  className='p-2 rounded'*/}
-            {/*  placeholder="Zoeken..."*/}
-            {/*  onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}*/}
-            {/*/>*/}
+            <input
+              type="text"
+              className="p-2 rounded"
+              placeholder="Zoeken..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-8 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('id', e, filterData))
-                  }>
+                  className={getSortButtonClass('id')}
+                  onClick={() => handleSort('id')}>
                   Stem ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-2">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('createdAt', e, filterData))
-                  }>
+                  className={getSortButtonClass('createdAt')}
+                  onClick={() => handleSort('createdAt')}>
                   Stemdatum
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('resourceId', e, filterData))
-                  }>
+                  className={getSortButtonClass('resourceId')}
+                  onClick={() => handleSort('resourceId')}>
                   Plan ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('userId', e, filterData))
-                  }>
+                  className={getSortButtonClass('userId')}
+                  onClick={() => handleSort('userId')}>
                   Gebruiker ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('ip', e, filterData))
-                  }>
+                  className={getSortButtonClass('ip')}
+                  onClick={() => handleSort('ip')}>
                   Gebruiker IP
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('opinion', e, filterData))
-                  }>
+                  className={getSortButtonClass('opinion')}
+                  onClick={() => handleSort('opinion')}>
                   Voorkeur
                 </button>
               </ListHeading>
             </div>
             <ul className="admin-overview">
-              {filterData?.map((vote: any) => {
+              {votes?.map((vote: any) => {
                 const userId = vote.userId;
                 const user =
                   usersData?.find((user: any) => user.id === userId) || null;

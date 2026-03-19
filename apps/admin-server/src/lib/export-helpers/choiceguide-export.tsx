@@ -1,5 +1,4 @@
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
-import { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 
 import { InitializeWeights } from '../../../../../packages/choiceguide/src/parts/init-weights';
