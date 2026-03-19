@@ -43,6 +43,7 @@ const formSchema = z.object({
   notEnoughBudgetText: z.string(),
   showOriginalResource: z.boolean(),
   originalResourceUrl: z.string().optional(),
+  originalResourceText: z.string().optional(),
   resourceListColumns: z.coerce.number({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
@@ -83,6 +84,7 @@ export default function BegrootmoduleDisplay(
       hideReadMore: props.hideReadMore || false,
       scrollWhenMaxReached: props.scrollWhenMaxReached || false,
       originalResourceUrl: props.originalResourceUrl || '',
+      originalResourceText: props.originalResourceText || 'Bekijk het originele ingediende plan',
       resourceListColumns: props.resourceListColumns || 3,
       showInfoMenu:
         props.showInfoMenu === undefined ? true : props.showInfoMenu,
@@ -271,6 +273,7 @@ export default function BegrootmoduleDisplay(
           />
 
           {form.watch('showOriginalResource') && (
+            <>
             <FormField
               control={form.control}
               name="originalResourceUrl"
@@ -293,6 +296,30 @@ export default function BegrootmoduleDisplay(
                 </FormItem>
               )}
             />
+
+              <FormField
+                control={form.control}
+                name="originalResourceText"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Tekst voor de link (optioneel)
+                      <InfoDialog content={'Standaard: "Bekijk het originele ingediende plan"'} />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
           )}
 
           <FormObjectSelectField

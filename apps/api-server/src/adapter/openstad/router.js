@@ -393,37 +393,36 @@ router
   })
   .get(function (req, res, next) {
     if (!req.query.ipdlogout) {
-      // redirect to idp server
-      let redirectUri = encodeURIComponent(
-        config.url +
-          '/auth/project/' +
-          req.project.id +
-          '/logout?ipdlogout=done&useAuth=' +
-          req.query.useAuth +
-          '&redirectUri=' +
-          encodeURIComponent(req.query.redirectUri)
-      );
-      let url = `${req.authConfig.serverUrl}/logout?redirectUrl=${redirectUri}&client_id=${req.authConfig.clientId}`;
+      const rawRedirectUri = Array.isArray(req.query.redirectUri)
+        ? req.query.redirectUri[0]
+        : req.query.redirectUri || '';
+      let url = `${req.authConfig.serverUrl}/logout?client_id=${req.authConfig.clientId}`;
+      if (rawRedirectUri) {
+        // Use ADMIN_URL if set, otherwise fall back to the origin of the redirectUri.
+        // Only the admin-server passes redirectUri; no allowlist lookup needed.
+        if (!process.env.ADMIN_URL) {
+          console.warn(
+            'ADMIN_URL is not set; falling back to redirectUri origin for logout redirect'
+          );
+        }
+        let safeRedirect;
+        try {
+          safeRedirect =
+            process.env.ADMIN_URL || new URL(rawRedirectUri).origin;
+        } catch (e) {
+          safeRedirect = process.env.ADMIN_URL || '';
+        }
+        if (safeRedirect) {
+          safeRedirect +=
+            (safeRedirect.includes('?') ? '&' : '?') + 'openstadlogout=true';
+          url += `&redirectUrl=${encodeURIComponent(safeRedirect)}`;
+        }
+      }
       return res.redirect(url);
     }
     return next();
   })
-  .get(async function (req, res, next) {
-    const projectId = req.params.projectId;
-    if (
-      req.query.redirectUri &&
-      projectId &&
-      (await isRedirectAllowed(projectId, req.query.redirectUri))
-    ) {
-      const redirectUri =
-        req.query.redirectUri +
-        (req.query.redirectUri.includes('?') ? '&' : '?') +
-        'openstadlogout=true';
-      return res.redirect(redirectUri);
-    } else if (req.query.redirectUri) {
-      return next(createError(403, 'redirectUri not found in allowlist.'));
-    }
-
+  .get(function (req, res) {
     return res.json({ logout: 'success' });
   });
 

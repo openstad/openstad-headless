@@ -9,6 +9,7 @@ const db = require('../../db');
 const tokenUrl = require('../../services/tokenUrl');
 const emailService = require('../../services/email');
 const authCodeConfig = require('../../config/auth').get(authType);
+const interpolate = require('../../utils/interpolate');
 
 exports.login = (req, res, next) => {
   const config = req.client.config ? req.client.config : {};
@@ -17,7 +18,7 @@ exports.login = (req, res, next) => {
     config.authTypes && config.authTypes[authType]
       ? config.authTypes[authType]
       : {};
-  const contactEmail = config.contactEmail || '';
+  const vars = { clientEmail: config.contactEmail || '' };
 
   res.render('auth/code/login', {
     client: req.client,
@@ -27,10 +28,10 @@ exports.login = (req, res, next) => {
       ? configAuthType.description
       : authCodeConfig.description,
     label: configAuthType.label ? configAuthType.label : authCodeConfig.label,
-    helpText: (configAuthType.helpText
-      ? configAuthType.helpText
-      : authCodeConfig.helpText
-    ).replace(/\[\[contactEmail\]\]/g, contactEmail),
+    helpText: interpolate(
+      configAuthType.helpText || authCodeConfig.helpText,
+      vars
+    ),
     buttonText: configAuthType.buttonText
       ? configAuthType.buttonText
       : authCodeConfig.buttonText,
