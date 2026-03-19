@@ -3,6 +3,34 @@ function getStringValue(value) {
   return value.trim();
 }
 
+function isSpamMetaFieldKey(key) {
+  return key === '__timeToSubmitMs';
+}
+
+function stripSpamMetaFieldsDeep(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => stripSpamMetaFieldsDeep(entry));
+  }
+
+  if (!value || typeof value !== 'object') return value;
+
+  const cleaned = {};
+  Object.entries(value).forEach(([key, entryValue]) => {
+    if (isSpamMetaFieldKey(key)) return;
+    cleaned[key] = stripSpamMetaFieldsDeep(entryValue);
+  });
+  return cleaned;
+}
+
+function getTimeToSubmitMs(payload = {}) {
+  const parsed = Number(payload.__timeToSubmitMs);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isSpamFilterEnabled() {
+  return process.env.SPAM_FILTER_ENABLED === 'true';
+}
+
 function isLikelyRandomText(value) {
   const text = getStringValue(value);
   if (!text || text.length < 12) return false;
@@ -153,9 +181,7 @@ function isSpacedGarbageFragment(value) {
 }
 
 function removeSpamMetaFields(payload = {}) {
-  const cleaned = { ...payload };
-  delete cleaned.__timeToSubmitMs;
-  return cleaned;
+  return stripSpamMetaFieldsDeep(payload);
 }
 
 function shouldIgnoreSpamCheckField(key) {
@@ -225,12 +251,10 @@ function analyzeSpamPayload(payload = {}, options = {}) {
   ).length;
 
   // Metadata signal: submissions sent very quickly after form load are more likely bot traffic.
-  // __timeToSubmitMs is injected upstream and removed before persistence.
-  const timeToSubmitMs = Number(payload.__timeToSubmitMs);
+  // Time-to-submit metadata is injected upstream and removed before persistence.
+  const timeToSubmitMs = getTimeToSubmitMs(payload);
   const veryFastSubmit =
-    Number.isFinite(timeToSubmitMs) &&
-    timeToSubmitMs > 0 &&
-    timeToSubmitMs < 2500;
+    timeToSubmitMs !== null && timeToSubmitMs > 0 && timeToSubmitMs < 2500;
 
   const candidateCount = textCandidates.length;
 
@@ -291,7 +315,7 @@ function analyzeSpamPayload(payload = {}, options = {}) {
     suspiciousFieldCount,
     suspiciousRatio,
     veryFastSubmit,
-    timeToSubmitMs: Number.isFinite(timeToSubmitMs) ? timeToSubmitMs : null,
+    timeToSubmitMs,
     candidateCount,
   };
 }
@@ -361,6 +385,7 @@ module.exports = {
   analyzeSpamPayload,
   isCompactMixedCaseText,
   isLikelyRandomText,
+  isSpamFilterEnabled,
   isLikelySingleTokenGarbage,
   isDigitHeavyGarbage,
   isSpacedGarbageFragment,

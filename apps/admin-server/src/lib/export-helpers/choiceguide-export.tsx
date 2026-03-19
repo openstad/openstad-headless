@@ -5,13 +5,16 @@ import * as XLSX from 'xlsx';
 import { InitializeWeights } from '../../../../../packages/choiceguide/src/parts/init-weights';
 import { calculateScoreForItem } from '../../../../../packages/choiceguide/src/parts/scoreUtils';
 import { fetchMatrixData } from './fetch-matrix-data';
+import { getRuntimeSpamFilterEnabled } from './get-runtime-spam-flag';
 
-export const exportChoiceGuideToCSV = (
+export const exportChoiceGuideToCSV = async (
   widgetName: string,
   selectedWidget: any,
   project: string,
   limit: number
 ) => {
+  const includeSpamColumn = await getRuntimeSpamFilterEnabled();
+
   const fetchResults = async () => {
     let allData: any = [];
     let page = 0;
@@ -75,6 +78,9 @@ export const exportChoiceGuideToCSV = (
 
   fetchResults().then((data) => {
     data = data || [];
+    const includeHashedIpColumn = data.some(
+      (row: any) => !!row?.result?.ipAddress
+    );
 
     if (
       selectedWidget &&
@@ -200,10 +206,7 @@ export const exportChoiceGuideToCSV = (
           rowMap.set(index, { result: scores[key], value: `Score: ${key}` });
         });
 
-        if (
-          process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true' &&
-          row?.result?.ipAddress
-        ) {
+        if (includeHashedIpColumn && row?.result?.ipAddress) {
           const index = rowMap.size;
           rowMap.set(index, {
             result: row?.result?.ipAddress,
@@ -275,7 +278,9 @@ export const exportChoiceGuideToCSV = (
         'Aangemaakt op': row.createdAt,
         'Project ID': row.projectId,
         Widget: widgetName,
-        'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee',
+        ...(includeSpamColumn
+          ? { 'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee' }
+          : {}),
         'Gebruikers ID': row.userId || ' ',
         'Gebruikers rol': row.user?.role || ' ',
         'Gebruikers naam': row.user?.name || ' ',
@@ -287,7 +292,7 @@ export const exportChoiceGuideToCSV = (
         'Gebruikers postcode': row.user?.postcode || ' ',
       };
 
-      if (process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true') {
+      if (includeHashedIpColumn) {
         rowObj['Gebruikers IP-adres (gehasht)'] = row?.result?.ipAddress || ' ';
       }
 

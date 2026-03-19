@@ -14,6 +14,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const {
   analyzeSpamPayload,
+  isSpamFilterEnabled,
   logSpamAnalysis,
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
@@ -309,9 +310,14 @@ router
       delete req.body.submittedData;
     }
 
-    const analysis = analyzeSpamPayload(req.body, { withDetails: true });
-    logSpamAnalysis({ routeName: 'resource', req, analysis });
-    req.isSpamSubmission = analysis.isProbablySpam;
+    if (isSpamFilterEnabled()) {
+      const analysis = analyzeSpamPayload(req.body, { withDetails: true });
+      logSpamAnalysis({ routeName: 'resource', req, analysis });
+      req.isSpamSubmission = analysis.isProbablySpam;
+    } else {
+      req.isSpamSubmission = false;
+    }
+
     req.body = removeSpamMetaFields(req.body);
     if (req.isSpamSubmission) {
       req.body.publishDate = null;
