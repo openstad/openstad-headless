@@ -654,7 +654,7 @@ function StemBegroot({
   const getOriginalResourceUrlText = () => {
     if (props.originalResourceText) return props.originalResourceText;
 
-    return "Bekijk het originele ingediende plan";
+    return 'Bekijk het originele ingediende plan';
   };
 
   // For now only support budgeting and count

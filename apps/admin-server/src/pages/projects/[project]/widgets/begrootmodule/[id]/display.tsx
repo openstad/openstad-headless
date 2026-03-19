@@ -84,7 +84,8 @@ export default function BegrootmoduleDisplay(
       hideReadMore: props.hideReadMore || false,
       scrollWhenMaxReached: props.scrollWhenMaxReached || false,
       originalResourceUrl: props.originalResourceUrl || '',
-      originalResourceText: props.originalResourceText || 'Bekijk het originele ingediende plan',
+      originalResourceText:
+        props.originalResourceText || 'Bekijk het originele ingediende plan',
       resourceListColumns: props.resourceListColumns || 3,
       showInfoMenu:
         props.showInfoMenu === undefined ? true : props.showInfoMenu,
@@ -274,28 +275,28 @@ export default function BegrootmoduleDisplay(
 
           {form.watch('showOriginalResource') && (
             <>
-            <FormField
-              control={form.control}
-              name="originalResourceUrl"
-              render={({ field }) => (
-                <FormItem className="col-span-1">
-                  <FormLabel>
-                    URL van de oorspronkelijke inzending
-                    <InfoDialog content={'TODO'} />
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="originalResourceUrl"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      URL van de oorspronkelijke inzending
+                      <InfoDialog content={'TODO'} />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -304,7 +305,11 @@ export default function BegrootmoduleDisplay(
                   <FormItem className="col-span-1">
                     <FormLabel>
                       Tekst voor de link (optioneel)
-                      <InfoDialog content={'Standaard: "Bekijk het originele ingediende plan"'} />
+                      <InfoDialog
+                        content={
+                          'Standaard: "Bekijk het originele ingediende plan"'
+                        }
+                      />
                     </FormLabel>
                     <FormControl>
                       <Input

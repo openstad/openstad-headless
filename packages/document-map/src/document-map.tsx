@@ -282,7 +282,6 @@ function DocumentMap({
     useState<Array<Comment>>(comments);
   const [commentValue, setCommentValue] = useState<string>('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [refreshComments, setRefreshComments] = useState(false);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentValue(e.target.value);
