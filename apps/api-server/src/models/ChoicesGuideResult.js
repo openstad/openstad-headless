@@ -54,6 +54,11 @@ module.exports = function (db, sequelize, DataTypes) {
         this.setDataValue('result', JSON.stringify(value));
       },
     },
+    isSpam: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   });
 
   ChoicesGuideResult.scopes = function scopes() {

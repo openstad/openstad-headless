@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { useWidgetConfig } from './use-widget-config';
@@ -12,6 +13,8 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
 } {
   const [previewConfig, setPreviewConfig] = useState<T>();
   const { data: widget, isLoading: isLoadingWidget } = useWidgetConfig<T>();
+  const router = useRouter();
+  const widgetId = router.query.id;
 
   // Set the preview the first time the widget config is loaded
   useEffect(() => {
@@ -24,6 +27,7 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
         setPreviewConfig({
           ...config,
           ...widgetSettings,
+          widgetId,
         });
       }
     }

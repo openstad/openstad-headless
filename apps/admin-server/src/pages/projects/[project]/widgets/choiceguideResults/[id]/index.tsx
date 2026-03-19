@@ -1,4 +1,3 @@
-import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -8,7 +7,7 @@ import {
 } from '@/lib/server-side-props-definition';
 import { ChoiceGuideResultsProps } from '@openstad-headless/choiceguide-results/src/props';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -36,7 +35,6 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Project naam"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -47,7 +45,7 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Keuzewijzer',
+            name: 'Keuzewijzer resultaat',
             url: `/projects/${projectId}/widgets/keuzewijzer/${id}`,
           },
         ]}>

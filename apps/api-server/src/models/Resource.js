@@ -123,7 +123,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
         validate: {
           textLength(value) {
-            let len = sanitize.title(value.trim()).length;
+            let len = value.trim().length;
             let titleMinLength =
               (this.config &&
                 this.config.resources &&
@@ -181,7 +181,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: !this.publishDate,
         validate: {
           textLength(value) {
-            let len = sanitize.summary(value.trim()).length;
+            let len = value.trim().length;
             let descriptionMinLength =
               (this.config &&
                 this.config.resources &&
@@ -328,6 +328,11 @@ module.exports = function (db, sequelize, DataTypes) {
       publishDate: {
         type: DataTypes.DATE,
         allowNull: true,
+      },
+      isSpam: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
 
       publishDateHumanized: {

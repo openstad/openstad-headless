@@ -261,6 +261,7 @@ function CommentsInner({
       props?.comments?.maxCharactersError ||
       'Tekst moet maximaal {maxCharacters} karakters bevatten',
     adminLabel: props.comments?.adminLabel || 'admin',
+    editorLabel: props.comments?.editorLabel,
     variant: variant || 'medium',
     ...props,
   } as CommentsWidgetProps;

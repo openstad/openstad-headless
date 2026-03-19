@@ -2,6 +2,7 @@
  * This code is based on the Leaflet Gesture Handling plugin.
  * Source: https://github.com/zacwang89/Leaflet.GestureHandling
  */
+import L from 'leaflet';
 
 L.LRMapInteraction = L.Class.extend({
   options: {

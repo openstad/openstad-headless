@@ -19,7 +19,6 @@ import { Heading } from '@/components/ui/typography';
 import useArea from '@/hooks/use-areas';
 import useTags from '@/hooks/use-tags';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Spacer } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -75,7 +74,6 @@ export default function ProjectAreaCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

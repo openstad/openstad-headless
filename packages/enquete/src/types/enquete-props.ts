@@ -15,9 +15,11 @@ export type EnqueteProps = {
   confirmation?: Confirmation;
   minCharactersWarning?: string;
   maxCharactersWarning?: string;
+  maxCharactersOverWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
-  datalayer?: Array<DataLayer>;
+  showMinMaxAfterBlur?: boolean;
+  datalayer?: DataLayer[];
   enableOnOffSwitching?: boolean;
   infoBlockStyle?: string;
   allowedPolygons?: Array<{ id: number; name: string }>;

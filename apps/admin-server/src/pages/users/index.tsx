@@ -11,44 +11,43 @@ import * as XLSX from 'xlsx';
 import { PageLayout } from '../../components/ui/page-layout';
 import { ListHeading, Paragraph } from '../../components/ui/typography';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE_OPTIONS = [10, 20, 25, 50, 100];
+const DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 600;
-
-type MergedType = {
-  [key: string]: userType & { key?: string };
-};
 
 export default function Users() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [searchQuery, setSearchQuery] = useState('');
   const [apiSearch] = useDebouncedValue(searchQuery, SEARCH_DEBOUNCE_MS);
 
   const { data, metadata, isValidating } = useUsers({
     page: currentPage,
-    pageSize: PAGE_SIZE,
+    pageSize,
     q: apiSearch || undefined,
+    uniqueByIdpUser: true,
+    excludeAnonymous: true,
   });
   const lastDataRef = useRef<userType[] | null>(null);
   const [users, setUsers] = useState<userType[]>([]);
 
+  const getUserRouteKey = (user: userType) => {
+    if (user.idpUser?.identifier && user.idpUser?.provider) {
+      return `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
+    }
+    return user.id?.toString() || 'unknown';
+  };
+
   useEffect(() => {
     if (!data) return;
     lastDataRef.current = data;
-    const merged: MergedType = {};
-    data.forEach((user: userType) => {
-      const key =
-        user.idpUser?.identifier && user.idpUser?.provider
-          ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
-          : user.id?.toString() || 'unknown';
-      merged[key] = user;
-    });
-    setUsers(Object.keys(merged).map((key) => ({ ...merged[key], key })));
+    setUsers(data);
   }, [data]);
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [apiSearch]);
+  }, [apiSearch, pageSize]);
 
   const [filterData, setFilterData] = useState<userType[]>([]);
 
@@ -151,7 +150,9 @@ export default function Users() {
             </div>
             <ul>
               {filterData?.map((user: any) => (
-                <Link href={`/users/${btoa(user.key)}`} key={user.key}>
+                <Link
+                  href={`/users/${btoa(getUserRouteKey(user))}`}
+                  key={getUserRouteKey(user)}>
                   <li className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="hidden lg:flex truncate">
                       {user.email}
@@ -173,39 +174,58 @@ export default function Users() {
               ))}
             </ul>
 
-            {metadata && metadata.pageCount > 1 && (
+            {metadata && (
               <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
                 <Paragraph className="text-sm text-muted-foreground">
                   Pagina {metadata.page + 1} van {metadata.pageCount} (
                   {metadata.totalCount} gebruikers)
                 </Paragraph>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((currentPage) =>
-                        Math.max(0, currentPage - 1)
-                      )
-                    }
-                    disabled={metadata.page <= 0}>
-                    <ChevronLeft className="w-4 h-4" />
-                    Vorige
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((currentPage) =>
-                        Math.min(metadata.pageCount - 1, currentPage + 1)
-                      )
-                    }
-                    disabled={metadata.page >= metadata.pageCount - 1}>
-                    Volgende
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Paragraph className="text-sm text-muted-foreground">
+                      Rijen per pagina:
+                    </Paragraph>
+                    <select
+                      className="p-2 rounded border"
+                      value={pageSize}
+                      onChange={(e) => setPageSize(Number(e.target.value))}>
+                      {PAGE_SIZE_OPTIONS.map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {metadata.pageCount > 1 && (
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setCurrentPage((currentPage) =>
+                            Math.max(0, currentPage - 1)
+                          )
+                        }
+                        disabled={metadata.page <= 0}>
+                        <ChevronLeft className="w-4 h-4" />
+                        Vorige
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setCurrentPage((currentPage) =>
+                            Math.min(metadata.pageCount - 1, currentPage + 1)
+                          )
+                        }
+                        disabled={metadata.page >= metadata.pageCount - 1}>
+                        Volgende
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

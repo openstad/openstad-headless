@@ -14,6 +14,8 @@ const formatRedirectUrl = (url, req) => {
     ? req.query.redirect_uri
     : req.client.redirectUrl;
 
+  if (!redirectUrl) return `${url}?clientId=${req.client.clientId}`;
+
   // check if url is encoded otherwise encode
   redirectUrl = isEncoded(redirectUrl)
     ? redirectUrl
@@ -41,7 +43,9 @@ exports.index = (req, res, next) => {
     description: configTwoFactor.description,
     title: configTwoFactor.title,
     buttonText: configTwoFactor.buttonText,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
   });
 };
 
@@ -69,6 +73,12 @@ exports.post = async (req, res, next) => {
     const redirectUrl = req.query.redirect_uri
       ? encodeURIComponent(req.query.redirect_uri)
       : req.client.redirectUrl;
+    if (!redirectUrl)
+      return next(
+        new Error(
+          'No redirect_uri provided and no default redirectUrl configured for this client'
+        )
+      );
     const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
     res.redirect(authorizeUrl);
@@ -137,7 +147,9 @@ exports.configure = async (req, res, next) => {
       description: configTwoFactor.description,
       title: configTwoFactor.title,
       buttonText: configTwoFactor.buttonText,
-      redirectUrl: encodeURIComponent(req.query.redirect_uri),
+      redirectUrl: req.query.redirect_uri
+        ? encodeURIComponent(req.query.redirect_uri)
+        : '',
     });
   }
 };

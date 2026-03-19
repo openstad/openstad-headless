@@ -1,16 +1,12 @@
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ChoiceGuide,
-  ChoiceGuideProps,
-} from '@openstad-headless/choiceguide/src/props';
+import { ChoiceGuideProps } from '@openstad-headless/choiceguide/src/props';
 import dynamic from 'next/dynamic';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -77,6 +73,11 @@ const formSchema = z.object({
     .string()
     .optional()
     .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+  showMinMaxAfterBlur: z.boolean().optional().default(false),
+  maxCharactersOverWarning: z
+    .string()
+    .optional()
+    .default('Je hebt {overCharacters} tekens teveel'),
 });
 
 export default function ChoicesSelectorForm(
@@ -130,6 +131,11 @@ export default function ChoicesSelectorForm(
       maxCharactersError:
         widget?.config?.[category]?.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      showMinMaxAfterBlur:
+        widget?.config?.[category]?.showMinMaxAfterBlur || false,
+      maxCharactersOverWarning:
+        widget?.config?.[category]?.maxCharactersOverWarning ||
+        'Je hebt {overCharacters} tekens teveel',
     }),
     [widget?.config]
   );
@@ -271,6 +277,19 @@ export default function ChoicesSelectorForm(
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="showMinMaxAfterBlur"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Toon min/max waarschuwing na verlaten van het veld
+                    </FormLabel>
+                    {/*@ts-ignore*/}
+                    {YesNoSelect(field, props)}
+                  </FormItem>
+                )}
+              />
               {watchChoicesType === 'plane' && (
                 <FormField
                   control={form.control}
@@ -391,6 +410,23 @@ export default function ChoicesSelectorForm(
                 </FormLabel>
                 <FormDescription>
                   {`Dit is de tekst die getoond wordt als het aantal karakters boven de maximum waarde ligt. Gebruik {maxCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
+                </FormDescription>
+                <Input {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="maxCharactersOverWarning"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Waarschuwing bij overschrijden maximaal aantal karakters
+                </FormLabel>
+                <FormDescription>
+                  {`Dit is de tekst die getoond wordt als het aantal karakters over de maximum waarde heen gaat. Gebruik {overCharacters} zodat het aantal karakters automatisch wordt ingevuld.`}
                 </FormDescription>
                 <Input {...field} />
                 <FormMessage />

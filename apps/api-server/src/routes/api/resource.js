@@ -12,11 +12,36 @@ const c = require('config');
 const { Op } = require('sequelize');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+const {
+  analyzeSpamPayload,
+  logSpamAnalysis,
+  removeSpamMetaFields,
+} = require('../../services/spam-detector');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
   return hasRole(user, 'editor');
 };
+
+async function shouldSendUpdatedResourceAdminEmail(req) {
+  const projectId = req.project?.id || Number(req.params.projectId);
+
+  try {
+    const project =
+      await db.Project.scope('includeEmailConfig').findByPk(projectId);
+    const value =
+      project?.emailConfig?.notifications?.sendUpdatedResourceAdminEmail ===
+      true;
+
+    return value;
+  } catch (err) {
+    console.error(
+      `Failed to read sendUpdatedResourceAdminEmail for project ${projectId}:`,
+      err
+    );
+    return false;
+  }
+}
 
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
@@ -227,12 +252,21 @@ router
       delete req.body.submittedData;
     }
 
+    req.body = removeSpamMetaFields(req.body);
+    const analysis = analyzeSpamPayload(req.body, { withDetails: true });
+    logSpamAnalysis({ routeName: 'resource', req, analysis });
+    req.isSpamSubmission = analysis.isProbablySpam;
+    if (req.isSpamSubmission) {
+      req.body.publishDate = null;
+    }
+
     const data = {
       ...req.body,
       projectId: req.params.projectId,
       userId,
       startDate: req.body.startDate || new Date(),
       widgetId: req.body.widgetId || null,
+      isSpam: req.isSpamSubmission,
     };
 
     // Check if resource has images and if so, check their domains
@@ -373,6 +407,8 @@ router
         : false;
 
     res.json(req.results);
+    if (req.isSpamSubmission) return;
+
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
       if (tags && tags.length > 0) {
@@ -647,15 +683,17 @@ router
         .catch(next);
     });
   })
-  .put(function (req, res, next) {
-    db.Notification.create({
-      type: 'updated resource - admin update',
-      projectId: req.project.id,
-      data: {
-        userId: req.user.id,
-        resourceId: req.results.id,
-      },
-    });
+  .put(async function (req, res, next) {
+    if (await shouldSendUpdatedResourceAdminEmail(req)) {
+      db.Notification.create({
+        type: 'updated resource - admin update',
+        projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id,
+        },
+      });
+    }
     if (req.changedToPublished) {
       db.Notification.create({
         type: 'new published resource - user feedback',

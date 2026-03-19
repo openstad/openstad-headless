@@ -6,6 +6,11 @@ const searchInResults = require('../../middleware/search-in-results');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const createError = require('http-errors');
 const crypto = require('crypto');
+const {
+  analyzeSpamPayload,
+  logSpamAnalysis,
+  removeSpamMetaFields,
+} = require('../../services/spam-detector');
 
 let router = express.Router({ mergeParams: true });
 
@@ -98,11 +103,21 @@ router
   // ---------------
   .post(auth.can('Submission', 'create'))
   .post(rateLimiter(), function (req, res, next) {
+    const analysis = analyzeSpamPayload(req.body.submittedData || {}, {
+      withDetails: true,
+    });
+    logSpamAnalysis({ routeName: 'submission', req, analysis });
+    req.isSpamSubmission = analysis.isProbablySpam;
+
+    const sanitizedSubmittedData = removeSpamMetaFields(
+      req.body.submittedData || {}
+    );
     let data = {
-      submittedData: req.body.submittedData,
+      submittedData: sanitizedSubmittedData,
       projectId: req.params.projectId,
       widgetId: req.body.widgetId || null,
       userId: req.user.id,
+      isSpam: req.isSpamSubmission,
     };
 
     req.sendConfirmationToUser = data.submittedData.confirmationUser || false;
@@ -136,6 +151,8 @@ router
       });
   })
   .post(async function (req, res, next) {
+    if (req.isSpamSubmission) return next();
+
     const sendConfirmationToUser = req.sendConfirmationToUser;
     const userEmailAddress = req.userEmailAddress;
     const sendConfirmationToAdmin = req.sendConfirmationToAdmin;

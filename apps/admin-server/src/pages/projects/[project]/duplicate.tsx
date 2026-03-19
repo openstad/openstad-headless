@@ -29,7 +29,7 @@ const formSchema = z.object({
 export default function ProjectDuplicate() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading } = useProject();
+  const { data, isLoading } = useProject(['includeAuthConfig']);
   const [errors, setErrors] = useState<Array<{ step: string; error: string }>>(
     []
   );
@@ -39,7 +39,7 @@ export default function ProjectDuplicate() {
     removePreviousDuplicatedDataInProgress,
     setRemovePreviousDuplicatedDataInProgress,
   ] = useState(false);
-  const [duplicatedData, setDuplicatedData] = useState<Array<any>>([]);
+  const [duplicatedData, setDuplicatedData] = useState<any>({});
 
   const defaults = useCallback(
     () => ({
@@ -71,18 +71,21 @@ export default function ProjectDuplicate() {
     if (!Array.isArray(data)) {
       return [];
     }
-    return data.map((item) => {
-      if (item.deletedAt) {
-        return null;
-      }
-      delete item.projectId;
-      item.originalId = item.id;
-      delete item.id;
-      return item;
-    });
+    return data
+      .map((item) => {
+        if (item.deletedAt) {
+          return null;
+        }
+        delete item.projectId;
+        item.originalId = item.id;
+        delete item.id;
+        return item;
+      })
+      .filter(Boolean);
   }
 
   type DuplicateData = {
+    sourceProjectId: number;
     areaId: number;
     config: any;
     emailConfig: any;
@@ -95,10 +98,12 @@ export default function ProjectDuplicate() {
     resources: any[];
     resourceSettings: boolean;
     skipDefaultStatuses: boolean;
+    isDuplicateRequest: boolean;
   };
 
   const removePreviousDuplicatedData = async () => {
     setRemovePreviousDuplicatedDataInProgress(true);
+    let rollbackSucceeded = false;
 
     try {
       const response = await fetch(
@@ -119,23 +124,27 @@ export default function ProjectDuplicate() {
       toast.success(
         'Gedupliceerde project en gedupliceerde data is verwijderd.'
       );
+      rollbackSucceeded = true;
     } catch (error) {
       toast.error(
         'Verwijderen niet gelukt. Neem contact op met de beheerders.'
       );
     } finally {
       setRemovePreviousDuplicatedDataInProgress(false);
-      setErrors([]);
-      setIsErrorsVisible(false);
-      setDuplicatedData([]);
+      if (rollbackSucceeded) {
+        setErrors([]);
+        setIsErrorsVisible(false);
+        setDuplicatedData({});
+      }
     }
   };
 
   async function duplicate(values: z.infer<typeof formSchema>) {
     setDuplicatingInProgress(true);
-    setDuplicatedData([]);
+    setDuplicatedData({});
 
     const duplicateData: DuplicateData = {
+      sourceProjectId: data.id,
       areaId: data.areaId,
       config: data.config,
       emailConfig: data.emailConfig,
@@ -148,6 +157,7 @@ export default function ProjectDuplicate() {
       resources: [],
       resourceSettings: false,
       skipDefaultStatuses: true,
+      isDuplicateRequest: true,
     };
 
     if (duplicateData.config && duplicateData.config.uniqueId) {
@@ -209,7 +219,7 @@ export default function ProjectDuplicate() {
           },
         ]
       );
-      setDuplicatedData(responseJSON.duplicatedData || []);
+      setDuplicatedData(responseJSON.duplicatedData || {});
       toast.error(
         'Er is een fout opgetreden bij het dupliceren van het project.'
       );
@@ -235,7 +245,6 @@ export default function ProjectDuplicate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

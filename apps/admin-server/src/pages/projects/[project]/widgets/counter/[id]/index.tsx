@@ -36,7 +36,6 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -47,7 +46,7 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Counter',
+            name: 'Teller',
             url: `/projects/${projectId}/widgets/counter/${id}`,
           },
         ]}>

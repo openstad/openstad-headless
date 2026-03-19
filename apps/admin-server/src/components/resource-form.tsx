@@ -461,6 +461,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             project={project as string}
             fieldName="image"
             allowedTypes={['image/*']}
+            allowMultiple={true}
             onImageUploaded={(imageResult) => {
               let array = [...(form.getValues('images') || [])];
               array.push(imageResult);
@@ -474,6 +475,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             form={form}
             project={project as string}
             fieldName="document"
+            allowMultiple={true}
             allowedTypes={[
               'application/pdf',
               'application/msword',
@@ -556,21 +558,22 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                             )}
                           />
                         </div>
-
-                        <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
-                          <button
-                            type="button"
-                            onClick={() => moveUpImage(index)}
-                            aria-label="Move image left">
-                            <ArrowLeft className="cursor-pointer" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => moveDownImage(index)}
-                            aria-label="Move image right">
-                            <ArrowRight className="cursor-pointer" />
-                          </button>
-                        </span>
+                        {imageFields.length > 1 && (
+                          <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                            <button
+                              type="button"
+                              onClick={() => moveUpImage(index)}
+                              aria-label="Move image left">
+                              <ArrowLeft className="cursor-pointer" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveDownImage(index)}
+                              aria-label="Move image right">
+                              <ArrowRight className="cursor-pointer" />
+                            </button>
+                          </span>
+                        )}
                       </div>
                     );
                   })}
@@ -777,13 +780,13 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="modBreak"
             render={({ field }) => (
-              <FormItem className="col-span-1">
+              <FormItem className="lg:col-span-2 col-span-2">
                 <FormLabel>Inhoud van de Modbreak</FormLabel>
                 <FormDescription>
                   Laat dit veld leeg om geen Modbreak bij deze resource te tonen
                 </FormDescription>
                 <FormControl>
-                  <Input placeholder="" {...field} />
+                  <Textarea rows={5} placeholder="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

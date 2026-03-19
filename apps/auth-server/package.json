@@ -9,7 +9,7 @@
     "@openstad-headless/lib": "*",
     "@azure/identity": "^4.6.0",
     "@draadnl/passport-url": "^1.0.4",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "bcrypt": "^5.0.1",
     "bluebird": "^3.5.1",
     "body-parser": "^1.9.x",

@@ -1,11 +1,5 @@
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { PageLayout } from '@/components/ui/page-layout';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
@@ -58,7 +52,6 @@ export default function ProjectCodes() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -137,7 +130,7 @@ export default function ProjectCodes() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((code: any) => (
                 <li
                   key={code.id}

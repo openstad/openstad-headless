@@ -1,5 +1,11 @@
 const dns = require('dns');
 const db = require('../db');
+const externalCertificates = require('./externalCertificates');
+const externalCertificatesManager = require('./externalCertificatesManager');
+const {
+  getCertificateConfig,
+  buildIngressConfig,
+} = require('./checkHostStatusHelpers');
 
 const getK8sApi = async () => {
   const k8s = await import('@kubernetes/client-node');
@@ -56,7 +62,9 @@ const updateIngress = async (
   domain,
   namespace,
   tlsSecretName,
-  tlsExtraDomains
+  tlsExtraDomains,
+  useClusterIssuer = false,
+  useExternalCerts = false
 ) => {
   // Check if domain is in the current ingress, otherwise
   // if there is only one host, replace it
@@ -92,16 +100,33 @@ const updateIngress = async (
     }
   }
 
+  // Rebuild annotations and ingressClassName on every update
+  const { annotations, ingressClassName } = buildIngressConfig(
+    useClusterIssuer,
+    useExternalCerts
+  );
+  ingress.metadata.annotations = annotations;
+  if (ingressClassName) {
+    ingress.spec.ingressClassName = ingressClassName;
+  } else {
+    delete ingress.spec.ingressClassName;
+  }
+
   // Set TLS hosts if managed by OpenStad
   if (process.env.KUBERNETES_INGRESS_TLS_MANAGED_BY_OPENSTAD === 'true') {
-    const hosts = getIngressHosts(domain, tlsExtraDomains);
+    if (tlsSecretName) {
+      const hosts = getIngressHosts(domain, tlsExtraDomains);
 
-    ingress.spec.tls = [
-      {
-        secretName: tlsSecretName,
-        hosts,
-      },
-    ];
+      ingress.spec.tls = [
+        {
+          secretName: tlsSecretName,
+          hosts,
+        },
+      ];
+    } else {
+      // Remove TLS section if secret is not ready (for external certs)
+      delete ingress.spec.tls;
+    }
   }
 
   return k8sApi.replaceNamespacedIngress({
@@ -118,33 +143,13 @@ const createIngress = async (
   namespace,
   tlsSecretName,
   tlsExtraDomains,
-  useClusterIssuer
+  useClusterIssuer,
+  useExternalCerts = false
 ) => {
-  const prodIssuerName = useClusterIssuer
-    ? process.env.KUBERNETES_INGRESS_ISSUER_NAME || 'openstad-letsencrypt-prod'
-    : null;
-
-  const defaultAnnotations = process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS
-    ? JSON.parse(process.env.KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS)
-    : {
-        'kubernetes.io/ingress.class': 'nginx',
-        // if www host isset it redirects always to www. if without is isset it redirects to not www
-        'nginx.ingress.kubernetes.io/from-to-www-redirect': 'true',
-        'nginx.ingress.kubernetes.io/proxy-body-size': '128m',
-        'nginx.ingress.kubernetes.io/configuration-snippet': `more_set_headers "X-Content-Type-Options: nosniff";
-        more_set_headers "X-Frame-Options: SAMEORIGIN";
-        more_set_headers "X-Xss-Protection: 1";
-        more_set_headers "Referrer-Policy: same-origin";`,
-      };
-
-  // Set the cluster issuer if not already set in the default annotations
-  if (
-    useClusterIssuer &&
-    !!prodIssuerName &&
-    !defaultAnnotations['cert-manager.io/cluster-issuer']
-  ) {
-    defaultAnnotations['cert-manager.io/cluster-issuer'] = prodIssuerName;
-  }
+  const { annotations, ingressClassName } = buildIngressConfig(
+    useClusterIssuer,
+    useExternalCerts
+  );
 
   let hosts = [domain];
 
@@ -180,16 +185,20 @@ const createIngress = async (
         },
       },
     ],
-    tls: [
+  };
+
+  // Only add TLS if tlsSecretName is provided (for external certs, null means pending)
+  if (tlsSecretName) {
+    spec.tls = [
       {
         secretName: tlsSecretName,
         hosts,
       },
-    ],
-  };
+    ];
+  }
 
-  if (process.env.KUBERNETES_INGRESS_CLASS_NAME) {
-    spec.ingressClassName = process.env.KUBERNETES_INGRESS_CLASS_NAME;
+  if (ingressClassName) {
+    spec.ingressClassName = ingressClassName;
   }
 
   return k8sApi.createNamespacedIngress({
@@ -200,7 +209,7 @@ const createIngress = async (
       metadata: {
         //name must be unique, lowercase, alphanumer, - is allowed
         name: `${name}`,
-        annotations: defaultAnnotations,
+        annotations,
       },
       spec,
     },
@@ -229,9 +238,9 @@ const checkHostStatus = async (conditions) => {
         return;
       }
 
-      let hostStatus = project.hostStatus;
-      //ensure it's an object so we dont have to worry about checks later
-      hostStatus = hostStatus ? hostStatus : {}; //
+      // Clone to avoid Sequelize JSON mutation trap: mutating the
+      // original reference in-place makes Sequelize think nothing changed.
+      let hostStatus = project.hostStatus ? { ...project.hostStatus } : {};
 
       const k8sApi = await getK8sApi();
       let ingress = '';
@@ -263,6 +272,126 @@ const checkHostStatus = async (conditions) => {
         ? false
         : process.env.KUBERNETES_INGRESS_USE_CLUSTER_ISSUER === 'true';
 
+      // Read certificate config from new path with fallback
+      const certConfig = getCertificateConfig(project.config);
+
+      // External certificates: per-project cert method choice
+      // When global flag is on AND project is configured for external certs,
+      // external cert logic runs instead of cert-manager logic.
+      const useExternalCerts =
+        externalCertificates.isEnabled() &&
+        certConfig.certificateMethod === 'external';
+
+      // External certificate branching: create ExternalSecret and dual-check readiness
+      if (useExternalCerts) {
+        const slugOverride = certConfig.externalCertSlug || null;
+        const secretName = externalCertificatesManager.generateSecretName(
+          project.url,
+          namespace,
+          slugOverride
+        );
+
+        try {
+          await externalCertificatesManager.ensureExternalSecret(
+            secretName,
+            namespace
+          );
+        } catch (error) {
+          console.error(
+            `[external-certificates] Failed to ensure ExternalSecret for project ${project.id}`
+          );
+          hostStatus.certificate = {
+            method: 'external',
+            state: 'error',
+            secretName,
+            lastChecked: new Date().toISOString(),
+          };
+          await project.update({ hostStatus });
+          return;
+        }
+
+        const certStatus = await externalCertificatesManager.waitForSecretReady(
+          secretName,
+          namespace
+        );
+
+        hostStatus.certificate = {
+          method: 'external',
+          state: certStatus.state,
+          secretName,
+          lastChecked: new Date().toISOString(),
+        };
+
+        if (!ingress) {
+          try {
+            if (certStatus.ready) {
+              await createIngress(
+                k8sApi,
+                project.config.uniqueId,
+                project.url,
+                namespace,
+                secretName,
+                tlsExtraDomains,
+                false,
+                true
+              );
+            } else {
+              await createIngress(
+                k8sApi,
+                project.config.uniqueId,
+                project.url,
+                namespace,
+                null,
+                tlsExtraDomains,
+                false,
+                true
+              );
+            }
+            hostStatus.ingress = true;
+          } catch (error) {
+            console.error(
+              `Error creating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`
+            );
+          }
+        } else {
+          try {
+            hostStatus.ingress = true;
+            if (certStatus.ready) {
+              await updateIngress(
+                ingress,
+                k8sApi,
+                project.config.uniqueId,
+                project.url,
+                namespace,
+                secretName,
+                tlsExtraDomains,
+                false,
+                true
+              );
+            } else {
+              await updateIngress(
+                ingress,
+                k8sApi,
+                project.config.uniqueId,
+                project.url,
+                namespace,
+                null,
+                tlsExtraDomains,
+                false,
+                true
+              );
+            }
+          } catch (error) {
+            console.error(
+              `Error updating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`
+            );
+          }
+        }
+
+        await project.update({ hostStatus });
+        return; // Skip the default cert-manager path below
+      }
+
       // if ip issset but not ingress try to create one
       if (!ingress) {
         try {
@@ -293,7 +422,8 @@ const checkHostStatus = async (conditions) => {
             namespace,
             tlsSecretName,
             tlsExtraDomains,
-            tlsUseClusterIssuer
+            tlsUseClusterIssuer,
+            false
           );
         } catch (error) {
           console.error(
@@ -301,9 +431,22 @@ const checkHostStatus = async (conditions) => {
           );
         }
       }
+
+      // Save certificate status for cert-manager path
+      hostStatus.certificate = {
+        method: 'cert-manager',
+        state: 'configured',
+        lastChecked: new Date().toISOString(),
+      };
+      await project.update({ hostStatus });
     });
 
-    await Promise.all(promises);
+    const results = await Promise.allSettled(promises);
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        console.error('[checkHostStatus] Project check failed');
+      }
+    }
   }
 };
 

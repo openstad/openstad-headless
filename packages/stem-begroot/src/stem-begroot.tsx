@@ -56,6 +56,7 @@ export type StemBegrootWidgetProps = BaseProps &
     showVoteCount: boolean;
     showOriginalResource?: boolean;
     originalResourceUrl?: string;
+    originalResourceText?: string;
     displayTitle?: boolean;
     displaySummary?: boolean;
     displayDescription?: boolean;
@@ -457,44 +458,59 @@ function StemBegroot({
 
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
-    let pending;
-
-    if (
+    const pending =
       props.votes.voteType === 'countPerTag' ||
       props.votes.voteType === 'budgetingPerTag'
-    ) {
-      pending = votePendingStorage.getVotePendingPerTag();
-      if (
-        props.votes.voteType === 'countPerTag' ||
-        props.votes.voteType === 'budgetingPerTag'
-      ) {
-        pending = votePendingStorage.getVotePendingPerTag();
-      } else {
-        pending = votePendingStorage.getVotePending();
-      }
+        ? votePendingStorage.getVotePendingPerTag()
+        : votePendingStorage.getVotePending();
 
-      if (
-        pending &&
-        ((isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
-          (isAllowedToVote && navAfterLogin && currentStep === 2) ||
-          (isAllowedToVote && !navAfterLogin))
-      ) {
-        if (voteAfterLoggingIn) {
-          if (selectedResources.length > 0 || tagCounter.length > 0) {
-            setCurrentStep(3);
-            submitVoteAndCleanup();
-          }
-        } else {
-          setCurrentStep(3);
-        }
+    if (!pending || !isAllowedToVote) return;
+
+    const hasPendingSelection =
+      props.votes.voteType === 'countPerTag' ||
+      props.votes.voteType === 'budgetingPerTag'
+        ? tagCounter.some((tagObj) => {
+            const tagName = Object.keys(tagObj)[0];
+            const selectedForTag = tagObj[tagName]?.selectedResources || [];
+            return selectedForTag.length > 0;
+          })
+        : selectedResources.length > 0;
+
+    if (!voteAfterLoggingIn) {
+      if (currentStep < 3) {
+        setCurrentStep(3);
       }
+      return;
     }
-  }, [currentUser, currentStep, selectedResources, tagCounter]);
+
+    if (hasPendingSelection && currentStep < 4) {
+      // Show in-progress state while submitting and only advance on successful submit
+      if (currentStep < 3) {
+        setCurrentStep(3);
+      }
+      void (async () => {
+        const submitted = await submitVoteAndCleanup();
+        if (submitted) {
+          setCurrentStep(4);
+        }
+      })();
+    }
+  }, [
+    currentUser,
+    currentStep,
+    selectedResources,
+    tagCounter,
+    isAllowedToVote,
+    voteAfterLoggingIn,
+    props.votes.voteType,
+    votePendingStorage,
+  ]);
 
   async function submitVoteAndCleanup() {
+    let submitted = false;
     try {
       if (submitInProgressRef.current) {
-        return;
+        return false;
       }
       submitInProgressRef.current = true;
 
@@ -526,13 +542,16 @@ function StemBegroot({
           votePendingStorage.clearVotePendingPerTag();
 
           await doVote(uniqueResourcesToVote);
+          submitted = true;
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
         }
       } else {
         if (selectedResources.length > 0) {
           votePendingStorage.clearVotePending();
-          return await doVote(selectedResources);
+          await doVote(selectedResources);
+          selectedResourcesStorage.clearSelectedResources();
+          submitted = true;
         }
       }
     } catch (err: any) {
@@ -540,6 +559,7 @@ function StemBegroot({
     } finally {
       submitInProgressRef.current = false;
     }
+    return submitted;
   }
 
   async function prepareForVote(
@@ -629,6 +649,12 @@ function StemBegroot({
     statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
   }) => {
     return canLikeResource(resource);
+  };
+
+  const getOriginalResourceUrlText = () => {
+    if (props.originalResourceText) return props.originalResourceText;
+
+    return "Bekijk het originele ingediende plan";
   };
 
   // For now only support budgeting and count
@@ -866,6 +892,7 @@ function StemBegroot({
         resourceBtnEnabled={resourceSelectable}
         resourceBtnTextHandler={createItemBtnString}
         defineOriginalUrl={getOriginalResourceUrl}
+        defineOriginalUrlText={getOriginalResourceUrlText}
         openDetailDialog={openDetailDialog}
         setOpenDetailDialog={setOpenDetailDialog}
         isSimpleView={Boolean(props.isSimpleView)}
@@ -1098,7 +1125,7 @@ function StemBegroot({
                       props.votes.voteType === 'budgeting'
                         ? notUsedResources.some(
                             (r: { budget: number }) =>
-                              r.budget < props.votes.maxBudget - budgetUsed
+                              r.budget <= props.votes.maxBudget - budgetUsed
                           )
                         : Math.max(
                             props.votes.maxResources - selectedResources.length,
@@ -1263,8 +1290,10 @@ function StemBegroot({
                     }
 
                     if (currentStep === 3) {
-                      await submitVoteAndCleanup();
-                      setCurrentStep(4);
+                      const submitted = await submitVoteAndCleanup();
+                      if (submitted) {
+                        setCurrentStep(4);
+                      }
                     } else if (currentStep === 4) {
                       currentUser.logout({ url: location.href });
                     } else {

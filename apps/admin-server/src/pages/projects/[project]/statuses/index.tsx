@@ -29,7 +29,6 @@ export default function ProjectStatuses() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -73,7 +72,7 @@ export default function ProjectStatuses() {
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
-            <div className="grid grid-cols-1 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-[2rem_2fr_2fr_1fr_auto_auto] items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">
                 <button
                   className="filter-button"
@@ -110,19 +109,22 @@ export default function ProjectStatuses() {
                   Liken toegestaan
                 </button>
               </ListHeading>
+              <ListHeading className="hidden lg:flex truncate">
+                Acties
+              </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((status: any) => (
                 <Link
                   href={`/projects/${project}/statuses/${status.id}`}
                   key={status.id}>
                   <li
                     key={status.id}
-                    className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                    className="grid grid-cols-2 lg:grid-cols-[2rem_2fr_2fr_1fr_auto_auto] py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       {status.id || null}
                     </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto">
+                    <Paragraph className="hidden lg:flex truncate my-auto min-w-0">
                       {status.name || null}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">

@@ -46,15 +46,15 @@ export default function ProjectResourceVotes() {
               Voorkeur
             </ListHeading>
           </div>
-          <ul>
+          <ul className="admin-overview">
             {votes?.map((vote: any) => {
               const userId = vote.userId;
               const user =
                 usersData?.find((user: any) => user.id === userId) || null;
               const currentUserKey =
-                !!user && user.idpUser?.identifier && user.idpUser?.provider
+                user?.idpUser?.identifier && user?.idpUser?.provider
                   ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
-                  : user?.id?.toString() || 'unknown';
+                  : (user?.id ?? userId)?.toString() || null;
 
               return (
                 <li
@@ -67,11 +67,15 @@ export default function ProjectResourceVotes() {
                     {vote.createdAt}
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                    <a
-                      href={`/users/${btoa(currentUserKey)}`}
-                      style={{ textDecoration: 'underline' }}>
-                      {vote.userId}
-                    </a>
+                    {currentUserKey ? (
+                      <a
+                        href={`/users/${btoa(currentUserKey)}`}
+                        style={{ textDecoration: 'underline' }}>
+                        {vote.userId}
+                      </a>
+                    ) : (
+                      vote.userId
+                    )}
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                     {vote.ip}

@@ -101,7 +101,10 @@ export default function CreateUserProjects() {
           if (user.emailNotificationConsent !== updateValue.consent) {
             updatedUser.emailNotificationConsent = updateValue.consent;
           }
-          if (user.role !== updateValue.roleId) {
+          if (
+            typeof updateValue.roleId !== 'undefined' &&
+            user.role !== updateValue.roleId
+          ) {
             updatedUser.role = updateValue.roleId;
           }
 
@@ -172,8 +175,9 @@ export default function CreateUserProjects() {
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="ml-1">
-            <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 items-center lg:py-3 lg:border-b border-border gap-4">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-4 items-center lg:py-3 lg:border-b border-border gap-4">
               <ListHeading className="hidden lg:flex">Projectnaam</ListHeading>
+              <ListHeading className="hidden lg:flex">Gebruiker ID</ListHeading>
               <ListHeading className="hidden lg:flex">Rol</ListHeading>
               <ListHeading className="hidden lg:flex">
                 E-mail notificaties toestemming
@@ -199,8 +203,11 @@ export default function CreateUserProjects() {
                 return (
                   <li
                     key={project.id}
-                    className="grid grid-cols-1 lg:grid-cols-3 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-4">
+                    className="grid grid-cols-1 lg:grid-cols-4 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-4">
                     <Paragraph className="truncate">{project.name}</Paragraph>
+                    <Paragraph className="truncate text-muted-foreground">
+                      {user?.id ?? '—'}
+                    </Paragraph>
                     <Paragraph className="truncate mr-4">
                       <UserRoleDropdownList
                         roleId={user?.role || ''}

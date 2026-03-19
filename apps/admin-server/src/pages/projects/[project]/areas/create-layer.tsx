@@ -50,7 +50,6 @@ export default function ProjectDatalayerCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

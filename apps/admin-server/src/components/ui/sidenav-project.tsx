@@ -1,5 +1,7 @@
 'use client';
+
 import { SessionContext } from '@/auth';
+import { useExternalCertificatesEnabled } from '@/hooks/use-external-certificates';
 import { HasAccess } from '@/lib/hasAccess';
 import { cn } from '@/lib/utils';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
@@ -20,6 +22,7 @@ export function SidenavProject({ className }: { className?: string }) {
   }, [router]);
 
   const sessionData = useContext(SessionContext);
+  const externalCertificatesEnabled = useExternalCertificatesEnabled();
 
   return (
     <nav
@@ -35,6 +38,14 @@ export function SidenavProject({ className }: { className?: string }) {
         </Link>
       </div>
       <div className="p-4 flex flex-col gap-2">
+        <Link href={`/projects/${project}/statistics`}>
+          <Button
+            variant={location.includes('/statistics') ? 'secondary' : 'ghost'}
+            size="default"
+            className="w-full flex justify-start">
+            <span className="truncate">Statistieken</span>
+          </Button>
+        </Link>
         <Link href={`/projects/${project}/widgets`}>
           <Button
             variant={location.endsWith('/widgets') ? 'secondary' : 'ghost'}
@@ -96,7 +107,7 @@ export function SidenavProject({ className }: { className?: string }) {
                   }
                   size="default"
                   className="w-full flex justify-start pl-8">
-                  <span className="truncate">Gebruikers</span>
+                  <span className="truncate">Archivering</span>
                 </Button>
               </Link>
             )}
@@ -174,6 +185,20 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Tags</span>
               </Button>
             </Link>
+            {externalCertificatesEnabled && (
+              <Link href={`/projects/${project}/settings/certificates`}>
+                <Button
+                  variant={
+                    location.includes('/settings/certificates')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">TLS Certificaat (SSL)</span>
+                </Button>
+              </Link>
+            )}
           </>
         ) : null}
         <Link href={`/projects/${project}/authentication`}>

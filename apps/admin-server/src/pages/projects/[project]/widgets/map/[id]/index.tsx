@@ -1,4 +1,3 @@
-import Preview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import {
   WithApiUrlProps,
@@ -33,7 +32,6 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',

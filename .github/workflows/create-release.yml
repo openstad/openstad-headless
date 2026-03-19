@@ -1,0 +1,341 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Release branch (e.g., release/v2.3)'
+        required: true
+        type: string
+      tag:
+        description: 'Version to release (e.g., 2.3.1). v prefix stripped automatically.'
+        required: true
+        type: string
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        default: stable
+        options:
+          - stable
+          - alpha
+          - beta
+
+concurrency:
+  group: create-release
+  cancel-in-progress: false
+
+jobs:
+  validate-inputs:
+    name: Validate release inputs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      release_version: ${{ steps.construct.outputs.release_version }}
+      git_tag: ${{ steps.construct.outputs.git_tag }}
+      is_prerelease: ${{ steps.construct.outputs.is_prerelease }}
+      short_sha: ${{ steps.construct.outputs.short_sha }}
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          persist-credentials: false
+
+      - name: Validate inputs and construct release version
+        id: construct
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_BRANCH: ${{ github.event.inputs.branch }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          INPUT_RELEASE_TYPE: ${{ github.event.inputs.release_type }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: |
+          BRANCH="$INPUT_BRANCH"
+          TAG="$INPUT_TAG"
+          RELEASE_TYPE="$INPUT_RELEASE_TYPE"
+
+          # Validate branch format
+          if [[ ! "$BRANCH" =~ ^release/ ]]; then
+            echo "::error::Branch must start with 'release/' (got: $BRANCH)"
+            exit 1
+          fi
+
+          # Strip v prefix from tag if present
+          TAG="${TAG#v}"
+
+          # Validate semver format
+          if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag must be a valid semver (X.Y.Z), got: $TAG"
+            exit 1
+          fi
+
+          # Extract version prefix from branch (release/v2.3 -> 2.3)
+          BRANCH_VERSION="${BRANCH#release/v}"
+          if [[ "$BRANCH_VERSION" == "$BRANCH" ]]; then
+            BRANCH_VERSION="${BRANCH#release/}"
+          fi
+
+          # Verify tag starts with branch version prefix
+          if [[ ! "$TAG" =~ ^${BRANCH_VERSION}\. ]] && [[ "$TAG" != "$BRANCH_VERSION" ]]; then
+            echo "::error::Tag $TAG does not match branch version prefix $BRANCH_VERSION (branch: $BRANCH)"
+            exit 1
+          fi
+
+          # Get short SHA
+          SHORT_SHA=$(git rev-parse --short=7 HEAD)
+
+          # Construct final version
+          case "$RELEASE_TYPE" in
+            stable)
+              RELEASE_VERSION="$TAG"
+              IS_PRERELEASE="false"
+              ;;
+            alpha)
+              RELEASE_VERSION="${TAG}-alpha-${SHORT_SHA}"
+              IS_PRERELEASE="true"
+              ;;
+            beta)
+              RELEASE_VERSION="${TAG}-beta-${SHORT_SHA}"
+              IS_PRERELEASE="true"
+              ;;
+          esac
+
+          GIT_TAG="v${RELEASE_VERSION}"
+
+          # Check for duplicate release
+          if gh release view "$GIT_TAG" --repo "$GH_REPOSITORY" > /dev/null 2>&1; then
+            echo "::error::Release $GIT_TAG already exists"
+            exit 1
+          fi
+
+          echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "git_tag=$GIT_TAG" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+          echo "::notice::Release version: $RELEASE_VERSION (tag: $GIT_TAG, prerelease: $IS_PRERELEASE)"
+
+  run-tests:
+    name: Run tests
+    needs: [validate-inputs]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup safe-chain
+        run: |
+          npm i -g @aikidosec/safe-chain
+          safe-chain setup-ci
+
+      - name: Install dependencies
+        run: npm ci --safe-chain-skip-minimum-package-age
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+  build-builder-stage:
+    name: Build `builder` stage
+    needs: [run-tests, validate-inputs]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: docker-base-${{ github.sha }}
+          restore-keys: |
+            docker-base-
+
+      - name: Build base stage
+        env:
+          OPENSTAD_VERSION: ${{ needs.validate-inputs.outputs.release_version }}
+        run: |
+          docker buildx build \
+            --target=builder \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --load \
+            --build-arg OPENSTAD_VERSION="$OPENSTAD_VERSION" \
+            -t builder-stage:latest \
+            .
+
+  build-and-push-docker-image:
+    needs: [build-builder-stage, validate-inputs]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        app: [admin-server, api-server, auth-server, image-server, cms-server]
+        include:
+          - app: api-server
+            build-target: release-with-packages
+    name: '[${{ matrix.app }}] Build & push image'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: 'ghcr.io/${{ github.repository_owner }}/${{ matrix.app }}'
+      APP: ${{ matrix.app }}
+      BUILD_TARGET: release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          persist-credentials: false
+
+      - name: Restore base build cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: docker-base-${{ github.sha }}
+          restore-keys: |
+            docker-base-
+
+      - if: ${{ matrix.build-target }}
+        name: Set correct build target
+        run: echo "BUILD_TARGET=${{ matrix.build-target }}" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image and push to GitHub Container Registry
+        env:
+          RELEASE_TAG: ${{ needs.validate-inputs.outputs.git_tag }}
+          OPENSTAD_VERSION: ${{ needs.validate-inputs.outputs.release_version }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: '${{ env.IMAGE }}:${{ needs.validate-inputs.outputs.git_tag }}'
+          build-args: |
+            APP=${{ matrix.app }}
+            OPENSTAD_VERSION=${{ needs.validate-inputs.outputs.release_version }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+
+  release-helm-chart:
+    name: Release Helm chart
+    needs: [build-and-push-docker-image, validate-inputs]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          persist-credentials: false
+
+      - name: Install yq
+        run: sudo snap install yq --channel=v4/stable
+
+      - name: Override Chart.yaml version
+        env:
+          RELEASE_VERSION: ${{ needs.validate-inputs.outputs.release_version }}
+        run: /snap/bin/yq -i ".version = \"$RELEASE_VERSION\"" ./charts/openstad-headless/Chart.yaml
+
+      - name: Set image references
+        env:
+          IMAGE_TAG: ${{ needs.validate-inputs.outputs.git_tag }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          /snap/bin/yq -i ".admin.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/admin-server:$IMAGE_TAG\"" ./operations/deployments/openstad-headless/environments/prod/images.yml
+          /snap/bin/yq -i ".admin.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/admin-server:$IMAGE_TAG\"" ./charts/openstad-headless/values.yaml
+          /snap/bin/yq -i ".api.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/api-server:$IMAGE_TAG\"" ./operations/deployments/openstad-headless/environments/prod/images.yml
+          /snap/bin/yq -i ".api.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/api-server:$IMAGE_TAG\"" ./charts/openstad-headless/values.yaml
+          /snap/bin/yq -i ".cms.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/cms-server:$IMAGE_TAG\"" ./operations/deployments/openstad-headless/environments/prod/images.yml
+          /snap/bin/yq -i ".cms.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/cms-server:$IMAGE_TAG\"" ./charts/openstad-headless/values.yaml
+          /snap/bin/yq -i ".auth.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/auth-server:$IMAGE_TAG\"" ./operations/deployments/openstad-headless/environments/prod/images.yml
+          /snap/bin/yq -i ".auth.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/auth-server:$IMAGE_TAG\"" ./charts/openstad-headless/values.yaml
+          /snap/bin/yq -i ".image.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/image-server:$IMAGE_TAG\"" ./operations/deployments/openstad-headless/environments/prod/images.yml
+          /snap/bin/yq -i ".image.deploymentContainer.image = \"ghcr.io/$REPO_OWNER/image-server:$IMAGE_TAG\"" ./charts/openstad-headless/values.yaml
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.19.2
+
+      - name: Helm Lint Charts
+        run: |
+          for dir in $(ls -d charts/*/); do
+            dir=$(echo $dir | sed 's:/*$::')
+            helm lint $dir -f $dir/values.yaml --strict || exit 1
+          done
+
+      - name: Helm Deps
+        run: |
+          for dir in $(ls -d charts/*/); do
+            helm dependency list $dir 2> /dev/null | tail +2 | head -n -1 | awk '{ print "helm repo add " $1 " " $3 }' | while read cmd; do $cmd; done
+          done
+
+      - name: Package and push Helm chart
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          GH_REPOSITORY: ${{ github.repository }}
+          RELEASE_VERSION: ${{ needs.validate-inputs.outputs.release_version }}
+        run: |
+          echo "$GH_TOKEN" | helm registry login ghcr.io \
+            --username "$REPO_OWNER" \
+            --password-stdin
+          helm package charts/openstad-headless
+          helm push "openstad-headless-${RELEASE_VERSION}.tgz" "oci://ghcr.io/$GH_REPOSITORY"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_TAG: ${{ needs.validate-inputs.outputs.git_tag }}
+          RELEASE_VERSION: ${{ needs.validate-inputs.outputs.release_version }}
+          IS_PRERELEASE: ${{ needs.validate-inputs.outputs.is_prerelease }}
+          GH_REPOSITORY: ${{ github.repository }}
+          INPUT_BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          RELEASE_FLAGS=""
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            RELEASE_FLAGS="--prerelease --latest=false"
+          else
+            RELEASE_FLAGS="--latest"
+          fi
+          gh release create "$GIT_TAG" \
+            "openstad-headless-${RELEASE_VERSION}.tgz" \
+            --repo "$GH_REPOSITORY" \
+            --target "$INPUT_BRANCH" \
+            --title "$GIT_TAG" \
+            --generate-notes \
+            $RELEASE_FLAGS

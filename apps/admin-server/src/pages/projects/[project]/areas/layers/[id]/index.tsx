@@ -82,7 +82,6 @@ export default function ProjectDatalayerEdit() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

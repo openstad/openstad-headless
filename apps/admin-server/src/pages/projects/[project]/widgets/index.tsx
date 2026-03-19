@@ -7,7 +7,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PageLayout } from '@/components/ui/page-layout';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
-import { useProject } from '@/hooks/use-project';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
 import { HasAccess } from '@/lib/hasAccess';
 import { WidgetDefinitions } from '@/lib/widget-definitions';
@@ -20,8 +19,6 @@ import toast from 'react-hot-toast';
 export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
-
-  const { data: projectData } = useProject();
 
   const {
     data: widgets,
@@ -47,11 +44,6 @@ export default function ProjectWidgets() {
   return (
     <div>
       <PageLayout
-        pageHeader={
-          projectData?.name
-            ? `Projectnaam: ${projectData.name}`
-            : `Projectnaam niet gevonden`
-        }
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -202,7 +194,7 @@ export default function ProjectWidgets() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {(data as Widget[])?.map((widget) => {
                 return (
                   <Link

@@ -32,7 +32,6 @@ export default function ProjectExport() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

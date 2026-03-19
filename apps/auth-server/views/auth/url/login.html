@@ -7,16 +7,15 @@
 			{% if title %}
 			{{title | safe}}
 			{% else %}
-			Registreren of inloggen <br /> per e-mail
+			Bevestig jouw e-mailadres
 			{% endif %}
 		</h1>
 		<p class="intro">
 			{% if description %}
 			{{description | safe}}
 			{% else %}
-			Je ontvangt per email een link waarmee je kan inloggen.
-			Hierna ben je gelijk ingelogd voor 6 maanden of totdat je uitlogt. <br />
-			Je hoeft je hiervoor niet apart te registreren.
+			Je ontvangt per e-mail een link waarmee je kan inloggen.
+			Daarna kom je automatisch terug op de pagina waar je hebt ingelogd.
 			{% endif %}
 	  </p>
 		<form
@@ -49,7 +48,7 @@
 			<input type="hidden" name="priviligedRoute" value="admin">
 			{% endif %}
 
-			<input type="submit" value="{{ buttonText if buttonText else 'Stuur link' }}" class="btn btn-primary">
+			<input type="submit" value="{{ buttonText if buttonText else 'Verstuur e-mail' }}" class="btn btn-primary">
 		</form>
 	</div>
 	<br />
@@ -57,8 +56,8 @@
 		{% if helpText %}
 		{{helpText | safe}}
 		{% else %}
-		Geen mail gekregen na het versturen van de link?
-		Kijk dan in je spam-folder of
+		Geen e-mail gekregen na het versturen van de link?
+		Kijk dan in je ongewenste e-mails of
 		<a href="mailto:{{clientEmail}}">neem contact met ons op.</a>
 		{% endif %}
 	</p>

@@ -6,11 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ChoiceOptions,
-  Item,
-  Weight,
-} from '@openstad-headless/choiceguide/src/props';
+import { ChoiceOptions } from '@openstad-headless/choiceguide/src/props';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -21,7 +17,6 @@ import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -58,13 +53,33 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   dimensions = chosenConfig === 'hidden' ? [] : dimensions;
 
   const nextIdRef = useRef<number>(1);
+  const normalizeChoiceOptions = (
+    options: Array<{
+      id?: string | number;
+      title?: string;
+      description?: string;
+      image?: string;
+      imageUploader?: string;
+    }>
+  ) =>
+    (options || []).map((option, index) => {
+      const parsedId = Number(option?.id);
+      return {
+        ...option,
+        id: Number.isFinite(parsedId) ? parsedId : index + 1,
+      };
+    });
 
   const defaults = useCallback(() => {
-    const choiceOptions = widget?.config?.[category]?.choiceOptions || [];
+    const choiceOptions = normalizeChoiceOptions(
+      widget?.config?.[category]?.choiceOptions || []
+    );
 
     if (choiceOptions.length > 0) {
       nextIdRef.current =
-        Math.max(...choiceOptions.map((group: ChoiceOptions) => group.id)) + 1;
+        Math.max(
+          ...choiceOptions.map((group: ChoiceOptions) => Number(group.id))
+        ) + 1;
     } else {
       nextIdRef.current = 1;
     }
@@ -91,9 +106,13 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   }, [form, defaults]);
 
   async function onSubmit(values: FormData) {
+    const normalizedChoiceOptions = normalizeChoiceOptions(
+      values.choiceOptions || []
+    );
+
     const updatedConfig = {
       ...widget.config,
-      [category]: { choiceOptions: values.choiceOptions },
+      [category]: { choiceOptions: normalizedChoiceOptions },
     };
 
     try {

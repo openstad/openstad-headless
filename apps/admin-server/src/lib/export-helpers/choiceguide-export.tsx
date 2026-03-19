@@ -1,5 +1,4 @@
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
-import { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 
 import { InitializeWeights } from '../../../../../packages/choiceguide/src/parts/init-weights';
@@ -271,6 +270,7 @@ export const exportChoiceGuideToCSV = (
         'Aangemaakt op': row.createdAt,
         'Project ID': row.projectId,
         Widget: widgetName,
+        'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee',
         'Gebruikers ID': row.userId || ' ',
         'Gebruikers rol': row.user?.role || ' ',
         'Gebruikers naam': row.user?.name || ' ',

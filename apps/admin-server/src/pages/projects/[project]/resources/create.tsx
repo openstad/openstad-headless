@@ -12,7 +12,6 @@ export default function ProjectResourceCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Resources"
         breadcrumbs={[
           {
             name: 'Projecten',

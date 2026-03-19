@@ -3,6 +3,7 @@ const fs = require('fs');
 const fields = require('./lib/fields');
 const arrangeFields = require('./lib/arrangeFields');
 const projectService = require('../../../services/projects');
+const resourceService = require('../../../services/resources');
 
 module.exports = {
   options: {
@@ -67,6 +68,29 @@ module.exports = {
           ? req.cookies && req.cookies['openstad-cookie-consent'] == 1
           : true;
 
+        // Fetch resource data for OG meta tags when openstadResourceId is in the query.
+        // Note: projects using a custom resourceIdRelativePath (e.g. ?articleId=[id])
+        // are not yet supported here. That requires a configurable param name setting.
+        const resourceId = req.query && req.query.openstadResourceId;
+        if (
+          resourceId &&
+          /^\d+$/.test(resourceId) &&
+          req.project &&
+          req.project.id
+        ) {
+          const resource = await resourceService.fetchOne(
+            req.project.id,
+            resourceId
+          );
+          if (resource) {
+            req.data.activeResource = resource;
+          }
+        }
+
+        // Pass the original URL so templates can build og:url without losing
+        // existing query parameters.
+        req.data.originalUrl = req.originalUrl;
+
         return next();
       },
     };
@@ -85,18 +109,18 @@ module.exports = {
         def: true,
       },
 
-      archiveStatus: {
+      bannerStatus: {
         type: 'boolean',
-        label: 'Zet de site in archief modus',
+        label: 'Toon site banner',
         def: false,
       },
 
-      archiveStatusText: {
+      bannerStatusText: {
         type: 'string',
-        label: 'Tekst die getoond wordt als de site in archief modus staat',
+        label: 'Tekst die getoond wordt als de site banner zichtbaar is',
         def: 'Dit project is afgerond.',
         if: {
-          archiveStatus: true,
+          bannerStatus: true,
         },
       },
 
@@ -236,6 +260,7 @@ module.exports = {
         type: 'attachment',
         label: 'Favicon',
         fileGroup: 'icons',
+        help: 'Gebruik bij voorkeur een vierkante .png of .ico van minstens 48x48 pixels. Google toont deze doorgaans betrouwbaarder in zoekresultaten.',
       },
       // cssExtras: {
       //   type: 'string',
@@ -393,8 +418,8 @@ module.exports = {
           'hideSiteTitle',
           'siteLogo',
           'logoAltText',
-          'archiveStatus',
-          'archiveStatusText',
+          'bannerStatus',
+          'bannerStatusText',
         ],
       },
       css: {

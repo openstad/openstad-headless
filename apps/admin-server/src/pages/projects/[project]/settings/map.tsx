@@ -23,7 +23,6 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useArea from '@/hooks/use-areas';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as Switch from '@radix-ui/react-switch';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -126,7 +125,6 @@ export default function ProjectSettingsMap() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

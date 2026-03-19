@@ -14,7 +14,6 @@ import useComments from '@/hooks/use-comments';
 import useResources from '@/hooks/use-resources';
 import { exportComments } from '@/lib/export-helpers/comments-export';
 import { Paginator } from '@openstad-headless/ui/src';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -179,7 +178,7 @@ export default function ProjectComments() {
 
   function renderComments(comments: any, pre = '') {
     return (
-      <ul>
+      <ul className="admin-overview">
         {comments.map((comment: any) => (
           <React.Fragment key={comment.id}>
             <li
@@ -274,7 +273,6 @@ export default function ProjectComments() {
       `}</style>
       <div>
         <PageLayout
-          pageHeader="Projecten"
           breadcrumbs={[
             {
               name: 'Projecten',

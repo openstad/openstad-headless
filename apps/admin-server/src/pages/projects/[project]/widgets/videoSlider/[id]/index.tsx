@@ -1,4 +1,3 @@
-import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -17,8 +16,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetEnqueteConfirmation from './confirmation';
-import WidgetEnqueteDisplay from './display';
 import WidgetEnqueteGeneral from './general';
 import WidgetEnqueteItems from './items';
 
@@ -38,7 +35,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Video Slider"
         breadcrumbs={[
           {
             name: 'Projecten',

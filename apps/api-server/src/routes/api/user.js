@@ -13,6 +13,47 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const crypto = require('crypto');
 
+function getUniqueUserKey(user) {
+  const provider = user?.idpUser?.provider;
+  const identifier = user?.idpUser?.identifier;
+  if (provider && identifier) {
+    return `${provider}-*-${identifier}`;
+  }
+  if (user?.id) return `user-${user.id}`;
+  return `user-${user?.email || ''}-${user?.name || ''}-${user?.createdAt || ''}`;
+}
+
+function getRecencyValue(user) {
+  const candidates = [user?.updatedAt, user?.lastLogin, user?.createdAt];
+  for (const candidate of candidates) {
+    const value = new Date(candidate || '').getTime();
+    if (!isNaN(value)) return value;
+  }
+  return 0;
+}
+
+function dedupeUsersByIdentity(users = []) {
+  const map = new Map();
+
+  users.forEach((user) => {
+    const key = getUniqueUserKey(user);
+    const previous = map.get(key);
+
+    if (!previous) {
+      map.set(key, user);
+      return;
+    }
+
+    const prevRecency = getRecencyValue(previous);
+    const currentRecency = getRecencyValue(user);
+    if (currentRecency >= prevRecency) {
+      map.set(key, user);
+    }
+  });
+
+  return Array.from(map.values());
+}
+
 const filterBody = (req, res, next) => {
   const data = {};
   const keys = [
@@ -166,11 +207,24 @@ router
   .get(pagination.init)
   .get(function (req, res, next) {
     let { dbQuery } = req;
+    const shouldDedupeByIdpUser =
+      !req.params.projectId && req.query.uniqueByIdpUser !== '0';
+    const shouldExcludeAnonymous = req.query.excludeAnonymous === '1';
+
     dbQuery.where = {
       ...req.queryConditions,
       ...dbQuery.where,
     };
     if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
+    if (shouldExcludeAnonymous) {
+      dbQuery.where.role = { [Op.not]: 'anonymous' };
+    }
+
+    if (shouldDedupeByIdpUser) {
+      delete dbQuery.offset;
+      delete dbQuery.limit;
+      delete dbQuery.pageSize;
+    }
 
     const q =
       req.query.q && typeof req.query.q === 'string' ? req.query.q.trim() : '';
@@ -189,8 +243,14 @@ router
     db.User.scope(...req.scope)
       .findAndCountAll(dbQuery)
       .then(function (result) {
-        req.results = result.rows;
-        req.dbQuery.count = result.count;
+        const shouldDedupeByIdpUser =
+          !req.params.projectId && req.query.uniqueByIdpUser !== '0';
+        const rows = shouldDedupeByIdpUser
+          ? dedupeUsersByIdentity(result.rows)
+          : result.rows;
+
+        req.results = rows;
+        req.dbQuery.count = rows.length;
         return next();
       })
       .catch(next);
@@ -517,6 +577,14 @@ router
     }
     return next();
   })
+  .put(function (req, res, next) {
+    const value =
+      typeof req.body?.anonymizeUserName === 'string'
+        ? req.body.anonymizeUserName.trim()
+        : '';
+    req.anonymizeUserName = value || undefined;
+    return next();
+  })
   .put(async function (req, res, next) {
     let result;
     if (
@@ -526,7 +594,7 @@ router
         req.targetUser.can('update', req.user)
       )
     )
-      return next(new Error('You cannot update this User'));
+      return next(createError(403, 'You cannot update this User'));
     if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
       req.results = {
         resources: [],
@@ -539,7 +607,9 @@ router
     }
     try {
       if (req.params.willOrDo == 'do') {
-        result = await req.targetUser.doAnonymize();
+        result = await req.targetUser.doAnonymize(req.anonymizeUserName, {
+          deleteVotes: false,
+        });
       } else {
         result = await req.targetUser.willAnonymize();
       }
@@ -561,9 +631,11 @@ router
         if (!req.onlyUserIds || req.onlyUserIds.includes(user.id)) {
           let result;
           if (!(user && user.can && user.can('update', req.user)))
-            return next(new Error('You cannot update this User'));
+            return next(createError(403, 'You cannot update this User'));
           if (req.params.willOrDo == 'do') {
-            result = await user.doAnonymize();
+            result = await user.doAnonymize(req.anonymizeUserName, {
+              deleteVotes: false,
+            });
           } else {
             result = await user.willAnonymize();
           }
@@ -738,6 +810,13 @@ router
                 : synchronizedUpdatedUserData;
 
             if (req.user.can('update', apiUser)) {
+              if (
+                data?.idpUser &&
+                !data.idpUser.accesstoken &&
+                apiUser?.idpUser?.accesstoken
+              ) {
+                data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
+              }
               apiUser
                 .authorizeData(data, 'update', req.user)
                 .update(data)

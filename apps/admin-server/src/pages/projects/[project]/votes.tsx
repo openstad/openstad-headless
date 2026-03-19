@@ -87,7 +87,7 @@ export default function ProjectResources() {
     fetchResults(page).then((results) => {
       if (results) {
         const data = results?.records || [];
-        const totalCount = results?.metadata?.totalCount || 50;
+        const totalCount = results?.metadata?.totalCount ?? 0;
 
         const pageCount = Math.ceil(totalCount / pageLimit);
         setTotalPages(pageCount);
@@ -121,7 +121,6 @@ export default function ProjectResources() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -143,6 +142,11 @@ export default function ProjectResources() {
           </div>
         }>
         <div className="container py-6">
+          <div className="mb-2">
+            <span className="text-sm text-muted-foreground">
+              {`${totalCount} ${totalCount === 1 ? 'stem' : 'stemmen'}`}
+            </span>
+          </div>
           <div className="float-right mb-4 flex gap-4">
             <p className="text-xs font-medium text-muted-foreground self-center">
               Filter op:
@@ -224,7 +228,7 @@ export default function ProjectResources() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
+            <ul className="admin-overview">
               {filterData?.map((vote: any) => {
                 const userId = vote.userId;
                 const user =

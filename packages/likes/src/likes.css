@@ -147,6 +147,21 @@
   border: unset;
   color: var(--microLikeColor);
 }
+
+.like-widget-container.micro-score
+  .like-option-container
+  button
+  .micro-score-triangle {
+  display: inline-block;
+}
+
+.like-widget-container.micro-score
+  .like-option-container
+  button
+  .micro-score-triangle-down {
+  transform: rotate(180deg);
+}
+
 .like-widget-container.micro-score .like-option-container button:focus-within,
 .utrecht-button-group.variant-micro-score > div button:focus-within,
 .like-widget-container.micro-score .like-option-container button:hover,

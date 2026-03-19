@@ -1,6 +1,5 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
-import { DropDownMenu } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import {
   Button,
@@ -33,9 +32,13 @@ function Comment({
   },
   showDateSeperately = false,
   selected,
+  disableReplyFeatures = false,
+  disableLocationLink = false,
+  keepMenuIconStatic = false,
   type,
   index,
   adminLabel,
+  editorLabel,
   disableSubmit = false,
   extraReplyButton = false,
   setRefreshComments,
@@ -48,6 +51,7 @@ function Comment({
     comment,
     selected,
     adminLabel,
+    editorLabel,
     ...props,
   } as CommentProps;
 
@@ -154,15 +158,24 @@ function Comment({
     <article
       className={`comment-item ${selected ? 'selected' : ''}`}
       id={`comment-${comment?.id}`}
-      onClick={findLocation(comment?.id || 0)}>
+      onClick={
+        disableLocationLink ? undefined : findLocation(comment?.id || 0)
+      }>
       <section className="comment-item-header">
         <Heading
           level={4}
           appearance="utrecht-heading-6"
           className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
-          {args.comment.user && args.comment.user.role === 'admin' ? (
+          {args.comment.user &&
+          args.comment.user.role === 'admin' &&
+          adminLabel ? (
             <span className="--isAdmin">{adminLabel}</span>
+          ) : null}
+          {args.comment.user &&
+          args.comment.user.role === 'editor' &&
+          editorLabel ? (
+            <span className="--isEditor">{editorLabel}</span>
           ) : null}
         </Heading>
         {canEdit() || canDelete() ? (
@@ -171,7 +184,12 @@ function Comment({
               appearance="subtle-button"
               onClick={() => setIsOpen(!isOpen)}>
               <div>
-                <i className={isOpen ? 'ri-close-fill' : 'ri-more-fill'}></i>
+                <i
+                  className={
+                    isOpen && !keepMenuIconStatic
+                      ? 'ri-close-fill'
+                      : 'ri-more-fill'
+                  }></i>
                 <span className="sr-only">Bewerken</span>
               </div>
             </Button>
@@ -406,7 +424,8 @@ function Comment({
 
       <Spacer size={1} />
 
-      {args.comment.replies &&
+      {!disableReplyFeatures &&
+        args.comment.replies &&
         args.comment.replies.map((reply, index) => {
           return (
             <div className="reaction-container" key={index}>
@@ -421,7 +440,8 @@ function Comment({
           );
         })}
 
-      {extraReplyButton &&
+      {!disableReplyFeatures &&
+        extraReplyButton &&
         !args.comment.parentId &&
         args.comment.replies &&
         args.comment.replies.length > 0 &&
@@ -435,7 +455,7 @@ function Comment({
           </Button>
         )}
 
-      {isReplyFormActive ? (
+      {!disableReplyFeatures && isReplyFormActive ? (
         <div className="reaction-container">
           <div className="input-container">
             <CommentForm

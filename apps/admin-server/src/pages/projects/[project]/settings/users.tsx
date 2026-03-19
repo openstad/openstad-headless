@@ -185,22 +185,21 @@ export default function ProjectSettingsUsers(
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           { name: 'Projecten', url: '/projects' },
           { name: 'Instellingen', url: `/projects/${project}/settings` },
-          { name: 'Gebruikers', url: `/projects/${project}/settings/users` },
+          { name: 'Archivering', url: `/projects/${project}/settings/users` },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="users" className="w-full">
+          <Tabs defaultValue="anonymize" className="w-full">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="users">Gebruikers</TabsTrigger>
               <TabsTrigger value="anonymize">Anonimiseren</TabsTrigger>
+              <TabsTrigger value="users">Archivering</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="p-0">
               <Form {...usersForm} className="p-6 bg-white rounded-md">
-                <Heading size="xl">Gebruikers</Heading>
+                <Heading size="xl">Archivering</Heading>
                 <Separator className="my-4" />
                 <form
                   onSubmit={usersForm.handleSubmit(onUsersSubmit)}

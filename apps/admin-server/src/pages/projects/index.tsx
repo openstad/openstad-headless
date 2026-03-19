@@ -84,7 +84,7 @@ export default function Projects() {
 
   const [filterSearchType, setFilterSearchType] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'ended' | 'active'>(
-    'all'
+    'active'
   );
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -153,8 +153,8 @@ export default function Projects() {
                 {(
                   [
                     { value: 'all', label: 'Alle projecten' },
-                    { value: 'ended', label: 'Beëindigd' },
                     { value: 'active', label: 'Actief' },
+                    { value: 'ended', label: 'Beëindigd' },
                   ] as const
                 ).map((option) => (
                   <button

@@ -53,7 +53,6 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -64,7 +63,7 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Inzending overzicht kaart',
+            name: 'Inzending kaart',
             url: `/projects/${projectId}/widgets/resourcedetailmap/${id}`,
           },
         ]}>

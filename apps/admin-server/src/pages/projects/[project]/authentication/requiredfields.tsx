@@ -248,7 +248,6 @@ export default function ProjectAuthenticationRequiredFields() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
         breadcrumbs={[
           {
             name: 'Projecten',

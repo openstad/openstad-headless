@@ -81,6 +81,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
 
   const sidebarRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const formStartTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
     const initialWeights = InitializeWeights(
@@ -135,7 +136,11 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const widgetId = props.widgetId;
     const storageKey = `choiceguide-${projectId}-${widgetId}`;
 
-    const finalAnswers = { ...formData, hiddenFields };
+    const finalAnswers = {
+      ...formData,
+      hiddenFields,
+      __timeToSubmitMs: Math.max(Date.now() - formStartTimeRef.current, 0),
+    };
     // Store in local storage
     localStorage.setItem(storageKey, JSON.stringify(finalAnswers));
 
