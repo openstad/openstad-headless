@@ -45,7 +45,7 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Keuzewijzer',
+            name: 'Keuzewijzer resultaat',
             url: `/projects/${projectId}/widgets/keuzewijzer/${id}`,
           },
         ]}>

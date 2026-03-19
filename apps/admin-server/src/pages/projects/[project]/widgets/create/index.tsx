@@ -38,8 +38,10 @@ export default function CreateWidget({}: WithApiUrlProps) {
   const [name, setName] = useState<string>('');
   const [filterSearchType, setFilterSearchType] = useState<string>('');
 
-  const filteredWidgets = widgetTypes.filter((widget) =>
-    widget[1].name.toLowerCase().includes(filterSearchType.toLowerCase())
+  const filteredWidgets = widgetTypes.filter(
+    (widget) =>
+      !widget[1].hidden &&
+      widget[1].name.toLowerCase().includes(filterSearchType.toLowerCase())
   );
 
   async function submit(type: any, description: any) {

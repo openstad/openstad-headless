@@ -76,7 +76,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Map',
+            name: 'Inzendingen kaart',
             url: `/projects/${projectId}/widgets/resourcesmap/${id}`,
           },
         ]}>
