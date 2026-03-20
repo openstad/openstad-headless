@@ -69,6 +69,7 @@
     "ajv-draft-04": {
       "ajv": "^8.18.0"
     },
+    "parse-node-version": "^1.0.1",
     "vega-lite": "^5.23.0",
     "tar": "7.5.9",
     "node-gyp@<10.0.0": "^12.2.0",
