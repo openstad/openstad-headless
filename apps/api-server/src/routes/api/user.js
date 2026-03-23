@@ -288,9 +288,10 @@ router
     // check config
     if (
       !(
-        req.project.config &&
-        req.project.config.users &&
-        req.project.config.users.canCreateNewUsers
+        ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
+        (req.project.config &&
+          req.project.config.users &&
+          req.project.config.users.canCreateNewUsers)
       )
     )
       return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
