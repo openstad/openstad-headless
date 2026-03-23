@@ -30,10 +30,10 @@ const UserRoleDropdownList = ({
         {/* currently not available
         <SelectItem value={'moderator'}>Moderator</SelectItem>
         */}
-        {cannotAddMembers && (
+        {!cannotAddMembers && (
           <SelectItem value={'member'}>Normale gebruiker</SelectItem>
         )}
-        {cannotAddMembers && (
+        {!cannotAddMembers && (
           <SelectItem value={'anonymous'}>Anonieme gebruiker</SelectItem>
         )}
       </SelectContent>
