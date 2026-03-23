@@ -18,8 +18,7 @@ const UserRoleDropdownList = ({
   return (
     <Select
       value={roleId ? roleId : ''}
-      onValueChange={(value: string) => addProject(value)}
-      disabled={disabled}>
+      onValueChange={(value: string) => addProject(value)}>
       <SelectTrigger>
         <SelectValue placeholder="" />
       </SelectTrigger>
