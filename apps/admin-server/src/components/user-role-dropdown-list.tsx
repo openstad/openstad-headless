@@ -9,11 +9,11 @@ import {
 const UserRoleDropdownList = ({
   roleId,
   addProject,
-  disabled = false,
+  cannotAddMembers = false,
 }: {
   roleId?: string;
   addProject: (roleId: string) => void;
-  disabled?: boolean;
+  cannotAddMembers?: boolean;
 }) => {
   return (
     <Select
@@ -30,8 +30,12 @@ const UserRoleDropdownList = ({
         {/* currently not available
         <SelectItem value={'moderator'}>Moderator</SelectItem>
         */}
-        <SelectItem value={'member'}>Normale gebruiker</SelectItem>
-        <SelectItem value={'anonymous'}>Anonieme gebruiker</SelectItem>
+        {cannotAddMembers && (
+          <SelectItem value={'member'}>Normale gebruiker</SelectItem>
+        )}
+        {cannotAddMembers && (
+          <SelectItem value={'anonymous'}>Anonieme gebruiker</SelectItem>
+        )}
       </SelectContent>
     </Select>
   );
