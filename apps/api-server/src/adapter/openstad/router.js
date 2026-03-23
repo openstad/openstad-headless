@@ -446,6 +446,10 @@ router
       codes = await service.fetchUniqueCode({
         authConfig: req.authConfig,
         isExport: req.query.export === 'true',
+        limit: req.query.limit,
+        offset: req.query.offset,
+        search: req.query.search,
+        sort: req.query.sort,
       });
     } catch (err) {
       console.log(err);
