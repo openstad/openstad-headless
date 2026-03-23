@@ -195,6 +195,10 @@ export default function CreateUserProjects() {
                     (user: any) => user.projectId == project.id
                   );
                 }
+
+                const cannotCreateNewUsers =
+                  project?.config?.users?.canCreateNewUsers === false;
+
                 return (
                   <li
                     key={project.id}
@@ -206,6 +210,7 @@ export default function CreateUserProjects() {
                         addProject={(roleId) => {
                           addProject(project.id, roleId);
                         }}
+                        cannotAddMembers={cannotCreateNewUsers}
                       />
                     </Paragraph>
 
