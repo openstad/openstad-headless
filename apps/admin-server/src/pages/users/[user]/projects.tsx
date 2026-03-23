@@ -218,7 +218,7 @@ export default function CreateUserProjects() {
                         addProject={(roleId) => {
                           addProject(project.id, roleId);
                         }}
-                        disabled={cannotCreateNewUsers}
+                        cannotAddMembers={cannotCreateNewUsers}
                       />
                     </Paragraph>
 
