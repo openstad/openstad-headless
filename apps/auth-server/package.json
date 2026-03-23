@@ -6,9 +6,9 @@
   "license": "MIT",
   "main": "app.js",
   "dependencies": {
-    "@openstad-headless/lib": "*",
     "@azure/identity": "^4.6.0",
     "@draadnl/passport-url": "^1.0.4",
+    "@openstad-headless/lib": "*",
     "ajv": "^8.18.0",
     "bcrypt": "^5.0.1",
     "bluebird": "^3.5.1",
@@ -52,7 +52,7 @@
     "postcss": "^8.4.38",
     "qrcode": "^1.5.3",
     "sanitize-html": "^2.7.0",
-    "sequelize": "^6.28.0",
+    "sequelize": "^6.37.8",
     "session-file-store": "^1.2.0",
     "umzug": "^3.2.1",
     "uuid": "^10.0.0"
