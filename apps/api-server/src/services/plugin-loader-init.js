@@ -43,11 +43,23 @@ function initPluginLoader() {
       }
       // Collect routes
       if (plugin.api.routes) {
+        var pluginContext = { config: plugin.config, pluginName: plugin.name };
+
         for (var route of plugin.api.routes) {
+          var handlerModule = require(path.join(pluginDir, route.handler));
+
+          // Convention: if a handler module sets `module.exports.createHandler`,
+          // it is a factory that receives the plugin context (config, name).
+          // Otherwise, the export is used directly as an Express handler.
+          var handler =
+            typeof handlerModule.createHandler === 'function'
+              ? handlerModule.createHandler(pluginContext)
+              : handlerModule;
+
           pluginRoutes.push({
             method: route.method || 'use',
             path: route.path,
-            handler: require(path.join(pluginDir, route.handler)),
+            handler: handler,
             pluginName: plugin.name,
           });
         }
