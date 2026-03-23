@@ -17,7 +17,7 @@ const UserRoleDropdownList = ({
 }) => {
   return (
     <Select
-      defaultValue={roleId ? roleId : ''}
+      value={roleId ? roleId : ''}
       onValueChange={(value: string) => addProject(value)}>
       <SelectTrigger>
         <SelectValue placeholder="" />
