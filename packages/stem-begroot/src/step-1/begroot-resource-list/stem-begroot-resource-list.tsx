@@ -87,7 +87,9 @@ export const StemBegrootResourceList = ({
   const getResourceStableKey = (resource: any) =>
     String(
       resource?.id ||
-        `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+        `${resource?.projectId || ''}:${resource?.title || ''}:${
+          resource?.createdAt || ''
+        }`
     );
 
   // Memoize intTags to avoid creating new array on every render
@@ -266,7 +268,9 @@ export const StemBegrootResourceList = ({
         return (
           <>
             <article
-              className={`stem-begroot--container ${hasImages} ${!canVoteByStatus ? 'resource-vote-disabled' : ''}`.trim()}>
+              className={`stem-begroot--container ${hasImages} ${
+                !canVoteByStatus ? 'resource-vote-disabled' : ''
+              }`.trim()}>
               <Carousel
                 items={resourceImages}
                 buttonText={{
@@ -325,14 +329,6 @@ export const StemBegrootResourceList = ({
                   __html: elipsizeHTML(resource.description, 200),
                 }}
               />
-              {showOriginalResource && originalUrl ? (
-                <Paragraph className="strong">
-                  Dit is een vervolg op plan:&nbsp;
-                  <Link target="_blank" href={originalUrl}>
-                    {originalUrl}
-                  </Link>
-                </Paragraph>
-              ) : null}
 
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (

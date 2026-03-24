@@ -39,7 +39,7 @@ ENV BUILD_ENV=${BUILD_ENV}
 # set Cypress cache to a writable temp path (avoids issues with /root/.cache)
 ENV CYPRESS_CACHE_FOLDER=/tmp/CypressCache
 
-RUN npm ci --safe-chain-skip-minimum-package-age
+RUN npm ci --include=optional --safe-chain-skip-minimum-package-age
 
 # Minimal target for update-lock. It only serves to update the lock file.
 FROM node:24-slim AS update-lock
@@ -61,6 +61,18 @@ RUN npm cache clean --force
 # Remove all folders from ./apps except the one specified by APP
 RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
 RUN npm prune -ws
+RUN if [ "${APP}" = "image-server" ]; then \
+      SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
+      BUILD_ARCH="$(uname -m)"; \
+      SHARP_CPU="$(case "${BUILD_ARCH}" in \
+        amd64|x86_64) echo "x64" ;; \
+        arm64|aarch64) echo "arm64" ;; \
+        armv7l|armv6l) echo "arm" ;; \
+        *) echo "${BUILD_ARCH}" ;; \
+      esac)"; \
+      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" "sharp@${SHARP_VERSION}" && \
+      node -e "require('sharp')"; \
+    fi
 
 
 # Development image
@@ -93,6 +105,18 @@ ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
 ENV NEXT_PUBLIC_OPENSTAD_VERSION=$OPENSTAD_VERSION
 RUN npm run build --if-present -w $WORKSPACE
 RUN npm prune -ws --production
+RUN if [ "${APP}" = "image-server" ]; then \
+      SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
+      BUILD_ARCH="$(uname -m)"; \
+      SHARP_CPU="$(case "${BUILD_ARCH}" in \
+        amd64|x86_64) echo "x64" ;; \
+        arm64|aarch64) echo "arm64" ;; \
+        armv7l|armv6l) echo "arm" ;; \
+        *) echo "${BUILD_ARCH}" ;; \
+      esac)"; \
+      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" "sharp@${SHARP_VERSION}" && \
+      node -e "require('sharp')"; \
+    fi
 
 # Release image
 FROM node:24-slim AS release

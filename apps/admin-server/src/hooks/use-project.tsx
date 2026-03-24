@@ -13,7 +13,9 @@ export function useProject(scopes?: Array<string>) {
 
   const projectSwr = useSWR(
     projectNumber
-      ? `/api/openstad/api/project/${projectNumber}?${useScopes.map((s) => `${s}=1`).join('&')}`
+      ? `/api/openstad/api/project/${projectNumber}?${useScopes
+          .map((s) => `${s}=1`)
+          .join('&')}`
       : null
   );
 

@@ -79,7 +79,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Multi project inzending overzicht',
+            name: 'Projectenoverzicht',
             url: `/projects/${projectId}/widgets/multiprojectresourceoverview/${id}`,
           },
         ]}>

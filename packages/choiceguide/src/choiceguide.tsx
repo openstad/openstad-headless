@@ -181,7 +181,9 @@ function ChoiceGuide(props: ChoiceGuideProps) {
   return (
     <div className="osc">
       <div
-        className={`osc-choiceguide-container ${stickyBarAtTop ? 'sticky-top-bar' : ''}`}
+        className={`osc-choiceguide-container ${
+          stickyBarAtTop ? 'sticky-top-bar' : ''
+        }`}
         ref={containerRef}>
         <div className="osc-choiceguide-form">
           {!showForm && (

@@ -288,6 +288,7 @@ async function setupEnvVars() {
   process.env.MAIL_MS_CLIENT_ID = process.env.MAIL_MS_CLIENT_ID || '';
   process.env.MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
   process.env.MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
+  process.env.WHITELISTED_EMAILS = process.env.WHITELISTED_EMAILS || '';
 }
 
 async function writeEnvFile() {
@@ -305,7 +306,9 @@ DB_DIALECT=${process.env.DB_DIALECT}
 DB_REQUIRE_SSL=${process.env.DB_REQUIRE_SSL}
 DB_AUTH_METHOD=${process.env.DB_AUTH_METHOD}
 
-MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
+MESSAGESTREAMING_REDIS_URL=${
+      process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'
+    }
 MESSAGESTREAMING_POSTFIX=${process.env.MESSAGESTREAMING_POSTFIX || ''}
 
 BASIC_AUTH_USER=${process.env.BASIC_AUTH_USER}
@@ -317,6 +320,8 @@ SMTP_HOST=${process.env.SMTP_HOST}
 SMTP_SECURE=${process.env.SMTP_SECURE || ''}
 SMTP_USERNAME=${process.env.SMTP_USERNAME}
 SMTP_PASSWORD=${process.env.SMTP_PASSWORD}
+
+WHITELISTED_EMAILS=${process.env.WHITELISTED_EMAILS}
 
 MONGO_HOST=localhost
 
