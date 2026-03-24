@@ -96,6 +96,7 @@ export default function ProjectDuplicate() {
     tags: any[];
     statuses: any[];
     resources: any[];
+    notificationTemplates: any[];
     resourceSettings: boolean;
     skipDefaultStatuses: boolean;
     isDuplicateRequest: boolean;
@@ -155,6 +156,7 @@ export default function ProjectDuplicate() {
       tags: [],
       statuses: [],
       resources: [],
+      notificationTemplates: [],
       resourceSettings: false,
       skipDefaultStatuses: true,
       isDuplicateRequest: true,
@@ -181,6 +183,11 @@ export default function ProjectDuplicate() {
       `/api/openstad/api/project/${data.id}/resource?includeTags=1&includeStatus=1`
     );
     duplicateData.resources = resources;
+
+    const notificationTemplates = await fetchData(
+      `/api/openstad/notification/project/${data.id}/template`
+    );
+    duplicateData.notificationTemplates = notificationTemplates;
 
     duplicateData.resourceSettings = duplicateData?.config?.resources || {};
 
