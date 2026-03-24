@@ -357,25 +357,47 @@ const createServerLoginPath = (requiredFields, authProviderData) => {
   if (!authProviderData) return '';
 
   const userFieldMapping = authProviderData.config?.userFieldMapping || {};
-  let url =
+  const baseUrl =
     '/broker/sp/oidc/authenticate?client_id=[[clientId]]&redirect_uri=[[redirectUri]]&response_type=code&scope=openid';
   const endUrl =
     '&code_challenge=[[codeChallenge]]&code_challenge_method=S256&response_mode=query';
 
+  const userFieldRequiredMapping =
+    authProviderData.config?.userFieldRequiredMapping || {};
+  const requiredAttributes = [];
+  const optionalAttributes = [];
+
   if (userFieldMapping['identifier']) {
-    url += encodeURIComponent(` ${userFieldMapping['identifier']}`);
+    requiredAttributes.push(userFieldMapping['identifier']);
   }
 
-  requiredFields.forEach((field) => {
-    const mappedField = userFieldMapping[field];
-    if (!!mappedField) {
-      url += encodeURIComponent(` ${mappedField}`);
+  for (const [field, attribute] of Object.entries(userFieldMapping)) {
+    if (field === 'identifier' || !attribute) continue;
+    if (userFieldRequiredMapping[field] === true) {
+      requiredAttributes.push(attribute);
+    } else {
+      optionalAttributes.push(attribute);
     }
-  });
+  }
 
-  url = url.trim();
+  if (requiredAttributes.length === 0 && optionalAttributes.length === 0) {
+    return `${baseUrl}${endUrl}`;
+  }
 
-  return `${url}${endUrl}`;
+  // Build condiscon: required = [["attr"]], optional = [["attr"], []]
+  const condiscon = [
+    ...requiredAttributes.map((attr) => [[attr]]),
+    ...optionalAttributes.map((attr) => [[attr], []]),
+  ];
+
+  const condisconBase64 = Buffer.from(JSON.stringify(condiscon)).toString(
+    'base64'
+  );
+  const scopeParam = encodeURIComponent(
+    ` signicat:param:condiscon_base64:${condisconBase64}`
+  );
+
+  return `${baseUrl}${scopeParam}${endUrl}`;
 };
 
 async function setServerLoginPathForProvider(
