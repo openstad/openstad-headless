@@ -5,7 +5,7 @@ const {
   setupGracefulShutdown,
 } = require('@openstad-headless/lib/telemetry');
 const telemetryManager = createTelemetry({
-  serviceName: 'openstad-api-server',
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-api-server',
 });
 telemetryManager.initialize();
 setupGracefulShutdown(telemetryManager);
