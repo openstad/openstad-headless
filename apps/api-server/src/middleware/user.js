@@ -44,13 +44,6 @@ module.exports = async function getUser(req, res, next) {
     const existingUseAuthProvider = req.cookies['useAuthProvider'];
     const resolvedUseAuthProvider =
       authProviderId || existingUseAuthProvider || authProvider || 'default';
-    console.log(
-      'set auth provider in cookie',
-      authProvider,
-      authProviderId,
-      existingUseAuthProvider,
-      resolvedUseAuthProvider
-    );
     req.cookies['useAuthProvider'] = resolvedUseAuthProvider;
     let authConfig = await authSettings.config({
       project: req.project,
@@ -64,8 +57,6 @@ module.exports = async function getUser(req, res, next) {
 
     let projectId = req.project && req.project.id;
 
-    console.log('get user instance');
-
     const userEntity =
       (await getUserInstance({
         authConfig,
@@ -75,8 +66,6 @@ module.exports = async function getUser(req, res, next) {
         projectId,
         req,
       })) || {};
-
-    console.log('user entity', userEntity);
 
     req.user = userEntity;
 
@@ -181,11 +170,7 @@ async function getUserInstance({
       }
     }
 
-    console.log('get user instance, where', where);
-
     dbUser = await db.User.findOne({ where });
-
-    console.log('get user instance, dbUser', dbUser);
 
     if (isFixed) {
       if (!dbUser.projectId || dbUser.projectId == config.admin.projectId)
@@ -216,13 +201,6 @@ async function getUserInstance({
     });
   }
 
-  console.log(
-    'get user instance, authConfig',
-    authConfig,
-    req.cookies['useAuthProvider'],
-    req.cookies
-  );
-
   let adapter = authConfig.adapter || 'openstad';
   try {
     if (!adapters[adapter]) {
@@ -250,11 +228,8 @@ async function getUserInstance({
       mergedUser.role = 'superuser';
     }
 
-    console.log('get user instance, mergedUser', mergedUser, service);
-
     return mergedUser;
   } catch (err) {
-    console.log('get user instance err', err);
     return await resetUserToken(dbUser);
   }
 }

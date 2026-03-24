@@ -36,21 +36,8 @@ router
           httpOnly: true,
           secure: true,
         });
-        console.log(
-          'choose-provider middleware, useAuthProvider set to',
-          useAuthProvider
-        );
 
         const returnTo = process.env.URL + req.query.returnTo;
-
-        console.log(
-          'provider chosen',
-          useAuthProvider,
-          'returnTo',
-          returnTo,
-          req.cookies['useAuthProvider']
-        );
-
         return res.redirect(returnTo);
       }
 

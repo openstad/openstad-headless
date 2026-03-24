@@ -20,13 +20,19 @@ service.fetchUserData = async function fetchUserData({
 
     let userData = await response.json();
 
-    console.log('user data', userData);
-
     let mappedUserData = mapUserData({
-      map: authConfig.userMapping,
+      map: authConfig.userFieldMapping || authConfig.userMapping,
       user: { ...userData, accessToken },
     });
     mappedUserData.idpUser.provider = authConfig.provider;
+    // Fall back to the standard OIDC `sub` claim if no identifier was mapped
+    if (!mappedUserData.idpUser.identifier && userData.sub) {
+      mappedUserData.idpUser.identifier = userData.sub;
+    }
+    // Default to member so the user is recognised as logged in by the CMS
+    if (!mappedUserData.role) {
+      mappedUserData.role = 'member';
+    }
     return mappedUserData;
   } catch (err) {
     console.log(err);

@@ -35,8 +35,6 @@ module.exports = function (req, res, next) {
     projectId = parseInt(req.cookies.projectId, 10);
   }
 
-  console.log('project id', projectId);
-
   if (!projectId || typeof projectId !== 'number')
     return next(
       new createError(400, 'Project niet gevonden for path: ' + req.path)

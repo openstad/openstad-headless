@@ -73,7 +73,6 @@ router
         }
       );
     } catch (err) {
-      console.log(err);
       return next(err);
     }
   });
@@ -83,8 +82,6 @@ router
 router
   .route('(/project/:projectId)?/login')
   .get(async function (req, res, next) {
-    console.log('req forceNewLogin', req.query.forceNewLogin);
-
     // logout first?
     if (!req.query.forceNewLogin) return next();
 
@@ -110,8 +107,6 @@ router
         req.project.id +
         '/logout?redirectUri=' +
         backToHereUrl;
-      console.log('login?', baseUrl, url);
-
       return res.redirect(url);
     } else if (req.query.redirectUri) {
       return next(createError(403, 'redirectUri not found in allowlist.'));
@@ -119,12 +114,6 @@ router
     return next();
   })
   .get(async function (req, res, next) {
-    console.log(
-      req.query.redirectUri,
-      req.project.id,
-      await isRedirectAllowed(req.project.id, req.query.redirectUri)
-    );
-
     // Check if redirect domain is allowed
     if (
       req.query.redirectUri &&
@@ -164,8 +153,6 @@ router
       url = url.replace(/(scope=[^&]*?)%25%2520/g, '$1%20');
       url = url.replace(/scope=openid%%20/g, 'scope=openid%20');
 
-      console.log('pkce enabled', pkceEnabled);
-
       // If we have a Proof Key for Code Exchange flow enabled for the Authorization Code Flow, we must provide a code_verifier and code_challenge to the authorization server
       // Example docs: https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-pkce
       if (pkceEnabled) {
@@ -197,13 +184,6 @@ router
           httpOnly: true,
           secure: true,
         });
-
-        console.log(
-          'pkce enabled',
-          codeVerifier,
-          codeChallenge,
-          codeVerifierInDb.id
-        );
       }
 
       // Set cookies for digest login
@@ -223,8 +203,6 @@ router
         secure: true,
       });
 
-      console.log('req authconfig', req.authConfig, url);
-
       res.redirect(url);
     } else if (req.query.redirectUri) {
       return next(createError(403, 'redirectUri not found in allowlist.'));
@@ -239,8 +217,16 @@ router
   .route('(/project/:projectId)?/digest-login')
   .get(async function (req, res, next) {
     // get accesstoken for code
+    if (req.query.error) {
+      const redirectUri = (req.cookies && req.cookies['redirectUri']) || '/';
+      res.clearCookie('redirectUri', { path: '/' });
+      res.clearCookie('useAuth', { path: '/' });
+      res.clearCookie('projectId', { path: '/' });
+      return res.redirect(redirectUri);
+    }
+
     let code = req.query.code;
-    if (!code) throw createError(403, 'Je bent niet ingelogd');
+    if (!code) return next(createError(403, 'Je bent niet ingelogd'));
 
     let url = req.authConfig.serverUrl + req.authConfig.serverExchangeCodePath;
 
@@ -253,20 +239,18 @@ router
 
     const pkceEnabled = !!req.authConfig.pkceEnabled || false;
 
-    console.log('pkce enabled', pkceEnabled);
-
     // If we have a Proof Key for Code Exchange flow enabled for the Authorization Code Flow, we must provide a code_verifier and code_challenge to the authorization server
     // Example docs: https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-pkce
     if (pkceEnabled) {
       // Get verifier
       const pkceUuid = req.cookies['pkce_uuid'];
 
-      console.log(pkceUuid, req.cookies);
-
       if (!pkceUuid) throw new Error('No PKCE verified UUID provided');
 
       // Get verifier from database
-      const verifier = await db.OidcCodeVerifier.findOne({ id: pkceUuid });
+      const verifier = await db.OidcCodeVerifier.findOne({
+        where: { id: pkceUuid },
+      });
 
       if (!verifier || !verifier.verifier) {
         throw new Error('PKCE Verifier not found for given UUID');
@@ -277,8 +261,8 @@ router
 
     let contentType =
       req.authConfig.serverExchangeContentType || 'application/json';
-    if (contentType == 'application/x-www-form-urlencoded')
-      data = `client_id=${encodeURIComponent(
+    if (contentType == 'application/x-www-form-urlencoded') {
+      let encoded = `client_id=${encodeURIComponent(
         req.authConfig.clientId
       )}&client_secret=${encodeURIComponent(
         req.authConfig.clientSecret
@@ -287,6 +271,11 @@ router
       )}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(
         config.url + '/auth/digest-login'
       )}`;
+      if (pkceEnabled && data.code_verifier) {
+        encoded += `&code_verifier=${encodeURIComponent(data.code_verifier)}`;
+      }
+      data = encoded;
+    }
 
     fetch(url, {
       method: 'POST',
@@ -296,24 +285,20 @@ router
       body: data,
     })
       .then((response) => {
-        console.log('response from oidc', response, response.status, data, url);
         if (!response.ok) throw Error(response);
         return response.json();
       })
       .then((json) => {
         let accessToken = json.access_token;
-        console.log('json from oidc', json, json.access_token);
         if (!accessToken)
           return next(
             createError(403, 'Inloggen niet gelukt: geen accessToken')
           );
 
         req.userAccessToken = accessToken;
-        console.log('id_token', json.id_token);
         return next();
       })
       .catch((err) => {
-        console.log(err, data, url);
         throw createError(401, 'Login niet gelukt');
       });
   })
@@ -356,8 +341,36 @@ router
           // user found; update and use
           let user = result[0];
 
+          // Always update IDP session fields
+          const updateData = {
+            idpUser: data.idpUser,
+            lastLogin: data.lastLogin,
+          };
+
+          // Only update profile fields if the new value is non-empty,
+          // so existing data is never wiped by a missing IDP value
+          const profileFields = [
+            'email',
+            'name',
+            'phoneNumber',
+            'address',
+            'postcode',
+            'city',
+            'nickName',
+            'emailNotificationConsent',
+          ];
+          for (const field of profileFields) {
+            if (
+              data[field] !== null &&
+              data[field] !== undefined &&
+              data[field] !== ''
+            ) {
+              updateData[field] = data[field];
+            }
+          }
+
           user
-            .update(data)
+            .update(updateData, { validate: false })
             .then(() => {
               req.userData.id = user.id;
               return next();
@@ -378,7 +391,7 @@ router
 
           data.complete = true;
 
-          db.User.create(data)
+          db.User.create(data, { validate: false })
             .then((result) => {
               req.userData.id = result.id;
               return next();
@@ -443,15 +456,6 @@ router
       return res.status(500).json({ status: 'Redirect domain not allowed' });
     }
 
-    console.log(
-      '[!!!!!] redirectUrl',
-      redirectUrl,
-      'allowedDomains',
-      allowedDomains,
-      'contains [[jwt]]',
-      redirectUrl.indexOf('[[jwt]]') > -1
-    );
-
     //check if redirect domain is allowed
     if (redirectUrl.match('[[jwt]]')) {
       return jwt.sign(
@@ -464,18 +468,9 @@ router
         { expiresIn: 182 * 24 * 60 * 60 },
         (err, token) => {
           if (err) {
-            console.log('error in jwt creation');
             return next(err);
           }
           redirectUrl = redirectUrl.replace('[[jwt]]', token);
-          console.log(
-            '[!!!! jwt cb] redirectUrl after jwt',
-            redirectUrl,
-            'token',
-            token,
-            'err',
-            err
-          );
 
           // Revalidate redirectUrl after adding the token
           if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
@@ -493,7 +488,6 @@ router
     if (isSafeRedirectUrl(redirectUrl, allowedDomains)) {
       return res.redirect(redirectUrl);
     } else {
-      console.log('[!!!! no jwt cb] redirectUrl without jwt', redirectUrl);
       // Revalidate redirectUrl before redirecting
       if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
         return res.status(500).json({ status: 'Redirect domain not allowed' });
@@ -532,13 +526,6 @@ router
       }
       return res.redirect(url);
     }*/
-
-    console.log(
-      'logout, req.query.redirectUri',
-      req.query.redirectUri,
-      req.project.id,
-      await isRedirectAllowed(req.project.id, req.query.redirectUri)
-    );
 
     res.clearCookie('useAuthProvider', { path: '/' });
     res.clearCookie('useAuth', { path: '/' });
