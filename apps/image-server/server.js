@@ -25,6 +25,12 @@ async function detectImageMimeType(response, extension) {
   const reader = response.clone().body.getReader();
   const { value } = await reader.read();
   reader.cancel();
+
+  if (!value) {
+    const ct = response.headers.get('content-type');
+    return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
+  }
+
   // 4100 bytes is the minimum needed by file-type to detect all supported formats
   // See https://github.com/sindresorhus/file-type?tab=readme-ov-file#samplesize
   const buf = Buffer.from(
@@ -38,7 +44,8 @@ async function detectImageMimeType(response, extension) {
 
   if (detected && ALLOWED_EXTENSIONS.includes(detected.ext))
     return detected.mime;
-  return response.headers.get('content-type') || 'application/octet-stream';
+  const ct = response.headers.get('content-type');
+  return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
 }
 const { createFilename, sanitizeFileName, getFileUrl } = require('./utils');
 const fs = require('node:fs');
