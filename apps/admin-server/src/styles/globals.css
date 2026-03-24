@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent Radix UI from locking page scroll when a Select/Dialog is open */
+html body[data-scroll-locked] {
+  overflow: auto !important;
+  margin-right: 0 !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

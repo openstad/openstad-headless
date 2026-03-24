@@ -46,8 +46,6 @@ let getConfig = async function ({ project, useAuth = 'default', req }) {
   let useAuthProvider =
     (req && req.cookies && req.cookies['useAuthProvider']) || 'openstad';
 
-  console.log('>>>>use auth provider', useAuthProvider, req.cookies);
-
   // Check if we have an authProviderId in the project config
   if (
     useAuthProvider !== 'openstad' &&
@@ -100,7 +98,6 @@ let getAdapter = async function ({ authConfig, project, useAuth = 'default' }) {
     let adapter = await require(
       path.normalize(__dirname + '/../..') + '/' + authConfig.modulePath
     );
-    console.log('getAdapter', adapter);
     return adapter;
   } catch (err) {
     console.log(err);

@@ -758,7 +758,10 @@ export default function ProjectAuthenticationRequiredFields() {
                                   <FormItem className="col-span-full">
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                       {requiredUserFields.map((item) => {
-                                        return item.id === 'suffix' ? null : (
+                                        return item.id === 'suffix' ||
+                                          item.id ===
+                                            'emailNotificationConsent' ||
+                                          item.id === 'accessCode' ? null : (
                                           <FormField
                                             key={`field_${providerId}_${item.id}`}
                                             control={userForm.control}
