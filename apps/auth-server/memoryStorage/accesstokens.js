@@ -2,7 +2,6 @@
 
 const jwt = require('jsonwebtoken');
 const db = require('../db');
-const utils = require('../utils');
 
 // The access tokens.
 // You will use these to access your end point data through the means outlined
@@ -20,17 +19,11 @@ let tokens = Object.create(null);
  * @returns {Promise} resolved with the token if found, otherwise resolved with undefined
  */
 exports.find = (token) => {
+  const decodeJwt = jwt.decode(token);
+  let id = decodeJwt?.jti;
+  id = !id && typeof token === 'string' ? token : id;
+
   const findAction = new Promise((resolve, reject) => {
-    let decoded;
-    try {
-      decoded = utils.verifyToken(token);
-    } catch (e) {
-      console.warn('Error verifying JWT: ', e);
-      return resolve(undefined);
-    }
-
-    const id = decoded.jti;
-
     db.AccessToken.findOne({ where: { tokenId: id } })
       .then((token) => {
         if (!token) {
@@ -59,17 +52,11 @@ exports.find = (token) => {
  * @returns {Promise} resolved with the saved token
  */
 exports.save = (token, expirationDate, userID, clientID, scope) => {
+  const decodeJwt = jwt.decode(token);
+  let id = decodeJwt?.jti;
+  id = !id && typeof token === 'string' ? token : id;
+
   const saveAction = new Promise((resolve, reject) => {
-    let decoded;
-    try {
-      decoded = utils.verifyToken(token);
-    } catch (e) {
-      console.warn('Error verifying JWT: ', e);
-      return resolve(undefined);
-    }
-
-    const id = decoded.jti;
-
     db.AccessToken.create({
       tokenId: id,
       userID,
@@ -99,17 +86,11 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
  * @returns {Promise} resolved with the deleted token
  */
 exports.delete = (token) => {
+  const decodeJwt = jwt.decode(token);
+  let id = decodeJwt?.jti;
+  id = !id && typeof token === 'string' ? token : id;
+
   const deleteAction = new Promise((resolve, reject) => {
-    let decoded;
-    try {
-      decoded = utils.verifyToken(token);
-    } catch (e) {
-      console.warn('Error verifying JWT: ', e);
-      return resolve(undefined);
-    }
-
-    const id = decoded.jti;
-
     db.AccessToken.findOne({ where: { tokenId: id } })
       .then((token) => {
         return token
