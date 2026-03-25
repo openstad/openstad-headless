@@ -1,11 +1,9 @@
-// @ts-expect-error
-//@ts-expect-error D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import type { FormValue } from '@openstad-headless/form/src/form';
 import Form from '@openstad-headless/form/src/form';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Banner, Button, Icon, Spacer } from '@openstad-headless/ui/src';
+import { Banner, Button, Spacer } from '@openstad-headless/ui/src';
 import {
   Heading2,
   Heading3,
