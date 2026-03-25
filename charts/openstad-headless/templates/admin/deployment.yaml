@@ -80,7 +80,10 @@ spec:
             value: "{{ .Values.api.spamFilterEnabled }}"
           - name: EXTERNAL_CERTIFICATES_ENABLED
             value: "{{ .Values.api.externalCertificates.enabled }}"
-          # Inject extra environment variables
+          - name: OTEL_SERVICE_NAME
+            value: {{ .Values.admin.otelServiceName | quote }}
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{ .Values.admin.otelExporterOtlpEndpoint | quote }}
           {{- if .Values.admin.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.admin.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
