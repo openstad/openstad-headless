@@ -289,7 +289,17 @@ class PluginLoader {
           );
           continue;
         }
-        merged[key] = definition;
+        // Merge plugin-level config into widget defaultConfig so that
+        // values provided via plugins.json (e.g. adminUrl) are available
+        // as defaults when the widget is rendered.
+        if (plugin.config && Object.keys(plugin.config).length > 0) {
+          merged[key] = {
+            ...definition,
+            defaultConfig: { ...plugin.config, ...definition.defaultConfig },
+          };
+        } else {
+          merged[key] = definition;
+        }
       }
     }
 
