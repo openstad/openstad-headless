@@ -49,7 +49,7 @@
     "@apostrophecms/redirect": "~1.5.0",
     "@apostrophecms/seo": "1.4.0",
     "@apostrophecms/sitemap": "~1.2.0",
-    "apostrophe": "~4.26.2",
+    "apostrophe": "~4.28.0",
     "dotenv": "^16.0.3",
     "express-basic-auth": "^1.2.1",
     "http-proxy-middleware": "^2.0.6",
