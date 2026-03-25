@@ -45,12 +45,15 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
 
   const totalPropPackage = {
     ...widget?.config,
-    updateConfig: (config: DocumentMapProps) =>
-      updateConfig({
+    updateConfig: (config: DocumentMapProps) => {
+      const newConfig = {
         ...widget.config,
         ...config,
         projectId: projectId as string,
-      }),
+      };
+      updateConfig(newConfig);
+      updatePreview(newConfig);
+    },
 
     onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
@@ -104,7 +107,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <DocumentGeneral
                   {...totalPropPackage}
-                  {...previewConfig}
                   projectId={projectId as string}
                 />
               ) : null}
@@ -113,7 +115,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <DocumentLinks
                   {...totalPropPackage}
-                  {...previewConfig}
                   projectId={projectId as string}
                 />
               ) : null}
@@ -122,7 +123,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <DocumentInclude
                   {...totalPropPackage}
-                  {...previewConfig}
                   projectId={projectId as string}
                 />
               ) : null}
@@ -131,7 +131,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <DocumentFilters
                   {...totalPropPackage}
-                  {...previewConfig}
                   projectId={projectId as string}
                 />
               ) : null}
@@ -140,7 +139,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <DocumentSorting
                   {...totalPropPackage}
-                  {...previewConfig}
                   projectId={projectId as string}
                 />
               ) : null}
@@ -149,7 +147,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <DocumentExtraFields
                   {...totalPropPackage}
-                  {...previewConfig}
                   projectId={projectId as string}
                 />
               ) : null}
@@ -158,7 +155,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <DocumentContent
                   {...totalPropPackage}
-                  {...previewConfig}
                   projectId={projectId as string}
                 />
               ) : null}

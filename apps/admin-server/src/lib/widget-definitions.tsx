@@ -1,4 +1,11 @@
-export const WidgetDefinitions = {
+type WidgetDefinitionEntry = {
+  name: string;
+  description: string;
+  image: string;
+  hidden?: boolean;
+};
+
+export const WidgetDefinitions: Record<string, WidgetDefinitionEntry> = {
   agenda: {
     name: 'Agenda',
     description:

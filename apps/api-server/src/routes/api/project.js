@@ -182,6 +182,27 @@ async function createStatuses(req, statusMap, errors) {
   }
 }
 
+// Function to create notification templates
+async function createNotificationTemplates(req, errors) {
+  for (const template of req.notificationTemplates) {
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const { originalId, ...templateData } = template;
+      // Skip afterCreate hooks: auth client sync is already handled by the
+      // auth provider sync earlier in the duplication flow.
+      await db.NotificationTemplate.create(
+        { ...templateData, projectId: req.projectId },
+        { hooks: false }
+      );
+    } catch (error) {
+      errors.push({
+        step: 'Create notification templates',
+        error: error.message,
+      });
+    }
+  }
+}
+
 // Function to create widgets
 async function createWidgets(req, widgetMap, newWidgets, errors) {
   for (const widget of req.widgets) {
@@ -785,12 +806,14 @@ router
     req.resources = req.body.resources || [];
     req.resourceSettings = req.body.resourceSettings || {};
     req.skipDefaultStatuses = req.body.skipDefaultStatuses || false;
+    req.notificationTemplates = req.body.notificationTemplates || [];
 
     delete req.body.widgets;
     delete req.body.tags;
     delete req.body.statuses;
     delete req.body.resources;
     delete req.body.resourceSettings;
+    delete req.body.notificationTemplates;
     req.authProviderConfigForSync = {};
     if (isDuplicationPayload) {
       req.body.config = sanitizeAuthConfigForDuplication(req.body.config || {});
@@ -1013,6 +1036,7 @@ router
       await createTags(req, tagMap, errors);
       await createStatuses(req, statusMap, errors);
       await createWidgets(req, widgetMap, newWidgets, errors);
+      await createNotificationTemplates(req, errors);
       await createResources(
         req,
         resourceMap,

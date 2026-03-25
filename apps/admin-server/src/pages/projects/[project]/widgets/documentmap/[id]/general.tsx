@@ -44,6 +44,8 @@ const formSchema = z.object({
   displaySearchBar: z.boolean().optional(),
   onlyAllowClickOnImage: z.boolean().optional(),
   hideCommentsList: z.boolean().optional(),
+  hideFilters: z.boolean().optional(),
+  hideToggleMarkers: z.boolean().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -81,6 +83,8 @@ export default function DocumentGeneral(
       onlyAllowClickOnImage: props?.onlyAllowClickOnImage || false,
       displaySearchBar: props?.displaySearchBar || false,
       hideCommentsList: props?.hideCommentsList || false,
+      hideFilters: props?.hideFilters || false,
+      hideToggleMarkers: props?.hideToggleMarkers || false,
     },
   });
 
@@ -331,6 +335,44 @@ export default function DocumentGeneral(
             )}
           />
         )}
+
+        {form.watch('markerClickBehavior') === 'popup' &&
+          form.watch('hideCommentsList') && (
+            <>
+              <FormField
+                control={form.control}
+                name="hideFilters"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Filter-, zoek- en sorteeropties verbergen
+                    </FormLabel>
+                    <FormDescription>
+                      Verberg de balk met filters, zoekfunctie en
+                      sorteermogelijkheden.
+                    </FormDescription>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="hideToggleMarkers"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Markers aan/uit-knop verbergen</FormLabel>
+                    <FormDescription>
+                      Verberg de knop waarmee markers aan of uit kunnen worden
+                      gezet.
+                    </FormDescription>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
         <FormField
           control={form.control}

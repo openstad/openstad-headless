@@ -313,6 +313,62 @@ a + .url-list:before {
   z-index: 1;
 }
 
+.documentMap--container.--info-above {
+  grid-template-rows: auto 1fr;
+}
+
+.documentMap--container.--info-above .resource-info-full {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.documentMap--container.--info-above .map-container,
+.documentMap--container.--info-above .content {
+  grid-row: 2;
+}
+
+.documentMap--container.--info-below {
+  grid-template-rows: 1fr auto;
+}
+
+.documentMap--container.--info-below .map-container,
+.documentMap--container.--info-below .content {
+  grid-row: 1;
+}
+
+.documentMap--container.--info-below .resource-info-full {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.documentMap--container .resource-info-full {
+  padding: 30px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.documentMap--container.--info-below .resource-info-full {
+  border-bottom: 0;
+  border-top: 1px solid #ddd;
+}
+
+.documentMap--container.--info-above,
+.documentMap--container.--info-below {
+  height: auto;
+}
+
+.documentMap--container.--info-above .content,
+.documentMap--container.--info-below .content {
+  max-height: calc(100vh - 193px);
+  overflow-y: auto;
+}
+
+.documentMap--container.--info-above .map-container,
+.documentMap--container.--info-below .map-container {
+  height: calc(100vh - 193px);
+  min-height: 400px;
+}
+
 .documentMap--container:has(.content:empty) {
   grid-template-columns: 1fr;
 }

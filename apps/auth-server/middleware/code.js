@@ -18,21 +18,37 @@ exports.withAll = (req, res, next) => {
 
   const search = req.query.search ? req.query.search : false;
 
-  let where = {};
-
-  if (req.query.clientId) {
-    where.clientId = req.client.id;
+  const allowedSortFields = ['id', 'code', 'userId'];
+  let sortField = 'id';
+  let sortDirection = 'DESC';
+  if (req.query.sort) {
+    const parts = req.query.sort.split('_');
+    const dir = parts.pop().toUpperCase();
+    const field = parts.join('_');
+    if (allowedSortFields.includes(field) && ['ASC', 'DESC'].includes(dir)) {
+      sortField = field;
+      sortDirection = dir;
+    }
   }
+
+  let where = {
+    clientId: req.client.id,
+  };
 
   if (search) {
     where.code = { [db.Sequelize.Op.like]: '%' + search + '%' };
   }
 
-  db.UniqueCode.findAll({ where, limit, offset, order: [['id', 'DESC']] })
+  db.UniqueCode.findAll({
+    where,
+    limit,
+    offset,
+    order: [[sortField, sortDirection]],
+  })
     .then((codes) => {
       req.codes = codes;
 
-      return db.UniqueCode.count({ where: { clientId: req.client.id } });
+      return db.UniqueCode.count({ where });
     })
     .then((total) => {
       req.totalCodeCount = total;
