@@ -268,7 +268,10 @@ export default function ProjectSettingsUsers(
                               Na hoeveel dagen na het einde van het project
                               worden gebruikers geanonimiseerd?
                               <InfoDialog
-                                content={`Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "${anonymizeForm.watch('anonymizeUserName') || 'Gebruiker is geanonimiseerd'}".`}
+                                content={`Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "${
+                                  anonymizeForm.watch('anonymizeUserName') ||
+                                  'Gebruiker is geanonimiseerd'
+                                }".`}
                               />
                             </FormLabel>
                             <FormControl>

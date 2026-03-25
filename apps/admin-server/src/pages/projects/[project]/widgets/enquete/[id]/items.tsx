@@ -771,8 +771,16 @@ export default function WidgetEnqueteItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary 
-                            ${item.questionType === 'pagination' && item.trigger !== selectedItem?.trigger ? 'bg-[#f8f8f8]' : ''}
-                            ${item.trigger == selectedItem?.trigger && 'bg-secondary'}`}>
+                            ${
+                              item.questionType === 'pagination' &&
+                              item.trigger !== selectedItem?.trigger
+                                ? 'bg-[#f8f8f8]'
+                                : ''
+                            }
+                            ${
+                              item.trigger == selectedItem?.trigger &&
+                              'bg-secondary'
+                            }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
                                 className="cursor-pointer"
@@ -796,7 +804,14 @@ export default function WidgetEnqueteItems(
                                 setSettingOptions(false);
                               }}
                               dangerouslySetInnerHTML={{
-                                __html: `${item.title || (item?.questionType === 'pagination' ? '--- Nieuwe pagina ---' : item?.questionType === 'swipe' ? 'Swipe' : 'Geen titel')}`,
+                                __html: `${
+                                  item.title ||
+                                  (item?.questionType === 'pagination'
+                                    ? '--- Nieuwe pagina ---'
+                                    : item?.questionType === 'swipe'
+                                      ? 'Swipe'
+                                      : 'Geen titel')
+                                }`,
                               }}></span>
                             <span className="gap-2 py-3 px-2">
                               <X
@@ -1578,7 +1593,7 @@ export default function WidgetEnqueteItems(
                                 Antwoordopties met afbeeldingen
                               </SelectItem>
                               <SelectItem value="multiplechoice">
-                                Multiplechoice
+                                Enkele keuze
                               </SelectItem>
                               <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">
@@ -1617,9 +1632,12 @@ export default function WidgetEnqueteItems(
                           name="variant"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>
-                                Is het veld qua grootte 1 regel of een tekstvak?
-                              </FormLabel>
+                              <FormLabel>Type open vraag</FormLabel>
+                              <FormDescription>
+                                Kies hier het type van jouw open vraag,
+                                bijvoorbeeld grootte van het tekstvak op 1 regel
+                                of groter, e-mail validatie etc.
+                              </FormDescription>
                               <Select
                                 value={field.value || 'text input'}
                                 onValueChange={field.onChange}>
@@ -1631,6 +1649,9 @@ export default function WidgetEnqueteItems(
                                 <SelectContent>
                                   <SelectItem value="text input">
                                     1 regel
+                                  </SelectItem>
+                                  <SelectItem value="email">
+                                    E-mail (validatie)
                                   </SelectItem>
                                   <SelectItem value="textarea">
                                     Tekstvak
@@ -1740,7 +1761,11 @@ export default function WidgetEnqueteItems(
                                   return (
                                     <div
                                       key={id}
-                                      className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                                      className={`relative grid ${
+                                        index === imageIndexOpen
+                                          ? 'col-span-full'
+                                          : 'tile'
+                                      } gap-x-4 items-center image-gallery`}
                                       style={{
                                         gridTemplateColumns:
                                           index === imageIndexOpen
@@ -2391,8 +2416,8 @@ export default function WidgetEnqueteItems(
                                       borderBottomRightRadius: '5px',
                                       marginTop: '12px',
                                     }}>
-                                    Je hebt nog geen meerkeuze, multiplechoice
-                                    of afbeelding keuze vragen toegevoegd. Voeg
+                                    Je hebt nog geen meerkeuze, enkele keuze of
+                                    afbeelding keuze vragen toegevoegd. Voeg
                                     deze eerst toe om deze vraag te kunnen tonen
                                     op basis van een ander antwoord.
                                   </p>

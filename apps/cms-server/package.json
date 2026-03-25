@@ -47,7 +47,7 @@
     "@apostrophecms/blog": "~1.0.6",
     "@apostrophecms/import-export": "~3.5.2",
     "@apostrophecms/redirect": "~1.5.0",
-    "@apostrophecms/seo": "~1.4.0",
+    "@apostrophecms/seo": "1.4.0",
     "@apostrophecms/sitemap": "~1.2.0",
     "apostrophe": "~4.26.2",
     "dotenv": "^16.0.3",
@@ -55,6 +55,7 @@
     "http-proxy-middleware": "^2.0.6",
     "jquery": "^3.7.1",
     "less": "^4.1.3",
+    "parse-node-version": "^1.0.1",
     "less-loader": "^11.1.0",
     "postcss-prefix-selector": "^2.1.0",
     "redis": "^4.6.13"

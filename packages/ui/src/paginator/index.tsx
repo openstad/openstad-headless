@@ -69,7 +69,9 @@ const Paginator = ({
             onClick={() => onPageChange(item as number)}
             disabled={item === page}
             test-id={`page-button-${item}`}
-            aria-label={`Pagina ${(item as number) + 1}${item === page ? ' (Huidige pagina)' : ''}`}
+            aria-label={`Pagina ${(item as number) + 1}${
+              item === page ? ' (Huidige pagina)' : ''
+            }`}
             aria-current={item === page ? 'page' : undefined}>
             {(item as number) + 1}
           </IconButton>
@@ -81,7 +83,9 @@ const Paginator = ({
         className="secondary round"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages - 1}
-        aria-label={`Volgende pagina${page >= totalPages - 1 ? ' (Niet beschikbaar)' : ''}`}
+        aria-label={`Volgende pagina${
+          page >= totalPages - 1 ? ' (Niet beschikbaar)' : ''
+        }`}
         iconOnly={true}
         test-id={'next-page-button'}
       />

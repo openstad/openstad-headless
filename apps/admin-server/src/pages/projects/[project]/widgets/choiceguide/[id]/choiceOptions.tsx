@@ -6,11 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ChoiceOptions,
-  Item,
-  Weight,
-} from '@openstad-headless/choiceguide/src/props';
+import { ChoiceOptions } from '@openstad-headless/choiceguide/src/props';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -21,7 +17,6 @@ import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,

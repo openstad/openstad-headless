@@ -366,9 +366,10 @@ export function Filters({
     }
 
     if (
-      autoApply &&
       displayCollapsibleFilter &&
-      props.closeFiltersOnAutoApply
+      props.closeFiltersOnAutoApply &&
+      e &&
+      typeof e.preventDefault === 'function'
     ) {
       setFiltersVisible(false);
     }
@@ -526,7 +527,8 @@ export function Filters({
             test-id={'filter-reset-button'}>
             {props.resetText}
           </Button>
-          {!autoApply && (
+          {(!autoApply ||
+            (props.closeFiltersOnAutoApply && displayCollapsibleFilter)) && (
             <Button
               type="submit"
               appearance="primary-action-button"
@@ -548,7 +550,9 @@ export function Filters({
     <section id="stem-begroot-filter">
       <form
         className={`osc-resources-filter ${className}`}
-        onSubmit={!autoApply ? handleSubmit : undefined}>
+        onSubmit={
+          !autoApply || props.closeFiltersOnAutoApply ? handleSubmit : undefined
+        }>
         {props.displaySearch ? (
           <div className="form-element">
             <FormLabel htmlFor="search">Zoeken</FormLabel>
@@ -589,7 +593,9 @@ export function Filters({
             </Button>
             <div
               id="filters-container"
-              className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
+              className={`filters-container ${
+                displayCollapsibleFilter ? '--collapsable' : ''
+              } ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
               onClick={(e) => {
                 setFiltersVisible(false);

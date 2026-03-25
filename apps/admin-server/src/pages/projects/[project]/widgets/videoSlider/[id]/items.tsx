@@ -29,7 +29,6 @@ import {
   Item,
   Option,
 } from '@openstad-headless/enquete/src/types/enquete-props';
-import { ProjectSettingProps } from '@openstad-headless/types';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -890,7 +889,7 @@ export default function WidgetEnqueteItems(
                                 Antwoordopties met afbeeldingen
                               </SelectItem>
                               <SelectItem value="multiplechoice">
-                                Multiplechoice
+                                Enkele keuze
                               </SelectItem>
                               <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">

@@ -72,8 +72,13 @@ export default function ProjectStatuses() {
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
-            <div className="grid grid-cols-1 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden lg:flex truncate">
+            <div
+              className="items-center py-2 px-2 border-b border-border"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '2rem 2fr 2fr 1fr 8rem',
+              }}>
+              <ListHeading className="truncate">
                 <button
                   className="filter-button"
                   onClick={(e) =>
@@ -82,7 +87,7 @@ export default function ProjectStatuses() {
                   ID
                 </button>
               </ListHeading>
-              <ListHeading className="flex truncate">
+              <ListHeading className="truncate">
                 <button
                   className="filter-button"
                   onClick={(e) =>
@@ -91,7 +96,7 @@ export default function ProjectStatuses() {
                   Naam
                 </button>
               </ListHeading>
-              <ListHeading className="hidden lg:flex truncate">
+              <ListHeading className="truncate">
                 <button
                   className="filter-button"
                   onClick={(e) =>
@@ -100,7 +105,7 @@ export default function ProjectStatuses() {
                   Voeg toe aan nieuwe resources
                 </button>
               </ListHeading>
-              <ListHeading className="hidden lg:flex truncate">
+              <ListHeading className="truncate">
                 <button
                   className="filter-button"
                   onClick={(e) =>
@@ -109,6 +114,7 @@ export default function ProjectStatuses() {
                   Liken toegestaan
                 </button>
               </ListHeading>
+              <ListHeading className="truncate">Acties</ListHeading>
             </div>
             <ul className="admin-overview">
               {filterData?.map((status: any) => (
@@ -117,23 +123,27 @@ export default function ProjectStatuses() {
                   key={status.id}>
                   <li
                     key={status.id}
-                    className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                    <Paragraph className="my-auto -mr-16 lg:mr-0">
+                    className="py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '2rem 2fr 2fr 1fr 6rem 2rem',
+                    }}>
+                    <Paragraph className="my-auto">
                       {status.id || null}
                     </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto">
+                    <Paragraph className="truncate my-auto min-w-0">
                       {status.name || null}
                     </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto">
+                    <Paragraph className="truncate my-auto">
                       {status.addToNewResources ? 'Ja' : 'Nee'}
                     </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto">
+                    <Paragraph className="truncate my-auto">
                       {status.extraFunctionality?.canLike === false
                         ? 'Nee'
                         : 'Ja'}
                     </Paragraph>
                     <div
-                      className="hidden lg:flex ml-auto"
+                      className="flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
                         header="Status verwijderen"

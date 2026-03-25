@@ -123,7 +123,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
         validate: {
           textLength(value) {
-            let len = sanitize.title(value.trim()).length;
+            let len = value.trim().length;
             let titleMinLength =
               (this.config &&
                 this.config.resources &&
@@ -181,7 +181,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: !this.publishDate,
         validate: {
           textLength(value) {
-            let len = sanitize.summary(value.trim()).length;
+            let len = value.trim().length;
             let descriptionMinLength =
               (this.config &&
                 this.config.resources &&
@@ -731,7 +731,9 @@ module.exports = function (db, sequelize, DataTypes) {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_statuses
-                WHERE statusId IN (${statuses.map((status) => `'${status}'`).join(', ')}))
+                WHERE statusId IN (${statuses
+                  .map((status) => `'${status}'`)
+                  .join(', ')}))
               `),
             },
           },
@@ -947,6 +949,10 @@ module.exports = function (db, sequelize, DataTypes) {
     // canEditAfterFirstLikeOrComment is handled in the validate hook
   };
 
+  let canViewModeratorOnlyExtraData = function (user, self) {
+    return userHasRole(user, 'moderator', self.userId);
+  };
+
   Resource.auth = Resource.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
@@ -1007,6 +1013,9 @@ module.exports = function (db, sequelize, DataTypes) {
 
       delete data.project;
       delete data.config;
+      delete data.hasResourceFormConfig;
+      delete data.resourceFormFieldKeys;
+      delete data.moderatorOnlyExtraDataKeys;
       // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
 
@@ -1022,6 +1031,38 @@ module.exports = function (db, sequelize, DataTypes) {
       // needs to move to definition per key
       if (!canMutate(user, self) && data.extraData && data.extraData.phone) {
         delete data.extraData.phone;
+      }
+
+      const moderatorOnlyExtraDataKeys = Array.isArray(
+        self.moderatorOnlyExtraDataKeys
+      )
+        ? self.moderatorOnlyExtraDataKeys
+        : [];
+      const resourceFormFieldKeys = Array.isArray(self.resourceFormFieldKeys)
+        ? self.resourceFormFieldKeys
+        : [];
+      const hasResourceFormConfig = !!self.hasResourceFormConfig;
+      if (
+        user &&
+        user.role &&
+        user.role !== 'all' &&
+        !canViewModeratorOnlyExtraData(user, self) &&
+        data.extraData &&
+        typeof data.extraData === 'object'
+      ) {
+        if (hasResourceFormConfig) {
+          Object.keys(data.extraData).forEach((key) => {
+            if (!resourceFormFieldKeys.includes(key)) {
+              delete data.extraData[key];
+            }
+          });
+        } else {
+          data.extraData = {};
+        }
+
+        moderatorOnlyExtraDataKeys.forEach((key) => {
+          delete data.extraData[key];
+        });
       }
 
       if (data.commentsAgainst) {

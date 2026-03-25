@@ -971,16 +971,16 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          {displayCollapsibleFilter && autoApply && (
+          {displayCollapsibleFilter && (
             <FormField
               control={form.control}
               name="closeFiltersOnAutoApply"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Filters automatisch sluiten na selectie</FormLabel>
+                  <FormLabel>Filtermenu sluiten na toepassen</FormLabel>
                   <FormDescription>
-                    Alleen van toepassing bij automatisch toepassen en een
-                    inklapbaar filtermenu.
+                    Sluit het inklapbare filtermenu automatisch nadat de filters
+                    zijn toegepast.
                   </FormDescription>
                   {YesNoSelect(field, props)}
                   <FormMessage />

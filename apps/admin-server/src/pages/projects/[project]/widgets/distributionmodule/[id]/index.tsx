@@ -47,7 +47,7 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Verdeel module',
+            name: 'Verdeelmodule',
             url: `/projects/${projectId}/widgets/distributionmodule/${id}`,
           },
         ]}>

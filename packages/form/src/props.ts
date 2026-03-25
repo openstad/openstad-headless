@@ -72,6 +72,7 @@ type CombinedFieldPropsWithType =
 
 type ComponentFieldProps = {
   index?: number;
+  infoBlockStyle?: string;
   infoBlockExtraButtonTitle?: string;
   infoBlockExtraButton?: string;
 } & CombinedFieldProps;

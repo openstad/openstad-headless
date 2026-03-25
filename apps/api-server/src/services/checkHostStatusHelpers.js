@@ -48,4 +48,37 @@ const buildIngressConfig = (useClusterIssuer, useExternalCerts) => {
   return { annotations, ingressClassName };
 };
 
-module.exports = { getCertificateConfig, buildIngressConfig };
+// Normalize project.url for ingress host usage and detect subpath-based setups.
+const normalizeProjectUrlForIngress = (projectUrl) => {
+  if (!projectUrl || typeof projectUrl !== 'string') {
+    return { host: '', hasPath: false };
+  }
+
+  const trimmed = projectUrl.trim();
+  if (!trimmed) {
+    return { host: '', hasPath: false };
+  }
+
+  try {
+    const candidate = trimmed.includes('://') ? trimmed : `https://${trimmed}`;
+    const parsed = new URL(candidate);
+    const pathname = parsed.pathname || '/';
+    return {
+      host: parsed.host,
+      hasPath: pathname !== '/' && pathname !== '',
+    };
+  } catch (error) {
+    // Fallback for malformed values: split on first slash and infer subpath.
+    const [host] = trimmed.split('/');
+    return {
+      host: host || '',
+      hasPath: trimmed.includes('/'),
+    };
+  }
+};
+
+module.exports = {
+  getCertificateConfig,
+  buildIngressConfig,
+  normalizeProjectUrlForIngress,
+};

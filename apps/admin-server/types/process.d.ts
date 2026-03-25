@@ -37,5 +37,9 @@ declare namespace NodeJS {
      * A fixed key in the API server that can be used as an admin login
      */
     API_FIXED_AUTH_KEY: string;
+    /**
+     * A comma separated string of whitelisted sender emails, empty by default ("noreply@mail.com, no-reply@mail.com")
+     */
+    WHITELISTED_EMAILS: string;
   }
 }

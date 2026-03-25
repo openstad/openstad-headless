@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -10,9 +11,22 @@ import {
 } from '@/components/ui/form';
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import {
+  WithWhitelistedEmailsProps,
+  withWhitelistedEmails,
+} from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -23,13 +37,18 @@ import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
 
+export const getServerSideProps = withWhitelistedEmails;
+
 const formSchema = z.object({
   fromAddress: z.string().email(),
   projectmanagerAddress: z.string().email(),
   fromName: z.string().optional(),
+  sendUpdatedResourceAdminEmail: z.boolean().optional(),
 });
 
-export default function ProjectSettingsNotifications() {
+export default function ProjectSettingsNotifications({
+  whitelistedEmails,
+}: WithWhitelistedEmailsProps) {
   const category = 'notifications';
 
   const router = useRouter();
@@ -37,10 +56,12 @@ export default function ProjectSettingsNotifications() {
   const { data, isLoading, updateProjectEmails } = useProject();
   const defaults = useCallback(
     () => ({
-      fromAddress: data?.emailConfig?.[category]?.fromAddress || null,
+      fromAddress: data?.emailConfig?.[category]?.fromAddress || '',
       fromName: data?.emailConfig?.[category]?.fromName || '',
       projectmanagerAddress:
         data?.emailConfig?.[category]?.projectmanagerAddress || null,
+      sendUpdatedResourceAdminEmail:
+        data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
     }),
     [data?.emailConfig]
   );
@@ -61,6 +82,8 @@ export default function ProjectSettingsNotifications() {
           fromAddress: values.fromAddress,
           projectmanagerAddress: values.projectmanagerAddress,
           fromName: values.fromName,
+          sendUpdatedResourceAdminEmail:
+            values.sendUpdatedResourceAdminEmail || false,
         },
       });
       if (project) {
@@ -96,7 +119,7 @@ export default function ProjectSettingsNotifications() {
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 gap-4">
+              className="lg:w-fit grid grid-cols-1 gap-6">
               <FormField
                 control={form.control}
                 name="fromAddress"
@@ -111,7 +134,14 @@ export default function ProjectSettingsNotifications() {
                       />
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="" {...field} />
+                      {whitelistedEmails.length > 0 ? (
+                        <WhitelistedEmailSelect
+                          field={field}
+                          whitelistedEmails={whitelistedEmails}
+                        />
+                      ) : (
+                        <Input placeholder="" {...field} />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,6 +168,37 @@ export default function ProjectSettingsNotifications() {
                     </FormDescription>
                     <FormControl>
                       <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sendUpdatedResourceAdminEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Notificatie bij bewerken van inzendingen
+                    </FormLabel>
+                    <FormDescription>
+                      Standaard uitgeschakeld. Schakel dit alleen in als je per
+                      wijziging een e-mail wilt ontvangen.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
+                        />
+                        <Label htmlFor={field.name} className="cursor-pointer">
+                          E-mail sturen naar beheerder als een inzending is
+                          bijgewerkt
+                        </Label>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
