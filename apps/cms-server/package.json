@@ -47,7 +47,7 @@
     "@apostrophecms/blog": "~1.0.6",
     "@apostrophecms/import-export": "~3.5.2",
     "@apostrophecms/redirect": "~1.5.0",
-    "@apostrophecms/seo": "~1.4.0",
+    "@apostrophecms/seo": "1.4.0",
     "@apostrophecms/sitemap": "~1.2.0",
     "apostrophe": "~4.26.2",
     "dotenv": "^16.0.3",
