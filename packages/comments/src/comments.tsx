@@ -5,7 +5,7 @@ import {
 } from '@openstad-headless/lib';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Banner, Paginator } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
@@ -25,7 +25,7 @@ import hasRole from '../../lib/has-role';
 import './index.css';
 import CommentForm from './parts/comment-form.js';
 import Comment from './parts/comment.js';
-import { CommentFormProps } from './types/comment-form-props';
+import type { CommentFormProps } from './types/comment-form-props';
 
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
@@ -48,7 +48,7 @@ export type CommentsWidgetProps = BaseProps &
     requiredUserRole?: string;
     descriptionMinLength?: number;
     descriptionMaxLength?: number;
-    selectedComment?: Number | undefined;
+    selectedComment?: number | undefined;
     customTitle?: string;
     onlyIncludeTags?: string;
     loginText?: string;
@@ -124,7 +124,7 @@ function CommentsInner({
 
   useEffect(() => {
     if (searchTerm !== search) setSearch(searchTerm);
-  }, [searchTerm]);
+  }, [searchTerm, search]);
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -197,20 +197,20 @@ function CommentsInner({
     if (onGoToLastPage) {
       onGoToLastPage(goToLastPage);
     }
-  }, [onGoToLastPage]);
+  }, [onGoToLastPage, goToLastPage]);
 
   useEffect(() => {
     if (overridePage !== page) {
       setPage(overridePage);
     }
-  }, [overridePage]);
+  }, [overridePage, page]);
 
   const refreshComments = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the key to trigger a refresh
     parentSetRefreshComments((prev: boolean) => !prev); // Trigger any parent-level refresh logic
   };
 
-  let resourceId = String(
+  const resourceId = String(
     getResourceId({
       resourceId: parseInt(props.resourceId || ''),
       url: document.location.href,
@@ -218,7 +218,7 @@ function CommentsInner({
     })
   ); // todo: make it a number throughout the code
 
-  let args = {
+  const args = {
     parentSetRefreshComments,
     title,
     sentiment,
@@ -302,8 +302,8 @@ function CommentsInner({
 
   useEffect(() => {
     if (!resource) return;
-    let statuses = resource.statuses || [];
-    for (let status of statuses) {
+    const statuses = resource.statuses || [];
+    for (const status of statuses) {
       if (status.extraFunctionality?.canComment === false) {
         setCanComment(false);
       }
@@ -336,7 +336,7 @@ function CommentsInner({
           .filter((tag) => !isNaN(tag))
       : [];
 
-    const formTags: string[] = [];
+    const formTags: Array<string> = [];
     Object.keys(formDataCopy)
       .filter((key) => key.startsWith('tags-'))
       .forEach((key) => {
@@ -361,7 +361,9 @@ function CommentsInner({
       if (formDataCopy.id) {
         let comment = comments.find((c: any) => c.id == formDataCopy.id);
         if (formDataCopy.parentId) {
-          let parent = comments.find((c: any) => c.id == formDataCopy.parentId);
+          const parent = comments.find(
+            (c: any) => c.id == formDataCopy.parentId
+          );
           comment = parent.replies.find((c: any) => c.id == formDataCopy.id);
         }
         await comment.update(formDataCopy);
@@ -387,7 +389,7 @@ function CommentsInner({
     if (comments) {
       let count = comments.length || 0;
 
-      for (let comment of comments) {
+      for (const comment of comments) {
         if (!comment?.replies) continue;
 
         count += comment.replies.length;
@@ -406,7 +408,7 @@ function CommentsInner({
     ) {
       setTotalPages(Math.ceil(comments.length / pageSize));
     }
-  }, [comments, pageSize]);
+  }, [comments, displayPagination, pageSize]);
 
   const randomId = Math.random().toString(36).replace('0.', 'container_');
 
@@ -426,7 +428,9 @@ function CommentsInner({
       }}>
       <section className="osc" id={randomId}>
         <Heading3 className="comments-title">
-          {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString())}
+          {comments
+            ? title?.replace(/\[\[nr\]\]/, commentCount.toString())
+            : null}
           {!comments && title}
         </Heading3>
 
@@ -447,12 +451,12 @@ function CommentsInner({
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
           <>
-            {formIntro && (
+            {formIntro ? (
               <>
                 <p>{formIntro}</p>
                 <Spacer size={1} />
               </>
-            )}
+            ) : null}
             <Banner className="big" role="complementary">
               <p id="login-description">{loginText}</p>
               <Spacer size={1} />
@@ -491,11 +495,15 @@ function CommentsInner({
         {((props.sorting || []).length > 0 && datastore) || displaySearchBar ? (
           <>
             <Filters
+              applyText="Toepassen"
+              autoApply={autoApply}
               className="osc-flex-columned"
               dataStore={datastore}
-              sorting={props.sorting || []}
-              displaySorting={(props.sorting || []).length > 0 && datastore}
               defaultSorting={props.defaultSorting || 'createdAt_asc'}
+              displayCollapsibleFilter={displayCollapsibleFilter}
+              displaySearch={displaySearchBar || false}
+              displaySorting={(props.sorting || []).length > 0 && datastore}
+              displayTagFilters={false}
               onUpdateFilter={(f) => {
                 if (
                   [
@@ -513,14 +521,10 @@ function CommentsInner({
                 }
                 setSearch(f?.search?.text || '');
               }}
-              applyText={'Toepassen'}
+              resetText="Reset"
               resources={undefined}
-              displaySearch={displaySearchBar || false}
-              displayTagFilters={false}
-              searchPlaceholder={''}
-              resetText={'Reset'}
-              displayCollapsibleFilter={displayCollapsibleFilter}
-              autoApply={autoApply}
+              searchPlaceholder=""
+              sorting={props.sorting || []}
             />
 
             <Spacer size={1} />
@@ -589,7 +593,7 @@ function CommentsInner({
           })
           .slice(page * pageSize, (page + 1) * pageSize)
           ?.map((comment: any, index: number) => {
-            let attributes = {
+            const attributes = {
               ...args,
               comment,
               submitComment,
@@ -599,29 +603,29 @@ function CommentsInner({
               <Comment
                 {...attributes}
                 disableSubmit={disableSubmit}
+                extraReplyButton={extraReplyButton}
                 index={index}
                 key={index}
                 selected={selectedComment === comment?.id}
-                extraReplyButton={extraReplyButton}
               />
             );
           })}
 
-        {displayPagination && (
+        {displayPagination ? (
           <>
             <Spacer size={4} />
             <div className="osc-comments-paginator col-span-full">
               <Paginator
-                page={page || 0}
-                totalPages={totalPages || 1}
                 onPageChange={(newPage) => {
                   setPage(newPage);
                   scrollToTop();
                 }}
+                page={page || 0}
+                totalPages={totalPages || 1}
               />
             </div>
           </>
-        )}
+        ) : null}
 
         <NotificationProvider />
       </section>
@@ -658,17 +662,17 @@ function Comments({
   return (
     <div>
       <CommentsInner
-        key={refreshKey ? 'refresh' : 'no-refresh'}
-        title={title}
-        sentiment={sentiment}
         emptyListText={emptyListText}
-        placeholder={placeholder}
         formIntro={formIntro}
-        selectedComment={selectedComment}
+        key={refreshKey ? 'refresh' : 'no-refresh'}
         loginText={loginText}
-        setRefreshComments={triggerRefresh}
         onGoToLastPage={onGoToLastPage}
         overridePage={overridePage}
+        placeholder={placeholder}
+        selectedComment={selectedComment}
+        sentiment={sentiment}
+        setRefreshComments={triggerRefresh}
+        title={title}
         variant={variant}
         {...props}
       />

@@ -343,7 +343,7 @@ function DocumentMap({
 
     setSelectedTagsString(tagsNewString);
     setFilteredComments(filtered);
-  }, [selectedTags, allComments]);
+  }, [selectedTags, allComments, filteredTagIdsArray, filterBehavior]);
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<number>();
@@ -484,7 +484,7 @@ function DocumentMap({
         }
         setIsBoundsSet(true);
       }
-    }, [map, bounds, isBoundsSet]);
+    }, [map]);
 
     return null;
   };
@@ -580,7 +580,7 @@ function DocumentMap({
             : '')
       );
     }
-  }, []);
+  }, [relativePathPrepend]);
 
   let args = {
     canComment:
@@ -612,7 +612,7 @@ function DocumentMap({
     if (resource.extraData?.originalId) {
       setOriginalID(resource.extraData?.originalId);
     }
-  }, [resource]);
+  }, [resource, statusId]);
 
   if (canComment === false) args.canComment = canComment;
 
@@ -881,7 +881,7 @@ function DocumentMap({
 
   useEffect(() => {
     updateMapBounds(hasOpenPopup);
-  }, [bounds, hasOpenPopup]);
+  }, [bounds, hasOpenPopup, updateMapBounds]);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -902,21 +902,21 @@ function DocumentMap({
       document.removeEventListener('keydown', trapFocus);
       document.removeEventListener('keydown', handleEsc);
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, trapFocus]);
 
   // Focus management when modal opens
   useEffect(() => {
     if (isModalOpen && modalRef.current && manualFocus) {
       modalRef.current.focus();
     }
-  }, [isModalOpen]);
+  }, [isModalOpen, manualFocus]);
 
   useEffect(() => {
     if (openInfoPopupOnInit === 'yes') {
       setIsModalOpen(true);
       setManualFocus(false);
     }
-  }, []);
+  }, [openInfoPopupOnInit]);
 
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -984,7 +984,7 @@ function DocumentMap({
         mapInteractionInstance.destroy();
       }
     };
-  }, [mapRef.current, isTouchDevice]);
+  }, [isTouchDevice]);
 
   return !bounds ? null : (
     <div

@@ -1,17 +1,17 @@
 // @ts-nocheck
-import { ChoiceOptions, Score } from '../props';
-import { Item } from '../props';
+import type { ChoiceOptions, Score } from '../props';
+import type { Item } from '../props';
 
 export const calculateColor = (
   score: number,
   minColor = '#ff9100',
   maxColor = '#bed200'
 ) => {
-  const maxColorMatch = maxColor.match(
-    /#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i
+  const maxColorMatch = /#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(
+    maxColor
   );
-  const minColorMatch = minColor.match(
-    /#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i
+  const minColorMatch = /#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(
+    minColor
   );
   if (maxColorMatch && minColorMatch) {
     const r =
@@ -32,16 +32,16 @@ export const calculateColor = (
 };
 
 export const calculateScoreForItem = (
-  choiceOption: ChoiceOptions | ChoiceOptions[],
+  choiceOption: ChoiceOptions | Array<ChoiceOptions>,
   answers: Record<string, string>,
   weights: Record<string, Record<string, Record<string, any>>>,
   choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden',
-  hiddenFields: string[],
-  items: Item[]
+  hiddenFields: Array<string>,
+  items: Array<Item>
 ): Score => {
   const results: Score = { x: 0, y: 0, z: 0 };
-  let totalScores = { x: 0, y: 0, z: 0 };
-  let countScores = { x: 0, y: 0, z: 0 };
+  const totalScores = { x: 0, y: 0, z: 0 };
+  const countScores = { x: 0, y: 0, z: 0 };
 
   let choiceOptionsArray = Array.isArray(choiceOption)
     ? choiceOption

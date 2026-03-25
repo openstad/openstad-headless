@@ -1,6 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import { ButtonLink, Paragraph } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
@@ -211,9 +211,7 @@ function Counter({
       {content()}
     </ButtonLink>
   ) : (
-    <div className="osc counter-container">
-      <>{content()}</>
-    </div>
+    <div className="osc counter-container">{content()}</div>
   );
 }
 

@@ -70,7 +70,7 @@ function MultiProjectResourceOverview({
 
       updateSelectedProjects(props.selectedProjects);
     }
-  }, [props.selectedProjects]);
+  }, [props?.api?.url, props.selectedProjects]);
 
   const initFinished = selectedProjectsState.some(
     (project) => typeof project?.createdAt === 'string'

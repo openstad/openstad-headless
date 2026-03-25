@@ -1,7 +1,8 @@
-import { FormValue } from '@openstad-headless/form/src/form';
+import type { FormValue } from '@openstad-headless/form/src/form';
 import type { BaseProps } from '@openstad-headless/types';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import './dilemma.scss';
 
@@ -31,7 +32,7 @@ export type DilemmaProps = {
   infofieldExplanation?: boolean;
   setCurrentPage?: any;
   currentPage?: number;
-  dilemmas?: DilemmaCard[];
+  dilemmas?: Array<DilemmaCard>;
   fieldKey?: string;
   type?: string;
   required?: boolean;
@@ -66,15 +67,15 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     [dilemmas]
   );
 
-  let initialAnswers: Record<string, string> = {};
-  let initialAnswersExplanation: Record<string, string> = {};
+  const initialAnswers: Record<string, string> = {};
+  const initialAnswersExplanation: Record<string, string> = {};
 
   if (overrideDefaultValue && typeof overrideDefaultValue === 'object') {
     const overrideArray = overrideDefaultValue as valueObject;
     overrideArray.forEach((item) => {
-      initialAnswers[item.dilemmaId as string] = item.answer;
+      initialAnswers[item.dilemmaId] = item.answer;
       if (item.explanation) {
-        initialAnswersExplanation[item.dilemmaId as string] = item.explanation;
+        initialAnswersExplanation[item.dilemmaId] = item.explanation;
       }
     });
   }
@@ -306,7 +307,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
       onChange({ name: fieldKey, value: combinedAnswers });
     }
-  }, [dilemmaAnswers, explanations]);
+  }, [dilemmaAnswers, explanations, fieldKey, dilemmaCards, onChange]);
 
   useEffect(() => {
     setCurrentDilemmaIndex(0);
@@ -314,17 +315,21 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     const unanswered = getUnansweredDilemmas();
     setIsFinished(unanswered.length === 0);
-  }, [dilemmas, dilemmaCards, getUnansweredDilemmas]);
+  }, [
+    dilemmas,
+    dilemmaCards,
+    getUnansweredDilemmas,
+    setCurrentDilemmaIndex,
+    setSelectedOption,
+    setIsFinished,
+  ]);
 
-  useEffect(() => {
-    console.log('test');
-  }, []);
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
       <div
+        aria-live="polite"
         className="dilemma-field dilemma-finished"
-        role="region"
-        aria-live="polite">
+        role="region">
         <div className="dilemma-finished-content">
           <div className="dilemma-intro">
             <Heading level={2}>Gemaakte keuzes</Heading>
@@ -333,10 +338,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
           <div className="dilemma-actions">
             <button
+              aria-label="Ga terug naar dilemma's"
               className="dilemma-back-button"
               onClick={(e) => (e.preventDefault(), goBackToDilemmas())}
-              type="button"
-              aria-label="Ga terug naar dilemma's">
+              type="button">
               Terug
             </button>
           </div>
@@ -348,23 +353,23 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                 const answer = dilemmaAnswers[dilemma.id] || '';
 
                 return (
-                  <div key={dilemma.id} className="dilemma-summary-item">
+                  <div className="dilemma-summary-item" key={dilemma.id}>
                     <div className="dilemma-summary-content">
                       <div className="dilemma-summary-option">
                         <button
+                          aria-label={`Kies optie A: ${dilemma.a.title}`}
                           className={`dilemma-summary-btn ${
                             answer === 'a' ? 'active' : ''
                           }`}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'a')
-                          )}
-                          aria-label={`Kies optie A: ${dilemma.a.title}`}>
+                          )}>
                           <figure className="dilemma-option-image">
-                            <img src={dilemma.a.image} alt={dilemma.a.title} />
+                            <img alt={dilemma.a.title} src={dilemma.a.image} />
                           </figure>
                           <div className="dilemma-option-content">
-                            <Heading level={3} appearance="utrecht-heading-4">
+                            <Heading appearance="utrecht-heading-4" level={3}>
                               {dilemma.a.title}
                             </Heading>
                             <Paragraph>{dilemma.a.description}</Paragraph>
@@ -374,19 +379,19 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
                       <div className="dilemma-summary-option">
                         <button
+                          aria-label={`Kies optie B: ${dilemma.b.title}`}
                           className={`dilemma-summary-btn ${
                             answer === 'b' ? 'active' : ''
                           }`}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'b')
-                          )}
-                          aria-label={`Kies optie B: ${dilemma.b.title}`}>
+                          )}>
                           <figure className="dilemma-option-image">
-                            <img src={dilemma.b.image} alt={dilemma.b.title} />
+                            <img alt={dilemma.b.title} src={dilemma.b.image} />
                           </figure>
                           <div className="dilemma-option-content">
-                            <Heading level={3} appearance="utrecht-heading-4">
+                            <Heading appearance="utrecht-heading-4" level={3}>
                               {dilemma.b.title}
                             </Heading>
                             <Paragraph>{dilemma.b.description}</Paragraph>
@@ -398,12 +403,12 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                     <div className="dilemma-summary-explanation">
                       <textarea
                         id={`explanation-${dilemma.id}`}
-                        placeholder="Voeg een korte uitleg (niet verplicht) toe..."
-                        value={explanations[dilemma.id] || ''}
                         onChange={(e) =>
                           handleExplanationChange(dilemma.id, e.target.value)
                         }
+                        placeholder="Voeg een korte uitleg (niet verplicht) toe..."
                         rows={3}
+                        value={explanations[dilemma.id] || ''}
                       />
                     </div>
                   </div>
@@ -420,15 +425,15 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   return (
     <div
-      className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`}
-      role="region"
-      aria-label="Dilemma keuze"
       aria-invalid={
         required && !dilemmaAnswers[currentDilemma.id] ? 'true' : 'false'
       }
-      data-required={required}>
+      aria-label="Dilemma keuze"
+      className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`}
+      data-required={required}
+      role="region">
       <div className="dilemma-intro">
-        <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
+        <Heading dangerouslySetInnerHTML={{ __html: title || '' }} level={2} />
         <div className="dilemma-progress">
           <span>
             {currentIndex + 1} van {dilemmas.length}
@@ -437,7 +442,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       </div>
 
       <div className="dilemma-options">
-        <span className="dilemma-label" aria-hidden="true">
+        <span aria-hidden="true" className="dilemma-label">
           <span>OF</span>
         </span>
 
@@ -448,26 +453,26 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               : ''
           }`}>
           <input
-            type="radio"
-            id={`option-${currentDilemma.id}-a`}
-            name={`dilemma-option-${currentDilemma.id}`}
-            value="a"
             checked={
               selectedOption === 'a' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'a')
             }
+            id={`option-${currentDilemma.id}-a`}
+            name={`dilemma-option-${currentDilemma.id}`}
             onChange={() => handleOptionSelect('a')}
             onClick={() => handleOptionSelect('a')}
+            type="radio"
+            value="a"
           />
           <label htmlFor={`option-${currentDilemma.id}-a`}>
             <figure className="dilemma-option-image">
-              <img src={currentDilemma.a.image} alt={currentDilemma.a.title} />
+              <img alt={currentDilemma.a.title} src={currentDilemma.a.image} />
             </figure>
             <div className="dilemma-option-content">
               <Heading
-                level={3}
                 appearance="utrecht-heading-4"
                 dangerouslySetInnerHTML={{ __html: currentDilemma.a.title }}
+                level={3}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
@@ -485,26 +490,26 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               : ''
           }`}>
           <input
-            type="radio"
-            id={`option-${currentDilemma.id}-b`}
-            name={`dilemma-option-${currentDilemma.id}`}
-            value="b"
             checked={
               selectedOption === 'b' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'b')
             }
+            id={`option-${currentDilemma.id}-b`}
+            name={`dilemma-option-${currentDilemma.id}`}
             onChange={() => handleOptionSelect('b')}
             onClick={() => handleOptionSelect('b')}
+            type="radio"
+            value="b"
           />
           <label htmlFor={`option-${currentDilemma.id}-b`}>
             <figure className="dilemma-option-image">
-              <img src={currentDilemma.b.image} alt={currentDilemma.b.title} />
+              <img alt={currentDilemma.b.title} src={currentDilemma.b.image} />
             </figure>
             <div className="dilemma-option-content">
               <Heading
-                level={3}
                 appearance="utrecht-heading-4"
                 dangerouslySetInnerHTML={{ __html: currentDilemma.b.title }}
+                level={3}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
@@ -518,27 +523,26 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
       <div className="dilemma-actions">
         <button
+          aria-expanded={infoDialog}
           className="more-info-btn dilemma-info-button"
-          onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
-          type="button"
           disabled={!currentDilemma?.infoField}
-          aria-expanded={infoDialog}>
+          onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
+          type="button">
           <span>Info</span>
         </button>
 
         <div className="dilemma-navigation-buttons">
           <button
+            aria-label="Ga terug naar vorige vraag"
             className="dilemma-back-button"
-            onClick={(e) => (e.preventDefault(), moveToPrevious())}
             disabled={!canGoBack()}
-            type="button"
-            aria-label="Ga terug naar vorige vraag">
+            onClick={(e) => (e.preventDefault(), moveToPrevious())}
+            type="button">
             Terug
           </button>
 
           <button
             className="dilemma-next-button"
-            onClick={(e) => (e.preventDefault(), handleNextClick())}
             disabled={
               !(
                 selectedOption ||
@@ -546,31 +550,32 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                 previousAnswers[currentDilemma.id] === 'b'
               )
             }
+            onClick={(e) => (e.preventDefault(), handleNextClick())}
             type="button">
             <span className="sr-only">Volgende</span>
           </button>
         </div>
       </div>
 
-      {showExplanationDialog && (
+      {showExplanationDialog ? (
         <div
-          className="explanation-dialog"
-          role="dialog"
+          aria-labelledby="explanation-dialog-title"
           aria-modal="true"
-          aria-labelledby="explanation-dialog-title">
+          className="explanation-dialog"
+          role="dialog">
           <div className="explanation-dialog-content">
-            <Heading level={3} id="explanation-dialog-title">
+            <Heading id="explanation-dialog-title" level={3}>
               Korte uitleg
             </Heading>
             <Paragraph>Zodat we beter begrijpen wat belangrijk is.</Paragraph>
             <textarea
               autoFocus
-              placeholder="Ik maak deze keuze, omdat..."
-              rows={5}
-              value={explanations[currentDilemma.id] || ''}
               onChange={(e) =>
                 handleExplanationChange(currentDilemma.id, e.target.value)
               }
+              placeholder="Ik maak deze keuze, omdat..."
+              rows={5}
+              value={explanations[currentDilemma.id] || ''}
             />
             <Button
               appearance="primary-action-button"
@@ -587,9 +592,9 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
 
-      <div className="info-card dilemma-info-field" aria-hidden={!infoDialog}>
+      <div aria-hidden={!infoDialog} className="info-card dilemma-info-field">
         <div className="info-card-container">
           <Paragraph
             dangerouslySetInnerHTML={{
@@ -598,8 +603,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           />
           <button
             className="utrecht-button utrecht-button--primary-action"
-            type="button"
-            onClick={(e) => (e.preventDefault(), setInfoDialog(false))}>
+            onClick={(e) => (e.preventDefault(), setInfoDialog(false))}
+            type="button">
             Snap ik
           </button>
         </div>
