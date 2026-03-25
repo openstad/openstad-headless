@@ -461,7 +461,14 @@ service.updateClient = async function ({ authConfig, project }) {
   }
 };
 
-service.fetchUniqueCode = async function ({ authConfig, isExport = false }) {
+service.fetchUniqueCode = async function ({
+  authConfig,
+  isExport = false,
+  limit,
+  offset,
+  search,
+  sort,
+}) {
   let clientId = authConfig.clientId;
   if (!clientId) {
     throw new Error('OpenStad.service.fetchUniqueCodes: clientId not found');
@@ -472,7 +479,12 @@ service.fetchUniqueCode = async function ({ authConfig, isExport = false }) {
 
     if (isExport) {
       url += '&export=true';
+    } else {
+      if (limit !== undefined) url += `&limit=${encodeURIComponent(limit)}`;
+      if (offset !== undefined) url += `&offset=${encodeURIComponent(offset)}`;
     }
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (sort) url += `&sort=${encodeURIComponent(sort)}`;
 
     let response = await fetch(url, {
       headers: {

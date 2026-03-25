@@ -79,7 +79,7 @@
     "isomorphic-fetch": "^3.0.0",
     "json-logic-js": "^2.0.2",
     "jsonwebtoken": "^9.0.0",
-    "mariadb": "^2.5.6",
+    "mariadb": "^3.4.3",
     "marked": "^4.0.14",
     "merge": "^2.1.1",
     "method-override": "^3.0.0",

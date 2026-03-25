@@ -122,6 +122,8 @@ export type DocumentMapProps = BaseProps &
     displaySearchBar?: boolean;
     markerClickBehavior?: 'sidebar' | 'popup';
     hideCommentsList?: boolean;
+    hideFilters?: boolean;
+    hideToggleMarkers?: boolean;
   };
 
 function DocumentMap({
@@ -168,6 +170,8 @@ function DocumentMap({
   displaySearchBar = false,
   markerClickBehavior = 'sidebar',
   hideCommentsList = false,
+  hideFilters = false,
+  hideToggleMarkers = false,
   ...props
 }: DocumentMapProps) {
   const [sort, setSort] = useState<string | undefined>(
@@ -282,7 +286,6 @@ function DocumentMap({
     useState<Array<Comment>>(comments);
   const [commentValue, setCommentValue] = useState<string>('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [refreshComments, setRefreshComments] = useState(false);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentValue(e.target.value);
@@ -984,7 +987,30 @@ function DocumentMap({
   }, [mapRef.current, isTouchDevice]);
 
   return !bounds ? null : (
-    <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
+    <div
+      className={`documentMap--container ${largeDoc ? '--largeDoc' : ''} ${displayResourceInfo === 'above' ? '--info-above' : ''} ${displayResourceInfo === 'below' ? '--info-below' : ''}`}>
+      {displayResourceInfo === 'above' && (
+        <div className="resource-info-full">
+          <section className="content-intro">
+            {displayResourceTitle === 'yes' && resource.title ? (
+              <Heading level={1}>{resource.title}</Heading>
+            ) : null}
+            {displayResourceSummary === 'yes' && resource.summary ? (
+              <Heading
+                level={2}
+                appearance="utrecht-heading-4"
+                dangerouslySetInnerHTML={{
+                  __html: resource.summary,
+                }}></Heading>
+            ) : null}
+            {displayResourceDescription === 'yes' && resource.description ? (
+              <Paragraph
+                dangerouslySetInnerHTML={{ __html: resource.description }}
+              />
+            ) : null}
+          </section>
+        </div>
+      )}
       <div
         className={`map-container ${
           !toggleMarker ? '--hideMarkers' : ''
@@ -1322,17 +1348,19 @@ function DocumentMap({
       <div className="content document-map-info-container" ref={contentRef}>
         {!isDefinitive && (
           <>
-            <div className="toggleMarkers">
-              <Checkbox
-                id="toggleMarkers"
-                defaultChecked
-                onChange={() => setToggleMarker(!toggleMarker)}
-              />
-              <FormLabel htmlFor="toggleMarkers">
-                {' '}
-                <Paragraph>{addMarkerText}</Paragraph>{' '}
-              </FormLabel>
-            </div>
+            {!hideToggleMarkers && (
+              <div className="toggleMarkers">
+                <Checkbox
+                  id="toggleMarkers"
+                  defaultChecked
+                  onChange={() => setToggleMarker(!toggleMarker)}
+                />
+                <FormLabel htmlFor="toggleMarkers">
+                  {' '}
+                  <Paragraph>{addMarkerText}</Paragraph>{' '}
+                </FormLabel>
+              </div>
+            )}
             {displayLikes && (
               <>
                 <Likes
@@ -1400,7 +1428,8 @@ function DocumentMap({
           </section>
         )}
 
-        {tagGroups &&
+        {!hideFilters &&
+        tagGroups &&
         Array.isArray(tagGroups) &&
         tagGroups.length > 0 &&
         datastore ? (
@@ -1467,6 +1496,29 @@ function DocumentMap({
           </div>
         )}
       </div>
+
+      {displayResourceInfo === 'below' && (
+        <div className="resource-info-full">
+          <section className="content-intro">
+            {displayResourceTitle === 'yes' && resource.title ? (
+              <Heading level={1}>{resource.title}</Heading>
+            ) : null}
+            {displayResourceSummary === 'yes' && resource.summary ? (
+              <Heading
+                level={2}
+                appearance="utrecht-heading-4"
+                dangerouslySetInnerHTML={{
+                  __html: resource.summary,
+                }}></Heading>
+            ) : null}
+            {displayResourceDescription === 'yes' && resource.description ? (
+              <Paragraph
+                dangerouslySetInnerHTML={{ __html: resource.description }}
+              />
+            ) : null}
+          </section>
+        </div>
+      )}
 
       <button
         className={`back-to-top ${showButton ? 'show' : ''}`}

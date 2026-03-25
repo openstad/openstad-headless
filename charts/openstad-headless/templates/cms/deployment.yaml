@@ -169,8 +169,6 @@ spec:
             name: tmp-dir
           - mountPath: /opt/openstad-headless/apps/cms-server/data/temp
             name: temp-dir
-          - mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/exports
-            name: exports-dir
 {{- if ne .Values.cms.useS3 "true" }}
           - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads" }}
             name: data-vol
@@ -185,8 +183,6 @@ spec:
         - name: tmp-dir
           emptyDir: {}
         - name: temp-dir
-          emptyDir: {}
-        - name: exports-dir
           emptyDir: {}
 {{- if ne .Values.cms.useS3 "true" }}
         - name: data-vol

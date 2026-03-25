@@ -7,6 +7,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
+import useUsers from '@/hooks/use-users';
+import { MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import toast from 'react-hot-toast';
@@ -40,11 +43,11 @@ export default function ProjectResourceArguments() {
                 </Paragraph>
                 <Paragraph className="hidden lg:flex lg:col-span-1 truncate">
                   {userKey ? (
-                    <a
+                    <Link
                       href={`/users/${btoa(userKey)}`}
-                      style={{ textDecoration: 'underline' }}>
+                      className="underline">
                       {comment.userId}
-                    </a>
+                    </Link>
                   ) : (
                     comment.userId
                   )}

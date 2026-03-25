@@ -476,7 +476,9 @@ const TextInput: FC<TextInputProps> = ({
             setIsFocused(false);
             setHasBlurred(true);
           }}
-          autoComplete={variant === 'email' ? 'email' : getAutocomplete(fieldKey)}
+          autoComplete={
+            variant === 'email' ? 'email' : getAutocomplete(fieldKey)
+          }
           aria-describedby={`${randomId}_error${
             (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
               ? ` ${helpTextId}`

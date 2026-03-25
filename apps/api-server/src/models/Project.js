@@ -211,6 +211,7 @@ module.exports = function (db, sequelize, DataTypes) {
           await db.Status.create({
             projectId: instance.id,
             name: 'Reageer op deze inzending',
+            label: 'Reageer op deze inzending',
             seqnr: 10,
             addToNewResources: true,
             canComment: true,
@@ -220,6 +221,7 @@ module.exports = function (db, sequelize, DataTypes) {
           await db.Status.create({
             projectId: instance.id,
             name: 'Deze inzending wordt niet uitgevoerd',
+            label: 'Deze inzending wordt niet uitgevoerd',
             seqnr: 20,
             addToNewResources: false,
             canComment: true,
@@ -229,6 +231,7 @@ module.exports = function (db, sequelize, DataTypes) {
           await db.Status.create({
             projectId: instance.id,
             name: 'Deze inzending is door naar de stemronde',
+            label: 'Deze inzending is door naar de stemronde',
             seqnr: 30,
             addToNewResources: false,
             canComment: true,
@@ -238,6 +241,7 @@ module.exports = function (db, sequelize, DataTypes) {
           await db.Status.create({
             projectId: instance.id,
             name: 'Deze inzending wordt uitgevoerd',
+            label: 'Deze inzending wordt uitgevoerd',
             seqnr: 40,
             addToNewResources: false,
             canComment: true,
