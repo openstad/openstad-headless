@@ -1,9 +1,10 @@
-// @ts-ignore
-//@ts-ignore D.type def missing, will disappear when datastore is ts
+// @ts-expect-error
+//@ts-expect-error D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
-import Form, { FormValue } from '@openstad-headless/form/src/form';
+import type { FormValue } from '@openstad-headless/form/src/form';
+import Form from '@openstad-headless/form/src/form';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Banner, Button, Icon, Spacer } from '@openstad-headless/ui/src';
 import {
   Heading2,
@@ -129,131 +130,133 @@ function DistributionModule(props: DistributionModuleProps) {
             ? 'visible-disabled'
             : ''
         }`}>
-        {props.title && <Heading2>{props.title}</Heading2>}
+        {props.title ? <Heading2>{props.title}</Heading2> : null}
         <div className="osc-distribution-modules-item-description">
-          {props.description && <Paragraph>{props.description}</Paragraph>}
+          {props.description ? (
+            <Paragraph>{props.description}</Paragraph>
+          ) : null}
         </div>
 
-        <div className={`osc-distribution-modules-content`}>
+        <div className="osc-distribution-modules-content">
           {props.choice === 'points' && (
             <>
-              <div className={`osc-distribution-modules-content-container`}>
-                <div className={`osc-distribution-modules-content__remaining`}>
+              <div className="osc-distribution-modules-content-container">
+                <div className="osc-distribution-modules-content__remaining">
                   <Paragraph>{props.pointsTotalText}</Paragraph>
                   <Paragraph>
                     {formatNumber(props.total || 0)}{' '}
-                    <span className={'append'}>{props.appendText}</span>
+                    <span className="append">{props.appendText}</span>
                   </Paragraph>
                 </div>
-                <div className={`osc-distribution-modules-content__leftover`}>
+                <div className="osc-distribution-modules-content__leftover">
                   <Paragraph>{props.pointsLeftoverText}</Paragraph>
                   <Paragraph>
                     {formatNumber(distributeLeft)}{' '}
-                    <span className={'append'}>{props.appendText}</span>
+                    <span className="append">{props.appendText}</span>
                   </Paragraph>
                 </div>
               </div>
 
-              {props.showProgress && (
+              {props.showProgress ? (
                 <progress
-                  className={`osc-distribution-modules-content__progress`}
-                  value={props.total - distributeLeft}
+                  className="osc-distribution-modules-content__progress"
                   max={props.total}
+                  value={props.total - distributeLeft}
                 />
-              )}
+              ) : null}
 
-              <div className={`osc-distribution-modules-content__error`}>
+              <div className="osc-distribution-modules-content__error">
                 {distributeLeft < 0 &&
-                  (props.pointsErrorTitle || props.pointsErrorMessage) && (
-                    <Banner big={true}>
-                      {props.pointsErrorTitle && (
-                        <Heading3>{props.pointsErrorTitle}</Heading3>
-                      )}
-                      {props.pointsErrorMessage && (
-                        <Paragraph
-                          dangerouslySetInnerHTML={{
-                            __html: props.pointsErrorMessage,
-                          }}
-                        />
-                      )}
-                    </Banner>
-                  )}
+                (props.pointsErrorTitle || props.pointsErrorMessage) ? (
+                  <Banner big>
+                    {props.pointsErrorTitle ? (
+                      <Heading3>{props.pointsErrorTitle}</Heading3>
+                    ) : null}
+                    {props.pointsErrorMessage ? (
+                      <Paragraph
+                        dangerouslySetInnerHTML={{
+                          __html: props.pointsErrorMessage,
+                        }}
+                      />
+                    ) : null}
+                  </Banner>
+                ) : null}
               </div>
             </>
           )}
           {props.choice === 'budget' && (
             <>
-              <div className={`osc-distribution-modules-content-container`}>
-                <div className={`osc-distribution-modules-content__remaining`}>
+              <div className="osc-distribution-modules-content-container">
+                <div className="osc-distribution-modules-content__remaining">
                   <Paragraph>{props.budgetTotalText}</Paragraph>
                   <Paragraph>
-                    <span className={'prepend'}>{props.prependText}</span>{' '}
+                    <span className="prepend">{props.prependText}</span>{' '}
                     {formatNumber(props.total || 0)}
                   </Paragraph>
                 </div>
-                <div className={`osc-distribution-modules-content__leftover`}>
+                <div className="osc-distribution-modules-content__leftover">
                   <Paragraph>{props.budgetLeftoverText}</Paragraph>
                   <Paragraph>
-                    <span className={'prepend'}>{props.prependText}</span>{' '}
+                    <span className="prepend">{props.prependText}</span>{' '}
                     {formatNumber(distributeLeft)}
                   </Paragraph>
                 </div>
               </div>
 
-              {props.showProgress && (
+              {props.showProgress ? (
                 <progress
-                  className={`osc-distribution-modules-content__progress`}
-                  value={props.total - distributeLeft}
+                  className="osc-distribution-modules-content__progress"
                   max={props.total}
+                  value={props.total - distributeLeft}
                 />
-              )}
+              ) : null}
 
-              <div className={`osc-distribution-modules-content__error`}>
+              <div className="osc-distribution-modules-content__error">
                 {distributeLeft < 0 &&
-                  (props.budgetErrorTitle || props.budgetErrorMessage) && (
-                    <Banner big={true}>
-                      {props.budgetErrorTitle && (
-                        <Heading3>{props.budgetErrorTitle}</Heading3>
-                      )}
-                      {props.budgetErrorMessage && (
-                        <Paragraph
-                          dangerouslySetInnerHTML={{
-                            __html: props.budgetErrorMessage,
-                          }}
-                        />
-                      )}
-                    </Banner>
-                  )}
+                (props.budgetErrorTitle || props.budgetErrorMessage) ? (
+                  <Banner big>
+                    {props.budgetErrorTitle ? (
+                      <Heading3>{props.budgetErrorTitle}</Heading3>
+                    ) : null}
+                    {props.budgetErrorMessage ? (
+                      <Paragraph
+                        dangerouslySetInnerHTML={{
+                          __html: props.budgetErrorMessage,
+                        }}
+                      />
+                    ) : null}
+                  </Banner>
+                ) : null}
               </div>
             </>
           )}
         </div>
 
-        {formOnlyVisibleForUsers && !hasRole(currentUser, 'member') && (
+        {formOnlyVisibleForUsers && !hasRole(currentUser, 'member') ? (
           <>
             <Banner className="big">
               <Heading6>Inloggen om deel te nemen.</Heading6>
               <Spacer size={1} />
               <Button
-                type="button"
                 onClick={() => {
                   document.location.href = props.login?.url || '';
-                }}>
+                }}
+                type="button">
                 Inloggen
               </Button>
             </Banner>
             <Spacer size={2} />
           </>
-        )}
+        ) : null}
 
         <Form
           {...props}
           fields={props.items || []}
-          submitHandler={onSubmit}
-          title=""
-          submitText="Versturen"
           getValuesOnChange={valuesChanged}
           submitDisabled={distributeLeft !== 0}
+          submitHandler={onSubmit}
+          submitText="Versturen"
+          title=""
         />
       </div>
 

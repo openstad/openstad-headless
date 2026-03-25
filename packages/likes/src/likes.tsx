@@ -100,7 +100,7 @@ function Likes({
         storage.remove('osc-resource-vote-pending');
       }
     }
-  }, [resource, currentUser]);
+  }, [resource, currentUser, storage, doVote]);
 
   async function doVote(
     e: React.MouseEvent<HTMLElement, MouseEvent> | null,

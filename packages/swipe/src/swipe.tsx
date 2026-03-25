@@ -2,7 +2,6 @@ import { FormValue } from '@openstad-headless/form/src/form';
 import type { BaseProps } from '@openstad-headless/types';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
 import React, {
-  FC,
   useCallback,
   useEffect,
   useId,
@@ -51,7 +50,7 @@ type valueObject = Array<{
   explanation?: string;
 }>;
 
-const SwipeField: FC<SwipeWidgetProps> = ({
+function SwipeField({
   cards = [],
   onSwipeLeft,
   onSwipeRight,
@@ -63,7 +62,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   overrideDefaultValue,
   agreeText = 'Eens',
   disagreeText = 'Oneens',
-}) => {
+}: SwipeWidgetProps) {
   // Generate unique ID for this component instance
   const componentId = useId();
 
@@ -170,6 +169,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     return swipeCards.filter((card) => !swipeAnswers[card.id]);
   }, [swipeCards, swipeAnswers]);
 
+  const removeCurrentCard = useCallback(() => {
+    setInfoVisibleCardId(null);
+
+    const timeout = setTimeout(() => {
+      const remainingUnanswered = getUnansweredCards();
+      if (remainingUnanswered.length === 0) {
+        setIsFinished(true);
+      }
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [getUnansweredCards]);
+
   const moveToPrevious = useCallback(() => {
     const answeredCards = swipeCards.filter((card) => swipeAnswers[card.id]);
 
@@ -224,27 +236,30 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     return answeredCardIds.length > 0;
   }, [swipeAnswers]);
 
-  const completeSwipe = useCallback((card: SwipeCard, direction: string) => {
-    // First phase: swipe animation (200ms)
-    setTimeout(() => {
-      setSwipeAnswers((prev) => ({
-        ...prev,
-        [card.id]: direction,
-      }));
-
-      // Start fadeout animation
-      setIsFadingOut(true);
-      setSwipeDirection(null);
-
-      // Second phase: fadeout animation (300ms)
+  const completeSwipe = useCallback(
+    (card: SwipeCard, direction: string) => {
+      // First phase: swipe animation (200ms)
       setTimeout(() => {
-        removeCurrentCard();
-        setIsAnimating(false);
-        setAnimationType(null);
-        setIsFadingOut(false);
-      }, 300);
-    }, 200);
-  }, []);
+        setSwipeAnswers((prev) => ({
+          ...prev,
+          [card.id]: direction,
+        }));
+
+        // Start fadeout animation
+        setIsFadingOut(true);
+        setSwipeDirection(null);
+
+        // Second phase: fadeout animation (300ms)
+        setTimeout(() => {
+          removeCurrentCard();
+          setIsAnimating(false);
+          setAnimationType(null);
+          setIsFadingOut(false);
+        }, 300);
+      }, 200);
+    },
+    [removeCurrentCard]
+  );
 
   const closeExplanationDialog = useCallback(() => {
     setIsDialogClosing(true);
@@ -273,7 +288,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         }, 300);
       }, 200);
     }, 200);
-  }, [pendingSwipe]);
+  }, [pendingSwipe, removeCurrentCard]);
 
   // Detect when cards change (new swipe component with different cards)
   useEffect(() => {
@@ -390,14 +405,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         }
       }
     },
-    [
-      getUnansweredCards,
-      isAnimating,
-      onSwipeRight,
-      completeSwipe,
-      agreeText,
-      disagreeText,
-    ]
+    [getUnansweredCards, isAnimating, onSwipeRight, completeSwipe, agreeText]
   );
 
   useEffect(() => {
@@ -414,17 +422,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [enableKeyboard, handleSwipeLeft, handleSwipeRight]);
-
-  const removeCurrentCard = () => {
-    setInfoVisibleCardId(null);
-
-    setTimeout(() => {
-      const remainingUnanswered = getUnansweredCards();
-      if (remainingUnanswered.length === 0) {
-        setIsFinished(true);
-      }
-    }, 0);
-  };
 
   const cleanupDragState = useCallback(
     (element: Element | null, pointerId?: number) => {
@@ -738,7 +735,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsFadingOut(false);
     setPendingSwipe(null);
     setShowExplanationDialog(false);
-  }, [swipeCards, swipeAnswers, fieldKey]);
+  }, [swipeCards, swipeAnswers]);
 
   useEffect(() => {
     if (onChange) {
@@ -753,7 +750,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
       onChange({ name: fieldKey, value: combinedAnswers });
     }
-  }, [swipeAnswers, explanations]);
+  }, [swipeAnswers, explanations, onChange, swipeCards, fieldKey]);
 
   const unansweredCards = getUnansweredCards();
 
@@ -1076,6 +1073,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       </button>
     </>
   );
-};
+}
 export { SwipeField };
 export default SwipeField;

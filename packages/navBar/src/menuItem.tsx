@@ -25,7 +25,7 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [handleClickOutside]);
 
   const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (!ref.current?.contains(event.relatedTarget as Node)) {

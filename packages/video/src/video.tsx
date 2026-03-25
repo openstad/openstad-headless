@@ -1,5 +1,5 @@
 import type { BaseProps } from '@openstad-headless/types';
-import React, { FC, useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import './video.scss';
 
@@ -16,12 +16,12 @@ export type VideoProps = {
   videoSubtitle?: boolean;
 };
 
-const VideoField: FC<VideoFieldProps> = ({
+function VideoField({
   videoUrl,
   videoLang,
   videoSubtitle,
   ...props
-}) => {
+}: VideoFieldProps) {
   const id = useId();
   function getYouTubeVideoId(url?: string) {
     if (!url) return '';
@@ -54,7 +54,7 @@ const VideoField: FC<VideoFieldProps> = ({
       player.destroy();
       setPlayer(null);
     }
-  }, [props.currentPage]);
+  }, [player, props.currentPage, videoUrl]);
 
   useEffect(() => {
     if ((window as any).YT && (window as any).YT.Player) {
@@ -98,15 +98,14 @@ const VideoField: FC<VideoFieldProps> = ({
         });
       }
     }
-  }, [videoId]);
+  }, [muted, videoId, videoLang, videoSubtitle]);
 
-  const handleVideoClick = () => {
+  const handleVideoClick = useCallback(() => {
     if (player) {
       setMuteToggle(true);
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setMuteToggle(false);
       }, 1000);
-
       if (muted) {
         player.unMute();
         setMuted(false);
@@ -118,8 +117,10 @@ const VideoField: FC<VideoFieldProps> = ({
         if (typeof window !== 'undefined')
           window.sessionStorage.setItem('video-muted', 'true');
       }
+
+      return () => clearTimeout(timeout);
     }
-  };
+  }, [muted, player]);
 
   const handlePlayPause = (e: any) => {
     e.preventDefault();
@@ -172,6 +173,6 @@ const VideoField: FC<VideoFieldProps> = ({
       </div>
     </>
   );
-};
+}
 export { VideoField };
 export default VideoField;

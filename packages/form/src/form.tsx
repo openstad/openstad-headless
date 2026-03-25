@@ -270,7 +270,15 @@ function Form({
         formValues,
       });
     }
-  }, [formValues]);
+  }, [
+    fields,
+    fieldsWithImpactOnRouting,
+    formValues,
+    getValuesOnChange,
+    initialFormValues,
+    lastUpdatedKey,
+    routingHiddenFields,
+  ]);
 
   const scrollTop = () => {
     const formWidget = document.querySelector(
