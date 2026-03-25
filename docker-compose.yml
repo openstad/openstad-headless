@@ -281,6 +281,19 @@ services:
       - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
       - ./packages:/opt/openstad-headless/packages
 
+  openstad-update-lock:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: update-lock
+    container_name: openstad-update-lock
+    profiles:
+      - tools
+    working_dir: /opt/openstad-headless
+    command: npm run update-lock
+    volumes:
+      - .:/opt/openstad-headless
+
   openstad-cms-server:
     build:
       target: ${BUILD_TARGET:-release-with-packages}
