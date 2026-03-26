@@ -196,11 +196,38 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeTags');
   }
 
+  if (req.query.excludeTags) {
+    let excludeTags = req.query.excludeTags;
+    if (!Array.isArray(excludeTags)) excludeTags = [excludeTags];
+    req.scope.push({ method: ['excludeTags', excludeTags] });
+  }
+
   if (req.query.statuses) {
     let statuses = req.query.statuses;
     // if statuses is not an array, make it an array
     if (!Array.isArray(statuses)) statuses = [statuses];
     req.scope.push({ method: ['selectStatuses', statuses] });
+  }
+
+  if (req.query.excludeStatuses) {
+    let excludeStatuses = req.query.excludeStatuses;
+    if (!Array.isArray(excludeStatuses)) excludeStatuses = [excludeStatuses];
+    req.scope.push({ method: ['excludeStatuses', excludeStatuses] });
+  }
+
+  if (req.query.tagGroups) {
+    try {
+      const tagGroups = JSON.parse(req.query.tagGroups);
+      if (Array.isArray(tagGroups) && tagGroups.length > 0) {
+        req.scope.push({ method: ['selectTagGroups', tagGroups] });
+      }
+    } catch (e) {
+      // invalid JSON, ignore
+    }
+  }
+
+  if (req.query.lat && req.query.lng && req.query.maxDistance) {
+    req.scope.push({ method: ['withinDistance', req.query.lat, req.query.lng, req.query.maxDistance] });
   }
 
   if (req.query.includeUser) {

@@ -713,12 +713,29 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       selectTags: function (tags) {
+        const safeIds = tags.map((t) => parseInt(t, 10)).filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
         return {
           where: {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_tags
-                WHERE tagId IN (${tags.map((tag) => `'${tag}'`).join(', ')}))
+                WHERE tagId IN (${safeIds.join(', ')}))
+              `),
+            },
+          },
+        };
+      },
+
+      excludeTags: function (tags) {
+        const safeIds = tags.map((t) => parseInt(t, 10)).filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
+        return {
+          where: {
+            id: {
+              [db.Sequelize.Op.notIn]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_tags
+                WHERE tagId IN (${safeIds.join(', ')}))
               `),
             },
           },
@@ -726,16 +743,81 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       selectStatuses: function (statuses) {
+        const safeIds = statuses.map((s) => parseInt(s, 10)).filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
         return {
           where: {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_statuses
-                WHERE statusId IN (${statuses
-                  .map((status) => `'${status}'`)
-                  .join(', ')}))
+                WHERE statusId IN (${safeIds.join(', ')}))
               `),
             },
+          },
+        };
+      },
+
+      excludeStatuses: function (statuses) {
+        const safeIds = statuses.map((s) => parseInt(s, 10)).filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
+        return {
+          where: {
+            id: {
+              [db.Sequelize.Op.notIn]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_statuses
+                WHERE statusId IN (${safeIds.join(', ')}))
+              `),
+            },
+          },
+        };
+      },
+
+      selectTagGroups: function (tagGroups) {
+        if (!Array.isArray(tagGroups) || tagGroups.length === 0) return {};
+        const conditions = {};
+        tagGroups.forEach((group, index) => {
+          if (!Array.isArray(group)) return;
+          const safeIds = group.map((t) => parseInt(t, 10)).filter(Number.isFinite);
+          if (safeIds.length === 0) return;
+          conditions[`tagGroup${index}`] = {
+            [db.Sequelize.Op.in]: db.Sequelize.literal(`
+              (SELECT resourceId FROM resource_tags
+              WHERE tagId IN (${safeIds.join(', ')}))
+            `),
+          };
+        });
+        if (Object.keys(conditions).length === 0) return {};
+        return {
+          where: {
+            [db.Sequelize.Op.and]: Object.values(conditions).map((condition) => ({
+              id: condition,
+            })),
+          },
+        };
+      },
+
+      withinDistance: function (lat, lng, maxDistance) {
+        const safeLat = parseFloat(lat);
+        const safeLng = parseFloat(lng);
+        const safeDistance = parseFloat(maxDistance);
+        if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng) || !Number.isFinite(safeDistance)) return {};
+        return {
+          where: {
+            [db.Sequelize.Op.and]: [
+              db.Sequelize.literal(`location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`),
+              db.Sequelize.where(
+                db.Sequelize.fn(
+                  'ST_Distance_Sphere',
+                  db.Sequelize.fn(
+                    'POINT',
+                    db.Sequelize.cast(db.Sequelize.fn('JSON_EXTRACT', db.Sequelize.col('location'), db.Sequelize.literal("'$.lng'")), 'DECIMAL(10,7)'),
+                    db.Sequelize.cast(db.Sequelize.fn('JSON_EXTRACT', db.Sequelize.col('location'), db.Sequelize.literal("'$.lat'")), 'DECIMAL(10,7)')
+                  ),
+                  db.Sequelize.fn('POINT', safeLng, safeLat)
+                ),
+                { [db.Sequelize.Op.lte]: safeDistance }
+              ),
+            ],
           },
         };
       },

@@ -410,18 +410,18 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       filterByTags: function (onlyIncludeTagIds) {
-        let where = {};
-        if (onlyIncludeTagIds) {
-          where.id = { [Op.in]: onlyIncludeTagIds.split(',') };
-        }
+        const safeIds = (onlyIncludeTagIds || '')
+          .split(',')
+          .map((id) => parseInt(id, 10))
+          .filter(Number.isFinite);
         return {
           include: [
             {
               model: db.Tag,
               as: 'tags',
               through: { attributes: [] },
-              required: !!onlyIncludeTagIds,
-              where: where,
+              required: safeIds.length > 0,
+              where: safeIds.length > 0 ? { id: { [Op.in]: safeIds } } : {},
             },
           ],
         };
