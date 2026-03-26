@@ -27,7 +27,6 @@ const formSchema = z.object({
   loginRequiredText: z.string().optional(),
   showLogoutButton: z.boolean().optional(),
   showEmailConsentField: z.boolean().optional(),
-  showPrivacyConsentField: z.boolean().optional(),
 });
 type Formdata = z.infer<typeof formSchema>;
 
@@ -53,7 +52,6 @@ export default function AccountDisplay(
           ? 'Je moet ingelogd zijn om verder te gaan.'
           : props.loginRequiredText,
       showEmailConsentField: props.showEmailConsentField || false,
-      showPrivacyConsentField: props.showPrivacyConsentField || false,
     },
   });
 
@@ -103,22 +101,6 @@ export default function AccountDisplay(
                 wanneer iemand reageert op zijn of haar inzending of reactie.
                 Dit werkt alleen als e-mailnotificaties ook zijn ingeschakeld in
                 de instellingen van de inzending- en reactie-widgets.
-              </FormDescription>
-              {YesNoSelect(field, props)}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="showPrivacyConsentField"
-          render={({ field }) => (
-            <FormItem className="col-span-1">
-              <FormLabel>Toon status privacy toestemming</FormLabel>
-              <FormDescription>
-                Toont de datum waarop de gebruiker toestemming heeft gegeven
-                voor de verwerking van persoonsgegevens (AVG).
               </FormDescription>
               {YesNoSelect(field, props)}
               <FormMessage />

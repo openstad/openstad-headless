@@ -42,7 +42,6 @@ export type AccountProps = {
   loginRequiredText?: string;
   showLogoutButton?: boolean;
   showEmailConsentField?: boolean;
-  showPrivacyConsentField?: boolean;
 };
 
 type FormData = {
@@ -145,7 +144,6 @@ function Account({
   loginRequiredText = undefined,
   showLogoutButton = false,
   showEmailConsentField = false,
-  showPrivacyConsentField = false,
   ...props
 }: AccountWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -173,8 +171,6 @@ function Account({
       ...props,
       projectId: props.projectId,
     });
-
-  const privacyConsentAt = (currentUser as { privacyConsentAt?: string | null })?.privacyConsentAt;
 
   const saveUserData = async (data: any) => {
     if (currentUser?.id === undefined) {
@@ -399,17 +395,6 @@ function Account({
                     />
                   );
             })}
-
-            {showPrivacyConsentField && (
-              <Fieldset role="group" className="consent-checkbox-container">
-                <FieldsetLegend>Privacy toestemming</FieldsetLegend>
-                <Paragraph>
-                  {privacyConsentAt
-                    ? `Toestemming gegeven op ${new Date(privacyConsentAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-                    : 'Nog geen toestemming gegeven.'}
-                </Paragraph>
-              </Fieldset>
-            )}
 
             {allowUserEdit && (
               <Button
