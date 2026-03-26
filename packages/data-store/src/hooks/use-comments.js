@@ -5,15 +5,24 @@ export default function useComments(props) {
   const sentiment = props.sentiment || null;
   const onlyIncludeTagIds = props.onlyIncludeTagIds || null;
   const search = props.search || '';
+  const page = props.page ?? null;
+  const pageSize = props.pageSize ?? null;
+  const sort = props.sort || null;
+  const noPagination = props.noPagination || false;
   const commentsCacheKey = {
     projectId,
     resourceId,
     sentiment,
     onlyIncludeTagIds,
     search,
+    page,
+    pageSize,
+    sort,
+    noPagination,
   };
 
   let dataToReturn = [];
+  let metadataToReturn = undefined;
   let errorToReturn = undefined;
   let isLoadingToReturn = false;
 
@@ -23,7 +32,12 @@ export default function useComments(props) {
       'comments.fetch'
     );
 
-    dataToReturn = data;
+    if (data && Array.isArray(data.records) && data.metadata !== undefined) {
+      dataToReturn = data.records;
+      metadataToReturn = data.metadata;
+    } else {
+      dataToReturn = data;
+    }
     errorToReturn = error;
     isLoadingToReturn = isLoading;
   }
@@ -82,6 +96,7 @@ export default function useComments(props) {
 
   return {
     data: comments,
+    metadata: metadataToReturn,
     error: errorToReturn,
     isLoading: isLoadingToReturn,
   };

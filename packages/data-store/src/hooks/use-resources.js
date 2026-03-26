@@ -5,61 +5,90 @@ export default function useResources(
     pageSize = 20,
     search = '',
     tags = [],
+    excludeTags = [],
     sort = undefined,
     statuses = [],
+    excludeStatuses = [],
+    tagGroups = [],
+    lat = undefined,
+    lng = undefined,
+    maxDistance = undefined,
     projectIds = [],
     allowMultipleProjects = false,
+    fetchAll = false,
   },
   options
 ) {
   let self = this;
 
-  if (!projectId) {
-    const data = {
-      metadata: {
-        page: 0,
-        pageSize: 0,
-        pageCount: 1,
-        totalCount: 0,
-      },
-      records: [],
-    };
+  const emptyResult = {
+    metadata: {
+      page: 0,
+      pageSize: 0,
+      pageCount: 1,
+      totalCount: 0,
+    },
+    records: [],
+  };
 
-    return { data, error: 'No projectId given', isLoading: false };
+  if (!projectId) {
+    return {
+      data: emptyResult,
+      allData: null,
+      error: 'No projectId given',
+      isLoading: false,
+    };
   }
 
-  // If you add a prop here, the also do it for filter
+  // Shared filter params used by both the paginated and all-resources calls
+  const filterParams = {
+    projectId,
+    search,
+    tags,
+    excludeTags,
+    sort,
+    statuses,
+    excludeStatuses,
+    tagGroups,
+    lat,
+    lng,
+    maxDistance,
+    projectIds,
+    allowMultipleProjects,
+  };
+
+  // Primary paginated call
   const { data, error, isLoading } = self.useSWR(
-    {
-      projectId,
-      page,
-      pageSize,
-      search,
-      tags,
-      sort,
-      statuses,
-      projectIds,
-      allowMultipleProjects,
-    },
+    { ...filterParams, page, pageSize },
     'resources.fetch',
     options
   );
 
-  // add functionality
-  let resources = data || [];
+  // Secondary all-resources call (only when fetchAll is true)
+  const { data: allDataRaw, isLoading: allIsLoading } = self.useSWR(
+    fetchAll ? { ...filterParams, noPagination: true } : null,
+    'resources.fetch',
+    options
+  );
 
-  // Resource where probably called without page and itemsPerPage
-  if (Array.isArray(resources)) {
-    resources = {
-      metadata: {
-        page: 0,
-        pageSize: resources.length,
-        pageCount: 1,
-        totalCount: resources.length,
-      },
-      records: resources,
-    };
+  function normalizeResources(rawData) {
+    let resources = rawData || [];
+    if (Array.isArray(resources)) {
+      resources = {
+        metadata: {
+          page: 0,
+          pageSize: resources.length,
+          pageCount: 1,
+          totalCount: resources.length,
+        },
+        records: resources,
+      };
+    }
+    return resources;
   }
+
+  let resources = normalizeResources(data);
+  let allResources = allDataRaw ? normalizeResources(allDataRaw) : null;
 
   const create = function (submittedData, widgetId) {
     return self.mutate(
@@ -99,5 +128,13 @@ export default function useResources(
     });
   }
 
-  return { data: resources, error, isLoading, submitVotes, create };
+  return {
+    data: resources,
+    allData: allResources, // Read-only: no mutate methods (create/update/delete). Used for maps and callbacks.
+
+    error,
+    isLoading: isLoading || (fetchAll && allIsLoading),
+    submitVotes,
+    create,
+  };
 }
