@@ -1,8 +1,4 @@
 import DataStore from '@openstad-headless/data-store/src';
-import {
-  deterministicRandomSort,
-  getScopedSessionRandomSortSeed,
-} from '@openstad-headless/lib';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -17,7 +13,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { createContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState } from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -117,9 +113,7 @@ function CommentsInner({
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(
-    displayPagination ? itemsPerPage || 9999 : 9999
-  );
+  const [pageSize] = useState<number>(itemsPerPage || 20);
   const [search, setSearch] = useState<string>('');
 
   useEffect(() => {
@@ -266,6 +260,12 @@ function CommentsInner({
     ...props,
   } as CommentsWidgetProps;
 
+  const [sort, setSort] = useState<string | undefined>(
+    props.defaultSorting || 'createdAt_asc'
+  );
+
+  const activeSort = overrideSort || sort;
+
   const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
@@ -274,28 +274,22 @@ function CommentsInner({
       props.onlyIncludeTags || filteredTagsIdsString || undefined,
     search: search || '',
     refreshKey,
+    page: displayPagination ? page : undefined,
+    pageSize: displayPagination ? pageSize : undefined,
+    noPagination: !displayPagination,
+    sort: activeSort,
   };
 
-  const { data: comments, isLoading } = datastore.useComments(useCommentsData);
+  const {
+    data: comments,
+    metadata: commentsMeta,
+    isLoading,
+  } = datastore.useComments(useCommentsData);
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });
-
-  const [sort, setSort] = useState<string | undefined>(
-    props.defaultSorting || 'createdAt_asc'
-  );
-  const randomSortSeed = useMemo(() => {
-    const pathname =
-      typeof window !== 'undefined' ? window.location.pathname : '';
-    const search = typeof window !== 'undefined' ? window.location.search : '';
-    const scope = `${
-      props.projectId || 'project'
-    }:${resourceId}:${pathname}:${search}`;
-    return getScopedSessionRandomSortSeed(scope, 'commentsRandomSortSeed');
-  }, [props.projectId, resourceId]);
-
   const [canComment, setCanComment] = useState(args.canComment);
   const [disableSubmit, setDisableSubmit] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
@@ -385,20 +379,19 @@ function CommentsInner({
 
   useEffect(() => {
     if (comments) {
-      let count = comments.length || 0;
-
+      let count = commentsMeta?.totalCount ?? comments.length ?? 0;
       for (let comment of comments) {
         if (!comment?.replies) continue;
-
         count += comment.replies.length;
       }
-
       setCommentCount(count);
     }
-  }, [comments]);
+  }, [comments, commentsMeta]);
 
   useEffect(() => {
-    if (
+    if (commentsMeta && displayPagination) {
+      setTotalPages(Math.ceil((commentsMeta.totalCount || 0) / pageSize));
+    } else if (
       comments &&
       Array.isArray(comments) &&
       comments.length > 0 &&
@@ -406,9 +399,12 @@ function CommentsInner({
     ) {
       setTotalPages(Math.ceil(comments.length / pageSize));
     }
-  }, [comments, pageSize]);
+  }, [comments, commentsMeta, pageSize]);
 
-  const randomId = Math.random().toString(36).replace('0.', 'container_');
+  const randomIdRef = useRef(
+    Math.random().toString(36).replace('0.', 'container_')
+  );
+  const randomId = randomIdRef.current;
 
   const scrollToTop = () => {
     const divElement = document.getElementById(randomId);
@@ -512,6 +508,7 @@ function CommentsInner({
                   setSort(f.sort);
                 }
                 setSearch(f?.search?.text || '');
+                setPage(0);
               }}
               applyText={'Toepassen'}
               resources={undefined}
@@ -539,73 +536,24 @@ function CommentsInner({
             </Paragraph>
           ))}
 
-        {(comments || [])
-          ?.sort((a: any, b: any) => {
-            const sortMethod = overrideSort || sort;
-
-            if (sortMethod === 'createdAt_desc') {
-              return (
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
-              );
-            }
-            if (sortMethod === 'createdAt_asc') {
-              return (
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime()
-              );
-            }
-            if (sortMethod === 'title_asc' && a.description && b.description) {
-              return a.description.localeCompare(b.description);
-            }
-            if (sortMethod === 'title_desc' && a.description && b.description) {
-              return b.description.localeCompare(a.description);
-            }
-            if (sortMethod === 'votes_desc') {
-              return b.yes - a.yes;
-            }
-            if (sortMethod === 'votes_asc') {
-              return a.yes - b.yes;
-            }
-            if (sortMethod === 'random') {
-              return deterministicRandomSort(
-                a,
-                b,
-                randomSortSeed,
-                (comment: any) =>
-                  String(
-                    comment?.id ||
-                      comment?.createdAt ||
-                      comment?.description ||
-                      ''
-                  )
-              );
-            }
-            if (sortMethod === 'score') {
-              return (b.score || 0) - (a.score || 0);
-            }
-
-            return 0;
-          })
-          .slice(page * pageSize, (page + 1) * pageSize)
-          ?.map((comment: any, index: number) => {
-            let attributes = {
-              ...args,
-              comment,
-              submitComment,
-              setRefreshComments: refreshComments,
-            };
-            return (
-              <Comment
-                {...attributes}
-                disableSubmit={disableSubmit}
-                index={index}
-                key={index}
-                selected={selectedComment === comment?.id}
-                extraReplyButton={extraReplyButton}
-              />
-            );
-          })}
+        {(comments || [])?.map((comment: any, index: number) => {
+          let attributes = {
+            ...args,
+            comment,
+            submitComment,
+            setRefreshComments: refreshComments,
+          };
+          return (
+            <Comment
+              {...attributes}
+              disableSubmit={disableSubmit}
+              index={index}
+              key={index}
+              selected={selectedComment === comment?.id}
+              extraReplyButton={extraReplyButton}
+            />
+          );
+        })}
 
         {displayPagination && (
           <>
