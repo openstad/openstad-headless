@@ -96,6 +96,12 @@ module.exports = (db, sequelize, Sequelize) => {
         },
       },
 
+      privacyConsentAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+      },
+
       accessCode: {
         type: DataTypes.STRING,
         set: function (value) {
