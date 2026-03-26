@@ -1,11 +1,13 @@
 const userFields = require('../../config/user').fields;
+const sanitize = require('../../utils/sanitize');
 
 exports.index = (req, res, next) => {
   let requiredUserFields = req.client.requiredUserFields;
 
   requiredUserFields = requiredUserFields.map((field) => {
-    return userFields.find((userField) => userField.key === field);
-  });
+    const found = userFields.find((userField) => userField.key === field);
+    return found ? { ...found } : null;
+  }).filter(Boolean);
 
   requiredUserFields = requiredUserFields.filter((field) => {
     // Consent field is a special case since it can contain multiple client IDs
@@ -20,6 +22,11 @@ exports.index = (req, res, next) => {
       }
     }
 
+    // Privacy consent is stored as a timestamp; show the field if not yet accepted
+    if (field?.key === 'privacyConsent') {
+      return !req.user.privacyConsentAt;
+    }
+
     return !req.user[field.key];
   });
 
@@ -29,6 +36,8 @@ exports.index = (req, res, next) => {
 
   const requiredUserFieldsLabels =
     (config && config.requiredFields?.requiredUserFieldsLabels) || {};
+
+  const privacyPolicyUrl = req.client.clientDisclaimerUrl || '';
 
   // Replace field labels with labels defined in the client config (if provided)
   if (Object.keys(requiredUserFieldsLabels).length > 0) {
@@ -42,6 +51,17 @@ exports.index = (req, res, next) => {
       return field;
     });
   }
+
+  // Replace {link} placeholder in privacyConsent label with actual anchor tag
+  requiredUserFields = requiredUserFields.map((field) => {
+    if (field.key === 'privacyConsent' && field.label.includes('{link}')) {
+      const anchor = privacyPolicyUrl
+        ? `<a href="${privacyPolicyUrl}" target="_blank" rel="noopener noreferrer" aria-label="privacyverklaring (opent in nieuw tabblad)">privacyverklaring</a>`
+        : 'privacyverklaring';
+      field.label = sanitize.noTags(field.label).replace('{link}', anchor);
+    }
+    return field;
+  });
 
   res.render('auth/required-fields', {
     client: req.client,
@@ -84,6 +104,14 @@ exports.post = (req, res, next) => {
           ...currentValue,
           [clientId]: newValue,
         };
+      }
+    } else if (field === 'privacyConsent') {
+      if (!req.user.privacyConsentAt) {
+        if (req.body[field] !== 'on') {
+          req.flash('error', { msg: 'Je moet akkoord gaan met de privacyverklaring om verder te gaan.' });
+          return res.redirect(`/auth/required-fields?redirect_uri=${redirectUrl}`);
+        }
+        data['privacyConsentAt'] = new Date();
       }
     } else if (field === 'email' && !!req.user.email) {
       //break;
