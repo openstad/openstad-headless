@@ -227,7 +227,14 @@ router.all('*', function (req, res, next) {
   }
 
   if (req.query.lat && req.query.lng && req.query.maxDistance) {
-    req.scope.push({ method: ['withinDistance', req.query.lat, req.query.lng, req.query.maxDistance] });
+    req.scope.push({
+      method: [
+        'withinDistance',
+        req.query.lat,
+        req.query.lng,
+        req.query.maxDistance,
+      ],
+    });
   }
 
   if (req.query.includeUser) {
