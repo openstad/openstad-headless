@@ -116,7 +116,7 @@ export default function ProjectAuthentication() {
   });
 
   const authProvidersEnabled = useAuthProvidersEnabledCheck();
-  const { data: authProviders } = useAuthProvidersList();
+  const { data: authProviders, updateAuthProviderServerLoginPath } = useAuthProvidersList();
 
   useEffect(() => {
     form.reset(defaults());
@@ -190,10 +190,22 @@ export default function ProjectAuthentication() {
         ];
       }
 
-      const project = await updateProject(updatedConfig);
+      const savedProject = await updateProject(updatedConfig);
       const doubleSave = await updateProject(updatedConfig);
 
-      if (doubleSave && project) {
+      if (doubleSave && savedProject) {
+        // Generate login paths for all OIDC auth providers in the project
+        const providerIds = (values.authProviders || []).filter(
+          (p) => typeof p === 'number'
+        );
+        for (const id of providerIds) {
+          try {
+            await updateAuthProviderServerLoginPath({ id, projectId: project });
+          } catch (e) {
+            console.error(`Failed to update login path for provider ${id}:`, e);
+          }
+        }
+
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.');
