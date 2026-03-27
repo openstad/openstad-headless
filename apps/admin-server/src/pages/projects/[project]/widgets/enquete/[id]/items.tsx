@@ -215,9 +215,23 @@ export default function WidgetEnqueteItems(
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
+    console.log(
+      '[SUBMIT] form options:',
+      JSON.stringify(values?.options?.length),
+      '| state options:',
+      JSON.stringify(options?.length),
+      '| selectedItem:',
+      selectedItem?.trigger,
+      '| selectedOption:',
+      selectedOption?.trigger
+    );
     if (values?.options) {
       values.options = options;
     }
+    console.log(
+      '[SUBMIT] final options after merge:',
+      JSON.stringify(values?.options?.length)
+    );
 
     if (selectedItem) {
       setItems((currentItems) =>
@@ -471,6 +485,14 @@ export default function WidgetEnqueteItems(
 
   // Sets form to selected item values when item is selected
   useEffect(() => {
+    console.log(
+      '[EFFECT selectedItem] selectedItem:',
+      selectedItem?.trigger,
+      '| selectedItem.options:',
+      JSON.stringify(selectedItem?.options?.length),
+      '| selectedOption:',
+      selectedOption?.trigger
+    );
     if (selectedItem) {
       // Migrate fallback image fields to images array if needed
       let images = selectedItem.images || [];
@@ -547,6 +569,21 @@ export default function WidgetEnqueteItems(
       const index = options.findIndex(
         (option) => option.trigger === selectedOption.trigger
       );
+      console.log(
+        '[EFFECT selectedOption] selectedOption.trigger:',
+        selectedOption.trigger,
+        '| options length:',
+        options.length,
+        '| found index:',
+        index
+      );
+      if (index === -1) {
+        console.warn(
+          '[EFFECT selectedOption] ⚠️ STALE selectedOption! Trigger',
+          selectedOption.trigger,
+          'not found in current options'
+        );
+      }
       updatedOptions[index] = { ...selectedOption };
 
       // Use form.reset to update the entire form state
@@ -609,6 +646,14 @@ export default function WidgetEnqueteItems(
 
       form.setValue('matrix', newMatrixOptions);
     } else {
+      console.log(
+        '[OPTIONS ACTION]',
+        actionType,
+        'option trigger:',
+        clickedTrigger,
+        '| options before:',
+        options.length
+      );
       setOptions((currentLinks) => {
         return handleMovementOrDeletion(
           currentLinks,
@@ -647,6 +692,16 @@ export default function WidgetEnqueteItems(
   }
 
   function handleSaveItems() {
+    console.log(
+      '[SAVE CONFIG] Saving all items. items count:',
+      items.length,
+      '| items with options:',
+      items.map((i) => ({
+        trigger: i.trigger,
+        type: i.questionType,
+        optionsCount: i.options?.length,
+      }))
+    );
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
@@ -698,6 +753,12 @@ export default function WidgetEnqueteItems(
   }
 
   function handleSaveOptions() {
+    console.log(
+      '[SAVE OPTIONS] Saving options to form. options length:',
+      options.length,
+      '| selectedOption:',
+      selectedOption?.trigger
+    );
     form.setValue('options', options);
     setSettingOptions(false);
   }
@@ -798,6 +859,14 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
+                                console.log(
+                                  '[ITEM CLICK] Switching to item:',
+                                  item.trigger,
+                                  '| item.options:',
+                                  JSON.stringify(item.options?.length),
+                                  '| selectedOption before clear:',
+                                  JSON.stringify(selectedOption?.trigger)
+                                );
                                 setItem(item);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
@@ -1393,6 +1462,12 @@ export default function WidgetEnqueteItems(
                         className="w-fit mt-4 bg-secondary text-black hover:text-white"
                         type="button"
                         onClick={() => {
+                          console.log(
+                            '[CANCEL OPTIONS] Cancelling options editor. options length:',
+                            options.length,
+                            '| selectedOption:',
+                            selectedOption?.trigger
+                          );
                           (setSettingOptions(() => !settingOptions),
                             setOption(null));
                         }}>
