@@ -146,9 +146,10 @@ export function Area({
   ...props
 }: BaseProps & AreaProps) {
   const datastore = new DataStore({});
-  const { data: allAreas } = datastore.useArea({
-    projectId: props.projectId,
-  });
+  const areaIds = areas?.map((item: { id: number }) => item.id);
+  const { data: fetchedAreas } = datastore.useAreas(
+    areaIds && areaIds.length > 0 ? { ids: areaIds } : undefined
+  );
 
   interface Area {
     id: number;
@@ -190,13 +191,9 @@ export function Area({
   }, [area, areaRenderMode]);
 
   const multiPolygon: any[] = [];
-  const areaIds = areas?.map((item: Area) => item.id);
-  const safeAllAreas = Array.isArray(allAreas) ? allAreas : [];
-  const filteredAreas = safeAllAreas.filter((item: any) =>
-    areaIds?.includes(item.id)
-  );
+  const safeFetchedAreas = Array.isArray(fetchedAreas) ? fetchedAreas : [];
 
-  filteredAreas.forEach((item: any) => {
+  safeFetchedAreas.forEach((item: any) => {
     multiPolygon.push({
       title: item.name,
       polygon: item.polygon,
