@@ -215,23 +215,9 @@ export default function WidgetEnqueteItems(
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
-    console.log(
-      '[SUBMIT] form options:',
-      JSON.stringify(values?.options?.length),
-      '| state options:',
-      JSON.stringify(options?.length),
-      '| selectedItem:',
-      selectedItem?.trigger,
-      '| selectedOption:',
-      selectedOption?.trigger
-    );
     if (values?.options) {
       values.options = options;
     }
-    console.log(
-      '[SUBMIT] final options after merge:',
-      JSON.stringify(values?.options?.length)
-    );
 
     if (selectedItem) {
       setItems((currentItems) =>
@@ -483,81 +469,74 @@ export default function WidgetEnqueteItems(
     onFieldChanged('items', items);
   }, [items]);
 
+  function buildFormValues(item: Item) {
+    let images = item.images || [];
+    if ((!images || images.length === 0) && item.image) {
+      images = [
+        {
+          url: item.image,
+          imageAlt: item.imageAlt || '',
+          imageDescription: item.imageDescription || '',
+        },
+      ];
+    }
+
+    return {
+      trigger: item.trigger,
+      title: item.title || '',
+      fieldKey: item.fieldKey || '',
+      description: item.description || '',
+      questionType: item.questionType || '',
+      minCharacters: item.minCharacters || '',
+      maxCharacters: item.maxCharacters || '',
+      nextPageText: item.nextPageText || '',
+      prevPageText: item.prevPageText || '',
+      variant: item.variant || '',
+      options: item.options || [],
+      multiple: item.multiple || false,
+      randomizeItems: item.randomizeItems || false,
+      infoBlockStyle: item.infoBlockStyle || 'default',
+      infoBlockShareButton: item.infoBlockShareButton || false,
+      infoBlockExtraButton: item.infoBlockExtraButton || '',
+      infoBlockExtraButtonTitle: item.infoBlockExtraButtonTitle || '',
+      fieldRequired: item.fieldRequired || false,
+      createImageSlider: item.createImageSlider || false,
+      imageClickable: item.imageClickable || false,
+      maxChoices: item.maxChoices || '',
+      maxChoicesMessage: item.maxChoicesMessage || '',
+      showSmileys: item.showSmileys || false,
+      defaultValue: item.defaultValue || '',
+      placeholder: item.placeholder || '',
+      matrix: item.matrix || matrixDefault,
+      matrixMultiple: item.matrixMultiple || false,
+      routingInitiallyHide: item.routingInitiallyHide || false,
+      numberingStyle: item.numberingStyle || 'none',
+      routingSelectedQuestion: item.routingSelectedQuestion || '',
+      routingSelectedAnswer: item.routingSelectedAnswer || '',
+      infoField: item.infoField || '',
+      infofieldExplanation: item.infofieldExplanation || false,
+      videoUrl: item.videoUrl || '',
+      videoSubtitle: item.videoSubtitle || false,
+      videoLang: item.videoLang || '',
+      images,
+
+      // Keeping these for backwards compatibility
+      image1: item.image1 || '',
+      text1: item.text1 || '',
+      key1: item.key1 || '',
+      image2: item.image2 || '',
+      text2: item.text2 || '',
+      key2: item.key2 || '',
+      image: '',
+      imageAlt: '',
+      imageDescription: '',
+    };
+  }
+
   // Sets form to selected item values when item is selected
   useEffect(() => {
-    console.log(
-      '[EFFECT selectedItem] selectedItem:',
-      selectedItem?.trigger,
-      '| selectedItem.options:',
-      JSON.stringify(selectedItem?.options?.length),
-      '| selectedOption:',
-      selectedOption?.trigger
-    );
     if (selectedItem) {
-      // Migrate fallback image fields to images array if needed
-      let images = selectedItem.images || [];
-      if ((!images || images.length === 0) && selectedItem.image) {
-        images = [
-          {
-            url: selectedItem.image,
-            imageAlt: selectedItem.imageAlt || '',
-            imageDescription: selectedItem.imageDescription || '',
-          },
-        ];
-      }
-
-      const formValues = {
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        fieldKey: selectedItem.fieldKey || '',
-        description: selectedItem.description || '',
-        questionType: selectedItem.questionType || '',
-        minCharacters: selectedItem.minCharacters || '',
-        maxCharacters: selectedItem.maxCharacters || '',
-        nextPageText: selectedItem.nextPageText || '',
-        prevPageText: selectedItem.prevPageText || '',
-        variant: selectedItem.variant || '',
-        options: selectedItem.options || [],
-        multiple: selectedItem.multiple || false,
-        randomizeItems: selectedItem.randomizeItems || false,
-        infoBlockStyle: selectedItem.infoBlockStyle || 'default',
-        infoBlockShareButton: selectedItem.infoBlockShareButton || false,
-        infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
-        infoBlockExtraButtonTitle: selectedItem.infoBlockExtraButtonTitle || '',
-        fieldRequired: selectedItem.fieldRequired || false,
-        createImageSlider: selectedItem.createImageSlider || false,
-        imageClickable: selectedItem.imageClickable || false,
-        maxChoices: selectedItem.maxChoices || '',
-        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
-        showSmileys: selectedItem.showSmileys || false,
-        defaultValue: selectedItem.defaultValue || '',
-        placeholder: selectedItem.placeholder || '',
-        matrix: selectedItem.matrix || matrixDefault,
-        matrixMultiple: selectedItem.matrixMultiple || false,
-        routingInitiallyHide: selectedItem.routingInitiallyHide || false,
-        numberingStyle: selectedItem.numberingStyle || 'none',
-        routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
-        routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
-        infoField: selectedItem.infoField || '',
-        infofieldExplanation: selectedItem.infofieldExplanation || false,
-        videoUrl: selectedItem.videoUrl || '',
-        videoSubtitle: selectedItem.videoSubtitle || false,
-        videoLang: selectedItem.videoLang || '',
-        images,
-
-        // Keeping these for backwards compatibility
-        image1: selectedItem.image1 || '',
-        text1: selectedItem.text1 || '',
-        key1: selectedItem.key1 || '',
-        image2: selectedItem.image2 || '',
-        text2: selectedItem.text2 || '',
-        key2: selectedItem.key2 || '',
-        image: '',
-        imageAlt: '',
-        imageDescription: '',
-      };
-
-      form.reset(formValues);
+      form.reset(buildFormValues(selectedItem));
       setOptions(selectedItem.options || []);
       setMatrixOptions(selectedItem.matrix || matrixDefault);
     }
@@ -569,21 +548,6 @@ export default function WidgetEnqueteItems(
       const index = options.findIndex(
         (option) => option.trigger === selectedOption.trigger
       );
-      console.log(
-        '[EFFECT selectedOption] selectedOption.trigger:',
-        selectedOption.trigger,
-        '| options length:',
-        options.length,
-        '| found index:',
-        index
-      );
-      if (index === -1) {
-        console.warn(
-          '[EFFECT selectedOption] ⚠️ STALE selectedOption! Trigger',
-          selectedOption.trigger,
-          'not found in current options'
-        );
-      }
       updatedOptions[index] = { ...selectedOption };
 
       // Use form.reset to update the entire form state
@@ -646,14 +610,6 @@ export default function WidgetEnqueteItems(
 
       form.setValue('matrix', newMatrixOptions);
     } else {
-      console.log(
-        '[OPTIONS ACTION]',
-        actionType,
-        'option trigger:',
-        clickedTrigger,
-        '| options before:',
-        options.length
-      );
       setOptions((currentLinks) => {
         return handleMovementOrDeletion(
           currentLinks,
@@ -692,16 +648,6 @@ export default function WidgetEnqueteItems(
   }
 
   function handleSaveItems() {
-    console.log(
-      '[SAVE CONFIG] Saving all items. items count:',
-      items.length,
-      '| items with options:',
-      items.map((i) => ({
-        trigger: i.trigger,
-        type: i.questionType,
-        optionsCount: i.options?.length,
-      }))
-    );
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
@@ -753,14 +699,9 @@ export default function WidgetEnqueteItems(
   }
 
   function handleSaveOptions() {
-    console.log(
-      '[SAVE OPTIONS] Saving options to form. options length:',
-      options.length,
-      '| selectedOption:',
-      selectedOption?.trigger
-    );
     form.setValue('options', options);
     setSettingOptions(false);
+    setOption(null);
   }
 
   function handleSaveMatrixOptions() {
@@ -859,18 +800,12 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                console.log(
-                                  '[ITEM CLICK] Switching to item:',
-                                  item.trigger,
-                                  '| item.options:',
-                                  JSON.stringify(item.options?.length),
-                                  '| selectedOption before clear:',
-                                  JSON.stringify(selectedOption?.trigger)
-                                );
+                                form.reset(buildFormValues(item));
                                 setItem(item);
-                                setOptions([]);
-                                setMatrixOptions(matrixDefault);
+                                setOptions(item.options || []);
+                                setMatrixOptions(item.matrix || matrixDefault);
                                 setSettingOptions(false);
+                                setOption(null);
                               }}
                               dangerouslySetInnerHTML={{
                                 __html: `${
@@ -1462,12 +1397,6 @@ export default function WidgetEnqueteItems(
                         className="w-fit mt-4 bg-secondary text-black hover:text-white"
                         type="button"
                         onClick={() => {
-                          console.log(
-                            '[CANCEL OPTIONS] Cancelling options editor. options length:',
-                            options.length,
-                            '| selectedOption:',
-                            selectedOption?.trigger
-                          );
                           (setSettingOptions(() => !settingOptions),
                             setOption(null));
                         }}>
