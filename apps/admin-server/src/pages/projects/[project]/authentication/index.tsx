@@ -278,7 +278,11 @@ export default function ProjectAuthentication() {
                                 name: 'Standaard Openstad authenticatie',
                               },
                               ...authProviders,
-                            ].map((provider: { id: string; name: string }) => (
+                            ].map((provider: { id: string; name: string; config?: any }) => {
+                              const isOidc = provider.id !== 'openstad';
+                              const hasMappingConfigured = !isOidc || !!provider.config?.userFieldMapping?.identifier;
+
+                              return (
                               <FormField
                                 key={provider.id}
                                 control={form.control}
@@ -293,6 +297,7 @@ export default function ProjectAuthentication() {
                                           checked={field.value?.includes(
                                             provider.id
                                           )}
+                                          disabled={!hasMappingConfigured}
                                           onCheckedChange={(checked: any) => {
                                             return checked
                                               ? field.onChange([
@@ -310,14 +315,20 @@ export default function ProjectAuthentication() {
                                           }}
                                         />
                                       </FormControl>
-                                      <FormLabel className="font-normal">
+                                      <FormLabel className={`font-normal ${!hasMappingConfigured ? 'text-muted-foreground' : ''}`}>
                                         {provider.name}
+                                        {!hasMappingConfigured && (
+                                          <span className="ml-2 text-sm text-amber-600">
+                                            — Veldmapping niet geconfigureerd
+                                          </span>
+                                        )}
                                       </FormLabel>
                                     </FormItem>
                                   );
                                 }}
                               />
-                            ))}
+                              );
+                            })}
                         </div>
                       </FormItem>
                     )}
