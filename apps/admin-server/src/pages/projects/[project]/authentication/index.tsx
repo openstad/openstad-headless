@@ -116,7 +116,8 @@ export default function ProjectAuthentication() {
   });
 
   const authProvidersEnabled = useAuthProvidersEnabledCheck();
-  const { data: authProviders, updateAuthProviderServerLoginPath } = useAuthProvidersList();
+  const { data: authProviders, updateAuthProviderServerLoginPath } =
+    useAuthProvidersList();
 
   useEffect(() => {
     form.reset(defaults());
@@ -278,57 +279,72 @@ export default function ProjectAuthentication() {
                                 name: 'Standaard Openstad authenticatie',
                               },
                               ...authProviders,
-                            ].map((provider: { id: string; name: string; config?: any }) => {
-                              const isOidc = provider.id !== 'openstad';
-                              const hasMappingConfigured = !isOidc || !!provider.config?.userFieldMapping?.identifier;
+                            ].map(
+                              (provider: {
+                                id: string;
+                                name: string;
+                                config?: any;
+                              }) => {
+                                const isOidc = provider.id !== 'openstad';
+                                const hasMappingConfigured =
+                                  !isOidc ||
+                                  !!provider.config?.userFieldMapping
+                                    ?.identifier;
 
-                              return (
-                              <FormField
-                                key={provider.id}
-                                control={form.control}
-                                name="authProviders"
-                                render={({ field }) => {
-                                  return (
-                                    <FormItem
-                                      key={provider.id}
-                                      className="flex flex-row items-start space-x-3 space-y-0">
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={field.value?.includes(
-                                            provider.id
-                                          )}
-                                          disabled={!hasMappingConfigured}
-                                          onCheckedChange={(checked: any) => {
-                                            return checked
-                                              ? field.onChange([
-                                                  ...(Array.isArray(field.value)
-                                                    ? field.value
-                                                    : []),
-                                                  provider.id,
-                                                ])
-                                              : field.onChange(
-                                                  field.value?.filter(
-                                                    (value) =>
-                                                      value !== provider.id
-                                                  )
-                                                );
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <FormLabel className={`font-normal ${!hasMappingConfigured ? 'text-muted-foreground' : ''}`}>
-                                        {provider.name}
-                                        {!hasMappingConfigured && (
-                                          <span className="ml-2 text-sm text-amber-600">
-                                            — Veldmapping niet geconfigureerd
-                                          </span>
-                                        )}
-                                      </FormLabel>
-                                    </FormItem>
-                                  );
-                                }}
-                              />
-                              );
-                            })}
+                                return (
+                                  <FormField
+                                    key={provider.id}
+                                    control={form.control}
+                                    name="authProviders"
+                                    render={({ field }) => {
+                                      return (
+                                        <FormItem
+                                          key={provider.id}
+                                          className="flex flex-row items-start space-x-3 space-y-0">
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={field.value?.includes(
+                                                provider.id
+                                              )}
+                                              disabled={!hasMappingConfigured}
+                                              onCheckedChange={(
+                                                checked: any
+                                              ) => {
+                                                return checked
+                                                  ? field.onChange([
+                                                      ...(Array.isArray(
+                                                        field.value
+                                                      )
+                                                        ? field.value
+                                                        : []),
+                                                      provider.id,
+                                                    ])
+                                                  : field.onChange(
+                                                      field.value?.filter(
+                                                        (value) =>
+                                                          value !== provider.id
+                                                      )
+                                                    );
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <FormLabel
+                                            className={`font-normal ${!hasMappingConfigured ? 'text-muted-foreground' : ''}`}>
+                                            {provider.name}
+                                            {!hasMappingConfigured && (
+                                              <span className="ml-2 text-sm text-amber-600">
+                                                — Veldmapping niet
+                                                geconfigureerd
+                                              </span>
+                                            )}
+                                          </FormLabel>
+                                        </FormItem>
+                                      );
+                                    }}
+                                  />
+                                );
+                              }
+                            )}
                         </div>
                       </FormItem>
                     )}
