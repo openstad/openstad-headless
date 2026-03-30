@@ -40,6 +40,7 @@ module.exports = function mapUserData({ map = {}, user = {} }) {
     'city',
     'twoFactorConfigured',
     'emailNotificationConsent',
+    'privacyConsentAt',
     'clientId',
   ];
   for (let key of keys) {
