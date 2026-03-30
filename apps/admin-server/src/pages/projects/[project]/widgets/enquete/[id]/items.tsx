@@ -534,13 +534,7 @@ export default function WidgetEnqueteItems(
   }
 
   // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      form.reset(buildFormValues(selectedItem));
-      setOptions(selectedItem.options || []);
-      setMatrixOptions(selectedItem.matrix || matrixDefault);
-    }
-  }, [selectedItem, form]);
+  // Item selection is handled directly in the click handler (no useEffect needed)
 
   useEffect(() => {
     if (selectedOption) {
