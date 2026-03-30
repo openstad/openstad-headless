@@ -421,6 +421,7 @@ service.updateClient = async function ({ authConfig, project }) {
       'configureTwoFactor',
       'clientStylesheets',
       'clientDisclaimerUrl',
+      'clientDisclaimerText',
     ];
     properties.forEach((property) => {
       if (authConfig?.config && authConfig.config[property]) {
