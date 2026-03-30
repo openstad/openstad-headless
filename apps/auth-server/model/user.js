@@ -97,9 +97,19 @@ module.exports = (db, sequelize, Sequelize) => {
       },
 
       privacyConsentAt: {
-        type: DataTypes.DATE,
+        type: DataTypes.JSON,
         allowNull: true,
         defaultValue: null,
+        set: function (value) {
+          try {
+            if (typeof value === 'string') {
+              value = JSON.parse(value);
+            }
+          } catch (e) {}
+          value = value || {};
+
+          this.setDataValue('privacyConsentAt', value);
+        },
       },
 
       accessCode: {

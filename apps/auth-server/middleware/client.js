@@ -53,6 +53,7 @@ exports.withOne = async (req, res, next) => {
       res.locals.clientProjectUrl = clientConfig.projectUrl;
       res.locals.clientEmail = clientConfig.contactEmail;
       res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+      res.locals.clientDisclaimerText = clientConfig.clientDisclaimerText;
       res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
       //if logo isset in config overwrite the .env logo
@@ -289,6 +290,18 @@ exports.checkRequiredUserFields = (req, res, next) => {
           error = true;
           return;
         }
+      }
+
+      // Privacy consent is stored per client ID as a timestamp
+      if (field === 'privacyConsent') {
+        const clientId = String(req?.client?.id);
+        const currentValue = req?.user?.privacyConsentAt || {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+        if (!clientConsentIsSet) {
+          error = true;
+        }
+        return;
       }
 
       // if at least one required field is empty, set to error
