@@ -325,20 +325,6 @@ export default function CreateUserGeneral() {
       <Separator className="my-4" />
 
       <div>
-        <Heading size="lg">Privacy toestemming (AVG)</Heading>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Wordt ingevuld wanneer &apos;Privacy toestemming&apos; is ingesteld als verplicht veld voor dit project.
-        </p>
-        <p className="mt-2 text-sm">
-          {user?.privacyConsentAt
-            ? `Toestemming gegeven op ${new Date(user.privacyConsentAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-            : '–'}
-        </p>
-      </div>
-
-      <Separator className="my-4" />
-
-      <div>
         <Heading size="lg">Gebruiker anonimiseren</Heading>
         <p className="mt-2 text-sm text-muted-foreground">
           Anonimiseer deze gebruiker in alle projecten waarin dit account
