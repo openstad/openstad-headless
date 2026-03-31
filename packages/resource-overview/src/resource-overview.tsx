@@ -1126,6 +1126,10 @@ function ResourceOverviewInner({
   ]);
 
   useEffect(() => {
+    // Skip recalculation while loading — SWR returns undefined for new keys
+    // which would cause totalPages=1 and clamp the page back to 0
+    if (isLoading) return;
+
     const totalCount = listUsesAllResources
       ? (filteredResources || []).length
       : resourcesWithPagination?.metadata?.totalCount || 0;
@@ -1135,7 +1139,10 @@ function ResourceOverviewInner({
       setTotalPages(totalPagesCalc);
     }
 
-    setPage((currentPage) => Math.min(currentPage, totalPagesCalc - 1));
+    // Only clamp page if it's actually out of bounds
+    setPage((currentPage) =>
+      currentPage >= totalPagesCalc ? totalPagesCalc - 1 : currentPage
+    );
 
     if (onFilteredResourcesChange) {
       onFilteredResourcesChange(
@@ -1147,6 +1154,7 @@ function ResourceOverviewInner({
       onLocationChange(location);
     }
   }, [
+    isLoading,
     filteredResources,
     resourcesWithPagination,
     allResourcesData,
@@ -1155,7 +1163,6 @@ function ResourceOverviewInner({
     onFilteredResourcesChange,
     onLocationChange,
     pageSize,
-    totalPages,
   ]);
 
   useEffect(() => {
