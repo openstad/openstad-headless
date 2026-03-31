@@ -268,7 +268,7 @@ function DocumentMap({
     urlTagIdsArray && allTags
       ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
       : [];
-  const [refreshComments, setRefreshComments] = useState(false);
+  const [refreshComments, setRefreshComments] = useState(0);
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -370,15 +370,19 @@ function DocumentMap({
   const leafletMapRef = useRef<HTMLDivElement>(null);
 
   const imageUrl = resource.images ? resource.images[0].url : '';
-  const img = new Image();
-  img.src = imageUrl;
-  img.onload = () => {
-    const containerWidth = leafletMapRef.current?.offsetWidth || 1920;
-    const imageWidth = containerWidth * 0.8;
-    const imageHeight = (img.height / img.width) * imageWidth;
-    setDocumentWidth(imageWidth);
-    setDocumentHeight(imageHeight);
-  };
+
+  useEffect(() => {
+    if (!imageUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      const containerWidth = leafletMapRef.current?.offsetWidth || 1920;
+      const imageWidth = containerWidth * 0.8;
+      const imageHeight = (img.height / img.width) * imageWidth;
+      setDocumentWidth(imageWidth);
+      setDocumentHeight(imageHeight);
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
 
   const [bounds, setBounds] = useState<Array<Array<number>> | null>(null);
 
@@ -545,7 +549,7 @@ function DocumentMap({
         setSelectedCommentIndex(newIndex);
         setSelectedMarkerIndex(newIndex);
 
-        setRefreshComments((prev) => !prev);
+        setRefreshComments((prev) => prev + 1);
         scrollToComment(newIndex);
 
         notifySuccess();
@@ -778,7 +782,7 @@ function DocumentMap({
     !!popupPosition || (isPopupMarkerBehavior && !!popupComment);
 
   const popupCommentWidgetContextValue: CommentsWidgetProps & {
-    setRefreshComments: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefreshComments: React.Dispatch<React.SetStateAction<number>>;
   } = {
     ...props,
     resourceId: resourceId || '',
@@ -1292,9 +1296,11 @@ function DocumentMap({
                       adminLabel={props.comments?.adminLabel || 'admin'}
                       editorLabel={props.comments?.editorLabel}
                       setRefreshComments={() =>
-                        setRefreshComments((prev) => !prev)
+                        setRefreshComments((prev) => prev + 1)
                       }
-                      submitComment={() => setRefreshComments((prev) => !prev)}
+                      submitComment={() =>
+                        setRefreshComments((prev) => prev + 1)
+                      }
                       variant={props.commentsWidget?.variant || 'medium'}
                     />
                   </CommentWidgetContext.Provider>
@@ -1475,7 +1481,7 @@ function DocumentMap({
           <div ref={containerRef}>
             <Comments
               {...props}
-              key={refreshComments ? 'refresh' : 'no-refresh'}
+              key={`refresh-${refreshComments}`}
               onlyIncludeTags={
                 selectedTagsString || filteredTagsIdsString || ''
               }
