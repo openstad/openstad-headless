@@ -23,7 +23,7 @@ data.page.title }} {% endblock %} {% block main %}
             </figure>
             <div class="card-content">
               <div class="date">
-                {{ piece.publishedAt | date('MMMM D, YYYY') }}
+                {{ piece.publishedAt | date('D MMMM YYYY') }}
               </div>
               <h2 class="utrecht-heading-4">{{ piece.title }}</h2>
               <p class="utrecht-paragraph">{{ piece.summary }}</p>
