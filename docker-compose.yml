@@ -120,6 +120,7 @@ services:
       - HASH_IP_SALT=${HASH_IP_SALT}
       - USER_ID_SALT=${USER_ID_SALT}
       - SPAM_FILTER_ENABLED=${SPAM_FILTER_ENABLED:-false}
+      - RANDOM_SORT_ROTATION_MS=${RANDOM_SORT_ROTATION_MS:-0}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:

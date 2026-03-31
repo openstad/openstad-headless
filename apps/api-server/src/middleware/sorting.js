@@ -46,41 +46,34 @@ module.exports = function (req, res, next) {
         case 'votes_desc':
         case 'ranking':
           return ['yes', 'DESC'];
-          break;
         case 'votes_asc':
           return ['yes', 'ASC'];
-          break;
         case 'random':
           const rotationMs =
             parseInt(process.env.RANDOM_SORT_ROTATION_MS, 10) || 0;
           const seed =
             rotationMs > 0 ? Math.floor(Date.now() / rotationMs) : 12345;
           return db.sequelize.literal(`RAND(${seed})`);
-          break;
         case 'score':
           if (!allowedSortColumns.includes('score')) {
             return [fallbackSortColumn, 'DESC'];
           }
           return ['score', 'DESC'];
-          break;
         case 'title':
           if (!allowedSortColumns.includes('title')) {
             return [fallbackSortColumn, 'DESC'];
           }
           return ['title', 'ASC'];
-          break;
         default:
           column = column.replace(/[^a-z0-9_]+/gi, '');
 
           let match = column.match(/^([a-z0-9_]+)_(asc|desc)$/i);
           if (!match) {
             return [fallbackSortColumn, 'DESC'];
-            break;
           }
 
           if (!allowedSortColumns.includes(match[1])) {
             return [fallbackSortColumn, 'DESC'];
-            break;
           }
 
           const sortOrder = column.endsWith('_asc') ? 'ASC' : 'DESC';
