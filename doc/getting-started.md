@@ -2,6 +2,13 @@
 
 This is the recommended happy path for local development: clone → generate config → start Docker → verify.
 
+### Prerequisites
+
+- Docker + Docker Compose
+- Node.js + npm (to run `npm run create-docker-config`)
+
+Details (including ports/domains): [Docker prerequisites and local ports/domains](./docker-prereqs-and-ports.md)
+
 ### 1) Clone and install dependencies
 
 ```sh

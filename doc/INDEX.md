@@ -5,6 +5,7 @@ This folder contains repo-level documentation for running and operating the Open
 ## What exists in `doc/`
 
 - [Getting started (Docker)](getting-started.md)
+- [Docker prerequisites and local ports/domains](docker-prereqs-and-ports.md)
 - [Widget workflow (admin preview)](widget-workflow.md)
 - [Setup (non-Docker)](setup.md)
 - [Setup options](setup-options.md)
