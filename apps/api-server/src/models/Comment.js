@@ -280,12 +280,6 @@ module.exports = function (db, sequelize, DataTypes) {
           where: {
             parentId: null,
           },
-          // HACK: Inelegant?
-          order: [
-            //						sequelize.literal(`GREATEST(0, \`yes\` - ${commentVoteThreshold}) DESC`),
-            sequelize.literal('parentId'),
-            sequelize.literal('createdAt'),
-          ],
         };
       },
 

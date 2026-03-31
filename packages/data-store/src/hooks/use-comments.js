@@ -9,6 +9,7 @@ export default function useComments(props) {
   const pageSize = props.pageSize ?? null;
   const sort = props.sort || null;
   const noPagination = props.noPagination || false;
+  const refreshKey = props.refreshKey || null;
   const commentsCacheKey = {
     projectId,
     resourceId,
@@ -19,6 +20,7 @@ export default function useComments(props) {
     pageSize,
     sort,
     noPagination,
+    refreshKey,
   };
 
   let dataToReturn = [];

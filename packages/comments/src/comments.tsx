@@ -13,7 +13,13 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -181,17 +187,17 @@ function CommentsInner({
     tagIdsArray
   );
 
-  const goToLastPage = () => {
+  const goToLastPage = useCallback(() => {
     if (totalPages > 0 && displayPagination) {
       setPage(totalPages - 1);
     }
-  };
+  }, [totalPages, displayPagination]);
 
   useEffect(() => {
     if (onGoToLastPage) {
       onGoToLastPage(goToLastPage);
     }
-  }, [onGoToLastPage]);
+  }, [onGoToLastPage, goToLastPage]);
 
   useEffect(() => {
     if (overridePage !== page) {
@@ -379,12 +385,7 @@ function CommentsInner({
 
   useEffect(() => {
     if (comments) {
-      let count = commentsMeta?.totalCount ?? comments.length ?? 0;
-      for (let comment of comments) {
-        if (!comment?.replies) continue;
-        count += comment.replies.length;
-      }
-      setCommentCount(count);
+      setCommentCount(commentsMeta?.totalCount ?? comments.length ?? 0);
     }
   }, [comments, commentsMeta]);
 
