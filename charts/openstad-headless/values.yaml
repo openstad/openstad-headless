@@ -2,6 +2,9 @@
 global:
   ingress:
     type: nginx
+  # Global OpenTelemetry toggle (per-service can override in their `extraEnvVars` or by adding `otelEnabled` to that service).
+  # NOTE: Service override is supported by the helm templates even if not shown in this default values file.
+  otelEnabled: false
 
 # Optional Dependencies
 

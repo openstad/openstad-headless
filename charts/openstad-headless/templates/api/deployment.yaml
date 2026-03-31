@@ -295,6 +295,9 @@ spec:
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
             value: {{ .Values.api.otelExporterOtlpEndpoint | quote }}
 
+          - name: OTEL_ENABLED
+            value: {{ (hasKey .Values.api "otelEnabled") | ternary .Values.api.otelEnabled (default false $.Values.global.otelEnabled) | quote }}
+
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}

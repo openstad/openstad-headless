@@ -156,6 +156,8 @@ spec:
             value: {{ .Values.cms.otelServiceName | quote }}
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
             value: {{ .Values.cms.otelExporterOtlpEndpoint | quote }}
+          - name: OTEL_ENABLED
+            value: {{ (hasKey .Values.cms "otelEnabled") | ternary .Values.cms.otelEnabled (default false $.Values.global.otelEnabled) | quote }}
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}

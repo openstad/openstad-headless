@@ -13,6 +13,7 @@ const DEPLOYMENT_ENVIRONMENT = 'deployment.environment';
 const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 
 const defaultConfig = {
+  enabled: process.env.OTEL_ENABLED === 'true',
   environment: process.env.NODE_ENV || 'development',
   otlpEndpoint:
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
