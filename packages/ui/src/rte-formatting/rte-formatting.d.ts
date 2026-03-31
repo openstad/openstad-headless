@@ -10,5 +10,3 @@ declare function RenderContent(
 ): string;
 
 export default RenderContent;
-
-export function unwrapSingleRootDiv(content: string): string;
