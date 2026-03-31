@@ -1019,12 +1019,13 @@ function ResourceOverviewInner({
 
   useEffect(() => {
     if (
+      !isLoading &&
       resourcesWithPagination &&
       !(selectedProjects.length > 0 && projectIds.length === 0)
     ) {
       setResources(resourcesWithPagination.records || []);
     }
-  }, [resourcesWithPagination]);
+  }, [resourcesWithPagination, isLoading]);
 
   useEffect(() => {
     if (listUsesAllResources) {
