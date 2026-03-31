@@ -2,6 +2,9 @@
 global:
   ingress:
     type: nginx
+  # Global OpenTelemetry toggle (per-service can override in their `extraEnvVars` or by adding `otelEnabled` to that service).
+  # NOTE: Service override is supported by the helm templates even if not shown in this default values file.
+  otelEnabled: false
 
 # Optional Dependencies
 
@@ -163,6 +166,9 @@ admin:
     tls:
       secretName: openstad-tls-admin
       hosts: []
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-admin-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
   # Resources:
@@ -238,6 +244,9 @@ auth:
   # Cookie settings
   cookie:
     secureOff:
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-auth-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
 api:
   name: api
   label: openstad-api-service
@@ -304,6 +313,9 @@ api:
     secretStoreName: "gcp-secret-store"
     # Cooldown in seconds between manual retry triggers per project
     retryCooldownSeconds: 60
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-api-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
   # Enable spam detection and spam flags
@@ -377,6 +389,9 @@ image:
     ccRequests: 100
   hqOriginalMaxPixels: 160000
   disableWebpConversion: false
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-image-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
   # Resources:
@@ -436,6 +451,9 @@ cms:
       hosts: []
   disableWidgetPreview: "false"
   useS3: "false"
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-cms-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
   # Resources:
