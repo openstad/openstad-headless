@@ -9,7 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "preview": "vite preview",
     "cy:open": "cypress open",
-    "test:component": "cypress run --component"
+    "test:component": "../../scripts/run-package-component-tests.sh"
   },
   "dependencies": {
     "@openstad-headless/data-store": "*",

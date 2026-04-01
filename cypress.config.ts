@@ -1,3 +1,4 @@
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'cypress';
 // Load environment variables from .testing.env file
 import dotenv from 'dotenv';
@@ -7,6 +8,7 @@ dotenv.config({ path: '.testing.env' });
 
 export default defineConfig({
   projectId: 'vqxz36',
+  allowCypressEnv: false,
 
   e2e: {
     setupNodeEvents(on, config) {
@@ -20,6 +22,10 @@ export default defineConfig({
     devServer: {
       framework: 'react',
       bundler: 'vite',
+      viteConfig: {
+        plugins: [react()],
+      },
     },
+    specPattern: 'packages/**/cypress/component/**/*.cy.{js,jsx,ts,tsx}',
   },
 });
