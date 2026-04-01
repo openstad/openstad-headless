@@ -17,14 +17,14 @@
     "@openstad-headless/swipe": "^0.0.0",
     "@openstad-headless/types": "*",
     "@openstad-headless/ui": "*",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.2.3",
-    "@types/react": "^18.2.78",
-    "@types/react-dom": "^18.2.7",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.4.1",
