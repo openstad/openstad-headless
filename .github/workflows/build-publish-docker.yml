@@ -137,7 +137,6 @@ jobs:
           record: true
           install: false
           component: true
-          command: npm run test:component
           ci-build-id: ${{ needs.generate-ci-build-id.outputs.build_id }}
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
