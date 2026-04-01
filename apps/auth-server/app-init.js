@@ -93,6 +93,7 @@ const initializeApp = async () => {
         //  domain: 'localhost',
         secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
         httpOnly: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
+        sameSite: 'lax',
       };
     }
 
