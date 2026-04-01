@@ -240,7 +240,6 @@ passport.use(
   new BearerStrategy((accessToken, done) => {
     memoryStorage.accessTokens
       .find(accessToken)
-      .then((token) => token)
       .then((token) => validate.token(token, accessToken))
       .then((token) => {
         return done(null, token, { scope: '*' });
