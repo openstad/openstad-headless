@@ -2,7 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@openstad-headless/*'],
-  images: { domains: ['localhost', 'localhost:31470'] },
+  images: {
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'http', hostname: 'localhost', port: '31470' },
+    ],
+  },
   async rewrites() {
     return [
       {
