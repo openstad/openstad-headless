@@ -23,11 +23,12 @@ export default defineConfig(({ command }) => {
           fileName: 'choiceguide-results',
         },
         rollupOptions: {
-          external: ['react', 'react-dom'],
+          external: ['react', 'react-dom', 'react-dom/client'],
           output: {
             globals: {
-              react: 'React',
-              'react-dom': 'ReactDOM',
+              react: 'OpenStadReact',
+              'react-dom': 'OpenStadReactDOM',
+              'react-dom/client': 'OpenStadReactDOM',
             },
           },
         },

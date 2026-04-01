@@ -23,11 +23,17 @@ export default defineConfig(({ command }) => {
           name: 'OpenstadHeadlessSwipe',
         },
         rollupOptions: {
-          external: ['react', 'react-dom', 'remixicon/fonts/remixicon.css'],
+          external: [
+            'react',
+            'react-dom',
+            'react-dom/client',
+            'remixicon/fonts/remixicon.css',
+          ],
           output: {
             globals: {
-              react: 'React',
-              'react-dom': 'ReactDOM',
+              react: 'OpenStadReact',
+              'react-dom': 'OpenStadReactDOM',
+              'react-dom/client': 'OpenStadReactDOM',
             },
           },
         },
