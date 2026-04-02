@@ -59,22 +59,24 @@ router
       return next(new Error('Invalid widget type'));
     }
 
+    let widgetConfig = {};
     try {
-      if (
-        !!widgetDefinition.defaultConfig &&
-        !widgetDefinition.defaultConfig.projectId
-      ) {
-        widgetDefinition.defaultConfig.projectId = projectId;
+      // Clone to avoid mutating the shared widget definition object.
+      widgetConfig = JSON.parse(
+        JSON.stringify(widgetDefinition.defaultConfig || {})
+      );
+      if (widgetConfig && typeof widgetConfig === 'object') {
+        widgetConfig.projectId = projectId;
       }
     } catch (err) {
-      console.log('Error setting projectId in defaultConfig', err);
+      console.log('Error generating widget config', err);
     }
 
     const createdWidget = await db.Widget.create({
       projectId,
       description: widget.description,
       type: widget.type,
-      config: widgetDefinition.defaultConfig || {},
+      config: widgetConfig,
     });
 
     return res.json(createdWidget);

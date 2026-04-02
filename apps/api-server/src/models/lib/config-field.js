@@ -73,7 +73,9 @@ function parseConfig(which, config) {
           typeof value[key] !== 'boolean'
         ) {
           throw new Error(
-            `project.config: ${key} must be an boolean ${value[key]}, ${options}, ${typeof value[key]}`
+            `project.config: ${key} must be an boolean ${
+              value[key]
+            }, ${options}, ${typeof value[key]}`
           );
         }
         if (

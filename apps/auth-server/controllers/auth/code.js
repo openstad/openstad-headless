@@ -10,6 +10,7 @@ const tokenUrl = require('../../services/tokenUrl');
 const emailService = require('../../services/email');
 const authCodeConfig = require('../../config/auth').get(authType);
 const clientAuth = require('../../utils/clientAuth');
+const interpolate = require('../../utils/interpolate');
 
 exports.login = (req, res, next) => {
   const config = req.client.config ? req.client.config : {};
@@ -18,7 +19,7 @@ exports.login = (req, res, next) => {
     config.authTypes && config.authTypes[authType]
       ? config.authTypes[authType]
       : {};
-  const contactEmail = config.contactEmail || '';
+  const vars = { clientEmail: config.contactEmail || '' };
 
   res.render('auth/code/login', {
     client: req.client,
@@ -28,10 +29,10 @@ exports.login = (req, res, next) => {
       ? configAuthType.description
       : authCodeConfig.description,
     label: configAuthType.label ? configAuthType.label : authCodeConfig.label,
-    helpText: (configAuthType.helpText
-      ? configAuthType.helpText
-      : authCodeConfig.helpText
-    ).replace(/\[\[contactEmail\]\]/g, contactEmail),
+    helpText: interpolate(
+      configAuthType.helpText || authCodeConfig.helpText,
+      vars
+    ),
     buttonText: configAuthType.buttonText
       ? configAuthType.buttonText
       : authCodeConfig.buttonText,
@@ -39,7 +40,9 @@ exports.login = (req, res, next) => {
       ? configAuthType.displaySidebar
       : authCodeConfig.displaySidebar,
     backUrl: authCodeConfig.displayBackbutton ? backUrl : false,
-    redirect_uri: encodeURIComponent(req.query.redirect_uri),
+    redirect_uri: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
   });
 };
 
@@ -54,8 +57,16 @@ exports.postLogin = (req, res, next) => {
         const redirectUrl = req.query.redirect_uri
           ? req.query.redirect_uri
           : req.client.redirectUrl;
+        if (!redirectUrl)
+          return next(
+            new Error(
+              'No redirect_uri provided and no default redirectUrl configured for this client'
+            )
+          );
         return res.redirect(
-          `${authCodeConfig.loginUrl}?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`
+          `${authCodeConfig.loginUrl}?redirect_uri=${encodeURIComponent(
+            redirectUrl
+          )}&response_type=code&client_id=${req.client.clientId}&scope=offline`
         );
       }
 
@@ -69,8 +80,16 @@ exports.postLogin = (req, res, next) => {
           const redirectUrl = req.query.redirect_uri
             ? req.query.redirect_uri
             : req.client.redirectUrl;
+          if (!redirectUrl)
+            return next(
+              new Error(
+                'No redirect_uri provided and no default redirectUrl configured for this client'
+              )
+            );
           // Redirect if it succeeds to authorize screen
-          const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(
+            redirectUrl
+          )}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
           return res.redirect(authorizeUrl);
         };
 

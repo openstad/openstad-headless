@@ -1,20 +1,43 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
+export type ResourceListOptions = {
+  sort?: string;
+  searchField?: string;
+  searchTerm?: string;
+};
+
 export default function useResources(
   projectId?: string,
   includeGlobalTags?: boolean,
   page?: number,
-  pageSize?: number
+  pageSize?: number,
+  options?: ResourceListOptions
 ) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
+  const baseUrl = `/api/openstad/api/project/${projectNumber}/resource`;
+  const params = new URLSearchParams({
+    includeUser: '1',
+    includeVoteCount: '1',
+    includeTags: '1',
+  });
 
-  const baseUrl = `/api/openstad/api/project/${projectNumber}/resource?includeUser=1&includeVoteCount=1&includeTags=1`;
-
-  let url = baseUrl;
   if (page !== undefined && pageSize !== undefined) {
-    url += `&page=${page}&pageSize=${pageSize}`;
+    params.set('page', page.toString());
+    params.set('pageSize', pageSize.toString());
   }
+  if (options?.sort?.trim()) {
+    params.set('sort', options.sort.trim());
+  }
+  if (options?.searchTerm?.trim()) {
+    const searchField =
+      options.searchField && options.searchField !== ''
+        ? options.searchField
+        : 'text';
+    params.set(`search[${searchField}]`, options.searchTerm.trim());
+  }
+
+  const url = `${baseUrl}?${params.toString()}`;
 
   const resourcesListSwr = useSWR(projectNumber ? url : null);
 
@@ -115,9 +138,14 @@ export default function useResources(
     const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
 
     for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
-      const response = await fetch(
-        `${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`
-      );
+      const fetchAllParams = new URLSearchParams({
+        includeUser: '1',
+        includeVoteCount: '1',
+        includeTags: '1',
+        page: currentPage.toString(),
+        pageSize: pageSizeLimit.toString(),
+      });
+      const response = await fetch(`${baseUrl}?${fetchAllParams.toString()}`);
       const results = await response.json();
       allData = allData.concat(results?.records || []);
     }

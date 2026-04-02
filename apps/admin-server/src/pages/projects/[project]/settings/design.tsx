@@ -15,7 +15,7 @@ import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import Prism from 'prismjs';
-import React, { useState } from 'react';
+import React from 'react';
 import { useCallback, useEffect } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';

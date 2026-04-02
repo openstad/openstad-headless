@@ -22,7 +22,6 @@ import {
 } from '../../../../../../components/ui/tabs';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
-import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
 import WidgetResourcesMapDatalayers from '../../resourcesmap/[id]/datalayers';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
@@ -79,7 +78,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Inzending overzicht tegels',
+            name: 'Inzendingen overzicht',
             url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
           },
         ]}>

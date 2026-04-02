@@ -76,7 +76,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/);
   if (match) targetProjectId = parseInt(match[1]);
   match = req.nextUrl.pathname.match(
-    /^\/api\/openstad\/(?:api|auth)\/project\/(\d+)/
+    /^\/api\/openstad\/(?:api|auth|stats)\/project\/(\d+)/
   );
   if (match) targetProjectId = parseInt(match[1]);
 
@@ -172,7 +172,9 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
     let query = searchParams ? '?' + searchParams.toString() : '';
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
-    const rewrittenUrl = `${process.env.API_URL_INTERNAL || process.env.API_URL}${path}${query}`;
+    const rewrittenUrl = `${
+      process.env.API_URL_INTERNAL || process.env.API_URL
+    }${path}${query}`;
     return NextResponse.rewrite(rewrittenUrl, {
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -217,7 +219,11 @@ async function signIn(
   let path = req.nextUrl.pathname.replace('/api/openstad', '');
   if (path == '/') path = '/projects';
   let redirectUri = `${process.env.URL}${path}?openstadlogintoken=[[jwt]]`;
-  let loginUrl = `${process.env.API_URL}/auth/project/${projectId}/login?useAuth=default&redirectUri=${redirectUri}${forceNewLogin ? '&forceNewLogin=1' : ''}`;
+  let loginUrl = `${
+    process.env.API_URL
+  }/auth/project/${projectId}/login?useAuth=default&redirectUri=${redirectUri}${
+    forceNewLogin ? '&forceNewLogin=1' : ''
+  }`;
   return NextResponse.redirect(loginUrl, { headers: res.headers });
 }
 

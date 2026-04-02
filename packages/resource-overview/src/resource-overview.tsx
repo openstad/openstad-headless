@@ -82,10 +82,18 @@ function calcCrow(
 }
 
 const getResourceStableKey = (resource: any) => {
+  // Keep keys typed to avoid collisions between synthetic project cards and resources.
+  if (resource?.uniqueId) {
+    return `unique:${String(resource.uniqueId)}`;
+  }
+  if (resource?.id !== undefined && resource?.id !== null) {
+    return `resource:${String(resource.id)}`;
+  }
+
   return String(
-    resource?.uniqueId ||
-      resource?.id ||
-      `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+    `fallback:${resource?.projectId || ''}:${resource?.createdAt || ''}:${
+      resource?.title || ''
+    }`
   );
 };
 
@@ -240,6 +248,7 @@ const defaultHeaderRenderer = (
           {...widgetProps}
           {...widgetProps.resourceOverviewMapWidget}
           givenResources={resources}
+          noFetch={true}
           selectedProjects={selectedProjects}
           locationProx={location}
           onMarkerClick={
@@ -425,7 +434,9 @@ const defaultItemRenderer = (
 
     return (
       <div
-        className={`osc-resource-overview-content-item-footer ${doVote ? 'liking-allowed' : ''}`}>
+        className={`osc-resource-overview-content-item-footer ${
+          doVote ? 'liking-allowed' : ''
+        }`}>
         {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
           <>
             <Icon
@@ -461,7 +472,9 @@ const defaultItemRenderer = (
               variant="big"
               description="Stemmen voor"
               onClick={() => vote('yes')}
-              className={`micro-score-vote micro-score-vote--yes ${selectedOpinion === 'yes' ? 'selected' : ''}`}
+              className={`micro-score-vote micro-score-vote--yes ${
+                selectedOpinion === 'yes' ? 'selected' : ''
+              }`}
             />
             <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
             {props.likeWidget?.displayDislike && (
@@ -474,7 +487,9 @@ const defaultItemRenderer = (
                 variant="big"
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
-                className={`micro-score-vote micro-score-vote--no ${selectedOpinion === 'no' ? 'selected' : ''}`}
+                className={`micro-score-vote micro-score-vote--no ${
+                  selectedOpinion === 'no' ? 'selected' : ''
+                }`}
               />
             )}
           </div>
@@ -738,7 +753,9 @@ const defaultItemRenderer = (
                         : 'ri-triangle-line'
                     } micro-score-triangle`}
                     variant="big"
-                    className={`micro-score-vote micro-score-vote--yes ${selectedOpinion === 'yes' ? 'selected' : ''}`}
+                    className={`micro-score-vote micro-score-vote--yes ${
+                      selectedOpinion === 'yes' ? 'selected' : ''
+                    }`}
                   />
                   <Paragraph className="votes-score">
                     {resource.netVotes}
@@ -751,7 +768,9 @@ const defaultItemRenderer = (
                           : 'ri-triangle-line'
                       } micro-score-triangle micro-score-triangle-down`}
                       variant="big"
-                      className={`micro-score-vote micro-score-vote--no ${selectedOpinion === 'no' ? 'selected' : ''}`}
+                      className={`micro-score-vote micro-score-vote--no ${
+                        selectedOpinion === 'no' ? 'selected' : ''
+                      }`}
                     />
                   )}
                 </>
@@ -1196,25 +1215,36 @@ function ResourceOverviewInner({
   ]);
 
   useEffect(() => {
-    if (filteredResources) {
-      const filtered: any = filteredResources || [];
-      const totalPagesCalc = Math.ceil(filtered?.length / pageSize);
+    const filtered: any = filteredResources || [];
+    const totalPagesCalc = Math.max(1, Math.ceil(filtered.length / pageSize));
 
-      if (totalPagesCalc !== totalPages) {
-        setTotalPages(totalPagesCalc);
-      }
-
-      setPage(0);
-
-      if (onFilteredResourcesChange) {
-        onFilteredResourcesChange(filtered);
-      }
-
-      if (onLocationChange) {
-        onLocationChange(location);
-      }
+    if (totalPagesCalc !== totalPages) {
+      setTotalPages(totalPagesCalc);
     }
-  }, [JSON.stringify(filteredResources)]);
+
+    // Keep current page when data refreshes, but clamp when page count shrinks.
+    setPage((currentPage) => Math.min(currentPage, totalPagesCalc - 1));
+
+    if (onFilteredResourcesChange) {
+      onFilteredResourcesChange(filtered);
+    }
+
+    if (onLocationChange) {
+      onLocationChange(location);
+    }
+  }, [
+    filteredResources,
+    location,
+    onFilteredResourcesChange,
+    onLocationChange,
+    pageSize,
+    totalPages,
+  ]);
+
+  useEffect(() => {
+    // Reset to first page when filter controls change.
+    setPage(0);
+  }, [tags, statuses, search, sort, location, includeTags, excludeTags]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 

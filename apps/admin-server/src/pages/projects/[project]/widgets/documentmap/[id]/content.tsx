@@ -369,12 +369,16 @@ export default function DocumentContent(
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="left">
-                      <strong>Links</strong>: Aan de linkerkant zal de info
-                      boven de kaart getoond worden
+                      Zelfde kant als de kaart
                     </SelectItem>
                     <SelectItem value="right">
-                      <strong>Rechts</strong>: Aan de rechterkant zal de info
-                      boven de reacties getoond worden
+                      Zelfde kant als de reacties
+                    </SelectItem>
+                    <SelectItem value="above">
+                      Boven (volledige breedte, boven kaart en reacties)
+                    </SelectItem>
+                    <SelectItem value="below">
+                      Onder (volledige breedte, onder kaart en reacties)
                     </SelectItem>
                   </SelectContent>
                 </Select>
