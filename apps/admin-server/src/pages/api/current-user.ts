@@ -13,6 +13,9 @@ export default async function handler(
     name: session.user?.name,
     role: session.user?.role,
     jwt: session.user?.jwt,
+    adminId: session.adminUser?.id,
+    adminName: session.adminUser?.name,
+    adminRole: session.adminUser?.role,
   };
 
   res.status(200).json(data);

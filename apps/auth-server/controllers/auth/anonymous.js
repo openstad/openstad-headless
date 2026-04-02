@@ -8,6 +8,7 @@ const login = require('connect-ensure-login');
 const tokenUrl = require('../../services/tokenUrl');
 const authAnonymousConfig = require('../../config/auth').get(authType);
 const url = require('url');
+const clientAuth = require('../../utils/clientAuth');
 
 exports.login = (req, res, next) => {
   /**
@@ -81,7 +82,13 @@ exports.register = (req, res, next) => {
           )}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
           try {
-            db.ActionLog.create(values)
+            clientAuth
+              .initializeClientAuth(req.session, req.client, user, {
+                authType,
+                twoFactorValid: false,
+              })
+              .then(() => clientAuth.saveSession(req.session))
+              .then(() => db.ActionLog.create(values))
               .then(() => {
                 return res.redirect(authorizeUrl);
               })

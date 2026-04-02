@@ -32,6 +32,7 @@ type userType = {
 interface SessionData {
   [key: string]: string | number | userType | undefined;
   user?: userType;
+  adminUser?: userType;
 }
 
 const sessionOptions = {
@@ -57,6 +58,19 @@ async function getSession(
 }
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
+  const loadSessionUser = async (projectId: number, jwt: string) => {
+    const url = `${process.env.API_URL_INTERNAL || process.env.API_URL}/auth/project/${projectId}/me`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${jwt}` },
+    });
+    if (!response.ok) throw new Error('TokenValidationFailed');
+
+    const result: OpenstadProfile = await response.json();
+    if (!result.id) throw new Error('NoUser');
+
+    return result;
+  };
+
   // projectId
   let targetProjectId = 1;
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/);
@@ -94,15 +108,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     // check login token
     if (jwt) {
       try {
-        let url = `${
-          process.env.API_URL_INTERNAL || process.env.API_URL
-        }/auth/project/${targetProjectId}/me`;
-        let response = await fetch(url, {
-          headers: { Authorization: `Bearer ${jwt}` },
-        });
-        if (!response.ok) throw new Error('TokenValidationFailed');
-        let result: OpenstadProfile = await response.json();
-        if (!result.id) throw 'no user';
+        const result = await loadSessionUser(targetProjectId, jwt as string);
         if (
           !(
             req.nextUrl.pathname.match(/^\/(?:projects)?\/?$/) &&
@@ -124,15 +130,40 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
       } catch (err) {
         jwt = '';
         session.user = undefined;
-      } finally {
-        await session.save();
       }
+
+      const adminJwt = session['project-1'];
+      if (adminJwt) {
+        try {
+          const adminResult =
+            targetProjectId === 1 && session.user
+              ? {
+                  id: session.user.id,
+                  name: session.user.name,
+                  role: session.user.role,
+                }
+              : await loadSessionUser(1, adminJwt as string);
+
+          session.adminUser = {
+            id: adminResult.id,
+            name: adminResult.name,
+            role: adminResult.role,
+            jwt: adminJwt as string,
+          };
+        } catch (err) {
+          session.adminUser = undefined;
+        }
+      } else {
+        session.adminUser = undefined;
+      }
+
+      await session.save();
     }
 
-    // login if token not found
+    // login if token not found — always login via project 1 (admin project)
     if (!jwt && !req.nextUrl.pathname.startsWith('/api/openstad')) {
       // api routes require user but will nog login
-      return signIn(req, res, targetProjectId, forceNewLogin);
+      return signIn(req, res, 1, forceNewLogin);
     }
   }
 
@@ -175,7 +206,15 @@ async function signIn(
 ) {
   if (forceNewLogin) {
     const session = await getSession(req, res);
-    session.destroy();
+    delete session[`project-${projectId}`];
+    session.user = undefined;
+
+    if (projectId === 1) {
+      delete session['project-1'];
+      session.adminUser = undefined;
+    }
+
+    await session.save();
   }
   let path = req.nextUrl.pathname.replace('/api/openstad', '');
   if (path == '/') path = '/projects';
@@ -198,6 +237,9 @@ type SessionUserType = {
   name?: string;
   role?: string;
   jwt?: string;
+  adminId?: number;
+  adminName?: string;
+  adminRole?: string;
 };
 
 async function fetchSessionUser() {
@@ -214,6 +256,9 @@ async function fetchSessionUser() {
       name: result.name,
       role: result.role,
       jwt: result.jwt,
+      adminId: result.adminId,
+      adminName: result.adminName,
+      adminRole: result.adminRole,
     };
   } catch (err) {
     console.log(err);

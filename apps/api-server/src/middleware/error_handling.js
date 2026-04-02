@@ -27,12 +27,18 @@ module.exports = function (app) {
       (err.name && err.name == 'SequelizeValidationError' && 400) ||
       500;
     var userIsAdmin = req.user && req.user.role && req.user.role == 'admin';
-    var showDebug = status == 500 && (env === 'development' || userIsAdmin);
+    var isDev = env === 'development';
+    var showDebug = isDev || userIsAdmin;
     var friendlyStatus = statuses[status];
     var stack = err.stack || err.toString();
     var message = err.message || err.error;
     message = message && message.replace(/Validation error:?\s*/, '');
-    var errorStack = showDebug ? stack : '';
+
+    // Always log full error server-side
+    if (status >= 500) {
+      console.error(stack);
+    }
+
     if (shouldLogSubmitFailure(req, status)) {
       console.error(
         JSON.stringify({
@@ -47,13 +53,16 @@ module.exports = function (app) {
       );
     }
 
+    // For 500 errors, only show details to admins or in development
+    var safeMessage =
+      status >= 500 && !showDebug ? 'Er is iets misgegaan' : message;
+
     res.status(status);
     res.json({
       status: status,
       friendlyStatus: friendlyStatus,
-      message: message,
-      errorStack: errorStack.replace(/\x20{2}/g, ' &nbsp;'),
-      error: message || err,
+      message: safeMessage,
+      errorStack: showDebug ? stack : '',
     });
   });
 };

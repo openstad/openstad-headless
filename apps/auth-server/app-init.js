@@ -28,6 +28,11 @@ const initializeApp = async () => {
   try {
     // Express configuration
     const app = express();
+    app.disable('x-powered-by');
+    app.use((req, res, next) => {
+      res.removeHeader('Date');
+      next();
+    });
     const nunjucksEnv = nunjucks.configure('views', {
       autoescape: true,
       express: app,
@@ -93,6 +98,7 @@ const initializeApp = async () => {
         //  domain: 'localhost',
         secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
         httpOnly: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
+        sameSite: 'lax',
       };
     }
 
