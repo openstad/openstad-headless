@@ -93,6 +93,7 @@ function createOnTick(database) {
 }
 
 module.exports = {
+  // second minute hour day month weekday (6-field, supported by 'cron' npm package)
   cronTime: '0 30 2 * * *',
   onTick: createOnTick(),
   onComplete: function () {},

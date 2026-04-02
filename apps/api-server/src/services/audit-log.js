@@ -12,6 +12,7 @@ const SENSITIVE_FIELDS = [
 ];
 
 const MAX_TEXT_LENGTH = 500;
+const HOSTNAME = os.hostname();
 
 let otlpLogger = null;
 
@@ -72,7 +73,11 @@ function sanitizeData(data) {
 
     if (typeof value === 'string' && value.length > MAX_TEXT_LENGTH) {
       sanitized[key] = value.substring(0, MAX_TEXT_LENGTH) + '...';
-    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+    } else if (Array.isArray(value)) {
+      sanitized[key] = value.map((item) =>
+        item && typeof item === 'object' ? sanitizeData(item) : item
+      );
+    } else if (value && typeof value === 'object') {
       sanitized[key] = sanitizeData(value);
     } else {
       sanitized[key] = value;
@@ -115,7 +120,7 @@ function buildEntry(
     previousData: previousData ? sanitizeData(previousData) : null,
     newData: newData ? sanitizeData(newData) : null,
     ipAddress: getClientIp(req),
-    hostname: os.hostname(),
+    hostname: HOSTNAME,
     userAgent: req.headers?.['user-agent']?.substring(0, 500) || null,
     routePath: req.originalUrl?.substring(0, 500) || null,
     statusCode: statusCode || null,

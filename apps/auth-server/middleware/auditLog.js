@@ -1,10 +1,12 @@
 const os = require('os');
 
+const HOSTNAME = os.hostname();
+
 function getClientIp(req) {
   return req.ip || null;
 }
 
-async function logAuthEvent(req, action, details = {}) {
+function logAuthEvent(req, action, details = {}) {
   const endpoint = process.env.AUDIT_API_ENDPOINT;
   const token = process.env.AUDIT_API_TOKEN;
 
@@ -23,25 +25,24 @@ async function logAuthEvent(req, action, details = {}) {
     modelId: user.id || details.userId || null,
     newData: details.data || null,
     ipAddress: getClientIp(req),
-    hostname: os.hostname(),
+    hostname: HOSTNAME,
     userAgent: req.headers?.['user-agent']?.substring(0, 500) || null,
     routePath: req.originalUrl?.substring(0, 500) || null,
     statusCode: details.statusCode || null,
   };
 
-  try {
-    await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Audit-Token': token,
-      },
-      body: JSON.stringify(entry),
-      signal: AbortSignal.timeout(5000),
-    });
-  } catch (err) {
+  // Fire-and-forget: never block the auth flow
+  fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Audit-Token': token,
+    },
+    body: JSON.stringify(entry),
+    signal: AbortSignal.timeout(5000),
+  }).catch((err) => {
     console.error('Audit log forwarding failed:', err.message);
-  }
+  });
 }
 
 module.exports = { logAuthEvent };

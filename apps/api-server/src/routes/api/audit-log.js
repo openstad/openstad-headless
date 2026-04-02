@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require('express');
 const db = require('../../db');
 const pagination = require('../../middleware/pagination');
@@ -5,15 +6,27 @@ const auditLogService = require('../../services/audit-log');
 
 let router = express.Router({ mergeParams: true });
 
+const VALID_ACTIONS = [
+  'create',
+  'read',
+  'update',
+  'delete',
+  'login',
+  'login_failed',
+  'logout',
+  'register',
+  'password_reset',
+  '2fa_configured',
+  '2fa_failed',
+];
+
+const VALID_SOURCES = ['api', 'auth'];
+
 // Auth check: only admins can query audit logs
 function requireAdmin(req, res, next) {
   const user = req.user;
   if (!user) return res.status(401).json({ error: 'Authentication required' });
-  if (
-    user.role === 'admin' ||
-    user.role === 'superuser' ||
-    user.role === 'editor'
-  ) {
+  if (user.role === 'admin' || user.role === 'superuser') {
     return next();
   }
   return res.status(403).json({ error: 'Insufficient permissions' });
@@ -28,7 +41,7 @@ function requireSuperuser(req, res, next) {
 
 function requireInternalToken(req, res, next) {
   const token = process.env.AUDIT_INTERNAL_TOKEN;
-  if (!token) {
+  if (!token || token.trim() === '') {
     return res
       .status(503)
       .json({ error: 'Internal audit token not configured' });
@@ -36,12 +49,32 @@ function requireInternalToken(req, res, next) {
 
   const authHeader =
     req.headers['x-audit-token'] || req.headers['authorization'];
-  const provided = authHeader?.replace('Bearer ', '');
+  const provided = authHeader?.replace('Bearer ', '') || '';
 
-  if (provided !== token) {
+  if (provided.length === 0) {
     return res.status(403).json({ error: 'Invalid internal token' });
   }
+
+  try {
+    const tokenBuf = Buffer.from(token);
+    const providedBuf = Buffer.from(provided);
+    if (
+      tokenBuf.length !== providedBuf.length ||
+      !crypto.timingSafeEqual(tokenBuf, providedBuf)
+    ) {
+      return res.status(403).json({ error: 'Invalid internal token' });
+    }
+  } catch (err) {
+    return res.status(403).json({ error: 'Invalid internal token' });
+  }
+
   next();
+}
+
+function parseDate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? false : date;
 }
 
 // GET /api/audit-log or /api/project/:projectId/audit-log
@@ -57,14 +90,37 @@ router.get('/', requireAdmin, pagination.init, async function (req, res, next) {
     if (modelName) where.modelName = modelName;
     if (modelId) where.modelId = parseInt(modelId);
     if (userId) where.userId = parseInt(userId);
-    if (action) where.action = action;
-    if (source) where.source = source;
+
+    if (action) {
+      if (!VALID_ACTIONS.includes(action)) {
+        return res.status(400).json({ error: 'Invalid action value' });
+      }
+      where.action = action;
+    }
+
+    if (source) {
+      if (!VALID_SOURCES.includes(source)) {
+        return res.status(400).json({ error: 'Invalid source value' });
+      }
+      where.source = source;
+    }
 
     if (fromDate || toDate) {
       const { Op } = require('sequelize');
       where.createdAt = {};
-      if (fromDate) where.createdAt[Op.gte] = new Date(fromDate);
-      if (toDate) where.createdAt[Op.lte] = new Date(toDate);
+
+      if (fromDate) {
+        const from = parseDate(fromDate);
+        if (from === false)
+          return res.status(400).json({ error: 'Invalid fromDate' });
+        where.createdAt[Op.gte] = from;
+      }
+      if (toDate) {
+        const to = parseDate(toDate);
+        if (to === false)
+          return res.status(400).json({ error: 'Invalid toDate' });
+        where.createdAt[Op.lte] = to;
+      }
     }
 
     const page = parseInt(req.query.page) || 1;

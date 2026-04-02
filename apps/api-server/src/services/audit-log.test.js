@@ -57,6 +57,26 @@ describe('audit-log service', () => {
       expect(result.config.password).toBeUndefined();
       expect(result.config.setting).toBe('keep');
     });
+
+    it('sanitizes sensitive fields inside arrays', () => {
+      const data = {
+        items: [
+          { name: 'item1', token: 'should-be-removed' },
+          { name: 'item2', password: 'secret' },
+        ],
+      };
+      const result = sanitizeData(data);
+      expect(result.items).toHaveLength(2);
+      expect(result.items[0].name).toBe('item1');
+      expect(result.items[0].token).toBeUndefined();
+      expect(result.items[1].password).toBeUndefined();
+    });
+
+    it('passes through primitive array values', () => {
+      const data = { tags: ['a', 'b', 'c'] };
+      const result = sanitizeData(data);
+      expect(result.tags).toEqual(['a', 'b', 'c']);
+    });
   });
 
   describe('getChangedFields', () => {

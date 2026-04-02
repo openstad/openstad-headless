@@ -65,9 +65,7 @@ function isAdminRole(user) {
     userHasRole(user, 'admin') ||
     userHasRole(user, 'superuser') ||
     user.role === 'admin' ||
-    user.role === 'superuser' ||
-    user.role === 'editor' ||
-    user.role === 'moderator'
+    user.role === 'superuser'
   );
 }
 
@@ -83,7 +81,8 @@ module.exports = function auditLogMiddleware(serviceOverride) {
     const resolved = resolveModelFromPath(req.path);
     if (!resolved) return next();
 
-    // Capture previous data for updates/deletes before the handler mutates it
+    // Capture previous data for updates/deletes before the handler mutates it.
+    // Depends on route handlers populating req.results via .all() middleware.
     let previousData = null;
     if ((action === 'update' || action === 'delete') && req.results) {
       try {
@@ -92,6 +91,11 @@ module.exports = function auditLogMiddleware(serviceOverride) {
       } catch (e) {
         // Ignore serialization errors
       }
+    }
+    if (action === 'update' && !previousData) {
+      console.warn(
+        `Audit log: no previousData for ${resolved.modelName} update on ${req.path}`
+      );
     }
 
     // Wrap res.json to capture response data
