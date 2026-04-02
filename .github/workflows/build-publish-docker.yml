@@ -137,6 +137,7 @@ jobs:
           record: true
           install: false
           component: true
+          group: 'Component'
           tag: 'component'
           ci-build-id: ${{ needs.generate-ci-build-id.outputs.build_id }}
         env:
