@@ -160,10 +160,10 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
       await session.save();
     }
 
-    // login if token not found
+    // login if token not found — always login via project 1 (admin project)
     if (!jwt && !req.nextUrl.pathname.startsWith('/api/openstad')) {
       // api routes require user but will nog login
-      return signIn(req, res, targetProjectId, forceNewLogin);
+      return signIn(req, res, 1, forceNewLogin);
     }
   }
 
