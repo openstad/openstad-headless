@@ -110,7 +110,6 @@ const TrixEditor: React.FC<{
       if (typeof window !== 'undefined') {
         // @ts-expect-error: trix has no types
         await import('trix');
-        // @ts-expect-error: trix css import
         await import('trix/dist/trix.css');
 
         // Use semantic paragraphs for new blocks created with Enter.
