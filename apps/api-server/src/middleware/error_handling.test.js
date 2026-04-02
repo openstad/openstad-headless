@@ -83,21 +83,32 @@ describe('error handling submit-failure logging', () => {
     ['GET', '/api/project/1/resource/2'],
     ['POST', '/auth/project/1/login'],
     ['DELETE', '/health'],
-  ])('does not log for excluded endpoint %s %s', (method, url) => {
-    const { errorHandler } = createHarness();
-    const req = createReq(method, url);
-    const res = createRes();
-    const err = { status: 500, message: 'Unexpected' };
-    const consoleErrorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+  ])(
+    'does not log submit_failure for excluded endpoint %s %s',
+    (method, url) => {
+      const { errorHandler } = createHarness();
+      const req = createReq(method, url);
+      const res = createRes();
+      const err = { status: 500, message: 'Unexpected' };
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
-    errorHandler(err, req, res, vi.fn());
+      errorHandler(err, req, res, vi.fn());
 
-    expect(consoleErrorSpy).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 500 })
-    );
-  });
+      // 500 errors are always logged server-side, but should not trigger submit_failure logging
+      const submitFailureCalls = consoleErrorSpy.mock.calls.filter((call) => {
+        try {
+          return JSON.parse(call[0]).type === 'submit_failure';
+        } catch {
+          return false;
+        }
+      });
+      expect(submitFailureCalls).toHaveLength(0);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 500 })
+      );
+    }
+  );
 });
