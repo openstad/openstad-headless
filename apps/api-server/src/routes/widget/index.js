@@ -8,17 +8,14 @@ router.use('/', cors(), require('./widget'));
 
 const path = require('path');
 // Serve the namespaced React runtime bundle
-router.use(
-  '/react-runtime.js',
-  express.static(
-    path.resolve(__dirname, '../../../dist/openstad-react-runtime.js'),
-    {
-      maxAge: '1d',
-      setHeaders: (res) => {
-        res.setHeader('Content-Type', 'application/javascript');
-      },
-    }
-  )
+const reactRuntimePath = path.resolve(
+  __dirname,
+  '../../../dist/openstad-react-runtime.js'
 );
+router.get('/react-runtime.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(reactRuntimePath);
+});
 
 module.exports = router;

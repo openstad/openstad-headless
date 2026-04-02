@@ -108,9 +108,9 @@ const TrixEditor: React.FC<{
   useEffect(() => {
     (async () => {
       if (typeof window !== 'undefined') {
-        // @ts-ignore: trix has no types
+        // @ts-expect-error: trix has no types
         await import('trix');
-        // @ts-ignore: trix css import
+        // @ts-expect-error: trix css import
         await import('trix/dist/trix.css');
 
         // Use semantic paragraphs for new blocks created with Enter.
