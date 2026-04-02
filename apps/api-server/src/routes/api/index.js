@@ -2,6 +2,7 @@ const express = require('express');
 const bruteForce = require('../../middleware/brute-force');
 const dbQuery = require('../../middleware/dbQuery');
 const sorting = require('../../middleware/sorting');
+const auditLogMiddleware = require('../../middleware/audit-log');
 
 const router = express.Router({ mergeParams: true });
 
@@ -12,6 +13,9 @@ const router = express.Router({ mergeParams: true });
 // dbQuery middleware
 router.use(dbQuery);
 router.use(sorting);
+
+// audit logging
+router.use(auditLogMiddleware());
 
 // projects
 router.use('/project', require('./project'));
@@ -87,5 +91,9 @@ router.use('/datalayer', require('./datalayer'));
 
 router.use('/repo', require('./template')); // backwards compatibility
 router.use('/template', require('./template'));
+
+// audit logs
+router.use('/project/:projectId(\\d+)/audit-log', require('./audit-log'));
+router.use('/audit-log', require('./audit-log'));
 
 module.exports = router;

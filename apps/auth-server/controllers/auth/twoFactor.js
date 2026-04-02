@@ -1,5 +1,6 @@
 const twofactor = require('node-2fa');
 const QRCode = require('qrcode');
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 const twoFactorBaseUrl = '/auth/two-factor';
 
@@ -83,6 +84,7 @@ exports.post = async (req, res, next) => {
 
     res.redirect(authorizeUrl);
   } else {
+    logAuthEvent(req, '2fa_failed', {});
     console.log('Two factor validation failed');
     req.flash('error', {
       msg: 'Two factor validatie is niet gelukt, probeer het nogmaals.',
@@ -167,6 +169,7 @@ exports.configurePost = async (req, res, next) => {
     req.user
       .update({ twoFactorConfigured: true })
       .then(() => {
+        logAuthEvent(req, '2fa_configured', {});
         req.flash('success', { msg: 'Two factor authentication configured!' });
         res.redirect(redirectToTwoFactor);
       })

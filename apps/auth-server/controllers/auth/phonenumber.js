@@ -13,6 +13,7 @@ const tokenSMS = require('../../services/tokenSMS');
 const authPhonenumberConfig = require('../../config/auth').get('Phonenumber');
 const interpolate = require('../../utils/interpolate');
 const verificationService = require('../../services/verificationService');
+const { logAuthEvent } = require('../../middleware/auditLog');
 const URL = require('url').URL;
 
 /**
@@ -250,6 +251,9 @@ exports.postSmsCode = (req, res, next) => {
 
       // Redirect if it fails to the original auth screen
       if (!user) {
+        logAuthEvent(req, 'login_failed', {
+          data: { method: 'phonenumber' },
+        });
         req.flash('error', { msg: authPhonenumberConfig.smsCodeErrorMessage });
         return res.redirect(
           `${authPhonenumberConfig.loginUrl}?redirect_uri=${encodeURIComponent(
@@ -280,6 +284,9 @@ exports.postSmsCode = (req, res, next) => {
             };
 
             req.brute.reset(() => {
+              logAuthEvent(req, 'login', {
+                data: { method: 'phonenumber' },
+              });
               //log the succesfull login
               authService
                 .logSuccessFullLogin(req)

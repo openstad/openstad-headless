@@ -316,6 +316,16 @@ api:
   # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
   otelServiceName: openstad-api-server
   otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
+  # Audit logging configuration
+  audit:
+    retentionMonths: 12
+    incidentRetentionMonths: 36
+    internalToken: ""   # shared token for auth-server -> api-server audit communication
+    otlp:
+      enabled: false    # enable OTLP log export for audit events
+      serviceName: ""   # OTLP service.name for audit logs; defaults to openstad.fullname + "-audit"
+      endpoint: ""      # OTLP gRPC endpoint; defaults to api.otelExporterOtlpEndpoint
+      headers: ""       # optional headers (e.g. Authorization=Bearer xxx)
   # Inject extra environment variables
   extraEnvVars: []
   # Enable spam detection and spam flags
