@@ -17,6 +17,11 @@ export default defineConfig({
   },
 
   env: { ...process.env },
+  expose: {
+    ADMIN_URL: process.env.ADMIN_URL,
+    AUTH_APP_URL: process.env.AUTH_APP_URL,
+    AUTH_FIRST_LOGIN_CODE: process.env.AUTH_FIRST_LOGIN_CODE,
+  },
 
   component: {
     devServer: {
