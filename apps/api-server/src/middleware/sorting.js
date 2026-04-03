@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const db = require('../db');
 
 function getSortableModel(req) {
@@ -49,10 +50,10 @@ module.exports = function (req, res, next) {
         case 'votes_asc':
           return ['yes', 'ASC'];
         case 'random':
-          const rotationMs =
-            parseInt(process.env.RANDOM_SORT_ROTATION_MS, 10) || 0;
-          const seed =
-            rotationMs > 0 ? Math.floor(Date.now() / rotationMs) : 12345;
+          const clientSeed = parseInt(req.query.pseudoRandomSortSeed, 10);
+          const seed = Number.isInteger(clientSeed)
+            ? clientSeed
+            : crypto.randomInt(4294967295);
           return db.sequelize.literal(`RAND(${seed})`);
         case 'score':
           if (!allowedSortColumns.includes('score')) {

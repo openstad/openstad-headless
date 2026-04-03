@@ -16,6 +16,7 @@ export default function useResources(
     projectIds = [],
     allowMultipleProjects = false,
     fetchAll = false,
+    randomSortRotationMs = 0,
   },
   options
 ) {
@@ -55,6 +56,7 @@ export default function useResources(
     maxDistance,
     projectIds,
     allowMultipleProjects,
+    randomSortRotationMs,
   };
 
   // Primary paginated call

@@ -327,6 +327,7 @@ function StemBegroot({
     search,
     page,
     pageSize: itemsPerPage,
+    randomSortRotationMs: props.randomSortRotationMs,
   });
 
   // Replace with type when available from datastore

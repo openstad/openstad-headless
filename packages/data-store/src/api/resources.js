@@ -1,3 +1,23 @@
+function resolveRandomSortSeed(randomSortRotationMs) {
+  const storedSeed = localStorage.getItem('pseudoRandomSortSeed');
+  const storedTimestamp = localStorage.getItem('pseudoRandomSortSeedTimestamp');
+
+  const needsNewSeed =
+    !storedSeed ||
+    (randomSortRotationMs &&
+      (!storedTimestamp ||
+        Date.now() - Number(storedTimestamp) > randomSortRotationMs));
+
+  if (needsNewSeed) {
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    localStorage.setItem('pseudoRandomSortSeed', String(array[0]));
+    localStorage.setItem('pseudoRandomSortSeedTimestamp', String(Date.now()));
+  }
+
+  return localStorage.getItem('pseudoRandomSortSeed');
+}
+
 export default {
   fetch: async function (
     {
@@ -17,6 +37,7 @@ export default {
       noPagination,
       projectIds,
       allowMultipleProjects,
+      randomSortRotationMs,
     },
     options
   ) {
@@ -57,6 +78,11 @@ export default {
     if (sort) {
       if (!Array.isArray(sort)) sort = [sort];
       sort.map((criterium) => params.append('sort', criterium));
+      if (sort.includes('random'))
+        params.append(
+          'pseudoRandomSortSeed',
+          resolveRandomSortSeed(randomSortRotationMs)
+        );
     }
 
     if (noPagination) {
