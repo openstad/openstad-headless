@@ -1,5 +1,6 @@
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { deterministicRandomSort } from '@openstad-headless/lib';
+import { humanizeDate } from '@openstad-headless/lib/humanize-date';
 import {
   Icon,
   IconButton,
@@ -414,26 +415,32 @@ export const StemBegrootResourceDetailDialog = ({
                             />
                           ) : null}
 
-                          {displayModBreak && resource.modBreak && (
-                            <div className="resource-detail-modbreak-banner">
-                              <section>
-                                <Heading
-                                  level={2}
-                                  appearance="utrecht-heading-6">
-                                  {modBreakTitle}
-                                </Heading>
-                                <Heading
-                                  level={2}
-                                  appearance="utrecht-heading-6">
-                                  {resource.modBreakDateHumanized}
-                                </Heading>
-                              </section>
-                              <Spacer size={1} />
-                              <Heading level={2} appearance="utrecht-heading-6">
-                                {resource.modBreak}
-                              </Heading>
-                            </div>
-                          )}
+                          {displayModBreak &&
+                            resource.modBreaks?.map((mb: any) => (
+                              <div
+                                key={mb.id}
+                                className="resource-detail-modbreak-banner">
+                                <section>
+                                  <Heading
+                                    level={2}
+                                    appearance="utrecht-heading-6">
+                                    {mb.authorName || modBreakTitle}
+                                  </Heading>
+                                  <Heading
+                                    level={2}
+                                    appearance="utrecht-heading-6">
+                                    {mb.modBreakDate &&
+                                      humanizeDate(mb.modBreakDate)}
+                                  </Heading>
+                                </section>
+                                <Spacer size={1} />
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: mb.description,
+                                  }}
+                                />
+                              </div>
+                            ))}
                         </div>
                       </div>
 

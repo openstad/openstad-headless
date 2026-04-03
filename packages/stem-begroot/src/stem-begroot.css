@@ -386,6 +386,10 @@ section.osc-begrootmodule-resource-detail-photo
   margin-top: 1rem;
 }
 
+.resource-detail-modbreak-banner + .resource-detail-modbreak-banner {
+  margin-top: 0.5rem;
+}
+
 .resource-detail-modbreak-banner > section {
   display: flex;
   width: 100%;
