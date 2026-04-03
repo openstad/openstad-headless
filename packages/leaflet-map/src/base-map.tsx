@@ -732,6 +732,7 @@ const BaseMap = ({
       newMarkers.length !== currentMarkers.length ||
       newMarkers.some(
         (marker, index) =>
+          marker.markerId !== currentMarkers[index]?.markerId ||
           marker.lat !== currentMarkers[index]?.lat ||
           marker.lng !== currentMarkers[index]?.lng
       );

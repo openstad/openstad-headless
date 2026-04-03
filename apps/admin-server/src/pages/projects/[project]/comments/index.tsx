@@ -88,7 +88,7 @@ export default function ProjectComments() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    const allData = await fetchAll(totalCount, pageLimit);
+    const allData = await fetchAll();
     exportComments(allData, `${projectId}_reacties_${formattedDate}.xlsx`);
   }
 

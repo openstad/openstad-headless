@@ -2,6 +2,10 @@ const config = require('config');
 
 module.exports = {
   init: function init(req, res, next) {
+    if (req.query.noPagination === 'true') {
+      req.dbQuery.noPagination = true;
+      return next();
+    }
     if (typeof req.query.page == 'undefined') return next();
     if (typeof req.query.search != 'undefined') return next(); // if search then pagination after the search
 
@@ -18,6 +22,21 @@ module.exports = {
   },
 
   paginateResults: function paginateResults(req, res, next) {
+    if (req.dbQuery.noPagination) {
+      let list = req.results;
+      let totalCount = req.dbQuery.count || list.length;
+      req.results = {
+        metadata: {
+          page: 0,
+          pageSize: totalCount,
+          pageCount: 1,
+          totalCount,
+        },
+        records: list,
+      };
+      return next();
+    }
+
     if (typeof req.query.page == 'undefined') return next();
 
     let list = req.results;

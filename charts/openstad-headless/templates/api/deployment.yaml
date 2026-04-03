@@ -289,6 +289,9 @@ spec:
                 key: rateWindowMs
                 name: {{ template "openstad.ratelimit.secret.fullname" . }}
 
+          - name: RANDOM_SORT_ROTATION_MS
+            value: {{ .Values.randomSortRotationMs | default "0" | quote }}
+
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}

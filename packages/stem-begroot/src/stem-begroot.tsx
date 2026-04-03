@@ -1,10 +1,6 @@
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
-import {
-  canLikeResource,
-  getScopedSessionRandomSortSeed,
-  hasRole,
-} from '@openstad-headless/lib';
+import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
@@ -12,7 +8,7 @@ import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-ove
 import '@utrecht/component-library-css';
 import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -287,29 +283,51 @@ function StemBegroot({
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
-  const randomSortSeed = React.useMemo(() => {
-    const pathname =
-      typeof window !== 'undefined' ? window.location.pathname : '';
-    const search = typeof window !== 'undefined' ? window.location.search : '';
-    const seedScope = `${props.projectId || 'project'}:${pathname}:${search}`;
-    return getScopedSessionRandomSortSeed(
-      seedScope,
-      'stemBegrootRandomSortSeed'
-    );
-  }, [props.projectId]);
   const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
   const [itemsPerPage, setPageSize] = useState<number>(
-    props.itemsPerPage || 999
+    props.itemsPerPage || 10
   );
-  const [totalPages, setTotalPages] = useState(0);
 
-  const { data: resources, submitVotes } = datastore.useResources({
+  // Resolve activeTagTab to tag IDs for the API
+  const isPerTagVoting =
+    props?.votes?.voteType === 'countPerTag' ||
+    props?.votes?.voteType === 'budgetingPerTag';
+
+  const activeTabTagIds = useMemo(() => {
+    if (!isPerTagVoting || !activeTagTab) return [];
+    const typeSelector = props.tagTypeSelector || 'tag';
+    if (typeSelector === 'tag') {
+      return allTags
+        .filter((tag: { name: string }) => tag.name === activeTagTab)
+        .map((tag: { id: number }) => tag.id);
+    } else {
+      return allTags
+        .filter((tag: { type: string }) => tag.type === activeTagTab)
+        .map((tag: { id: number }) => tag.id);
+    }
+  }, [isPerTagVoting, activeTagTab, allTags, props.tagTypeSelector]);
+
+  const apiTags = useMemo(() => {
+    if (isPerTagVoting && activeTabTagIds.length > 0) {
+      return activeTabTagIds;
+    }
+    return tags;
+  }, [tags, activeTabTagIds, isPerTagVoting]);
+
+  const {
+    data: resources,
+    isLoading,
+    submitVotes,
+  } = datastore.useResources({
     projectId: props.projectId,
-    tags,
-    sort: sort === 'random' ? undefined : sort,
+    tags: apiTags,
+    statuses: initStatuses,
+    sort,
     search,
-    pageSize: 999,
+    page,
+    pageSize: itemsPerPage,
+    randomSortRotationMs: props.randomSortRotationMs,
   });
 
   // Replace with type when available from datastore
@@ -522,15 +540,7 @@ function StemBegroot({
 
         for (const tagObj of tagCounter) {
           const tagName = Object.keys(tagObj)[0];
-          const resourcesToVote = tagObj[tagName].selectedResources
-            .map((resourceSelected: { id: number }) => {
-              return resources?.records?.find(
-                (resource: { id: number }) =>
-                  resource.id === resourceSelected.id
-              );
-            })
-            .filter(Boolean);
-
+          const resourcesToVote = tagObj[tagName].selectedResources || [];
           allResourcesToVote = allResourcesToVote.concat(resourcesToVote);
         }
 
@@ -851,20 +861,43 @@ function StemBegroot({
     }
   };
 
+  // Keep previous totalPages while loading to prevent UI flicker
+  const totalPagesRef = useRef(1);
+  if (!isLoading && resources?.metadata?.pageCount) {
+    totalPagesRef.current = resources.metadata.pageCount;
+  }
+  const totalPages = totalPagesRef.current;
+
+  // Scroll to top after page change (skip initial render)
+  const pendingScrollRef = useRef(false);
+  const pageInitialised = useRef(false);
   useEffect(() => {
-    if (filteredResources) {
-      const filtered: any = filteredResources || [];
-      const totalPagesCalc = Math.ceil(filtered?.length / itemsPerPage);
-
-      if (totalPagesCalc !== totalPages) {
-        setTotalPages(totalPagesCalc);
-      }
-
-      if (page !== 0) {
-        setPage(0);
-      }
+    if (!pageInitialised.current) {
+      pageInitialised.current = true;
+      return;
     }
-  }, [filteredResources]);
+    if (isLoading) {
+      pendingScrollRef.current = true;
+    } else {
+      scrollToTop();
+    }
+  }, [page]);
+  useEffect(() => {
+    if (!isLoading && pendingScrollRef.current) {
+      pendingScrollRef.current = false;
+      scrollToTop();
+    }
+  }, [isLoading]);
+
+  // Reset to first page when filters change (skip initial render)
+  const filtersInitialised = useRef(false);
+  useEffect(() => {
+    if (!filtersInitialised.current) {
+      filtersInitialised.current = true;
+      return;
+    }
+    setPage(0);
+  }, [tags, search, sort, activeTagTab]);
 
   useEffect(() => {
     setVisitedTagTabs((prev) =>
@@ -945,20 +978,11 @@ function StemBegroot({
           }
         }}
         resourceDetailIndex={resourceDetailIndex}
-        statusIdsToLimitResourcesTo={initStatuses}
-        tagIdsToLimitResourcesTo={tags}
-        sort={sort}
-        allTags={allTags}
-        tags={tags}
         setFilteredResources={setFilteredResources}
         filteredResources={filteredResources}
         voteType={props?.votes?.voteType || 'likes'}
         typeSelector={typeSelector}
         activeTagTab={activeTagTab}
-        randomSortSeed={randomSortSeed}
-        currentPage={page}
-        pageSize={itemsPerPage}
-        filterBehavior={filterBehavior}
         displayModBreak={displayModBreak}
         modBreakTitle={props?.resources?.modbreakTitle || ''}
       />
@@ -1488,22 +1512,13 @@ function StemBegroot({
                   }
                 }
               }}
-              statusIdsToLimitResourcesTo={initStatuses}
-              tagIdsToLimitResourcesTo={tags}
-              sort={sort}
-              allTags={allTags}
-              tags={tags}
               activeTagTab={activeTagTab}
               setFilteredResources={setFilteredResources}
               filteredResources={filteredResources}
               voteType={props?.votes?.voteType || 'likes'}
               typeSelector={typeSelector}
-              randomSortSeed={randomSortSeed}
               hideTagsForResources={hideTagsForResources}
               hideReadMore={hideReadMore}
-              currentPage={page}
-              pageSize={itemsPerPage}
-              filterBehavior={filterBehavior}
             />
             <Spacer size={3} />
 
@@ -1514,7 +1529,6 @@ function StemBegroot({
                   totalPages={totalPages || 1}
                   onPageChange={(newPage) => {
                     setPage(newPage);
-                    scrollToTop();
                   }}
                 />
               </div>
