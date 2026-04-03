@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const { Op } = require('sequelize');
+const crypto = require('crypto');
 
 const co = require('co'),
   config = require('config'),
@@ -242,44 +243,67 @@ module.exports = function (db, sequelize, DataTypes) {
         ),
       },
 
+      modBreaks: {
+        type: DataTypes.JSON,
+        auth: {
+          createableBy: 'editor',
+          updateableBy: 'editor',
+        },
+        allowNull: true,
+        defaultValue: null,
+        set: function (value) {
+          if (!Array.isArray(value) || value.length === 0) {
+            this.setDataValue('modBreaks', null);
+            return;
+          }
+          var sanitized = value.map(function (entry) {
+            return {
+              id: entry.id || crypto.randomUUID(),
+              description: entry.description
+                ? sanitize.content(entry.description.trim())
+                : '',
+              authorName: entry.authorName ? entry.authorName.trim() : null,
+              modBreakDate: entry.modBreakDate || new Date().toISOString(),
+              createdAt: entry.createdAt || new Date().toISOString(),
+            };
+          });
+          this.setDataValue('modBreaks', sanitized);
+        },
+      },
+
+      modBreaksHumanized: {
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks)) return [];
+          return breaks.map(function (entry) {
+            return Object.assign({}, entry, {
+              modBreakDateHumanized: entry.modBreakDate
+                ? moment(entry.modBreakDate).format('LLL')
+                : undefined,
+            });
+          });
+        },
+      },
+
       modBreak: {
-        type: DataTypes.TEXT,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks) || breaks.length === 0)
+            return undefined;
+          return breaks[0].description;
         },
-        allowNull: true,
-        set: function (text) {
-          text = text ? sanitize.content(text.trim()) : null;
-          this.setDataValue('modBreak', text);
-        },
-      },
-
-      modBreakUserId: {
-        type: DataTypes.INTEGER,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
-        },
-        allowNull: true,
-      },
-
-      modBreakDate: {
-        type: DataTypes.DATE,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
-        },
-        allowNull: true,
       },
 
       modBreakDateHumanized: {
         type: DataTypes.VIRTUAL,
         get: function () {
-          var date = this.getDataValue('modBreakDate');
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks) || breaks.length === 0)
+            return undefined;
           try {
-            if (!date) return undefined;
-            return moment(date).format('LLL');
+            return moment(breaks[0].modBreakDate).format('LLL');
           } catch (error) {
             return (error.message || 'dateFilter error').toString();
           }
@@ -362,15 +386,6 @@ module.exports = function (db, sequelize, DataTypes) {
       individualHooks: true,
 
       validate: {
-        validModBreak: function () {
-          return true;
-          /*
-        skip validation for now, should be moved to own rest object.
-
-        if (this.modBreak && (!this.modBreakUserId || !this.modBreakDate)) {
-          throw Error('Incomplete mod break');
-        }*/
-        },
         validExtraData: function (next) {
           let self = this;
           let errors = [];
@@ -860,7 +875,7 @@ module.exports = function (db, sequelize, DataTypes) {
             voteCount('no'),
             commentCount('commentCount'),
           ],
-          exclude: ['modBreak'],
+          exclude: ['modBreaks'],
         },
       },
 
@@ -915,14 +930,6 @@ module.exports = function (db, sequelize, DataTypes) {
       through: 'resource_statuses',
       constraints: false,
       onDelete: 'CASCADE',
-    });
-  };
-
-  Resource.prototype.setModBreak = function (user, modBreak) {
-    return this.update({
-      modBreak: modBreak,
-      modBreakUserId: user.id,
-      modBreakDate: new Date(),
     });
   };
 
