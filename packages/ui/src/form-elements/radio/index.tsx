@@ -35,6 +35,7 @@ export type RadioboxFieldProps = {
     label: string;
     isOtherOption?: boolean;
     defaultValue?: boolean;
+    trigger?: string;
   }[];
   fieldRequired?: boolean;
   requiredWarning?: string;
@@ -136,7 +137,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     const initialOtherOptionValues: { [key: string]: string } = {};
     displayChoices?.forEach((choice, index) => {
       if (choice?.isOtherOption) {
-        initialOtherOptionValues[`${fieldKey}_${index}_other`] = '';
+        const id = choice.trigger || `${index}`;
+        initialOtherOptionValues[`${fieldKey}_${id}_other`] = '';
       }
     });
     setOtherOptionValues(initialOtherOptionValues);
@@ -149,7 +151,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     }
   }, [fieldRequired, initialValue, selectedOption]);
 
-  const handleRadioChange = (value: string, index: number) => {
+  const handleRadioChange = (value: string, trigger: string) => {
     setSelectedOption(value);
     setCheckInvalid(false);
     if (onChange) {
@@ -159,7 +161,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
       });
     }
     Object.keys(otherOptionValues).forEach((key) => {
-      if (key !== `${fieldKey}_${index}_other`) {
+      if (key !== `${fieldKey}_${trigger}_other`) {
         otherOptionValues[key] = '';
         if (onChange) {
           onChange(
@@ -254,7 +256,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     name={fieldKey}
                     required={fieldRequired}
                     onChange={() => {
-                      (handleRadioChange(choice.value, index),
+                      (handleRadioChange(
+                        choice.value,
+                        choice.trigger || `${index}`
+                      ),
                         setCheckInvalid(false));
                     }}
                     disabled={disabled}
@@ -273,10 +278,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                   onChange={(e: { name: string; value: string }) =>
                     handleOtherOptionChange(e)
                   }
-                  fieldKey={`${fieldKey}_${index}_other`}
+                  fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
                   title=""
                   fieldInvalid={false}
-                  randomId={`${fieldKey}_${index}`}
+                  randomId={`${fieldKey}_${choice.trigger || index}`}
                 />
               </div>
             )}
