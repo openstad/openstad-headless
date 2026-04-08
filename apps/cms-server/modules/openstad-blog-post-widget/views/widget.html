@@ -54,11 +54,7 @@
             <h3 class="utrecht-heading-4">{{ post.title }}</h3>
             <p class="utrecht-paragraph">{{ post.summary | truncate(150) }}</p>
 
-            <a
-              href="{{ post._url }}"
-              class="read-more"
-              title="Lees meer over {{ post.title }}"
-              aria-label="Lees meer over {{ post.title }}">
+            <a href="{{ post._url }}" class="read-more">
               <span>Lees meer over {{ post.title }}</span>
             </a>
           </div>
