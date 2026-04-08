@@ -25,56 +25,66 @@ data.piece.title }}{% endblock %} {% block main %}
 
           <div class="share-links">
             <h2 class="utrecht-heading-4">Deel dit</h2>
-            <div class="link-container">
-              <a
-                href="http://www.facebook.com/share.php?u={{ data.piece._url | urlencode }}"
-                title="Facebook"
-                target="_blank"
-                class="utrecht-link-social"
-                rel="external noopener noreferrer"
-                ><i class="icon --facebook"></i
-              ></a>
-              <a
-                href="https://x.com/intent/post?text={{ data.piece._url | urlencode }}"
-                title="X"
-                target="_blank"
-                class="utrecht-link-social"
-                rel="external noopener noreferrer"
-                ><i class="icon --twitter"></i
-              ></a>
-              <a
-                href="mailto:?subject=Nieuwe project - resources&amp;body={{ data.piece._url | urlencode }}"
-                title="Mail"
-                target="_blank"
-                class="utrecht-link-social"
-                rel="external noopener noreferrer"
-                ><i class="icon --mail"></i
-              ></a>
-              <a
-                href="https://api.whatsapp.com/send?phone=&amp;text={{ data.piece._url | urlencode }}&amp;source=&amp;data="
-                title="Whatsapp"
-                target="_blank"
-                class="utrecht-link-social"
-                rel="external noopener noreferrer"
-                ><i class="icon --whatsapp"></i
-              ></a>
-              <a
-                href="https://www.linkedin.com/sharing/share-offsite/?url={{ data.piece._url | urlencode }}"
-                title="LinkedIn"
-                target="_blank"
-                class="utrecht-link-social"
-                rel="external noopener noreferrer"
-                ><i class="icon --linkedin"></i
-              ></a>
-              <a
-                title="Kopieer link"
-                tabindex="0"
-                target="_blank"
-                class="utrecht-link-social copy-link"
-                rel="external noopener noreferrer"
-                ><i class="icon --url"></i
-              ></a>
-            </div>
+            <ul class="link-container" aria-label="Deel dit bericht">
+              <li>
+                <a
+                  href="http://www.facebook.com/share.php?u={{ data.piece._url | urlencode }}"
+                  aria-label="Deel op Facebook"
+                  target="_blank"
+                  class="utrecht-link-social"
+                  rel="external noopener noreferrer"
+                  ><i class="icon --facebook" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  href="https://x.com/intent/post?text={{ data.piece._url | urlencode }}"
+                  aria-label="Deel op X"
+                  target="_blank"
+                  class="utrecht-link-social"
+                  rel="external noopener noreferrer"
+                  ><i class="icon --twitter" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  href="mailto:?subject={{ data.piece.title | urlencode }}&amp;body={{ data.piece._url | urlencode }}"
+                  aria-label="Deel via e-mail"
+                  class="utrecht-link-social"
+                  rel="external noopener noreferrer"
+                  ><i class="icon --mail" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  href="https://api.whatsapp.com/send?text={{ data.piece._url | urlencode }}"
+                  aria-label="Deel op WhatsApp"
+                  target="_blank"
+                  class="utrecht-link-social"
+                  rel="external noopener noreferrer"
+                  ><i class="icon --whatsapp" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  href="https://www.linkedin.com/sharing/share-offsite/?url={{ data.piece._url | urlencode }}"
+                  aria-label="Deel op LinkedIn"
+                  target="_blank"
+                  class="utrecht-link-social"
+                  rel="external noopener noreferrer"
+                  ><i class="icon --linkedin" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  aria-label="Kopieer link naar dit bericht"
+                  class="utrecht-link-social copy-link"
+                  data-copy-link>
+                  <i class="icon --url" aria-hidden="true"></i>
+                </button>
+              </li>
+            </ul>
           </div>
         </aside>
       </div>
@@ -90,5 +100,23 @@ data.piece.title }}{% endblock %} {% block main %}
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    var button = document.querySelector('[data-copy-link]');
+    if (!button || !navigator.clipboard) return;
+    var originalLabel = button.getAttribute('aria-label');
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(window.location.href).then(function () {
+        button.setAttribute('aria-label', 'Link gekopieerd');
+        button.classList.add('is-copied');
+        setTimeout(function () {
+          button.setAttribute('aria-label', originalLabel);
+          button.classList.remove('is-copied');
+        }, 2000);
+      });
+    });
+  })();
+</script>
 
 {% endblock %}
