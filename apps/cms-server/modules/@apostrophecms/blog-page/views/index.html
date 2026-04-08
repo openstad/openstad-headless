@@ -19,7 +19,8 @@ data.page.title }} {% endblock %} {% block main %}
             <figure>
               <img
                 src="{{ apos.attachment.url(piece.image, { size: 'full' }) }}"
-                role="presentation" />
+                alt="{{ piece.image.title or piece.title }}"
+                loading="lazy" />
             </figure>
             <div class="card-content">
               <div class="date">

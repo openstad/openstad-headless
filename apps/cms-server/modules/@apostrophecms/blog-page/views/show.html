@@ -9,7 +9,7 @@ data.piece.title }}{% endblock %} {% block main %}
           <figure>
             <img
               src="{{ apos.attachment.url(data.piece.image, { size: 'full' }) }}"
-              role="presentation" />
+              alt="{{ data.piece.image.title or data.piece.title }}" />
           </figure>
         </div>
       </div>
