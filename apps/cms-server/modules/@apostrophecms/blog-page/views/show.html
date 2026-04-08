@@ -19,7 +19,10 @@ data.piece.title }}{% endblock %} {% block main %}
           <div class="publication-date">
             <p class="utrecht-heading-4 share-links__label">Gepubliceerd op</p>
             <p class="utrecht-paragraph">
-              {{ data.piece.publishedAt | date('MMMM D, YYYY') }}
+              <time
+                datetime="{{ data.piece.publishedAt | date('YYYY-MM-DD') }}">
+                {{ data.piece.publishedAt | date('D MMMM YYYY') }}
+              </time>
             </p>
           </div>
 

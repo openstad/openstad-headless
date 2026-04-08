@@ -46,7 +46,11 @@
           </figure>
           {% endif %}
           <div class="card-content">
-            <div class="date">{{ post.publishedAt | date('MMMM D, YYYY')}}</div>
+            <div class="date">
+              <time datetime="{{ post.publishedAt | date('YYYY-MM-DD') }}">
+                {{ post.publishedAt | date('D MMMM YYYY') }}
+              </time>
+            </div>
             <h3 class="utrecht-heading-4">{{ post.title }}</h3>
             <p class="utrecht-paragraph">{{ post.summary | truncate(150) }}</p>
 
