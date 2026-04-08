@@ -47,15 +47,34 @@ services:
       - 8025:8025 # web ui
 
   openstad-jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/jaeger:2.8.0
     container_name: openstad-jaeger
     restart: unless-stopped
     ports:
-      - 16686:16686 # Jaeger UI
-      - 4317:4317 # OTLP gRPC receiver
-      - 4318:4318 # OTLP HTTP receiver
+      - 16686:16686
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+
+  openstad-otel-collector:
+    build:
+      context: otel-collector
+    image: openstad-headless-otel-collector:local
+    volumes:
+      - ./otel-collector/config.local.yaml:/etc/otelcol-contrib/config.yaml
+    depends_on:
+      openstad-jaeger:
+        condition: service_started
+    ports:
+      - 4317:4317 # OTLP gRPC
+      - 4318:4318 # OTLP HTTP
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 128M
 
   openstad-api-server:
     build:
@@ -73,6 +92,8 @@ services:
         condition: service_healthy
       openstad-redis:
         condition: service_healthy
+      openstad-otel-collector:
+        condition: service_started
     container_name: openstad-api-server
     restart: unless-stopped
     environment:
@@ -119,6 +140,9 @@ services:
       - HASH_IP_ADDRESSES=${HASH_IP_ADDRESSES}
       - HASH_IP_SALT=${HASH_IP_SALT}
       - USER_ID_SALT=${USER_ID_SALT}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-api-server}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
+      - OTEL_ENABLED=${OTEL_ENABLED_API:-false}
       - SPAM_FILTER_ENABLED=${SPAM_FILTER_ENABLED:-false}
     ports:
       - '${API_PORT}:${API_PORT}'
@@ -159,6 +183,8 @@ services:
     depends_on:
       openstad-mysql:
         condition: service_healthy
+      openstad-otel-collector:
+        condition: service_started
     container_name: openstad-auth-server
     restart: unless-stopped
     environment:
@@ -199,6 +225,9 @@ services:
       - ALLOWED_ADMIN_DOMAINS=["${ADMIN_DOMAIN}"]
       - ENVIRONMENT_NAME=${ENVIRONMENT_NAME}
       - NODE_ENV=development
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-auth-server}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
+      - OTEL_ENABLED=${OTEL_ENABLED_AUTH:-false}
     ports:
       - '${AUTH_PORT}:${AUTH_PORT}'
     volumes:
@@ -221,6 +250,8 @@ services:
     depends_on:
       openstad-mysql:
         condition: service_healthy
+      openstad-otel-collector:
+        condition: service_started
     container_name: openstad-image-server
     restart: unless-stopped
     environment:
@@ -238,6 +269,9 @@ services:
       - NODE_ENV=development
       - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
       - FORCE_HTTP=${FORCE_HTTP}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-image-server}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
+      - OTEL_ENABLED=${OTEL_ENABLED_IMAGE:-false}
     ports:
       - '${IMAGE_PORT_API}:${IMAGE_PORT_API}'
     volumes:
@@ -257,6 +291,9 @@ services:
         - PORT=${ADMIN_PORT}
         - BUILD_ENV=${BUILD_ENV:-production}
     image: ${REGISTRY:-docker.io}/${REPOSITORY:-openstad/headless-admin-server}:${RELEASE_VERSION:-latest}
+    depends_on:
+      openstad-otel-collector:
+        condition: service_started
     container_name: openstad-admin-server
     restart: unless-stopped
     environment:
@@ -273,6 +310,9 @@ services:
       - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
       - NEXT_PUBLIC_SPAM_FILTER_ENABLED=${SPAM_FILTER_ENABLED:-false}
       - HASH_IP_SALT=${HASH_IP_SALT}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-admin-server}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
+      - OTEL_ENABLED=${OTEL_ENABLED_ADMIN:-false}
       - WHITELISTED_EMAILS=${WHITELISTED_EMAILS}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
@@ -315,6 +355,9 @@ services:
       - REACT_CDN=${REACT_CDN}
       - REACT_DOM_CDN=${REACT_DOM_CDN}
       - DISABLE_WIDGET_PREVIEW=${CMS_DISABLE_WIDGET_PREVIEW:-false}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME_CMS:-openstad-cms-server}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT_CMS:-http://openstad-otel-collector:4317}
+      - OTEL_ENABLED=${OTEL_ENABLED_CMS:-false}
     ports:
       - '${CMS_PORT}:${CMS_PORT}'
     volumes:
