@@ -87,11 +87,11 @@ if (
 
   const isDatabaseEmpty = async () => {
     try {
-      const tables = await db.sequelize.query('SHOW TABLES');
-      return tables[0].length === 0;
+      const tables = await db.sequelize.getQueryInterface().showAllTables();
+      return tables.length === 0;
     } catch (err) {
       console.error('Error while checking database tables:', err);
-      process.exit(0);
+      process.exit(1);
     }
   };
 
