@@ -159,16 +159,14 @@ During setup the databases are filled with some initial data, as described in th
 
 To rerun the database initialisation, e.g. for the api, run
 
+```
 docker exec openstad-api-server bash -c "npm run init-database"
-
 ```
 
 To connect directly to the database use
 
 ```
-
 mysql -h 127.0.0.1 -u root -p
-
 ```
 
 You can find the password in the `.env` file
@@ -180,23 +178,18 @@ The `npm run create-docker-config` command above uses the `.env` file to overwri
 You can use this to create a simpler initial login code:
 
 ```
-
 AUTH_FIRST_LOGIN_CODE=123
-
 ```
 
 or mysql password:
 
 ```
-
 DB_PASSWORD=123
-
 ```
 
 or use an existing database server:
 
 ```
-
 DB_HOST=
 DB_USERNAME=
 DB_PASSWORD=
@@ -204,7 +197,6 @@ DB_AUTH_METHOD=''
 DB_REQUIRE_SSL=
 API_DB_NAME=
 AUTH_DB_NAME=
-
 ```
 
 ### If everything else fails
@@ -212,9 +204,7 @@ AUTH_DB_NAME=
 Try deleting your existing containers and volumes:
 
 ```
-
 docker-compose down -v
-
 ```
 
 ### ToDo's
@@ -225,4 +215,3 @@ docker-compose down -v
 - Ik wil er eigenlijk nog een nginx server voor zetten
 - De db's zijn nu een kopie van docker-compose.deps-only.yml; die zou je willen hergebruiken ipv kopieren
 - Ik heb de Dockerfiles in de apps wat opgeschoond, maar er moet natuurlijk gechecked of die nou nog goed werken
-```
