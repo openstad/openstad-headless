@@ -159,7 +159,6 @@ During setup the databases are filled with some initial data, as described in th
 
 To rerun the database initialisation, e.g. for the api, run
 
-````
 
 docker exec openstad-api-server bash -c "npm run init-database"
 
