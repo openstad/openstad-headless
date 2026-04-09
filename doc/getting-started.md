@@ -150,7 +150,7 @@ Some tasks use the `tools` profile and are run on demand (they do not start with
 Remove `node_modules` first to avoid EACCES on the Docker mount, then run the update-lock container:
 
 ```bash
-rm -rf node_modules && docker compose --profile tools run --rm openstad-update-lock`
+rm -rf node_modules && docker compose --profile tools run --rm openstad-update-lock
 ```
 
 ### Initial data
