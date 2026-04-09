@@ -37,6 +37,7 @@ import { LikeWidgetTabProps } from '../../likes/[id]';
 import LikesDisplay from '../../likes/[id]/weergave';
 import WidgetResourceDetailDisplay from './display';
 import WidgetResourceDetailGeneral from './general';
+import WidgetResourceDetailTijdlijn from './tijdlijn';
 
 export const getServerSideProps = withApiUrl;
 
@@ -80,6 +81,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
+              <TabsTrigger value="tijdlijn">Tijdlijn</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="comments">Reacties widget</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
@@ -109,6 +111,25 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsContent value="display" className="p-0">
               {previewConfig && (
                 <WidgetResourceDetailDisplay
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="tijdlijn" className="p-0">
+              {previewConfig && (
+                <WidgetResourceDetailTijdlijn
                   {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })

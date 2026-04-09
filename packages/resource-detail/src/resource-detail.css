@@ -392,3 +392,141 @@
 .dd-accordion:has(.dd-accordion-content-wrapper[data-visible-lines='10']) {
   --dataAccordionLines: calc(10 * var(--accordion-lineHeight));
 }
+
+/* ============================
+   Agenda / Tijdlijn Section
+   ============================ */
+.osc-resource-detail-agenda-section {
+  padding-top: 0.5rem;
+  padding-bottom: 1.25rem;
+}
+
+.osc-resource-detail-agenda-section .utrecht-heading-3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  line-height: 1.3;
+}
+
+.osc-resource-detail-agenda-section .osc-agenda {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+/* Vertical line on the container */
+.osc-resource-detail-agenda-section .osc-agenda::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--nlds-agenda-line-color, #333);
+  z-index: 0;
+}
+
+.osc-resource-detail-agenda-section .osc-agenda-item {
+  background-color: var(--nlds-agenda-item-bg, #f5f5f5);
+  padding: 0.6rem 0.8rem 0.6rem 2.5rem;
+  margin-left: 0;
+  border: none;
+  position: relative;
+}
+
+.osc-resource-detail-agenda-section .osc-agenda-item:last-child {
+  padding-bottom: 0.6rem;
+}
+
+/* Hide ALL original pseudo-element lines */
+.osc-resource-detail-agenda-section .osc-agenda-item::before,
+.osc-resource-detail-agenda-section .osc-agenda-item::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Circle centered on the line */
+.osc-resource-detail-agenda-section .osc-date-circle {
+  box-sizing: content-box;
+  position: absolute;
+  left: 15px;
+  top: 1.3rem;
+  transform: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 5px solid var(--nlds-agenda-dot-color, #333);
+  outline: none;
+  margin: 0;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.osc-resource-detail-agenda-section
+  .osc-agenda-item.--active-item
+  .osc-date-circle {
+  background-color: var(--nlds-agenda-dot-color, #333);
+}
+
+.osc-resource-detail-agenda-section
+  .osc-agenda-item.--active-item
+  .osc-date-circle:before {
+  display: none;
+}
+
+/* Content area */
+.osc-resource-detail-agenda-section .osc-agenda-content {
+  background-color: transparent;
+  border: none;
+  border-radius: 3px;
+  padding: 0.6rem 1rem;
+  flex: 1;
+}
+
+.osc-tijdlijn-date {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #282828;
+  display: inline;
+}
+
+.osc-tijdlijn-date::after {
+  content: ' - ';
+}
+
+.osc-resource-detail-agenda-section .osc-agenda-content h4 {
+  font-size: 1.1rem;
+  display: inline;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+  color: #282828;
+}
+
+.osc-resource-detail-agenda-section .osc-agenda-content p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin: 0 0 0.1rem 0;
+  color: #282828;
+}
+
+.osc-resource-detail-agenda-section .osc-agenda-list {
+  margin-top: 0.1rem;
+  padding: 0;
+}
+
+.osc-resource-detail-agenda-section .osc-agenda-list a {
+  color: var(--nlds-agenda-link-color, #0a7b6c) !important;
+  text-decoration: underline !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+}
+
+.osc-resource-detail-agenda-section .osc-agenda-list a:hover {
+  text-decoration: none !important;
+}

@@ -61,7 +61,8 @@ type booleanProps = {
     | 'displayEditResourceButton'
     | 'displayDeleteButton'
     | 'displayDeleteEditButtonOnTop'
-    | 'displaySocials']: boolean | undefined;
+    | 'displaySocials'
+    | 'displayAgenda']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -135,6 +136,7 @@ function ResourceDetail({
   displaySocials = true,
   displayDocuments = true,
   clickableImage = false,
+  displayAgenda = false,
   documentsTitle = '',
   documentsDesc = '',
   backUrlText = 'Terug naar het document',
@@ -187,6 +189,10 @@ function ResourceDetail({
   };
 
   if (!resource) return null;
+
+  // Tijdlijn items
+  const tijdlijnItems = resource?.extraData?.tijdlijn || [];
+
   const shouldHaveSideColumn =
     displayLikes ||
     displayTags ||
@@ -606,6 +612,66 @@ function ResourceDetail({
                     </div>
                   ))}
               </div>
+
+              {displayAgenda &&
+                tijdlijnItems.length > 0 &&
+                !resource?.extraData?.hideTijdlijn && (
+                  <div className="osc-resource-detail-agenda-section">
+                    <Heading level={3} appearance="utrecht-heading-3">
+                      Project tijdlijn
+                    </Heading>
+                    <section className="osc-agenda">
+                      {tijdlijnItems
+                        .sort(
+                          (a: any, b: any) =>
+                            parseInt(a.trigger) - parseInt(b.trigger)
+                        )
+                        .map((item: any, index: number) => (
+                          <div
+                            key={index}
+                            className={`osc-agenda-item${item.active || (item.date && new Date(item.date) <= new Date()) ? ' --active-item' : ''}`}>
+                            <div className="osc-date-circle" />
+                            <div className="osc-agenda-content">
+                              {item.date && (
+                                <span className="osc-tijdlijn-date">
+                                  {new Date(item.date).toLocaleDateString(
+                                    'nl-NL',
+                                    {
+                                      day: 'numeric',
+                                      month: 'long',
+                                      year: 'numeric',
+                                    }
+                                  )}
+                                </span>
+                              )}
+                              <h4>{item.title}</h4>
+                              {item.description && <p>{item.description}</p>}
+                              {item.links && item.links.length > 0 && (
+                                <div className="osc-agenda-list">
+                                  {item.links.map(
+                                    (link: any, linkIndex: number) => (
+                                      <a
+                                        key={linkIndex}
+                                        href={link.url || '#'}
+                                        target={
+                                          link.openInNewWindow
+                                            ? '_blank'
+                                            : '_self'
+                                        }
+                                        rel="noopener noreferrer">
+                                        {link.title || 'Lees het verslag'}
+                                      </a>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </section>
+                  </div>
+                )}
+
               {displayLocation && resource.location && (
                 <>
                   <Heading level={2} appearance="utrecht-heading-2">
