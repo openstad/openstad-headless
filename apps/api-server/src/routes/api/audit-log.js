@@ -165,6 +165,7 @@ router.post(
         hostname,
         userAgent,
         routePath,
+        referer,
         statusCode,
       } = req.body;
 
@@ -188,6 +189,7 @@ router.post(
         hostname: hostname || null,
         userAgent: userAgent || null,
         routePath: routePath || null,
+        referer: referer || null,
         statusCode: statusCode || null,
         source: 'auth',
       };

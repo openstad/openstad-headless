@@ -123,6 +123,7 @@ function buildEntry(
     hostname: HOSTNAME,
     userAgent: req.headers?.['user-agent']?.substring(0, 500) || null,
     routePath: req.originalUrl?.substring(0, 500) || null,
+    referer: req.headers?.referer?.substring(0, 500) || null,
     statusCode: statusCode || null,
     source: source || 'api',
   };
@@ -162,9 +163,11 @@ function emitOtlp(entry) {
         'audit.user_role': entry.userRole || '',
         'audit.ip_address': entry.ipAddress || '',
         'audit.route_path': entry.routePath || '',
+        'audit.referer': entry.referer || '',
         'audit.status_code':
           entry.statusCode != null ? String(entry.statusCode) : '',
         'audit.hostname': entry.hostname || '',
+        'audit.user_agent': entry.userAgent || '',
       },
     });
   } catch (err) {

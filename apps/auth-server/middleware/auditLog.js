@@ -28,6 +28,7 @@ function logAuthEvent(req, action, details = {}) {
     hostname: HOSTNAME,
     userAgent: req.headers?.['user-agent']?.substring(0, 500) || null,
     routePath: req.originalUrl?.substring(0, 500) || null,
+    referer: req.headers?.referer?.substring(0, 500) || null,
     statusCode: details.statusCode || null,
   };
 

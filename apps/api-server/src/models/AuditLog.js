@@ -66,6 +66,10 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.STRING(500),
         allowNull: true,
       },
+      referer: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+      },
       statusCode: {
         type: DataTypes.SMALLINT,
         allowNull: true,
