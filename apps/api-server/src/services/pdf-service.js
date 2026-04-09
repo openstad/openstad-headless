@@ -6,7 +6,13 @@
 
 function stripHtml(str) {
   if (typeof str !== 'string') return '';
-  return str.replace(/<[^>]*>/g, '').trim();
+  let result = str;
+  let prev;
+  do {
+    prev = result;
+    result = result.replace(/<[^>]*>/g, '');
+  } while (result !== prev);
+  return result.trim();
 }
 
 function escapeHtml(str) {
@@ -26,7 +32,12 @@ function sanitizeAnswer(str) {
     preserved.push(match);
     return `%%LINK${preserved.length - 1}%%`;
   });
-  result = result.replace(/<[^>]*>/g, '').trim();
+  let prev;
+  do {
+    prev = result;
+    result = result.replace(/<[^>]*>/g, '');
+  } while (result !== prev);
+  result = result.trim();
   preserved.forEach((link, i) => {
     result = result.replace(`%%LINK${i}%%`, link);
   });
