@@ -226,7 +226,3 @@ docker-compose down -v
 - De db's zijn nu een kopie van docker-compose.deps-only.yml; die zou je willen hergebruiken ipv kopieren
 - Ik heb de Dockerfiles in de apps wat opgeschoond, maar er moet natuurlijk gechecked of die nou nog goed werken
 ```
-
-```
-
-```
