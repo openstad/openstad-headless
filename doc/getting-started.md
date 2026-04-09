@@ -147,10 +147,10 @@ Some tasks use the `tools` profile and are run on demand (they do not start with
 
 **Regenerate `package-lock.json` (lock file only, no install):**
 
-Remove `node_modules` first to avoid EACCES on the Docker mount, then run the update-lock container:
+Run the update-lock container (it will remove `node_modules` for you to avoid EACCES on the Docker mount):
 
 ```bash
-rm -rf node_modules && docker compose --profile tools run --rm openstad-update-lock
+npm run update-lock:docker
 ```
 
 ### Initial data
@@ -158,7 +158,6 @@ rm -rf node_modules && docker compose --profile tools run --rm openstad-update-l
 During setup the databases are filled with some initial data, as described in the [databases](./databases.md) documentation.
 
 To rerun the database initialisation, e.g. for the api, run
-
 
 docker exec openstad-api-server bash -c "npm run init-database"
 
@@ -227,4 +226,7 @@ docker-compose down -v
 - De db's zijn nu een kopie van docker-compose.deps-only.yml; die zou je willen hergebruiken ipv kopieren
 - Ik heb de Dockerfiles in de apps wat opgeschoond, maar er moet natuurlijk gechecked of die nou nog goed werken
 ```
-````
+
+```
+
+```

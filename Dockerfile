@@ -47,7 +47,7 @@ WORKDIR /opt/openstad-headless
 RUN npm update -g npm
 # Install safe-chain so --safe-chain-skip-minimum-package-age is recognized when updating the lock file
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
-CMD ["npm", "run", "update-lock"]
+CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
 
 FROM builder AS base
 

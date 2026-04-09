@@ -9,6 +9,7 @@
     "start": "node ./scripts/start-all.js",
     "init-databases": "node ./scripts/init-databases.js",
     "update-lock": "npm install --package-lock-only --ignore-scripts --safe-chain-skip-minimum-package-age",
+    "update-lock:docker": "docker compose --profile tools run --rm openstad-update-lock",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
