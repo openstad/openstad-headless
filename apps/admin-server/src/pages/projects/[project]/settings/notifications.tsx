@@ -44,6 +44,8 @@ const formSchema = z.object({
   projectmanagerAddress: z.string().email(),
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
+  pdfTitle: z.string().optional(),
+  pdfDescription: z.string().optional(),
 });
 
 export default function ProjectSettingsNotifications({
@@ -62,6 +64,8 @@ export default function ProjectSettingsNotifications({
         data?.emailConfig?.[category]?.projectmanagerAddress || null,
       sendUpdatedResourceAdminEmail:
         data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
+      pdfTitle: data?.emailConfig?.[category]?.pdfTitle ?? '',
+      pdfDescription: data?.emailConfig?.[category]?.pdfDescription ?? '',
     }),
     [data?.emailConfig]
   );
@@ -84,6 +88,8 @@ export default function ProjectSettingsNotifications({
           fromName: values.fromName,
           sendUpdatedResourceAdminEmail:
             values.sendUpdatedResourceAdminEmail || false,
+          pdfTitle: values.pdfTitle || '',
+          pdfDescription: values.pdfDescription || '',
         },
       });
       if (project) {
@@ -220,6 +226,51 @@ export default function ProjectSettingsNotifications({
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Separator className="my-4" />
+              <Heading size="lg">PDF bijlage instellingen</Heading>
+              <FormField
+                control={form.control}
+                name="pdfTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Titel van de PDF bijlage
+                      <InfoDialog
+                        content={
+                          'Deze titel wordt bovenaan de PDF weergegeven die als bijlage bij de bevestigingsmail wordt meegestuurd.'
+                        }
+                      />
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nieuwe inzending" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="pdfDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Beschrijving van de PDF bijlage
+                      <InfoDialog
+                        content={
+                          'Deze beschrijving wordt onder de titel weergegeven in de PDF bijlage.'
+                        }
+                      />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Er is een nieuwe inzending ontvangen."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

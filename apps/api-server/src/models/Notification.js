@@ -300,20 +300,109 @@ module.exports = (db, sequelize, DataTypes) => {
                   </mj-table>
                 `;
 
-                  // Generate PDF attachment if configured
+                  // Generate PDF attachment for user notifications only
+                  const userNotificationTypes = [
+                    'new concept resource - user feedback',
+                    'new published resource - user feedback',
+                    'updated resource - user feedback',
+                  ];
                   if (
                     process.env.PDF_API_ENDPOINT &&
                     process.env.PDF_API_KEY &&
-                    questionsAndAnswers.length > 0
+                    questionsAndAnswers.length > 0 &&
+                    userNotificationTypes.includes(instance.type)
                   ) {
                     try {
                       const {
                         buildPdfHtml,
                         generatePdf,
                       } = require('../services/pdf-service');
-                      const pdfHtml = buildPdfHtml(questionsAndAnswers, {
-                        title: resource?.title,
-                        description: resource?.description,
+
+                      // Build user data section
+                      const userDetails = [];
+                      if (instance.data?.userId) {
+                        const pdfUser = await db.User.findByPk(
+                          instance.data.userId
+                        );
+                        if (pdfUser) {
+                          const fullName =
+                            [pdfUser.firstname, pdfUser.lastname]
+                              .filter(Boolean)
+                              .join(' ') || pdfUser.name;
+                          if (fullName)
+                            userDetails.push({
+                              question: 'Voor- en achternaam',
+                              answer: fullName,
+                            });
+                          if (pdfUser.phoneNumber)
+                            userDetails.push({
+                              question: 'Telefoonnummer',
+                              answer: pdfUser.phoneNumber,
+                            });
+                          if (pdfUser.email)
+                            userDetails.push({
+                              question: 'Email',
+                              answer: pdfUser.email,
+                            });
+                          const addressParts = [
+                            pdfUser.address,
+                            pdfUser.postcode,
+                            pdfUser.city,
+                          ]
+                            .filter(Boolean)
+                            .join(' ');
+                          if (addressParts)
+                            userDetails.push({
+                              question: 'Adres',
+                              answer: addressParts,
+                            });
+                        }
+                      }
+
+                      const pdfItems = [];
+
+                      // Add user data section if available
+                      if (userDetails.length > 0) {
+                        pdfItems.push({ section: 'Je gegevens' });
+                        pdfItems.push(...userDetails);
+                      }
+
+                      // Add form data with sections
+                      widgetItems
+                        .filter((item) => item.fieldType !== 'none')
+                        .forEach((item) => {
+                          if (item.fieldType === 'pagination') {
+                            pdfItems.push({ section: item.title || '' });
+                          } else {
+                            const qa = questionsAndAnswers.find(
+                              (q) =>
+                                q.question === (item.title || item.fieldKey)
+                            );
+                            pdfItems.push(
+                              qa || {
+                                question: item.title || item.fieldKey,
+                                answer: '',
+                              }
+                            );
+                          }
+                        });
+
+                      const pdfProject = await db.Project.scope(
+                        'includeEmailConfig'
+                      ).findByPk(instance.projectId);
+                      const logoUrl =
+                        pdfProject?.emailConfig?.styling?.logo ||
+                        pdfProject?.config?.auth?.provider?.openstad?.config
+                          ?.styling?.logo ||
+                        '';
+                      const pdfHtml = buildPdfHtml(pdfItems, {
+                        title:
+                          pdfProject?.emailConfig?.notifications?.pdfTitle ||
+                          'Nieuwe inzending',
+                        description:
+                          pdfProject?.emailConfig?.notifications
+                            ?.pdfDescription || '',
+                        logoUrl,
                       });
                       const pdfBuffer = await generatePdf(pdfHtml);
                       pdfAttachment = {

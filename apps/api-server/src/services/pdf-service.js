@@ -4,6 +4,11 @@
  * Requires PDF_API_ENDPOINT and PDF_API_KEY environment variables.
  */
 
+function stripHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/<[^>]*>/g, '').trim();
+}
+
 function escapeHtml(str) {
   if (typeof str !== 'string') return '';
   return str
@@ -13,19 +18,44 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-function buildPdfHtml(questionsAndAnswers, { title, description } = {}) {
+function sanitizeAnswer(str) {
+  if (typeof str !== 'string') return '';
+  // Preserve <a> tags but strip all other HTML
+  const preserved = [];
+  let result = str.replace(/<a\s[^>]*>.*?<\/a>/gi, (match) => {
+    preserved.push(match);
+    return `%%LINK${preserved.length - 1}%%`;
+  });
+  result = result.replace(/<[^>]*>/g, '').trim();
+  preserved.forEach((link, i) => {
+    result = result.replace(`%%LINK${i}%%`, link);
+  });
+  return result;
+}
+
+function buildPdfHtml(
+  questionsAndAnswers,
+  { title, description, logoUrl } = {}
+) {
   const rows = questionsAndAnswers
-    .map(
-      (qa) => `
-      <tr class="question">
-        <td>${escapeHtml(qa.question)}</td>
-      </tr>
-      <tr class="answer">
-        <td>${escapeHtml(qa.answer)}</td>
-      </tr>`
-    )
+    .map((qa) => {
+      if (qa.section !== undefined) {
+        return `
+      <tr class="section">
+        <td colspan="2">${stripHtml(qa.section)}</td>
+      </tr>`;
+      }
+      return `
+      <tr>
+        <td class="question">${stripHtml(qa.question)}</td>
+        <td class="answer">${qa.answer != null ? sanitizeAnswer(String(qa.answer)) : '-'}</td>
+      </tr>`;
+    })
     .join('');
 
+  const logoHtml = logoUrl
+    ? `<img src="${escapeHtml(logoUrl)}" alt="Logo" class="logo" />`
+    : '';
   const titleHtml = title ? `<h1>${escapeHtml(title)}</h1>` : '';
   const descriptionHtml = description
     ? `<p class="description">${escapeHtml(description)}</p>`
@@ -38,39 +68,64 @@ function buildPdfHtml(questionsAndAnswers, { title, description } = {}) {
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 13px;
-      color: #000;
-      margin: 40px;
+      font-size: 14px;
+      color: #1a1a1a;
+      margin: 60px 80px;
+    }
+    .logo {
+      max-height: 60px;
+      max-width: 220px;
+      margin-bottom: 32px;
     }
     h1 {
-      font-size: 20px;
-      margin-bottom: 8px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #000;
+      margin: 0 0 12px 0;
     }
     .description {
       font-size: 14px;
-      color: #333;
-      margin-bottom: 24px;
+      color: #1a1a1a !important;
+      text-decoration: none;
+      margin: 0 0 24px 0;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      border: 1px solid #000;
     }
-    tr.question td {
-      background-color: #f0f0f0;
-      padding: 10px;
+    tr {
+      border: 1px solid #e0e0e0;
+    }
+    tr.section {
+      page-break-after: avoid;
+    }
+    tr.section td {
+      background-color: #f7f7f7;
+      padding: 12px 14px;
       font-weight: bold;
+      font-size: 14px;
+      color: #000;
     }
-    tr.answer td {
-      background-color: #fff;
-      padding: 10px;
+    td.question {
+      width: 35%;
+      padding: 14px 14px;
+      vertical-align: top;
+      color: #1a1a1a;
     }
-    td {
-      border: 1px solid #000;
+    td.answer {
+      width: 65%;
+      padding: 14px 14px;
+      vertical-align: top;
+      color: #000;
+    }
+    td.answer a {
+      color: #1a56db;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+  ${logoHtml}
   ${titleHtml}
   ${descriptionHtml}
   <table>
@@ -92,6 +147,7 @@ async function generatePdf(htmlString) {
     new Blob([htmlString], { type: 'text/html' }),
     'template.html'
   );
+  formData.append('save', 'false');
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -107,22 +163,7 @@ async function generatePdf(htmlString) {
     throw new Error(`PDF API returned ${response.status}: ${body}`);
   }
 
-  const data = await response.json();
-  if (!data.pdf_url) {
-    throw new Error('PDF API response missing pdf_url');
-  }
-
-  const pdfResponse = await fetch(data.pdf_url, {
-    signal: AbortSignal.timeout(15000),
-  });
-
-  if (!pdfResponse.ok) {
-    throw new Error(
-      `Failed to download PDF from ${data.pdf_url}: ${pdfResponse.status}`
-    );
-  }
-
-  const arrayBuffer = await pdfResponse.arrayBuffer();
+  const arrayBuffer = await response.arrayBuffer();
   return Buffer.from(arrayBuffer);
 }
 
