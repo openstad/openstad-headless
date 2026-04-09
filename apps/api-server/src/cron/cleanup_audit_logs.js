@@ -92,11 +92,14 @@ function createOnTick(database) {
   };
 }
 
-module.exports = {
+const cronJob = {
   // second minute hour day month weekday (6-field, supported by 'cron' npm package)
   cronTime: '0 30 2 * * *',
   onTick: createOnTick(),
   onComplete: function () {},
-  // Exposed for testing
-  createOnTick,
 };
+
+// Expose factory for testing
+cronJob.createOnTick = createOnTick;
+
+module.exports = cronJob;

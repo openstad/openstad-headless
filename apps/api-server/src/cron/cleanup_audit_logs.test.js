@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createOnTick } from './cleanup_audit_logs.js';
+import cleanupModule from './cleanup_audit_logs.js';
+
+const { createOnTick } = cleanupModule;
 
 const Op = {
   ne: Symbol('ne'),
