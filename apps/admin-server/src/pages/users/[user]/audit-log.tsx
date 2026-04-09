@@ -1,10 +1,11 @@
 import AuditLogTable from '@/components/audit-log-table';
-import { useRouter } from 'next/router';
+import useUser from '@/hooks/use-user';
 import React from 'react';
 
 export default function UserAuditLog() {
-  const router = useRouter();
-  const { user } = router.query;
+  const { data } = useUser();
 
-  return <AuditLogTable userId={user as string} />;
+  if (!data?.id) return null;
+
+  return <AuditLogTable userId={data.id} />;
 }

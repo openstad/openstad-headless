@@ -81,24 +81,33 @@ module.exports = function auditLogMiddleware(serviceOverride) {
     const resolved = resolveModelFromPath(req.path);
     if (!resolved) return next();
 
-    // Capture previous data for updates/deletes before the handler mutates it.
-    // Depends on route handlers populating req.results via .all() middleware.
-    let previousData = null;
-    if ((action === 'update' || action === 'delete') && req.results) {
-      try {
-        const raw = req.results.dataValues || req.results;
-        previousData = JSON.parse(JSON.stringify(raw));
-      } catch (e) {
-        // Ignore serialization errors
-      }
-    }
-    if (action === 'update' && !previousData) {
-      console.warn(
-        `Audit log: no previousData for ${resolved.modelName} update on ${req.path}`
-      );
+    // Capture a snapshot of req.results when it is first set by the route's
+    // .all() handler. This must happen before the .put()/.delete() handler
+    // mutates the Sequelize instance in place.
+    let previousSnapshot = null;
+    if (action === 'update' || action === 'delete') {
+      let _results = req.results;
+      Object.defineProperty(req, 'results', {
+        get() {
+          return _results;
+        },
+        set(val) {
+          // Snapshot on first assignment only
+          if (!previousSnapshot && val) {
+            try {
+              const raw = val.dataValues || val;
+              previousSnapshot = JSON.parse(JSON.stringify(raw));
+            } catch (e) {
+              // Ignore serialization errors
+            }
+          }
+          _results = val;
+        },
+        configurable: true,
+        enumerable: true,
+      });
     }
 
-    // Wrap res.json to capture response data
     const originalJson = res.json.bind(res);
     let jsonCalled = false;
 
@@ -108,12 +117,11 @@ module.exports = function auditLogMiddleware(serviceOverride) {
 
       const statusCode = res.statusCode;
 
-      // Only log successful operations (2xx/3xx) for mutations
-      // Log all admin reads regardless
       if (action && statusCode >= 400) {
         return originalJson(data);
       }
 
+      let previousData = previousSnapshot;
       let newData = null;
       let modelId = resolved.modelId;
 
@@ -127,7 +135,6 @@ module.exports = function auditLogMiddleware(serviceOverride) {
           const rawNew = data.dataValues || data;
           newData = service.getChangedFields(previousData, rawNew);
           if (previousData && newData) {
-            // Only keep changed fields in previousData too
             const changedPrev = {};
             for (const key of Object.keys(newData)) {
               if (previousData[key] !== undefined) {
