@@ -149,6 +149,11 @@ module.exports = (db, sequelize, DataTypes) => {
               body = await mjml2html(body);
               instance.body = body.html;
             } catch (err) {}
+
+            // Carry PDF attachment as non-persisted property for email sending
+            if (options.data?.pdfAttachment) {
+              instance._pdfAttachment = options.data.pdfAttachment;
+            }
           }
         },
       },

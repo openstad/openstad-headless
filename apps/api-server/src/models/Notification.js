@@ -186,6 +186,7 @@ module.exports = (db, sequelize, DataTypes) => {
               };
 
               let htmlContent = '';
+              let pdfAttachment = null;
 
               if (instance.data.resourceId) {
                 const resource = await db.Resource.findByPk(
@@ -298,6 +299,35 @@ module.exports = (db, sequelize, DataTypes) => {
                     </tbody>
                   </mj-table>
                 `;
+
+                  // Generate PDF attachment if configured
+                  if (
+                    process.env.PDF_API_ENDPOINT &&
+                    process.env.PDF_API_KEY &&
+                    questionsAndAnswers.length > 0
+                  ) {
+                    try {
+                      const {
+                        buildPdfHtml,
+                        generatePdf,
+                      } = require('../services/pdf-service');
+                      const pdfHtml = buildPdfHtml(questionsAndAnswers, {
+                        title: resource?.title,
+                        description: resource?.description,
+                      });
+                      const pdfBuffer = await generatePdf(pdfHtml);
+                      pdfAttachment = {
+                        filename: `inzending-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.pdf`,
+                        content: pdfBuffer,
+                        contentType: 'application/pdf',
+                      };
+                    } catch (err) {
+                      console.error(
+                        'PDF generation failed, sending email without attachment:',
+                        err
+                      );
+                    }
+                  }
                 }
               }
 
@@ -413,6 +443,7 @@ module.exports = (db, sequelize, DataTypes) => {
                           ...messageData.data,
                           submissionContent: htmlContent,
                           enqueteContent: htmlContentEnquete,
+                          pdfAttachment,
                         },
                       }
                     );
