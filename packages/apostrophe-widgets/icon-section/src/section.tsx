@@ -26,20 +26,20 @@ const renderCards = (items) => {
       <ul className="container u-small-dropdowns icon-section-list" role="list">
         {items.map((item: any, index: number) => {
           const headingId = `icon-section-heading-${index}`;
+          const isBlank =
+            typeof item.target === 'undefined' || item.target !== false;
           const linkProps = item.href
             ? {
                 href: item.href,
-                target:
-                  typeof item.target !== 'undefined' && item.target === false
-                    ? '_self'
-                    : '_blank',
+                target: isBlank ? '_blank' : '_self',
+                ...(isBlank ? { rel: 'noopener noreferrer' } : {}),
               }
             : {};
 
           if (item.linkScreenReaderText) {
             linkProps['aria-label'] = item.linkScreenReaderText;
           } else if (item.title && item.linkText) {
-            linkProps['aria-label'] = `${item.linkText} - ${item.title}`;
+            linkProps['aria-label'] = `${item.linkText} over ${item.title}`;
           }
 
           return (
