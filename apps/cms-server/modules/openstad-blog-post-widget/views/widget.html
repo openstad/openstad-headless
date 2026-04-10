@@ -8,13 +8,13 @@
   endif
   %}
   aria-labelledby="related-posts-heading-{{ data.widget._id }}">
+  {% if data.widget.title %}
   <h2
     class="utrecht-heading-2 related-post-heading"
     id="related-posts-heading-{{ data.widget._id }}">
     {{ data.widget.title }}
   </h2>
-
-  {% if data.widget.enableCarousel %}
+  {% endif %} {% if data.widget.enableCarousel %}
   <div class="carousel-controls">
     <button
       class="utrecht-button osc-icon-button carousel-prev"
@@ -34,6 +34,7 @@
   <div
     class="carousel-container{% if not data.widget.enableCarousel %} static-grid{% endif %}">
     <ul
+      role="list"
       class="{% if data.widget.enableCarousel %}carousel-track{% else %}static-list{% endif %}"
       {%
       if
@@ -46,8 +47,9 @@
       %}>
       {% for post in data.widget.relatedPosts %}
       <li>
-        <div
-          class="news-card{% if loop.first and data.widget.highlightedPost and data.widget.highlightedPost.length > 0 %} --highlight{% endif %}">
+        <article
+          class="news-card{% if loop.first and data.widget.highlightedPost and data.widget.highlightedPost.length > 0 %} --highlight{% endif %}"
+          aria-labelledby="related-post-{{ loop.index }}">
           {% if post.image %}
           <figure>
             <img
@@ -61,14 +63,16 @@
                 {{ post.publishedAt | date('D MMMM YYYY') }}
               </time>
             </div>
-            <h3 class="utrecht-heading-4">{{ post.title }}</h3>
+            <h3 class="utrecht-heading-4" id="related-post-{{ loop.index }}">
+              {{ post.title }}
+            </h3>
             <p class="utrecht-paragraph">{{ post.summary | truncate(150) }}</p>
 
             <a href="{{ post._url }}" class="read-more">
               <span>Lees meer over {{ post.title }}</span>
             </a>
           </div>
-        </div>
+        </article>
       </li>
       {% endfor %}
     </ul>
