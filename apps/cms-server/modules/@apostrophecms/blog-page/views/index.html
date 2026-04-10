@@ -13,32 +13,38 @@ data.page.title }} {% endblock %} {% block main %}
     </div>
     <div class="row">
       <div class="col-xs-12">
-        <article class="news-grid">
+        <ul class="news-grid" role="list">
           {% for piece in data.pieces %}
-          <a href="{{ piece._url }}" class="news-card">
-            <figure>
-              <img
-                src="{{ apos.attachment.url(piece.image, { size: 'full' }) }}"
-                alt="{{ piece.image.title or piece.title }}"
-                loading="lazy" />
-            </figure>
-            <div class="card-content">
-              <div class="date">
-                <time datetime="{{ piece.publishedAt | date('YYYY-MM-DD') }}">
-                  {{ piece.publishedAt | date('D MMMM YYYY') }}
-                </time>
+          <li>
+            <article class="news-card" aria-labelledby="news-{{ piece._id }}">
+              <figure>
+                <img
+                  src="{{ apos.attachment.url(piece.image, { size: 'full' }) }}"
+                  alt="{{ piece.image.title or piece.title }}"
+                  loading="lazy" />
+              </figure>
+              <div class="card-content">
+                <div class="date">
+                  <time datetime="{{ piece.publishedAt | date('YYYY-MM-DD') }}">
+                    {{ piece.publishedAt | date('D MMMM YYYY') }}
+                  </time>
+                </div>
+                <h2 class="utrecht-heading-4" id="news-{{ piece._id }}">
+                  <a href="{{ piece._url }}" class="stretched-link">
+                    {{ piece.title }}
+                  </a>
+                </h2>
+                <p class="utrecht-paragraph">{{ piece.summary }}</p>
               </div>
-              <h2 class="utrecht-heading-4">{{ piece.title }}</h2>
-              <p class="utrecht-paragraph">{{ piece.summary }}</p>
-            </div>
-          </a>
+            </article>
+          </li>
           {% endfor %}
+        </ul>
 
-          <div class="pagination">
-            {{ pager.render({ page: data.currentPage, total: data.totalPages },
-            data.url) }}
-          </div>
-        </article>
+        <nav class="pagination" aria-label="Paginering nieuwsberichten">
+          {{ pager.render({ page: data.currentPage, total: data.totalPages },
+          data.url) }}
+        </nav>
       </div>
     </div>
   </div>
