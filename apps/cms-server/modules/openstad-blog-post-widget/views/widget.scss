@@ -51,6 +51,11 @@
 
   .news-card {
     position: relative;
+
+    &:has(a:focus-visible) {
+      outline: 2px solid var(--utrecht-link-color, #1b4c92);
+      outline-offset: 2px;
+    }
   }
 
   .static-grid {
@@ -72,7 +77,8 @@
   &.carousel-enabled {
     .carousel-container {
       position: relative;
-      overflow: hidden;
+      overflow-x: clip;
+      overflow-y: visible;
       padding: 0 1px;
     }
 
