@@ -94,13 +94,26 @@
     .carousel-dot {
       width: 12px;
       height: 12px;
+      padding: 6px;
+      box-sizing: content-box;
       background: #e7e7e7;
+      background-clip: content-box;
       border: none;
       cursor: pointer;
       transition: background 0.2s;
     }
     .carousel-dot.active {
       background: var(--_utrecht-button-background-color, #228540);
+      background-clip: content-box;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .carousel-track {
+        transition: none;
+      }
+      .carousel-dot {
+        transition: none;
+      }
     }
 
     .carousel-track {
