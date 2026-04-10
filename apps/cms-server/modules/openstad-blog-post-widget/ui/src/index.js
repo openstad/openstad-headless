@@ -14,6 +14,7 @@ function initCarousel(container) {
   const prevBtn = container.querySelector('[data-carousel-prev]');
   const nextBtn = container.querySelector('[data-carousel-next]');
   const dotsContainer = container.querySelector('[data-carousel-dots]');
+  const statusEl = container.querySelector('[data-carousel-status]');
 
   if (!track || !prevBtn || !nextBtn) return;
 
@@ -60,6 +61,8 @@ function initCarousel(container) {
     nextBtn.disabled = currentIndex === maxIndex;
 
     updateDots();
+    updateSlideVisibility();
+    announceSlide();
   }
 
   function getItemsPerView() {
@@ -145,8 +148,26 @@ function initCarousel(container) {
     if (!dotsContainer) return;
     const dots = dotsContainer.querySelectorAll('.carousel-dot');
     dots.forEach((dot, index) => {
-      dot.classList.toggle('active', index === currentIndex);
+      const isActive = index === currentIndex;
+      dot.classList.toggle('active', isActive);
+      dot.setAttribute('aria-current', isActive ? 'true' : 'false');
     });
+  }
+
+  function updateSlideVisibility() {
+    const visibleCount = getItemsPerView();
+    items.forEach((item, index) => {
+      const isVisible =
+        index >= currentIndex && index < currentIndex + visibleCount;
+      item.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
+    });
+  }
+
+  function announceSlide() {
+    if (!statusEl) return;
+    const visibleCount = getItemsPerView();
+    const total = items.length;
+    statusEl.textContent = `Slide ${currentIndex + 1} tot ${Math.min(currentIndex + visibleCount, total)} van ${total}`;
   }
 
   updateItemWidths();

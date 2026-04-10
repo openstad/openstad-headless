@@ -1,5 +1,12 @@
 <section
-  class="related-posts section{% if data.widget.enableCarousel %} carousel-enabled{% endif %}">
+  class="related-posts section{% if data.widget.enableCarousel %} carousel-enabled{% endif %}"
+  {%
+  if
+  data.widget.enableCarousel
+  %}aria-roledescription="carousel"
+  {%
+  endif
+  %}>
   <h2 class="utrecht-heading-2 related-post-heading">
     {{ data.widget.title }}
   </h2>
@@ -64,6 +71,7 @@
     </ul>
     {% if data.widget.enableCarousel %}
     <div class="carousel-dots" data-carousel-dots></div>
+    <div class="visually-hidden" aria-live="polite" data-carousel-status></div>
     {% endif %}
   </div>
 </section>
