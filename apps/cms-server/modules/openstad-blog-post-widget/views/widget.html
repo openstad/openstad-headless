@@ -6,8 +6,11 @@
   %}aria-roledescription="carousel"
   {%
   endif
-  %}>
-  <h2 class="utrecht-heading-2 related-post-heading">
+  %}
+  aria-labelledby="related-posts-heading-{{ data.widget._id }}">
+  <h2
+    class="utrecht-heading-2 related-post-heading"
+    id="related-posts-heading-{{ data.widget._id }}">
     {{ data.widget.title }}
   </h2>
 

@@ -41,10 +41,10 @@ function initCarousel(container) {
     maxIndex = Math.max(0, items.length - itemsPerView);
 
     currentIndex = Math.max(0, Math.min(maxIndex, currentIndex + direction));
-    updateCarousel();
+    updateCarousel(true);
   }
 
-  function updateCarousel() {
+  function updateCarousel(announce) {
     itemsPerView = getItemsPerView();
     maxIndex = Math.max(0, items.length - itemsPerView);
 
@@ -62,7 +62,9 @@ function initCarousel(container) {
 
     updateDots();
     updateSlideVisibility();
-    announceSlide();
+    if (announce) {
+      announceSlide();
+    }
   }
 
   function getItemsPerView() {
@@ -137,7 +139,7 @@ function initCarousel(container) {
       dot.setAttribute('aria-label', `Ga naar slide ${i + 1}`);
       dot.addEventListener('click', () => {
         currentIndex = i;
-        updateCarousel();
+        updateCarousel(true);
       });
       dotsContainer.appendChild(dot);
     }
@@ -160,6 +162,15 @@ function initCarousel(container) {
       const isVisible =
         index >= currentIndex && index < currentIndex + visibleCount;
       item.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
+      // Prevent keyboard focus on links/buttons inside hidden slides
+      const focusables = item.querySelectorAll('a, button, [tabindex]');
+      focusables.forEach((el) => {
+        if (isVisible) {
+          el.removeAttribute('tabindex');
+        } else {
+          el.setAttribute('tabindex', '-1');
+        }
+      });
     });
   }
 
