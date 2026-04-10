@@ -100,6 +100,7 @@
     .carousel-dot {
       width: 12px;
       height: 12px;
+      box-sizing: content-box;
       padding: 0;
       background: #e7e7e7;
       background-clip: content-box;
