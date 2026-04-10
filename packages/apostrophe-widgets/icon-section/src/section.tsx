@@ -23,8 +23,9 @@ interface Item {
 const renderCards = (items) => {
   return (
     <div className="icon-section-grid">
-      <div className="container u-small-dropdowns">
+      <ul className="container u-small-dropdowns icon-section-list" role="list">
         {items.map((item: any, index: number) => {
+          const headingId = `icon-section-heading-${index}`;
           const linkProps = item.href
             ? {
                 href: item.href,
@@ -37,31 +38,41 @@ const renderCards = (items) => {
 
           if (item.linkScreenReaderText) {
             linkProps['aria-label'] = item.linkScreenReaderText;
+          } else if (item.title && item.linkText) {
+            linkProps['aria-label'] = `${item.linkText} - ${item.title}`;
           }
 
           return (
-            <article className="icon-section-card" key={index}>
-              {item.image && (
-                <Image
-                  alt={item.imageAlt}
-                  height={item.image.height}
-                  width={item.image.width}
-                  src={item.image._urls.full}
-                />
-              )}
-              <div className="icon-section-content">
-                {item.title && <Heading3>{item.title}</Heading3>}
-                {item.description && <Paragraph>{item.description}</Paragraph>}
-                {item.href && (
-                  <div>
-                    <Link {...linkProps}>{item.linkText}</Link>
-                  </div>
+            <li key={index}>
+              <article
+                className="icon-section-card"
+                aria-labelledby={item.title ? headingId : undefined}>
+                {item.image && (
+                  <Image
+                    alt={item.imageAlt || ''}
+                    height={item.image.height}
+                    width={item.image.width}
+                    src={item.image._urls.full}
+                  />
                 )}
-              </div>
-            </article>
+                <div className="icon-section-content">
+                  {item.title && (
+                    <Heading3 id={headingId}>{item.title}</Heading3>
+                  )}
+                  {item.description && (
+                    <Paragraph>{item.description}</Paragraph>
+                  )}
+                  {item.href && (
+                    <div>
+                      <Link {...linkProps}>{item.linkText}</Link>
+                    </div>
+                  )}
+                </div>
+              </article>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 };
