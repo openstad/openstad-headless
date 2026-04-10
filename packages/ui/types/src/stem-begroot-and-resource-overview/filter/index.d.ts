@@ -38,6 +38,7 @@ type Props = {
         multiple: boolean;
         projectId?: any;
         inlineOptions?: boolean;
+        parentTagType?: string;
     }>;
     tagsLimitation?: Array<number> | {
         [key: string]: number[];
