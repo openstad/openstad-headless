@@ -97,7 +97,12 @@
   background: var(--nlds-default-background-color);
 
   .share-links .link-container {
+    display: flex;
     flex-wrap: wrap;
+    gap: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
   }
 }
 
