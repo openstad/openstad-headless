@@ -7,7 +7,14 @@ changes) }} {%- endmacro -%} {% fragment render(data) %}
       <a
         class="{{ 'is-active' if data.query.year == year.value }}"
         href="{{ here(data.url, { year: year.value }) }}"
-        aria-current="{{ 'page' if data.query.year == year.value else 'false' }}"
+        {%
+        if
+        data.query.year=""
+        ="year.value"
+        %}aria-current="true"
+        {%
+        endif
+        %}
         >{{ __t(year.label) }}</a
       >
     </li>
