@@ -12404,11 +12404,11 @@
 }
 .icon-section .icon-section-grid .container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, auto));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   grid-gap: 2rem;
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
 }
 .icon-section .icon-section-content {
   padding: 10px;
