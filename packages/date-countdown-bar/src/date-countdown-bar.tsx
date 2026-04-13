@@ -124,30 +124,33 @@ function DateCountdownBar({
             <span className="nr-left-title amount">
               {renderAmount(padNumber(timeLeft.days))}
             </span>
-            {showLabels && <span className="nr-left-label">Dagen</span>}
+            {showLabels ? <span className="nr-left-label">Dagen</span> : null}
           </Paragraph>
         </div>
-        {showHours && (
+        {showHours ? (
           <div className="osc-countdown-bar-nr-left">
             <Paragraph>
               <span className="nr-left-title amount">
                 {renderAmount(padNumber(timeLeft.hours))}
               </span>
-              {showLabels && <span className="nr-left-label">Uren</span>}
+              {showLabels ? <span className="nr-left-label">Uren</span> : null}
             </Paragraph>
           </div>
-        )}
-        {showMinutes &&
-          (timeLeft.minutes > 0 ? (
+        ) : null}
+        {showMinutes ? (
+          timeLeft.minutes > 0 ? (
             <div className="osc-countdown-bar-nr-left">
               <Paragraph>
                 <span className="nr-left-title amount">
                   {renderAmount(padNumber(timeLeft.minutes))}
                 </span>
-                {showLabels && <span className="nr-left-label">Minuten</span>}
+                {showLabels ? (
+                  <span className="nr-left-label">Minuten</span>
+                ) : null}
               </Paragraph>
             </div>
-          ) : null)}
+          ) : null
+        ) : null}
       </div>
       {afterTextParam.length > 0 ? (
         <Paragraph className="osc-countdown-bar-text --start">
