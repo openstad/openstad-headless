@@ -21,6 +21,7 @@ const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
 
+const compression = require('compression');
 const basicAuth = require('express-basic-auth');
 const path = require('node:path');
 
@@ -41,6 +42,13 @@ if (
   app.use(rateLimiter());
 }
 
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024,
+  })
+);
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -49,6 +57,10 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(
+  '/widget-assets',
+  express.static(path.join(__dirname, 'public', 'widget-assets'))
+);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/:sitePrefix?/config-reset', async function (req, res, next) {
