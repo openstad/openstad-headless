@@ -1,166 +1,76 @@
-@charset "UTF-8";
-:root {
-  --osc-background: #ffffff;
-  --osc-foreground: #010d0a;
-  --osc-muted: #59636d;
-  --osc-muted-foreground: #ffffff;
-  --osc-card: #f0f4f8;
-  --osc-card-dark: #dbdfe5;
-  --osc-card-foreground: #010d0a;
-  --osc-border: #a9b2ba;
-  --osc-input: #ffffff;
-  --osc-primary: #12b886;
-  --osc-primary-hover: #009f6d;
-  --osc-primary-foreground: #ffffff;
-  --osc-secondary: #1471ef;
-  --osc-secondary-hover: #0058d6;
-  --osc-secondary-foreground: #ffffff;
-  --osc-destructive: #e8393b;
-  --osc-destructive-foreground: #ffffff;
-  --osc-ring: #1471ef;
-  --osc-radius: 0.25rem;
-}
-.osc,
-.osc * {
-  font-family:
-    Open Sans,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    Segoe UI,
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    Helvetica Neue,
-    sans-serif;
-}
-.osc figure {
-  margin: 0;
-}
-.osc p.strong {
-  color: var(--osc-foreground, black);
-  font-weight: 600;
-  line-height: 1.5rem;
-  letter-spacing: 0px;
-}
-.osc p.helptext {
-  margin: 0.5 0;
-  font-size: 0.75rem;
-  font-weight: 400;
-  line-height: 1rem;
-  letter-spacing: 0px;
-  text-align: left;
-  color: var(--osc-muted);
-}
-.osc p.helptext > i {
-  margin-right: 0.25rem;
-}
-.osc p.helptext.error {
-  color: var(--osc-destructive);
-}
-.osc .sr-only {
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  display: block;
-}
-*:first-child {
-  --nlds-counter-margin-block-start: 0;
-}
-.--negative {
-  margin-block-start: calc(var(--nlds-default-margin-block-start, 2rem) * -1);
-}
-[lang='nl'] > * {
-  -webkit-hyphens: auto;
-  -moz-hyphens: auto;
-  -ms-hyphens: auto;
-  hyphens: auto;
-}
-.document-download-container {
-  background: var(--nlds-default-background-color, #f0f4f8);
-  padding: 30px;
-}
-.osc .osc-button {
-  padding: 0.625rem 3rem;
-  border: none;
-  border-radius: 0.375rem;
-  gap: 0.5rem;
-  background-color: var(--osc-primary);
-  color: var(--osc-primary-foreground);
-  text-align: center;
-}
-.osc .osc-button.osc-secondary {
-  background-color: var(--osc-secondary);
-}
-.osc .osc-button.ghost {
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: none;
-  background-color: var(--osc-background);
-  color: var(--osc-foreground);
-  cursor: pointer;
-}
-.osc .osc-button.osc-plain {
-  background-color: var(--osc-background);
-  border: 1px solid var(--osc-border);
-  color: var(--osc-muted);
-}
-.osc .osc-button.ghost.active i {
-  color: var(--osc-primary);
-}
-.osc .osc-button > i {
-  font-size: 1.5rem;
-}
-.osc .osc-button:hover {
-  background-color: var(--osc-primary-hover);
-}
-.osc .osc-button.osc-secondary:hover {
-  background-color: var(--osc-secondary-hover);
-}
-.osc .osc-button.ghost:hover {
-  color: var(--osc-muted);
-  background-color: var(--osc-background);
-}
-.osc .osc-button.osc-plain:hover {
-  color: var(--osc-foreground);
-  background-color: var(--osc-background);
-}
-.osc .osc-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.osc-carousel .utrecht-button {
-  flex-shrink: 0;
-}
-.osc-paginator {
-  align-items: center;
-}
-.osc .icon {
-  display: inline-flex;
-  justify-items: center;
-  align-items: center;
-  gap: 0.25rem;
-  font-weight: 600;
-}
-.osc .icon.no-label {
-  gap: 0rem;
-}
-.osc .icon.no-label p {
-  width: 0;
-  height: 0;
-  overflow: clip;
-}
-.osc .icon > i.big {
-  font-size: 24px;
-}
-.osc .icon > i.regular {
-  font-size: 16px;
-}
-.osc .icon > i.small {
-  font-size: 8px;
+@charset "UTF-8"; /**
+* @license EUPL-1.2
+* Copyright (c) 2024-2025 Gemeente Utrecht
+* Copyright (c) 2024-2025 Frameless B.V.
+*/ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 The Knights Who Say NIH! B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Robbert Broersma
+ * Copyright (c) 2021 Gemeente Utrecht
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Gemeente Utrecht
+ * Copyright (c) 2022 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 The Knights Who Say NIH! B.V.
+ * Copyright (c) 2022 Gemeente Utrecht
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Gemeente Utrecht
+ * Copyright (c) 2022 Robbert Broersma
+ * Copyright (c) 2022 The Knights Who Say NIH! B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021-2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Gemeente Utrecht
+ * Copyright (c) 2021 Robbert Broersma
+ * Copyright (c) 2021 The Knights Who Say NIH! B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2023 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021-2022 Gemeente Utrecht
+ * Copyright (c) 2021-2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Gemeente Utrecht
+ * Copyright (c) 2021 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 The Knights Who Say NIH! B.V.
+ * Copyright (c) 2021 Gemeente Utrecht
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2020-2022 Gemeente Utrecht
+ * Copyright (c) 2020-2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Gemeente Utrecht
+ */
+.utrecht-accordion {
+  margin-block-end: calc(
+    var(--utrecht-space-around, 0) *
+      var(--utrecht-accordion-margin-block-end, 0)
+  );
+  margin-block-start: calc(
+    var(--utrecht-space-around, 0) *
+      var(--utrecht-accordion-margin-block-start, 0)
+  );
 }
 .utrecht-accordion__section {
   break-inside: avoid;
@@ -553,8 +463,17 @@
   line-height: 1;
   max-block-size: max-content;
   max-inline-size: max-content;
-  min-block-size: var(--utrecht-badge-counter-min-size, 1em);
-  min-inline-size: var(--utrecht-badge-counter-min-size, 1em);
+  min-block-size: var(
+    --utrecht-badge-counter-min-block-size,
+    var(
+      --utrecht-badge-counter-min-inline-size,
+      var(--utrecht-badge-counter-min-size, 1em)
+    )
+  );
+  min-inline-size: var(
+    --utrecht-badge-counter-min-inline-size,
+    var(--utrecht-badge-counter-min-size, 1em)
+  );
   padding-block-end: var(
     --utrecht-badge-counter-padding-block,
     var(--utrecht-badge-padding-block, 0.5ex)
@@ -959,10 +878,7 @@
 }
 .utrecht-breadcrumb-nav__item ~ .utrecht-breadcrumb-nav__item {
   margin-inline-start: var(--utrecht-breadcrumb-nav-item-divider-inline-size);
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Frameless B.V.
- */
+}
 .utrecht-button-group {
   align-items: baseline;
   background-color: var(--utrecht-button-group-background-color);
@@ -1244,6 +1160,14 @@
     --utrecht-button-border-bottom-width,
     var(--_utrecht-button-border-width, 0)
   );
+  --_utrecht-button-font-size: var(
+    --_utrecht-button-appearance-font-size,
+    var(--utrecht-button-font-size)
+  );
+  --_utrecht-button-line-height: var(
+    --_utrecht-button-appearance-line-height,
+    var(--utrecht-button-line-height)
+  );
   --utrecht-icon-size: var(--utrecht-button-icon-size, 1em);
   align-items: center;
   background-color: var(--_utrecht-button-background-color);
@@ -1259,11 +1183,11 @@
   cursor: var(--utrecht-action-activate-cursor, revert);
   display: inline-flex;
   font-family: var(
-    --utrecht-button-font-family,
+    --_utrecht-button-font-family,
     var(--utrecht-document-font-family)
   );
   font-size: var(
-    --utrecht-button-font-size,
+    --_utrecht-button-font-size,
     var(--utrecht-document-font-family, inherit)
   );
   font-weight: var(
@@ -1273,7 +1197,7 @@
   gap: var(--utrecht-button-icon-gap);
   inline-size: var(--utrecht-button-inline-size, auto);
   justify-content: center;
-  line-height: var(--utrecht-button-line-height);
+  line-height: var(--_utrecht-button-line-height);
   max-inline-size: var(--utrecht-button-max-inline-size, fit-content);
   min-block-size: var(--utrecht-button-min-block-size, 44px);
   min-inline-size: var(--utrecht-button-min-inline-size, 44px);
@@ -1378,8 +1302,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-primary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-primary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-primary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-primary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-primary-action-disabled-background-color
@@ -1440,8 +1370,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-secondary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-secondary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-secondary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-secondary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-secondary-action-disabled-background-color
@@ -1500,8 +1436,14 @@
     --utrecht-button-subtle-border-width
   );
   --_utrecht-button-appearance-color: var(--utrecht-button-subtle-color);
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-subtle-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-subtle-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-subtle-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-subtle-disabled-background-color
@@ -1790,6 +1732,14 @@
     --utrecht-button-border-bottom-width,
     var(--_utrecht-button-border-width, 0)
   );
+  --_utrecht-button-font-size: var(
+    --_utrecht-button-appearance-font-size,
+    var(--utrecht-button-font-size)
+  );
+  --_utrecht-button-line-height: var(
+    --_utrecht-button-appearance-line-height,
+    var(--utrecht-button-line-height)
+  );
   --utrecht-icon-size: var(--utrecht-button-icon-size, 1em);
   align-items: center;
   background-color: var(--_utrecht-button-background-color);
@@ -1805,11 +1755,11 @@
   cursor: var(--utrecht-action-activate-cursor, revert);
   display: inline-flex;
   font-family: var(
-    --utrecht-button-font-family,
+    --_utrecht-button-font-family,
     var(--utrecht-document-font-family)
   );
   font-size: var(
-    --utrecht-button-font-size,
+    --_utrecht-button-font-size,
     var(--utrecht-document-font-family, inherit)
   );
   font-weight: var(
@@ -1819,7 +1769,7 @@
   gap: var(--utrecht-button-icon-gap);
   inline-size: var(--utrecht-button-inline-size, auto);
   justify-content: center;
-  line-height: var(--utrecht-button-line-height);
+  line-height: var(--_utrecht-button-line-height);
   max-inline-size: var(--utrecht-button-max-inline-size, fit-content);
   min-block-size: var(--utrecht-button-min-block-size, 44px);
   min-inline-size: var(--utrecht-button-min-inline-size, 44px);
@@ -1954,8 +1904,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-primary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-primary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-primary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-primary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-primary-action-disabled-background-color
@@ -2016,8 +1972,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-secondary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-secondary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-secondary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-secondary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-secondary-action-disabled-background-color
@@ -2076,8 +2038,14 @@
     --utrecht-button-subtle-border-width
   );
   --_utrecht-button-appearance-color: var(--utrecht-button-subtle-color);
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-subtle-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-subtle-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-subtle-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-subtle-disabled-background-color
@@ -3276,7 +3244,9 @@
   );
 }
 .utrecht-checkbox--custom.utrecht-checkbox--html-input:indeterminate,
-.utrecht-custom-checkbox--html-input:indeterminate {
+.utrecht-checkbox--custom.utrecht-checkbox--html-input:checked:indeterminate,
+.utrecht-custom-checkbox--html-input:indeterminate,
+.utrecht-custom-checkbox--html-input:checked:indeterminate {
   background-color: var(
     --utrecht-checkbox-indeterminate-background-color,
     var(--utrecht-checkbox-background-color)
@@ -3417,6 +3387,8 @@
   gap: var(--utrecht-space-inline-sm);
 }
 .utrecht-document {
+  -webkit-font-smoothing: auto !important;
+  -moz-osx-font-smoothing: auto !important;
   color: var(--utrecht-document-color, inherit);
   font-family: var(--utrecht-document-font-family, inherit);
   font-size: var(--utrecht-document-font-size, inherit);
@@ -3596,6 +3568,7 @@
   font-family: var(--utrecht-document-font-family, inherit);
   font-size: var(--utrecht-form-field-description-font-size, inherit);
   font-style: var(--utrecht-form-field-description-font-style);
+  line-height: var(--utrecht-form-field-description-line-height);
   margin-block-end: calc(
     var(--utrecht-space-around, 0) *
       var(
@@ -3643,6 +3616,7 @@
   font-family: var(--utrecht-document-font-family, inherit);
   font-size: var(--utrecht-form-field-error-message-font-size, inherit);
   font-style: var(--utrecht-form-field-error-message-font-style);
+  line-height: var(--utrecht-form-field-error-message-line-height);
   margin-block-end: calc(
     var(--utrecht-space-around, 0) *
       var(
@@ -3682,7 +3656,6 @@
     var(--utrecht-space-around, 0) *
       var(--utrecht-form-field-margin-block-start, 0)
   );
-  max-inline-size: var(--utrecht-form-field-max-inline-size);
   page-break-inside: avoid;
 }
 .utrecht-form-field--distanced {
@@ -4228,10 +4201,7 @@
 }
 .utrecht-heading-5--distanced {
   --utrecht-space-around: 1;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021-2022 Frameless B.V.
- */
+}
 .utrecht-heading-6 {
   break-inside: avoid-column;
   page-break-inside: avoid;
@@ -4261,12 +4231,7 @@
 }
 .utrecht-heading-6--distanced {
   --utrecht-space-around: 1;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Gemeente Utrecht
- * Copyright (c) 2022 Robbert Broersma
- * Copyright (c) 2022 The Knights Who Say NIH! B.V.
- */
+}
 .utrecht-heading-group {
   --utrecht-pre-heading-order: -1;
   display: flex;
@@ -4286,11 +4251,7 @@
 .utrecht-iban-data {
   font-variant-numeric: lining-nums slashed-zero tabular-nums;
   white-space: nowrap;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021-2022 Gemeente Utrecht
- * Copyright (c) 2021-2022 Frameless B.V.
- */
+}
 .utrecht-icon {
   block-size: var(--utrecht-icon-size);
   color: var(--utrecht-icon-color);
@@ -4333,10 +4294,7 @@
 }
 .utrecht-index-char-nav__link--disabled {
   pointer-events: none;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Robbert Broersma
- */
+}
 .utrecht-link-button {
   --utrecht-icon-size: var(--utrecht-link-icon-size, 1em);
   color: var(
@@ -4456,7 +4414,6 @@
   background-color: transparent;
   border-width: 0;
 }
-.utrecht-link-list,
 .utrecht-link-list--html-ul {
   margin-block-end: 0;
   margin-block-start: 0;
@@ -4464,14 +4421,21 @@
   margin-inline-start: 0;
   padding-inline-start: 0;
 }
-.utrecht-link-list > li,
 .utrecht-link-list--html-ul > li {
   list-style: none;
 }
 .utrecht-link-list {
-  --utrecht-link-text-decoration: none;
-  --utrecht-link-hover-text-decoration: underline;
-  --utrecht-link-focus-text-decoration: underline;
+  --utrecht-icon-inset-block-start: var(
+    --utrecht-link-list-icon-inset-block-start
+  );
+  --utrecht-icon-size: var(--utrecht-link-list-icon-size);
+  --utrecht-link-icon-size: var(--utrecht-link-list-icon-size);
+  --utrecht-link-text-decoration: var(
+    --utrecht-link-list-link-text-decoration,
+    none
+  );
+  display: flex;
+  flex-direction: column;
   margin-block-end: calc(
     var(--utrecht-space-around, 0) *
       var(--utrecht-link-list-margin-block-end, 0)
@@ -4480,31 +4444,17 @@
     var(--utrecht-space-around, 0) *
       var(--utrecht-link-list-margin-block-start, 0)
   );
-}
-.utrecht-link-list--distanced {
-  --utrecht-space-around: 1;
+  row-gap: var(--utrecht-link-list-row-gap);
 }
 .utrecht-link-list__item {
-  --utrecht-icon-size: var(--utrecht-link-list-icon-size);
-  --utrecht-link-icon-size: var(--utrecht-link-list-icon-size);
-  --utrecht-icon-inset-block-start: var(
-    --utrecht-link-list-icon-inset-block-start
-  );
   display: block;
-  font-weight: var(--utrecht-link-list-item-font-weight);
-}
-.utrecht-link-list__item + .utrecht-link-list__item {
-  margin-block-start: var(--utrecht-link-list-item-margin-block-start);
 }
 .utrecht-link-list__link {
   align-items: baseline;
-  column-gap: var(--utrecht-link-list-item-column-gap);
+  column-gap: var(--utrecht-link-list-link-column-gap);
   display: inline-flex;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 The Knights Who Say NIH! B.V.
- * Copyright (c) 2022 Gemeente Utrecht
- */
+  font-weight: var(--utrecht-link-list-link-font-weight);
+}
 .utrecht-link-social {
   --utrecht-icon-size: var(--utrecht-link-social-icon-size);
   --utrecht-icon-color: currentColor;
@@ -4697,10 +4647,7 @@
 }
 .utrecht-list-social__item:last-child {
   margin-inline-end: 0;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2023 Frameless B.V.
- */
+}
 .utrecht-listbox {
   --utrecht-listbox-max-block-size: 300px;
   background-color: var(--utrecht-listbox-background-color);
@@ -4915,11 +4862,7 @@
   block-size: 100%;
   display: inline-block;
   inline-size: auto;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Gemeente Utrecht
- * Copyright (c) 2022 Robbert Broersma
- */
+}
 .utrecht-map-marker {
   --utrecht-icon-size: var(--utrecht-map-marker-icon-size);
   align-items: center;
@@ -5146,11 +5089,7 @@
   padding-inline-end: var(--utrecht-nav-bar-link-padding-inline-end);
   padding-inline-start: var(--utrecht-nav-bar-link-padding-inline-start);
   text-decoration: none;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 The Knights Who Say NIH! B.V.
- * Copyright (c) 2021 Gemeente Utrecht
- */
+}
 .utrecht-sidenav {
   --utrecht-sidenav-connection-color: var(--utrecht-sidenav-item-marker-color);
   --utrecht-sidenav-connection-inline-size: 2px;
@@ -5700,10 +5639,7 @@
 .utrecht-pagination__relative-link:focus:not(:focus-visible) {
   box-shadow: none;
   outline-style: revert;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 The Knights Who Say NIH! B.V.
- */
+}
 .utrecht-paragraph {
   color: var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit));
   font-family: var(
@@ -6214,10 +6150,2875 @@
     --_utrecht-radio-button-state-active-color,
     var(--utrecht-radio-button-active-color)
   );
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Gemeente Utrecht
- */
+}
+.utrecht-rich-text {
+  --utrecht-space-around: 1;
+}
+.utrecht-rich-text .utrecht-heading-1:first-child {
+  --utrecht-heading-1-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-heading-2) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-accordion) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-alert) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-badge-list) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-blockquote) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-button) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-button-group) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-data-list) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-form-field) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-img) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-link) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-ordered-list) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-pagination) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-paragraph) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-separator) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-badge-status) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-table) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-1:has(+ .utrecht-unordered-list) {
+  --utrecht-heading-1-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:first-child {
+  --utrecht-heading-2-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-heading-3) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-accordion) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-alert) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-badge-list) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-blockquote) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-button) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-button-group) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-data-list) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-figure) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-form-field) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-img) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-link) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-ordered-list) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-pagination) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-paragraph) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-separator) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-sidenav) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-badge-status) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-table) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-2:has(+ .utrecht-unordered-list) {
+  --utrecht-heading-2-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:first-child {
+  --utrecht-heading-3-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-heading-4) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-accordion) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-alert) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-badge-list) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-blockquote) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-button) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-button-group) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-data-list) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-figure) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-form-field) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-img) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-link) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-ordered-list) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-pagination) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-paragraph) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-separator) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-sidenav) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-badge-status) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-table) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-3:has(+ .utrecht-unordered-list) {
+  --utrecht-heading-3-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:first-child {
+  --utrecht-heading-4-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-heading-5) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-accordion) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-alert) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-badge-list) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-blockquote) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-button) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-button-group) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-data-list) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-figure) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-form-field) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-img) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-link) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-ordered-list) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-pagination) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-paragraph) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-separator) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-sidenav) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-badge-status) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-table) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-4:has(+ .utrecht-unordered-list) {
+  --utrecht-heading-4-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:first-child {
+  --utrecht-heading-5-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-heading-6) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-accordion) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-alert) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-badge-list) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-blockquote) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-button) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-button-group) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-data-list) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-figure) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-form-field) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-img) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-link) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-ordered-list) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-pagination) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-paragraph) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-separator) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-sidenav) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-badge-status) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-table) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-5:has(+ .utrecht-unordered-list) {
+  --utrecht-heading-5-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:first-child {
+  --utrecht-heading-6-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-accordion) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-alert) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-badge-list) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-blockquote) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-button) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-button-group) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-data-list) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-figure) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-form-field) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-img) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-link) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-ordered-list) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-pagination) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-paragraph) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-separator) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-sidenav) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-badge-status) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-table) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-heading-6:has(+ .utrecht-unordered-list) {
+  --utrecht-heading-6-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:first-child {
+  --utrecht-accordion-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-heading-2) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-heading-3) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-heading-4) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-heading-5) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-heading-6) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-accordion) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-alert) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-badge-list) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-blockquote) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-button) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-button-group) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-data-list) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-figure) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-form-field) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-img) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-link) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-ordered-list) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-paragraph) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-separator) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-sidenav) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-table) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-accordion:has(+ .utrecht-unordered-list) {
+  --utrecht-accordion-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:first-child {
+  --utrecht-alert-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-heading-1) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-heading-2) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-heading-3) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-heading-4) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-heading-5) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-heading-6) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-accordion) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-alert) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-badge-list) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-blockquote) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-button) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-button-group) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-data-list) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-figure) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-form-field) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-img) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-link) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-ordered-list) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-pagination) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-paragraph) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-separator) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-badge-status) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-table) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-alert:has(+ .utrecht-unordered-list) {
+  --utrecht-alert-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:first-child {
+  --utrecht-badge-list-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-heading-1) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-heading-2) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-heading-3) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-heading-4) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-heading-5) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-heading-6) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-accordion) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-alert) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-blockquote) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-button) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-button-group) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-data-list) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-figure) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-form-field) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-img) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-link) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-ordered-list) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-paragraph) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-separator) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-table) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-list:has(+ .utrecht-unordered-list) {
+  --utrecht-badge-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:first-child {
+  --utrecht-blockquote-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-heading-2) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-heading-3) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-heading-4) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-heading-5) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-heading-6) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-accordion) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-alert) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-badge-list) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-blockquote) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-button) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-button-group) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-data-list) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-figure) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-form-field) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-img) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-link) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-ordered-list) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-pagination) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-paragraph) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-separator) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-table) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-blockquote:has(+ .utrecht-unordered-list) {
+  --utrecht-blockquote-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:first-child {
+  --utrecht-breadcrumb-nav-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-heading-1) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-heading-2) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-heading-3) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-heading-4) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-heading-5) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-heading-6) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-accordion) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-alert) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-badge-list) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-blockquote) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-button) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-button-group) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-data-list) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-figure) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-form-field) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-img) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-link) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-ordered-list) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-pagination) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-paragraph) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-separator) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-sidenav) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-badge-status) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-table) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-breadcrumb-nav:has(+ .utrecht-unordered-list) {
+  --utrecht-breadcrumb-nav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:first-child {
+  --utrecht-button-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-heading-2) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-heading-3) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-heading-4) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-heading-5) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-heading-6) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-accordion) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-alert) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-badge-list) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-blockquote) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-button) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-button-group) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-data-list) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-figure) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-img) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-link) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-ordered-list) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-paragraph) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-separator) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-sidenav) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-table) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button:has(+ .utrecht-unordered-list) {
+  --utrecht-button-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:first-child {
+  --utrecht-button-group-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-heading-2) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-heading-3) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-heading-4) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-heading-5) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-heading-6) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-accordion) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-alert) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-badge-list) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-blockquote) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-button) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-button-group) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-data-list) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-figure) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-img) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-link) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-ordered-list) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-paragraph) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-separator) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-sidenav) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-table) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-button-group:has(+ .utrecht-unordered-list) {
+  --utrecht-button-group-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:first-child {
+  --utrecht-data-list-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-heading-2) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-heading-3) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-heading-4) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-heading-5) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-heading-6) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-accordion) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-alert) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-badge-list) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-blockquote) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-button) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-button-group) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-data-list) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-figure) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-form-field) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-img) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-link) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-ordered-list) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-pagination) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-paragraph) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-separator) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-table) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-data-list:has(+ .utrecht-unordered-list) {
+  --utrecht-data-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:first-child {
+  --utrecht-figure-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-heading-2) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-heading-3) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-heading-4) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-heading-5) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-heading-6) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-accordion) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-alert) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-badge-list) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-blockquote) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-button) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-button-group) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-data-list) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-form-field) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-img) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-link) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-ordered-list) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-pagination) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-paragraph) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-separator) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-table) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-figure:has(+ .utrecht-unordered-list) {
+  --utrecht-figure-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:first-child {
+  --utrecht-form-field-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-heading-2) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-heading-3) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-heading-4) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-heading-5) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-heading-6) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-accordion) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-alert) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-badge-list) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-blockquote) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-button) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-button-group) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-data-list) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-figure) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-form-field) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-img) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-link) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-ordered-list) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-paragraph) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-separator) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-table) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field:has(+ .utrecht-unordered-list) {
+  --utrecht-form-field-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-description:first-child {
+  --utrecht-form-field-description-margin-block-start: 0;
+}
+.utrecht-rich-text
+  .utrecht-form-field-description:has(+ .utrecht-form-field-error-message) {
+  --utrecht-form-field-description-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-description:has(+ .utrecht-select) {
+  --utrecht-form-field-description-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-description:has(+ .utrecht-textarea) {
+  --utrecht-form-field-description-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-description:has(+ .utrecht-textbox) {
+  --utrecht-form-field-description-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-error-message:first-child {
+  --utrecht-form-field-error-message-margin-block-start: 0;
+}
+.utrecht-rich-text
+  .utrecht-form-field-error-message:has(+ .utrecht-form-field-description) {
+  --utrecht-form-field-error-message-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text
+  .utrecht-form-field-error-message:has(+ .utrecht-form-field-error-message) {
+  --utrecht-form-field-error-message-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-error-message:has(+ .utrecht-select) {
+  --utrecht-form-field-error-message-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-error-message:has(+ .utrecht-textarea) {
+  --utrecht-form-field-error-message-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-field-error-message:has(+ .utrecht-textbox) {
+  --utrecht-form-field-error-message-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-label:first-child {
+  --utrecht-form-label-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-form-label:has(+ .utrecht-form-field-description) {
+  --utrecht-form-label-margin-block-end: var(
+    --utrecht-rich-text-confidant-margin-block-end
+  );
+}
+.utrecht-rich-text
+  .utrecht-form-label:has(+ .utrecht-form-field-error-message) {
+  --utrecht-form-label-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-label:has(+ .utrecht-select) {
+  --utrecht-form-label-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-label:has(+ .utrecht-textarea) {
+  --utrecht-form-label-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-form-label:has(+ .utrecht-textbox) {
+  --utrecht-form-label-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:first-child {
+  --utrecht-img-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-heading-2) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-heading-3) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-heading-4) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-heading-5) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-heading-6) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-accordion) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-alert) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-badge-list) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-blockquote) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-button) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-button-group) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-data-list) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-form-field) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-img) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-link) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-ordered-list) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-pagination) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-paragraph) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-separator) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-table) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-img:has(+ .utrecht-unordered-list) {
+  --utrecht-img-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:first-child {
+  --utrecht-link-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-heading-2) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-heading-3) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-heading-4) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-heading-5) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-heading-6) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-accordion) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-alert) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-badge-list) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-blockquote) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-button) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-button-group) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-data-list) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-form-field) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-img) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-link) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-ordered-list) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-paragraph) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-separator) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-sidenav) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-table) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-link:has(+ .utrecht-unordered-list) {
+  --utrecht-link-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:first-child {
+  --utrecht-ordered-list-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-heading-2) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-heading-3) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-heading-4) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-heading-5) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-heading-6) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-accordion) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-alert) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-badge-list) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-blockquote) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-button) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-button-group) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-data-list) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-form-field) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-img) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-link) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-ordered-list) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-pagination) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-paragraph) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-separator) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-table) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-ordered-list:has(+ .utrecht-unordered-list) {
+  --utrecht-ordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:first-child {
+  --utrecht-pagination-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-heading-2) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-heading-3) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-heading-4) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-heading-5) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-heading-6) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-accordion) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-alert) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-badge-list) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-blockquote) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-button) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-button-group) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-data-list) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-form-field) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-img) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-link) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-ordered-list) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-paragraph) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-separator) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-table) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-pagination:has(+ .utrecht-unordered-list) {
+  --utrecht-pagination-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:first-child {
+  --utrecht-paragraph-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-heading-2) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-heading-3) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-heading-4) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-heading-5) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-heading-6) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-accordion) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-alert) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-badge-list) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-blockquote) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-button) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-button-group) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-data-list) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-form-field) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-img) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-link) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-ordered-list) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-pagination) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-paragraph) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-separator) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-table) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-paragraph:has(+ .utrecht-unordered-list) {
+  --utrecht-paragraph-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-select:first-child {
+  --utrecht-select-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-select:has(+ .utrecht-form-field-description) {
+  --utrecht-select-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-select:has(+ .utrecht-form-field-error-message) {
+  --utrecht-select-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:first-child {
+  --utrecht-separator-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-heading-1) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-heading-2) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-heading-3) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-heading-4) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-heading-5) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-heading-6) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-accordion) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-alert) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-badge-list) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-blockquote) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-button) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-button-group) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-data-list) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-form-field) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-img) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-link) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-ordered-list) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-pagination) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-paragraph) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-separator) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-sidenav) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-table) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-separator:has(+ .utrecht-unordered-list) {
+  --utrecht-separator-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:first-child {
+  --utrecht-sidenav-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-heading-1) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-heading-2) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-heading-3) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-heading-4) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-heading-5) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-heading-6) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-accordion) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-alert) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-badge-list) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-blockquote) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-button) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-button-group) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-data-list) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-form-field) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-img) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-link) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-ordered-list) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-pagination) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-separator) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-table) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-sidenav:has(+ .utrecht-unordered-list) {
+  --utrecht-sidenav-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-status:first-child {
+  --utrecht-badge-status-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-badge-status:has(+ .utrecht-heading-2) {
+  --utrecht-badge-status-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-status:has(+ .utrecht-heading-3) {
+  --utrecht-badge-status-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-status:has(+ .utrecht-heading-4) {
+  --utrecht-badge-status-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-status:has(+ .utrecht-heading-5) {
+  --utrecht-badge-status-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-status:has(+ .utrecht-heading-6) {
+  --utrecht-badge-status-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-badge-status:has(+ .utrecht-badge-status) {
+  --utrecht-badge-status-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:first-child {
+  --utrecht-table-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-heading-2) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-heading-3) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-heading-4) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-heading-5) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-heading-6) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-accordion) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-alert) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-badge-list) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-blockquote) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-button) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-button-group) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-data-list) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-form-field) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-img) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-link) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-ordered-list) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-pagination) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-paragraph) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-separator) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-table) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-table:has(+ .utrecht-unordered-list) {
+  --utrecht-table-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-textarea:first-child {
+  --utrecht-textarea-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-textarea:has(+ .utrecht-form-field-description) {
+  --utrecht-textarea-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-textarea:has(+ .utrecht-form-field-error-message) {
+  --utrecht-textarea-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-textbox:first-child {
+  --utrecht-textbox-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-textbox:has(+ .utrecht-form-field-description) {
+  --utrecht-textbox-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-textbox:has(+ .utrecht-form-field-error-message) {
+  --utrecht-textbox-margin-block-end: var(
+    --utrecht-rich-text-best-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:first-child {
+  --utrecht-unordered-list-margin-block-start: 0;
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-heading-2) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-heading-3) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-heading-4) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-heading-5) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-heading-6) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-accordion) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-alert) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-badge-list) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-blockquote) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-acquaintance-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-button) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-button-group) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-data-list) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-form-field) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-img) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-link) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-ordered-list) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-pagination) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-paragraph) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-separator) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-stranger-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-table) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
+.utrecht-rich-text .utrecht-unordered-list:has(+ .utrecht-unordered-list) {
+  --utrecht-unordered-list-margin-block-end: var(
+    --utrecht-rich-text-friend-margin-block-end
+  );
+}
 .utrecht-search-bar {
   --utrecht-button-border-color: var(--utrecht-search-bar-button-border-color);
   --utrecht-button-hover-scale: var(--utrecht-search-bar-hover-transform);
@@ -6557,12 +9358,7 @@
   background-position: 100%;
   background-repeat: no-repeat;
   background-size: 1.4em;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Gemeente Utrecht
- * Copyright (c) 2021 Robbert Broersma
- * Copyright (c) 2021 The Knights Who Say NIH! B.V.
- */
+}
 .utrecht-separator {
   border-color: var(--utrecht-separator-color);
   border-style: solid;
@@ -6630,11 +9426,7 @@
   outline-style: var(--utrecht-focus-outline-style, revert);
   outline-width: var(--utrecht-focus-outline-width, revert);
   text-decoration: var(--utrecht-skip-link-focus-text-decoration);
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2020-2022 Gemeente Utrecht
- * Copyright (c) 2020-2022 Frameless B.V.
- */
+}
 .utrecht-spotlight-section {
   background-color: var(
     --_utrecht-spotlight-section-background-color,
@@ -6713,10 +9505,10 @@
 .utrecht-table-container--overflow-inline {
   background-attachment: local, local, scroll, scroll;
   background-image:
-    linear-gradient(to right, white, white),
-    linear-gradient(to right, white, white),
-    linear-gradient(to right, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0)),
-    linear-gradient(to left, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0));
+    linear-gradient(to right, #fff, #fff),
+    linear-gradient(to right, #fff, #fff),
+    linear-gradient(to right, #00000040, #fff0),
+    linear-gradient(to left, #00000040, #fff0);
   background-position:
     left center,
     right center,
@@ -7444,10 +10236,7 @@
   );
   font-style: var(--utrecht-form-control-placeholder-font-style);
   opacity: 100%;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Robbert Broersma
- */
+}
 .utrecht-textbox {
   --_utrecht-textbox-value-char: 0.667em + 0.334ch;
   --_utrecht-textbox-max-inline-size: calc(
@@ -7989,11 +10778,7 @@
   display: block;
   padding-block-end: var(--utrecht-space-block-xs);
   padding-inline-end: var(--utrecht-space-inline-md);
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Gemeente Utrecht
- * Copyright (c) 2021 Robbert Broersma
- */
+}
 .utrecht-toptask-nav {
   display: flex;
   flex-direction: column;
@@ -8065,11 +10850,7 @@
 .utrecht-unordered-list__marker {
   color: var(--utrecht-unordered-list-marker-color);
   content: '●';
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Robbert Broersma
- * Copyright (c) 2021 Gemeente Utrecht
- */
+}
 .utrecht-url-data {
   break-inside: avoid;
   font-variant-ligatures: none;
@@ -8200,6 +10981,7 @@
   --utrecht-search-bar-input-background-position-x: 0.5em;
   --utrecht-search-bar-button-hover-scale: 1;
   --utrecht-search-bar-button-hover-background-color: hsl(359 65% 58%);
+  --utrecht-rich-text-confidant-margin-block-end: 0;
   --utrecht-radio-button-margin-inline-end: 12px;
   --utrecht-radio-button-border-radius: 0;
   --utrecht-radio-button-invalid-border-width: 2px;
@@ -8454,7 +11236,6 @@
   --utrecht-badge-border-radius: 0;
   --utrecht-badge-counter-padding-inline: 1ex;
   --utrecht-badge-counter-padding-block: 1ex;
-  --utrecht-badge-counter-font-size: 16px;
   --utrecht-backdrop-reduced-transparency-opacity: 0.98;
   --utrecht-backdrop-fade-in-animation-duration: 0.4s;
   --utrecht-backdrop-opacity: 0.8;
@@ -8680,6 +11461,14 @@
   --utrecht-search-bar-button-color: var(--utrecht-color-white);
   --utrecht-search-bar-button-border-color: var(--utrecht-color-red-40);
   --utrecht-search-bar-button-background-color: var(--utrecht-color-red-40);
+  --utrecht-rich-text-best-friend-margin-block-end: var(
+    --utrecht-space-block-2xs
+  );
+  --utrecht-rich-text-friend-margin-block-end: var(--utrecht-space-block-xs);
+  --utrecht-rich-text-acquaintance-margin-block-end: var(
+    --utrecht-space-block-md
+  );
+  --utrecht-rich-text-stranger-margin-block-end: var(--utrecht-space-block-2xl);
   --utrecht-radio-button-color: var(--utrecht-color-white);
   --utrecht-radio-button-disabled-color: var(--utrecht-color-white);
   --utrecht-radio-button-disabled-background-color: var(
@@ -9329,11 +12118,10 @@
   --utrecht-badge-background-color: var(--utrecht-color-grey-30);
   --utrecht-badge-list-item-margin-inline: var(--utrecht-space-block-sm);
   --utrecht-badge-list-item-margin-block: var(--utrecht-space-block-xs);
-  --utrecht-badge-counter-font-style: var(
+  --utrecht-badge-counter-font-size: var(
     --utrecht-typography-scale-md-font-size
   );
   --utrecht-badge-counter-color: var(--utrecht-color-white);
-  --utrecht-badge-counter-border-radius: var(--utrecht-badge-counter-font-size);
   --utrecht-badge-counter-background-color: var(--utrecht-color-red-40);
   --utrecht-backdrop-color: var(--utrecht-color-black);
   --utrecht-backdrop-background-color: var(--utrecht-color-white);
@@ -9512,6 +12300,7 @@
   --utrecht-breadcrumb-nav-link-focus-background-color: var(
     --utrecht-focus-background-color
   );
+  --utrecht-badge-counter-border-radius: var(--utrecht-badge-counter-font-size);
   --of-layout-bg: var(--of-layout-background);
   --utrecht-radio-button-invalid-border-color: var(
     --utrecht-form-control-invalid-border-color
@@ -9580,840 +12369,82 @@
     --utrecht-feedback-valid-background-color
   );
 }
-.osc .banner {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: var(
-    --nlds-banner-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
+.share-links {
+  margin-block-start: var(
+    --nlds-share-margin-block-start,
+    var(--nlds-default-margin-block-start, 1.5rem)
+  );
+  margin-block-end: var(
+    --nlds-share-margin-block-end,
+    var(--nlds-default-margin-block-end, 1.5rem)
   );
 }
-.osc .banner > p {
-  color: var(--osc-card-foreground);
-}
-.osc .banner.big {
-  justify-content: center;
-  padding: 3rem 2rem;
-  border: 1px solid
-    var(--nlds-banner-border-color, var(--nlds-default-border-color, #f0f4f8));
-  border-radius: 0.5rem;
-}
-.osc .checkbox {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  height: 1.5rem;
-  width: 1.5rem;
-  border: 1px solid var(--osc-secondary);
-  border-radius: 0.5rem;
-}
-.osc .checkbox.checked {
-  background-color: var(--osc-secondary);
-  color: var(--osc-secondary-foreground);
-}
-.DropdownMenuContent,
-.DropdownMenuSubContent {
-  background-color: #fff;
-  border-radius: 6px;
-  padding: 1rem;
-  box-shadow:
-    0 10px 38px -10px #16171859,
-    0 10px 20px -15px #16171833;
-  animation-duration: 0.4s;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity;
-  margin: 10px;
-}
-.DropdownMenuContent[data-side='top'],
-.DropdownMenuSubContent[data-side='top'] {
-  animation-name: slideDownAndFade;
-}
-.DropdownMenuContent[data-side='right'],
-.DropdownMenuSubContent[data-side='right'] {
-  animation-name: slideLeftAndFade;
-}
-.DropdownMenuContent[data-side='bottom'],
-.DropdownMenuSubContent[data-side='bottom'] {
-  animation-name: slideUpAndFade;
-}
-.DropdownMenuContent[data-side='left'],
-.DropdownMenuSubContent[data-side='left'] {
-  animation-name: slideRightAndFade;
-}
-.DropdownMenuItem,
-.DropdownMenuCheckboxItem,
-.DropdownMenuRadioItem,
-.DropdownMenuSubTrigger {
-  font-size: 13px;
-  line-height: 1;
-  color: var(--violet-11);
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  height: 25px;
-  padding: 0 5px;
-  position: relative;
-  -webkit-user-select: none;
-  user-select: none;
-  outline: none;
-}
-.DropdownMenuSubTrigger[data-state='open'] {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-}
-.DropdownMenuItem[data-disabled],
-.DropdownMenuCheckboxItem[data-disabled],
-.DropdownMenuRadioItem[data-disabled],
-.DropdownMenuSubTrigger[data-disabled] {
-  color: var(--mauve-8);
-  pointer-events: none;
-}
-.DropdownMenuItem[data-highlighted],
-.DropdownMenuCheckboxItem[data-highlighted],
-.DropdownMenuRadioItem[data-highlighted],
-.DropdownMenuSubTrigger[data-highlighted] {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-}
-.DropdownMenuLabel {
-  padding-left: 25px;
-  font-size: 12px;
-  line-height: 25px;
-  color: var(--mauve-11);
-}
-.DropdownMenuSeparator {
-  height: 1px;
-  background-color: var(--primary);
-  margin: 5px;
-}
-.DropdownMenuItemIndicator {
-  position: absolute;
-  left: 0;
-  width: 25px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.DropdownMenuArrow {
-  fill: #fff;
-}
-.IconButton {
-  font-family: inherit;
-  border-radius: 100%;
-  height: 35px;
-  width: 35px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-  background-color: #fff;
-  box-shadow: 0 2px 10px var(--black-a7);
-}
-.IconButton:hover {
-  background-color: var(--primary);
-}
-.IconButton:focus {
-  box-shadow: 0 0 0 2px #000;
-}
-.RightSlot {
-  margin-left: auto;
-  padding-left: 20px;
-  color: var(--primary);
-}
-[data-highlighted] > .RightSlot {
-  color: #fff;
-}
-[data-disabled] .RightSlot {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-@keyframes slideUpAndFade {
-  0% {
-    opacity: 0;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes slideRightAndFade {
-  0% {
-    opacity: 0;
-    transform: translate(-2px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0);
-  }
-}
-@keyframes slideDownAndFade {
-  0% {
-    opacity: 0;
-    transform: translateY(-2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes slideLeftAndFade {
-  0% {
-    opacity: 0;
-    transform: translate(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0);
-  }
-}
-.DropdownMenuContent button,
-.DropdownMenuSubContent button {
-  width: 100%;
-  max-width: unset;
-}
-.osc .image-container {
-  border-radius: 4px;
-  box-sizing: border-box;
-  position: relative;
-  overflow: clip;
-  background: #212529;
-}
-.osc .image-container.selected {
-  border: 4px solid var(--osc-primary);
-}
-.osc .image-container > img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  aspect-ratio: 16/9;
-}
-.osc .image-container > .osc-image-footer {
-  display: flex;
-  width: 100%;
-  position: relative;
-  bottom: 0;
-  gap: 1rem;
-  box-sizing: border-box;
-  background: var(
-    --nlds-figcaption-background-color,
-    var(--utrecht-button-primary-action-background-color)
-  );
-  color: var(
-    --nlds-figcaption-color,
-    var(--utrecht-button-primary-action-color)
-  );
-}
-.osc .image-container > .osc-image-footer p {
-  color: inherit;
-  padding: 1rem;
-}
-.osc .image-container > .osc-image-header {
-  display: flex;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  gap: 1rem;
-  box-sizing: border-box;
-  padding: 0.5rem;
-}
-.osc .osc-image-footer > * {
-  flex-grow: 1;
-}
-.osc.osc-resource-detail-column-container .carousel-button-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-}
-.osc.osc-resource-detail-column-container
-  .carousel-button-container
-  .osc-carousel-navigation-button-wrapper {
-  top: 50%;
-  transform: translateY(-50%);
-}
-.osc .osc-imageselect {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-.osc .osc-imageselect p {
-  color: #000 !important;
-}
-.osc .osc-imageselect-item {
-  display: flex;
-  flex-direction: column;
-  background: white;
-  width: 50%;
-  gap: 0.5rem;
-  padding: 0.2rem;
-  border-radius: 4px;
-  border: 2px solid transparent;
+.utrecht-link-social.copy-link {
   cursor: pointer;
 }
-.osc .osc-imageselect-item-selected {
-  border: 2px solid var(--osc-secondary);
+.share-links .icon {
+  position: relative;
+  width: 50px;
+  height: 50px;
 }
-input[type='radio'].osc-imageselect-radio {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  display: none;
+.share-links .icon:before {
+  content: '';
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--utrecht-link-social-color);
+  position: absolute;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
-.osc-imageselect-image {
-  object-fit: cover;
-  border-radius: 0;
+.share-links .icon.--facebook:before {
+  -webkit-mask-size: 12px;
+  mask-size: 12px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z'/%3E%3C/svg%3E");
 }
-.osc .multi-select {
-  background-color: var(--osc-background);
+.share-links .icon.--twitter:before {
+  -webkit-mask-size: 17px;
+  mask-size: 17px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z'/%3E%3C/svg%3E");
 }
-.osc .multi-select button {
-  width: 100%;
-  justify-content: space-between;
-  background-color: var(
-    --utrecht-textbox-background-color,
-    var(--utrecht-form-control-background-color)
-  );
-  block-size: initial;
-  border-width: var(
-    --utrecht-textbox-border-width,
-    var(--utrecht-form-control-border-width)
-  );
-  border-block-end-width: var(
-    --utrecht-textbox-border-bottom-width,
-    var(
-      --utrecht-textbox-border-width,
-      var(--utrecht-form-control-border-width)
-    )
-  );
-  border-color: var(
-    --utrecht-textbox-border-color,
-    var(--utrecht-form-control-border-color)
-  );
-  border-radius: var(
-    --utrecht-textbox-border-radius,
-    var(--utrecht-form-control-border-radius, 0)
-  );
-  border-style: solid;
-  box-sizing: border-box;
-  color: var(--utrecht-textbox-color, var(--utrecht-form-control-color));
-  font-family: var(
-    --utrecht-textbox-font-family,
-    var(--utrecht-form-control-font-family)
-  );
-  font-size: var(
-    --utrecht-textbox-font-size,
-    var(--utrecht-form-control-font-size, inherit)
-  );
-  font-weight: initial;
-  inline-size: 100%;
-  line-height: var(
-    --utrecht-textbox-line-height,
-    var(--utrecht-form-control-line-height, initial)
-  );
-  padding-block-end: var(
-    --utrecht-textbox-padding-block-end,
-    var(--utrecht-form-control-padding-block-end, 0)
-  );
-  padding-block-start: var(
-    --utrecht-textbox-padding-block-start,
-    var(--utrecht-form-control-padding-block-start, 0)
-  );
-  padding-inline-end: var(
-    --utrecht-textbox-padding-inline-end,
-    var(--utrecht-form-control-padding-inline-end, initial)
-  );
-  padding-inline-start: var(
-    --utrecht-textbox-padding-inline-start,
-    var(--utrecht-form-control-padding-inline-start, initial)
-  );
-  max-width: none;
-  --utrecht-button-min-block-size: 38px;
-  scale: 1 !important;
+.share-links .icon.--mail:before {
+  -webkit-mask-size: 17px;
+  mask-size: 17px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M64 112c-8.8 0-16 7.2-16 16v22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1V128c0-8.8-7.2-16-16-16H64zM48 212.2V384c0 8.8 7.2 16 16 16H448c8.8 0 16-7.2 16-16V212.2L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64H448c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M64 112c-8.8 0-16 7.2-16 16v22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1V128c0-8.8-7.2-16-16-16H64zM48 212.2V384c0 8.8 7.2 16 16 16H448c8.8 0 16-7.2 16-16V212.2L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64H448c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z'/%3E%3C/svg%3E");
 }
-.osc .multi-select button .icon {
+.share-links .icon.--whatsapp:before {
+  -webkit-mask-size: 17px;
+  mask-size: 17px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3C!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z'/%3E%3C/svg%3E");
+}
+.share-links .icon.--linkedin:before {
+  -webkit-mask-size: 17px;
+  mask-size: 17px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3C!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M100.3 448H7.4V148.9h92.9zM53.8 108.1C24.1 108.1 0 83.5 0 53.8a53.8 53.8 0 0 1 107.6 0c0 29.7-24.1 54.3-53.8 54.3zM447.9 448h-92.7V302.4c0-34.7-.7-79.2-48.3-79.2-48.3 0-55.7 37.7-55.7 76.7V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.5 42.7-48.3 87.9-48.3 94 0 111.3 61.9 111.3 142.3V448z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3C!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M100.3 448H7.4V148.9h92.9zM53.8 108.1C24.1 108.1 0 83.5 0 53.8a53.8 53.8 0 0 1 107.6 0c0 29.7-24.1 54.3-53.8 54.3zM447.9 448h-92.7V302.4c0-34.7-.7-79.2-48.3-79.2-48.3 0-55.7 37.7-55.7 76.7V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.5 42.7-48.3 87.9-48.3 94 0 111.3 61.9 111.3 142.3V448z'/%3E%3C/svg%3E");
+}
+.share-links .icon.--url:before {
+  -webkit-mask-size: 17px;
+  mask-size: 17px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3C!--!Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M580.3 267.2c56.2-56.2 56.2-147.3 0-203.5C526.8 10.2 440.9 7.3 383.9 57.2l-6.1 5.4c-10 8.7-11 23.9-2.3 33.9s23.9 11 33.9 2.3l6.1-5.4c38-33.2 95.2-31.3 130.9 4.4c37.4 37.4 37.4 98.1 0 135.6L433.1 346.6c-37.4 37.4-98.2 37.4-135.6 0c-35.7-35.7-37.6-92.9-4.4-130.9l4.7-5.4c8.7-10 7.7-25.1-2.3-33.9s-25.1-7.7-33.9 2.3l-4.7 5.4c-49.8 57-46.9 142.9 6.6 196.4c56.2 56.2 147.3 56.2 203.5 0L580.3 267.2zM59.7 244.8C3.5 301 3.5 392.1 59.7 448.2c53.6 53.6 139.5 56.4 196.5 6.5l6.1-5.4c10-8.7 11-23.9 2.3-33.9s-23.9-11-33.9-2.3l-6.1 5.4c-38 33.2-95.2 31.3-130.9-4.4c-37.4-37.4-37.4-98.1 0-135.6L207 165.4c37.4-37.4 98.1-37.4 135.6 0c35.7 35.7 37.6 92.9 4.4 130.9l-5.4 6.1c-8.7 10-7.7 25.1 2.3 33.9s25.1 7.7 33.9-2.3l5.4-6.1c49.9-57 47-142.9-6.5-196.5c-56.2-56.2-147.3-56.2-203.5 0L59.7 244.8z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3C!--!Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M580.3 267.2c56.2-56.2 56.2-147.3 0-203.5C526.8 10.2 440.9 7.3 383.9 57.2l-6.1 5.4c-10 8.7-11 23.9-2.3 33.9s23.9 11 33.9 2.3l6.1-5.4c38-33.2 95.2-31.3 130.9 4.4c37.4 37.4 37.4 98.1 0 135.6L433.1 346.6c-37.4 37.4-98.2 37.4-135.6 0c-35.7-35.7-37.6-92.9-4.4-130.9l4.7-5.4c8.7-10 7.7-25.1-2.3-33.9s-25.1-7.7-33.9 2.3l-4.7 5.4c-49.8 57-46.9 142.9 6.6 196.4c56.2 56.2 147.3 56.2 203.5 0L580.3 267.2zM59.7 244.8C3.5 301 3.5 392.1 59.7 448.2c53.6 53.6 139.5 56.4 196.5 6.5l6.1-5.4c10-8.7 11-23.9 2.3-33.9s-23.9-11-33.9-2.3l-6.1 5.4c-38 33.2-95.2 31.3-130.9-4.4c-37.4-37.4-37.4-98.1 0-135.6L207 165.4c37.4-37.4 98.1-37.4 135.6 0c35.7 35.7 37.6 92.9 4.4 130.9l-5.4 6.1c-8.7 10-7.7 25.1 2.3 33.9s25.1 7.7 33.9-2.3l5.4-6.1c49.9-57 47-142.9-6.5-196.5c-56.2-56.2-147.3-56.2-203.5 0L59.7 244.8z'/%3E%3C/svg%3E");
+}
+.share-links .link-container {
+  display: flex;
+  grid-gap: 5px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.sr-only {
+  width: 0;
   height: 0;
-}
-.osc .multi-select-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.25rem 0rem;
-}
-.osc .multi-select-header > p {
-  margin: 0 1rem;
-  color: var(--osc-foreground);
-}
-.osc .multi-select-header > .osc-icon {
-  color: var(--osc-foreground);
-  font-weight: lighter;
-  gap: 0;
-}
-.osc .multiselect-container {
-  padding: 1rem;
-  display: grid;
-  grid-gap: 0.5rem;
-}
-.osc .multi-select {
-  position: relative;
-}
-.osc .multi-select .multiselect-container {
-  background: #fff;
-  position: absolute;
-  z-index: 1;
-  width: 100%;
-}
-.osc .progressbar {
-  height: var(--nlds-progressbar-height, 0.5rem);
-  width: 100%;
-  background-color: var(--nlds-progressbar-background-color, #a9b2ba);
-  border-radius: var(--nlds-progressbar-border-radius, 50px);
-  overflow-x: hidden;
-}
-.osc .progressbar-tracker {
-  height: 100%;
-  background-color: var(
-    --nlds-progressbar-fill-background-color,
-    var(--utrecht-button-primary-action-background-color)
-  );
-  border-radius: inherit;
-}
-.osc .progressbar-counter {
-  font-weight: 600;
-  text-align: center;
-  color: var(--nlds-progressbar-color, #010d0a);
-}
-.osc .range-slider input[type='range'] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  cursor: pointer;
-  outline: none;
-  border-radius: 15px;
-  height: 5px;
-  width: 100%;
-  margin-bottom: 1rem;
-  margin-top: 2rem;
-  background: var(--osc-border);
-}
-.osc .range-slider input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  height: 30px;
-  width: 30px;
-  background-image: url('data:image/svg+xml,<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg"><g><title>Layer 1</title><circle id="svg_1" stroke-width="2" stroke="rgba(20,113,239,1)" fill="white" r="11" cy="12" cx="11.93554"/><path stroke="null" id="svg_2" fill="rgba(20,113,239,1)" d="m9.3966,6.53503l-5.46488,5.46493l5.46488,5.46488l1.24515,-1.24518l-4.21982,-4.2197l4.21982,-4.21982l-1.24515,-1.24511zm5.20679,10.9299l5.46488,-5.46488l-5.46488,-5.46488l-1.24518,1.24511l4.21979,4.21978l-4.21979,4.21979l1.24518,1.2451z"/></g></svg>');
-  background-size: cover;
-}
-.osc .range-slider input[type='range']::-moz-range-thumb {
-  height: 30px;
-  width: 30px;
-  background-image: url('data:image/svg+xml,<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg"><g><title>Layer 1</title><circle id="svg_1" stroke-width="2" stroke="rgba(20,113,239,1)" fill="white" r="11" cy="12" cx="11.93554"/><path stroke="null" id="svg_2" fill="rgba(20,113,239,1)" d="m9.3966,6.53503l-5.46488,5.46493l5.46488,5.46488l1.24515,-1.24518l-4.21982,-4.2197l4.21982,-4.21982l-1.24515,-1.24511zm5.20679,10.9299l5.46488,-5.46488l-5.46488,-5.46488l-1.24518,1.24511l4.21979,4.21978l-4.21979,4.21979l1.24518,1.2451z"/></g></svg>');
-  background-size: cover;
-}
-.osc .range-slider .range-slider-labels {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 0.5rem;
-  color: #000;
-}
-.osc-card {
-  display: inline-block;
-  margin: 0;
-  padding: 0.25rem 0.35rem;
-  border-radius: 3px;
-  background: #e8e8e8;
-  background: linear-gradient(#e8e8e8 50%, #ffffff 50%);
-}
-.osc-card p {
-  color: #000 !important;
-  font-weight: 800;
-  font-size: 1rem;
-}
-:root {
-  --black-a1: rgba(0, 0, 0, 0.05);
-  --black-a2: rgba(0, 0, 0, 0.1);
-  --black-a3: rgba(0, 0, 0, 0.15);
-  --black-a4: rgba(0, 0, 0, 0.2);
-  --black-a5: rgba(0, 0, 0, 0.3);
-  --black-a6: rgba(0, 0, 0, 0.4);
-  --black-a7: rgba(0, 0, 0, 0.5);
-  --black-a8: rgba(0, 0, 0, 0.6);
-  --black-a9: rgba(0, 0, 0, 0.7);
-  --black-a10: rgba(0, 0, 0, 0.8);
-  --black-a11: rgba(0, 0, 0, 0.9);
-  --black-a12: rgba(0, 0, 0, 0.95);
-}
-@supports (color: color(display-p3 1 1 1)) {
-  @media (color-gamut: p3) {
-    :root {
-      --black-a1: color(display-p3 0 0 0 / 0.05);
-      --black-a2: color(display-p3 0 0 0 / 0.1);
-      --black-a3: color(display-p3 0 0 0 / 0.15);
-      --black-a4: color(display-p3 0 0 0 / 0.2);
-      --black-a5: color(display-p3 0 0 0 / 0.3);
-      --black-a6: color(display-p3 0 0 0 / 0.4);
-      --black-a7: color(display-p3 0 0 0 / 0.5);
-      --black-a8: color(display-p3 0 0 0 / 0.6);
-      --black-a9: color(display-p3 0 0 0 / 0.7);
-      --black-a10: color(display-p3 0 0 0 / 0.8);
-      --black-a11: color(display-p3 0 0 0 / 0.9);
-      --black-a12: color(display-p3 0 0 0 / 0.95);
-    }
-  }
-}
-:root,
-.light,
-.light-theme {
-  --green-1: #fbfefc;
-  --green-2: #f4fbf6;
-  --green-3: #e6f6eb;
-  --green-4: #d6f1df;
-  --green-5: #c4e8d1;
-  --green-6: #adddc0;
-  --green-7: #8eceaa;
-  --green-8: #5bb98b;
-  --green-9: #30a46c;
-  --green-10: #2b9a66;
-  --green-11: #218358;
-  --green-12: #193b2d;
-}
-@supports (color: color(display-p3 1 1 1)) {
-  @media (color-gamut: p3) {
-    :root,
-    .light,
-    .light-theme {
-      --green-1: color(display-p3 0.986 0.996 0.989);
-      --green-2: color(display-p3 0.963 0.983 0.967);
-      --green-3: color(display-p3 0.913 0.964 0.925);
-      --green-4: color(display-p3 0.859 0.94 0.879);
-      --green-5: color(display-p3 0.796 0.907 0.826);
-      --green-6: color(display-p3 0.718 0.863 0.761);
-      --green-7: color(display-p3 0.61 0.801 0.675);
-      --green-8: color(display-p3 0.451 0.715 0.559);
-      --green-9: color(display-p3 0.332 0.634 0.442);
-      --green-10: color(display-p3 0.308 0.595 0.417);
-      --green-11: color(display-p3 0.19 0.5 0.32);
-      --green-12: color(display-p3 0.132 0.228 0.18);
-    }
-  }
-}
-:root,
-.light,
-.light-theme {
-  --mauve-1: #fdfcfd;
-  --mauve-2: #faf9fb;
-  --mauve-3: #f2eff3;
-  --mauve-4: #eae7ec;
-  --mauve-5: #e3dfe6;
-  --mauve-6: #dbd8e0;
-  --mauve-7: #d0cdd7;
-  --mauve-8: #bcbac7;
-  --mauve-9: #8e8c99;
-  --mauve-10: #84828e;
-  --mauve-11: #65636d;
-  --mauve-12: #211f26;
-}
-@supports (color: color(display-p3 1 1 1)) {
-  @media (color-gamut: p3) {
-    :root,
-    .light,
-    .light-theme {
-      --mauve-1: color(display-p3 0.991 0.988 0.992);
-      --mauve-2: color(display-p3 0.98 0.976 0.984);
-      --mauve-3: color(display-p3 0.946 0.938 0.952);
-      --mauve-4: color(display-p3 0.915 0.906 0.925);
-      --mauve-5: color(display-p3 0.886 0.876 0.901);
-      --mauve-6: color(display-p3 0.856 0.846 0.875);
-      --mauve-7: color(display-p3 0.814 0.804 0.84);
-      --mauve-8: color(display-p3 0.735 0.728 0.777);
-      --mauve-9: color(display-p3 0.555 0.549 0.596);
-      --mauve-10: color(display-p3 0.514 0.508 0.552);
-      --mauve-11: color(display-p3 0.395 0.388 0.424);
-      --mauve-12: color(display-p3 0.128 0.122 0.147);
-    }
-  }
-}
-:root,
-.light,
-.light-theme {
-  --violet-1: #fdfcfe;
-  --violet-2: #faf8ff;
-  --violet-3: #f4f0fe;
-  --violet-4: #ebe4ff;
-  --violet-5: #e1d9ff;
-  --violet-6: #d4cafe;
-  --violet-7: #c2b5f5;
-  --violet-8: #aa99ec;
-  --violet-9: #6e56cf;
-  --violet-10: #654dc4;
-  --violet-11: #6550b9;
-  --violet-12: #2f265f;
-}
-@supports (color: color(display-p3 1 1 1)) {
-  @media (color-gamut: p3) {
-    :root,
-    .light,
-    .light-theme {
-      --violet-1: color(display-p3 0.991 0.988 0.995);
-      --violet-2: color(display-p3 0.978 0.974 0.998);
-      --violet-3: color(display-p3 0.953 0.943 0.993);
-      --violet-4: color(display-p3 0.916 0.897 1);
-      --violet-5: color(display-p3 0.876 0.851 1);
-      --violet-6: color(display-p3 0.825 0.793 0.981);
-      --violet-7: color(display-p3 0.752 0.712 0.943);
-      --violet-8: color(display-p3 0.654 0.602 0.902);
-      --violet-9: color(display-p3 0.417 0.341 0.784);
-      --violet-10: color(display-p3 0.381 0.306 0.741);
-      --violet-11: color(display-p3 0.383 0.317 0.702);
-      --violet-12: color(display-p3 0.179 0.15 0.359);
-    }
-  }
-}
-.osc-DialogOverlay {
-  background-color: var(--black-a9);
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  animation: overlayShow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 1000;
-}
-.osc-DialogContent {
-  background-color: #fff;
-  border-radius: 6px;
-  box-shadow:
-    #0e121659 0 10px 38px -10px,
-    #0e121633 0 10px 20px -15px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-height: 75vh;
-  padding: 25px;
-  animation: contentShow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  max-width: 82.5rem;
-  overflow: auto;
-  box-sizing: border-box;
-}
-.osc-DialogContent:focus {
-  outline: none;
-}
-.osc-DialogTitle {
-  margin: 0;
-  font-weight: 500;
-  color: var(--mauve-12);
-  font-size: 17px;
-}
-.osc-DialogDescription {
-  margin: 10px 0 20px;
-  color: var(--mauve-11);
-  font-size: 15px;
-  line-height: 1.5;
-}
-@keyframes overlayShow {
-  0% {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes contentShow {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-.osc-DialogContent .carousel-button-container {
-  position: absolute;
-  display: flex;
-  top: -36px;
-  left: 0;
-  flex-wrap: nowrap;
-  gap: 10px;
-}
-.osc-DialogContent .carousel-button-container .osc-carousel-previous,
-.osc-DialogContent .carousel-button-container .osc-carousel-next {
-  position: relative;
-  flex-shrink: 0;
-  flex-grow: 1;
-  right: 0;
-  left: 0;
-}
-.osc-DialogContent .carousel-button-container p {
-  margin: 0;
-}
-.osc-DialogContent > div > button,
-.osc-DialogContent .carousel-button-container button {
-  aspect-ratio: 1;
-  min-width: auto;
-  min-height: auto;
-  padding: 0;
-  width: 36px;
-  height: 36px;
-}
-.osc-DialogContent .carousel-items {
-  padding-top: 10px;
-}
-.osc-carousel {
-  display: flex;
-  position: relative;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-.carousel-items {
-  flex: 1;
-}
-.osc-carousel-navigation-button-wrapper {
-  flex-grow: 0;
-  flex-basis: 0;
-}
-.osc-carousel-previous {
-  position: absolute;
-  left: 10px;
-  z-index: 1;
-}
-.osc-carousel-next {
-  position: absolute;
-  right: 10px;
-  z-index: 1;
-}
-.osc-paginator {
-  display: flex;
-  gap: 1rem;
-}
-.osc-listview {
-  display: grid;
-  gap: 2rem;
-}
-.osc-listview-template-columns-1 {
-  grid-template-columns: 1fr;
-}
-.osc-listview-template-columns-2 {
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-}
-.osc-listview-template-columns-3 {
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-}
-.stepper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.step-container {
-  display: inline-flex;
-  flex-direction: row;
-  align-items: center;
-}
-.step-container > .step-icon {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: var(--nlds-stepper-icon-width, 0.5rem);
-  height: var(--nlds-stepper-icon-height, 0.5rem);
-  padding: var(--nlds-stepper-icon-padding, 0.5rem);
-  margin-right: var(--nlds-stepper-icon-margin-right, 0.5rem);
-  border-width: var(--nlds-stepper-icon-border-width, 1px);
-  border-style: solid;
-  border-color: var(
-    --nlds-stepper-icon-border-color,
-    var(--utrecht-button-primary-action-background-color)
-  );
-  border-radius: var(--nlds-stepper-icon-border-radius, 50%);
-}
-.stepper > .step-divider {
-  height: var(--nlds-stepper-divider-height, 1px);
-  width: 100%;
-  margin-left: var(--nlds-stepper-divider-margin-left, 1rem);
-  margin-right: var(--nlds-stepper-divider-margin-right, 1rem);
-  background-color: var(--nlds-stepper-divider-color, #a9b2ba);
-}
-.step-icon > p {
-  color: var(
-    --nlds-stepper-icon-color,
-    var(--utrecht-button-primary-action-background-color)
-  );
-}
-.step-icon.active {
-  background-color: var(
-    --nlds-stepper-icon-active-background-color,
-    var(--utrecht-button-primary-action-background-color)
-  );
-}
-.step-icon.done {
-  background-color: var(
-    --nlds-stepper-icon-done-background-color,
-    var(--utrecht-button-secondary-action-background-color)
-  );
-  border-color: var(
-    --nlds-stepper-icon-done-border-color,
-    var(--utrecht-button-secondary-action-background-color)
-  );
-}
-.step-icon.active > p {
-  color: var(
-    --nlds-stepper-icon-active-color,
-    var(--utrecht-button-primary-action-color)
-  );
-}
-.step-icon.done > p {
-  color: var(
-    --nlds-stepper-icon-active-color,
-    var(--utrecht-button-secondary-action-color)
-  );
-}
-.osc-pill {
-  padding: 0.25rem 1rem;
-  background-color: var(--osc-muted);
-  color: var(--osc-muted-foreground);
-  border-radius: 0.125rem;
-}
-.osc-pill-rounded {
-  border-radius: 1rem;
-}
-.osc-pill-light {
-  background-color: var(--osc-card-dark);
-  color: var(--osc-card-dark-foreground);
-}
-.osc-pill > p {
-  text-align: center;
-}
-.carousel.--small {
-  --carousel-image-max-height: 200px;
-}
-.carousel.--medium {
-  --carousel-image-max-height: 400px;
-}
-.carousel.--large {
-  --carousel-image-max-height: 600px;
-}
-.carousel.--autoHeight {
-  --carousel-image-max-height: unset;
-}
-.carousel.--cover {
-  --carousel-image-object-fit: cover;
-}
-.carousel.--contain {
-  --carousel-image-object-fit: contain;
-}
-.carousel .osc .image-container > img {
-  object-fit: var(--carousel-image-object-fit, cover);
-  max-height: var(--carousel-image-max-height, unset);
-}
-.carousel .osc .carousel-button-container {
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  margin-top: -26px;
+  overflow: hidden;
+  display: block;
 }

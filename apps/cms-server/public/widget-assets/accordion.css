@@ -1,95 +1,67 @@
-@charset "UTF-8";
-.icon-section {
-  background-color: var(
-    --nlds-iconsection-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
-  );
-}
-.icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button {
-  background-color: var(--utrecht-button-primary-action-background-color);
-  color: var(--utrecht-button-primary-action-color);
-  border-radius: var(--nlds-iconsection-border-radius, 0);
-  justify-content: center !important;
-  grid-gap: 20px;
-}
-.icon-section
-  .utrecht-button.utrecht-button--subtle.utrecht-accordion__button
-  * {
-  color: var(--utrecht-button-primary-action-color);
-  fill: var(--utrecht-button-primary-action-color);
-}
-.icon-section .utrecht-accordion__panel {
-  padding: revert;
-  border: none;
-}
-.icon-section-container {
-  padding-block-start: var(
-    --nlds-iconsection-padding-block-start,
-    var(--nlds-default-padding-block-start, 3.5rem)
-  );
-  padding-block-end: var(
-    --nlds-iconsection-padding-block-end,
-    var(--nlds-default-padding-block-start, 3.5rem)
-  );
-}
-.icon-section .icon-section-grid .container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, auto));
-  grid-gap: 2rem;
-}
-.icon-section .icon-section-content {
-  padding: 10px;
-  display: grid;
-  grid-gap: 10px;
-}
-.icon-section .icon-section-content h3 {
-  color: var(
-    --nlds-iconsection-color,
-    var(
-      --utrecht-heading-3-color,
-      var(--utrecht-heading-color, var(--utrecht-document-color, inherit))
-    )
-  );
-}
-.icon-section .icon-section-content p {
-  color: var(
-    --nlds-iconsection-color,
-    var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit))
-  );
-}
-.icon-section .icon-section-content a {
-  color: var(
-    --nlds-iconsection-link-color,
-    var(
-      --_utrecht-link-state-color,
-      var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))
-    )
-  );
-  font-weight: 600;
-}
-.icon-section .icon-section-content a:before {
-  content: '';
-  aspect-ratio: 1;
-  width: 8px;
-  border: solid
-    var(
-      --nlds-iconsection-link-color,
-      var(
-        --_utrecht-link-state-color,
-        var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))
-      )
-    );
-  display: inline-block;
-  transform: rotate(45deg) translate(-1px);
-  border-width: 2px 2px 0 0;
-  margin-right: 10px;
-}
-.icon-section .icon-section-card img {
-  width: 100%;
-  height: 120px;
-  object-fit: contain;
-  object-position: center center;
-}
+@charset "UTF-8"; /**
+* @license EUPL-1.2
+* Copyright (c) 2024-2025 Gemeente Utrecht
+* Copyright (c) 2024-2025 Frameless B.V.
+*/ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 The Knights Who Say NIH! B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Robbert Broersma
+ * Copyright (c) 2021 Gemeente Utrecht
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Gemeente Utrecht
+ * Copyright (c) 2022 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 The Knights Who Say NIH! B.V.
+ * Copyright (c) 2022 Gemeente Utrecht
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Gemeente Utrecht
+ * Copyright (c) 2022 Robbert Broersma
+ * Copyright (c) 2022 The Knights Who Say NIH! B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021-2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Gemeente Utrecht
+ * Copyright (c) 2021 Robbert Broersma
+ * Copyright (c) 2021 The Knights Who Say NIH! B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2023 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021-2022 Gemeente Utrecht
+ * Copyright (c) 2021-2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Gemeente Utrecht
+ * Copyright (c) 2021 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 The Knights Who Say NIH! B.V.
+ * Copyright (c) 2021 Gemeente Utrecht
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Robbert Broersma
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2020-2022 Gemeente Utrecht
+ * Copyright (c) 2020-2022 Frameless B.V.
+ */ /**
+ * @license EUPL-1.2
+ * Copyright (c) 2021 Gemeente Utrecht
+ */
 .utrecht-accordion {
   margin-block-end: calc(
     var(--utrecht-space-around, 0) *
@@ -491,8 +463,17 @@
   line-height: 1;
   max-block-size: max-content;
   max-inline-size: max-content;
-  min-block-size: var(--utrecht-badge-counter-min-size, 1em);
-  min-inline-size: var(--utrecht-badge-counter-min-size, 1em);
+  min-block-size: var(
+    --utrecht-badge-counter-min-block-size,
+    var(
+      --utrecht-badge-counter-min-inline-size,
+      var(--utrecht-badge-counter-min-size, 1em)
+    )
+  );
+  min-inline-size: var(
+    --utrecht-badge-counter-min-inline-size,
+    var(--utrecht-badge-counter-min-size, 1em)
+  );
   padding-block-end: var(
     --utrecht-badge-counter-padding-block,
     var(--utrecht-badge-padding-block, 0.5ex)
@@ -897,10 +878,7 @@
 }
 .utrecht-breadcrumb-nav__item ~ .utrecht-breadcrumb-nav__item {
   margin-inline-start: var(--utrecht-breadcrumb-nav-item-divider-inline-size);
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Frameless B.V.
- */
+}
 .utrecht-button-group {
   align-items: baseline;
   background-color: var(--utrecht-button-group-background-color);
@@ -1182,6 +1160,14 @@
     --utrecht-button-border-bottom-width,
     var(--_utrecht-button-border-width, 0)
   );
+  --_utrecht-button-font-size: var(
+    --_utrecht-button-appearance-font-size,
+    var(--utrecht-button-font-size)
+  );
+  --_utrecht-button-line-height: var(
+    --_utrecht-button-appearance-line-height,
+    var(--utrecht-button-line-height)
+  );
   --utrecht-icon-size: var(--utrecht-button-icon-size, 1em);
   align-items: center;
   background-color: var(--_utrecht-button-background-color);
@@ -1197,11 +1183,11 @@
   cursor: var(--utrecht-action-activate-cursor, revert);
   display: inline-flex;
   font-family: var(
-    --utrecht-button-font-family,
+    --_utrecht-button-font-family,
     var(--utrecht-document-font-family)
   );
   font-size: var(
-    --utrecht-button-font-size,
+    --_utrecht-button-font-size,
     var(--utrecht-document-font-family, inherit)
   );
   font-weight: var(
@@ -1211,7 +1197,7 @@
   gap: var(--utrecht-button-icon-gap);
   inline-size: var(--utrecht-button-inline-size, auto);
   justify-content: center;
-  line-height: var(--utrecht-button-line-height);
+  line-height: var(--_utrecht-button-line-height);
   max-inline-size: var(--utrecht-button-max-inline-size, fit-content);
   min-block-size: var(--utrecht-button-min-block-size, 44px);
   min-inline-size: var(--utrecht-button-min-inline-size, 44px);
@@ -1316,8 +1302,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-primary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-primary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-primary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-primary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-primary-action-disabled-background-color
@@ -1378,8 +1370,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-secondary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-secondary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-secondary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-secondary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-secondary-action-disabled-background-color
@@ -1438,8 +1436,14 @@
     --utrecht-button-subtle-border-width
   );
   --_utrecht-button-appearance-color: var(--utrecht-button-subtle-color);
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-subtle-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-subtle-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-subtle-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-subtle-disabled-background-color
@@ -1728,6 +1732,14 @@
     --utrecht-button-border-bottom-width,
     var(--_utrecht-button-border-width, 0)
   );
+  --_utrecht-button-font-size: var(
+    --_utrecht-button-appearance-font-size,
+    var(--utrecht-button-font-size)
+  );
+  --_utrecht-button-line-height: var(
+    --_utrecht-button-appearance-line-height,
+    var(--utrecht-button-line-height)
+  );
   --utrecht-icon-size: var(--utrecht-button-icon-size, 1em);
   align-items: center;
   background-color: var(--_utrecht-button-background-color);
@@ -1743,11 +1755,11 @@
   cursor: var(--utrecht-action-activate-cursor, revert);
   display: inline-flex;
   font-family: var(
-    --utrecht-button-font-family,
+    --_utrecht-button-font-family,
     var(--utrecht-document-font-family)
   );
   font-size: var(
-    --utrecht-button-font-size,
+    --_utrecht-button-font-size,
     var(--utrecht-document-font-family, inherit)
   );
   font-weight: var(
@@ -1757,7 +1769,7 @@
   gap: var(--utrecht-button-icon-gap);
   inline-size: var(--utrecht-button-inline-size, auto);
   justify-content: center;
-  line-height: var(--utrecht-button-line-height);
+  line-height: var(--_utrecht-button-line-height);
   max-inline-size: var(--utrecht-button-max-inline-size, fit-content);
   min-block-size: var(--utrecht-button-min-block-size, 44px);
   min-inline-size: var(--utrecht-button-min-inline-size, 44px);
@@ -1892,8 +1904,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-primary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-primary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-primary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-primary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-primary-action-disabled-background-color
@@ -1954,8 +1972,14 @@
   --_utrecht-button-appearance-color: var(
     --utrecht-button-secondary-action-color
   );
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-secondary-action-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-secondary-action-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-secondary-action-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-secondary-action-disabled-background-color
@@ -2014,8 +2038,14 @@
     --utrecht-button-subtle-border-width
   );
   --_utrecht-button-appearance-color: var(--utrecht-button-subtle-color);
+  --_utrecht-button-appearance-font-size: var(
+    --utrecht-button-subtle-font-size
+  );
   --_utrecht-button-appearance-font-weight: var(
     --utrecht-button-subtle-font-weight
+  );
+  --_utrecht-button-appearance-line-height: var(
+    --utrecht-button-subtle-line-height
   );
   --_utrecht-button-appearance-disabled-background-color: var(
     --utrecht-button-subtle-disabled-background-color
@@ -3357,6 +3387,8 @@
   gap: var(--utrecht-space-inline-sm);
 }
 .utrecht-document {
+  -webkit-font-smoothing: auto !important;
+  -moz-osx-font-smoothing: auto !important;
   color: var(--utrecht-document-color, inherit);
   font-family: var(--utrecht-document-font-family, inherit);
   font-size: var(--utrecht-document-font-size, inherit);
@@ -3536,6 +3568,7 @@
   font-family: var(--utrecht-document-font-family, inherit);
   font-size: var(--utrecht-form-field-description-font-size, inherit);
   font-style: var(--utrecht-form-field-description-font-style);
+  line-height: var(--utrecht-form-field-description-line-height);
   margin-block-end: calc(
     var(--utrecht-space-around, 0) *
       var(
@@ -3583,6 +3616,7 @@
   font-family: var(--utrecht-document-font-family, inherit);
   font-size: var(--utrecht-form-field-error-message-font-size, inherit);
   font-style: var(--utrecht-form-field-error-message-font-style);
+  line-height: var(--utrecht-form-field-error-message-line-height);
   margin-block-end: calc(
     var(--utrecht-space-around, 0) *
       var(
@@ -3622,7 +3656,6 @@
     var(--utrecht-space-around, 0) *
       var(--utrecht-form-field-margin-block-start, 0)
   );
-  max-inline-size: var(--utrecht-form-field-max-inline-size);
   page-break-inside: avoid;
 }
 .utrecht-form-field--distanced {
@@ -4168,10 +4201,7 @@
 }
 .utrecht-heading-5--distanced {
   --utrecht-space-around: 1;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021-2022 Frameless B.V.
- */
+}
 .utrecht-heading-6 {
   break-inside: avoid-column;
   page-break-inside: avoid;
@@ -4201,12 +4231,7 @@
 }
 .utrecht-heading-6--distanced {
   --utrecht-space-around: 1;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Gemeente Utrecht
- * Copyright (c) 2022 Robbert Broersma
- * Copyright (c) 2022 The Knights Who Say NIH! B.V.
- */
+}
 .utrecht-heading-group {
   --utrecht-pre-heading-order: -1;
   display: flex;
@@ -4226,11 +4251,7 @@
 .utrecht-iban-data {
   font-variant-numeric: lining-nums slashed-zero tabular-nums;
   white-space: nowrap;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021-2022 Gemeente Utrecht
- * Copyright (c) 2021-2022 Frameless B.V.
- */
+}
 .utrecht-icon {
   block-size: var(--utrecht-icon-size);
   color: var(--utrecht-icon-color);
@@ -4273,10 +4294,7 @@
 }
 .utrecht-index-char-nav__link--disabled {
   pointer-events: none;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Robbert Broersma
- */
+}
 .utrecht-link-button {
   --utrecht-icon-size: var(--utrecht-link-icon-size, 1em);
   color: var(
@@ -4436,11 +4454,7 @@
   column-gap: var(--utrecht-link-list-link-column-gap);
   display: inline-flex;
   font-weight: var(--utrecht-link-list-link-font-weight);
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 The Knights Who Say NIH! B.V.
- * Copyright (c) 2022 Gemeente Utrecht
- */
+}
 .utrecht-link-social {
   --utrecht-icon-size: var(--utrecht-link-social-icon-size);
   --utrecht-icon-color: currentColor;
@@ -4633,10 +4647,7 @@
 }
 .utrecht-list-social__item:last-child {
   margin-inline-end: 0;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2023 Frameless B.V.
- */
+}
 .utrecht-listbox {
   --utrecht-listbox-max-block-size: 300px;
   background-color: var(--utrecht-listbox-background-color);
@@ -4851,11 +4862,7 @@
   block-size: 100%;
   display: inline-block;
   inline-size: auto;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2022 Gemeente Utrecht
- * Copyright (c) 2022 Robbert Broersma
- */
+}
 .utrecht-map-marker {
   --utrecht-icon-size: var(--utrecht-map-marker-icon-size);
   align-items: center;
@@ -5082,11 +5089,7 @@
   padding-inline-end: var(--utrecht-nav-bar-link-padding-inline-end);
   padding-inline-start: var(--utrecht-nav-bar-link-padding-inline-start);
   text-decoration: none;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 The Knights Who Say NIH! B.V.
- * Copyright (c) 2021 Gemeente Utrecht
- */
+}
 .utrecht-sidenav {
   --utrecht-sidenav-connection-color: var(--utrecht-sidenav-item-marker-color);
   --utrecht-sidenav-connection-inline-size: 2px;
@@ -5636,10 +5639,7 @@
 .utrecht-pagination__relative-link:focus:not(:focus-visible) {
   box-shadow: none;
   outline-style: revert;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 The Knights Who Say NIH! B.V.
- */
+}
 .utrecht-paragraph {
   color: var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit));
   font-family: var(
@@ -6150,11 +6150,7 @@
     --_utrecht-radio-button-state-active-color,
     var(--utrecht-radio-button-active-color)
   );
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2024-2025 Gemeente Utrecht
- * Copyright (c) 2024-2025 Frameless B.V.
- */
+}
 .utrecht-rich-text {
   --utrecht-space-around: 1;
 }
@@ -9022,10 +9018,7 @@
   --utrecht-unordered-list-margin-block-end: var(
     --utrecht-rich-text-friend-margin-block-end
   );
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Gemeente Utrecht
- */
+}
 .utrecht-search-bar {
   --utrecht-button-border-color: var(--utrecht-search-bar-button-border-color);
   --utrecht-button-hover-scale: var(--utrecht-search-bar-hover-transform);
@@ -9365,12 +9358,7 @@
   background-position: 100%;
   background-repeat: no-repeat;
   background-size: 1.4em;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Gemeente Utrecht
- * Copyright (c) 2021 Robbert Broersma
- * Copyright (c) 2021 The Knights Who Say NIH! B.V.
- */
+}
 .utrecht-separator {
   border-color: var(--utrecht-separator-color);
   border-style: solid;
@@ -9438,11 +9426,7 @@
   outline-style: var(--utrecht-focus-outline-style, revert);
   outline-width: var(--utrecht-focus-outline-width, revert);
   text-decoration: var(--utrecht-skip-link-focus-text-decoration);
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2020-2022 Gemeente Utrecht
- * Copyright (c) 2020-2022 Frameless B.V.
- */
+}
 .utrecht-spotlight-section {
   background-color: var(
     --_utrecht-spotlight-section-background-color,
@@ -10252,10 +10236,7 @@
   );
   font-style: var(--utrecht-form-control-placeholder-font-style);
   opacity: 100%;
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Robbert Broersma
- */
+}
 .utrecht-textbox {
   --_utrecht-textbox-value-char: 0.667em + 0.334ch;
   --_utrecht-textbox-max-inline-size: calc(
@@ -10797,11 +10778,7 @@
   display: block;
   padding-block-end: var(--utrecht-space-block-xs);
   padding-inline-end: var(--utrecht-space-inline-md);
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Gemeente Utrecht
- * Copyright (c) 2021 Robbert Broersma
- */
+}
 .utrecht-toptask-nav {
   display: flex;
   flex-direction: column;
@@ -10873,11 +10850,7 @@
 .utrecht-unordered-list__marker {
   color: var(--utrecht-unordered-list-marker-color);
   content: '●';
-} /**
- * @license EUPL-1.2
- * Copyright (c) 2021 Robbert Broersma
- * Copyright (c) 2021 Gemeente Utrecht
- */
+}
 .utrecht-url-data {
   break-inside: avoid;
   font-variant-ligatures: none;
@@ -10888,6 +10861,7 @@
 }
 :root,
 ::backdrop {
+  --of-progress-indicator-mobile-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
   --denhaag-process-steps-sub-step-marker-size: 12px;
   --denhaag-process-steps-step-marker-size: 28px;
   --utrecht-toptask-nav-link-grid-max-inline-size: 240px;
@@ -10975,8 +10949,8 @@
   --utrecht-color-red-40: hsl(0 100% 40%);
   --utrecht-color-red-30: hsl(0 100% 30%);
   --utrecht-color-red-20: hsl(0 100% 20%);
-  --utrecht-unordered-list-item-margin-block-end: 0.5rem;
-  --utrecht-unordered-list-item-margin-block-start: 0.5rem;
+  --utrecht-unordered-list-item-margin-block-end: 0.25rem;
+  --utrecht-unordered-list-item-margin-block-start: 0.25rem;
   --utrecht-unordered-list-margin-block-end: 0;
   --utrecht-toptask-link-icon-size: 2.25rem;
   --utrecht-toptask-link-hover-transform-scale: 1.02;
@@ -11007,6 +10981,7 @@
   --utrecht-search-bar-input-background-position-x: 0.5em;
   --utrecht-search-bar-button-hover-scale: 1;
   --utrecht-search-bar-button-hover-background-color: hsl(359 65% 58%);
+  --utrecht-rich-text-confidant-margin-block-end: 0;
   --utrecht-radio-button-margin-inline-end: 12px;
   --utrecht-radio-button-border-radius: 0;
   --utrecht-radio-button-invalid-border-width: 2px;
@@ -11070,6 +11045,9 @@
   --utrecht-logo-min-block-size: 58.97px;
   --utrecht-logo-max-inline-size: 192px;
   --utrecht-logo-max-block-size: 103px;
+  --utrecht-listbox-option-min-block-size: 44px;
+  --utrecht-listbox-max-block-size: 300px;
+  --utrecht-listbox-inline-size: 448px;
   --utrecht-list-social-item-margin-inline-end: 10px;
   --utrecht-link-icon-size: 1.2em;
   --utrecht-link-hover-text-decoration-thickness: 3px;
@@ -11082,6 +11060,7 @@
   --utrecht-link-social-size: 40px;
   --utrecht-link-social-border-width: 2px;
   --utrecht-link-list-icon-size: 14px;
+  --utrecht-link-list-link-text-decoration: none;
   --utrecht-icon-baseline-inset-block-start: 0.125em;
   --utrecht-icon-size: 48px;
   --utrecht-heading-5-margin-block-start: 1rem;
@@ -11123,6 +11102,7 @@
   --utrecht-form-control-padding-block-end: 8px;
   --utrecht-form-control-max-inline-size: 28em;
   --utrecht-form-control-border-radius: 0;
+  --utrecht-focus-outline-style: dotted;
   --utrecht-figure-caption-line-height: 20px;
   --utrecht-figure-caption-font-size: 14px;
   --utrecht-figure-caption-color: #727272;
@@ -11187,7 +11167,6 @@
   --utrecht-space-block-2xs: 4px;
   --utrecht-space-block-3xs: 2px;
   --utrecht-pointer-target-min-size: 44px;
-  --utrecht-focus-outline-style: dotted;
   --utrecht-action-inert-cursor: default;
   --utrecht-action-activate-cursor: pointer;
   --utrecht-action-submit-cursor: pointer;
@@ -11257,7 +11236,6 @@
   --utrecht-badge-border-radius: 0;
   --utrecht-badge-counter-padding-inline: 1ex;
   --utrecht-badge-counter-padding-block: 1ex;
-  --utrecht-badge-counter-font-size: 16px;
   --utrecht-backdrop-reduced-transparency-opacity: 0.98;
   --utrecht-backdrop-fade-in-animation-duration: 0.4s;
   --utrecht-backdrop-opacity: 0.8;
@@ -11433,7 +11411,7 @@
     --utrecht-space-block-md
   );
   --utrecht-spotlight-section-color: var(--utrecht-color-black);
-  --utrecht-spotlight-section-background-color: var(--utrecht-color-grey-80);
+  --utrecht-spotlight-section-background-color: var(--utrecht-color-grey-90);
   --utrecht-skip-link-focus-text-decoration: var(
     --utrecht-link-focus-text-decoration
   );
@@ -11483,6 +11461,14 @@
   --utrecht-search-bar-button-color: var(--utrecht-color-white);
   --utrecht-search-bar-button-border-color: var(--utrecht-color-red-40);
   --utrecht-search-bar-button-background-color: var(--utrecht-color-red-40);
+  --utrecht-rich-text-best-friend-margin-block-end: var(
+    --utrecht-space-block-2xs
+  );
+  --utrecht-rich-text-friend-margin-block-end: var(--utrecht-space-block-xs);
+  --utrecht-rich-text-acquaintance-margin-block-end: var(
+    --utrecht-space-block-md
+  );
+  --utrecht-rich-text-stranger-margin-block-end: var(--utrecht-space-block-2xl);
   --utrecht-radio-button-color: var(--utrecht-color-white);
   --utrecht-radio-button-disabled-color: var(--utrecht-color-white);
   --utrecht-radio-button-disabled-background-color: var(
@@ -11517,7 +11503,7 @@
     --utrecht-typography-weight-scale-normal-font-weight
   );
   --utrecht-paragraph-lead-font-size: var(
-    --utrecht-typography-scale-lg-font-size
+    --utrecht-typography-scale-xl-font-size
   );
   --utrecht-paragraph-margin-block-start: var(--utrecht-space-block-md);
   --utrecht-paragraph-line-height: var(--utrecht-typography-line-height-md);
@@ -11644,6 +11630,37 @@
   --utrecht-map-marker-border-color: var(--utrecht-color-white);
   --utrecht-map-marker-color: var(--utrecht-color-white);
   --utrecht-map-marker-background-color: var(--utrecht-color-blue-30);
+  --utrecht-listbox-option-group-title-margin-inline-start: var(
+    --utrecht-space-inline-xs
+  );
+  --utrecht-listbox-option-group-title-color: var(--utrecht-color-black);
+  --utrecht-listbox-option-group-title-font-weight: var(
+    --utrecht-typography-weight-scale-bold-font-weight
+  );
+  --utrecht-listbox-option-group-title-font-size: var(
+    --utrecht-typography-scale-md-font-size
+  );
+  --utrecht-listbox-option-group-margin-block-end: var(
+    --utrecht-space-inline-xs
+  );
+  --utrecht-listbox-option-hover-background-color: var(--utrecht-color-blue-90);
+  --utrecht-listbox-option-hover-color: var(--utrecht-color-black);
+  --utrecht-listbox-option-selected-color: var(--utrecht-color-black);
+  --utrecht-listbox-option-selected-background-color: var(
+    --utrecht-color-grey-95
+  );
+  --utrecht-listbox-option-active-font-weight: var(
+    --utrecht-typography-weight-scale-bold-font-weight
+  );
+  --utrecht-listbox-option-active-color: var(--utrecht-color-black);
+  --utrecht-listbox-option-active-background-color: var(
+    --utrecht-color-grey-95
+  );
+  --utrecht-listbox-option-padding-inline-start: var(--utrecht-space-inline-xs);
+  --utrecht-listbox-option-padding-inline-end: var(--utrecht-space-inline-xs);
+  --utrecht-listbox-option-padding-block-start: var(--utrecht-space-block-xs);
+  --utrecht-listbox-option-padding-block-end: var(--utrecht-space-block-xs);
+  --utrecht-listbox-background-color: var(--utrecht-color-white);
   --utrecht-link-placeholder-color: var(--utrecht-color-grey-40);
   --utrecht-link-focus-color: var(--utrecht-color-blue-40);
   --utrecht-link-color: var(--utrecht-color-blue-35);
@@ -11651,11 +11668,11 @@
   --utrecht-link-social-margin-inline-start: var(--utrecht-space-inline-sm);
   --utrecht-link-social-border-color: var(--utrecht-color-white);
   --utrecht-link-social-background-color: var(--utrecht-color-red-40);
-  --utrecht-link-list-item-font-weight: var(
+  --utrecht-link-list-link-font-weight: var(
     --utrecht-typography-weight-scale-bold-font-weight
   );
-  --utrecht-link-list-item-column-gap: var(--utrecht-space-block-xs);
-  --utrecht-link-list-item-margin-block-start: var(--utrecht-space-block-xs);
+  --utrecht-link-list-link-column-gap: var(--utrecht-space-block-xs);
+  --utrecht-link-list-row-gap: var(--utrecht-space-block-xs);
   --utrecht-index-char-nav-link-current-font-weight: var(
     --utrecht-typography-weight-scale-bold-font-weight
   );
@@ -11709,7 +11726,7 @@
   --utrecht-heading-1-font-weight: var(
     --utrecht-typography-weight-scale-bold-font-weight
   );
-  --utrecht-heading-1-font-size: var(--utrecht-typography-scale-3xl-font-size);
+  --utrecht-heading-1-font-size: var(--utrecht-typography-scale-4xl-font-size);
   --utrecht-heading-1-font-family: var(
     --utrecht-typography-sans-serif-font-family
   );
@@ -11780,6 +11797,10 @@
   --utrecht-form-control-border-width: var(--utrecht-border-width-sm);
   --utrecht-form-control-border-color: var(--utrecht-color-grey-30);
   --utrecht-form-control-background-color: var(--utrecht-color-white);
+  --utrecht-focus-inverse-outline-color: var(--utrecht-color-white);
+  --utrecht-focus-outline-width: var(--utrecht-border-width-md);
+  --utrecht-focus-outline-color: var(--utrecht-color-black);
+  --utrecht-focus-background-color: var(--utrecht-color-yellow-60);
   --utrecht-emphasis-strong-font-weight: var(
     --utrecht-typography-weight-scale-bold-font-weight
   );
@@ -11806,10 +11827,6 @@
   );
   --utrecht-data-list-margin-block-start: var(--utrecht-space-block-md);
   --utrecht-data-list-margin-block-end: var(--utrecht-space-block-md);
-  --utrecht-focus-inverse-outline-color: var(--utrecht-color-white);
-  --utrecht-focus-outline-width: var(--utrecht-border-width-md);
-  --utrecht-focus-outline-color: var(--utrecht-color-black);
-  --utrecht-focus-background-color: var(--utrecht-color-yellow-60);
   --utrecht-feedback-active-fill-color: var(--utrecht-color-white);
   --utrecht-feedback-inactive-fill-color: var(--utrecht-color-white);
   --utrecht-feedback-success-fill-color: var(--utrecht-color-white);
@@ -11943,9 +11960,12 @@
   --utrecht-button-secondary-action-disabled-background-color: var(
     --utrecht-color-white
   );
-  --utrecht-button-secondary-action-active-color: var(--utrecht-color-white);
+  --utrecht-button-secondary-action-active-color: var(--utrecht-color-blue-30);
+  --utrecht-button-secondary-action-active-border-color: var(
+    --utrecht-color-blue-30
+  );
   --utrecht-button-secondary-action-active-background-color: var(
-    --utrecht-color-blue-35
+    --utrecht-color-white
   );
   --utrecht-button-secondary-action-color: var(--utrecht-color-blue-35);
   --utrecht-button-secondary-action-border-width: var(
@@ -12030,12 +12050,12 @@
   --utrecht-button-primary-action-disabled-background-color: var(
     --utrecht-color-grey-90
   );
-  --utrecht-button-primary-action-active-color: var(--utrecht-color-blue-35);
+  --utrecht-button-primary-action-active-color: var(--utrecht-color-white);
   --utrecht-button-primary-action-active-border-color: var(
-    --utrecht-color-blue-35
+    --utrecht-color-blue-30
   );
   --utrecht-button-primary-action-active-background-color: var(
-    --utrecht-color-white
+    --utrecht-color-blue-30
   );
   --utrecht-button-primary-action-color: var(--utrecht-color-white);
   --utrecht-button-primary-action-border-width: var(--utrecht-border-width-md);
@@ -12098,20 +12118,17 @@
   --utrecht-badge-background-color: var(--utrecht-color-grey-30);
   --utrecht-badge-list-item-margin-inline: var(--utrecht-space-block-sm);
   --utrecht-badge-list-item-margin-block: var(--utrecht-space-block-xs);
-  --utrecht-badge-counter-font-style: var(
+  --utrecht-badge-counter-font-size: var(
     --utrecht-typography-scale-md-font-size
   );
   --utrecht-badge-counter-color: var(--utrecht-color-white);
-  --utrecht-badge-counter-border-radius: var(--utrecht-badge-counter-font-size);
   --utrecht-badge-counter-background-color: var(--utrecht-color-red-40);
   --utrecht-backdrop-color: var(--utrecht-color-black);
   --utrecht-backdrop-background-color: var(--utrecht-color-white);
-  --utrecht-alert-info-color: var(--utrecht-color-black);
-  --utrecht-alert-info-background-color: var(--utrecht-color-blue-90);
-  --utrecht-alert-icon-info-color: var(--utrecht-color-blue-35);
   --utrecht-alert-icon-ok-color: var(--utrecht-color-green-40);
   --utrecht-alert-icon-warning-color: var(--utrecht-color-yellow-40);
   --utrecht-alert-icon-error-color: var(--utrecht-color-red-40);
+  --utrecht-alert-icon-info-color: var(--utrecht-color-blue-35);
   --utrecht-alert-icon-gap: var(--utrecht-space-column-md);
   --utrecht-alert-icon-color: var(--utrecht-color-blue-35);
   --utrecht-alert-ok-color: var(--utrecht-color-black);
@@ -12120,6 +12137,8 @@
   --utrecht-alert-error-background-color: var(--utrecht-color-red-95);
   --utrecht-alert-warning-color: var(--utrecht-color-black);
   --utrecht-alert-warning-background-color: var(--utrecht-color-yellow-80);
+  --utrecht-alert-info-color: var(--utrecht-color-black);
+  --utrecht-alert-info-background-color: var(--utrecht-color-blue-90);
   --utrecht-alert-padding-inline-end: var(--utrecht-space-block-lg);
   --utrecht-alert-padding-inline-start: var(--utrecht-space-block-lg);
   --utrecht-alert-padding-block-end: var(--utrecht-space-block-lg);
@@ -12137,7 +12156,7 @@
   --utrecht-accordion-panel-padding-block-end: var(--utrecht-space-block-xs);
   --utrecht-accordion-panel-padding-block-start: var(--utrecht-space-block-xs);
   --utrecht-accordion-panel-border-color: var(--utrecht-color-grey-95);
-  --utrecht-accordion-button-icon-background-color: var(
+  --utrecht-accordion-button-icon-utrecht-background-color: var(
     --utrecht-color-yellow-50
   );
   --utrecht-accordion-button-focus-color: var(--utrecht-color-grey-10);
@@ -12161,6 +12180,11 @@
     --utrecht-space-block-md
   );
   --utrecht-accordion-button-padding-inline-end: var(--utrecht-space-block-md);
+  --of-progress-indicator-background-color: var(
+    --utrecht-document-background-color
+  );
+  --of-page-footer-fg: var(--utrecht-page-footer-color);
+  --of-page-footer-bg: var(--utrecht-page-footer-background-color);
   --of-layout-background: var(--utrecht-document-background-color);
   --denhaag-process-steps-sub-step-line-color: var(
     --denhaag-process-steps-step-line-color
@@ -12200,6 +12224,8 @@
     --utrecht-form-control-background-color
   );
   --utrecht-paragraph-lead-color: var(--utrecht-document-color);
+  --utrecht-listbox-border-width: var(--utrecht-form-control-border-width);
+  --utrecht-listbox-border-color: var(--utrecht-form-control-border-color);
   --utrecht-link-visited-color: var(--utrecht-link-color);
   --utrecht-link-hover-color: var(--utrecht-link-focus-color);
   --utrecht-link-active-color: var(--utrecht-link-color);
@@ -12274,6 +12300,7 @@
   --utrecht-breadcrumb-nav-link-focus-background-color: var(
     --utrecht-focus-background-color
   );
+  --utrecht-badge-counter-border-radius: var(--utrecht-badge-counter-font-size);
   --of-layout-bg: var(--of-layout-background);
   --utrecht-radio-button-invalid-border-color: var(
     --utrecht-form-control-invalid-border-color
@@ -12341,4 +12368,7 @@
   --utrecht-feedback-valid-fill-background-color: var(
     --utrecht-feedback-valid-background-color
   );
+}
+.utrecht-accordion__button:after {
+  display: none;
 }
