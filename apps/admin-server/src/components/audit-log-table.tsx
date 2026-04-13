@@ -10,10 +10,10 @@ type AuditLogTableProps = {
 };
 
 const ACTION_LABELS: Record<string, { label: string; className: string }> = {
-  create: { label: 'Aangemaakt', className: 'bg-green-100 text-green-800' },
-  read: { label: 'Bekeken', className: 'bg-gray-100 text-gray-800' },
-  update: { label: 'Bewerkt', className: 'bg-blue-100 text-blue-800' },
-  delete: { label: 'Verwijderd', className: 'bg-red-100 text-red-800' },
+  GET: { label: 'Bekeken', className: 'bg-gray-100 text-gray-800' },
+  POST: { label: 'Aangemaakt', className: 'bg-green-100 text-green-800' },
+  PUT: { label: 'Bewerkt', className: 'bg-blue-100 text-blue-800' },
+  DELETE: { label: 'Verwijderd', className: 'bg-red-100 text-red-800' },
   login: { label: 'Ingelogd', className: 'bg-purple-100 text-purple-800' },
   login_failed: {
     label: 'Login mislukt',
@@ -35,6 +35,10 @@ const ACTION_LABELS: Record<string, { label: string; className: string }> = {
   '2fa_failed': {
     label: '2FA mislukt',
     className: 'bg-orange-100 text-orange-800',
+  },
+  cleanup: {
+    label: 'Opgeschoond',
+    className: 'bg-yellow-100 text-yellow-800',
   },
 };
 
@@ -60,7 +64,7 @@ function ChangesDisplay({
   newData: Record<string, any> | null;
   action: string;
 }) {
-  if (action === 'read' || action === 'login' || action === 'logout') {
+  if (action === 'GET' || action === 'login' || action === 'logout') {
     if (newData && Object.keys(newData).length > 0) {
       return (
         <div className="text-xs text-muted-foreground">
@@ -75,7 +79,7 @@ function ChangesDisplay({
     return <span className="text-xs text-muted-foreground">-</span>;
   }
 
-  if (action === 'delete' && previousData) {
+  if (action === 'DELETE' && previousData) {
     return (
       <div className="text-xs text-muted-foreground">
         {Object.entries(previousData)

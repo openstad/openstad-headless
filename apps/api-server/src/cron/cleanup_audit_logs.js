@@ -85,6 +85,18 @@ function createOnTick(database) {
         console.log(
           `[cron] cleanup_audit_logs: deleted ${totalDeleted} audit log records`
         );
+
+        await database.AuditLog.create({
+          action: 'cleanup',
+          modelName: 'audit_log',
+          newData: {
+            deletedCount: totalDeleted,
+            retentionMonths,
+            incidentRetentionMonths,
+            incidentProjectIds: [...incidentProjectIds],
+          },
+          source: 'api',
+        });
       }
     } catch (err) {
       console.error('[cron] cleanup_audit_logs error:', err);

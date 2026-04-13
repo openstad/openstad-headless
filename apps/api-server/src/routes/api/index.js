@@ -3,6 +3,9 @@ const bruteForce = require('../../middleware/brute-force');
 const dbQuery = require('../../middleware/dbQuery');
 const sorting = require('../../middleware/sorting');
 const auditLogMiddleware = require('../../middleware/audit-log');
+const auditLogService = require('../../services/audit-log');
+
+auditLogService.init();
 
 const router = express.Router({ mergeParams: true });
 

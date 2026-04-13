@@ -19,19 +19,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: true,
       },
       action: {
-        type: DataTypes.ENUM(
-          'create',
-          'read',
-          'update',
-          'delete',
-          'login',
-          'login_failed',
-          'logout',
-          'register',
-          'password_reset',
-          '2fa_configured',
-          '2fa_failed'
-        ),
+        type: DataTypes.STRING(50),
         allowNull: false,
       },
       modelName: {

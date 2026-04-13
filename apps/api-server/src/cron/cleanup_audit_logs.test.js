@@ -16,6 +16,7 @@ function createMockDb() {
   return {
     AuditLog: {
       destroy: vi.fn().mockResolvedValue(0),
+      create: vi.fn().mockResolvedValue({}),
     },
     Project: {
       findAll: vi.fn().mockResolvedValue([]),
@@ -65,6 +66,31 @@ describe('cleanup_audit_logs cron', () => {
     await onTick();
     // Should call destroy for both regular and incident cleanup
     expect(mockDb.AuditLog.destroy).toHaveBeenCalledTimes(2);
+  });
+
+  it('creates an audit entry when records are deleted', async () => {
+    mockDb.AuditLog.destroy.mockResolvedValue(5);
+
+    await onTick();
+
+    expect(mockDb.AuditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'cleanup',
+        modelName: 'audit_log',
+        source: 'api',
+        newData: expect.objectContaining({
+          deletedCount: 5,
+        }),
+      })
+    );
+  });
+
+  it('does not create an audit entry when no records are deleted', async () => {
+    mockDb.AuditLog.destroy.mockResolvedValue(0);
+
+    await onTick();
+
+    expect(mockDb.AuditLog.create).not.toHaveBeenCalled();
   });
 
   it('handles errors gracefully', async () => {

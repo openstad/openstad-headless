@@ -2,28 +2,7 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 
 const auditLogService = require('../services/audit-log');
 
-const METHOD_ACTION_MAP = {
-  POST: 'create',
-  PUT: 'update',
-  DELETE: 'delete',
-};
-
-const PATH_MODEL_MAP = {
-  resource: 'Resource',
-  comment: 'Comment',
-  vote: 'Vote',
-  submission: 'Submission',
-  tag: 'Tag',
-  status: 'Status',
-  widgets: 'Widget',
-  poll: 'Poll',
-  area: 'Area',
-  datalayer: 'Datalayer',
-  choicesguide: 'ChoicesGuide',
-  user: 'User',
-  project: 'Project',
-  action: 'Action',
-};
+const WRITE_METHODS = ['POST', 'PUT', 'DELETE'];
 
 function resolveModelFromPath(path) {
   const segments = path.replace(/^\//, '').split('/');
@@ -32,26 +11,24 @@ function resolveModelFromPath(path) {
   const projectIdx = segments.indexOf('project');
   if (projectIdx !== -1 && segments.length > projectIdx + 2) {
     const modelSegment = segments[projectIdx + 2];
-    if (PATH_MODEL_MAP[modelSegment]) {
-      return {
-        modelName: PATH_MODEL_MAP[modelSegment],
-        modelId: segments[projectIdx + 3] || null,
-      };
-    }
-  }
-
-  // Top-level routes: /api/<model>/...
-  if (PATH_MODEL_MAP[segments[0]]) {
     return {
-      modelName: PATH_MODEL_MAP[segments[0]],
-      modelId: segments[1] || null,
+      modelName: modelSegment,
+      modelId: segments[projectIdx + 3] || null,
     };
   }
 
   // /api/project route (create/update project)
   if (segments[0] === 'project') {
     return {
-      modelName: 'Project',
+      modelName: 'project',
+      modelId: segments[1] || null,
+    };
+  }
+
+  // Top-level routes: /api/<model>/...
+  if (segments[0] && segments[0] !== 'api') {
+    return {
+      modelName: segments[0],
       modelId: segments[1] || null,
     };
   }
@@ -73,10 +50,10 @@ module.exports = function auditLogMiddleware(serviceOverride) {
   const service = serviceOverride || auditLogService;
   return function (req, res, next) {
     const method = req.method;
-    const action = METHOD_ACTION_MAP[method];
+    const isWrite = WRITE_METHODS.includes(method);
     const isAdminRead = method === 'GET' && isAdminRole(req.user);
 
-    if (!action && !isAdminRead) return next();
+    if (!isWrite && !isAdminRead) return next();
 
     const resolved = resolveModelFromPath(req.path);
     if (!resolved) return next();
@@ -85,7 +62,7 @@ module.exports = function auditLogMiddleware(serviceOverride) {
     // .all() handler. This must happen before the .put()/.delete() handler
     // mutates the Sequelize instance in place.
     let previousSnapshot = null;
-    if (action === 'update' || action === 'delete') {
+    if (method === 'PUT' || method === 'DELETE') {
       let _results = req.results;
       Object.defineProperty(req, 'results', {
         get() {
@@ -117,7 +94,7 @@ module.exports = function auditLogMiddleware(serviceOverride) {
 
       const statusCode = res.statusCode;
 
-      if (action && statusCode >= 400) {
+      if (isWrite && statusCode >= 400) {
         return originalJson(data);
       }
 
@@ -125,12 +102,12 @@ module.exports = function auditLogMiddleware(serviceOverride) {
       let newData = null;
       let modelId = resolved.modelId;
 
-      if (action === 'create') {
+      if (method === 'POST') {
         if (data && data.id) {
           modelId = data.id;
           newData = data.dataValues || data;
         }
-      } else if (action === 'update') {
+      } else if (method === 'PUT') {
         if (data) {
           const rawNew = data.dataValues || data;
           newData = service.getChangedFields(previousData, rawNew);
@@ -148,11 +125,11 @@ module.exports = function auditLogMiddleware(serviceOverride) {
       // For deletes, previousData is already captured, newData stays null
 
       service.log(req, {
-        action: action || 'read',
+        action: method,
         modelName: resolved.modelName,
         modelId: modelId ? parseInt(modelId) : null,
-        previousData: action === 'read' ? null : previousData,
-        newData: action === 'read' ? null : newData,
+        previousData: method === 'GET' ? null : previousData,
+        newData: method === 'GET' ? null : newData,
         source: 'api',
         statusCode,
       });

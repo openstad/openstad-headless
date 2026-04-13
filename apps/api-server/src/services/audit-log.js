@@ -175,6 +175,19 @@ function emitOtlp(entry) {
   }
 }
 
+function init() {
+  if (process.env.AUDIT_OTLP_ENABLED !== 'true') return;
+
+  const logger = getOtlpLogger();
+  if (logger) {
+    console.log('[audit] OTLP logger initialized successfully');
+  } else {
+    console.error(
+      '[audit] OTLP logger failed to initialize — audit events will only be written to the database'
+    );
+  }
+}
+
 function log(req, options) {
   const entry = buildEntry(req, options);
 
@@ -194,6 +207,7 @@ function logDirect(entry) {
 }
 
 module.exports = {
+  init,
   log,
   logDirect,
   buildEntry,

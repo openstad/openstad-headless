@@ -1,26 +1,21 @@
 const crypto = require('crypto');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const db = require('../../db');
 const pagination = require('../../middleware/pagination');
 const auditLogService = require('../../services/audit-log');
 
 let router = express.Router({ mergeParams: true });
 
-const VALID_ACTIONS = [
-  'create',
-  'read',
-  'update',
-  'delete',
-  'login',
-  'login_failed',
-  'logout',
-  'register',
-  'password_reset',
-  '2fa_configured',
-  '2fa_failed',
-];
-
 const VALID_SOURCES = ['api', 'auth'];
+
+const auditQueryLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many audit log requests, please try again later' },
+});
 
 // Auth check: only admins can query audit logs
 function requireAdmin(req, res, next) {
@@ -78,73 +73,76 @@ function parseDate(value) {
 }
 
 // GET /api/audit-log or /api/project/:projectId/audit-log
-router.get('/', requireAdmin, pagination.init, async function (req, res, next) {
-  try {
-    const where = {};
-    const { modelName, modelId, userId, action, source, fromDate, toDate } =
-      req.query;
+router.get(
+  '/',
+  auditQueryLimiter,
+  requireAdmin,
+  pagination.init,
+  async function (req, res, next) {
+    try {
+      const where = {};
+      const { modelName, modelId, userId, action, source, fromDate, toDate } =
+        req.query;
 
-    if (req.params.projectId) {
-      where.projectId = parseInt(req.params.projectId);
-    }
-    if (modelName) where.modelName = modelName;
-    if (modelId) where.modelId = parseInt(modelId);
-    if (userId) where.userId = parseInt(userId);
-
-    if (action) {
-      if (!VALID_ACTIONS.includes(action)) {
-        return res.status(400).json({ error: 'Invalid action value' });
+      if (req.params.projectId) {
+        where.projectId = parseInt(req.params.projectId);
       }
-      where.action = action;
-    }
+      if (modelName) where.modelName = modelName;
+      if (modelId) where.modelId = parseInt(modelId);
+      if (userId) where.userId = parseInt(userId);
 
-    if (source) {
-      if (!VALID_SOURCES.includes(source)) {
-        return res.status(400).json({ error: 'Invalid source value' });
+      if (action) {
+        where.action = action;
       }
-      where.source = source;
-    }
 
-    if (fromDate || toDate) {
-      const { Op } = require('sequelize');
-      where.createdAt = {};
-
-      if (fromDate) {
-        const from = parseDate(fromDate);
-        if (from === false)
-          return res.status(400).json({ error: 'Invalid fromDate' });
-        where.createdAt[Op.gte] = from;
+      if (source) {
+        if (!VALID_SOURCES.includes(source)) {
+          return res.status(400).json({ error: 'Invalid source value' });
+        }
+        where.source = source;
       }
-      if (toDate) {
-        const to = parseDate(toDate);
-        if (to === false)
-          return res.status(400).json({ error: 'Invalid toDate' });
-        where.createdAt[Op.lte] = to;
+
+      if (fromDate || toDate) {
+        const { Op } = require('sequelize');
+        where.createdAt = {};
+
+        if (fromDate) {
+          const from = parseDate(fromDate);
+          if (from === false)
+            return res.status(400).json({ error: 'Invalid fromDate' });
+          where.createdAt[Op.gte] = from;
+        }
+        if (toDate) {
+          const to = parseDate(toDate);
+          if (to === false)
+            return res.status(400).json({ error: 'Invalid toDate' });
+          where.createdAt[Op.lte] = to;
+        }
       }
+
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = Math.min(parseInt(req.query.pageSize) || 20, 100);
+      const offset = (page - 1) * pageSize;
+
+      const { count, rows } = await db.AuditLog.findAndCountAll({
+        where,
+        order: [['createdAt', 'DESC']],
+        limit: pageSize,
+        offset,
+      });
+
+      res.json({
+        total: count,
+        page,
+        pageSize,
+        totalPages: Math.ceil(count / pageSize),
+        records: rows,
+      });
+    } catch (err) {
+      next(err);
     }
-
-    const page = parseInt(req.query.page) || 1;
-    const pageSize = Math.min(parseInt(req.query.pageSize) || 20, 100);
-    const offset = (page - 1) * pageSize;
-
-    const { count, rows } = await db.AuditLog.findAndCountAll({
-      where,
-      order: [['createdAt', 'DESC']],
-      limit: pageSize,
-      offset,
-    });
-
-    res.json({
-      total: count,
-      page,
-      pageSize,
-      totalPages: Math.ceil(count / pageSize),
-      records: rows,
-    });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // POST /api/audit-log/auth-event — internal endpoint for auth-server
 router.post(

@@ -56,7 +56,7 @@ describe('audit-log middleware', () => {
     expect(next).toHaveBeenCalled();
   });
 
-  it('logs admin GET requests as read', () => {
+  it('logs admin GET requests with method as action', () => {
     const req = createMockReq({ method: 'GET' });
     const res = createMockRes();
     const next = vi.fn();
@@ -69,8 +69,8 @@ describe('audit-log middleware', () => {
     expect(mockService.log).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        action: 'read',
-        modelName: 'Resource',
+        action: 'GET',
+        modelName: 'resource',
       })
     );
   });
@@ -89,7 +89,7 @@ describe('audit-log middleware', () => {
     expect(res.json).toBe(originalJson);
   });
 
-  it('logs POST requests as create', () => {
+  it('logs POST requests with method as action', () => {
     const req = createMockReq({
       method: 'POST',
       path: '/project/1/resource',
@@ -103,13 +103,13 @@ describe('audit-log middleware', () => {
     expect(mockService.log).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        action: 'create',
-        modelName: 'Resource',
+        action: 'POST',
+        modelName: 'resource',
       })
     );
   });
 
-  it('logs PUT requests as update', () => {
+  it('logs PUT requests with method as action', () => {
     const req = createMockReq({
       method: 'PUT',
       results: { dataValues: { id: 42, title: 'Old Title' } },
@@ -123,13 +123,13 @@ describe('audit-log middleware', () => {
     expect(mockService.log).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        action: 'update',
-        modelName: 'Resource',
+        action: 'PUT',
+        modelName: 'resource',
       })
     );
   });
 
-  it('logs DELETE requests as delete', () => {
+  it('logs DELETE requests with method as action', () => {
     const req = createMockReq({
       method: 'DELETE',
       results: { dataValues: { id: 42, title: 'To Delete' } },
@@ -143,8 +143,8 @@ describe('audit-log middleware', () => {
     expect(mockService.log).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        action: 'delete',
-        modelName: 'Resource',
+        action: 'DELETE',
+        modelName: 'resource',
       })
     );
   });
@@ -164,18 +164,23 @@ describe('audit-log middleware', () => {
     expect(mockService.log).not.toHaveBeenCalled();
   });
 
-  it('skips unknown routes', () => {
+  it('logs any path segment as modelName', () => {
     const req = createMockReq({
       method: 'POST',
-      path: '/unknown-route',
+      path: '/project/1/some-new-model',
     });
     const res = createMockRes();
     const next = vi.fn();
-    const originalJson = res.json;
 
     middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
-    expect(res.json).toBe(originalJson);
+    res.json({ id: 1 });
+
+    expect(mockService.log).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        modelName: 'some-new-model',
+      })
+    );
   });
 
   it('resolves model from project sub-routes', () => {
@@ -192,7 +197,7 @@ describe('audit-log middleware', () => {
     expect(mockService.log).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        modelName: 'Comment',
+        modelName: 'comment',
       })
     );
   });
