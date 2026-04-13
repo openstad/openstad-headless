@@ -306,6 +306,7 @@ module.exports = (db, sequelize, DataTypes) => {
                     'new published resource - user feedback',
                     'updated resource - user feedback',
                   ];
+
                   if (
                     process.env.PDF_API_ENDPOINT &&
                     process.env.PDF_API_KEY &&
@@ -368,33 +369,75 @@ module.exports = (db, sequelize, DataTypes) => {
                       }
 
                       // Add form data with sections
-                      widgetItems
-                        .filter((item) => item.fieldType !== 'none')
-                        .forEach((item) => {
-                          if (item.fieldType === 'pagination') {
-                            pdfItems.push({ section: item.title || '' });
-                          } else {
-                            const qa = questionsAndAnswers.find(
-                              (q) =>
-                                q.question === (item.title || item.fieldKey)
-                            );
-                            pdfItems.push(
-                              qa || {
-                                question: item.title || item.fieldKey,
-                                answer: '',
-                              }
-                            );
-                          }
-                        });
+                      widgetItems.forEach((item, index) => {
+                        if (item.type === 'none') {
+                          pdfItems.push({ section: item.title || '' });
+                        } else {
+                          pdfItems.push(
+                            questionsAndAnswers[index] || {
+                              question: item.title || item.fieldKey || '',
+                              answer: '',
+                            }
+                          );
+                        }
+                      });
 
                       const pdfProject = await db.Project.scope(
                         'includeEmailConfig'
                       ).findByPk(instance.projectId);
-                      const logoUrl =
-                        pdfProject?.emailConfig?.styling?.logo ||
-                        pdfProject?.config?.auth?.provider?.openstad?.config
-                          ?.styling?.logo ||
-                        '';
+                      // Try emailConfig logo first, then fetch from auth server
+                      let rawLogoUrl =
+                        pdfProject?.emailConfig?.styling?.logo || '';
+                      if (!rawLogoUrl) {
+                        try {
+                          const authSettings = require('../util/auth-settings');
+                          const providers = await authSettings.providers({
+                            project: pdfProject,
+                          });
+                          for (const provider of providers) {
+                            if (provider === 'default') continue;
+                            const authConfig = await authSettings.config({
+                              project: pdfProject,
+                              useAuth: provider,
+                            });
+                            const adapter = await authSettings.adapter({
+                              authConfig,
+                            });
+                            if (
+                              adapter.service.fetchClient &&
+                              authConfig.clientId
+                            ) {
+                              const client = await adapter.service.fetchClient({
+                                authConfig,
+                                project: pdfProject,
+                              });
+                              if (client?.config?.styling?.logo) {
+                                rawLogoUrl = client.config.styling.logo;
+                                break;
+                              }
+                            }
+                          }
+                        } catch (err) {
+                          console.error(
+                            'Failed to fetch auth logo:',
+                            err.message
+                          );
+                        }
+                      }
+                      let logoUrl = rawLogoUrl;
+                      if (rawLogoUrl) {
+                        try {
+                          const {
+                            fetchImageAsDataUrl,
+                          } = require('../services/pdf-service');
+                          logoUrl = await fetchImageAsDataUrl(rawLogoUrl);
+                        } catch (err) {
+                          console.error(
+                            'Failed to fetch logo for PDF:',
+                            err.message
+                          );
+                        }
+                      }
                       const pdfHtml = buildPdfHtml(pdfItems, {
                         title:
                           pdfProject?.emailConfig?.notifications?.pdfTitle ||

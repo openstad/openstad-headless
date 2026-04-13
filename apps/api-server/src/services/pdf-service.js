@@ -178,4 +178,37 @@ async function generatePdf(htmlString) {
   return Buffer.from(arrayBuffer);
 }
 
-module.exports = { buildPdfHtml, generatePdf };
+async function fetchImageAsDataUrl(url) {
+  if (!url || url.startsWith('data:')) return url;
+  // Replace external image URL with internal Docker URL for container-to-container fetch
+  let fetchUrl = url;
+  if (process.env.IMAGE_APP_URL && process.env.IMAGE_APP_URL_INTERNAL) {
+    fetchUrl = url.replace(
+      process.env.IMAGE_APP_URL,
+      process.env.IMAGE_APP_URL_INTERNAL
+    );
+  }
+  const response = await fetch(fetchUrl, {
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) throw new Error(`Image fetch failed: ${response.status}`);
+  const contentType = response.headers.get('content-type') || 'image/png';
+  if (!contentType.startsWith('image/')) {
+    throw new Error(`Expected image content-type, got: ${contentType}`);
+  }
+  const contentLength = parseInt(
+    response.headers.get('content-length') || '0',
+    10
+  );
+  if (contentLength > 2 * 1024 * 1024) {
+    throw new Error(`Image too large: ${contentLength} bytes`);
+  }
+  const arrayBuffer = await response.arrayBuffer();
+  if (arrayBuffer.byteLength > 2 * 1024 * 1024) {
+    throw new Error(`Image too large: ${arrayBuffer.byteLength} bytes`);
+  }
+  const base64 = Buffer.from(arrayBuffer).toString('base64');
+  return `data:${contentType};base64,${base64}`;
+}
+
+module.exports = { buildPdfHtml, generatePdf, fetchImageAsDataUrl };
