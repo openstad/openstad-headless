@@ -142,6 +142,12 @@ spec:
                 key: cmsSecret
                 name: {{ template "openstad.s3.secret.fullname" . }}
 {{- end }}
+          - name: OTEL_SERVICE_NAME
+            value: {{ .Values.cms.otelServiceName | quote }}
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{ .Values.cms.otelExporterOtlpEndpoint | quote }}
+          - name: OTEL_ENABLED
+            value: {{ (hasKey .Values.cms "otelEnabled") | ternary .Values.cms.otelEnabled (default false $.Values.global.otelEnabled) | quote }}
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
