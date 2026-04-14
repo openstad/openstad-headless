@@ -1,72 +1,209 @@
-## Deployment
+## Deployment (Kubernetes/Helm)
 
-We use the [included](charts/openstad-headless) [Helm](https://helm.sh/) chart to deploy to our own test cluster. The
-deployment is described via the scripts located in the `operations/deployments/openstad-headless` directory. For each
-environment we created a single deploy script. For example to the deploy to acc you would run the
-`./operations/deployments/openstad-headless/deploy-acc.sh` script. This automatically decrypts the secret values
-located in the repository using SOPS.
+OpenStad Headless is deployed to Kubernetes using the included Helm chart and a set of script-first deploy helpers.
+
+- Helm chart: `../charts/openstad-headless/`
+- Deploy scripts: `../operations/deployments/openstad-headless/`
+
+The deploy scripts are the canonical way to deploy/upgrade an environment: they select the correct kubectl context, decrypt secrets, and run `helm upgrade --install` with the right value files.
 
 ### Requirements
 
-- [SOPS](https://github.com/getsops/sops) is installed
-- [Helm](https://helm.sh/) is installed
-- You have access to the `headless.agekey` private key
-- You have access to and configured the context used in the deployment script.
+- [kubectl](https://kubernetes.io/docs/reference/kubectl/)
+- [Helm](https://helm.sh/)
+- [SOPS](https://github.com/getsops/sops)
+- Access to the `headless.agekey` private key (Age)
+- A configured kubectl context (the deploy scripts will switch context; double-check before running)
 
-### Adding secrets
+Required environment variables for SOPS:
 
-> **NOTE**: Export the location of the agekey file in a variable called `SOPS_AGE_KEY_FILE`
+- `SOPS_AGE_KEY_FILE` — path to your Age private key (e.g. `~/keys/headless.agekey`)
 
-Adding new secrets to the Helm deployment can be done by using the utilities scripts [`decrypt.sh`](<(operations/scripts/decrypt.sh)>) and [`encrypt.sh`](operations/scripts/encrypt.sh).
+Optional:
 
-To decrypt all secrets ending with `.enc.yml` you can run the following command:
+- `SOPS_AGE_RECIPIENTS` — if not set, the helper scripts try to derive it from the public key embedded in the private key file
+
+### Environment inputs (what operators edit)
+
+Each environment lives under:
+
+- `../operations/deployments/openstad-headless/environments/<env>/`
+
+Typical structure (example: `acc`):
+
+```
+operations/deployments/openstad-headless/environments/
+    acc/
+        values.yml
+        images.yml
+        secrets/
+            secrets.enc.yml
+            secrets.yml
+```
+
+What each file is:
+
+- `values.yml` — Helm values (plain text configuration)
+- `images.yml` — pinned image tags for each service
+- `secrets/secrets.enc.yml` — encrypted secrets (committed to git)
+- `secrets/secrets.yml` — decrypted secrets (generated locally; DO NOT COMMIT)
+
+Concrete example paths you can use as references:
+
+- `../operations/deployments/openstad-headless/environments/acc/values.yml`
+- `../operations/deployments/openstad-headless/environments/acc/images.yml`
+- `../operations/deployments/openstad-headless/environments/acc/secrets/secrets.enc.yml`
+
+### Required services / dependencies
+
+For production-like deployments you need (at minimum):
+
+- **MySQL** — used by **api-server** and **auth-server**
+  - If you run MySQL outside the chart, keep `dependencies.mysql.enabled: false` and provide credentials via `secrets.database` in your environment values/secrets.
+  - If you use the chart-provided MySQL, set `dependencies.mysql.enabled: true` and ensure secrets match what the chart expects.
+
+- **MongoDB** — used by **cms-server**
+  - If you run MongoDB outside the chart, keep `dependencies.mongodb.enabled: false` and set `secrets.cms.mongodbUri`.
+
+- **Redis** (message streaming) — used by **api-server** and **cms-server** when message streaming is enabled
+  - Configured via `MESSAGESTREAMING_REDIS_URL` (an env var consumed by the apps)
+  - In Helm values, inject this using `api.extraEnvVars` and `cms.extraEnvVars` in your environment’s `values.yml`.
+
+- **S3-compatible object storage (optional)**
+  - If you enable S3-backed storage for CMS and/or images, configure it via the chart secrets (see `secrets.cms.s3.*`) and the image service settings (e.g. `image.useS3`).
+  - If you don’t use S3, the chart can use PVC-backed storage where supported.
+
+### Deploy / upgrade checklist (script-first)
+
+From repo root, run the script for your environment.
+
+ACC example:
 
 ```sh
-$ ./operations/scripts/decrypt.sh
+./operations/deployments/openstad-headless/deploy-acc.sh
 ```
 
-To decrypt a single file you can run the following command:
+Local cluster helper (if applicable):
 
 ```sh
-$ ./operations/scripts/decrypt.sh /path/to/secret.enc.yml
+./operations/deployments/openstad-headless/deploy-local.sh
 ```
 
-This places a decrypted `yml` next to the encrypted file. Make sure to not commit this unecrypted file to git. To avoid
-this issue make sure to store secrets in a file called `secrets.yml`.
+What the scripts do (high level):
 
-To encrypt a yml file you can run the `encrypt.sh` script. This creates a `$filename.enc.yml` file next to the
-unencrypted file. Make sure to decrypt the original file first to avoid overriding values. Call the encrypt script with the file to encrypt.
+1. Switch kubectl context and select namespace
+2. Decrypt `*.enc.yml` secrets files
+3. Run `helm upgrade --install` with:
+   - `-f values.yml`
+   - `-f secrets/secrets.yml` (decrypted)
+   - `-f images.yml`
+4. Restore your previous kubectl context
+
+### Adding / editing secrets (SOPS)
+
+Helper scripts:
+
+- `../operations/scripts/decrypt.sh`
+- `../operations/scripts/encrypt.sh`
+
+Decrypt all secrets ending with `.enc.yml`:
 
 ```sh
-$ ./operations/scripts/encrypt.sh operations/deployments/openstad-headless/environments/acc/secrets/secrets.yml
+./operations/scripts/decrypt.sh
 ```
 
-### Using deployment scripts
-
-Run the deployment script for the specific environment, for example acc:
+Decrypt a single file:
 
 ```sh
-$ ./operations/deployments/openstad-headless/deploy-acc.sh
+./operations/scripts/decrypt.sh operations/deployments/openstad-headless/environments/acc/secrets/secrets.enc.yml
 ```
 
-### Customizing deployments
+Encrypt after editing:
 
-Every deployment has their own `yml` files with their own config. This can be customized per environment. In the root of
-every deployment an environments folder is created with the following structure:
-
-```
-└── environments
-    └── acc                     # Environment name
-        ├── images.yml          # Target images to deploy
-        ├── secrets
-        │   ├── secrets.enc.yml # Encrypted yml containing secret values for deployment
-        │   └── secrets.yml     # Unencrypted yml containing secrets. Not in git
-        └── values.yml          # Custom values for Helm deployment (plain text)
+```sh
+./operations/scripts/encrypt.sh operations/deployments/openstad-headless/environments/acc/secrets/secrets.yml
 ```
 
-These files get called in custom deployment scripts like `deploy-acc.sh`. These scripts configure the correct kubernetes
-context, configure deployment namespace, decrypts files, combines multiple value files and runs the helm command to
-install or upgrade release.
+Important:
 
-If you want to create a new environment you can copy the deployment script (`deploy-acc.sh`) and change the configuration
-in the script itself. This allows other users to also deploy to that environment by simply running the script.
+- Commit only `*.enc.yml` files.
+- Never commit decrypted `secrets.yml`.
+
+### Version pinning / defining an upgrade
+
+A repeatable deployment/upgrade is defined by:
+
+1. **Helm chart version** — pinned in the deploy script (e.g. `CHART_VERSION` in `../operations/deployments/openstad-headless/deploy-acc.sh`).
+
+2. **Image tags** — pinned in your environment:
+
+- `../operations/deployments/openstad-headless/environments/<env>/images.yml`
+
+Recommendation: avoid `:latest` in production-like environments. Pin explicit tags.
+
+### Post-upgrade validation
+
+After a deploy/upgrade, validate in this order:
+
+1. **Helm + Kubernetes sanity**
+
+- `helm status <release> -n <namespace>`
+- `helm history <release> -n <namespace>`
+- `kubectl get pods -n <namespace>` (all pods Ready)
+- `kubectl get events -n <namespace> --sort-by=.lastTimestamp` (spot obvious failures)
+
+2. **InitContainers / migrations completed**
+
+API/Auth run DB init/migrations using initContainers. If a service is not Ready, inspect initContainer logs.
+
+Source-of-truth chart templates:
+
+- `../charts/openstad-headless/templates/api/deployment.yaml`
+- `../charts/openstad-headless/templates/auth/deployment.yaml`
+
+3. **HTTP health checks**
+
+All services expose `/health`.
+
+Examples (replace `<base>` with your environment base domain):
+
+- API: `https://api.<base>/health`
+- API DB: `https://api.<base>/db-health`
+- Auth: `https://auth.<base>/health`
+- Admin: `https://admin.<base>/health`
+- Image: `https://img.<base>/health`
+- CMS: `https://cms.<base>/health`
+
+4. **Functional smoke tests (core entry points)**
+
+Mirror the “core 5 URLs” idea from `doc/getting-started.md`, but using your Kubernetes hostnames:
+
+- API returns JSON (e.g. `/api/project/1/resource`)
+- Auth login page renders
+- Image renders in browser
+- Admin UI loads
+- CMS UI loads
+
+### Where to look when it breaks (production-like)
+
+- `helm status` / `helm history`
+- Rollback if needed: `helm rollback <release> <revision> -n <namespace>`
+- `kubectl describe pod <pod> -n <namespace>`
+- `kubectl logs <pod> -n <namespace>` (or `-c <container>` / init container)
+- `kubectl get events -n <namespace> --sort-by=.lastTimestamp`
+
+InitContainer issues (DB init/migrations) are a common upgrade failure mode. If API/Auth won’t become Ready, start by inspecting initContainer logs and reviewing the chart templates:
+
+- `../charts/openstad-headless/templates/api/deployment.yaml`
+- `../charts/openstad-headless/templates/auth/deployment.yaml`
+
+Certificates / pre-install job:
+
+- The chart includes a pre-install job: `../charts/openstad-headless/templates/pre-install-job.yml`
+- See also: `doc/external-certificates-operator-guide.md`
+
+### Breaking changes & migrations: where to look
+
+- `../CHANGELOG.md`
+- `../apps/api-server/migrations/`
+- `../apps/auth-server/migrations/`

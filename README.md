@@ -8,6 +8,7 @@ Currently the following elements have been documented:
 
 **All**
 
+- [Documentation index](doc/README.md)
 - [Getting started (dockerized)](doc/getting-started.md)
 - [Setup](doc/setup.md)
 - [About databases](doc/databases.md)

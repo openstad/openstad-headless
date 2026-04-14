@@ -51,6 +51,8 @@ GRANT ALL ON `openstad-oauth-server`.* TO `USERNAME`@`%`;
 
 Create the `.env` file that contains the basic configuration. You will find a `.env.example` file in the root of the repo. Copy it and rename it to `.env` in the same folder.
 
+Configuration reference: [Configuration reference](./configuration.md)
+
 Make sure the MySQL credentials are correct, using the username and password from the previous step.
 
 Change value for `AUTH_FIRST_LOGIN_CODE`; you will use this code to login.
@@ -82,6 +84,8 @@ will start the servers.
 #### What to expect
 
 Three node servers should now be running.
+
+Troubleshooting: [Troubleshooting](./troubleshooting.md)
 
 In any setup you should be able to login with the `AUTH_FIRST_LOGIN_CODE` from the `.env` file. In a development environment additional users are available: `123` logs in an administrator, `456` a moderator and `789` an normal user.
 

@@ -10,6 +10,8 @@ secrets.yml
 secrets.yaml
 /.idea
 
+.planning/
+
 *.agekey
 
 docker-compose.override.yml
