@@ -601,6 +601,7 @@ function DocumentMap({
     id: string;
     index: number;
     color: string;
+    label?: string;
   }
 
   const [overridePage, setoverridePage] = useState<number | undefined>(
@@ -684,10 +685,18 @@ function DocumentMap({
     id,
     index,
     color,
+    label,
     ...props
   }) => {
     const markerRef = useRef<any>(null);
     const isDefaultColor = color === '#555588';
+
+    useEffect(() => {
+      const el = markerRef.current?.getElement?.();
+      if (el && label) {
+        el.setAttribute('aria-label', label);
+      }
+    }, [label]);
 
     return (
       <Marker
@@ -1037,6 +1046,11 @@ function DocumentMap({
                       index={comment?.id}
                       position={comment.location}
                       color={documentMapIconColor}
+                      label={
+                        comment?.description
+                          ? `Reactie: ${comment.description.substring(0, 80)}`
+                          : `Reactie ${comment?.id}`
+                      }
                     />
                   );
                 })}

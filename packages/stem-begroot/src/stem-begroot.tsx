@@ -844,6 +844,31 @@ function StemBegroot({
     }
   };
 
+  const isInitialStepRef = useRef(true);
+  useEffect(() => {
+    if (isInitialStepRef.current) {
+      isInitialStepRef.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (step1ContainerRef.current) {
+        const heading = step1ContainerRef.current.querySelector(
+          'h1, h2, h3, h4, h5, h6, [role="heading"]'
+        );
+        if (heading) {
+          (heading as HTMLElement).setAttribute('tabindex', '-1');
+          (heading as HTMLElement).focus();
+        } else {
+          step1ContainerRef.current.setAttribute('tabindex', '-1');
+          step1ContainerRef.current.focus();
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
   useEffect(() => {
     if (filteredResources) {
       const filtered: any = filteredResources || [];

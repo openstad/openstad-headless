@@ -241,6 +241,7 @@ export const StemBegrootResourceDetailDialog = ({
       open={openDetailDialog}
       onOpenChange={setOpenDetailDialog}
       className="begrootmodule-dialog"
+      aria-label="Details van inzending"
       children={
         <Carousel
           startIndex={resourceDetailIndex}

@@ -1,5 +1,5 @@
 import '@utrecht/component-library-css';
-import { Heading4, LinkSocial } from '@utrecht/component-library-react';
+import { Heading, LinkSocial } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -8,6 +8,7 @@ import './share-links.css';
 
 interface Item {
   title: string;
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
   selectedSocialShareOptions?: Array<
     'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink'
   >;
@@ -15,6 +16,7 @@ interface Item {
 
 function ShareLinks({
   title,
+  headingLevel = 3,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -26,7 +28,9 @@ function ShareLinks({
 }: Item) {
   return (
     <div className="share-links">
-      <Heading4>{title}</Heading4>
+      <Heading level={headingLevel} appearance="utrecht-heading-4">
+        {title}
+      </Heading>
       <div className="link-container">
         {selectedSocialShareOptions.length ? (
           selectedSocialShareOptions.map((option) => {

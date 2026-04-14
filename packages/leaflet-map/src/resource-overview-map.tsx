@@ -155,6 +155,7 @@ const ResourceOverviewMap = ({
           : '';
 
       // Set the resource name
+      marker.title = resource.title ?? 'Locatie pin';
       marker.icon = {
         title: resource.title ?? 'Locatie pin',
       };

@@ -1345,6 +1345,7 @@ function ResourceOverviewInner({
       <Dialog
         open={open}
         onOpenChange={setOpen}
+        aria-label="Details van inzending"
         children={
           <Carousel
             startIndex={resourceDetailIndex}

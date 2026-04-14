@@ -346,7 +346,11 @@ function ResourceDetail({
     );
 
     return clickableImage ? (
-      <a href={src} target="_blank" rel="noreferrer">
+      <a
+        href={src}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Bekijk afbeelding${imageDescription ? `: ${imageDescription}` : ''} (opent in nieuw tabblad)`}>
         {imageElement}
       </a>
     ) : (

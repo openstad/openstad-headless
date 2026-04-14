@@ -118,6 +118,7 @@
                     topLink.targetBlank
                     %}
                     target="_blank"
+                    rel="noopener noreferrer"
                     {%
                     endif
                     %}
@@ -130,7 +131,10 @@
                     {%
                     endif
                     %}>
-                    {{topLink.label}}
+                    {{topLink.label}}{% if topLink.targetBlank %}<span
+                      class="sr-only">
+                      (opent in nieuw tabblad)</span
+                    >{% endif %}
                   </a>
                 </li>
                 {% endif%} {% endfor %}

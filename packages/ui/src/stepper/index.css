@@ -4,11 +4,22 @@
   align-items: center;
 }
 
-.step-container {
+.stepper-list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  gap: 0;
+}
+
+.stepper-list > .step-container {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .step-container > .step-icon {
@@ -28,6 +39,16 @@
   border-radius: var(--nlds-stepper-icon-border-radius, 50%);
 }
 
+/* Divider lines between steps using a separator li */
+.stepper-list > .step-divider {
+  height: var(--nlds-stepper-divider-height, 1px);
+  flex: 1;
+  margin-left: var(--nlds-stepper-divider-margin-left, 1rem);
+  margin-right: var(--nlds-stepper-divider-margin-right, 1rem);
+  background-color: var(--nlds-stepper-divider-color, #a9b2ba);
+}
+
+/* Legacy support for non-list dividers */
 .stepper > .step-divider {
   height: var(--nlds-stepper-divider-height, 1px);
   width: 100%;

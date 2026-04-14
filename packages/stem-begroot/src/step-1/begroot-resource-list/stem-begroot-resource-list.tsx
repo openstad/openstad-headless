@@ -373,6 +373,7 @@ export const StemBegrootResourceList = ({
                   <Button
                     appearance="secondary-action-button"
                     className="osc-stem-begroot-item-action-btn"
+                    aria-label={`Lees meer over ${resource.title}`}
                     onClick={(e) => {
                       onResourcePlainClicked(resource, index);
                       e.currentTarget.classList.add('active-resource');
@@ -383,6 +384,7 @@ export const StemBegrootResourceList = ({
                 <Button
                   disabled={primaryBtnDisabled}
                   className="osc-stem-begroot-item-action-btn"
+                  aria-label={`${primaryBtnText}: ${resource.title}`}
                   onClick={() => {
                     onResourcePrimaryClicked(resource);
                   }}

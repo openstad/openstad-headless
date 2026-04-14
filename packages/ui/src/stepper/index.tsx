@@ -12,49 +12,50 @@ type Props = {
   isSimpleView?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 const Stepper = (props: Props) => {
-  const { steps, currentStep = 0, isSimpleView = false } = props;
+  const { steps, currentStep = 0, isSimpleView = false, ...rest } = props;
+
+  const renderStep = (step: string, index: number, displayNumber: number) => (
+    <li
+      key={index}
+      className="step-container"
+      aria-current={currentStep === index ? 'step' : undefined}>
+      <div
+        className={`step-icon ${currentStep === index ? 'active' : ''} ${
+          currentStep > index ? 'done' : ''
+        }`}>
+        <Paragraph>{displayNumber}</Paragraph>
+      </div>
+      <Paragraph> {step}</Paragraph>
+    </li>
+  );
 
   return (
-    <div
-      {...props}
+    <nav
+      {...rest}
       className={`stepper ${props.className ?? ''}`}
-      aria-hidden="true">
-      {steps.map((step, index) => {
-        return (
-          <React.Fragment key={index}>
-            {isSimpleView === true && index !== 1 && (
-              <>
-                <div className="step-container">
-                  <div
-                    className={`step-icon ${currentStep === index ? 'active' : ''} ${
-                      currentStep > index ? 'done' : ''
-                    }`}>
-                    <Paragraph>{index >= 1 ? index : 1}</Paragraph>
-                  </div>
-                  <Paragraph> {step}</Paragraph>
-                </div>
-                <div className="step-divider"></div>
-              </>
-            )}
-
-            {isSimpleView === false && (
-              <>
-                <div className="step-container">
-                  <div
-                    className={`step-icon ${currentStep === index ? 'active' : ''} ${
-                      currentStep > index ? 'done' : ''
-                    }`}>
-                    <Paragraph>{index + 1}</Paragraph>
-                  </div>
-                  <Paragraph> {step}</Paragraph>
-                </div>
-                <div className="step-divider"></div>
-              </>
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
+      aria-label="Stappen">
+      <ol className="stepper-list">
+        {steps.map((step, index) => {
+          if (isSimpleView === true && index === 1) return null;
+          const displayNumber = isSimpleView && index >= 1 ? index : index + 1;
+          const isLast =
+            index === steps.length - 1 ||
+            (isSimpleView && index === steps.length - 1);
+          return (
+            <React.Fragment key={index}>
+              {renderStep(step, index, displayNumber)}
+              {!isLast && (
+                <li
+                  className="step-divider"
+                  role="presentation"
+                  aria-hidden="true"
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </ol>
+    </nav>
   );
 };
 
