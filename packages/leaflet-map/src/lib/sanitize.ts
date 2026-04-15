@@ -4,7 +4,10 @@ export function isSafeUrl(url: string): boolean {
     const parsed = new URL(url, window.location.origin);
     return ['http:', 'https:', 'mailto:'].includes(parsed.protocol);
   } catch {
-    return !url.toLowerCase().trimStart().startsWith('javascript:');
+    const normalizedUrl = url.toLowerCase().trimStart();
+    return !['javascript:', 'data:', 'vbscript:'].some((scheme) =>
+      normalizedUrl.startsWith(scheme)
+    );
   }
 }
 
