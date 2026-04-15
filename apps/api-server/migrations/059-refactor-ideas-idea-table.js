@@ -1,9 +1,9 @@
 let db = require('../src/db').sequelize;
 
 module.exports = {
-  up: async function () {
+  up: function () {
     try {
-      return await db.query(`
+      return db.query(`
         RENAME TABLE ideas TO resources;
 `);
     } catch (e) {
