@@ -1,12 +1,20 @@
 /** @type {import('next').NextConfig} */
+
+const adminRemotePattern = (() => {
+  const url = new URL(process.env.ADMIN_URL || 'http://localhost');
+  const pattern = {
+    protocol: url.protocol.replace(':', ''),
+    hostname: url.hostname,
+  };
+  if (url.port) pattern.port = url.port;
+  return pattern;
+})();
+
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@openstad-headless/*'],
   images: {
-    remotePatterns: [
-      { protocol: 'http', hostname: 'localhost' },
-      { protocol: 'http', hostname: 'localhost', port: '31470' },
-    ],
+    remotePatterns: [adminRemotePattern],
   },
   async rewrites() {
     return [

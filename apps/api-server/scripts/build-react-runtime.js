@@ -2,6 +2,13 @@ const esbuild = require('esbuild');
 const path = require('path');
 const fs = require('fs');
 
+const outfile = path.resolve(__dirname, '../dist/openstad-react-runtime.js');
+
+if (fs.existsSync(outfile)) {
+  console.log('React runtime already built, skipping');
+  process.exit(0);
+}
+
 const distDir = path.resolve(__dirname, '../dist');
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
@@ -22,7 +29,7 @@ esbuild
     },
     bundle: true,
     format: 'iife',
-    outfile: path.resolve(__dirname, '../dist/openstad-react-runtime.js'),
+    outfile,
     minify: true,
     define: { 'process.env.NODE_ENV': '"production"' },
   })
