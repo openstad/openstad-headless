@@ -23,7 +23,7 @@ async function fetchSessionUser() {
       jwt: result.jwt,
     };
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return {};
   }
 }
