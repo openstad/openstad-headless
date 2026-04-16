@@ -1,13 +1,13 @@
 export function isSafeUrl(url: string): boolean {
-  if (!url) return false;
+  const value = url.trim();
+  if (!value) return false;
+  if (/[\x00-\x1f\x7f]/.test(value)) return false;
+
   try {
-    const parsed = new URL(url, window.location.origin);
+    const parsed = new URL(value, window.location.origin);
     return ['http:', 'https:', 'mailto:'].includes(parsed.protocol);
   } catch {
-    const normalizedUrl = url.toLowerCase().trimStart();
-    return !['javascript:', 'data:', 'vbscript:'].some((scheme) =>
-      normalizedUrl.startsWith(scheme)
-    );
+    return false;
   }
 }
 

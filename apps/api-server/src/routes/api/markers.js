@@ -13,9 +13,7 @@ const MAX_MARKERS_JSON_SIZE = 1024 * 512; // 512KB
 function validateMarkers(markers) {
   if (!Array.isArray(markers)) return false;
   if (JSON.stringify(markers).length > MAX_MARKERS_JSON_SIZE) return false;
-  return markers.every(
-    (m) => typeof m.lat === 'number' && typeof m.lng === 'number'
-  );
+  return markers.every((m) => Number.isFinite(m.lat) && Number.isFinite(m.lng));
 }
 
 // scopes: for all get requests
