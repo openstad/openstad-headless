@@ -24,6 +24,16 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function escapeAttr(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function sanitizeAnswer(str) {
   if (typeof str !== 'string') return '';
   // Preserve <a> tags but strip all other HTML
@@ -211,4 +221,11 @@ async function fetchImageAsDataUrl(url) {
   return `data:${contentType};base64,${base64}`;
 }
 
-module.exports = { buildPdfHtml, generatePdf, fetchImageAsDataUrl };
+module.exports = {
+  buildPdfHtml,
+  generatePdf,
+  fetchImageAsDataUrl,
+  escapeHtml,
+  escapeAttr,
+  stripHtml,
+};

@@ -1,4 +1,12 @@
 const merge = require('merge');
+const {
+  processResourceQA,
+  processSubmissionQA,
+} = require('../services/qa-processor');
+const {
+  buildPdfAttachment,
+  shouldGeneratePdf,
+} = require('../services/pdf-attachment');
 
 function deriveNotificationTemplateData(instance) {
   const normalizeBaseUrl = (url) => {
@@ -150,8 +158,8 @@ module.exports = (db, sequelize, DataTypes) => {
           try {
             await instance.update({ status: 'pending' });
 
-            // send immediatly or wait for cron
-            let immediateTypes = [
+            // send immediately or wait for cron
+            const immediateTypes = [
               'new concept resource - user feedback',
               'new published resource - user feedback',
               'updated resource - user feedback',
@@ -174,7 +182,7 @@ module.exports = (db, sequelize, DataTypes) => {
               const derivedTemplateData =
                 deriveNotificationTemplateData(instance);
 
-              let messageData = {
+              const messageData = {
                 projectId: instance.projectId,
                 engine: instance.engine,
                 type: instance.type,
@@ -186,389 +194,45 @@ module.exports = (db, sequelize, DataTypes) => {
               };
 
               let htmlContent = '';
+              // _pdfAttachment is a non-persisted in-memory property.
+              // This works because immediateTypes are sent synchronously
+              // after .create() — never re-fetched from DB. If the send
+              // flow is ever refactored to re-fetch, this property will be lost.
               let pdfAttachment = null;
-
-              if (instance.data.resourceId) {
-                const resource = await db.Resource.findByPk(
-                  instance.data.resourceId,
-                  {
-                    include: [{ model: db.Tag, attributes: ['name', 'type'] }],
-                  }
-                );
-
-                const widget = !!resource
-                  ? await db.Widget.findByPk(resource.widgetId)
-                  : instance.widgetId || null;
-
-                if (
-                  widget &&
-                  widget.dataValues.config &&
-                  widget.dataValues.config.items
-                ) {
-                  const widgetItems = widget.dataValues.config.items;
-
-                  const questionsAndAnswers = widgetItems.map((item) => {
-                    const question = item.title || item.fieldKey;
-                    const fieldKey = item.fieldKey;
-                    let answer =
-                      resource[fieldKey] ||
-                      resource.extraData?.[fieldKey] ||
-                      '';
-
-                    if (fieldKey.includes('[') && fieldKey.includes(']')) {
-                      const [mainKey, subKey] = fieldKey
-                        .split(/[\[\]]/)
-                        .filter(Boolean);
-                      if (mainKey === 'tags') {
-                        const tags = resource.tags.filter(
-                          (tag) => tag.type === subKey
-                        );
-                        answer = tags.map((tag) => tag.name).join(', ');
-                      }
-                    } else {
-                      if (
-                        typeof answer === 'string' &&
-                        answer.startsWith('[') &&
-                        answer.endsWith(']')
-                      ) {
-                        try {
-                          const parsedAnswer = JSON.parse(answer);
-                          if (Array.isArray(parsedAnswer)) {
-                            answer = parsedAnswer.length
-                              ? parsedAnswer.join(', ')
-                              : '';
-                          }
-                        } catch (e) {
-                          // If parsing fails, keep the original answer
-                        }
-                      } else if (Array.isArray(answer)) {
-                        // Check if the elements are objects with a 'url' field
-                        if (
-                          answer.every(
-                            (item) =>
-                              typeof item === 'object' &&
-                              item !== null &&
-                              'url' in item
-                          )
-                        ) {
-                          // Determine if the field is for images or documents based on the fieldKey
-                          answer = answer
-                            .map((item, index) => {
-                              const name =
-                                item.name ||
-                                (fieldKey === 'images'
-                                  ? `Afbeelding ${index + 1}`
-                                  : `Document ${index + 1}`);
-                              return `<a href="${item.url}" target="_blank">${name}</a>`;
-                            })
-                            .join(', ');
-                        } else {
-                          answer = answer.join(', ');
-                        }
-                      } else if (
-                        typeof answer === 'object' &&
-                        answer !== null
-                      ) {
-                        answer = Object.entries(answer)
-                          .map(([key, value]) => `${key}: ${value}`)
-                          .join(', ');
-                      }
-                    }
-
-                    return { question, answer };
-                  });
-
-                  htmlContent = `
-                  <mj-table cellpadding="5" border="1px solid black" width="100%">
-                    <tbody>
-                      ${questionsAndAnswers
-                        .map(
-                          (qa) => `
-                        <tr style="background-color: #f0f0f0;">
-                          <td style="padding: 10px; font-weight: bold; color: #000; font-size: 13px;font-family: Roboto;">${qa.question}</td>
-                        </tr>
-                        <tr style="background-color: #ffffff;">
-                          <td style="padding: 10px; color: #000; font-size: 13px;font-family: Roboto;">
-                            ${qa.answer}
-                            <br/>
-                          </td>
-                        </tr>
-                      `
-                        )
-                        .join('')}
-                    </tbody>
-                  </mj-table>
-                `;
-
-                  // Generate PDF attachment for user notifications only
-                  const userNotificationTypes = [
-                    'new concept resource - user feedback',
-                    'new published resource - user feedback',
-                    'updated resource - user feedback',
-                  ];
-
-                  if (
-                    process.env.PDF_API_ENDPOINT &&
-                    process.env.PDF_API_KEY &&
-                    questionsAndAnswers.length > 0 &&
-                    userNotificationTypes.includes(instance.type)
-                  ) {
-                    try {
-                      const {
-                        buildPdfHtml,
-                        generatePdf,
-                      } = require('../services/pdf-service');
-
-                      // Build user data section
-                      const userDetails = [];
-                      if (instance.data?.userId) {
-                        const pdfUser = await db.User.findByPk(
-                          instance.data.userId
-                        );
-                        if (pdfUser) {
-                          const fullName =
-                            [pdfUser.firstname, pdfUser.lastname]
-                              .filter(Boolean)
-                              .join(' ') || pdfUser.name;
-                          if (fullName)
-                            userDetails.push({
-                              question: 'Voor- en achternaam',
-                              answer: fullName,
-                            });
-                          if (pdfUser.phoneNumber)
-                            userDetails.push({
-                              question: 'Telefoonnummer',
-                              answer: pdfUser.phoneNumber,
-                            });
-                          if (pdfUser.email)
-                            userDetails.push({
-                              question: 'Email',
-                              answer: pdfUser.email,
-                            });
-                          const addressParts = [
-                            pdfUser.address,
-                            pdfUser.postcode,
-                            pdfUser.city,
-                          ]
-                            .filter(Boolean)
-                            .join(' ');
-                          if (addressParts)
-                            userDetails.push({
-                              question: 'Adres',
-                              answer: addressParts,
-                            });
-                        }
-                      }
-
-                      const pdfItems = [];
-
-                      // Add user data section if available
-                      if (userDetails.length > 0) {
-                        pdfItems.push({ section: 'Je gegevens' });
-                        pdfItems.push(...userDetails);
-                      }
-
-                      // Add form data with sections
-                      widgetItems.forEach((item, index) => {
-                        if (item.type === 'none') {
-                          pdfItems.push({ section: item.title || '' });
-                        } else {
-                          pdfItems.push(
-                            questionsAndAnswers[index] || {
-                              question: item.title || item.fieldKey || '',
-                              answer: '',
-                            }
-                          );
-                        }
-                      });
-
-                      const pdfProject = await db.Project.scope(
-                        'includeEmailConfig'
-                      ).findByPk(instance.projectId);
-                      // Try emailConfig logo first, then fetch from auth server
-                      let rawLogoUrl =
-                        pdfProject?.emailConfig?.styling?.logo || '';
-                      if (!rawLogoUrl) {
-                        try {
-                          const authSettings = require('../util/auth-settings');
-                          const providers = await authSettings.providers({
-                            project: pdfProject,
-                          });
-                          for (const provider of providers) {
-                            if (provider === 'default') continue;
-                            const authConfig = await authSettings.config({
-                              project: pdfProject,
-                              useAuth: provider,
-                            });
-                            const adapter = await authSettings.adapter({
-                              authConfig,
-                            });
-                            if (
-                              adapter.service.fetchClient &&
-                              authConfig.clientId
-                            ) {
-                              const client = await adapter.service.fetchClient({
-                                authConfig,
-                                project: pdfProject,
-                              });
-                              if (client?.config?.styling?.logo) {
-                                rawLogoUrl = client.config.styling.logo;
-                                break;
-                              }
-                            }
-                          }
-                        } catch (err) {
-                          console.error(
-                            'Failed to fetch auth logo:',
-                            err.message
-                          );
-                        }
-                      }
-                      let logoUrl = rawLogoUrl;
-                      if (rawLogoUrl) {
-                        try {
-                          const {
-                            fetchImageAsDataUrl,
-                          } = require('../services/pdf-service');
-                          logoUrl = await fetchImageAsDataUrl(rawLogoUrl);
-                        } catch (err) {
-                          console.error(
-                            'Failed to fetch logo for PDF:',
-                            err.message
-                          );
-                        }
-                      }
-                      const pdfHtml = buildPdfHtml(pdfItems, {
-                        title:
-                          pdfProject?.emailConfig?.notifications?.pdfTitle ||
-                          'Nieuwe inzending',
-                        description:
-                          pdfProject?.emailConfig?.notifications
-                            ?.pdfDescription || '',
-                        logoUrl,
-                      });
-                      const pdfBuffer = await generatePdf(pdfHtml);
-                      pdfAttachment = {
-                        filename: `inzending-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.pdf`,
-                        content: pdfBuffer,
-                        contentType: 'application/pdf',
-                      };
-                    } catch (err) {
-                      console.error(
-                        'PDF generation failed, sending email without attachment:',
-                        err
-                      );
-                    }
-                  }
-                }
-              }
-
               let htmlContentEnquete = '';
 
-              if (instance.data.submissionId) {
-                const submission = await db.Submission.findByPk(
-                  instance.data.submissionId
-                );
+              // Process resource Q&A
+              if (instance.data.resourceId) {
+                const resourceResult = await processResourceQA(instance, db);
+                htmlContent = resourceResult.htmlContent;
 
-                const widget = !!instance.data.widgetId
-                  ? await db.Widget.findByPk(instance.data.widgetId)
-                  : null;
-
-                if (
-                  widget &&
-                  widget.dataValues.config &&
-                  widget.dataValues.config.items &&
-                  submission &&
-                  submission.dataValues &&
-                  submission.dataValues.submittedData
-                ) {
-                  const widgetItems = widget.dataValues.config.items;
-                  const submittedData = submission.dataValues.submittedData;
-
-                  const questionsAndAnswers = widgetItems.map((item) => {
-                    const question = item.title || item.fieldKey;
-                    const fieldKey = item.fieldKey;
-                    let answer = submittedData[fieldKey] || '';
-
-                    if (
-                      typeof answer === 'string' &&
-                      answer.startsWith('[') &&
-                      answer.endsWith(']')
-                    ) {
-                      try {
-                        const parsedAnswer = JSON.parse(answer);
-                        if (Array.isArray(parsedAnswer)) {
-                          answer = parsedAnswer.length
-                            ? parsedAnswer.join(', ')
-                            : '';
-                        }
-                      } catch (e) {
-                        // If parsing fails, keep the original answer
-                      }
-                    } else if (Array.isArray(answer)) {
-                      // Check if the elements are objects with a 'url' field
-                      if (
-                        answer.every(
-                          (item) =>
-                            typeof item === 'object' &&
-                            item !== null &&
-                            'url' in item
-                        )
-                      ) {
-                        // Determine if the field is for images or documents based on the fieldKey
-                        answer = answer
-                          .map((item, index) => {
-                            const name =
-                              item.name ||
-                              (fieldKey === 'images'
-                                ? `Afbeelding ${index + 1}`
-                                : `Document ${index + 1}`);
-                            return `<a href="${item.url}" target="_blank">${name}</a>`;
-                          })
-                          .join(', ');
-                      } else {
-                        answer = answer.join(', ');
-                      }
-                    } else if (typeof answer === 'object' && answer !== null) {
-                      answer = Object.entries(answer)
-                        .map(([key, value]) => `${key}: ${value}`)
-                        .join(', ');
-                    }
-
-                    return { question, answer };
-                  });
-
-                  htmlContentEnquete = `
-                  <mj-table cellpadding="5" border="1px solid black" width="100%">
-                    <tbody>
-                      ${questionsAndAnswers
-                        .map(
-                          (qa) => `
-                        <tr style="background-color: #f0f0f0;">
-                          <td style="padding: 10px; font-weight: bold; color: #000; font-size: 13px;font-family: Roboto;">${qa.question}</td>
-                        </tr>
-                        <tr style="background-color: #ffffff;">
-                          <td style="padding: 10px; color: #000; font-size: 13px;font-family: Roboto;">
-                            ${qa.answer}
-                            <br/>
-                          </td>
-                        </tr>
-                      `
-                        )
-                        .join('')}
-                    </tbody>
-                  </mj-table>
-                `;
+                if (shouldGeneratePdf(instance.type)) {
+                  pdfAttachment = await buildPdfAttachment(
+                    instance,
+                    resourceResult.questionsAndAnswers,
+                    resourceResult.widgetItems,
+                    db
+                  );
                 }
               }
 
-              let recipients =
+              // Process submission Q&A
+              if (instance.data.submissionId) {
+                const submissionResult = await processSubmissionQA(
+                  instance,
+                  db
+                );
+                htmlContentEnquete = submissionResult.htmlContent;
+              }
+
+              // Create and send messages to all recipients
+              const recipients =
                 instance.to &&
                 instance.to.split(',').map((email) => email.trim());
               if (recipients && recipients.length) {
                 await Promise.all(
                   recipients.map(async (recipient) => {
-                    let message = await db.NotificationMessage.create(
+                    const message = await db.NotificationMessage.create(
                       { ...messageData, to: recipient },
                       {
                         data: {
@@ -582,6 +246,12 @@ module.exports = (db, sequelize, DataTypes) => {
                     await message.send();
                   })
                 );
+              }
+
+              // Allow GC to reclaim PDF buffer immediately
+              if (pdfAttachment) {
+                pdfAttachment.content = null;
+                pdfAttachment = null;
               }
 
               await instance.update({ status: 'sent' });
