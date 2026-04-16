@@ -19,7 +19,8 @@ export default function useMarker(projectId?: string, markersId?: string) {
     });
 
     if (!res.ok) {
-      throw new Error('Could not update markers');
+      const errorText = await res.text();
+      throw new Error(`Could not update markers: ${errorText}`);
     }
 
     const data = await res.json();
