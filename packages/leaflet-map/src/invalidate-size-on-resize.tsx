@@ -12,6 +12,7 @@ export function InvalidateSizeOnResize() {
       if (container.clientHeight && container.clientWidth) {
         try {
           map.invalidateSize();
+          map.fire('viewreset');
         } catch (e) {
           console.warn('invalidateSize failed:', e);
         }

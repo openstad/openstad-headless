@@ -606,24 +606,26 @@ function ResourceDetail({
                     </div>
                   ))}
               </div>
-              {displayLocation && resource.location && (
-                <>
-                  <Heading level={2} appearance="utrecht-heading-2">
-                    Plaats
-                  </Heading>
-                  <ResourceDetailMap
-                    resourceId={resource.id || resourceId || '0'}
-                    resourceIdRelativePath={
-                      props.resourceIdRelativePath || 'openstadResourceId'
-                    }
-                    {...resourceOverviewMapWidget}
-                    {...props}
-                    dataLayerSettings={dataLayerSettings}
-                    center={resource.location}
-                    area={props.resourceDetailMap?.area}
-                  />
-                </>
-              )}
+              {displayLocation &&
+                resource.location?.lat &&
+                resource.location?.lng && (
+                  <>
+                    <Heading level={2} appearance="utrecht-heading-2">
+                      Plaats
+                    </Heading>
+                    <ResourceDetailMap
+                      resourceId={resource.id || resourceId || '0'}
+                      resourceIdRelativePath={
+                        props.resourceIdRelativePath || 'openstadResourceId'
+                      }
+                      {...resourceOverviewMapWidget}
+                      {...props}
+                      dataLayerSettings={dataLayerSettings}
+                      center={resource.location}
+                      area={props.resourceDetailMap?.area}
+                    />
+                  </>
+                )}
             </article>
           ) : (
             <span>resource niet gevonden..</span>

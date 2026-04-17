@@ -149,8 +149,7 @@ export function AutoZoom({
     const allRings = collectAreaRings(polygons);
 
     if (allRings.length === 0) {
-      map.panTo(new LatLng(definedCenter.lat, definedCenter.lng));
-      return true;
+      return false;
     }
 
     if (
