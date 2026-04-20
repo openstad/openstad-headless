@@ -356,7 +356,9 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                     <div className="dilemma-summary-content">
                       <div className="dilemma-summary-option">
                         <button
-                          className={`dilemma-summary-btn ${answer === 'a' ? 'active' : ''}`}
+                          className={`dilemma-summary-btn ${
+                            answer === 'a' ? 'active' : ''
+                          }`}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'a')
@@ -376,7 +378,9 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
                       <div className="dilemma-summary-option">
                         <button
-                          className={`dilemma-summary-btn ${answer === 'b' ? 'active' : ''}`}
+                          className={`dilemma-summary-btn ${
+                            answer === 'b' ? 'active' : ''
+                          }`}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'b')
@@ -450,7 +454,11 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </span>
 
         <div
-          className={`dilemma-option${previousAnswers[currentDilemma.id] === 'a' ? ' --previous-awnser' : ''}`}>
+          className={`dilemma-option${
+            previousAnswers[currentDilemma.id] === 'a'
+              ? ' --previous-awnser'
+              : ''
+          }`}>
           <input
             type="radio"
             id={`option-${currentDilemma.id}-a`}
@@ -483,7 +491,11 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
 
         <div
-          className={`dilemma-option${previousAnswers[currentDilemma.id] === 'b' ? ' --previous-awnser' : ''}`}>
+          className={`dilemma-option${
+            previousAnswers[currentDilemma.id] === 'b'
+              ? ' --previous-awnser'
+              : ''
+          }`}>
           <input
             type="radio"
             id={`option-${currentDilemma.id}-b`}

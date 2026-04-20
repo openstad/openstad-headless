@@ -40,7 +40,8 @@ router
   })
   .post(async (req, res, next) => {
     const projectId = req.query.projectId;
-    const widgetId = Math.floor(Math.random() * 1000000);
+    const widgetId =
+      req.widgetConfig.widgetId || Math.floor(Math.random() * 1000000);
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widgetType = req.widgetConfig.widgetType;
@@ -86,7 +87,8 @@ router
         widgetSettings,
         defaultConfig,
         projectConfig,
-        req.widgetConfig
+        req.widgetConfig,
+        widgetId
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -249,7 +251,7 @@ function setConfigsToOutput(
 
   let config = merge.recursive(
     {},
-    widgetSettings.Config,
+    widgetSettings.defaultConfig || {},
     defaultConfig,
     projectConfig,
     widgetConfig,
@@ -475,19 +477,22 @@ function getWidgetJavascriptOutput(
           insertCssLinks(customCssUrls);
           
           function renderWidget () {
-            
+
             // Check if widget has already been rendered
             if (renderedWidgets[randomComponentId]) {
               return;
             }
-            
+
             renderedWidgets[randomComponentId] = true;
-            
+
+            const React = window.OpenStadReact;
+            const ReactDOM = window.OpenStadReactDOM;
+
             ${widgetOutput}
             ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
           }
-          
-          ${reactCheck}
+
+          ${reactCheck(apiUrl)}
           currentScript.remove();
       } catch(e) {
         console.error("Could not place widget", e);

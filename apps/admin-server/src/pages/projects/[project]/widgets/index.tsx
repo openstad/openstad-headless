@@ -1,4 +1,4 @@
-import { SessionContext } from '@/auth';
+import { SessionContext } from '@/auth-context';
 import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { RenameResourceDialog } from '@/components/dialog-resource-rename';
@@ -7,7 +7,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PageLayout } from '@/components/ui/page-layout';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
-import { useProject } from '@/hooks/use-project';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
 import { HasAccess } from '@/lib/hasAccess';
 import { WidgetDefinitions } from '@/lib/widget-definitions';
@@ -163,7 +162,9 @@ export default function ProjectWidgets() {
             <div
               className={`grid grid-cols-2 items-left py-2 px-2 border-b border-border`}
               style={{
-                gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 40px) repeat(5, 1fr) 60px`,
+                gridTemplateColumns: `repeat(${
+                  bulkSelectActive ? 2 : 1
+                }, 40px) repeat(5, 1fr) 60px`,
               }}>
               {bulkSelectActive && <ListHeading />}
               <ListHeading className="hidden lg:flex">
@@ -209,7 +210,9 @@ export default function ProjectWidgets() {
                     <li
                       className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
                       style={{
-                        gridTemplateColumns: `repeat(${bulkSelectActive ? 2 : 1}, 40px) repeat(5, 1fr) 60px`,
+                        gridTemplateColumns: `repeat(${
+                          bulkSelectActive ? 2 : 1
+                        }, 40px) repeat(5, 1fr) 60px`,
                       }}>
                       {bulkSelectActive && (
                         <Checkbox

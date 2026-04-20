@@ -41,6 +41,7 @@ const ResourceOverviewMap = ({
   ctaButton = undefined,
   locationProx = undefined,
   givenResources,
+  noFetch = false,
   selectedProjects = [],
   onMarkerClick,
   ...props
@@ -57,10 +58,10 @@ const ResourceOverviewMap = ({
 
   const { data: resources } = datastore.useResources(
     {
-      projectId: props.projectId,
+      projectId: noFetch ? undefined : props.projectId,
       pageSize: 99999,
     },
-    { suspense: !!givenResources }
+    { suspense: false }
   );
 
   const allResources = givenResources || resources?.records || [];

@@ -7,7 +7,9 @@ const fs = require('fs').promises;
 
     try {
       let files = await fs.readdir(`seeds/lorem-images`);
-      let targetDir = `${process.env.PWD}${process.env.IMAGES_DIR || '/images'}`;
+      let targetDir = `${process.env.PWD}${
+        process.env.IMAGES_DIR || '/images'
+      }`;
       for (let file of files) {
         console.log(`  ${file}`);
         await fs.copyFile(`seeds/lorem-images/${file}`, `${targetDir}/${file}`);

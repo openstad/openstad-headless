@@ -2,6 +2,9 @@
 global:
   ingress:
     type: nginx
+  # Global OpenTelemetry toggle (per-service can override in their `extraEnvVars` or by adding `otelEnabled` to that service).
+  # NOTE: Service override is supported by the helm templates even if not shown in this default values file.
+  otelEnabled: false
 
 # Optional Dependencies
 
@@ -163,6 +166,9 @@ admin:
     tls:
       secretName: openstad-tls-admin
       hosts: []
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-admin-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
   # Resources:
@@ -205,6 +211,7 @@ auth:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
     extraLabels: {}
     hosts: []
     ingressClassName:  # defaults to global.ingress.type
@@ -237,6 +244,9 @@ auth:
   # Cookie settings
   cookie:
     secureOff:
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-auth-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
 api:
   name: api
   label: openstad-api-service
@@ -262,6 +272,7 @@ api:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
         more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     extraLabels: {}
     hosts: []
@@ -276,7 +287,7 @@ api:
     # The defaults below are for nginx. When using global.ingress.type: traefik,
     # override with traefik middleware annotations, e.g.:
     #   annotations:
-    #     traefik.ingress.kubernetes.io/router.middlewares: "<namespace>-<release>-security-headers@kubernetescrd,<namespace>-<release>-security-headers-hsts@kubernetescrd,<namespace>-<release>-security-headers-noindex@kubernetescrd,<namespace>-<release>-body-size-limit@kubernetescrd,<namespace>-<release>-www-redirect@kubernetescrd"
+    #     traefik.ingress.kubernetes.io/router.middlewares: "<namespace>-<release>-security-headers@kubernetescrd,<namespace>-<release>-security-headers-hsts@kubernetescrd,<namespace>-<release>-compress-response@kubernetescrd,<namespace>-<release>-body-size-limit@kubernetescrd,<namespace>-<release>-www-redirect@kubernetescrd"
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -284,7 +295,6 @@ api:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
-        more_set_headers "X-Robots-Tag: noindex, nofollow";
         more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
     # Is the TLS for this ingress managed by Openstad?
     # Set to `false` if the secrets are managed manually -- compatible with older versions of Openstad
@@ -303,8 +313,13 @@ api:
     secretStoreName: "gcp-secret-store"
     # Cooldown in seconds between manual retry triggers per project
     retryCooldownSeconds: 60
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-api-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
+  # Enable spam detection and spam flags
+  spamFilterEnabled: "false"
   disableProjectIssueWarnings: "false"
   # Resources:
   resources:
@@ -356,6 +371,7 @@ image:
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
+        more_set_headers "X-Robots-Tag: noindex, nofollow";
     extraLabels: {}
     hosts: []
     ingressClassName:  # defaults to global.ingress.type
@@ -373,6 +389,9 @@ image:
     ccRequests: 100
   hqOriginalMaxPixels: 160000
   disableWebpConversion: false
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-image-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
   # Resources:
@@ -432,6 +451,9 @@ cms:
       hosts: []
   disableWidgetPreview: "false"
   useS3: "false"
+  # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
+  otelServiceName: openstad-cms-server
+  otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
   # Inject extra environment variables
   extraEnvVars: []
   # Resources:
@@ -455,7 +477,13 @@ cms:
   volumes:
     data:
       size: 1Gi
-      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads
+    exports:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/exports
+    bigUploads:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/big-uploads
+    importExport:
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/import-export
   disableRateLimiter: "false" # Whether to disable the rate limiter for this service
 # Overwrite Secrets
 
@@ -532,8 +560,6 @@ secrets:
     onlySecure:
     jwtSecret:
   cdn:
-    reactUrl: https://unpkg.com/react@18.3.1/umd/react.production.min.js
-    reactDomUrl: https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
     zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
     zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
   ### Mail server secretes

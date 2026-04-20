@@ -1,6 +1,5 @@
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -217,22 +216,6 @@ export default function ProjectSettings() {
     setImgUrl(data.installationUrls?.img || '');
 
     const cdns = ['https://openstad-cdn.nl'];
-
-    if (process.env.REACT_CDN) {
-      let reactCdn = process.env.REACT_CDN;
-      if (!reactCdn.startsWith('http')) {
-        reactCdn = `https://${reactCdn}`;
-      }
-      cdns.push(reactCdn);
-    }
-
-    if (process.env.REACT_DOM_CDN) {
-      let reactDomCdn = process.env.REACT_DOM_CDN;
-      if (!reactDomCdn.startsWith('http')) {
-        reactDomCdn = `https://${reactDomCdn}`;
-      }
-      cdns.push(reactDomCdn);
-    }
 
     setCdnUrls(cdns);
   }, [data]);

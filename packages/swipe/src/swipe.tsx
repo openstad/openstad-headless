@@ -465,7 +465,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
       animationFrameRef.current = requestAnimationFrame(() => {
         const rotation = deltaX * 0.1;
-        const transform = `translate(${deltaX}px, ${deltaY * 0.5}px) rotate(${rotation}deg)`;
+        const transform = `translate(${deltaX}px, ${
+          deltaY * 0.5
+        }px) rotate(${rotation}deg)`;
         setDragTransform(transform);
 
         if (Math.abs(deltaX) > 50) {
@@ -792,7 +794,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                       <div className="swipe-summary-answer">
                         <div className="swipe-summary-buttons">
                           <button
-                            className={`swipe-summary-btn ${answer === disagreeText ? 'active' : ''}`}
+                            className={`swipe-summary-btn ${
+                              answer === disagreeText ? 'active' : ''
+                            }`}
                             onClick={(e) => (
                               e.preventDefault(),
                               handleAnswerChange(card.id, disagreeText)
@@ -802,7 +806,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                             <span>Oneens</span>
                           </button>
                           <button
-                            className={`swipe-summary-btn ${answer === agreeText ? 'active' : ''}`}
+                            className={`swipe-summary-btn ${
+                              answer === agreeText ? 'active' : ''
+                            }`}
                             onClick={(e) => (
                               e.preventDefault(),
                               handleAnswerChange(card.id, agreeText)
@@ -870,7 +876,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                 <>
                   <div
                     key={card.id}
-                    className={`swipe-card ${positionClass} ${isTop ? 'swipe-card--top' : ''} ${swipeDirection && isTop ? `swipe-card--${swipeDirection === agreeText ? 'right' : 'left'}` : ''} ${isAnimating && isTop ? 'swipe-card--animating' : ''} ${animationType && isTop ? `swipe-card--${animationType}` : ''} ${isFadingOut && isTop ? 'swipe-card--fadeout' : ''}`}
+                    className={`swipe-card ${positionClass} ${
+                      isTop ? 'swipe-card--top' : ''
+                    } ${
+                      swipeDirection && isTop
+                        ? `swipe-card--${
+                            swipeDirection === agreeText ? 'right' : 'left'
+                          }`
+                        : ''
+                    } ${isAnimating && isTop ? 'swipe-card--animating' : ''} ${
+                      animationType && isTop
+                        ? `swipe-card--${animationType}`
+                        : ''
+                    } ${isFadingOut && isTop ? 'swipe-card--fadeout' : ''}`}
                     style={{ zIndex, ...(transform ? { transform } : {}) }}
                     {...(isTop
                       ? {
@@ -908,7 +926,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
                     {isTop && swipeDirection && (
                       <div
-                        className={`swipe-indicator swipe-indicator--${swipeDirection === agreeText ? 'right' : 'left'}`}
+                        className={`swipe-indicator swipe-indicator--${
+                          swipeDirection === agreeText ? 'right' : 'left'
+                        }`}
                         aria-live="polite"
                         aria-label={
                           swipeDirection === disagreeText
@@ -1015,7 +1035,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
         {showExplanationDialog && (
           <div
-            className={`explanation-dialog ${isDialogClosing ? 'explanation-dialog--closing' : ''}`}
+            className={`explanation-dialog ${
+              isDialogClosing ? 'explanation-dialog--closing' : ''
+            }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="explanation-dialog-title">

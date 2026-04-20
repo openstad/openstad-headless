@@ -90,7 +90,9 @@ export function Carousel({
           {items.map((_, id) => (
             <button
               key={`osc-carousel-pager-button-${id}`}
-              className={`osc-carousel-pager-button ${id === index ? 'active' : ''}`}
+              className={`osc-carousel-pager-button ${
+                id === index ? 'active' : ''
+              }`}
               onClick={() => handleIndexChange(id)}
               aria-label={`Ga naar slide ${id + 1}`}
               type="button"></button>

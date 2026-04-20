@@ -18,23 +18,12 @@
     "test:e2e:debug": "jest --no-cache --config jest-e2e.config.js --verbose --forceExit",
     "init-database": "node ./scripts/init-database.js",
     "migrate-database": "node ./scripts/migrate-database.js",
-    "build-packages": "node ./scripts/build-packages.js"
+    "build-packages": "node ./scripts/build-react-runtime.js && node ./scripts/build-packages.js",
+    "build:react-runtime": "node scripts/build-react-runtime.js"
   },
   "dependencies": {
     "@azure/identity": "^4.6.0",
     "@kubernetes/client-node": "^1.1.2",
-    "@opentelemetry/api": "1.7.0",
-    "@opentelemetry/auto-instrumentations-node": "0.40.3",
-    "@opentelemetry/exporter-trace-otlp-http": "0.46.0",
-    "@opentelemetry/instrumentation": "0.46.0",
-    "@opentelemetry/instrumentation-express": "0.33.0",
-    "@opentelemetry/instrumentation-http": "0.46.0",
-    "@opentelemetry/instrumentation-mysql2": "0.33.0",
-    "@opentelemetry/instrumentation-redis": "0.33.0",
-    "@opentelemetry/resources": "1.19.0",
-    "@opentelemetry/sdk-node": "0.46.0",
-    "@opentelemetry/sdk-trace-base": "1.19.0",
-    "@opentelemetry/semantic-conventions": "1.19.0",
     "@openstad-headless/account": "*",
     "@openstad-headless/activity": "*",
     "@openstad-headless/agenda": "*",
@@ -79,7 +68,7 @@
     "isomorphic-fetch": "^3.0.0",
     "json-logic-js": "^2.0.2",
     "jsonwebtoken": "^9.0.0",
-    "mariadb": "^2.5.6",
+    "mariadb": "^3.4.3",
     "marked": "^4.0.14",
     "merge": "^2.1.1",
     "method-override": "^3.0.0",
@@ -96,6 +85,8 @@
     "sanitize-html": "^2.7.0",
     "sequelize": "^6.28.0",
     "umzug": "^3.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "ws": "^7.5.7"
   },
   "devDependencies": {

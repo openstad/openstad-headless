@@ -1,5 +1,15 @@
 require('dotenv').config();
 
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-cms-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const apostrophe = require('apostrophe');
 const dayjs = require('dayjs');
 require('dayjs/locale/nl');
@@ -534,7 +544,9 @@ app.use(async function (req, res, next) {
   res
     .status(404)
     .send(
-      `Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`
+      `Error: No project found for given URL ${escapeHtml(
+        req.openstadDomain
+      )}${escapeHtml(req.url)}`
     );
 });
 

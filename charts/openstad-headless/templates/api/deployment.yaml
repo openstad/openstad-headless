@@ -155,6 +155,9 @@ spec:
           - name: DISABLE_PROJECT_ISSUE_WARNINGS
             value: "{{ .Values.api.disableProjectIssueWarnings }}"
 
+          - name: SPAM_FILTER_ENABLED
+            value: "{{ .Values.api.spamFilterEnabled }}"
+
           - name: AUTH_JWTSECRET
             valueFrom:
               secretKeyRef:
@@ -192,18 +195,6 @@ spec:
 
           - name: CMS_URL
             value: https://{{ template "openstad.cms.url" . }}
-
-          - name: REACT_CDN
-            valueFrom:
-              secretKeyRef:
-                key: reactUrl
-                name: {{ template "openstad.cdn.secret.fullname" . }}
-
-          - name: REACT_DOM_CDN
-            valueFrom:
-              secretKeyRef:
-                key: reactDomUrl
-                name: {{ template "openstad.cdn.secret.fullname" . }}
 
           - name: ZIPCODE_AUTOFILL_API_URL
             valueFrom:
@@ -285,6 +276,15 @@ spec:
               secretKeyRef:
                 key: rateWindowMs
                 name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
+          - name: OTEL_SERVICE_NAME
+            value: {{ .Values.api.otelServiceName | quote }}
+            
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{ .Values.api.otelExporterOtlpEndpoint | quote }}
+
+          - name: OTEL_ENABLED
+            value: {{ (hasKey .Values.api "otelEnabled") | ternary .Values.api.otelEnabled (default false $.Values.global.otelEnabled) | quote }}
 
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
@@ -490,18 +490,6 @@ spec:
 
             - name: CMS_URL
               value: https://{{ template "openstad.cms.url" . }}
-
-            - name: REACT_CDN
-              valueFrom:
-                secretKeyRef:
-                  key: reactUrl
-                  name: {{ template "openstad.cdn.secret.fullname" . }}
-
-            - name: REACT_DOM_CDN
-              valueFrom:
-                secretKeyRef:
-                  key: reactDomUrl
-                  name: {{ template "openstad.cdn.secret.fullname" . }}
 
             - name: ZIPCODE_AUTOFILL_API_URL
               valueFrom:

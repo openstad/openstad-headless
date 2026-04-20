@@ -265,7 +265,11 @@ export default function WidgetChoiceGuideItems(
       setItems((currentItems) => [
         ...currentItems,
         {
-          trigger: `${currentItems.length > 0 ? parseInt(currentItems[currentItems.length - 1].trigger) + 1 : 1}`,
+          trigger: `${
+            currentItems.length > 0
+              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+              : 1
+          }`,
           title: values.title,
           description: values.description,
           type: values.type,
@@ -774,7 +778,12 @@ export default function WidgetChoiceGuideItems(
   // Create component for heading dimensions
   const DimensionHeading = (version: number = 1) => (
     <div
-      className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-y-${version === 1 ? '2' : '0'} gap-x-${version === 1 ? '2' : '4'}`}>
+      className={`w-full col-span-full grid-cols-${
+        dimensions.length +
+        (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)
+      } grid gap-y-${version === 1 ? '2' : '0'} gap-x-${
+        version === 1 ? '2' : '4'
+      }`}>
       {version === 1 && <Heading size="lg">Vraaggroep titel</Heading>}
       {dimensions.length > 0 &&
         dimensions.map((XY, i) => (
@@ -806,7 +815,12 @@ export default function WidgetChoiceGuideItems(
     index: number
   ) => (
     <div
-      className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-x-${form.watch('type') === 'a-b-slider' ? 4 : 2} gap-y-${form.watch('type') === 'a-b-slider' ? 0 : 2} items-center`}
+      className={`w-full col-span-full grid-cols-${
+        dimensions.length +
+        (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)
+      } grid gap-x-${form.watch('type') === 'a-b-slider' ? 4 : 2} gap-y-${
+        form.watch('type') === 'a-b-slider' ? 0 : 2
+      } items-center`}
       key={index}>
       <p
         style={{
@@ -885,7 +899,10 @@ export default function WidgetChoiceGuideItems(
         {group.title}
       </Heading>
       <div
-        className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)} grid gap-2 gap-y-2 items-center`}
+        className={`w-full col-span-full grid-cols-${
+          dimensions.length +
+          (form.watch('type') === 'a-b-slider' ? dimensions.length : 1)
+        } grid gap-2 gap-y-2 items-center`}
         key={index}>
         {options.length > 0 &&
           options.map((option, j) => (
@@ -1496,11 +1513,11 @@ export default function WidgetChoiceGuideItems(
                                   Informatie blok
                                 </SelectItem>
                                 <SelectItem value="radiobox">
-                                  Radio buttons
+                                  Enkele keuze
                                 </SelectItem>
                                 <SelectItem value="text">Tekstveld</SelectItem>
                                 <SelectItem value="checkbox">
-                                  Checkboxes
+                                  Meerkeuze
                                 </SelectItem>
                                 <SelectItem value="map">Locatie</SelectItem>
                                 <SelectItem value="imageUpload">
@@ -1600,7 +1617,11 @@ export default function WidgetChoiceGuideItems(
                                   return (
                                     <div
                                       key={id}
-                                      className={`relative grid ${index === imageIndexOpen ? 'col-span-full' : 'tile'} gap-x-4 items-center image-gallery`}
+                                      className={`relative grid ${
+                                        index === imageIndexOpen
+                                          ? 'col-span-full'
+                                          : 'tile'
+                                      } gap-x-4 items-center image-gallery`}
                                       style={{
                                         gridTemplateColumns:
                                           index === imageIndexOpen
@@ -2407,7 +2428,7 @@ export default function WidgetChoiceGuideItems(
                                         borderBottomRightRadius: '5px',
                                         marginTop: '12px',
                                       }}>
-                                      Je hebt nog geen meerkeuze, multiplechoice
+                                      Je hebt nog geen meerkeuze, enkele keuze
                                       of afbeelding keuze vragen toegevoegd.
                                       Voeg deze eerst toe om deze vraag te
                                       kunnen tonen op basis van een ander

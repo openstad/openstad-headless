@@ -18,7 +18,7 @@ let createProjectConfig = function ({
   if (useOnlyDefinedOnProject) {
     // use only providers that are configured on the project, but fallback on defaults if nothing is defined on the project
     let projectProviders = Object.keys(projectSpecificConfig.provider || {});
-    if (projectProviders) {
+    if (projectProviders.length > 0) {
       let mergedProviders = Object.keys(mergedConfig.provider || {});
       mergedProviders.map((target) => {
         if (!projectProviders.find((p) => p == target)) {

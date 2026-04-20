@@ -29,6 +29,7 @@ export type AgendaWidgetProps = BaseProps &
       title?: string;
       description: string;
       active: boolean;
+      highlighted?: boolean;
       activeFrom?: string;
       activeTo?: string;
       links?: Array<{
@@ -109,7 +110,7 @@ function Agenda({
       {items.map((item, index) => (
         <div
           key={item.trigger}
-          className={`osc-agenda-item${item.active ? ' --active-item' : ''}`}
+          className={`osc-agenda-item${item.active ? ' --active-item' : ''}${item.highlighted ? ' --highlighted-item' : ''}`}
           aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
