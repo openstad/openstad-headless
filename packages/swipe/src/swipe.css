@@ -333,6 +333,9 @@
   color: #000;
   text-align: center;
   padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .swipe-widget .swipe-middle-actions .swipe-info-btn svg,
 .swipe-widget .swipe-middle-actions .swipe-skip-btn svg {
