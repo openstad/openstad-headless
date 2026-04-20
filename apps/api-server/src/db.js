@@ -70,6 +70,7 @@ const dialectOptions = {
   multipleStatements: dbConfig.multipleStatements,
   socketPath: dbConfig.socketPath,
   ssl,
+  enableCleartextPlugin: dbConfig.enableCleartextPlugin,
 };
 
 const getDbPassword = async () => {
