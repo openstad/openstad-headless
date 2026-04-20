@@ -663,13 +663,6 @@ function Enquete(props: EnqueteWidgetProps) {
     formFields.length,
   ];
 
-  const getPrevPageTitle =
-    formFields.filter((field) => field.type === 'pagination')[currentPage]
-      ?.prevPageText || 'Vorige';
-  const getNextPageTitle =
-    formFields.filter((field) => field.type === 'pagination')[currentPage]
-      ?.nextPageText || 'Volgende';
-
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleValuesChange = (values: Record<string, unknown>) => {
@@ -785,15 +778,13 @@ function Enquete(props: EnqueteWidgetProps) {
                 !hasRole(currentUser, 'member') && formOnlyVisibleForUsers
               }
               submitHandler={onSubmit}
-              submitText={
-                currentPage < totalPages - 1 ? getNextPageTitle : 'Versturen'
-              }
+              submitText="Versturen"
               title=""
               currentPage={currentPage}
               pageFieldEndPositions={pageFieldEndPositions}
               pageFieldStartPositions={pageFieldStartPositions}
               prevPage={currentPage > 0 ? currentPage - 1 : null}
-              prevPageText={getPrevPageTitle}
+              prevPageText="Vorige"
               setCurrentPage={setCurrentPage}
               totalFieldCount={totalFieldCount}
               totalPages={totalPages}
