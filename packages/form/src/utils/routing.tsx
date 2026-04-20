@@ -5,6 +5,7 @@ type ExtendedFormValue = FormValue | string[];
 
 type RoutingFunction = {
   fields: Array<FieldWithOptionalFields>;
+  routingKeys: string[];
   initialFormValues: { [key: string]: FormValue };
   routingHiddenFields: string[];
   setFormValues: React.Dispatch<
@@ -16,6 +17,7 @@ type RoutingFunction = {
 
 export const updateRouting = ({
   fields,
+  routingKeys,
   initialFormValues,
   routingHiddenFields,
   setFormValues,
@@ -25,7 +27,7 @@ export const updateRouting = ({
   const hiddenFields: Array<string> = [];
   const updateValues: { [key: string]: FormValue } = {};
 
-  fields.forEach((field: FieldWithOptionalFields) => {
+  fields.forEach((field: FieldWithOptionalFields, index: number) => {
     if (
       !field?.routingInitiallyHide ||
       !field.routingSelectedQuestion ||
@@ -33,7 +35,7 @@ export const updateRouting = ({
     )
       return;
 
-    const fieldKeyFromFieldToHide = field.fieldKey || '';
+    const fieldKeyFromFieldToHide = routingKeys[index] || '';
     if (hiddenFields.includes(fieldKeyFromFieldToHide)) return;
 
     const fieldToCheck = fields.find(

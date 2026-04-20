@@ -335,8 +335,6 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     formFields.length,
   ];
   const prevPageText = paginationFields[currentPage]?.prevPageText || 'Vorige';
-  const nextPageText =
-    paginationFields[currentPage]?.nextPageText || 'Volgende';
   const totalFieldCount =
     formFields.filter((field) => field.type !== 'pagination').length || 0;
 
@@ -390,9 +388,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             fields={formFields}
             secondaryLabel={saveConceptButton || ''}
             submitHandler={onSubmit}
-            submitText={
-              currentPage < totalPages - 1 ? nextPageText : submitButtonText
-            }
+            submitText={submitButtonText}
             title=""
             submitDisabled={disableSubmit}
             allowResetAfterSubmit={editMode}

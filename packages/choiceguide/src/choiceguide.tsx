@@ -224,11 +224,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
           <Form
             fields={formFields}
             title=""
-            submitText={
-              currentPage < totalPages - 1
-                ? nextButtonText || 'Volgende'
-                : submitButtonText || 'Versturen'
-            }
+            submitText={submitButtonText || 'Versturen'}
             submitHandler={onSubmit}
             secondaryLabel={''}
             getValuesOnChange={(

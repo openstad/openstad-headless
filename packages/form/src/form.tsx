@@ -22,7 +22,7 @@ import {
   FormFieldErrorMessage,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import './form.css';
 import type {
@@ -30,6 +30,7 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
+import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
 import { handleSubmit } from './utils/submit';
 
@@ -69,8 +70,11 @@ function Form({
   const initialFormValues: { [key: string]: FormValue } = {};
   const initialHiddenFields: string[] = [];
   const fieldsWithImpactOnRouting: string[] = [];
+  const routingKeys: string[] = fields.map(
+    (field, index) => field.fieldKey || `_routing_${index}`
+  );
 
-  fields.forEach((field) => {
+  fields.forEach((field, index) => {
     const fieldKey = field.fieldKey || '';
 
     if (fieldKey) {
@@ -84,21 +88,21 @@ function Form({
           (field?.fieldOptions?.length || 2) / 2
         ).toString();
       }
+    }
 
-      if (
-        field?.routingInitiallyHide &&
-        field?.routingSelectedQuestion &&
-        field?.routingSelectedAnswer
-      ) {
-        const getRoutingSelectedQuestionField = fields.find(
-          (f) => f.trigger === field.routingSelectedQuestion
-        );
-        const routingSelectedQuestionFieldKey =
-          getRoutingSelectedQuestionField?.fieldKey || '';
+    if (
+      field?.routingInitiallyHide &&
+      field?.routingSelectedQuestion &&
+      field?.routingSelectedAnswer
+    ) {
+      const getRoutingSelectedQuestionField = fields.find(
+        (f) => f.trigger === field.routingSelectedQuestion
+      );
+      const routingSelectedQuestionFieldKey =
+        getRoutingSelectedQuestionField?.fieldKey || '';
 
-        fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
-        initialHiddenFields.push(fieldKey);
-      }
+      fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
+      initialHiddenFields.push(routingKeys[index]);
     }
   });
 
@@ -118,58 +122,87 @@ function Form({
     useState<Array<string>>(initialHiddenFields);
   const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
 
-  let fieldsToRender = fields;
-  if (
-    typeof currentPage === 'number' &&
-    typeof pageFieldStartPositions !== 'undefined' &&
-    typeof pageFieldEndPositions !== 'undefined'
-  ) {
-    const start = pageFieldStartPositions[currentPage];
-    const end = pageFieldEndPositions[currentPage];
+  const {
+    effectiveTotalPages,
+    effectiveStartPositions,
+    effectiveEndPositions,
+    effectiveCurrentPage,
+    effectiveSubmitText,
+    effectivePrevPageText,
+    lastFieldIsYouthOutro,
+  } = useMemo(
+    () =>
+      computeEffectivePagination({
+        fields,
+        routingKeys,
+        routingHiddenFields,
+        totalPages,
+        pageFieldStartPositions,
+        pageFieldEndPositions,
+        currentPage,
+        submitText,
+        prevPageText,
+      }),
+    [
+      fields,
+      routingKeys,
+      routingHiddenFields,
+      totalPages,
+      currentPage,
+      submitText,
+      prevPageText,
+    ]
+  );
 
+  useEffect(() => {
+    if (
+      typeof effectiveCurrentPage === 'number' &&
+      typeof currentPage === 'number' &&
+      effectiveCurrentPage !== currentPage &&
+      setCurrentPage
+    ) {
+      setCurrentPage(effectiveCurrentPage);
+    }
+  }, [effectiveCurrentPage]);
+
+  let fieldsToRender = fields;
+  let fieldsToRenderOffset = 0;
+  if (
+    typeof effectiveCurrentPage === 'number' &&
+    typeof effectiveStartPositions !== 'undefined' &&
+    typeof effectiveEndPositions !== 'undefined'
+  ) {
+    const start = effectiveStartPositions[effectiveCurrentPage];
+    const end = effectiveEndPositions[effectiveCurrentPage];
+
+    fieldsToRenderOffset = start;
     fieldsToRender = fields.slice(start, end);
   }
 
   const handleFormSubmit = (event: React.FormEvent) => {
-    const nonPaginationFields = fields.filter(
-      (field) => field.type !== 'pagination'
-    );
-
     let pageHandler = undefined;
 
     const isNumber = typeof currentPage === 'number';
-    const isTotalNumber = typeof totalPages === 'number';
-    const hasPages = isNumber && isTotalNumber && currentPage < totalPages - 1;
+    const isTotalNumber = typeof effectiveTotalPages === 'number';
+    const hasPages =
+      isNumber && isTotalNumber && currentPage < effectiveTotalPages - 1;
     const hasSetCurrentPage = !!setCurrentPage;
     const isSecondToLast =
-      isNumber && isTotalNumber && currentPage === totalPages - 2;
-    const lastFieldIsYouthOutro =
-      isTotalNumber &&
-      (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle ===
-        'youth-outro';
+      isNumber && isTotalNumber && currentPage === effectiveTotalPages - 2;
 
-    const shouldGoToNextPage =
-      hasPages &&
-      hasSetCurrentPage &&
-      (!lastFieldIsYouthOutro ||
-        !isSecondToLast ||
-        (isSecondToLast && lastFieldIsYouthOutro));
+    const shouldGoToNextPage = hasPages && hasSetCurrentPage;
 
     if (isNumber && isTotalNumber && shouldGoToNextPage) {
       allowResetAfterSubmit = false;
       pageHandler = () => setCurrentPage(currentPage + 1);
     }
 
-    const lastField = fields[fields.length - 1];
-    const lastFieldIsOutro =
-      lastField?.type === 'none' && lastField?.infoBlockStyle === 'youth-outro';
-
     let submitBeforeLastPage = false;
     if (
       typeof currentPage === 'number' &&
-      typeof totalPages === 'number' &&
-      currentPage === totalPages - 2 &&
-      lastFieldIsOutro
+      typeof effectiveTotalPages === 'number' &&
+      currentPage === effectiveTotalPages - 2 &&
+      lastFieldIsYouthOutro
     ) {
       submitBeforeLastPage = true;
     }
@@ -253,7 +286,10 @@ function Form({
 
   useEffect(() => {
     if (getValuesOnChange) {
-      getValuesOnChange(formValues, routingHiddenFields);
+      const externalHiddenFields = routingHiddenFields.filter(
+        (key) => !key.startsWith('_routing_')
+      );
+      getValuesOnChange(formValues, externalHiddenFields);
     }
 
     if (
@@ -263,6 +299,7 @@ function Form({
     ) {
       updateRouting({
         fields,
+        routingKeys,
         initialFormValues,
         routingHiddenFields,
         setFormValues,
@@ -356,7 +393,7 @@ function Form({
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
                 }}>
-                {prevPageText || 'vorige'}
+                {effectivePrevPageText || 'vorige'}
               </Button>
             )}
           </div>
@@ -389,10 +426,8 @@ function Form({
               typeof formErrors[field.fieldKey] !== 'undefined'
             );
 
-            if (
-              field.fieldKey &&
-              routingHiddenFields.includes(field.fieldKey)
-            ) {
+            const routingKey = routingKeys[fieldsToRenderOffset + index];
+            if (routingKey && routingHiddenFields.includes(routingKey)) {
               return null;
             }
 
@@ -483,7 +518,7 @@ function Form({
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
                 }}>
-                <span>{prevPageText || 'vorige'}</span>
+                <span>{effectivePrevPageText || 'vorige'}</span>
               </Button>
             )}
             <Button
@@ -494,7 +529,7 @@ function Form({
               onClick={() => {
                 scrollTop();
               }}>
-              <span>{submitText}</span>
+              <span>{effectiveSubmitText}</span>
             </Button>
           </div>
         </form>
