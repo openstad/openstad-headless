@@ -58,6 +58,7 @@ function Form({
   setCurrentPage,
   prevPage,
   prevPageText,
+  nextPageText,
   pageFieldStartPositions,
   pageFieldEndPositions,
   totalPages,
@@ -127,9 +128,6 @@ function Form({
     effectiveStartPositions,
     effectiveEndPositions,
     effectiveCurrentPage,
-    effectiveSubmitText,
-    effectivePrevPageText,
-    lastFieldIsYouthOutro,
   } = useMemo(
     () =>
       computeEffectivePagination({
@@ -140,19 +138,37 @@ function Form({
         pageFieldStartPositions,
         pageFieldEndPositions,
         currentPage,
-        submitText,
-        prevPageText,
       }),
-    [
-      fields,
-      routingKeys,
-      routingHiddenFields,
-      totalPages,
-      currentPage,
-      submitText,
-      prevPageText,
-    ]
+    [fields, routingKeys, routingHiddenFields, totalPages, currentPage]
   );
+
+  // Button labels: Form is the single owner of button text logic
+  const lastField = fields[fields.length - 1];
+  const lastFieldIsYouthOutro =
+    lastField?.type === 'none' &&
+    (lastField as any)?.infoBlockStyle === 'youth-outro';
+
+  let currentButtonLabel = submitText;
+  let currentPrevLabel = prevPageText;
+
+  if (typeof effectiveTotalPages === 'number' && effectiveTotalPages > 1) {
+    const isLastPage = effectiveCurrentPage === effectiveTotalPages - 1;
+    const isSecondToLast = effectiveCurrentPage === effectiveTotalPages - 2;
+    const isSubmitPage =
+      isLastPage || (isSecondToLast && lastFieldIsYouthOutro);
+
+    if (!isSubmitPage) {
+      const visiblePagFields = fields.filter(
+        (f, i) =>
+          f.type === 'pagination' &&
+          !routingHiddenFields.includes(routingKeys[i])
+      );
+      const currentPagField = visiblePagFields[effectiveCurrentPage] as any;
+      currentButtonLabel =
+        currentPagField?.nextPageText || nextPageText || 'Volgende';
+      currentPrevLabel = currentPagField?.prevPageText || prevPageText;
+    }
+  }
 
   useEffect(() => {
     if (
@@ -393,7 +409,7 @@ function Form({
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
                 }}>
-                {effectivePrevPageText || 'vorige'}
+                {currentPrevLabel || 'vorige'}
               </Button>
             )}
           </div>
@@ -518,7 +534,7 @@ function Form({
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
                 }}>
-                <span>{effectivePrevPageText || 'vorige'}</span>
+                <span>{currentPrevLabel || 'vorige'}</span>
               </Button>
             )}
             <Button
@@ -529,7 +545,7 @@ function Form({
               onClick={() => {
                 scrollTop();
               }}>
-              <span>{effectiveSubmitText}</span>
+              <span>{currentButtonLabel}</span>
             </Button>
           </div>
         </form>

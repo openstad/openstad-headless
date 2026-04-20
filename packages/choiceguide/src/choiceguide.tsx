@@ -225,6 +225,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
             fields={formFields}
             title=""
             submitText={submitButtonText || 'Versturen'}
+            nextPageText={nextButtonText}
             submitHandler={onSubmit}
             secondaryLabel={''}
             getValuesOnChange={(
