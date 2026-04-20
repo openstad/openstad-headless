@@ -29,6 +29,7 @@ if (
 
 const dialectOptions = {
   ssl,
+  enableCleartextPlugin: process.env.DB_ENABLE_CLEARTEXT_PLUGIN || false,
 };
 
 let sequelize = new Sequelize({
