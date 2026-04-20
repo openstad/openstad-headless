@@ -46,6 +46,7 @@ const formSchema = z.object({
         multiple: z.boolean(),
         projectId: z.string().optional(),
         inlineOptions: z.boolean().optional(),
+        parentTagType: z.string().optional(),
       })
     )
     .refine((value) => value.some((item) => item), {

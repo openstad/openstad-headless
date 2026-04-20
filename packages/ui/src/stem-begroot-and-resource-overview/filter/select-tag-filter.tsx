@@ -22,6 +22,7 @@ type Props = {
   valueSelected?: string;
   removeActiveTag?: (tagType: string, tagId: number) => void;
   resetCounter: number;
+  selectedParentTagIds?: number[];
   setResetCounter: React.Dispatch<React.SetStateAction<number>>;
 };
 
@@ -45,6 +46,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
       valueSelected = '',
       removeActiveTag,
       resetCounter,
+      selectedParentTagIds = [],
       setResetCounter,
       ...props
     },
@@ -124,7 +126,13 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
       }
     }, [preFilterTags]);
 
-    return tags.length > 0 && !inlineOptions ? (
+    const filteredTags =
+      selectedParentTagIds.length > 0
+        ? tags.filter((tag: any) =>
+            selectedParentTagIds.includes(tag.extraData?.parentTagId)
+          )
+        : tags;
+    return filteredTags.length > 0 && !inlineOptions ? (
       <div className="form-element">
         <FormLabel htmlFor={getRandomId(props.placeholder)}>
           {props.placeholder || 'Selecteer item'}
@@ -132,7 +140,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
         <Select
           id={getRandomId(props.placeholder)}
           ref={ref}
-          options={(tags || []).map((tag: TagDefinition) => ({
+          options={(filteredTags || []).map((tag: TagDefinition) => ({
             value: tag.id,
             label: tag.name,
           }))}
@@ -150,7 +158,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
           }></Select>
       </div>
     ) : (
-      tags.length > 0 && inlineOptions && (
+      filteredTags.length > 0 && inlineOptions && (
         <div className="form-element">
           <FormLabel>
             {props.placeholder || 'Selecteer item'}
