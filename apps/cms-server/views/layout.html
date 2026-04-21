@@ -48,6 +48,11 @@ data.activeResource.images[0] and data.activeResource.images[0].url %}
 <meta
   property="og:image"
   content="{{ data.baseUrl }}{{ apos.attachment.url(data.global.fbImage, { size: 'full' }) }}" />
+{% endif %} {# Self-referential canonical when no explicit canonical is set via
+the SEO module #} {% set canonicalUrl = data.piece._url or data.page._url %} {%
+if canonicalUrl and not ((data.piece._seoCanonical and data.piece._seoCanonical
+| length) or (data.page._seoCanonical and data.page._seoCanonical | length)) %}
+<link rel="canonical" href="{{ canonicalUrl | e }}" />
 {% endif %} {% endblock %} {% block beforeMain %}
 
 <div
