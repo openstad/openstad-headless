@@ -684,6 +684,38 @@ export default function WidgetChoiceGuideItems(
   }, [form.watch('type')]);
 
   function handleSaveItems() {
+    let itemsToSave = [...items];
+
+    if (selectedItem) {
+      const values = form.getValues();
+      if (values?.options) {
+        values.options = options;
+      }
+      if (values?.matrix) {
+        values.matrix = matrixOptions;
+      }
+
+      const normalizedValuesWeights = ensureABDefaultsOnWeights(
+        values.type,
+        values.weights || {}
+      );
+      const selectedItemWeights = structuredClone(selectedItem.weights || {});
+      const mergedWeights = {
+        ...selectedItemWeights,
+        ...structuredClone(normalizedValuesWeights),
+      };
+      const normalizedMergedWeights = ensureABDefaultsOnWeights(
+        values.type,
+        mergedWeights
+      );
+
+      itemsToSave = itemsToSave.map((item) =>
+        item.trigger === selectedItem.trigger
+          ? { ...item, ...values, weights: normalizedMergedWeights }
+          : item
+      );
+    }
+
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
@@ -693,7 +725,11 @@ export default function WidgetChoiceGuideItems(
       }
     });
 
-    props.updateConfig({ ...updatedProps, items });
+    setItems(itemsToSave);
+    props.updateConfig({ ...updatedProps, items: itemsToSave });
+    setItem(null);
+    form.reset(defaults());
+    setOptions([]);
     setMatrixOptions(matrixDefault);
     window.location.reload();
   }
@@ -988,6 +1024,8 @@ export default function WidgetChoiceGuideItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
+                                if (selectedItem?.trigger === item.trigger)
+                                  return;
                                 setItem(item);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
