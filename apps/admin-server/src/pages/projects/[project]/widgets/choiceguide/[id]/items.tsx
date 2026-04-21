@@ -684,6 +684,38 @@ export default function WidgetChoiceGuideItems(
   }, [form.watch('type')]);
 
   function handleSaveItems() {
+    let itemsToSave = [...items];
+
+    if (selectedItem) {
+      const values = form.getValues();
+      if (values?.options) {
+        values.options = options;
+      }
+      if (values?.matrix) {
+        values.matrix = matrixOptions;
+      }
+
+      const normalizedValuesWeights = ensureABDefaultsOnWeights(
+        values.type,
+        values.weights || {}
+      );
+      const selectedItemWeights = structuredClone(selectedItem.weights || {});
+      const mergedWeights = {
+        ...selectedItemWeights,
+        ...structuredClone(normalizedValuesWeights),
+      };
+      const normalizedMergedWeights = ensureABDefaultsOnWeights(
+        values.type,
+        mergedWeights
+      );
+
+      itemsToSave = itemsToSave.map((item) =>
+        item.trigger === selectedItem.trigger
+          ? { ...item, ...values, weights: normalizedMergedWeights }
+          : item
+      );
+    }
+
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
@@ -693,9 +725,12 @@ export default function WidgetChoiceGuideItems(
       }
     });
 
-    props.updateConfig({ ...updatedProps, items });
+    setItems(itemsToSave);
+    props.updateConfig({ ...updatedProps, items: itemsToSave });
+    setItem(null);
+    form.reset(defaults());
+    setOptions([]);
     setMatrixOptions(matrixDefault);
-    window.location.reload();
   }
 
   const hasOptions = () => {
@@ -960,7 +995,7 @@ export default function WidgetChoiceGuideItems(
                 <Separator className="my-4" />
                 <div className="flex flex-col gap-1">
                   {items.length > 0
-                    ? items
+                    ? [...items]
                         .sort(
                           (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
                         )
@@ -988,6 +1023,8 @@ export default function WidgetChoiceGuideItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
+                                if (selectedItem?.trigger === item.trigger)
+                                  return;
                                 setItem(item);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
@@ -1037,7 +1074,7 @@ export default function WidgetChoiceGuideItems(
 
                           <div className="flex flex-col gap-1">
                             {matrixOptions?.[matrixItem.type]?.length > 0
-                              ? matrixOptions?.[matrixItem.type]
+                              ? [...matrixOptions?.[matrixItem.type]]
                                   .sort(
                                     (a, b) =>
                                       parseInt(a.trigger) - parseInt(b.trigger)
@@ -1391,7 +1428,7 @@ export default function WidgetChoiceGuideItems(
                     <Separator className="my-4" />
                     <div className="flex flex-col gap-1">
                       {options.length > 0
-                        ? options
+                        ? [...options]
                             .sort(
                               (a, b) =>
                                 parseInt(a.trigger) - parseInt(b.trigger)
