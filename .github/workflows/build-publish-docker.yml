@@ -293,7 +293,7 @@ jobs:
           safe-chain setup-ci
 
       - name: Install Cypress
-        run: npm install cypress
+        run: npm install cypress --safe-chain-skip-minimum-package-age
 
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v1
