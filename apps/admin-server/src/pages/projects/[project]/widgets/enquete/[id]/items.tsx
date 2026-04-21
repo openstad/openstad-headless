@@ -781,7 +781,7 @@ export default function WidgetEnqueteItems(
                 <Separator className="my-4" />
                 <div className="flex flex-col gap-1">
                   {items.length > 0
-                    ? items
+                    ? [...items]
                         .sort(
                           (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
                         )
@@ -871,7 +871,7 @@ export default function WidgetEnqueteItems(
 
                           <div className="flex flex-col gap-1">
                             {matrixOptions?.[matrixItem.type]?.length > 0
-                              ? matrixOptions?.[matrixItem.type]
+                              ? [...matrixOptions?.[matrixItem.type]]
                                   .sort(
                                     (a, b) =>
                                       parseInt(a.trigger) - parseInt(b.trigger)
@@ -1433,7 +1433,7 @@ export default function WidgetEnqueteItems(
                     <Separator className="my-4" />
                     <div className="flex flex-col gap-1">
                       {options.length > 0
-                        ? options
+                        ? [...options]
                             .sort(
                               (a, b) =>
                                 parseInt(a.trigger) - parseInt(b.trigger)
