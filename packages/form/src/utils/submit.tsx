@@ -62,7 +62,13 @@ export const handleSubmit = (
     if (pageHandler) pageHandler();
 
     if (!pageHandler || submitBeforeLastPage) {
-      submitHandler(formValues);
+      const valuesToSubmit: { [key: string]: FormValue } = {};
+      for (const [key, value] of Object.entries(formValues)) {
+        if (!routingHiddenFields.includes(key)) {
+          valuesToSubmit[key] = value;
+        }
+      }
+      submitHandler(valuesToSubmit);
     }
     return null;
   }
