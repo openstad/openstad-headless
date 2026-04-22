@@ -1,43 +1,42 @@
+function getParentDomains(hostname) {
+  const host = hostname.split(':')[0];
+  const parts = host.split('.');
+  const parents = [];
+  for (let i = 1; i < parts.length - 1; i++) {
+    parents.push(parts.slice(i).join('.'));
+  }
+  return parents;
+}
+
+function parseHost(value) {
+  if (!value) return null;
+  if (value.indexOf('http') !== 0) value = 'https://' + value;
+  return new URL(value).host;
+}
+
 const prefillAllowedDomains = function (allowedDomains, projectUrl) {
   try {
     if (projectUrl) {
-      let url = projectUrl;
-      if (url.indexOf('http') !== 0) {
-        url = 'https://' + url;
+      allowedDomains.push(parseHost(projectUrl));
+    }
+
+    const envVars = [
+      process.env.BASE_DOMAIN,
+      process.env.URL,
+      process.env.CMS_URL,
+      process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL,
+      process.env.ADMIN_DOMAIN,
+    ];
+
+    for (const envVar of envVars) {
+      if (!envVar) continue;
+      const host = parseHost(envVar);
+      if (host) {
+        allowedDomains.push(host);
+        for (const parent of getParentDomains(host)) {
+          allowedDomains.push(parent);
+        }
       }
-      allowedDomains.push(new URL(url).host);
-    }
-
-    if (process.env.BASE_DOMAIN) {
-      let baseDomain = process.env.BASE_DOMAIN;
-      if (baseDomain.indexOf('http') !== 0) {
-        baseDomain = 'https://' + baseDomain;
-      }
-      const baseUrl = new URL(baseDomain);
-      allowedDomains.push(baseUrl.host);
-    }
-
-    if (process.env.URL) {
-      let hostname = process.env.URL;
-      if (hostname.indexOf('http') !== 0) {
-        hostname = 'https://' + hostname;
-      }
-      const url = new URL(hostname);
-      allowedDomains.push(url.host);
-    }
-
-    if (process.env.CMS_URL) {
-      const cmsUrl = new URL(process.env.CMS_URL);
-      allowedDomains.push(cmsUrl.host);
-    }
-
-    if (process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL) {
-      const authUrl = new URL(process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL);
-      allowedDomains.push(authUrl.host);
-    }
-
-    if (process.env.ADMIN_DOMAIN) {
-      allowedDomains.push(process.env.ADMIN_DOMAIN);
     }
   } catch (err) {
     console.error('Error processing allowed domains:', err);
