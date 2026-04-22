@@ -1,5 +1,13 @@
-const prefillAllowedDomains = function (allowedDomains) {
+const prefillAllowedDomains = function (allowedDomains, projectUrl) {
   try {
+    if (projectUrl) {
+      let url = projectUrl;
+      if (url.indexOf('http') !== 0) {
+        url = 'https://' + url;
+      }
+      allowedDomains.push(new URL(url).host);
+    }
+
     if (process.env.BASE_DOMAIN) {
       let baseDomain = process.env.BASE_DOMAIN;
       if (baseDomain.indexOf('http') !== 0) {

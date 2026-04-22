@@ -13,7 +13,10 @@ module.exports = function (req, res, next) {
   let allowedDomains =
     (req.project && req.project.config && req.project.config.allowedDomains) ||
     config.allowedDomains;
-  allowedDomains = prefillAllowedDomains(allowedDomains || []);
+  allowedDomains = prefillAllowedDomains(
+    allowedDomains || [],
+    req.project?.url
+  );
 
   if (!allowedDomains || allowedDomains.indexOf(domain) === -1) {
     url = config.url || req.protocol + '://' + req.host;

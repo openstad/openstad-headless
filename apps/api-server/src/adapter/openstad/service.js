@@ -6,6 +6,27 @@ const db = require('../../db');
 
 let service = {};
 
+function getClientDomains(apiDomain, project) {
+  let domains = [apiDomain];
+  if (project?.config?.allowedDomains?.length > 0) {
+    domains = domains.concat(project.config.allowedDomains);
+  }
+  if (project?.url) {
+    try {
+      let url = project.url;
+      if (url.indexOf('http') !== 0) url = 'https://' + url;
+      domains.push(new URL(url).host);
+    } catch (e) {
+      console.log(
+        '[allowedDomains] Could not parse project url:',
+        project.url,
+        e.message
+      );
+    }
+  }
+  return [...new Set(domains.filter(Boolean))];
+}
+
 service.fetchUserData = async function fetchUserData({
   authConfig,
   userId,
@@ -298,7 +319,7 @@ service.createClient = async function ({ authConfig, project }) {
         twoFactorRoles,
         siteUrl: project.url || '',
         redirectUrl: config.url || '',
-        allowedDomains: [config.domain],
+        allowedDomains: getClientDomains(config.domain, project),
         name: authConfig.name || project.name || '',
         description: `Client for API project ${project.name} (${project.id})`,
         config: newConfig,
@@ -339,7 +360,7 @@ service.updateClient = async function ({ authConfig, project }) {
       requiredUserFields,
       twoFactorRoles,
       redirectUrl: `${config.url}`,
-      allowedDomains: [config.domain],
+      allowedDomains: getClientDomains(config.domain, project),
       name: `${project.name}`,
       description: `Client for API project ${project.name} (${project.id})`,
     };
@@ -432,14 +453,6 @@ service.updateClient = async function ({ authConfig, project }) {
 
     let clientConfig = client.config;
     data.config = merge.recursive({}, clientConfig, newClientConfig);
-
-    // Update allowedDomains if exists
-    if (
-      typeof project.config.allowedDomains !== 'undefined' &&
-      project.config.allowedDomains.length > 0
-    ) {
-      data.allowedDomains = project.config.allowedDomains;
-    }
 
     // update client
     let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
