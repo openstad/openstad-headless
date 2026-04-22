@@ -1,13 +1,35 @@
 import MapInput from '@/components/maps/leaflet-input';
 import { PageLayout } from '@/components/ui/page-layout';
 import useSubmissions from '@/hooks/use-submission';
+import { useWidgetsHook } from '@/hooks/use-widgets';
+import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
 import { useRouter } from 'next/router';
-import * as React from 'react';
+import React, { useMemo } from 'react';
 
 export default function ProjectStatusEdit() {
   const router = useRouter();
   const { project, id, dataId } = router.query;
   const { data } = useSubmissions(project as string);
+  const { data: widgetData } = useWidgetsHook(project as string);
+
+  const fieldTitles = useMemo(() => {
+    if (!widgetData || !id) return null;
+    const widget = widgetData.find(
+      (w: any) => w.id.toString() === id.toString()
+    );
+    const items = widget?.config?.items;
+    if (!Array.isArray(items)) return null;
+
+    const map = new Map<string, string>();
+    for (const item of items) {
+      if (item.questionType === 'none' || item.questionType === 'pagination')
+        continue;
+      if (item.fieldKey) {
+        map.set(item.fieldKey, stripHtmlTags(item.title || item.fieldKey));
+      }
+    }
+    return map;
+  }, [widgetData, id]);
 
   const Header = ({ sub }: any) => {
     return (
@@ -104,15 +126,33 @@ export default function ProjectStatusEdit() {
       return value;
     };
 
+    const orderedKeys: string[] = [];
+    const shown = new Set<string>();
+
+    if (fieldTitles) {
+      Array.from(fieldTitles.keys()).forEach((key) => {
+        if (key in sub) {
+          orderedKeys.push(key);
+          shown.add(key);
+        }
+      });
+    }
+
+    for (const key of Object.keys(sub)) {
+      if (!shown.has(key)) {
+        orderedKeys.push(key);
+      }
+    }
+
     return (
       <table className="w-full border border-gray-100">
         <tbody>
-          {Object.entries(sub).map(([key, value]) => (
+          {orderedKeys.map((key) => (
             <tr key={key} className="even:bg-gray-50">
               <td className="align-top p-2.5 w-40">
-                <strong>{key}</strong>
+                <strong>{fieldTitles?.get(key) || key}</strong>
               </td>
-              <td className="align-top p-2.5">{renderValue(value)}</td>
+              <td className="align-top p-2.5">{renderValue(sub[key])}</td>
             </tr>
           ))}
         </tbody>
