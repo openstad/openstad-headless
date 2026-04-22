@@ -1214,13 +1214,37 @@ router
       })
       .catch(next);
   })
+  .get(async function (req, res, next) {
+    // blocked domains (last 24h)
+    try {
+      let blockedByProject = await projectsWithIssues.blockedDomains();
+      for (let projectId of Object.keys(blockedByProject)) {
+        let { project, blocks } = blockedByProject[projectId];
+        let entry = project.toJSON();
+        entry.issue = 'blocked-domains';
+        entry.domainBlocks = blocks.map((b) => ({
+          widgetId: b.widgetId,
+          domain: b.domain,
+          referer: b.referer,
+          count: b.count,
+          lastSeen: b.lastSeen,
+        }));
+        req.results.push(entry);
+        req.dbQuery.count += 1;
+      }
+    } catch (e) {
+      console.log('[issues] Could not fetch blocked domains:', e.message);
+    }
+    return next();
+  })
   .get(searchInResults({ searchfields: ['name', 'title'] }))
   .get(auth.useReqUser)
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     let records = req.results.records || req.results;
     records.forEach((record, i) => {
-      let project = record.toJSON();
+      let project =
+        typeof record.toJSON === 'function' ? record.toJSON() : record;
       if (!(req.user && hasRole(req.user, 'admin'))) {
         project.config = undefined;
       }

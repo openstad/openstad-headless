@@ -160,6 +160,32 @@ router
             console.log(
               `[widget] Widget ${widgetId}: referer "${referer}" is not in the allowed domains for project ${widget.project.id}`
             );
+            db.DomainBlock.findOne({
+              where: {
+                projectId: widget.project.id,
+                widgetId: parseInt(widgetId),
+                domain: refererHost,
+              },
+            })
+              .then((record) => {
+                if (record) {
+                  record.update({
+                    count: record.count + 1,
+                    lastSeen: new Date(),
+                    referer,
+                  });
+                } else {
+                  db.DomainBlock.create({
+                    projectId: widget.project.id,
+                    widgetId: parseInt(widgetId),
+                    domain: refererHost,
+                    referer,
+                  });
+                }
+              })
+              .catch((e) =>
+                console.log('[widget] Could not save domain block:', e.message)
+              );
           }
         } catch (e) {
           // Malformed Referer header, skip domain check
