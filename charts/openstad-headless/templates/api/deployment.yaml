@@ -158,6 +158,20 @@ spec:
           - name: SPAM_FILTER_ENABLED
             value: "{{ .Values.api.spamFilterEnabled }}"
 
+          - name: PDF_API_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                key: pdfApiEndpoint
+                name: {{ template "openstad.pdf.secret.fullname" . }}
+                optional: true
+
+          - name: PDF_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: pdfApiKey
+                name: {{ template "openstad.pdf.secret.fullname" . }}
+                optional: true
+
           - name: AUTH_JWTSECRET
             valueFrom:
               secretKeyRef:
