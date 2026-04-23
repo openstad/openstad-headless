@@ -106,6 +106,16 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: true,
       },
 
+      auditIncidentAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+        auth: {
+          viewableBy: 'admin',
+          updateableBy: 'admin',
+        },
+      },
+
       installationUrls: {
         type: DataTypes.VIRTUAL,
         get() {

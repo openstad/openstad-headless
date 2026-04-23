@@ -10,6 +10,7 @@ const tokenUrl = require('../../services/tokenUrl');
 const emailService = require('../../services/email');
 const authCodeConfig = require('../../config/auth').get(authType);
 const interpolate = require('../../utils/interpolate');
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 exports.login = (req, res, next) => {
   const config = req.client.config ? req.client.config : {};
@@ -52,6 +53,9 @@ exports.postLogin = (req, res, next) => {
     function (err, user, info) {
       // Redirect if it fails to the original auth screen
       if (!user) {
+        logAuthEvent(req, 'login_failed', {
+          data: { method: 'uniqueCode' },
+        });
         req.flash('error', { msg: authCodeConfig.errorMessage });
         const redirectUrl = req.query.redirect_uri
           ? req.query.redirect_uri
@@ -76,6 +80,9 @@ exports.postLogin = (req, res, next) => {
 
         const redirectToAuthorize = () => {
           req.brute.resetKey(req.bruteKey);
+          logAuthEvent(req, 'login', {
+            data: { method: 'uniqueCode' },
+          });
           const redirectUrl = req.query.redirect_uri
             ? req.query.redirect_uri
             : req.client.redirectUrl;
