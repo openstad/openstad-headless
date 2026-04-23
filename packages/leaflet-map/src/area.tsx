@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Polygon, Popup, Tooltip } from 'react-leaflet';
 import { difference, polygon as tPolygon } from 'turf';
 
+import { isSafeUrl, sanitizeColor } from './lib/sanitize';
 import type {
   AreaMultiPolygon,
   AreaPolygon,
@@ -155,6 +156,9 @@ export function Area({
     id: number;
     name: string;
     url: string;
+    color?: string;
+    openInNewTab?: boolean;
+    buttonText?: string;
   }
 
   const [poly, setPoly] = useState<any>([]);
@@ -206,6 +210,9 @@ export function Area({
     );
     if (existingItem) {
       existingItem.url = item.url;
+      existingItem.color = item.color;
+      existingItem.openInNewTab = item.openInNewTab;
+      existingItem.buttonText = item.buttonText;
     }
   });
 
@@ -232,23 +239,49 @@ export function Area({
             <Polygon
               key={index}
               {...props}
-              pathOptions={areaPolygonStyle}
+              pathOptions={
+                item.color
+                  ? {
+                      ...areaPolygonStyle,
+                      color: sanitizeColor(item.color),
+                      fillColor: sanitizeColor(item.color),
+                      fillOpacity: 0.3,
+                      weight: 3,
+                    }
+                  : areaPolygonStyle
+              }
               positions={item.polygon}
               eventHandlers={
                 interactionType !== 'direct'
                   ? {
                       mouseover: (e) => {
                         e.target.setStyle({
-                          fillOpacity: 0.05,
+                          fillOpacity: 0.15,
                         });
                       },
                       mouseout: (e) => {
-                        e.target.setStyle(areaPolygonStyle);
+                        e.target.setStyle(
+                          item.color
+                            ? {
+                                ...areaPolygonStyle,
+                                color: sanitizeColor(item.color),
+                                fillColor: sanitizeColor(item.color),
+                                fillOpacity: 0.3,
+                                weight: 3,
+                              }
+                            : areaPolygonStyle
+                        );
                       },
                     }
                   : {
                       click: () => {
-                        if (item.url) window.open(item.url, '_self');
+                        const url =
+                          item.url && isSafeUrl(item.url) ? item.url : '';
+                        if (url)
+                          window.open(
+                            url,
+                            item.openInNewTab ? '_blank' : '_self'
+                          );
                       },
                     }
               }>
@@ -257,9 +290,15 @@ export function Area({
                   {item.title && (
                     <h3 className="utrecht-heading-3">{item.title}</h3>
                   )}
-                  {item.url && (
-                    <a className="pop-up-link" href={item.url}>
-                      Lees verder
+                  {item.url && isSafeUrl(item.url) && (
+                    <a
+                      className="pop-up-link"
+                      href={item.url}
+                      target={item.openInNewTab ? '_blank' : '_self'}
+                      rel={
+                        item.openInNewTab ? 'noopener noreferrer' : undefined
+                      }>
+                      {item.buttonText || 'Lees verder'}
                     </a>
                   )}
                 </Popup>
@@ -267,7 +306,13 @@ export function Area({
                 <Tooltip permanent direction="center">
                   <span
                     onClick={() => {
-                      if (item.url) window.open(item.url, '_self');
+                      const url =
+                        item.url && isSafeUrl(item.url) ? item.url : '';
+                      if (url)
+                        window.open(
+                          url,
+                          item.openInNewTab ? '_blank' : '_self'
+                        );
                     }}>
                     {item.title}
                   </span>
