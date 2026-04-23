@@ -277,7 +277,10 @@ router
   })
   .get(function (req, res, next) {
     const isSafeRedirectUrl = (url, allowedDomains) => {
-      allowedDomains = prefillAllowedDomains(allowedDomains || []);
+      allowedDomains = prefillAllowedDomains(
+        allowedDomains || [],
+        req.project?.url
+      );
 
       let redirectUrlHost = '';
       try {
