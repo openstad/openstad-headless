@@ -206,13 +206,24 @@ module.exports = (db, sequelize, DataTypes) => {
                 const resourceResult = await processResourceQA(instance, db);
                 htmlContent = resourceResult.htmlContent;
 
-                if (shouldGeneratePdf(instance.type)) {
-                  pdfAttachment = await buildPdfAttachment(
-                    instance,
-                    resourceResult.questionsAndAnswers,
-                    resourceResult.widgetItems,
-                    db
-                  );
+                if (
+                  resourceResult.questionsAndAnswers.length &&
+                  shouldGeneratePdf(instance.type)
+                ) {
+                  const project = await db.Project.scope(
+                    'includeEmailConfig'
+                  ).findByPk(instance.projectId);
+                  if (
+                    project?.emailConfig?.notifications?.pdfAttachmentEnabled
+                  ) {
+                    pdfAttachment = await buildPdfAttachment(
+                      instance,
+                      resourceResult.questionsAndAnswers,
+                      resourceResult.widgetItems,
+                      db,
+                      project
+                    );
+                  }
                 }
               }
 

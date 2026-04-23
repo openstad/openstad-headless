@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
 import {
@@ -44,6 +45,7 @@ const formSchema = z.object({
   projectmanagerAddress: z.string().email(),
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
+  pdfAttachmentEnabled: z.boolean().optional(),
   pdfTitle: z.string().optional(),
   pdfDescription: z.string().optional(),
 });
@@ -64,6 +66,8 @@ export default function ProjectSettingsNotifications({
         data?.emailConfig?.[category]?.projectmanagerAddress || null,
       sendUpdatedResourceAdminEmail:
         data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
+      pdfAttachmentEnabled:
+        data?.emailConfig?.[category]?.pdfAttachmentEnabled || false,
       pdfTitle: data?.emailConfig?.[category]?.pdfTitle ?? '',
       pdfDescription: data?.emailConfig?.[category]?.pdfDescription ?? '',
     }),
@@ -88,6 +92,7 @@ export default function ProjectSettingsNotifications({
           fromName: values.fromName,
           sendUpdatedResourceAdminEmail:
             values.sendUpdatedResourceAdminEmail || false,
+          pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
           pdfTitle: values.pdfTitle || '',
           pdfDescription: values.pdfDescription || '',
         },
@@ -235,6 +240,34 @@ export default function ProjectSettingsNotifications({
               <Heading size="lg">PDF bijlage instellingen</Heading>
               <FormField
                 control={form.control}
+                name="pdfAttachmentEnabled"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PDF bijlage</FormLabel>
+                    <FormDescription>
+                      Wanneer ingeschakeld wordt er een PDF bijlage meegestuurd
+                      met de bevestigingsmail na het indienen van een inzending.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
+                        />
+                        <Label htmlFor={field.name} className="cursor-pointer">
+                          PDF bijlage meesturen bij bevestigingsmails
+                        </Label>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="pdfTitle"
                 render={({ field }) => (
                   <FormItem>
@@ -247,7 +280,11 @@ export default function ProjectSettingsNotifications({
                       />
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Nieuwe inzending" {...field} />
+                      <Input
+                        placeholder="Nieuwe inzending"
+                        disabled={!form.watch('pdfAttachmentEnabled')}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -267,8 +304,9 @@ export default function ProjectSettingsNotifications({
                       />
                     </FormLabel>
                     <FormControl>
-                      <Input
+                      <Textarea
                         placeholder="Er is een nieuwe inzending ontvangen."
+                        disabled={!form.watch('pdfAttachmentEnabled')}
                         {...field}
                       />
                     </FormControl>

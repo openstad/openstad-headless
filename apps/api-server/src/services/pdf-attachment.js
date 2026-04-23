@@ -17,7 +17,9 @@ const PDF_USER_NOTIFICATION_TYPES = [
 ];
 
 /**
- * Check whether PDF attachment generation should run for this notification.
+ * Check whether PDF attachment generation could run for this notification.
+ * Only checks env vars and notification type. The project-level toggle
+ * (pdfAttachmentEnabled) is checked separately after fetching the project.
  */
 function shouldGeneratePdf(notificationType) {
   return (
@@ -139,13 +141,15 @@ function buildPdfItems(widgetItems, questionsAndAnswers, userDetails) {
  * @param {Array} questionsAndAnswers - Processed Q&A array from qa-processor
  * @param {Array} widgetItems - Widget config items
  * @param {object} db - Sequelize models
+ * @param {object} project - Project with emailConfig scope (pre-fetched by caller)
  * @returns {object|null} Attachment object or null
  */
 async function buildPdfAttachment(
   instance,
   questionsAndAnswers,
   widgetItems,
-  db
+  db,
+  project
 ) {
   if (!questionsAndAnswers.length) return null;
 
@@ -157,9 +161,6 @@ async function buildPdfAttachment(
       userDetails
     );
 
-    const project = await db.Project.scope('includeEmailConfig').findByPk(
-      instance.projectId
-    );
     const logoUrl = await fetchLogoUrl(project);
 
     const pdfHtml = buildPdfHtml(pdfItems, {
