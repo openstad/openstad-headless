@@ -84,6 +84,11 @@ function DataStore(props = {}) {
       fetcher = self.api[fetcherAsString];
     }
 
+    // Allow hooks to pass null to skip the fetch entirely
+    if (props === null) {
+      return useSWR(null, null);
+    }
+
     let key = self.createKey(props, fetcherAsString);
 
     windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
